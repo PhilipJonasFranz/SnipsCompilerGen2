@@ -1,0 +1,11 @@
+SOURCE
+int foo() {
+	return 10;
+}
+
+int main() {
+	return foo() * foo();
+}
+PARAMS
+VALIDATION
+100

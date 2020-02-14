@@ -1,0 +1,15 @@
+SOURCE
+int baz(int x) {
+	return x << 1;
+}
+
+int foo() {
+	return 8 * baz(4);
+}
+
+int main() {
+	return foo() + foo();
+}
+PARAMS
+VALIDATION
+128

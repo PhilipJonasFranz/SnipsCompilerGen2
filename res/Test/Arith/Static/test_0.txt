@@ -1,0 +1,7 @@
+SOURCE
+int main() {
+	return ((10 * 10) + (3 * 2)) << 1;
+}
+PARAMS
+VALIDATION
+212

@@ -1,0 +1,10 @@
+SOURCE
+int main(int a) {
+	int b = a;
+	a = a * 3;
+	return b;
+}
+PARAMS
+5
+VALIDATION
+5

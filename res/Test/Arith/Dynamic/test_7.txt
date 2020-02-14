@@ -1,0 +1,8 @@
+SOURCE
+int main(int a) {
+	return (a * 2) + 5 + (a - (a * a));
+}
+PARAMS
+4
+VALIDATION
+1

@@ -1,0 +1,15 @@
+SOURCE
+int bar() {
+	return 6;
+}
+
+int foo() {
+	return bar() * bar();
+}
+
+int main() {
+	return foo() + foo();
+}
+PARAMS
+VALIDATION
+72
