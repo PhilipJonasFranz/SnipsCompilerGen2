@@ -1,0 +1,47 @@
+C-- Specification
+
+Program := ProgramElement
+ProgramElement := FunctionDeclaration | Declaration | StructDeclaration
+
+FunctionDeclaration := functionName '(' (Declaration (',' Declaration)*)* ')' '{' CompoundStatement '}'
+Declaration := TypeIdentifier vname
+
+CompoundStatement := Statement*
+Statement := Declaration | Assignment | ForLoop | WhileLoop | DoWhile | Switch | If | Return | Break
+
+Assignment := vname '=' Expression ';'
+
+ForLoop := 'for' '(' Declaration ';' Expression ';' Assignment ')' '{' CompoundStatement '}'
+
+WhileLoop := 'while' '(' Expression ')' '{' CompoundStatement '}'
+
+DoWhile := 'do' '{' CompoundStatement '}' 'while' '(' Expression ')' ';'
+
+Switch := 'switch' '(' Expression ')' '{' Case* Default '}'
+Case := 'case' '(' Expression ')' ':' CompoundStatement
+Default := 'default' ':' CompoundStatement
+
+If := 'if' '(' Expression ')' '{' CompoundStatement '}' ElseIf* Else?
+ElseIf := 'else' If
+Else := 'else' '{' CompoundStatement '}'
+
+Return := 'return' Expression ';'
+
+Break := 'break' ';'
+
+Expression := Ternary
+Ternary := Logical | '(' Expression ')' '?' Expression ':' Expression
+LogicalBinary := Bitwise | Expression ('||' | '&&') Expression
+BitwiseBinary := Compare | Expression ('|' | '^' | '&') Expression
+Compare := Shift | Expression ('==' | '!=' | '<' | '>' | '<=' | '>=') Expression
+Shift := AddSub | Expression ('<<' | '>>') Expression
+AddSub := MulDiv | Expression ('+' | '-') Expression
+MulDiv := AddressOf | Expression ('*' | '/') Expression
+AddressOf := Deref | '&' Expression
+Deref := LogicalUnary | '*' Expression
+LogicalUnary := BitwiseUnary | '!' Expression
+BitwiseUnary := StructAccess | '~' Expression
+StructAccess := ElemSelect | '.' Expression
+ElemSelect := FunctionCall | Expression '[' Expression ']' ('[' Expression ']')*
+FunctionCall := Atom | fname '(' Expression* ')'
+Atom := vname | '(' Expression ')'
