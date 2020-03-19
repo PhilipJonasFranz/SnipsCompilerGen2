@@ -2,9 +2,13 @@ package Imm.AsN.Expression.Arith;
 
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.ASMMove;
+import Imm.ASM.Stack.ASMPopStack;
+import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Arith.Add;
@@ -44,6 +48,45 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			return AsNLsr.cast((Lsr) e, r);
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No cast available for " + e.getClass().getName());
+	}
+	
+	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, Solver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
+		/* Total Atomic Loading */
+		if (b.left() instanceof Atom && b.right() instanceof Atom) {
+			m.atomicPrecalc(b, solver);
+		}
+		else {
+			/* Partial Atomic Loading Left */
+			if (b.left() instanceof Atom) {
+				m.loadRight(b, 2, r);
+				m.instructions.add(new ASMMove(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
+			}
+			/* Partial Atomic Loading Right */
+			else if (b.right() instanceof Atom) {
+				m.loadLeft(b, 1, r);
+				m.instructions.add(new ASMMove(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
+			}
+			else {
+				m.instructions.addAll(AsNExpression.cast(b.left(), r).getInstructions());
+				m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				r.regs [0].free();
+				
+				m.instructions.addAll(AsNExpression.cast(b.right(), r).getInstructions());
+				
+				m.instructions.add(new ASMMove(new RegOperand(2), new RegOperand(0)));
+				r.copy(0, 2);
+				
+				m.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			}
+			
+			/* Inject calculation into loader code */
+			m.instructions.add(inject);
+			
+			/* Clean up Reg Set */
+			r.regs [0].setExpression(b);
+			r.regs [1].free();
+			r.regs [2].free();
+		}
 	}
 	
 	protected void loadLeft(BinaryExpression b, int target, RegSet r) throws CGEN_EXCEPTION {
