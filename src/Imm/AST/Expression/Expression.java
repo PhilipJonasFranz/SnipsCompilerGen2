@@ -1,6 +1,7 @@
 package Imm.AST.Expression;
 
 import Imm.AST.SyntaxElement;
+import Imm.TYPE.TYPE;
 import Util.Source;
 
 /**
@@ -8,6 +9,8 @@ import Util.Source;
  */
 public abstract class Expression extends SyntaxElement {
 
+	TYPE type;
+	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.

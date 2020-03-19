@@ -6,7 +6,8 @@ public class ARRAY extends TYPE {
 
 	TYPE elementType;
 	
-	public ARRAY(TYPE elementType) {
+	public ARRAY(String value, TYPE elementType) {
+		super(value);
 		this.elementType = elementType;
 	}
 
@@ -16,6 +17,10 @@ public class ARRAY extends TYPE {
 			return this.elementType.isEqual(array.elementType);
 		}
 		else return false;
+	}
+
+	public String typeString() {
+		return this.elementType.typeString() + "[]";
 	}
 	
 }

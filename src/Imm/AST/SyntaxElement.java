@@ -2,6 +2,9 @@ package Imm.AST;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
+import Exc.CTX_EXCEPTION;
+import Imm.TYPE.TYPE;
 import Util.Source;
 
 /**
@@ -62,5 +65,10 @@ public abstract class SyntaxElement {
 	 * Create a source code representation of this syntax element. May be called recursiveley. 
 	 */
 	public abstract List<String> buildProgram(int pad);
+	
+	/**
+	 * Visitor relay for context checking
+	 */
+	public abstract TYPE check(ContextChecker ctx) throws CTX_EXCEPTION;
 	
 }

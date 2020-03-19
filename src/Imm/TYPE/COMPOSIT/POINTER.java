@@ -6,7 +6,8 @@ public class POINTER extends TYPE {
 
 	TYPE targetType;
 	
-	public POINTER(TYPE targetType) {
+	public POINTER(String value, TYPE targetType) {
+		super(value);
 		this.targetType = targetType;
 	}
 
@@ -16,6 +17,10 @@ public class POINTER extends TYPE {
 			return this.targetType.isEqual(pointer.targetType);
 		}
 		else return false;
+	}
+	
+	public String typeString() {
+		return "*" + this.targetType.typeString();
 	}
 	
 }

@@ -2,6 +2,9 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
+import Exc.CTX_EXCEPTION;
+import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Par.Token;
 import Util.Source;
@@ -12,9 +15,11 @@ import Util.Source;
 public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
-	String fieldName;
+	public String fieldName;
 		
-	TYPE type;
+	public TYPE type;
+	
+	public Expression value;
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -27,14 +32,28 @@ public class Declaration extends Statement {
 		this.type = type;
 	}
 	
+	public Declaration(Token id, TYPE type, Expression value, Source source) {
+		super(source);
+		this.fieldName = id.spelling;
+		this.type = type;
+		this.value = value;
+	}
+	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		
+		System.out.println(this.pad(d) + "<" + this.type.typeString() + "> " + this.fieldName);
+		if (rec && this.value != null) {
+			this.value.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public List<String> buildProgram(int pad) {
 		return null;
+	}
+	
+	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+		return ctx.checkDeclaration(this);
 	}
 	
 }

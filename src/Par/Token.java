@@ -48,78 +48,28 @@ public class Token {
 		RPAREN(")"),
 		LBRACE("{"),
 		RBRACE("}"),
-		LBRACKET("["),
-		RBRACKET("]"),
 		
-		/* Structs */
-		STRUCT("struct"),
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
 		
 		/* Functions */
 		RETURN("return"),
 		
-		/* Control Structures */
-		IF("if"),
-		ELSE("else"),
-		
-		/* Loop Statements */
-		BREAK("break"),
-		FOR("for"),
-		WHILE("while"),
-		DO("do"),
-		
-		/* Switch Statement */
-		SWITCH("switch"),
-		CASE("case"),
-		DEFAULT("default"),
-		
-		COLON(":"),
 		SEMICOLON(";"),
 		COMMA(","),
-		TERN("?"),
-		ELEMSEL("."),
 		LET("="),
-		ADDROF("&"),
-		
-		/* Compare Operators */
-		CMPEQ("==", 				TokenGroup.COMPARE),
-		CMPNE("!=", 				TokenGroup.COMPARE),
-		CMPLT("<", 					TokenGroup.COMPARE),
-		CMPGT(">", 					TokenGroup.COMPARE),
-		CMPLE("<=", 				TokenGroup.COMPARE),
-		CMPGE(">=",					TokenGroup.COMPARE),
 		
 		/* Arithmetic Operators */
 		ADD("+"),
 		SUB("-"),
 		MUL("*"),
 		DIV("/"),
-		LSL("<<"),
-		LSR(">>"),
-		
-		/* Boolean Operators */
-		OR("||"),
-		AND("&&"),
-		NOT("!"),
-		
-		GLOBAL("global"),
 		
 		/* Types */
 		INT("int", 					TokenGroup.TYPE),
-		FLOAT("float", 				TokenGroup.TYPE),
-		BOOL("boolean", 			TokenGroup.TYPE),
-		CHAR("char", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
-		ID("", 						TokenGroup.IDENTIFIER),
-		
 		/* Primitive Literals */
-		INTLIT("intlit",			TokenGroup.LITERAL),
-		CHARLIT("charlit", 			TokenGroup.LITERAL),
-		FLOATLIT("floatlit", 		TokenGroup.LITERAL),
-		BOOLLIT("boollit", 			TokenGroup.LITERAL),
-		
-		TYPEDEF("typedef");
+		INTLIT("intlit",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,

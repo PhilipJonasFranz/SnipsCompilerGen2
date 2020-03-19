@@ -8,7 +8,8 @@ public class STRUCT extends TYPE {
 
 	List<TYPE> types;
 	
-	public STRUCT(List<TYPE> types) {
+	public STRUCT(String value, List<TYPE> types) {
+		super(value);
 		this.types = types;
 	}
 
@@ -25,6 +26,16 @@ public class STRUCT extends TYPE {
 		}
 		
 		return false;
+	}
+	
+	public String typeString() {
+		String s = "STRUCT<";
+		for (TYPE t : types) {
+			s += t.typeString() + ",";
+		}
+		s = s.substring(0, s.length() - 1);
+		s += ">";
+		return s;
 	}
 	
 }

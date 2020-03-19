@@ -5,8 +5,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import Ctx.ContextChecker;
+import Exc.CTX_EXCEPTION;
+import Imm.ASM.ASMInstruction;
+import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AsN.AsNBody;
 import Par.Parser;
 import Par.Scanner;
 import Util.Logging.Message;
@@ -14,7 +20,7 @@ import Util.Logging.Message;
 public class CompilerDriver {
 
 	/* The Input File */
-	public File file;
+	public static File file;
 	
 	/* The Contents of the input file */
 	public List<String> code;
@@ -38,6 +44,8 @@ public class CompilerDriver {
 		fOut = false,
 		silenced = false,
 		imm = false;
+	
+	public static String printDepth = "    ";
 	
 	
 	public static void main(String [] args) {
@@ -67,7 +75,7 @@ public class CompilerDriver {
 	}
 	
 	public CompilerDriver(File file, List<String> code) {
-		this.file = file;
+		file = file;
 		this.code = code;
 	}
 
@@ -80,6 +88,9 @@ public class CompilerDriver {
 		List<String> output = null;
 		
 		try {
+			/* Read in code */
+			this.code = Util.Util.readFile(file);
+			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
@@ -90,10 +101,30 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
+			AST.print(0, true);
+			
+			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
+			ContextChecker ctx = new ContextChecker(AST);
+			try {
+				ctx.check();
+				log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
+			} catch (CTX_EXCEPTION e) {
+				
+			}
+			
+			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
+			AsNBody body = AsNBody.cast((Program) AST);
+			
+			List<ASMInstruction> build = body.getInstructions();
+			List<String> program = build.stream().map(x -> x.build()).collect(Collectors.toList());
+		
+			System.out.println();
+			program.stream().forEach(System.out::println);
+			
 			/* TODO: Build and insert compilation pipeline modules here */
-
-			log.add(new Message("SNIPS -> Missing modules, aborting.", Message.Type.FAIL));
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		/* Report Status */
 		int err = this.getMessageTypeNumber(Message.Type.FAIL);
@@ -124,7 +155,7 @@ public class CompilerDriver {
 	}
 	
 	public void readFlags(String [] args) {
-		this.file = new File(args [0]);
+		file = new File(args [0]);
 		
 		if (args.length > 1) {
 			for (int i = 1; i < args.length; i++) {
