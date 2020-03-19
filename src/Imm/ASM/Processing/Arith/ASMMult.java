@@ -1,7 +1,7 @@
 package Imm.ASM.Processing.Arith;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Operand;
+import Imm.ASM.Util.Operands.Operand;
 import Snips.CompilerDriver;
 
 public class ASMMult extends ASMInstruction {

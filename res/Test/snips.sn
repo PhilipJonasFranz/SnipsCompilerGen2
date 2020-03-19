@@ -5,6 +5,6 @@ int main(int a) {
 	return b;
 }
 PARAMS
-5
+2
 VALIDATION
-15
+6

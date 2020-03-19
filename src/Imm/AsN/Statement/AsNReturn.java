@@ -4,8 +4,8 @@ import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Util.RegOperand;
-import Imm.ASM.Util.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Return;
 import Imm.AsN.Expression.AsNExpression;
 

@@ -1,7 +1,7 @@
 package CGen.Opt;
 
 import Imm.ASM.Processing.ASMMove;
-import Imm.ASM.Util.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Imm.AsN.AsNBody;
 
 public class ASMOptimizer {

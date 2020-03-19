@@ -102,11 +102,6 @@ public class Scanner {
 				tokens.add(new Token(TokenType.DIV, new Source(i, a)));
 				this.emptyBuffer();
 			}
-			else if (this.buffer.startsWith("=")) {
-				tokens.add(new Token(TokenType.LET, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-				this.buffer = this.buffer.substring(1);
-				this.checkState(i, a);
-			}
 			else if (this.buffer.equals("+")) {
 				tokens.add(new Token(TokenType.ADD, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
 				this.buffer = this.buffer.substring(1);
@@ -116,6 +111,18 @@ public class Scanner {
 				tokens.add(new Token(TokenType.SUB, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
 				this.buffer = this.buffer.substring(1);
 				this.checkState(i, a);
+			}
+			else if (this.buffer.equals("if")) {
+				tokens.add(new Token(TokenType.IF, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("else")) {
+				tokens.add(new Token(TokenType.ELSE, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("||")) {
+				tokens.add(new Token(TokenType.OR, new Source(i, a)));
+				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("int")) {
 				tokens.add(new Token(TokenType.INT, new Source(i, a)));
@@ -128,6 +135,70 @@ public class Scanner {
 				this.emptyBuffer();
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;
+			}
+			else if (this.buffer.equals("||")) {
+				tokens.add(new Token(TokenType.OR, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("&&")) {
+				tokens.add(new Token(TokenType.AND, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.startsWith("!")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("!=")) {
+					tokens.add(new Token(TokenType.CMPNE, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.NOT, new Source(i, a), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
+			}
+			else if (this.buffer.startsWith("=")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("==")) {
+					tokens.add(new Token(TokenType.CMPEQ, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.LET, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
+			}
+			else if (this.buffer.startsWith("<")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("<=")) {
+					tokens.add(new Token(TokenType.CMPLE, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else if (this.buffer.equals("<<")) {
+					tokens.add(new Token(TokenType.LSL, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.CMPLT, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
+			}
+			else if (this.buffer.startsWith(">")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals(">=")) {
+					tokens.add(new Token(TokenType.CMPGE, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else if (this.buffer.equals(">>")) {
+					tokens.add(new Token(TokenType.LSR, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.CMPGT, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z])([a-z]|[A-Z]|[0-9])*")) {

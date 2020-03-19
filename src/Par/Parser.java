@@ -15,10 +15,15 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Div;
+import Imm.AST.Expression.Arith.Lsl;
+import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
 import Imm.TYPE.TYPE;
@@ -75,13 +80,8 @@ public class Parser {
 		return old;
 	}
 	
-	public SyntaxElement parse() {
-		try {
-			return parseProgram();
-		} catch (PARSE_EXCEPTION e) {
-			e.printStackTrace();
-			return null;
-		}
+	public SyntaxElement parse() throws PARSE_EXCEPTION {
+		return parseProgram();
 	}
 	
 	public Program parseProgram() throws PARSE_EXCEPTION {
@@ -140,7 +140,48 @@ public class Parser {
 		else if (current.type == TokenType.IDENTIFIER) {
 			return this.parseAssignment();
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE);
+		else if (current.type == TokenType.IF) {
+			return this.parseIf();
+		}
+		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
+	}
+	
+	public Statement parseIf() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		accept(TokenType.IF);
+		accept(TokenType.LPAREN);
+		Expression condition = this.parseExpression();
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = new ArrayList();
+		
+		if (current.type == TokenType.LBRACE) {
+			accept();
+			while (current.type != TokenType.RBRACE) body.add(this.parseStatement());
+			accept(TokenType.RBRACE);
+		}
+		else body.add(this.parseStatement());
+		
+		IfStatement if0 = new IfStatement(condition, body, source);
+		if (current.type == TokenType.ELSE) {
+			Source elseSource = accept().getSource();
+			if (current.type == TokenType.IF) {
+				if0.elseStatement = (IfStatement) this.parseIf();
+			}
+			else {
+				List<Statement> elseBody = new ArrayList();
+				if (current.type == TokenType.LBRACE) {
+					accept();
+					while (current.type != TokenType.RBRACE) elseBody.add(this.parseStatement());
+					accept(TokenType.RBRACE);
+				}
+				else elseBody.add(this.parseStatement());
+				
+				if0.elseStatement = new IfStatement(elseBody, elseSource);
+			}
+		}
+		
+		return if0;
 	}
 	
 	public Assignment parseAssignment() throws PARSE_EXCEPTION {
@@ -174,34 +215,82 @@ public class Parser {
 	}
 	
 	public Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseMulDiv();
+			return this.parseCompare();
 	}
-		
-	public Expression parseMulDiv() throws PARSE_EXCEPTION {
-		Expression left = this.parseAddSub();
-		while (current.type == TokenType.MUL || current.type == TokenType.DIV) {
-			if (current.type == TokenType.MUL) {
+	
+	public Expression parseCompare() throws PARSE_EXCEPTION {
+		Expression left = this.parseShift();
+		if (current.type.group == TokenGroup.COMPARE) {
+			Source source = current.getSource();
+			if (current.type == TokenType.CMPEQ) {
 				accept();
-				left = new Mul(left, this.parseAddSub(), current.source);
+				return new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
+			}
+			else if (current.type == TokenType.CMPNE) {
+				accept();
+				return new Compare(left, this.parseShift(), COMPARATOR.NOT_EQUAL, source);
+			}
+			else if (current.type == TokenType.CMPGE) {
+				accept();
+				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_SAME, source);
+			}
+			else if (current.type == TokenType.CMPGT) {
+				accept();
+				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_THAN, source);
+			}
+			else if (current.type == TokenType.CMPLE) {
+				accept();
+				return new Compare(left, this.parseShift(), COMPARATOR.LESS_SAME, source);
+			}
+			else if (current.type == TokenType.CMPLT) {
+				accept();
+				return new Compare(left, this.parseShift(), COMPARATOR.LESS_THAN, source);
+			}
+		}
+		
+		return left;
+	}
+	
+	public Expression parseShift() throws PARSE_EXCEPTION {
+		Expression left = this.parseAddSub();
+		while (current.type == TokenType.LSL || current.type == TokenType.LSR) {
+			if (current.type == TokenType.LSL) {
+				accept();
+				left = new Lsl(left, this.parseAddSub(), current.source);
 			}
 			else {
 				accept();
-				left = new Div(left, this.parseAddSub(), current.source);
+				left = new Lsr(left, this.parseAddSub(), current.source);
 			}
 		}
 		return left;
 	}
 	
 	public Expression parseAddSub() throws PARSE_EXCEPTION {
-		Expression left = this.parseAtom();
+		Expression left = this.parseMulDiv();
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
 				accept();
-				left = new Add(left, this.parseAtom(), current.source);
+				left = new Add(left, this.parseMulDiv(), current.source);
 			}
 			else {
 				accept();
-				left = new Sub(left, this.parseAtom(), current.source);
+				left = new Sub(left, this.parseMulDiv(), current.source);
+			}
+		}
+		return left;
+	}
+		
+	public Expression parseMulDiv() throws PARSE_EXCEPTION {
+		Expression left = this.parseAtom();
+		while (current.type == TokenType.MUL || current.type == TokenType.DIV) {
+			if (current.type == TokenType.MUL) {
+				accept();
+				left = new Mul(left, this.parseAtom(), current.source);
+			}
+			else {
+				accept();
+				left = new Div(left, this.parseAtom(), current.source);
 			}
 		}
 		return left;

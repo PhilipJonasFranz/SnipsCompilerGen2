@@ -38,7 +38,7 @@ public class TestDriver {
 		
 		List<String> paths = new ArrayList();
 		
-		if (args.length == 0) this.getTestFiles().stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList());
+		if (args.length == 0) paths.addAll(this.getTestFiles().stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
 		else paths.add(args [0]);
 		
 		long start = System.currentTimeMillis();
@@ -91,6 +91,7 @@ public class TestDriver {
 				else if (ret == RET_TYPE.TIMEOUT) {
 					timeout++;
 				}
+				else System.out.println(new Message("Test finished successfully.", Message.Type.INFO).getMessage());
 				
 			} catch (Exception e) {
 				System.out.println(new Message("-> Test " + current + " ran into an error!", Message.Type.FAIL).getMessage());
@@ -108,15 +109,21 @@ public class TestDriver {
 	
 	@SuppressWarnings("deprecation")
 	public RET_TYPE test(String path, List<String> code, List<String> params, int validation) throws InterruptedException {
-		
 		File f = new File(path);
 		CompilerDriver cd = new CompilerDriver(f, code);
-		List<String> compile = cd.compile(false, false);
+		
+		CompilerDriver.silenced = true;
+		CompilerDriver.imm = false;
+		
+		List<String> compile = cd.compile();
 		Thread.sleep(10);
 		
 		if (compile == null) {
 			System.out.println(new Message("-> A crash occured during compilation.", Message.Type.FAIL).getMessage());
-			cd.compile(false, false);
+			System.out.println(new Message("-> Tested code:", Message.Type.FAIL).getMessage());
+			CompilerDriver.silenced = false;
+			CompilerDriver.imm = true;
+			cd.compile();
 			return RET_TYPE.CRASH;
 		}
 		

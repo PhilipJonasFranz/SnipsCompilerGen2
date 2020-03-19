@@ -3,7 +3,7 @@ package Imm.AsN.Statement;
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMMove;
-import Imm.ASM.Util.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Expression.AsNExpression;
 

@@ -33,7 +33,7 @@ public class CompilerDriver {
 			"	|_____  ||  _    ||   ||    ___||_____  | ",
 			"	 _____| || | |   ||   ||   |     _____| | ",
 			"	|_______||_|  |__||___||___|    |_______| ",
-			"    		                   Compiler v.0.1 "};
+			"    		                   Compiler v.0.2 "};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -41,9 +41,10 @@ public class CompilerDriver {
 	public static boolean 
 		logoPrinted = false, 
 		useTerminalColors = true, 
-		fOut = false,
 		silenced = false,
-		imm = false;
+		imm = true;
+	
+	public static boolean printErrors = false;
 	
 	public static String printDepth = "    ";
 	
@@ -67,7 +68,7 @@ public class CompilerDriver {
 		}
 		
 		/* Perform compilation */
-		scd.compile(false, imm);
+		scd.compile();
 	}
 	
 	public CompilerDriver(String [] args) {
@@ -79,7 +80,7 @@ public class CompilerDriver {
 		this.code = code;
 	}
 
-	public List<String> compile(boolean silenced, boolean imm) {
+	public List<String> compile() {
 		long start = System.currentTimeMillis();
 		
 		printLogo();
@@ -91,7 +92,9 @@ public class CompilerDriver {
 			/* Read in code */
 			if (this.code == null) this.code = Util.Util.readFile(file);
 			
-			code.stream().forEach(System.out::println);
+			if (!silenced) {
+				this.code.stream().forEach(System.out::println);
+			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
@@ -103,7 +106,7 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			AST.print(0, true);
+			if (imm) AST.print(0, true);
 			
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
@@ -120,10 +123,12 @@ public class CompilerDriver {
 			List<ASMInstruction> build = body.getInstructions();
 			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
 		
-			System.out.println();
-			output.stream().forEach(System.out::println);
+			if (!silenced) {
+				System.out.println();
+				output.stream().forEach(System.out::println);
+			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (printErrors) e.printStackTrace();
 		}
 		
 		/* Report Status */
@@ -135,8 +140,10 @@ public class CompilerDriver {
 				/* ... successfully */
 				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
 				/* ... with errors */
-				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + ".\n"), (err == 0)? Message.Type.INFO : Message.Type.FAIL));		
-		if (!silenced)log.stream().forEach(x -> System.out.println(x.getMessage()));
+				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? Message.Type.INFO : Message.Type.FAIL));		
+		if (!silenced) {
+			log.stream().forEach(x -> System.out.println(x.getMessage()));
+		}
 		
 		return output;
 	}
@@ -161,9 +168,6 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
-				else if (args [i].equals("-o")) {
-					fOut = true;
-				}
 				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
 			}
 		}

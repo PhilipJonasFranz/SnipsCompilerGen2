@@ -1,8 +1,8 @@
 package Imm.ASM.Stack;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Operand;
-import Imm.ASM.Util.RegOperand;
+import Imm.ASM.Util.Operands.Operand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {

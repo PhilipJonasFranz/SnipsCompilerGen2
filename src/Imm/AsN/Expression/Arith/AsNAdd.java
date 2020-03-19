@@ -6,15 +6,13 @@ import Imm.ASM.Processing.ASMMove;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
-import Imm.ASM.Util.ImmOperand;
-import Imm.ASM.Util.RegOperand;
-import Imm.ASM.Util.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.TYPE.PRIMITIVES.INT;
 
-public class AsNAdd extends AsNExpression {
+public class AsNAdd extends AsNBinaryExpression {
 
 	public AsNAdd() {
 		
@@ -23,15 +21,8 @@ public class AsNAdd extends AsNExpression {
 	public static AsNAdd cast(Add a, RegSet r) throws CGEN_EXCEPTION {
 		AsNAdd add = new AsNAdd();
 		
-		/* Process left and right operand */
-		
-		/* Both operands are immediates, precalculate */
 		if (a.left() instanceof Atom && a.right() instanceof Atom) {
-			Atom l0 = (Atom) a.left(), r0 = (Atom) a.right();
-			if (l0.type instanceof INT && r0.type instanceof INT) {
-				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
-				add.instructions.add(new ASMMove(new RegOperand(0), new ImmOperand(i0.value + i1.value)));
-			}
+			add.atomicPrecalc(a, (x, y) -> x + y);
 		}
 		else {
 			if (a.left() instanceof Atom) {
@@ -62,18 +53,6 @@ public class AsNAdd extends AsNExpression {
 		}
 		
 		return add;
-	}
-	
-	private void loadLeft(Add a, int target, RegSet r) throws CGEN_EXCEPTION {
-		this.instructions.addAll(AsNExpression.cast(a.left(), r).getInstructions());
-		this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
-		r.copy(0, target);
-	}
-	
-	private void loadRight(Add a, int target, RegSet r) throws CGEN_EXCEPTION {
-		this.instructions.addAll(AsNExpression.cast(a.right(), r).getInstructions());
-		this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
-		r.copy(0, target);
 	}
 	
 }

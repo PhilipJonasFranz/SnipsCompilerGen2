@@ -5,6 +5,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AsN.AsNNode;
 
@@ -24,6 +25,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof Assignment) {
 			return AsNAssignment.cast((Assignment) s, r); 
+		}
+		else if (s instanceof IfStatement) {
+			return AsNIfStatement.cast((IfStatement) s, r);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No cast available for " + s.getClass().getName());
 	}

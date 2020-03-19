@@ -8,19 +8,15 @@ import Util.Source;
 /**
  * This class represents a superclass for all Expressions.
  */
-public class Sub extends BinaryExpression {
+public class Lsl extends BinaryExpression {
 	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Sub(Expression left, Expression right, Source source) {
-		super(left, right, Operator.SUB, source);
-	}
-
-	public void print(int d, boolean rec) {
-		
+	public Lsl(Expression left, Expression right, Source source) {
+		super(left, right, Operator.LSL, source);
 	}
 
 	public List<String> buildProgram(int pad) {

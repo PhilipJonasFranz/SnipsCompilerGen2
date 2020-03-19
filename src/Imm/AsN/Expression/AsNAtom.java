@@ -3,9 +3,9 @@ package Imm.AsN.Expression;
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMMove;
-import Imm.ASM.Util.ImmOperand;
-import Imm.ASM.Util.RegOperand;
-import Imm.ASM.Util.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOperand;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.TYPE.PRIMITIVES.INT;
 

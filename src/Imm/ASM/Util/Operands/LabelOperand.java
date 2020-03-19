@@ -1,4 +1,4 @@
-package Imm.ASM.Util;
+package Imm.ASM.Util.Operands;
 
 import Imm.ASM.Structural.ASMLabel;
 

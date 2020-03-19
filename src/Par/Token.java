@@ -51,6 +51,10 @@ public class Token {
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
 		
+		/* Conditional */
+		IF("if"),
+		ELSE("else"),
+		
 		/* Functions */
 		RETURN("return"),
 		
@@ -63,6 +67,23 @@ public class Token {
 		SUB("-"),
 		MUL("*"),
 		DIV("/"),
+		
+		/* Logic Operators */
+		OR("||"),
+		AND("&&"),
+		NOT("!"),
+		
+		/* Comparators */
+		CMPEQ("==", 				TokenGroup.COMPARE),
+		CMPNE("!=", 				TokenGroup.COMPARE),
+		CMPLE("<=", 				TokenGroup.COMPARE),
+		CMPLT("<",					TokenGroup.COMPARE),
+		CMPGE(">=", 				TokenGroup.COMPARE),
+		CMPGT(">", 					TokenGroup.COMPARE),
+		
+		/* Shift Operators */
+		LSL("<<"),
+		LSR(">>"),
 		
 		/* Types */
 		INT("int", 					TokenGroup.TYPE),

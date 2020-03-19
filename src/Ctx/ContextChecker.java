@@ -9,11 +9,14 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.BOOL;
 
 public class ContextChecker {
 
@@ -30,20 +33,18 @@ public class ContextChecker {
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {
-		if (AST instanceof Program) {
-			scopes.push(new Scope(null));
-			
-			Program p = (Program) AST;
-			this.head = p;
-			for (SyntaxElement s : p.programElements) {
-				s.check(this);
-			}
-			
-			return null;
+		this.checkProgram((Program) AST);
+		return null;
+	}
+	
+	public TYPE checkProgram(Program p) throws CTX_EXCEPTION {
+		scopes.push(new Scope(null));
+		this.head = p;
+		for (SyntaxElement s : p.programElements) {
+			s.check(this);
 		}
-		else {
-			throw new CTX_EXCEPTION(AST.getSource(), "Head of AST is not instance of Program...How?");
-		}
+		
+		return null;
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
@@ -81,6 +82,28 @@ public class ContextChecker {
 		}
 		
 		scopes.pop();
+		return null;
+	}
+	
+	public TYPE checkIfStatement(IfStatement i) throws CTX_EXCEPTION {
+		if (i.condition != null) {
+			TYPE cond = i.condition.check(this);
+			if (!(cond instanceof BOOL)) {
+				throw new CTX_EXCEPTION(i.getSource(), "Condition is not boolean");
+			}
+		}
+		else {
+			if (i.elseStatement != null) {
+				throw new CTX_EXCEPTION(i.getSource(), "If Statement can only have one else statement");
+			}
+		}
+		
+		for (Statement s : i.body) s.check(this);
+
+		if (i.elseStatement != null) {
+			i.elseStatement.check(this);
+		}
+		
 		return null;
 	}
 	
@@ -124,6 +147,16 @@ public class ContextChecker {
 		if (left.isEqual(right)) return left;
 		else {
 			throw new CTX_EXCEPTION(b.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
+		}
+	}
+	
+	public TYPE checkCompare(Compare c) throws CTX_EXCEPTION {
+		TYPE left = c.left().check(this);
+		TYPE right = c.right().check(this);
+		
+		if (left.isEqual(right)) return new BOOL();
+		else {
+			throw new CTX_EXCEPTION(c.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
 		}
 	}
 	
