@@ -12,38 +12,27 @@ import Util.Source;
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class Declaration extends Statement {
+public class Assignment extends Statement {
 
 			/* --- FIELDS --- */
 	public String fieldName;
-		
-	public TYPE type;
+	
+	public Declaration origin;
 	
 	public Expression value;
 	
 			/* --- CONSTRUCTORS --- */
-	/**
-	 * Default constructor.
-	 * @param source See {@link #source}
-	 */
-	public Declaration(Token id, TYPE type, Source source) {
+	public Assignment(Token fieldName, Expression value, Source source) {
 		super(source);
-		this.fieldName = id.spelling;
-		this.type = type;
-	}
-	
-	public Declaration(Token id, TYPE type, Expression value, Source source) {
-		super(source);
-		this.fieldName = id.spelling;
-		this.type = type;
+		this.fieldName = fieldName.spelling;
 		this.value = value;
 	}
 	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.fieldName);
-		if (rec && this.value != null) {
+		System.out.println(this.pad(d) + "Assign " + this.fieldName);
+		if (rec) {
 			this.value.print(d + this.printDepthStep, rec);
 		}
 	}
@@ -53,7 +42,7 @@ public class Declaration extends Statement {
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		return ctx.checkDeclaration(this);
+		return ctx.checkAssignment(this);
 	}
 	
 }

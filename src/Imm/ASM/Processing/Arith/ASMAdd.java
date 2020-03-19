@@ -1,4 +1,4 @@
-package Imm.ASM.Processing;
+package Imm.ASM.Processing.Arith;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Operand;

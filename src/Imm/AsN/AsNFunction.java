@@ -1,6 +1,7 @@
 package Imm.AsN;
 
 import CGen.RegSet;
+import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
@@ -19,7 +20,7 @@ public class AsNFunction extends AsNNode {
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
 	 */
-	public static AsNFunction cast(Function f, RegSet r) {
+	public static AsNFunction cast(Function f, RegSet r) throws CGEN_EXCEPTION {
 		AsNFunction function = new AsNFunction();
 		function.source = f;
 		

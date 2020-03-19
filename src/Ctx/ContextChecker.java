@@ -9,6 +9,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
@@ -46,6 +47,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
+		scopes.push(new Scope(scopes.peek()));
+		
 		/* Check for duplicate function name */
 		for (Function f0 : head.functions) {
 			if (f0.functionName.equals(f.functionName)) {
@@ -77,10 +80,31 @@ public class ContextChecker {
 			s.check(this);
 		}
 		
+		scopes.pop();
 		return null;
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
+		if (d.value != null) {
+			TYPE t = d.value.check(this);
+			if (t.isEqual(d.type)) {
+				scopes.peek().addDeclaration(d);
+			}
+			else {
+				throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
+			}
+		}
+		
+		return null;
+	}
+	
+	public TYPE checkAssignment(Assignment a) throws CTX_EXCEPTION {
+		TYPE t = a.value.check(this);
+		Declaration dec = scopes.peek().getField(a.fieldName);
+		a.origin = dec;
+		if (!t.isEqual(dec.type)) {
+			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
+		}
 		return null;
 	}
 	

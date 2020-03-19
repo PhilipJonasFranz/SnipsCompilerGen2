@@ -84,9 +84,23 @@ public class RegSet {
 		return false;
 	}
 	
+	public boolean expressionLoaded(Expression e) {
+		for (int i = 0; i < regs.length; i++) {
+			if (regs [i].expr != null && regs [i].expr.equals(e)) return true;
+		}
+		return false;
+	}
+	
 	public int declarationRegLocation(Declaration dec) {
 		for (int i = 0; i < regs.length; i++) {
 			if (regs [i].value != null && regs [i].value.equals(dec)) return i;
+		}
+		return -1;
+	}
+	
+	public int ExpressionRegLocation(Expression e) {
+		for (int i = 0; i < regs.length; i++) {
+			if (regs [i].expr != null && regs [i].expr.equals(e)) return i;
 		}
 		return -1;
 	}

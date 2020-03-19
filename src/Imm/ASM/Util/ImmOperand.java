@@ -1,10 +1,10 @@
 package Imm.ASM.Util;
 
-public class ImmediateOperand extends Operand {
+public class ImmOperand extends Operand {
 
 	public int value;
 	
-	public ImmediateOperand(int value) {
+	public ImmOperand(int value) {
 		this.value = value;
 	}
 

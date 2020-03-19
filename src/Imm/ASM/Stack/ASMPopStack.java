@@ -1,15 +1,15 @@
-package Imm.ASM.Data;
+package Imm.ASM.Stack;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Operand;
-import Imm.ASM.Util.RegisterOperand;
+import Imm.ASM.Util.RegOperand;
 import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {
 
 	public Operand [] operands;
 	
-	public ASMPopStack(RegisterOperand...operands) {
+	public ASMPopStack(RegOperand...operands) {
 		this.operands = operands;
 	}
 

@@ -1,6 +1,6 @@
 package Imm.ASM.Util;
 
-public class RegisterOperand extends Operand {
+public class RegOperand extends Operand {
 
 	public enum REGISTER {
 		R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15,
@@ -9,7 +9,7 @@ public class RegisterOperand extends Operand {
 	
 	public REGISTER reg;
 	
-	public RegisterOperand(REGISTER reg) {
+	public RegOperand(REGISTER reg) {
 		if (reg == REGISTER.R11) this.reg = REGISTER.FP;
 		else if (reg == REGISTER.R13) this.reg = REGISTER.SP;
 		else if (reg == REGISTER.R14) this.reg = REGISTER.LR;
@@ -17,7 +17,7 @@ public class RegisterOperand extends Operand {
 		else this.reg = reg;
 	}
 	
-	public RegisterOperand(int reg) {
+	public RegOperand(int reg) {
 		if (reg == 11) this.reg = REGISTER.FP;
 		else if (reg == 13) this.reg = REGISTER.SP;
 		else if (reg == 14) this.reg = REGISTER.LR;

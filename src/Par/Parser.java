@@ -17,6 +17,7 @@ import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Div;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
@@ -136,11 +137,23 @@ public class Parser {
 		else if (current.type == TokenType.RETURN) {
 			return this.parseReturn();
 		}
+		else if (current.type == TokenType.IDENTIFIER) {
+			return this.parseAssignment();
+		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE);
 	}
 	
+	public Assignment parseAssignment() throws PARSE_EXCEPTION {
+		Token id = accept(TokenType.IDENTIFIER);
+		accept(TokenType.LET);
+		Expression value = this.parseExpression();
+		accept(TokenType.SEMICOLON);
+		return new Assignment(id, value, id.source);
+	}
+	
 	public Declaration parseDeclaration() throws PARSE_EXCEPTION {
-		Token type = accept(TokenGroup.TYPE);
+		Source source = current.getSource();
+		TYPE type = this.parseType();
 		Token id = accept(TokenType.IDENTIFIER);
 		
 		Expression value = null;
@@ -150,7 +163,7 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		return new Declaration(id, TYPE.fromToken(type), value, type.getSource());
+		return new Declaration(id, type, value, source);
 	}
 	
 	public Return parseReturn() throws PARSE_EXCEPTION {

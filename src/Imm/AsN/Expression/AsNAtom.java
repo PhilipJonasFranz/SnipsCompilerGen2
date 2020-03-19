@@ -1,10 +1,11 @@
 package Imm.AsN.Expression;
 
 import CGen.RegSet;
+import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMMove;
-import Imm.ASM.Util.ImmediateOperand;
-import Imm.ASM.Util.RegisterOperand;
-import Imm.ASM.Util.RegisterOperand.REGISTER;
+import Imm.ASM.Util.ImmOperand;
+import Imm.ASM.Util.RegOperand;
+import Imm.ASM.Util.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.TYPE.PRIMITIVES.INT;
 
@@ -14,13 +15,14 @@ public class AsNAtom extends AsNExpression {
 		
 	}
 	
-	public static AsNAtom cast(Atom a, RegSet r) {
+	public static AsNAtom cast(Atom a, RegSet r) throws CGEN_EXCEPTION {
 		AsNAtom atom = new AsNAtom();
 		
 		if (a.type instanceof INT) {
-			atom.instructions.add(new ASMMove(new RegisterOperand(REGISTER.R0), new ImmediateOperand(((INT) a.type).value)));
+			atom.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(((INT) a.type).value)));
 			r.regs [0].setExpression(a);
 		}
+		else throw new CGEN_EXCEPTION(a.getSource(), "No cast for atom type supported: " + a.type.typeString());
 		
 		return atom;
 	}

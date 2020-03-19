@@ -1,6 +1,7 @@
 package Imm.AsN.Expression;
 
 import CGen.RegSet;
+import Exc.CGEN_EXCEPTION;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -18,7 +19,7 @@ public abstract class AsNExpression extends AsNNode {
 		
 	}
 	
-	public static AsNExpression cast(Expression e, RegSet r) {
+	public static AsNExpression cast(Expression e, RegSet r) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		if (e instanceof Add) {
 			return AsNAdd.cast((Add) e, r);
@@ -35,7 +36,7 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof Atom) {
 			return AsNAtom.cast((Atom) e, r); 
 		}
-		else return null;
+		else throw new CGEN_EXCEPTION(e.getSource(), "No cast available for " + e.getClass().getName());
 	}
 	
 }

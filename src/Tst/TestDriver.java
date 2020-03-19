@@ -22,6 +22,7 @@ public class TestDriver {
 	/** The Milliseconds the program can run on the processor until it timeouts */
 	public long ttl = 200;
 	
+	/** Test case statuses */
 	public enum RET_TYPE {	
 		SUCCESS, FAIL, CRASH, TIMEOUT
 	}
@@ -102,7 +103,7 @@ public class TestDriver {
 				(System.currentTimeMillis() - start) + " Millis." : ", " + failed + " test(s) failed" + 
 				((crashed > 0)? ", " + crashed + " tests(s) crashed" : ((timeout > 0)? ", " : ".")) + 
 				((timeout > 0)? ", " + timeout + " tests(s) timed out." : ".")), 
-					(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL).getMessage());
+				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL).getMessage());
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -153,9 +154,11 @@ public class TestDriver {
 		int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
 		
 		if (pcu_return == validation) {
+			/* Output does match expected value */
 			return RET_TYPE.SUCCESS;
 		}
 		else {
+			/* Wrong output */
 			System.out.println(new Message("-> Expected <" + validation + ">, actual <" + pcu_return + ">.", Message.Type.FAIL).getMessage());
 			System.out.println(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL).getMessage());
 			compile.stream().forEach(x -> System.out.println(x));

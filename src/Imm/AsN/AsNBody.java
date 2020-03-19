@@ -1,9 +1,7 @@
 package Imm.AsN;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.RegSet;
+import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
@@ -15,8 +13,6 @@ import Snips.CompilerDriver;
 
 public class AsNBody extends AsNNode {
 
-	List<AsNFunction> functions = new ArrayList();
-	
 	public AsNBody() {
 		
 	}
@@ -24,7 +20,7 @@ public class AsNBody extends AsNNode {
 	/**
 	 * Casts given program into an ASMBody.
 	 */
-	public static AsNBody cast(Program p) {
+	public static AsNBody cast(Program p) throws CGEN_EXCEPTION {
 		AsNBody body = new AsNBody();
 		
 		body.instructions.add(new ASMComment("---" + CompilerDriver.file.getName()));

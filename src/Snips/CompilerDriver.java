@@ -91,6 +91,8 @@ public class CompilerDriver {
 			/* Read in code */
 			if (this.code == null) this.code = Util.Util.readFile(file);
 			
+			code.stream().forEach(System.out::println);
+			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
@@ -114,7 +116,7 @@ public class CompilerDriver {
 			
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
 			AsNBody body = AsNBody.cast((Program) AST);
-			
+		
 			List<ASMInstruction> build = body.getInstructions();
 			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
 		
