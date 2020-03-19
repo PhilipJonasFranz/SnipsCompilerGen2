@@ -8,9 +8,9 @@ import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
 import Imm.AsN.AsNNode;
-import Imm.AsN.Expression.Arith.AsNAddition;
-import Imm.AsN.Expression.Arith.AsNMultiplication;
-import Imm.AsN.Expression.Arith.AsNSubtraction;
+import Imm.AsN.Expression.Arith.AsNAdd;
+import Imm.AsN.Expression.Arith.AsNMult;
+import Imm.AsN.Expression.Arith.AsNSub;
 
 public abstract class AsNExpression extends AsNNode {
 
@@ -21,13 +21,13 @@ public abstract class AsNExpression extends AsNNode {
 	public static AsNExpression cast(Expression e, RegSet r) {
 		/* Relay to Expression type */
 		if (e instanceof Add) {
-			return AsNAddition.cast((Add) e, r);
+			return AsNAdd.cast((Add) e, r);
 		}
 		else if (e instanceof Sub) {
-			return AsNSubtraction.cast((Sub) e, r);
+			return AsNSub.cast((Sub) e, r);
 		}
 		else if (e instanceof Mul) {
-			return AsNMultiplication.cast((Mul) e, r);
+			return AsNMult.cast((Mul) e, r);
 		}
 		else if (e instanceof IDRef) {
 			return AsNIdRef.cast((IDRef) e, r);

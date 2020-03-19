@@ -18,6 +18,7 @@ public class ASMSectionAnnotation extends ASMInstruction {
 	
 	public ASMSectionAnnotation(SECTION section, String postfix) {
 		this.section = section;
+		this.postfix = postfix;
 	}
 
 	public String build() {

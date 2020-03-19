@@ -19,7 +19,7 @@ public class AsNAtom extends AsNExpression {
 		
 		if (a.type instanceof INT) {
 			atom.instructions.add(new ASMMove(new RegisterOperand(REGISTER.R0), new ImmediateOperand(((INT) a.type).value)));
-			r.regs [0].setAtomic(a);
+			r.regs [0].setExpression(a);
 		}
 		
 		return atom;

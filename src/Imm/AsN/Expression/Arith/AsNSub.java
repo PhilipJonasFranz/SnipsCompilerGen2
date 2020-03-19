@@ -4,14 +4,14 @@ import CGen.RegSet;
 import Imm.AST.Expression.Arith.Sub;
 import Imm.AsN.Expression.AsNExpression;
 
-public class AsNSubtraction extends AsNExpression {
+public class AsNSub extends AsNExpression {
 
-	public AsNSubtraction() {
+	public AsNSub() {
 		
 	}
 	
-	public static AsNSubtraction cast(Sub s, RegSet r) {
-		AsNSubtraction sub = new AsNSubtraction();
+	public static AsNSub cast(Sub s, RegSet r) {
+		AsNSub sub = new AsNSub();
 		
 		sub.build();
 		return sub;

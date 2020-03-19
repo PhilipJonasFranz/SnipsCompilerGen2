@@ -1,6 +1,6 @@
 package CGen;
 
-import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Declaration;
 
 public class RegSet {
@@ -15,7 +15,7 @@ public class RegSet {
 		
 		public Declaration value;
 		
-		public Atom atomicValue;
+		public Expression expr;
 		
 		public RegState() {
 			
@@ -23,6 +23,7 @@ public class RegSet {
 		
 		public void free() {
 			this.value = null;
+			this.expr = null;
 			this.status = STATUS.FREE;
 		}
 		
@@ -31,15 +32,18 @@ public class RegSet {
 			this.status = STATUS.USED;
 		}
 		
-		public void setAtomic(Atom atomic) {
-			this.atomicValue = atomic;
+		public void setExpression(Expression e) {
+			this.expr = e;
 			this.value = null;
 			this.status = STATUS.USED;
 		}
 		
 		public void print() {
 			System.out.println("    Status: " + this.status.toString());
-			if (this.status == STATUS.USED) this.value.print(4, true);
+			if (this.status == STATUS.USED) {
+				if (this.value != null) this.value.print(4, true);
+				else if (this.expr != null) this.expr.print(4, true);
+			}
 		}
 		
 	}

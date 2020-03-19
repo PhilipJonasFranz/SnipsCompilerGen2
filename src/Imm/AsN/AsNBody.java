@@ -27,7 +27,7 @@ public class AsNBody extends AsNNode {
 	public static AsNBody cast(Program p) {
 		AsNBody body = new AsNBody();
 		
-		body.instructions.add(new ASMComment("---" + CompilerDriver.file.getName() + ".asm"));
+		body.instructions.add(new ASMComment("---" + CompilerDriver.file.getName()));
 		
 		ASMSectionAnnotation data = new ASMSectionAnnotation(SECTION.DATA);
 		body.instructions.add(data);

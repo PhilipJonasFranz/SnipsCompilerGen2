@@ -27,15 +27,18 @@ public class TestDriver {
 	}
 	
 	public static void main(String [] args) {
-		new TestDriver();	
+		new TestDriver(args);	
 	}
 	
-	public TestDriver() {
+	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
 		CompilerDriver.printLogo();
 		CompilerDriver.useTerminalColors = true;
 		
-		List<String> paths = this.getTestFiles().stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList());
+		List<String> paths = new ArrayList();
+		
+		if (args.length == 0) this.getTestFiles().stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList());
+		else paths.add(args [0]);
 		
 		long start = System.currentTimeMillis();
 		int failed = 0, crashed = 0, timeout = 0;
@@ -77,6 +80,7 @@ public class TestDriver {
 				
 				/* Run test */
 				RET_TYPE ret = this.test(file, code, params, returnValue);
+				
 				if (ret == RET_TYPE.FAIL) {
 					failed++;
 				}
@@ -102,9 +106,12 @@ public class TestDriver {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public RET_TYPE test(String path, List<String> code, List<String> params, int validation) {
-		CompilerDriver cd = new CompilerDriver(new File(path), code);
-		List<String> compile = cd.compile(true, false);
+	public RET_TYPE test(String path, List<String> code, List<String> params, int validation) throws InterruptedException {
+		
+		File f = new File(path);
+		CompilerDriver cd = new CompilerDriver(f, code);
+		List<String> compile = cd.compile(false, false);
+		Thread.sleep(10);
 		
 		if (compile == null) {
 			System.out.println(new Message("-> A crash occured during compilation.", Message.Type.FAIL).getMessage());
@@ -145,7 +152,9 @@ public class TestDriver {
 		
 		int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
 		
-		if (pcu_return == validation)return RET_TYPE.SUCCESS;
+		if (pcu_return == validation) {
+			return RET_TYPE.SUCCESS;
+		}
 		else {
 			System.out.println(new Message("-> Expected <" + validation + ">, actual <" + pcu_return + ">.", Message.Type.FAIL).getMessage());
 			System.out.println(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL).getMessage());

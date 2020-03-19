@@ -75,7 +75,7 @@ public class CompilerDriver {
 	}
 	
 	public CompilerDriver(File file, List<String> code) {
-		file = file;
+		CompilerDriver.file = file;
 		this.code = code;
 	}
 
@@ -89,7 +89,7 @@ public class CompilerDriver {
 		
 		try {
 			/* Read in code */
-			this.code = Util.Util.readFile(file);
+			if (this.code == null) this.code = Util.Util.readFile(file);
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
@@ -116,12 +116,10 @@ public class CompilerDriver {
 			AsNBody body = AsNBody.cast((Program) AST);
 			
 			List<ASMInstruction> build = body.getInstructions();
-			List<String> program = build.stream().map(x -> x.build()).collect(Collectors.toList());
+			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
 		
 			System.out.println();
-			program.stream().forEach(System.out::println);
-			
-			/* TODO: Build and insert compilation pipeline modules here */
+			output.stream().forEach(System.out::println);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

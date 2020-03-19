@@ -31,6 +31,7 @@ public class AsNIdRef extends AsNExpression {
 			else if (location != 0) {
 				/* Copy value in R0 */
 				ref.instructions.add(new ASMMove(new RegisterOperand(REGISTER.R0), new RegisterOperand(location)));
+				r.copy(location, 0);
 			}
 		}
 		
