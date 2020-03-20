@@ -7,7 +7,6 @@ public abstract class ASMInstruction {
 	public Cond cond;
 	
 	public ASMInstruction() {
-		
 	}
 	
 	public ASMInstruction(Cond cond) {

@@ -35,20 +35,34 @@ public class IfStatement extends Statement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		if (this.condition != null) {
-			System.out.println(this.pad(d) + "If");
-			this.condition.print(d + this.printDepthStep, rec);
-		}
-		else {
-			System.out.println(this.pad(d) + "Else");
-		}
+		System.out.println(this.pad(d) + "If");
+		this.condition.print(d + this.printDepthStep, rec);
 		
 		for (Statement s : this.body) {
 			s.print(d + this.printDepthStep, rec);
 		}
 		
-		if (this.elseStatement != null) {
-			this.elseStatement.print(d, rec);
+		IfStatement if0 = this.elseStatement;
+		while (if0 != null) {
+			if (if0.condition != null) {
+				System.out.println(this.pad(d) + "Else If");
+				if0.condition.print(d + this.printDepthStep, rec);
+				
+				for (Statement s : if0.body) {
+					s.print(d + this.printDepthStep, rec);
+				}
+				
+				if0 = if0.elseStatement;
+			}
+			else {
+				System.out.println(this.pad(d) + "Else");
+				
+				for (Statement s : if0.body) {
+					s.print(d + this.printDepthStep, rec);
+				}
+				
+				return;
+			}
 		}
 	}
 

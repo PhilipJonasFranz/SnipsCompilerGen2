@@ -5,10 +5,11 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
-public class Compare extends Expression {
+public class Compare extends BinaryExpression {
 
 	public enum COMPARATOR {
 		EQUAL, NOT_EQUAL,
@@ -18,25 +19,11 @@ public class Compare extends Expression {
 	
 	public COMPARATOR comparator;
 	
-	public Expression left;
-	
-	public Expression right;
-	
-	public Compare(Expression leftOperand, Expression rightOperand, COMPARATOR comparator, Source source) {
-		super(source);
-		this.left = leftOperand;
-		this.right = rightOperand;
+	public Compare(Expression left, Expression right, COMPARATOR comparator, Source source) {
+		super(left, right, Operator.CMP, source);
 		this.comparator = comparator;
 	}
 	
-	public Expression left() {
-		return this.left;
-	}
-	
-	public Expression right() {
-		return this.right;
-	}
-
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
 		this.left().print(d + this.printDepthStep, rec);

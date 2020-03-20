@@ -7,8 +7,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
@@ -21,9 +23,6 @@ public class CompilerDriver {
 
 	/* The Input File */
 	public static File file;
-	
-	/* The Contents of the input file */
-	public List<String> code;
 	
 	public static String [] logo = {
 			"	 _______  __    _  ___  _______  _______  ",
@@ -44,7 +43,7 @@ public class CompilerDriver {
 		silenced = false,
 		imm = true;
 	
-	public static boolean printErrors = false;
+	public static boolean printErrors = true;
 	
 	public static String printDepth = "    ";
 	
@@ -67,21 +66,24 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
+		List<String> code = Util.Util.readFile(file);
+		
 		/* Perform compilation */
-		scd.compile();
+		scd.compile(file, code);
 	}
 	
 	public CompilerDriver(String [] args) {
 		this.readFlags(args);
 	}
 	
-	public CompilerDriver(File file, List<String> code) {
-		CompilerDriver.file = file;
-		this.code = code;
+	public CompilerDriver() {
+		
 	}
 
-	public List<String> compile() {
+	public List<String> compile(File file, List<String> code) {
 		long start = System.currentTimeMillis();
+		
+		CompilerDriver.file = file;
 		
 		printLogo();
 		log.clear();
@@ -89,17 +91,18 @@ public class CompilerDriver {
 		List<String> output = null;
 		
 		try {
-			/* Read in code */
-			if (this.code == null) this.code = Util.Util.readFile(file);
+			if (code == null) {
+				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
+			}
 			
 			if (!silenced) {
-				this.code.stream().forEach(System.out::println);
+				code.stream().forEach(System.out::println);
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
-			Scanner scanner = new Scanner(this.code);
+			Scanner scanner = new Scanner(code);
 			Deque deque = scanner.scan();
 			
 			log.add(new Message("SNIPS_PARSE -> Starting...", Message.Type.INFO));
@@ -114,13 +117,17 @@ public class CompilerDriver {
 				ctx.check();
 				log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
 			} catch (CTX_EXCEPTION e) {
-				
+				throw e;
 			}
 			
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
 			AsNBody body = AsNBody.cast((Program) AST);
 		
+			ASMOptimizer opt = new ASMOptimizer();
+			opt.optimize(body);
+			
 			List<ASMInstruction> build = body.getInstructions();
+			
 			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
 		
 			if (!silenced) {
@@ -141,9 +148,8 @@ public class CompilerDriver {
 				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
 				/* ... with errors */
 				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? Message.Type.INFO : Message.Type.FAIL));		
-		if (!silenced) {
-			log.stream().forEach(x -> System.out.println(x.getMessage()));
-		}
+		
+		log.clear();
 		
 		return output;
 	}

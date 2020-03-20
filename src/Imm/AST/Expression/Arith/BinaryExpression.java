@@ -13,7 +13,7 @@ public abstract class BinaryExpression extends Expression {
 
 	public enum Operator {
 		MUL, DIV, ADD, SUB, 
-		LSL, LSR;
+		LSL, LSR, CMP;
 	}
 	
 	public Expression leftOperand;

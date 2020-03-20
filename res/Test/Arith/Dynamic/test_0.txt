@@ -6,6 +6,5 @@ int foo() {
 int main() {
 	return foo() * foo();
 }
-PARAMS
-VALIDATION
+TESTCASES
 100

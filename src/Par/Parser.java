@@ -113,15 +113,10 @@ public class Parser {
 		}
 		
 		accept(TokenType.RPAREN);
-		accept(TokenType.LBRACE);
 		
-		List<Statement> statements = new ArrayList();
-		while (current.type != TokenType.RBRACE) {
-			statements.add(this.parseStatement());
-		}
-		accept(TokenType.RBRACE);
+		List<Statement> body = this.parseCompoundStatement();
 		
-		return new Function(TYPE.fromToken(type), id, parameters, statements, type.source);
+		return new Function(TYPE.fromToken(type), id, parameters, body, type.source);
 	}
 	
 	public Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
@@ -153,30 +148,17 @@ public class Parser {
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
 		
-		List<Statement> body = new ArrayList();
-		
-		if (current.type == TokenType.LBRACE) {
-			accept();
-			while (current.type != TokenType.RBRACE) body.add(this.parseStatement());
-			accept(TokenType.RBRACE);
-		}
-		else body.add(this.parseStatement());
+		List<Statement> body = this.parseCompoundStatement();
 		
 		IfStatement if0 = new IfStatement(condition, body, source);
+		
 		if (current.type == TokenType.ELSE) {
 			Source elseSource = accept().getSource();
 			if (current.type == TokenType.IF) {
 				if0.elseStatement = (IfStatement) this.parseIf();
 			}
 			else {
-				List<Statement> elseBody = new ArrayList();
-				if (current.type == TokenType.LBRACE) {
-					accept();
-					while (current.type != TokenType.RBRACE) elseBody.add(this.parseStatement());
-					accept(TokenType.RBRACE);
-				}
-				else elseBody.add(this.parseStatement());
-				
+				List<Statement> elseBody = this.parseCompoundStatement();
 				if0.elseStatement = new IfStatement(elseBody, elseSource);
 			}
 		}
@@ -324,6 +306,25 @@ public class Parser {
 		}
 		
 		return type;
+	}
+	
+	protected List<Statement> parseCompoundStatement() throws PARSE_EXCEPTION {
+		List<Statement> body = new ArrayList();
+		
+		/* Compound Statement with braces */
+		if (current.type == TokenType.LBRACE) {
+			accept();
+			while (current.type != TokenType.RBRACE) {
+				body.add(this.parseStatement());
+			}
+			accept(TokenType.RBRACE);
+		}
+		/* Without braces, one statement only */
+		else {
+			body.add(this.parseStatement());
+		}
+		
+		return body;
 	}
 	
 }

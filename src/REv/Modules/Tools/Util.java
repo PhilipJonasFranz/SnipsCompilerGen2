@@ -113,7 +113,7 @@ public class Util {
 		}
 	}
 	
-	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn) {
+	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) {
 		// Load Devices
 		XMLNode devices = head.getNode("Devices");
 		List<Device> deviceList = new ArrayList();
@@ -124,7 +124,7 @@ public class Util {
 			deviceList.add(d);
 		}
 		
-		int [] [] program = Assembler.assemble(asmIn, true);
+		int [] [] program = Assembler.assemble(asmIn, silent, false);
 		if (program != null) {
 			Device d = deviceList.get(0);
 			for (int i = 0; i < program.length; i++) {

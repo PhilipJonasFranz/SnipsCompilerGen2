@@ -4,7 +4,5 @@ int main(int a) {
 	a = a * 3;
 	return b;
 }
-PARAMS
-5
-VALIDATION
-5
+TESTCASES
+5 5

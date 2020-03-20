@@ -2,6 +2,5 @@ SOURCE
 int main() {
 	return 1 * 1 * 1 * 1 * 1;
 }
-PARAMS
-VALIDATION
+TESTCASES
 1

@@ -6,26 +6,31 @@ import Imm.ASM.Processing.ASMMove;
 import Imm.ASM.Processing.Logic.ASMCompare;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.PRIMITIVES.INT;
 
 public class AsNCompare extends AsNBinaryExpression {
 
+	public COND trueC, neg;
+	
 	public AsNCompare() {
 		
 	}
 	
 	public static AsNCompare cast(Compare c, RegSet r) throws CGEN_EXCEPTION {
 		AsNCompare cmp = new AsNCompare();
-	
+		
 		if (c.right() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
-			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right).type).value)));
+			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
@@ -42,10 +47,35 @@ public class AsNCompare extends AsNBinaryExpression {
 			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
 	
+		cmp.trueC = cmp.toCondition(c.comparator);
+		cmp.neg = cmp.negate(cmp.trueC);
+		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(cmp.trueC)));
+		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(cmp.neg)));
+	
 		r.regs [0].setExpression(c);
 		r.regs [1].free();
 		
 		return cmp;
+	}
+	
+	protected COND toCondition(COMPARATOR c) {
+		if (c == COMPARATOR.EQUAL) return COND.EQ;
+		else if (c == COMPARATOR.NOT_EQUAL) return COND.NE;
+		else if (c == COMPARATOR.GREATER_SAME) return COND.GE;
+		else if (c == COMPARATOR.GREATER_THAN) return COND.GT;
+		else if (c == COMPARATOR.LESS_SAME) return COND.LE;
+		else if (c == COMPARATOR.LESS_THAN) return COND.LT;
+		return null;
+	}
+	
+	protected COND negate(COND c) {
+		if (c == COND.EQ) return COND.NE;
+		if (c == COND.NE) return COND.EQ;
+		if (c == COND.GE) return COND.LT;
+		if (c == COND.GT) return COND.LE;
+		if (c == COND.LE) return COND.GT;
+		if (c == COND.LT) return COND.GE;
+		return null;
 	}
 	
 }

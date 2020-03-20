@@ -22,9 +22,24 @@ public class TestDriver {
 	/** The Milliseconds the program can run on the processor until it timeouts */
 	public long ttl = 200;
 	
-	/** Test case statuses */
+	/** Test result Status */
 	public enum RET_TYPE {	
 		SUCCESS, FAIL, CRASH, TIMEOUT
+	}
+	
+	/** Result summary of a test */
+	public class Result {
+		
+		public RET_TYPE res;
+		
+		public int succ, fail;
+		
+		public Result(RET_TYPE res, int succ, int fail) {
+			this.res = res;
+			this.succ = succ;
+			this.fail = fail;
+		}
+		
 	}
 	
 	public static void main(String [] args) {
@@ -38,13 +53,24 @@ public class TestDriver {
 		
 		List<String> paths = new ArrayList();
 		
-		if (args.length == 0) paths.addAll(this.getTestFiles().stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
-		else paths.add(args [0]);
+		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+		else {
+			if (args [0].endsWith(".sn")) paths.add(args [0]);
+			else {
+				paths.addAll(this.getTestFiles(args [0]).stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+			}
+		}
+		
+		if (paths.size() == 0) {
+			new Message("Could not find any tests, make sure the path starts from the res/ folder.", Message.Type.WARN);
+			new Message("Make sure the test files are .txt files.", Message.Type.WARN);
+			System.exit(0);
+		}
 		
 		long start = System.currentTimeMillis();
 		int failed = 0, crashed = 0, timeout = 0;
 		
-		System.out.println(new Message("Starting Run, found " + paths.size() + " tests.", Message.Type.INFO).getMessage());
+		new Message("Starting run, found " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ".", Message.Type.INFO);
 		
 		String current = null;
 		for (String file : paths) {
@@ -55,130 +81,155 @@ public class TestDriver {
 			
 				/* Extract contents */
 				List<String> code = new ArrayList();
-				List<String> params = new ArrayList();
-				int returnValue = 0;
+				List<String> testcases = new ArrayList();
 				
 				int i = 1;
 				while (true) {
-					if (content.get(i).equals("PARAMS")) {
+					if (content.get(i).equals("TESTCASES")) {
 						i++;
 						break;
 					}
 					code.add(content.get(i));
 					i++;
 				}
-				while (true) {
-					if (content.get(i).equals("VALIDATION")) {
-						i++;
-						break;
-					}
-					params.add(content.get(i));
+				while (i < content.size()) {
+					testcases.add(content.get(i));
 					i++;
 				}
-				returnValue = Integer.parseInt(content.get(i));
 			
-				System.out.println(new Message("Testing file " + file, Message.Type.INFO).getMessage());
+				new Message("Testing file " + file, Message.Type.INFO);
 				
 				/* Run test */
-				RET_TYPE ret = this.test(file, code, params, returnValue);
+				Result res = this.test(file, code, testcases);
 				
-				if (ret == RET_TYPE.FAIL) {
+				if (res.fail > 0) {
 					failed++;
 				}
-				else if (ret == RET_TYPE.CRASH) {
+				else if (res.res == RET_TYPE.CRASH) {
 					crashed++;
 				}
-				else if (ret == RET_TYPE.TIMEOUT) {
+				else if (res.res == RET_TYPE.TIMEOUT) {
 					timeout++;
 				}
-				else System.out.println(new Message("Test finished successfully.", Message.Type.INFO).getMessage());
+				else {
+					new Message("Test finished successfully.", Message.Type.INFO);
+				}
 				
 			} catch (Exception e) {
-				System.out.println(new Message("-> Test " + current + " ran into an error!", Message.Type.FAIL).getMessage());
+				new Message("-> Test " + current + " ran into an error!", Message.Type.FAIL);
 				crashed++;
 				e.printStackTrace();
 			}
 		}
 		
-		System.out.println(new Message("Finished " + paths.size() + " tests" + ((failed == 0 && crashed == 0 && timeout == 0)? " successfully in " + 
+		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((failed == 0 && crashed == 0 && timeout == 0)? " successfully in " + 
 				(System.currentTimeMillis() - start) + " Millis." : ", " + failed + " test(s) failed" + 
 				((crashed > 0)? ", " + crashed + " tests(s) crashed" : ((timeout > 0)? ", " : ".")) + 
 				((timeout > 0)? ", " + timeout + " tests(s) timed out." : ".")), 
-				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL).getMessage());
+				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
 	}
 	
 	@SuppressWarnings("deprecation")
-	public RET_TYPE test(String path, List<String> code, List<String> params, int validation) throws InterruptedException {
-		File f = new File(path);
-		CompilerDriver cd = new CompilerDriver(f, code);
+	public Result test(String path, List<String> code, List<String> cases) throws InterruptedException {
+		
+		CompilerDriver cd = new CompilerDriver();
 		
 		CompilerDriver.silenced = true;
 		CompilerDriver.imm = false;
 		
-		List<String> compile = cd.compile();
+		File file = new File(path);
+		List<String> compile = cd.compile(file, code);
 		Thread.sleep(10);
 		
+		CompilerDriver.silenced = false;
+		CompilerDriver.imm = true;
+		
 		if (compile == null) {
-			System.out.println(new Message("-> A crash occured during compilation.", Message.Type.FAIL).getMessage());
-			System.out.println(new Message("-> Tested code:", Message.Type.FAIL).getMessage());
-			CompilerDriver.silenced = false;
-			CompilerDriver.imm = true;
-			cd.compile();
-			return RET_TYPE.CRASH;
+			new Message("-> A crash occured during compilation.", Message.Type.FAIL);
+			new Message("-> Tested code:", Message.Type.FAIL);
+			cd.compile(file, code);
+			return new Result(RET_TYPE.CRASH, 0, 0);
 		}
+		
+		int succ = 0;
+		int fail = 0;
 		
 		/* Setup Runtime Environment */
-		XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
-		ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile);
-		
-		for (int i = 0; i < params.size(); i++) {
-			pcu.regs [i] = pcu.toBinary(Integer.parseInt(params.get(i)));
-		}
-		
-		/* Execute Program */
-		pcu.debug = 0;
-		pcu.step = 1;
-		
-		Thread runThread = new Thread(new Runnable() {
-			public void run() {
-				pcu.execute();
+		for (int i = 0; i < cases.size(); i++) {
+			new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
+			String [] sp = cases.get(i).split(" ");
+			
+			boolean assemblyMessages = false;
+			XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
+			ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+			
+			/* Set parameters */
+			if (sp.length > 1) {
+				for (int a = 0; a < sp.length - 1; a++) {
+					pcu.regs [a] = pcu.toBinary(Integer.parseInt(sp [a]));
+				}
 			}
-		});
-		
-		long start = System.currentTimeMillis();
-		runThread.start();
-		while (runThread.isAlive()) {
-			if (System.currentTimeMillis() - start > ttl) {
-				runThread.interrupt();
-				runThread.stop();
-				runThread = null;
-				System.out.println(new Message("The compiled program timed out!", Message.Type.FAIL).getMessage());
+			
+			/* Execute Program */
+			pcu.debug = 0;
+			pcu.step = 1;
+			
+			Thread runThread = new Thread(new Runnable() {
+				public void run() {
+					pcu.execute();
+				}
+			});
+			
+			long start = System.currentTimeMillis();
+			runThread.start();
+			while (runThread.isAlive()) {
+				if (System.currentTimeMillis() - start > ttl) {
+					runThread.interrupt();
+					runThread.stop();
+					runThread = null;
+					new Message("The compiled program timed out!", Message.Type.FAIL);
+					compile.stream().forEach(x -> System.out.println(x));
+					return new Result(RET_TYPE.TIMEOUT, 0, 0);
+				}
+			}
+			
+			int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
+			
+			if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
+				/* Output does match expected value */
+				succ++;
+			}
+			else {
+				/* Wrong output */
+				new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL);
+				String params = "-> Params: ";
+				if (sp.length == 1) params += "-";
+				else {
+					for (int a = 0; a < sp.length - 2; a++) {
+						params += sp [a];
+						if (a < sp.length - 3) {
+							params += ", ";
+						}
+					}
+				}
+				new Message(params, Message.Type.FAIL);
+				
+				new Message("-> Outputted Assemby Program: ", Message.Type.FAIL);
 				compile.stream().forEach(x -> System.out.println(x));
-				return RET_TYPE.TIMEOUT;
+				
+				fail++;
 			}
 		}
 		
-		int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
-		
-		if (pcu_return == validation) {
-			/* Output does match expected value */
-			return RET_TYPE.SUCCESS;
-		}
-		else {
-			/* Wrong output */
-			System.out.println(new Message("-> Expected <" + validation + ">, actual <" + pcu_return + ">.", Message.Type.FAIL).getMessage());
-			System.out.println(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL).getMessage());
-			compile.stream().forEach(x -> System.out.println(x));
-			return RET_TYPE.FAIL;
-		}
+		return new Result((fail > 0)? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
 	}
 	
 	/**
 	 * Recursiveley get all test files from the res/Test/ directory
 	 * @return A list of all file names.
 	 */
-	public List<String> getTestFiles() {
-		try (Stream<Path> walk = Files.walk(Paths.get("res\\Test\\"))) {
+	public List<String> getTestFiles(String path) {
+		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
 			List<String> result = walk.filter(Files::isRegularFile)
 					.map(x -> x.toString()).collect(Collectors.toList());
 			return result;

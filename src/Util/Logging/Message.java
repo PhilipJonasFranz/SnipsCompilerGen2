@@ -25,6 +25,7 @@ public class Message {
 	public Message(String message, Type type) {
 		this.message = message;
 		this.messageType = type;
+		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
 	}
 	
 	public String getMessage() {
