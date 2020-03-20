@@ -2,7 +2,10 @@ SOURCE
 int main(int a) {
 	int b = a * 3;
 	a = 3;
-	return b;
+	int c = 3 * 3;
+	b = b + c;
+	c = a + c;
+	return a + b - c;
 }
 PARAMS
 2
