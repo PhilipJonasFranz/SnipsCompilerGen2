@@ -11,6 +11,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.Lsl;
@@ -31,7 +32,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	/**
 	 * Solve the binary expression for two given operands.
 	 */
-	public interface Solver {
+	public interface BinarySolver {
 		public int solve(int a, int b);
 	}
 	
@@ -59,10 +60,11 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (e instanceof Lsr) {
 			return AsNLsr.cast((Lsr) e, r);
 		}
-		else throw new CGEN_EXCEPTION(e.getSource(), "No cast available for " + e.getClass().getName());
+		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	}
 	
-	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, Solver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
+		/* --- OPERAND LOADING --- */
+	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, BinarySolver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
 		/* Total Atomic Loading */
 		if (b.left() instanceof Atom && b.right() instanceof Atom) {
 			m.atomicPrecalc(b, solver);
@@ -112,17 +114,26 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	}
 	
 	protected void loadOperand(Expression e, int target, RegSet r) throws CGEN_EXCEPTION {
-		this.instructions.addAll(AsNExpression.cast(e, r).getInstructions());
-		if (target != 0) {
-			this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
-			r.copy(0, target);
+		/* Operand is ID Reference and can be loaded directley into the target register, 
+		 * 		no need for intermidiate result in R0 */
+		if (e instanceof IDRef) {
+			this.instructions.addAll(AsNIdRef.cast((IDRef) e, r, target).getInstructions());
 		}
+		else {
+			this.instructions.addAll(AsNExpression.cast(e, r).getInstructions());
+			if (target != 0) {
+				this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
+				r.copy(0, target);
+			}
+		}
+		
+		r.regs [target].setExpression(e);
 	}
 	
 	/**
 	 * Precalculate this expression since both operands are immediates.
 	 */
-	protected void atomicPrecalc(BinaryExpression b, Solver s) {
+	protected void atomicPrecalc(BinaryExpression b, BinarySolver s) {
 		if (b.left() instanceof Atom && b.right() instanceof Atom) {
 			Atom l0 = (Atom) b.left(), r0 = (Atom) b.right();
 			if (l0.type instanceof INT && r0.type instanceof INT) {
@@ -132,6 +143,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 	}
 	
+		/* --- REGISTER CLEARING --- */
 	/**
 	 * Clear R0, R1, R2 using {@link #clearReg(RegSet, int)}
 	 * @param r The current RegSet

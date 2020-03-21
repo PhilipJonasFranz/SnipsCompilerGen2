@@ -55,9 +55,11 @@ public class TestDriver {
 		
 		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
-			if (args [0].endsWith(".sn")) paths.add(args [0]);
-			else {
-				paths.addAll(this.getTestFiles(args [0]).stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+			for (String s : args) {
+				if (s.endsWith(".sn")) paths.add(s);
+				else {
+					paths.addAll(this.getTestFiles(s).stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+				}
 			}
 		}
 		

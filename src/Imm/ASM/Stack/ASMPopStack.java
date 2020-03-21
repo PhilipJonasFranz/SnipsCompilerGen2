@@ -20,12 +20,12 @@ public class ASMPopStack extends ASMInstruction {
 	}
 
 	public String build() {
-		String s = CompilerDriver.printDepth + "pop" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " {";
+		String s = CompilerDriver.printDepth + "pop" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " { ";
 		for (int i = 0; i < operands.length; i++) {
 			s += operands [i].toString();
 			if (i < operands.length - 1) s += ", ";
 		}
-		s += "}";
+		s += " }";
 		return s;
 	}
 	

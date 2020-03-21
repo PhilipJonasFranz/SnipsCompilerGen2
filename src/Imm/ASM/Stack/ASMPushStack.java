@@ -20,12 +20,12 @@ public class ASMPushStack extends ASMInstruction {
 	}
 
 	public String build() {
-		String s = CompilerDriver.printDepth + "push" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " {";
+		String s = CompilerDriver.printDepth + "push" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " { ";
 		for (int i = 0; i < operands.length; i++) {
 			s += operands [i].toString();
 			if (i < operands.length - 1) s += ", ";
 		}
-		s += "}";
+		s += " }";
 		return s;
 	}
 	

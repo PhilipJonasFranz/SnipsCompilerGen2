@@ -12,7 +12,7 @@ public class AsNIdRef extends AsNExpression {
 		
 	}
 	
-	public static AsNIdRef cast(IDRef i, RegSet r) {
+	public static AsNIdRef cast(IDRef i, RegSet r, int target) {
 		AsNIdRef ref = new AsNIdRef();
 		
 		/* Declaration is already loaded in Reg Stack */
@@ -28,11 +28,16 @@ public class AsNIdRef extends AsNExpression {
 					ref.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(REGISTER.R0)));
 					r.copy(0, free);
 				}
+				
+				if (target != 0) {
+					ref.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(target)));
+					r.copy(target, free);
+				}
 			}
 			else if (location != 0) {
 				/* Copy value in R0 */
-				ref.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new RegOperand(location)));
-				r.copy(location, 0);
+				ref.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(location)));
+				r.copy(location, target);
 			}
 		}
 		else {

@@ -26,7 +26,16 @@ public class AsNAssignment extends AsNStatement {
 		}
 		/* Not loaded, store value to stack at save position */
 		else {
-			throw new CGEN_EXCEPTION(a.getSource(), "Assign origin not loaded!");
+			int free = r.findFree();
+			
+			if (free != -1) {
+				if (a.value != null) {
+					ass.instructions.addAll(AsNExpression.cast(a.value, r).getInstructions());
+				}
+				ass.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(0)));
+				r.copy(0, free);
+			}
+			else throw new CGEN_EXCEPTION(a.getSource(), "Assign origin not loaded!");
 		}
 		
 		return ass;

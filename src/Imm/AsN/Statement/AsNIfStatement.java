@@ -99,11 +99,17 @@ public class AsNIfStatement extends AsNStatement {
 		
 		IfStatement elseS = a.elseStatement;
 		
-		ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
-		/* Condition was false, jump to else */
-		if (elseS != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(elseTarget)));
-		
 		ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
+		
+		ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
+		if (elseS != null) {
+			/* Condition was false, jump to else */
+			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(elseTarget)));
+		}
+		else {
+			/* Condition was false, no else, skip body */
+			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(endTarget)));
+		}
 		
 		/* True Body */
 		for (Statement s : a.body) {

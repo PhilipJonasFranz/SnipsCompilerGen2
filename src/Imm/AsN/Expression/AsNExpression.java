@@ -6,6 +6,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AsN.AsNNode;
 
 public abstract class AsNExpression extends AsNNode {
@@ -19,13 +20,16 @@ public abstract class AsNExpression extends AsNNode {
 		if (e instanceof BinaryExpression) {
 			return AsNBinaryExpression.cast((BinaryExpression) e, r);
 		}
+		else if (e instanceof UnaryExpression) {
+			return AsNUnaryExpression.cast((UnaryExpression) e, r);
+		}
 		else if (e instanceof IDRef) {
-			return AsNIdRef.cast((IDRef) e, r);
+			return AsNIdRef.cast((IDRef) e, r, 0);
 		}
 		else if (e instanceof Atom) {
 			return AsNAtom.cast((Atom) e, r); 
 		}
-		else throw new CGEN_EXCEPTION(e.getSource(), "No cast available for " + e.getClass().getName());
+		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	}
 	
 }

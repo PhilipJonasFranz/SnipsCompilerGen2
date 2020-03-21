@@ -5,7 +5,7 @@ import Imm.TYPE.TYPE;
 public class INT extends TYPE<Integer> {
 
 	public INT() {
-		
+	
 	}
 	
 	public INT(String initial) {

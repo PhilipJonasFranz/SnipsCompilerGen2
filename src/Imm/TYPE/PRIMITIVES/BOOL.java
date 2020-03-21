@@ -5,7 +5,7 @@ import Imm.TYPE.TYPE;
 public class BOOL extends TYPE<Boolean> {
 
 	public BOOL() {
-		
+	
 	}
 	
 	public BOOL(String initial) {
