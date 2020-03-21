@@ -6,6 +6,7 @@ import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Arith.Lsr;
+import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNLsr extends AsNBinaryExpression {
 

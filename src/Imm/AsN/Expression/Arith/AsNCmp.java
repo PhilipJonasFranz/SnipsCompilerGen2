@@ -14,42 +14,52 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
+import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.PRIMITIVES.INT;
 
-public class AsNCompare extends AsNBinaryExpression {
+public class AsNCmp extends AsNBinaryExpression {
 
 	public COND trueC, neg;
 	
-	public AsNCompare() {
-		
+	public AsNCmp() {
+		/**
+		 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
+		 * expression is true, #0 if not.
+		 */
 	}
 	
-	public static AsNCompare cast(Compare c, RegSet r) throws CGEN_EXCEPTION {
-		AsNCompare cmp = new AsNCompare();
+	public static AsNCmp cast(Compare c, RegSet r) throws CGEN_EXCEPTION {
+		AsNCmp cmp = new AsNCmp();
+		
+		/* Clear only R0, R1 since R2 is not needed */
+		cmp.clearReg(r, 0);
+		cmp.clearReg(r, 1);
 		
 		if (c.right() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
 			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
-			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.right(), r).getInstructions());
 			cmp.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			r.regs [0].free();
 			
-			cmp.instructions.addAll(AsNExpression.cast(c.right(), r).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
 			
-			cmp.instructions.add(new ASMMove(new RegOperand(1), new RegOperand(0)));
-			r.copy(0, 1);
-			
-			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			r.regs [1].setExpression(c.right());
 			
 			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
 	
 		cmp.trueC = cmp.toCondition(c.comparator);
 		cmp.neg = cmp.negate(cmp.trueC);
+		
+		/* Move #1 into R0 when condition is true with comparator of c */
 		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(cmp.trueC)));
+		
+		/* Move #0 into R0 when condition is false with negated operator of c */
 		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(cmp.neg)));
 	
 		r.regs [0].setExpression(c);

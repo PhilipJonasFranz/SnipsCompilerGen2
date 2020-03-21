@@ -60,7 +60,7 @@ public class ContextChecker {
 		/* Check for duplicate function parameters */
 		if (f.parameters.size() > 1) {
 			for (int i = 0; i < f.parameters.size(); i++) {
-				for (int a = 1; a < f.parameters.size(); a++) {
+				for (int a = i + 1; a < f.parameters.size(); a++) {
 					if (f.parameters.get(i).fieldName.equals(f.parameters.get(a).fieldName)) {
 						throw new CTX_EXCEPTION(f.getSource(), "Duplicate parameter name: " + f.parameters.get(i).fieldName + " in function: " + f.functionName);
 					}

@@ -6,6 +6,7 @@ import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Arith.Mul;
+import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNMult extends AsNBinaryExpression {
 

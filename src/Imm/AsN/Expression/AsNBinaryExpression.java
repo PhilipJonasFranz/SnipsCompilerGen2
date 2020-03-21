@@ -1,4 +1,4 @@
-package Imm.AsN.Expression.Arith;
+package Imm.AsN.Expression;
 
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
@@ -18,11 +18,23 @@ import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
 import Imm.AST.Expression.Boolean.Compare;
-import Imm.AsN.Expression.AsNExpression;
+import Imm.AsN.Expression.Arith.AsNAdd;
+import Imm.AsN.Expression.Arith.AsNCmp;
+import Imm.AsN.Expression.Arith.AsNLsl;
+import Imm.AsN.Expression.Arith.AsNLsr;
+import Imm.AsN.Expression.Arith.AsNMult;
+import Imm.AsN.Expression.Arith.AsNSub;
 import Imm.TYPE.PRIMITIVES.INT;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
+	/**
+	 * Solve the binary expression for two given operands.
+	 */
+	public interface Solver {
+		public int solve(int a, int b);
+	}
+	
 	public AsNBinaryExpression() {
 		
 	}
@@ -39,7 +51,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			return AsNMult.cast((Mul) e, r);
 		}
 		else if (e instanceof Compare) {
-			return AsNCompare.cast((Compare) e, r);
+			return AsNCmp.cast((Compare) e, r);
 		}
 		else if (e instanceof Lsl) {
 			return AsNLsl.cast((Lsl) e, r);
@@ -56,14 +68,16 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			m.atomicPrecalc(b, solver);
 		}
 		else {
+			this.clearOperandRegs(r);
+			
 			/* Partial Atomic Loading Left */
 			if (b.left() instanceof Atom) {
-				m.loadRight(b, 2, r);
+				m.loadRightOperand(b, 2, r);
 				m.instructions.add(new ASMMove(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.right() instanceof Atom) {
-				m.loadLeft(b, 1, r);
+				m.loadLeftOperand(b, 1, r);
 				m.instructions.add(new ASMMove(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
 			}
 			else {
@@ -89,27 +103,20 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 	}
 	
-	protected void loadLeft(BinaryExpression b, int target, RegSet r) throws CGEN_EXCEPTION {
-		this.instructions.addAll(AsNExpression.cast(b.left(), r).getInstructions());
+	protected void loadLeftOperand(BinaryExpression b, int target, RegSet r) throws CGEN_EXCEPTION {
+		this.loadOperand(b.left(), target, r);
+	}
+	
+	protected void loadRightOperand(BinaryExpression b, int target, RegSet r) throws CGEN_EXCEPTION {
+		this.loadOperand(b.right(), target, r);
+	}
+	
+	protected void loadOperand(Expression e, int target, RegSet r) throws CGEN_EXCEPTION {
+		this.instructions.addAll(AsNExpression.cast(e, r).getInstructions());
 		if (target != 0) {
 			this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
 			r.copy(0, target);
 		}
-	}
-	
-	protected void loadRight(BinaryExpression b, int target, RegSet r) throws CGEN_EXCEPTION {
-		this.instructions.addAll(AsNExpression.cast(b.right(), r).getInstructions());
-		if (target != 0) {
-			this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
-			r.copy(0, target);
-		}
-	}
-	
-	/**
-	 * Solve the binary expression for two given operands.
-	 */
-	public interface Solver {
-		public int solve(int a, int b);
 	}
 	
 	/**
@@ -122,6 +129,31 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
 				this.instructions.add(new ASMMove(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
 			}
+		}
+	}
+	
+	/**
+	 * Clear R0, R1, R2 using {@link #clearReg(RegSet, int)}
+	 * @param r The current RegSet
+	 */
+	protected void clearOperandRegs(RegSet r) {
+		this.clearReg(r, 0);
+		this.clearReg(r, 1);
+		this.clearReg(r, 2);
+	}
+	
+	/**
+	 * Clear given reg under the current RegSet by searching for a free reg and copying the value
+	 * into it. Clears the given reg in the RegSet.
+	 * @param r The current RegSet
+	 * @param reg The Register to clear
+	 */
+	protected void clearReg(RegSet r, int reg) {
+		if (!r.regs [reg].isFree()) {
+			int free = r.findFree();
+			this.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(reg)));
+			r.copy(reg, free);
+			r.regs [reg].free();
 		}
 	}
 	

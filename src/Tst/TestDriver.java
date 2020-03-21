@@ -136,6 +136,7 @@ public class TestDriver {
 		
 		CompilerDriver.silenced = true;
 		CompilerDriver.imm = false;
+		CompilerDriver.printErrors = false;
 		
 		File file = new File(path);
 		List<String> compile = cd.compile(file, code);
@@ -143,6 +144,7 @@ public class TestDriver {
 		
 		CompilerDriver.silenced = false;
 		CompilerDriver.imm = true;
+		CompilerDriver.printErrors = true;
 		
 		if (compile == null) {
 			new Message("-> A crash occured during compilation.", Message.Type.FAIL);
@@ -151,12 +153,16 @@ public class TestDriver {
 			return new Result(RET_TYPE.CRASH, 0, 0);
 		}
 		
+		compile.stream().forEach(x -> System.out.println(x));
+		
 		int succ = 0;
 		int fail = 0;
 		
+		boolean printedOutput = false;
+		
 		/* Setup Runtime Environment */
 		for (int i = 0; i < cases.size(); i++) {
-			new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
+			if (cases.size() > 1) new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
 			String [] sp = cases.get(i).split(" ");
 			
 			boolean assemblyMessages = false;
@@ -205,17 +211,20 @@ public class TestDriver {
 				String params = "-> Params: ";
 				if (sp.length == 1) params += "-";
 				else {
-					for (int a = 0; a < sp.length - 2; a++) {
+					for (int a = 0; a < sp.length - 1; a++) {
 						params += sp [a];
-						if (a < sp.length - 3) {
+						if (a < sp.length - 2) {
 							params += ", ";
 						}
 					}
 				}
 				new Message(params, Message.Type.FAIL);
 				
-				new Message("-> Outputted Assemby Program: ", Message.Type.FAIL);
-				compile.stream().forEach(x -> System.out.println(x));
+				if (!printedOutput) {
+					new Message("-> Outputted Assemby Program: ", Message.Type.FAIL);
+					compile.stream().forEach(x -> System.out.println(x));
+				}
+				printedOutput = true;
 				
 				fail++;
 			}

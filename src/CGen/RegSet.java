@@ -46,6 +46,10 @@ public class RegSet {
 			}
 		}
 		
+		public boolean isFree() {
+			return this.status == STATUS.FREE;
+		}
+		
 	}
 	
 	public RegState [] regs = new RegState [16]; 

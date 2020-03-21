@@ -7,7 +7,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AsN.AsNNode;
-import Imm.AsN.Expression.Arith.AsNBinaryExpression;
 
 public abstract class AsNExpression extends AsNNode {
 

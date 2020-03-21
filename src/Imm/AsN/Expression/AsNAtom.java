@@ -18,6 +18,7 @@ public class AsNAtom extends AsNExpression {
 	public static AsNAtom cast(Atom a, RegSet r) throws CGEN_EXCEPTION {
 		AsNAtom atom = new AsNAtom();
 		
+		/* Int Literal, move directley into R0 */
 		if (a.type instanceof INT) {
 			atom.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(((INT) a.type).value)));
 			r.regs [0].setExpression(a);

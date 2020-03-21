@@ -19,7 +19,7 @@ public class AsNIdRef extends AsNExpression {
 		if (r.declarationLoaded(i.origin)) {
 			int location = r.declarationRegLocation(i.origin);
 			
-			/* Declaration is loaded in target register */
+			/* Declaration is loaded in R0 */
 			if (location == 0) {
 				int free = r.findFree();
 				
@@ -27,7 +27,6 @@ public class AsNIdRef extends AsNExpression {
 					/* Copy declaration to other free location, leave result in R0 */
 					ref.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(REGISTER.R0)));
 					r.copy(0, free);
-					r.regs [0].free();
 				}
 			}
 			else if (location != 0) {

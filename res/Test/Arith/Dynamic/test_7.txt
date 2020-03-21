@@ -4,3 +4,4 @@ int main(int a) {
 }
 TESTCASES
 4 1
+0 5

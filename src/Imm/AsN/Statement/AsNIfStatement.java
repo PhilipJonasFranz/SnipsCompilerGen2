@@ -16,7 +16,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Arith.AsNCompare;
+import Imm.AsN.Expression.Arith.AsNCmp;
 
 public class AsNIfStatement extends AsNStatement {
 
@@ -29,8 +29,8 @@ public class AsNIfStatement extends AsNStatement {
 		
 		AsNExpression expr = AsNExpression.cast(a.condition, r);
 		
-		if (expr instanceof AsNCompare) {
-			if0.topComparison(a, (AsNCompare) expr, r);
+		if (expr instanceof AsNCmp) {
+			if0.topComparison(a, (AsNCmp) expr, r);
 			return if0;
 		}
 		else {
@@ -88,7 +88,7 @@ public class AsNIfStatement extends AsNStatement {
 		}
 	}
 	
-	protected void topComparison(IfStatement a, AsNCompare com, RegSet r) throws CGEN_EXCEPTION {
+	protected void topComparison(IfStatement a, AsNCmp com, RegSet r) throws CGEN_EXCEPTION {
 		COND neg = com.neg;
 		
 		/* Remove Conditional results */
@@ -119,21 +119,9 @@ public class AsNIfStatement extends AsNStatement {
 			if (elseS.condition != null) {
 				AsNExpression expr = AsNExpression.cast(elseS.condition, r);
 				
-				if (expr instanceof AsNCompare) {
-					this.topComparison(elseS, (AsNCompare) expr, r);
+				if (expr instanceof AsNCmp) {
+					this.topComparison(elseS, (AsNCmp) expr, r);
 					return;
-				
-					/*AsNCompare com0 = (AsNCompare) expr;
-					COND neg0 = com0.neg;
-					
-					com0.instructions.remove(com0.instructions.size() - 1);
-					com0.instructions.remove(com0.instructions.size() - 1);
-				
-					this.instructions.addAll(com0.getInstructions());
-					
-					elseTarget = new ASMLabel(LabelGen.getLabel());
-					
-					this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg0), new LabelOperand(elseTarget)));*/
 				}
 				else {
 					this.instructions.addAll(expr.getInstructions());
