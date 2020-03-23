@@ -2,7 +2,7 @@ package Imm.AsN.Expression.Arith;
 
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.ASMAdd;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Arith.Add;

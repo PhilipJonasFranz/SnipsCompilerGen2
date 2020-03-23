@@ -11,25 +11,21 @@ import Util.Source;
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class IfStatement extends Statement {
+public class IfStatement extends CapsuledStatement {
 
 			/* --- FIELDS --- */
 	public Expression condition;
-	
-	public List<Statement> body;
 	
 	public IfStatement elseStatement;
 	
 			/* --- CONSTRUCTORS --- */
 	public IfStatement(Expression condition, List<Statement> body, Source source) {
-		super(source);
+		super(body, source);
 		this.condition = condition;
-		this.body = body;
 	}
 	
 	public IfStatement(List<Statement> body, Source source) {
-		super(source);
-		this.body = body;
+		super(body, source);
 	}
 	
 	

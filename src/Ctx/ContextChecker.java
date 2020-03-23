@@ -98,7 +98,11 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Statement s : i.body) s.check(this);
+		this.scopes.push(new Scope(this.scopes.peek()));
+		for (Statement s : i.body) {
+			s.check(this);
+		}
+		this.scopes.pop();
 
 		if (i.elseStatement != null) {
 			i.elseStatement.check(this);

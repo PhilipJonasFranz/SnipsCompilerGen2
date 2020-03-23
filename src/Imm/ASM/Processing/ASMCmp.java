@@ -1,22 +1,23 @@
-package Imm.ASM.Processing.Logic;
+package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
-public class ASMCompare extends ASMInstruction {
+public class ASMCmp extends ASMInstruction {
 
-	public Operand op0;
+	public RegOperand op0;
 	
 	public Operand op1;
 	
-	public ASMCompare(Operand op0, Operand op1) {
+	public ASMCmp(RegOperand op0, Operand op1) {
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
-	public ASMCompare(Operand op0, Operand op1, Cond cond) {
+	public ASMCmp(RegOperand op0, Operand op1, Cond cond) {
 		super(cond);
 		this.op0 = op0;
 		this.op1 = op1;

@@ -2,13 +2,12 @@ package Imm.ASM.Stack;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
 public class ASMPushStack extends ASMInstruction {
 
-	public Operand [] operands;
+	public RegOperand [] operands;
 	
 	public ASMPushStack(RegOperand...operands) {
 		this.operands = operands;

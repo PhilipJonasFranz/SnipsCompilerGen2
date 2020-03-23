@@ -2,8 +2,8 @@ package Imm.AsN.Expression.Arith;
 
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.ASMMove;
-import Imm.ASM.Processing.Logic.ASMCompare;
+import Imm.ASM.Processing.ASMCmp;
+import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Util.Cond;
@@ -38,7 +38,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		
 		if (c.right() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
-			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
+			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
 			cmp.instructions.addAll(AsNExpression.cast(c.right(), r).getInstructions());
@@ -50,19 +50,19 @@ public class AsNCmp extends AsNBinaryExpression {
 			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 			r.regs [1].setExpression(c.right());
 			
-			cmp.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
 	
 		cmp.trueC = cmp.toCondition(c.comparator);
 		cmp.neg = cmp.negate(cmp.trueC);
 		
 		/* Move #1 into R0 when condition is true with comparator of c */
-		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(cmp.trueC)));
+		cmp.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(cmp.trueC)));
 		
 		/* Move #0 into R0 when condition is false with negated operator of c */
-		cmp.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(cmp.neg)));
+		cmp.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(cmp.neg)));
 	
-		r.regs [0].setExpression(c);
+		r.regs [0].free();
 		r.regs [1].free();
 		
 		return cmp;

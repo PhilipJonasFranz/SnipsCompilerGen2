@@ -1,7 +1,7 @@
 package Imm.AsN.Expression;
 
 import CGen.RegSet;
-import Imm.ASM.Processing.ASMMove;
+import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.IDRef;
@@ -25,18 +25,18 @@ public class AsNIdRef extends AsNExpression {
 				
 				if (free != -1) {
 					/* Copy declaration to other free location, leave result in R0 */
-					ref.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(REGISTER.R0)));
+					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));
 					r.copy(0, free);
 				}
 				
 				if (target != 0) {
-					ref.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(target)));
+					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
 					r.copy(target, free);
 				}
 			}
 			else if (location != 0) {
 				/* Copy value in R0 */
-				ref.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(location)));
+				ref.instructions.add(new ASMMov(new RegOperand(target), new RegOperand(location)));
 				r.copy(location, target);
 			}
 		}

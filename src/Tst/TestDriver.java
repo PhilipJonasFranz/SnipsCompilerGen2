@@ -104,19 +104,11 @@ public class TestDriver {
 				/* Run test */
 				Result res = this.test(file, code, testcases);
 				
-				if (res.fail > 0) {
-					failed++;
-				}
-				else if (res.res == RET_TYPE.CRASH) {
-					crashed++;
-				}
-				else if (res.res == RET_TYPE.TIMEOUT) {
-					timeout++;
-				}
-				else {
-					new Message("Test finished successfully.", Message.Type.INFO);
-				}
-				
+				if (res.fail > 0) failed++;
+				else if (res.res == RET_TYPE.CRASH) crashed++;
+				else if (res.res == RET_TYPE.TIMEOUT) timeout++;
+				else new Message("Test finished successfully.", Message.Type.INFO);
+			
 			} catch (Exception e) {
 				new Message("-> Test " + current + " ran into an error!", Message.Type.FAIL);
 				crashed++;
@@ -136,17 +128,12 @@ public class TestDriver {
 		
 		CompilerDriver cd = new CompilerDriver();
 		
-		CompilerDriver.silenced = true;
-		CompilerDriver.imm = false;
-		CompilerDriver.printErrors = false;
+		cd.setBurstMode(true);
 		
 		File file = new File(path);
-		List<String> compile = cd.compile(file, code);
-		Thread.sleep(10);
+		List<String> compile = cd.compile(new File(path), code);
 		
-		CompilerDriver.silenced = false;
-		CompilerDriver.imm = true;
-		CompilerDriver.printErrors = true;
+		cd.setBurstMode(false);
 		
 		if (compile == null) {
 			new Message("-> A crash occured during compilation.", Message.Type.FAIL);
@@ -154,8 +141,6 @@ public class TestDriver {
 			cd.compile(file, code);
 			return new Result(RET_TYPE.CRASH, 0, 0);
 		}
-		
-		compile.stream().forEach(x -> System.out.println(x));
 		
 		int succ = 0;
 		int fail = 0;

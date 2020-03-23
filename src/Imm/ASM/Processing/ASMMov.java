@@ -3,20 +3,21 @@ package Imm.ASM.Processing;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
-public class ASMMove extends ASMInstruction {
+public class ASMMov extends ASMInstruction {
 
-	public Operand target;
+	public RegOperand target;
 	
 	public Operand origin;
 	
-	public ASMMove(Operand target, Operand origin) {
+	public ASMMov(RegOperand target, Operand origin) {
 		this.target = target;
 		this.origin = origin;
 	}
 	
-	public ASMMove(Operand target, Operand origin, Cond cond) {
+	public ASMMov(RegOperand target, Operand origin, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.origin = origin;

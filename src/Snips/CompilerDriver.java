@@ -32,7 +32,7 @@ public class CompilerDriver {
 			"	|_____  ||  _    ||   ||    ___||_____  | ",
 			"	 _____| || | |   ||   ||   |     _____| | ",
 			"	|_______||_|  |__||___||___|    |_______| ",
-			"    		                   Compiler v.0.2 "};
+			"    		                   Compiler v2 "};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -73,7 +73,7 @@ public class CompilerDriver {
 	}
 	
 	public CompilerDriver(String [] args) {
-		this.readFlags(args);
+		this.readArgs(args);
 	}
 	
 	public CompilerDriver() {
@@ -95,7 +95,7 @@ public class CompilerDriver {
 				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
 			}
 			
-			if (!silenced) {
+			if (imm) {
 				code.stream().forEach(System.out::println);
 			}
 			
@@ -123,14 +123,25 @@ public class CompilerDriver {
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
 			AsNBody body = AsNBody.cast((Program) AST);
 		
+			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
+			
+			double before = body.getInstructions().size();
+			
 			ASMOptimizer opt = new ASMOptimizer();
 			opt.optimize(body);
+			
+			double after = body.getInstructions().size();
+			
+			double delta = before - after;
+			double rate = Math.round(1 / (before / 100) * delta * 100) / 100;
+			
+			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			
 			List<ASMInstruction> build = body.getInstructions();
 			
 			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
 		
-			if (!silenced) {
+			if (imm) {
 				System.out.println();
 				output.stream().forEach(System.out::println);
 			}
@@ -167,7 +178,7 @@ public class CompilerDriver {
 		System.out.println();
 	}
 	
-	public void readFlags(String [] args) {
+	public void readArgs(String [] args) {
 		file = new File(args [0]);
 		
 		if (args.length > 1) {
@@ -177,6 +188,12 @@ public class CompilerDriver {
 				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
 			}
 		}
+	}
+	
+	public void setBurstMode(boolean value) {
+		CompilerDriver.silenced = value;
+		CompilerDriver.imm = !value;
+		CompilerDriver.printErrors = !value;
 	}
 	
 }

@@ -1,25 +1,25 @@
-package Imm.ASM.Processing.Arith;
+package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.Operand;
+import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
 public class ASMMult extends ASMInstruction {
 
-	public Operand target;
+	public RegOperand target;
 	
-	public Operand op0;
+	public RegOperand op0;
 	
-	public Operand op1;
+	public RegOperand op1;
 	
-	public ASMMult(Operand target, Operand op0, Operand op1) {
+	public ASMMult(RegOperand target, RegOperand op0, RegOperand op1) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
-	public ASMMult(Operand target, Operand op0, Operand op1, Cond cond) {
+	public ASMMult(RegOperand target, RegOperand op0, RegOperand op1, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

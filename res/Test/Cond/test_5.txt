@@ -1,0 +1,15 @@
+SOURCE
+int main(int a, int b) {
+	if (a == 3) {
+		int c = a * 2;
+		b = b + c;
+	}
+	
+	int c = 10;
+	b = b + c;
+	
+	return b;
+}
+TESTCASES
+2 4 14
+3 5 21

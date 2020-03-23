@@ -623,6 +623,7 @@ public class Assembler {
 					instr.add(app);
 				}
 			} catch (Exception e) {
+				System.out.println("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine());
 				e.printStackTrace();
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), Message.Type.FAIL));
 			}
@@ -677,7 +678,7 @@ public class Assembler {
 	}
 	
 	/*
-	 * [num] -> |bin(num)] = w
+	 * [num] -> |bin(num)| = w
 	 */
 	public static String toBinaryStringLength(String num, int w) {
 		int [] b = Util.toBinary(Integer.parseInt(num));

@@ -2,7 +2,7 @@ package Imm.AsN.Expression;
 
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.ASMMove;
+import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -20,7 +20,7 @@ public class AsNAtom extends AsNExpression {
 		
 		/* Int Literal, move directley into R0 */
 		if (a.type instanceof INT) {
-			atom.instructions.add(new ASMMove(new RegOperand(REGISTER.R0), new ImmOperand(((INT) a.type).value)));
+			atom.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(((INT) a.type).value)));
 			r.regs [0].setExpression(a);
 		}
 		else throw new CGEN_EXCEPTION(a.getSource(), "No cast for atom type supported: " + a.type.typeString());

@@ -3,7 +3,7 @@ package Imm.AsN.Expression;
 import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Processing.ASMMove;
+import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -75,12 +75,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Partial Atomic Loading Left */
 			if (b.left() instanceof Atom) {
 				m.loadRightOperand(b, 2, r);
-				m.instructions.add(new ASMMove(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
+				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.right() instanceof Atom) {
 				m.loadLeftOperand(b, 1, r);
-				m.instructions.add(new ASMMove(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
+				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
 			}
 			else {
 				m.instructions.addAll(AsNExpression.cast(b.left(), r).getInstructions());
@@ -89,7 +89,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				
 				m.instructions.addAll(AsNExpression.cast(b.right(), r).getInstructions());
 				
-				m.instructions.add(new ASMMove(new RegOperand(2), new RegOperand(0)));
+				m.instructions.add(new ASMMov(new RegOperand(2), new RegOperand(0)));
 				r.copy(0, 2);
 				
 				m.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
@@ -99,7 +99,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			m.instructions.add(inject);
 			
 			/* Clean up Reg Set */
-			r.regs [0].setExpression(b);
+			r.regs [0].free();
 			r.regs [1].free();
 			r.regs [2].free();
 		}
@@ -122,7 +122,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else {
 			this.instructions.addAll(AsNExpression.cast(e, r).getInstructions());
 			if (target != 0) {
-				this.instructions.add(new ASMMove(new RegOperand(target), new RegOperand(0)));
+				this.instructions.add(new ASMMov(new RegOperand(target), new RegOperand(0)));
 				r.copy(0, target);
 			}
 		}
@@ -138,7 +138,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			Atom l0 = (Atom) b.left(), r0 = (Atom) b.right();
 			if (l0.type instanceof INT && r0.type instanceof INT) {
 				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
-				this.instructions.add(new ASMMove(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
+				this.instructions.add(new ASMMov(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
 			}
 		}
 	}
@@ -163,7 +163,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	protected void clearReg(RegSet r, int reg) {
 		if (!r.regs [reg].isFree()) {
 			int free = r.findFree();
-			this.instructions.add(new ASMMove(new RegOperand(free), new RegOperand(reg)));
+			this.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(reg)));
 			r.copy(reg, free);
 			r.regs [reg].free();
 		}

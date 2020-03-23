@@ -5,7 +5,7 @@ import CGen.RegSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.Logic.ASMCompare;
+import Imm.ASM.Processing.ASMCmp;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -18,7 +18,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Arith.AsNCmp;
 
-public class AsNIfStatement extends AsNStatement {
+public class AsNIfStatement extends AsNCapsuledStatement {
 
 	public AsNIfStatement() {
 		
@@ -37,7 +37,7 @@ public class AsNIfStatement extends AsNStatement {
 			if0.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			if0.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+			if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			
 			ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
 			/* Condition was false, jump to else */
@@ -50,7 +50,9 @@ public class AsNIfStatement extends AsNStatement {
 				if0.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
 			}
 			
-			if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
+			if0.popDeclarationScope(a, r);
+			
+			if (a.elseStatement != null) if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 			
 			IfStatement elseS = a.elseStatement;
 			if (elseS != null) if0.instructions.add(elseTarget);
@@ -58,7 +60,7 @@ public class AsNIfStatement extends AsNStatement {
 				if (elseS.condition != null) {
 					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r).getInstructions());
 					
-					if0.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 					
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
@@ -71,10 +73,12 @@ public class AsNIfStatement extends AsNStatement {
 					if0.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
 				}
 				
-				if (elseS.condition != null) {
+				/* Free all declarations in scope */
+				if0.popDeclarationScope(a, r);
+				
+				if (elseS.elseStatement != null) {
 					/* Jump to end */
 					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
-					
 					if0.instructions.add(elseTarget);
 				}
 				else break;
@@ -116,7 +120,9 @@ public class AsNIfStatement extends AsNStatement {
 			this.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
 		}
 		
-		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
+		this.popDeclarationScope(a, r);
+		
+		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 		
 		/* ElseIf / Else Exists, needs jump to next case */
 		if (elseS != null) this.instructions.add(elseTarget);
@@ -127,12 +133,13 @@ public class AsNIfStatement extends AsNStatement {
 				
 				if (expr instanceof AsNCmp) {
 					this.topComparison(elseS, (AsNCmp) expr, r);
+					this.instructions.add(endTarget);
 					return;
 				}
 				else {
 					this.instructions.addAll(expr.getInstructions());
 					
-					this.instructions.add(new ASMCompare(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+					this.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 					
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
@@ -146,7 +153,9 @@ public class AsNIfStatement extends AsNStatement {
 				this.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
 			}
 			
-			if (elseS.condition != null) {
+			this.popDeclarationScope(a, r);
+			
+			if (elseS.elseStatement != null) {
 				/* Jump to end */
 				this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 				

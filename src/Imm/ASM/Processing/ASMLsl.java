@@ -1,30 +1,20 @@
-package Imm.ASM.Processing.Arith;
+package Imm.ASM.Processing;
 
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
-public class ASMLsl extends ASMInstruction {
+public class ASMLsl extends ASMDataP {
 
-	public RegOperand target;
-	
-	public RegOperand op0;
-	
-	public Operand op1;
-	
 	public ASMLsl(RegOperand target, RegOperand op0, Operand op1) {
-		this.target = target;
-		this.op0 = op0;
-		this.op1 = op1;
+		super(target, op0, op1);
+		this.solver = (x, y) -> x << y;
 	}
 	
 	public ASMLsl(RegOperand target, RegOperand op0, Operand op1, Cond cond) {
-		super(cond);
-		this.target = target;
-		this.op0 = op0;
-		this.op1 = op1;
+		super(target, op0, op1, cond);
+		this.solver = (x, y) -> x << y;
 	}
 	
 	public String build() {
