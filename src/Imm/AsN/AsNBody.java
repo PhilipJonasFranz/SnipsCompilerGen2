@@ -33,7 +33,7 @@ public class AsNBody extends AsNNode {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
 		
-		body.instructions.add(new ASMComment("---" + CompilerDriver.file.getName()));
+		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName()));
 		
 		ASMSectionAnnotation data = new ASMSectionAnnotation(SECTION.DATA);
 		body.instructions.add(data);
@@ -64,7 +64,9 @@ public class AsNBody extends AsNNode {
 				if (((Function) s).functionName.equals("main")) {
 					((LabelOperand) branch.target).patch((ASMLabel) ins.get(1));
 				}
+				
 				body.instructions.addAll(ins);
+				
 				body.instructions.add(new ASMSeperator());
 			}
 		}

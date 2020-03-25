@@ -1,0 +1,11 @@
+DESCRIPTION
+This Test aims to verify the correct behaviour of the main function when parameters are
+passed through the stack and registers, as well as the access through them in following
+statements.
+SOURCE
+int main(int a, int b, int c, int d, int e) {
+	return (a * e) + b + (d * c);
+}
+TESTCASES
+1 2 3 4 5 19
+1 0 1 0 1 1

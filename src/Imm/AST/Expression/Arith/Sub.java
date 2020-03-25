@@ -19,10 +19,6 @@ public class Sub extends BinaryExpression {
 		super(left, right, Operator.SUB, source);
 	}
 
-	public void print(int d, boolean rec) {
-		
-	}
-
 	public List<String> buildProgram(int pad) {
 		return null;
 	}

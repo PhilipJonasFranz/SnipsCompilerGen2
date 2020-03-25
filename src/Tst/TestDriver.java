@@ -27,6 +27,12 @@ public class TestDriver {
 		SUCCESS, FAIL, CRASH, TIMEOUT
 	}
 	
+	public boolean detailedCompilerMessages = false;
+	
+	public boolean displayCompilerImmediateRepresentations = false;
+	
+	public boolean printResult = false;
+	
 	/** Result summary of a test */
 	public class Result {
 		
@@ -85,7 +91,15 @@ public class TestDriver {
 				List<String> code = new ArrayList();
 				List<String> testcases = new ArrayList();
 				
-				int i = 1;
+				int i = 0;
+				if (content.get(0).equals("DESCRIPTION")) {
+					while (!content.get(i).equals("SOURCE")) {
+						i++;
+					}
+					i++;
+				}
+				else i = 1;
+				
 				while (true) {
 					if (content.get(i).equals("TESTCASES")) {
 						i++;
@@ -117,7 +131,7 @@ public class TestDriver {
 		}
 		
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((failed == 0 && crashed == 0 && timeout == 0)? " successfully in " + 
-				(System.currentTimeMillis() - start) + " Millis." : ", " + failed + " test(s) failed" + 
+				(System.currentTimeMillis() - start) + " Millis" : ", " + failed + " test(s) failed" + 
 				((crashed > 0)? ", " + crashed + " tests(s) crashed" : "")) + 
 				((timeout > 0)? ", " + timeout + " tests(s) timed out" : "") + ".", 
 				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
@@ -128,12 +142,12 @@ public class TestDriver {
 		
 		CompilerDriver cd = new CompilerDriver();
 		
-		cd.setBurstMode(true);
+		cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 		
 		File file = new File(path);
 		List<String> compile = cd.compile(new File(path), code);
 		
-		cd.setBurstMode(false);
+		cd.setBurstMode(false, false);
 		
 		if (compile == null) {
 			new Message("-> A crash occured during compilation.", Message.Type.FAIL);
@@ -142,10 +156,14 @@ public class TestDriver {
 			return new Result(RET_TYPE.CRASH, 0, 0);
 		}
 		
+		if (this.printResult) {
+			compile.stream().forEach(System.out::println);
+		}
+		
 		int succ = 0;
 		int fail = 0;
 		
-		boolean printedOutput = false;
+		boolean printedOutput = this.printResult;
 		
 		/* Setup Runtime Environment */
 		for (int i = 0; i < cases.size(); i++) {
@@ -156,10 +174,19 @@ public class TestDriver {
 			XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
 			ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
 			
-			/* Set parameters */
+			/* Setup parameters in registers and stack */
 			if (sp.length > 1) {
+				int r = 0;
+				int st = 0;
 				for (int a = 0; a < sp.length - 1; a++) {
-					pcu.regs [a] = pcu.toBinary(Integer.parseInt(sp [a]));
+					if (r < 3) pcu.regs [a] = pcu.toBinary(Integer.parseInt(sp [a]));
+					else {
+						int n = pcu.memoryBlocks.length - 1;
+						pcu.memoryBlocks [n][pcu.memoryBlocks [n].length - (st + 1)] = pcu.toBinary(Integer.parseInt(sp [a]));
+						pcu.regs [13] = pcu.toBinary(pcu.toDecimal(pcu.regs [13]) - 4);
+						st++;
+					}
+					r++;
 				}
 			}
 			
@@ -227,7 +254,7 @@ public class TestDriver {
 	public List<String> getTestFiles(String path) {
 		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
 			List<String> result = walk.filter(Files::isRegularFile)
-					.map(x -> x.toString()).collect(Collectors.toList());
+				.map(x -> x.toString()).collect(Collectors.toList());
 			return result;
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -3,6 +3,9 @@ package Imm.AsN.Expression;
 import CGen.RegSet;
 import CGen.StackSet;
 import Imm.ASM.Processing.ASMMov;
+import Imm.ASM.Stack.ASMLdrStack;
+import Imm.ASM.Stack.ASMMemOp.MEM_OP;
+import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.IDRef;
@@ -43,9 +46,11 @@ public class AsNIdRef extends AsNExpression {
 			}
 		}
 		else {
-			/* Make space in Reg Stack */
+			/* Get offset relative to Frame Pointer in Stack, Load from Stack */
+			int off = st.getParameterByteOffset(i.origin);
+			ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(off)));
 			
-			/* Load declaration */
+			r.getReg(0).setDeclaration(i.origin);
 		}
 		
 		return ref;

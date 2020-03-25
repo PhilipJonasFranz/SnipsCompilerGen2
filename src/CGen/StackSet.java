@@ -26,7 +26,6 @@ public class StackSet {
 		
 		public StackCell reference;
 		
-		/* Used as marker */
 		public StackCell(REGISTER reg) {
 			this.reg = reg;
 			this.contentType = CONTENT_TYPE.REGISTER;
@@ -106,6 +105,21 @@ public class StackSet {
 				x.expression.print(4, true);
 			}
 			else System.out.println("    " + x.reg.toString());
+		}
+	}
+	
+	public int getParameterByteOffset(Declaration dec) {
+		int x = 0;
+		int off = 0;
+		while (true) {
+			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
+				return off;
+			}
+			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
+				off = 0;
+			}
+			else off += 4;
+			x++;
 		}
 	}
 	

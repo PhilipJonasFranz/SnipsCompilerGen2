@@ -11,7 +11,6 @@ import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
-import Imm.ASM.ASMInstruction;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNBody;
@@ -25,14 +24,14 @@ public class CompilerDriver {
 	public static File file;
 	
 	public static String [] logo = {
-			"	 _______  __    _  ___  _______  _______  ",
-			"	|       ||  |  | ||   ||       ||       | ",
-			"	|  _____||   |_| ||   ||    _  ||  _____| ",
-			"	| |_____ |       ||   ||   |_| || |_____  ",
-			"	|_____  ||  _    ||   ||    ___||_____  | ",
-			"	 _____| || | |   ||   ||   |     _____| | ",
-			"	|_______||_|  |__||___||___|    |_______| ",
-			"    		                   Compiler v2 "};
+			"	 _______  __    _  ___  _______  _______   ",
+			"	|       ||  \\  | ||   ||       ||       | ",
+			"	|  _____||   \\_| ||   ||    _  ||  _____| ",
+			"	| |_____ |       ||   ||   |_| || |_____   ",
+			"	|_____  ||  _    ||   ||    ___||_____  |  ",
+			"	 _____| || | \\   ||   ||   |     _____| | ",
+			"	|_______||_|  \\__||___||___|    |_______| ",
+			"    		                            Gen.2  "};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -40,8 +39,10 @@ public class CompilerDriver {
 	public static boolean 
 		logoPrinted = false, 
 		useTerminalColors = true, 
-		silenced = false,
-		imm = true;
+		silenced = true,
+		imm = false;
+	
+	public static String outputPath;
 	
 	public static boolean printErrors = true;
 	
@@ -96,7 +97,8 @@ public class CompilerDriver {
 			}
 			
 			if (imm) {
-				code.stream().forEach(System.out::println);
+				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
+				code.stream().forEach(x -> System.out.println("    " + x));
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
@@ -109,7 +111,9 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			if (imm) AST.print(0, true);
+			if (imm) {
+				AST.print(4, true);
+			}
 			
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
@@ -128,7 +132,7 @@ public class CompilerDriver {
 			double before = body.getInstructions().size();
 			
 			ASMOptimizer opt = new ASMOptimizer();
-			//opt.optimize(body);
+			opt.optimize(body);
 			
 			double after = body.getInstructions().size();
 			
@@ -137,13 +141,11 @@ public class CompilerDriver {
 			
 			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			
-			List<ASMInstruction> build = body.getInstructions();
-			
-			output = build.stream().map(x -> x.build()).collect(Collectors.toList());
+			output = body.getInstructions().stream().map(x -> x.build()).collect(Collectors.toList());
 		
 			if (imm) {
-				System.out.println();
-				output.stream().forEach(System.out::println);
+				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
+				output.stream().forEach(x -> System.out.println("    " + x));
 			}
 		} catch (Exception e) {
 			if (printErrors) e.printStackTrace();
@@ -161,6 +163,11 @@ public class CompilerDriver {
 				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? Message.Type.INFO : Message.Type.FAIL));		
 		
 		log.clear();
+		
+		if (outputPath != null) {
+			Util.Util.writeInFile(output, outputPath);
+			log.add(new Message("SNIPS -> Saved to file: " + outputPath, Message.Type.INFO));
+		}
 		
 		return output;
 	}
@@ -185,14 +192,24 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
+				else if (args [i].equals("-log")) {
+					logoPrinted = false;
+					silenced = false;
+				}
+				else if (args [i].equals("-o")) {
+					outputPath = args [i + 1];
+					i++;
+				}
 				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
 			}
 		}
+		
+		if (silenced) logoPrinted = true;
 	}
 	
-	public void setBurstMode(boolean value) {
+	public void setBurstMode(boolean value, boolean imm) {
 		CompilerDriver.silenced = value;
-		CompilerDriver.imm = !value;
+		CompilerDriver.imm = imm;
 		CompilerDriver.printErrors = !value;
 	}
 	

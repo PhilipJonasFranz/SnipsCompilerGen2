@@ -1,19 +1,24 @@
 package Imm.AsN.Expression;
 
+import java.util.List;
+
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.ASMAdd;
+import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Statement.Declaration;
+import Imm.AsN.AsNFunction;
+import Util.Pair;
 
 public class AsNInlineCall extends AsNExpression {
 
@@ -25,22 +30,45 @@ public class AsNInlineCall extends AsNExpression {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
 		
-		/* Move parameters in regs and/or stack */
-		r.free(0, 1, 2);
+		/* Load Mapping */
+		List<Pair<Declaration, Integer>> mapping = 
+			((AsNFunction) ic.calledFunction.castedNode).parameterMapping;
 		
-		/* Inflate Stack */
-		for (Expression e : ic.parameters) {
-			call.instructions.addAll(AsNExpression.cast(e, r, st).getInstructions());
-			call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			r.getReg(0).free();
+		/* Load Parameters in the Stack */
+		if (mapping.size() > 3) { 
+			for (int i = 0; i < mapping.size(); i++) {
+				Pair<Declaration, Integer> p = mapping.get(i);
+				if (p.tpl_2() == -1) {
+					call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+					r.getReg(0).free();
+				}
+			}
 		}
 		
+		/* Load Parameters in the registers */
+		for (int i = mapping.size() - 1; i >= 0; i--) {
+			Pair<Declaration, Integer> p = mapping.get(i);
+			if (p.tpl_2() != -1) {
+				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+				if (p.tpl_2() > 0) call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				r.getReg(0).free();
+			}
+		}
+		
+		/* Pop Parameters on the stack into the correct registers, 
+		 * 		Parameter for R0 is already located in reg */
+		if (mapping.size() > 3) {
+			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		}
+
 		/* Branch to function */
 		ASMLabel functionLabel = (ASMLabel) ic.calledFunction.castedNode.instructions.get(1);
 		call.instructions.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel)));
 		
-		/* Shrink Stack */
-		call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(ic.parameters.size() * 4)));
+		/* Shrink Stack if parameters were passed through it */
+		if (mapping.size() > 3) 
+			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand((ic.parameters.size() - 3) * 4)));
 		
 		/* Update Register Set */
 		r.getReg(0).setExpression(ic);

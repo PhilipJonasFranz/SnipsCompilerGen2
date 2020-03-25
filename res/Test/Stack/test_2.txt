@@ -1,0 +1,14 @@
+DESCRIPTION
+This Test aims to verify the correct functionality of inline calls that have to load parameters
+from the stack and registers.
+SOURCE
+int foo(int a, int e) {
+	return a * e;
+}
+
+int main(int a, int b, int c, int d, int e) {
+	return foo(a, e) + b + (d * c);
+}
+TESTCASES
+1 2 3 4 5 19
+1 0 1 0 1 1

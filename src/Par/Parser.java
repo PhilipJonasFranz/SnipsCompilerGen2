@@ -296,6 +296,8 @@ public class Parser {
 				List<Expression> parameters = new ArrayList();
 				while (current.type != TokenType.RPAREN) {
 					parameters.add(this.parseExpression());
+					if (current.type != TokenType.COMMA) break;
+					accept(TokenType.COMMA);
 				}
 				accept(TokenType.RPAREN);
 				

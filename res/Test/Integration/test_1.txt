@@ -1,0 +1,16 @@
+SOURCE
+int fac(int n) {
+	if (n == 0) return 1;
+	else return fac(n - 1) * n;
+}
+
+int main(int a) {
+	return fac(a);
+}
+TESTCASES
+0 1
+1 1
+2 2
+3 6
+4 24
+5 120

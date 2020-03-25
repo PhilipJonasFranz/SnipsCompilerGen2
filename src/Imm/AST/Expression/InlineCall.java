@@ -32,7 +32,7 @@ public class InlineCall extends Expression {
 
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Inline Call: " + this.functionName);
-		for (Expression e : parameters) {
+		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}
 	}

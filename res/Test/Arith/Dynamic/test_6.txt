@@ -1,8 +1,7 @@
 SOURCE
 int main(int a) {
-	int b = a;
-	a = a * 3;
-	return b;
+	return (a * 2) + 5 + (a - (a * a));
 }
 TESTCASES
-5 5
+4 1
+0 5
