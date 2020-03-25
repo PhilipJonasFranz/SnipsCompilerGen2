@@ -52,10 +52,15 @@ public class RegSet {
 		
 	}
 	
-	public RegState [] regs = new RegState [16]; 
+	private RegState [] regs = new RegState [16]; 
 	
 	public RegSet() {
 		for (int i = 0; i < regs.length; i++) regs [i] = new RegState();
+		for (int i = 11; i < regs.length; i++) regs [i].status = STATUS.RESERVED;
+	}
+	
+	public RegState getReg(int num) {
+		return this.regs [num];
 	}
 	
 	public int findFree() {
@@ -107,6 +112,10 @@ public class RegSet {
 			if (regs [i].expr != null && regs [i].expr.equals(e)) return i;
 		}
 		return -1;
+	}
+	
+	public void free(int...regs) {
+		for (int r : regs) this.regs [r].free();
 	}
 	
 }

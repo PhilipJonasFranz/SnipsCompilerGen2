@@ -9,7 +9,7 @@ import Util.Source;
  */
 public abstract class Expression extends SyntaxElement {
 
-	TYPE type;
+	public TYPE type;
 	
 			/* --- CONSTRUCTORS --- */
 	/**

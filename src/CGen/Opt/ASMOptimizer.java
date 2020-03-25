@@ -59,10 +59,10 @@ public class ASMOptimizer {
 			if (body.instructions.get(i - 1) instanceof ASMPushStack && body.instructions.get(i) instanceof ASMPopStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i - 1);
 				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
-				if (push.operands.length == 1 && pop.operands.length == 1) {
+				if (push.operands.size() == 1 && pop.operands.size() == 1) {
 					body.instructions.remove(i - 1);
 					body.instructions.remove(i - 1);
-					body.instructions.add(i - 1, new ASMMov(pop.operands [0], push.operands [0]));
+					body.instructions.add(i - 1, new ASMMov(pop.operands.get(0), push.operands.get(0)));
 					OPT_DONE = true;
 				}
 			}
@@ -81,6 +81,8 @@ public class ASMOptimizer {
 				if (move0.origin instanceof RegOperand && move1.origin instanceof RegOperand) {
 					RegOperand op0 = (RegOperand) move0.origin;
 					RegOperand op1 = (RegOperand) move1.origin;
+					if (op0.reg == REGISTER.FP || op1.reg == REGISTER.FP) continue;
+					
 					if (op0.reg == move1.target.reg && move0.target.reg == op1.reg) {
 						body.instructions.remove(i);
 						i--;

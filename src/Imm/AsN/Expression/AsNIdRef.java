@@ -1,6 +1,7 @@
 package Imm.AsN.Expression;
 
 import CGen.RegSet;
+import CGen.StackSet;
 import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -12,8 +13,9 @@ public class AsNIdRef extends AsNExpression {
 		
 	}
 	
-	public static AsNIdRef cast(IDRef i, RegSet r, int target) {
+	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) {
 		AsNIdRef ref = new AsNIdRef();
+		i.castedNode = ref;
 		
 		/* Declaration is already loaded in Reg Stack */
 		if (r.declarationLoaded(i.origin)) {

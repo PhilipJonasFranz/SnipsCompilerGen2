@@ -1,0 +1,17 @@
+SOURCE
+int bar(int b) {
+	return b + 2;
+}
+
+int foo(int x) {
+	return x + bar(x);
+}
+
+int main(int a) {
+	a = a + foo(a + 4);
+	return a;
+}
+TESTCASES
+3 19
+0 10
+5 25

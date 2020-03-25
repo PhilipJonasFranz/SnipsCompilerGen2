@@ -1,6 +1,7 @@
 package Imm.AsN.Statement;
 
 import CGen.RegSet;
+import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.CapsuledStatement;
@@ -15,21 +16,25 @@ public abstract class AsNStatement extends AsNNode {
 		
 	}
 	
-	public static AsNStatement cast(Statement s, RegSet r) throws CGEN_EXCEPTION {
+	public static AsNStatement cast(Statement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
+		AsNStatement node = null;
 		if (s instanceof CapsuledStatement) {
-			return AsNCapsuledStatement.cast((CapsuledStatement) s, r);
+			node = AsNCapsuledStatement.cast((CapsuledStatement) s, r, st);
 		}
 		else if (s instanceof Return) {
-			return AsNReturn.cast((Return) s, r); 
+			node = AsNReturn.cast((Return) s, r, st); 
 		}
 		else if (s instanceof Declaration) {
-			return AsNDeclaration.cast((Declaration) s, r);
+			node = AsNDeclaration.cast((Declaration) s, r, st);
 		}
 		else if (s instanceof Assignment) {
-			return AsNAssignment.cast((Assignment) s, r); 
+			node = AsNAssignment.cast((Assignment) s, r, st); 
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No cast available for " + s.getClass().getName());
+	
+		s.castedNode = node;
+		return node;
 	}
 	
 }

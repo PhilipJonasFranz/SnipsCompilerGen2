@@ -3,18 +3,13 @@ package Imm.ASM.Util.Operands;
 public class RegOperand extends Operand {
 
 	public enum REGISTER {
-		R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15,
-		FP, SP, LR, PC
+		R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, FP, R12, SP, LR, PC;
 	}
 	
 	public REGISTER reg;
 	
 	public RegOperand(REGISTER reg) {
-		if (reg == REGISTER.R11) this.reg = REGISTER.FP;
-		else if (reg == REGISTER.R13) this.reg = REGISTER.SP;
-		else if (reg == REGISTER.R14) this.reg = REGISTER.LR;
-		else if (reg == REGISTER.R15) this.reg = REGISTER.PC;
-		else this.reg = reg;
+		this.reg = reg;
 	}
 	
 	public RegOperand(int reg) {

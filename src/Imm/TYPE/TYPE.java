@@ -6,6 +6,8 @@ import Par.Token.TokenType;
 
 public abstract class TYPE<T> {
 
+	public int wordSize = 1;
+	
 	public T value;
 	
 	public TYPE() {

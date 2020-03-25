@@ -1,5 +1,7 @@
 package Ctx;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import Exc.CTX_EXCEPTION;
@@ -8,6 +10,7 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Statement.Assignment;
@@ -21,6 +24,8 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 public class ContextChecker {
 
 	Program head;
+	
+	List<Function> functions = new ArrayList();
 	
 	Function currentFunction;
 	
@@ -48,6 +53,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
+		this.functions.add(f);
+		
 		scopes.push(new Scope(scopes.peek()));
 		
 		/* Check for duplicate function name */
@@ -162,6 +169,36 @@ public class ContextChecker {
 		else {
 			throw new CTX_EXCEPTION(c.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
 		}
+	}
+	
+	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		Function f = null;
+		for (Function f0 : this.functions) {
+			if (f0.functionName.equals(i.functionName)) {
+				f = f0;
+				break;
+			}
+		}
+		
+		if (f == null) {
+			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.functionName);
+		}
+		else {
+			i.calledFunction = f;
+		}
+		
+		if (i.parameters.size() != f.parameters.size()) {
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
+		}
+		
+		for (int a = 0; a < f.parameters.size(); a++) {
+			TYPE paramType = i.parameters.get(a).check(this);
+			if (!paramType.isEqual(f.parameters.get(a).type)) {
+				throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
+			}
+		}
+		
+		return f.returnType;
 	}
 	
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {

@@ -16,5 +16,9 @@ public class FLOAT extends TYPE<Float> {
 	public String typeString() {
 		return "FLOAT";
 	}
+
+	public void setValue(String value) {
+		this.value = Float.parseFloat(value);
+	}
 	
 }

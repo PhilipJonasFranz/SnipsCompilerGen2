@@ -1,6 +1,7 @@
 package Imm.AsN.Expression.Arith;
 
 import CGen.RegSet;
+import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMCmp;
 import Imm.ASM.Processing.ASMMov;
@@ -29,7 +30,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		 */
 	}
 	
-	public static AsNCmp cast(Compare c, RegSet r) throws CGEN_EXCEPTION {
+	public static AsNCmp cast(Compare c, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNCmp cmp = new AsNCmp();
 		
 		/* Clear only R0, R1 since R2 is not needed */
@@ -37,18 +38,18 @@ public class AsNCmp extends AsNBinaryExpression {
 		cmp.clearReg(r, 1);
 		
 		if (c.right() instanceof Atom) {
-			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
-			cmp.instructions.addAll(AsNExpression.cast(c.right(), r).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.right(), r, st).getInstructions());
 			cmp.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			r.regs [0].free();
+			r.free(0);
 			
-			cmp.instructions.addAll(AsNExpression.cast(c.left(), r).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());
 			
 			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
-			r.regs [1].setExpression(c.right());
+			r.getReg(1).setExpression(c.right());
 			
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
@@ -62,8 +63,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		/* Move #0 into R0 when condition is false with negated operator of c */
 		cmp.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(cmp.neg)));
 	
-		r.regs [0].free();
-		r.regs [1].free();
+		r.free(0, 1);
 		
 		return cmp;
 	}

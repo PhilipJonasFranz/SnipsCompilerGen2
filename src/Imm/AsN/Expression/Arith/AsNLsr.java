@@ -1,6 +1,7 @@
 package Imm.AsN.Expression.Arith;
 
 import CGen.RegSet;
+import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMLsr;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -14,10 +15,10 @@ public class AsNLsr extends AsNBinaryExpression {
 		
 	}
 	
-	public static AsNLsr cast(Lsr l, RegSet r) throws CGEN_EXCEPTION {
+	public static AsNLsr cast(Lsr l, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNLsr lsr = new AsNLsr();
 		
-		lsr.generateLoaderCode(lsr, l, r, (x, y) -> x >> y, 
+		lsr.generateLoaderCode(lsr, l, r, st, (x, y) -> x >> y, 
 				new ASMLsr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 		
 		return lsr;

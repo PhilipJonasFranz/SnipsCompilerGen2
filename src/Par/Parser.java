@@ -13,6 +13,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Div;
 import Imm.AST.Expression.Arith.Lsl;
@@ -287,7 +288,23 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			Token id = accept();
-			return new IDRef(id, id.source);
+			
+			if (current.type == TokenType.LPAREN) {
+				/* Inline Call */
+				accept();
+				
+				List<Expression> parameters = new ArrayList();
+				while (current.type != TokenType.RPAREN) {
+					parameters.add(this.parseExpression());
+				}
+				accept(TokenType.RPAREN);
+				
+				return new InlineCall(id, parameters, id.getSource());
+			}
+			else {
+				/* Identifier Reference */
+				return new IDRef(id, id.source);
+			}
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();

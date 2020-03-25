@@ -118,8 +118,8 @@ public class TestDriver {
 		
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((failed == 0 && crashed == 0 && timeout == 0)? " successfully in " + 
 				(System.currentTimeMillis() - start) + " Millis." : ", " + failed + " test(s) failed" + 
-				((crashed > 0)? ", " + crashed + " tests(s) crashed" : ((timeout > 0)? ", " : ".")) + 
-				((timeout > 0)? ", " + timeout + " tests(s) timed out." : ".")), 
+				((crashed > 0)? ", " + crashed + " tests(s) crashed" : "")) + 
+				((timeout > 0)? ", " + timeout + " tests(s) timed out" : "") + ".", 
 				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
 	}
 	

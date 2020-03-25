@@ -16,5 +16,9 @@ public class CHAR extends TYPE<Character> {
 	public String typeString() {
 		return "CHAR";
 	}
+
+	public void setValue(String value) {
+		this.value = value.charAt(0);
+	}
 	
 }

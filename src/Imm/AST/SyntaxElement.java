@@ -4,6 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -15,6 +16,8 @@ public abstract class SyntaxElement {
 			/* --- FIELDS --- */
 	/** The Tab width when pretty printing [NON-CRITICAL] */
 	protected int printDepthStep = 4;
+	
+	public AsNNode castedNode;
 	
 	/**
 	 * [NON-CRITICAL]

@@ -128,7 +128,7 @@ public class CompilerDriver {
 			double before = body.getInstructions().size();
 			
 			ASMOptimizer opt = new ASMOptimizer();
-			opt.optimize(body);
+			//opt.optimize(body);
 			
 			double after = body.getInstructions().size();
 			

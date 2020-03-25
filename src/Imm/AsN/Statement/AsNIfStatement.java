@@ -2,6 +2,7 @@ package Imm.AsN.Statement;
 
 import CGen.LabelGen;
 import CGen.RegSet;
+import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -24,13 +25,13 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 		
 	}
 
-	public static AsNIfStatement cast(IfStatement a, RegSet r) throws CGEN_EXCEPTION {
+	public static AsNIfStatement cast(IfStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNIfStatement if0 = new AsNIfStatement();
 		
-		AsNExpression expr = AsNExpression.cast(a.condition, r);
+		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
 		
 		if (expr instanceof AsNCmp) {
-			if0.topComparison(a, (AsNCmp) expr, r);
+			if0.topComparison(a, (AsNCmp) expr, r, st);
 			return if0;
 		}
 		else {
@@ -47,10 +48,10 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 			
 			/* True Body */
 			for (Statement s : a.body) {
-				if0.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
+				if0.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
 			}
 			
-			if0.popDeclarationScope(a, r);
+			if0.popDeclarationScope(a, r, st);
 			
 			if (a.elseStatement != null) if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 			
@@ -58,7 +59,7 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 			if (elseS != null) if0.instructions.add(elseTarget);
 			while (elseS != null) {
 				if (elseS.condition != null) {
-					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r).getInstructions());
+					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, st).getInstructions());
 					
 					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 					
@@ -70,11 +71,11 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 				
 				/* Body */
 				for (Statement s : elseS.body) {
-					if0.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
+					if0.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
 				}
 				
 				/* Free all declarations in scope */
-				if0.popDeclarationScope(a, r);
+				if0.popDeclarationScope(a, r, st);
 				
 				if (elseS.elseStatement != null) {
 					/* Jump to end */
@@ -92,7 +93,7 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 		}
 	}
 	
-	protected void topComparison(IfStatement a, AsNCmp com, RegSet r) throws CGEN_EXCEPTION {
+	protected void topComparison(IfStatement a, AsNCmp com, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		COND neg = com.neg;
 		
 		/* Remove Conditional results */
@@ -117,10 +118,10 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 		
 		/* True Body */
 		for (Statement s : a.body) {
-			this.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
+			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
 		}
 		
-		this.popDeclarationScope(a, r);
+		this.popDeclarationScope(a, r, st);
 		
 		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 		
@@ -129,10 +130,10 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 		
 		while (elseS != null) {
 			if (elseS.condition != null) {
-				AsNExpression expr = AsNExpression.cast(elseS.condition, r);
+				AsNExpression expr = AsNExpression.cast(elseS.condition, r, st);
 				
 				if (expr instanceof AsNCmp) {
-					this.topComparison(elseS, (AsNCmp) expr, r);
+					this.topComparison(elseS, (AsNCmp) expr, r, st);
 					this.instructions.add(endTarget);
 					return;
 				}
@@ -150,10 +151,10 @@ public class AsNIfStatement extends AsNCapsuledStatement {
 			
 			/* Body */
 			for (Statement s : elseS.body) {
-				this.instructions.addAll(AsNStatement.cast(s, r).getInstructions());
+				this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
 			}
 			
-			this.popDeclarationScope(a, r);
+			this.popDeclarationScope(a, r, st);
 			
 			if (elseS.elseStatement != null) {
 				/* Jump to end */

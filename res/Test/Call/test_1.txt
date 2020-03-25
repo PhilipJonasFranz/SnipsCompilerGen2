@@ -1,0 +1,12 @@
+SOURCE
+int foo(int x) {
+	return x * 2;
+}
+
+int main(int a) {
+	a = a + foo(6);
+	return a;
+}
+TESTCASES
+2 14
+0 12
