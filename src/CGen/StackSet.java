@@ -108,19 +108,34 @@ public class StackSet {
 		}
 	}
 	
+	/**
+	 * Finds the offset to a parameter passed in the stack. Returns -1 if given declaration
+	 * is not a parameter.
+	 */
 	public int getParameterByteOffset(Declaration dec) {
 		int x = 0;
 		int off = 0;
+		boolean foundHook = false;
 		while (true) {
 			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
-				return off;
+				if (!foundHook) return -1;
+				else return off;
 			}
 			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
 				off = 0;
+				foundHook = true;
 			}
 			else off += 4;
 			x++;
 		}
+	}
+	
+	/**
+	 * Finds the offset to a local variable in the stack.
+	 */
+	public int findDecInStack(Declaration dec) {
+		// TODO
+		return 0;
 	}
 	
 }

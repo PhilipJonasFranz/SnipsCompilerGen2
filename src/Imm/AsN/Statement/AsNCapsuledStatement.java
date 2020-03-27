@@ -7,8 +7,8 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.CapsuledStatement;
+import Imm.AST.Statement.ConditionalCapsuledStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Statement;
 
 public abstract class AsNCapsuledStatement extends AsNStatement {
@@ -19,8 +19,8 @@ public abstract class AsNCapsuledStatement extends AsNStatement {
 	
 	public static AsNCapsuledStatement cast(CapsuledStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
-		if (s instanceof IfStatement) {
-			return AsNIfStatement.cast((IfStatement) s, r, st);
+		if (s instanceof ConditionalCapsuledStatement) {
+			return AsNConditionalCapsuledStatement.cast((ConditionalCapsuledStatement) s, r, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No cast available for " + s.getClass().getName());	
 	}

@@ -1,0 +1,16 @@
+SOURCE
+int sq(int n) {
+	return n * n;
+}
+
+int sqsum(int a, int b, int c, int d, int e) {
+	int r = sq(a) + sq(b) + sq(c) + sq(d) + sq(e);
+	return r;
+}
+
+int main(int a, int b, int c, int d, int e) {
+	return sqsum(a, b, c, d, e);
+}
+TESTCASES
+1 2 3 4 5 55
+2 2 2 2 2 20
