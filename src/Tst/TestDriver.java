@@ -31,7 +31,7 @@ public class TestDriver {
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
-	public boolean printResult = false;
+	public boolean printResult = true;
 	
 	/** Result summary of a test */
 	public class Result {

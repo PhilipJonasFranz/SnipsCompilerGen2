@@ -11,10 +11,6 @@ import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNAdd extends AsNBinaryExpression {
 
-	public AsNAdd() {
-		
-	}
-	
 	public static AsNAdd cast(Add a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNAdd add = new AsNAdd();
 		

@@ -1,6 +1,7 @@
 package Imm.ASM.Structural;
 
 import Imm.ASM.ASMInstruction;
+import Snips.CompilerDriver;
 
 public class ASMSeperator extends ASMInstruction {
 
@@ -9,7 +10,7 @@ public class ASMSeperator extends ASMInstruction {
 	}
 
 	public String build() {
-		return "";
+		return CompilerDriver.printDepth;
 	}
 	
 }

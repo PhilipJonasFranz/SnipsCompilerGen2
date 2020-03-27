@@ -3,6 +3,7 @@ package Imm.AsN;
 import java.util.ArrayList;
 import java.util.List;
 
+import CGen.LabelGen;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -14,9 +15,8 @@ import Imm.ASM.Stack.ASMMemOp;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Structural.ASMLabel;
-import Imm.ASM.Structural.ASMSectionAnnotation;
-import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Util.Operands.ImmOperand;
+import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
@@ -31,9 +31,6 @@ public class AsNFunction extends AsNNode {
 	
 	Function source;
 	
-	public AsNFunction() {
-		
-	}
 	
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
@@ -43,23 +40,22 @@ public class AsNFunction extends AsNNode {
 		f.castedNode = func;
 		func.source = f;
 		
+		
 		/* Setup Parameter Mapping */
 		func.parameterMapping = func.getParameterMapping();
 		
 		/* Set Params in Registers */
 		for (Pair<Declaration, Integer> p : func.parameterMapping) {
-			/* Paramter is in stack, push in stackSet */
-			if (p.tpl_2() == -1) {
+			if (p.tpl_2() == -1) 
+				/* Paramter is in stack, push in stackSet */
 				st.push(p.t0);
-			}
-			else {
+			else 
 				/* Load Declaration into register */
 				r.getReg(p.tpl_2()).setDeclaration(p.tpl_1());
-			}
 		}
 		
+		
 		/* Function Header and Entry Label */
-		func.instructions.add(new ASMSectionAnnotation(SECTION.GLOBAL, func.source.functionName));
 		func.instructions.add(new ASMLabel(func.source.functionName));
 		
 		/* Save FP and lr by default */
@@ -67,48 +63,38 @@ public class AsNFunction extends AsNNode {
 		func.instructions.add(push);
 		st.push(REGISTER.LR, REGISTER.FP);
 		
-		/* Save Stack from caller perspective */
+		/* Save Stackpointer from caller perspective */
 		ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
 		func.instructions.add(fpMov);
 		
+		
 		/* Cast all statements and add all instructions */
-		for (Statement s : f.statements) {
+		for (Statement s : f.statements) 
 			func.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-		}
+		
 		
 		/* Check if other function is called within this function */
 		boolean hasCall = func.instructions.stream().filter(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL).count() > 0;
 		
-		/* Branch back */
-		func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
+		/* Jumplabel to centralized function return */
+		ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());
 		
 		List<REGISTER> used = func.getUsed();
 		
-		/* Reset stack to state from caller */
-		if (!hasCall && !func.paramsInStack()) {
-			/* No other function was called and no parameters in the stack, saving lr not nessesary */
-			if (used.isEmpty()) func.instructions.remove(push);
+		
+		if (!hasCall && !func.hasParamsInStack()) {
+			if (used.isEmpty()) {
+				func.instructions.remove(push);
+			}
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();
 				used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
 				
-				for (int i = 0; i < func.instructions.size(); i++) {
-					if (func.instructions.get(i) instanceof ASMBranch) {
-						ASMBranch branch = (ASMBranch) func.instructions.get(i);
-						if (branch.type == BRANCH_TYPE.BX) {
-							ASMPopStack pop = new ASMPopStack();
-							used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
-							
-							func.instructions.add(i, pop);
-							i++;
-						}
-					}
-				}
-				
-				func.patchFramePointerAddressing(push.operands.size() * 4);
+				func.patchBxToB(funcReturn);
 			}
-			func.instructions.remove(fpMov);
+			
+			/* if (no new declarations on stack) */ func.instructions.remove(fpMov);
 		}
 		else {
 			/* Patch used registers into push instruction at the start */
@@ -117,32 +103,53 @@ public class AsNFunction extends AsNNode {
 			push.operands.add(new RegOperand(REGISTER.FP));
 			push.operands.add(new RegOperand(REGISTER.LR));
 			
-			/* Inject register restoring and stack resetting before returns */
-			for (int i = 0; i < func.instructions.size(); i++) {
-				if (func.instructions.get(i) instanceof ASMBranch) {
-					ASMBranch branch = (ASMBranch) func.instructions.get(i);
-					if (branch.type == BRANCH_TYPE.BX) {
-						func.instructions.add(i, new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
-						
-						/* Build Instruction that pops all used regs, FP and LR */
-						ASMPopStack pop = new ASMPopStack();
-						used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
-						pop.operands.add(new RegOperand(REGISTER.FP));
-						pop.operands.add(new RegOperand(REGISTER.LR));
-						
-						/* Restore FP and LR */
-						func.instructions.add(i + 1, pop);
-						i += 2;
-					}
-				}
-			}
-			
-			func.patchFramePointerAddressing(push.operands.size() * 4);
+			func.patchBxToB(funcReturn);
 		}
 		
-		/* Patch Frame Pointer Stack Addressing */
+		
+		/* Patch offset based on amount of pushed registers excluding LR and FP */
+		if (!used.isEmpty()) 
+			func.patchFramePointerAddressing(push.operands.size() * 4);
+		
+		
+		if (hasCall || func.hasParamsInStack() || !used.isEmpty()) {
+			/* Add centralized stack reset and register restoring */
+			func.instructions.add(funcReturn);
+			
+			ASMPopStack pop = new ASMPopStack();
+			used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
+			
+			if (hasCall || func.hasParamsInStack() /* || New declarations on the stack */) {
+				func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
+			
+				/* Need to restore registers */
+				pop.operands.add(new RegOperand(REGISTER.FP));
+				pop.operands.add(new RegOperand(REGISTER.LR));
+			}
+			
+			func.instructions.add(pop);
+		}
+		
+		
+		/* Branch back */
+		func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
 		
 		return func;
+	}
+	
+	/**
+	 * Replace bx lr with branch to function end for centralized stack reset and bx
+	 */
+	public void patchBxToB(ASMLabel funcReturn) {
+		for (int i = 0; i < this.instructions.size(); i++) {
+			if (this.instructions.get(i) instanceof ASMBranch) {
+				ASMBranch branch = (ASMBranch) this.instructions.get(i);
+				if (branch.type == BRANCH_TYPE.BX) {
+					branch.type = BRANCH_TYPE.B;
+					branch.target = new LabelOperand(funcReturn);
+				}
+			}
+		}
 	}
 	
 	public void patchFramePointerAddressing(int offset) {
@@ -160,12 +167,16 @@ public class AsNFunction extends AsNNode {
 	/**
 	 * Check if parameters are passed in the stack.
 	 */
-	public boolean paramsInStack() {
+	public boolean hasParamsInStack() {
 		return this.parameterMapping.stream().map(x -> x.tpl_2()).filter(x -> x == -1).count() > 0;
 	}
 	
+	/**
+	 * Return a list of all registers that were used. Registers 0-2 and FP, SP, LR, PC are excluded.
+	 * @return
+	 */
 	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.FP, REGISTER.SP, REGISTER.LR};
+		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
 		List<REGISTER> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {
@@ -176,7 +187,6 @@ public class AsNFunction extends AsNNode {
 				for (REGISTER r : notIncluded) if (r == mov.target.reg) use = false;
 				
 				if (use) used.add(mov.target.reg);
-
 			}
 		});
 		
@@ -194,9 +204,9 @@ public class AsNFunction extends AsNNode {
 	}
 	
 	public List<Pair<Declaration, Integer>> getParameterMapping() {
+		int r = 0;
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
-		int r = 0;
 		for (Declaration dec : this.source.parameters) {
 			int wordSize = dec.type.wordSize;
 			if (wordSize == 1 && r < 3) {
@@ -204,12 +214,10 @@ public class AsNFunction extends AsNNode {
 				mapping.add(new Pair(dec, r));
 				r++;
 			}
-			else {
+			else 
 				/* Load in stack */
 				mapping.add(new Pair(dec, -1));
-			}
 		}
-		
 		return mapping;
 	}
 

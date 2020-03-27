@@ -4,7 +4,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.Assignment;
-import Imm.AST.Statement.CapsuledStatement;
+import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
@@ -12,15 +12,11 @@ import Imm.AsN.AsNNode;
 
 public abstract class AsNStatement extends AsNNode {
 
-	public AsNStatement() {
-		
-	}
-	
 	public static AsNStatement cast(Statement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNStatement node = null;
-		if (s instanceof CapsuledStatement) {
-			node = AsNCapsuledStatement.cast((CapsuledStatement) s, r, st);
+		if (s instanceof CompoundStatement) {
+			node = AsNCompoundStatement.cast((CompoundStatement) s, r, st);
 		}
 		else if (s instanceof Return) {
 			node = AsNReturn.cast((Return) s, r, st); 

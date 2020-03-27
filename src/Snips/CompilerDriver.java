@@ -111,9 +111,7 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			if (imm) {
-				AST.print(4, true);
-			}
+			if (imm) AST.print(4, true);
 			
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);

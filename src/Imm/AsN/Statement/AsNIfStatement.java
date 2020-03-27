@@ -19,11 +19,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Arith.AsNCmp;
 
-public class AsNIfStatement extends AsNConditionalCapsuledStatement {
-
-	public AsNIfStatement() {
-		
-	}
+public class AsNIfStatement extends AsNCompoundStatement {
 
 	public static AsNIfStatement cast(IfStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNIfStatement if0 = new AsNIfStatement();
@@ -91,6 +87,82 @@ public class AsNIfStatement extends AsNConditionalCapsuledStatement {
 			
 			return if0;
 		}
+	}
+	
+	protected void topComparison(IfStatement a, AsNCmp com, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+		COND neg = com.neg;
+		
+		/* Remove Conditional results */
+		com.instructions.remove(com.instructions.size() - 1);
+		com.instructions.remove(com.instructions.size() - 1);
+		
+		this.instructions.addAll(com.getInstructions());
+		
+		IfStatement elseS = a.elseStatement;
+		
+		ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
+		
+		ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
+		if (elseS != null) {
+			/* Condition was false, jump to else */
+			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(elseTarget)));
+		}
+		else {
+			/* Condition was false, no else, skip body */
+			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(endTarget)));
+		}
+		
+		/* True Body */
+		for (Statement s : a.body) {
+			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+		}
+		
+		this.popDeclarationScope(a, r, st);
+		
+		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
+		
+		/* ElseIf / Else Exists, needs jump to next case */
+		if (elseS != null) this.instructions.add(elseTarget);
+		
+		while (elseS != null) {
+			if (elseS.condition != null) {
+				AsNExpression expr = AsNExpression.cast(elseS.condition, r, st);
+				
+				if (expr instanceof AsNCmp) {
+					this.topComparison(elseS, (AsNCmp) expr, r, st);
+					this.instructions.add(endTarget);
+					return;
+				}
+				else {
+					this.instructions.addAll(expr.getInstructions());
+					
+					this.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+					
+					elseTarget = new ASMLabel(LabelGen.getLabel());
+				
+					/* False Jump */
+					this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(elseTarget)));
+				}
+			}
+			
+			/* Body */
+			for (Statement s : elseS.body)
+				this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+			
+			this.popDeclarationScope(a, r, st);
+			
+			if (elseS.elseStatement != null) {
+				/* Jump to end */
+				this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
+				this.instructions.add(elseTarget);
+			}
+			else break;
+			
+			elseS = elseS.elseStatement;
+		}
+		
+		/* End Target Destination */
+		this.instructions.add(endTarget);
 	}
 	
 }

@@ -10,10 +10,6 @@ import Imm.AST.Expression.Arith.Sub;
 import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNSub extends AsNBinaryExpression {
-
-	public AsNSub() {
-		
-	}
 	
 	public static AsNSub cast(Sub s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNSub sub = new AsNSub();

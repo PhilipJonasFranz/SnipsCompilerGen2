@@ -10,10 +10,6 @@ import Imm.AsN.Expression.AsNExpression;
 
 public class AsNAssignment extends AsNStatement {
 
-	public AsNAssignment() {
-		
-	}
-
 	public static AsNAssignment cast(Assignment a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNAssignment assign = new AsNAssignment();
 		

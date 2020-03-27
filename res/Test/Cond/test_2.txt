@@ -1,5 +1,5 @@
 SOURCE
-int main(int a, int b) {
+int main(int a, int b, int c, int d) {
 	if (a == 2) return a;
 	else if (b == 5) return b;
 	else return a + b;

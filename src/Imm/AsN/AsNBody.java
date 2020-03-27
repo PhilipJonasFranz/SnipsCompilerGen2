@@ -22,13 +22,6 @@ import Snips.CompilerDriver;
 
 public class AsNBody extends AsNNode {
 
-	public AsNBody() {
-		
-	}
-	
-	/**
-	 * Casts given program into an ASMBody.
-	 */
 	public static AsNBody cast(Program p) throws CGEN_EXCEPTION {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
@@ -62,13 +55,13 @@ public class AsNBody extends AsNNode {
 				
 				/* Patch Branch to Main Function */
 				if (((Function) s).functionName.equals("main")) {
-					((LabelOperand) branch.target).patch((ASMLabel) ins.get(1));
+					((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
 				}
 				
 				body.instructions.addAll(ins);
-				
-				body.instructions.add(new ASMSeperator());
 			}
+			
+			body.instructions.add(new ASMSeperator());
 		}
 		
 		return body;

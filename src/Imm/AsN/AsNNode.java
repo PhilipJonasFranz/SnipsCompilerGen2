@@ -13,9 +13,6 @@ public abstract class AsNNode {
 
 	public List<ASMInstruction> instructions = new ArrayList();
 	
-	public AsNNode() {
-		
-	}
 	
 	/**
 	 * Casts given syntax element based on the given reg set to a asm node. 

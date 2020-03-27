@@ -12,10 +12,6 @@ import Imm.TYPE.PRIMITIVES.INT;
 
 public class AsNAtom extends AsNExpression {
 
-	public AsNAtom() {
-		
-	}
-	
 	public static AsNAtom cast(Atom a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNAtom atom = new AsNAtom();
 		a.castedNode = atom;

@@ -22,10 +22,6 @@ import Util.Pair;
 
 public class AsNInlineCall extends AsNExpression {
 
-	public AsNInlineCall() {
-		
-	}
-	
 	public static AsNInlineCall cast(InlineCall ic, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
@@ -35,14 +31,12 @@ public class AsNInlineCall extends AsNExpression {
 			((AsNFunction) ic.calledFunction.castedNode).parameterMapping;
 		
 		/* Load Parameters in the Stack */
-		if (mapping.size() > 3) { 
-			for (int i = 0; i < mapping.size(); i++) {
-				Pair<Declaration, Integer> p = mapping.get(i);
-				if (p.tpl_2() == -1) {
-					call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
-					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-					r.getReg(0).free();
-				}
+		for (int i = 0; i < mapping.size(); i++) {
+			Pair<Declaration, Integer> p = mapping.get(i);
+			if (p.tpl_2() == -1) {
+				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+				call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				r.getReg(0).free();
 			}
 		}
 		
@@ -66,7 +60,7 @@ public class AsNInlineCall extends AsNExpression {
 			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 
 		/* Branch to function */
-		ASMLabel functionLabel = (ASMLabel) ic.calledFunction.castedNode.instructions.get(1);
+		ASMLabel functionLabel = (ASMLabel) ic.calledFunction.castedNode.instructions.get(0);
 		call.instructions.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel)));
 		
 		/* Shrink Stack if parameters were passed through it */

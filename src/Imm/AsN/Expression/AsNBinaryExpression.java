@@ -37,10 +37,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		public int solve(int a, int b);
 	}
 	
-	public AsNBinaryExpression() {
-		
-	}
-	
+
 	public static AsNBinaryExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		AsNBinaryExpression node = null;

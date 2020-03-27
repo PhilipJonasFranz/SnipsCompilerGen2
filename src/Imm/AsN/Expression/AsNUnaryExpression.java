@@ -16,9 +16,6 @@ public abstract class AsNUnaryExpression extends AsNExpression {
 		public int solve(int a, int b);
 	}
 	
-	public AsNUnaryExpression() {
-		
-	}
 	
 	public static AsNUnaryExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */

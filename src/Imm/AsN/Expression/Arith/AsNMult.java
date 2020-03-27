@@ -11,10 +11,6 @@ import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNMult extends AsNBinaryExpression {
 
-	public AsNMult() {
-		
-	}
-	
 	public static AsNMult cast(Mul m, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNMult mul = new AsNMult();
 		

@@ -14,6 +14,7 @@ import Imm.ASM.Processing.ASMMvn;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Structural.ASMLabel;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -44,8 +45,31 @@ public class ASMOptimizer {
 			this.removeDoubleCrossing(body);
 			
 			this.removeImplicitStackAssignment(body);
+			
+			this.removeBranchesBeforeLabelToLabel(body);
 		}
 		
+	}
+	
+	/**
+	 * b .Lx <-- Remove this line
+	 * .Lx: 
+	 */
+	public void removeBranchesBeforeLabelToLabel(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i - 1) instanceof ASMBranch && body.instructions.get(i) instanceof ASMLabel) {
+				ASMBranch branch = (ASMBranch) body.instructions.get(i - 1);
+				ASMLabel label = (ASMLabel) body.instructions.get(i);
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand) {
+					LabelOperand op = (LabelOperand) branch.target;
+					if (op.label.equals(label)) {
+						body.instructions.remove(i - 1);
+						i--;
+						OPT_DONE = true;
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -252,14 +276,14 @@ public class ASMOptimizer {
 	
 	/**
 	 * b .L1
-	 * ... <- Remove these Lines until Label
+	 * ... <- Remove these Lines until Label or newline
 	 */
 	public void clearInstructionsAfterBranch(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) body.instructions.get(i);
 				if (b.cond == null && b.type != BRANCH_TYPE.BL) {
-					while (i < body.instructions.size() - 1 && !(body.instructions.get(i + 1) instanceof ASMLabel)) {
+					while (i < body.instructions.size() - 1 && !(body.instructions.get(i + 1) instanceof ASMLabel) && !(body.instructions.get(i + 1) instanceof ASMSeperator)) {
 						body.instructions.remove(i + 1);
 						OPT_DONE = true;
 					}

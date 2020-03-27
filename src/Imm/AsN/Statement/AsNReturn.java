@@ -11,10 +11,6 @@ import Imm.AST.Statement.Return;
 import Imm.AsN.Expression.AsNExpression;
 
 public class AsNReturn extends AsNStatement {
-	
-	public AsNReturn() {
-
-	}
 
 	public static AsNReturn cast(Return s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNReturn ret = new AsNReturn();

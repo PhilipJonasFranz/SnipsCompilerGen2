@@ -12,10 +12,6 @@ import Imm.AST.Expression.IDRef;
 
 public class AsNIdRef extends AsNExpression {
 
-	public AsNIdRef() {
-		
-	}
-	
 	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) {
 		AsNIdRef ref = new AsNIdRef();
 		i.castedNode = ref;

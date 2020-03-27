@@ -10,10 +10,6 @@ import Imm.AsN.Expression.AsNExpression;
 
 public class AsNDeclaration extends AsNStatement {
 
-	public AsNDeclaration() {
-		
-	}
-
 	public static AsNDeclaration cast(Declaration d, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNDeclaration dec = new AsNDeclaration();
 		

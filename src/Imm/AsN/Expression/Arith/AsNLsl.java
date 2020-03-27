@@ -11,10 +11,6 @@ import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNLsl extends AsNBinaryExpression {
 
-	public AsNLsl() {
-		
-	}
-	
 	public static AsNLsl cast(Lsl l, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNLsl lsl = new AsNLsl();
 		
