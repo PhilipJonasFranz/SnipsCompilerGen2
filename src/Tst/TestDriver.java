@@ -27,7 +27,7 @@ public class TestDriver {
 		SUCCESS, FAIL, CRASH, TIMEOUT
 	}
 	
-	public boolean detailedCompilerMessages = false;
+	public boolean detailedCompilerMessages = true;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	

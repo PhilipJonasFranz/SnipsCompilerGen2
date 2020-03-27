@@ -134,10 +134,7 @@ public class CompilerDriver {
 			ASMOptimizer opt = new ASMOptimizer();
 			opt.optimize(body);
 			
-			double after = body.getInstructions().size();
-			
-			double delta = before - after;
-			double rate = Math.round(1 / (before / 100) * delta * 100) / 100;
+			double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 			
 			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			

@@ -51,6 +51,8 @@ public class AsNInlineCall extends AsNExpression {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.tpl_2() != -1) {
 				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+				
+				/* Leave First Parameter directley in R0 */
 				if (p.tpl_2() > 0) call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				r.getReg(0).free();
 			}
@@ -58,9 +60,10 @@ public class AsNInlineCall extends AsNExpression {
 		
 		/* Pop Parameters on the stack into the correct registers, 
 		 * 		Parameter for R0 is already located in reg */
-		if (mapping.size() > 3) {
+		if (mapping.size() >= 3) 
 			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
-		}
+		else if (mapping.size() == 2) 
+			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 
 		/* Branch to function */
 		ASMLabel functionLabel = (ASMLabel) ic.calledFunction.castedNode.instructions.get(1);
