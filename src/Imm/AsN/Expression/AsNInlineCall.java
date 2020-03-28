@@ -67,9 +67,6 @@ public class AsNInlineCall extends AsNExpression {
 		if (mapping.size() > 3) 
 			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand((ic.parameters.size() - 3) * 4)));
 		
-		/* Update Register Set */
-		r.getReg(0).setExpression(ic);
-		
 		return call;
 	}
 	

@@ -1,0 +1,20 @@
+DESCRIPTION
+Provocate a RegStack Overflow, so b7 is stored on the stack. This way stack accesses can be
+tested.
+SOURCE
+int main(int a) {
+	int b0 = a + 0;
+	int b1 = a + 1;
+	int b2 = a + 2;
+	int b3 = a + 3;
+	int b4 = a + 4;
+	int b5 = a + 5;
+	int b6 = a + 6;
+	int b7 = a + 7;
+	int b8 = a + 8;
+	int b9 = a + 9;
+	return b0 + b1 + b2 + b3 + b4 + b5 + b6 + b7 + b8 + b9;
+}
+TESTCASES
+0 45
+2 65

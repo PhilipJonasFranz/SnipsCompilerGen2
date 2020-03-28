@@ -49,7 +49,6 @@ public class AsNCmp extends AsNBinaryExpression {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());
 			
 			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
-			r.getReg(1).setExpression(c.right());
 			
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}

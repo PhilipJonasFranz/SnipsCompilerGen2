@@ -71,8 +71,11 @@ public class StackSet {
 		return this.stack;
 	}
 	
+	public boolean newDecsOnStack = false;
+	
 	public void push(Declaration...dec) {
 		for (Declaration dec0 : dec) this.stack.push(new StackCell(dec0));
+		this.newDecsOnStack = true;
 	}
 	
 	public void push(Expression...e) {
@@ -94,7 +97,7 @@ public class StackSet {
 	}
 	
 	public void print() {
-		System.out.println("Stack Layout:");
+		System.out.println("---- STACK TOP ----");
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
 			System.out.println(x.contentType.toString() + ": ");
@@ -106,6 +109,7 @@ public class StackSet {
 			}
 			else System.out.println("    " + x.reg.toString());
 		}
+		System.out.println("---- STACK BASE ----\n");
 	}
 	
 	/**
@@ -133,9 +137,19 @@ public class StackSet {
 	/**
 	 * Finds the offset to a local variable in the stack.
 	 */
-	public int findDecInStack(Declaration dec) {
-		// TODO
-		return 0;
+	public int getDeclarationInStackByteOffset(Declaration dec) {
+		int x = 0;
+		int off = 0;
+		while (true) {
+			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER) {
+				off = 4;
+			}
+			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
+				return off;
+			}
+			else off += 4;
+			x++;
+		}
 	}
 	
 }

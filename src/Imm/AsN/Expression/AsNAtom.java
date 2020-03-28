@@ -19,7 +19,7 @@ public class AsNAtom extends AsNExpression {
 		/* Int Literal, move directley into R0 */
 		if (a.type instanceof INT) {
 			atom.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(((INT) a.type).value)));
-			r.getReg(0).setExpression(a);
+			
 		}
 		else throw new CGEN_EXCEPTION(a.getSource(), "No injection cast for atom type supported: " + a.type.typeString());
 		

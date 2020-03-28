@@ -2,17 +2,19 @@ package Imm.AsN.Expression;
 
 import CGen.RegSet;
 import CGen.StackSet;
+import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Stack.ASMLdrStack;
 import Imm.ASM.Stack.ASMMemOp.MEM_OP;
-import Imm.ASM.Util.Operands.ImmOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.IDRef;
 
 public class AsNIdRef extends AsNExpression {
 
-	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) {
+	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) throws CGEN_EXCEPTION {
 		AsNIdRef ref = new AsNIdRef();
 		i.castedNode = ref;
 		
@@ -20,39 +22,38 @@ public class AsNIdRef extends AsNExpression {
 		if (r.declarationLoaded(i.origin)) {
 			int location = r.declarationRegLocation(i.origin);
 			
-			/* Declaration is loaded in R0 */
-			if (location == 0) {
+			/* Declaration is loaded in target reg, make copy */
+			if (location == target) {
 				int free = r.findFree();
 				
 				if (free != -1) {
-					/* Copy declaration to other free location, leave result in R0 */
-					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));
-					r.copy(0, free);
-				}
-				
-				if (target != 0) {
+					/* Copy declaration to other free location, leave result in target reg */
 					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
 					r.copy(target, free);
 				}
+				else {
+					// TODO No free reg to move copy to, save in stack
+					throw new CGEN_EXCEPTION(i.getSource(), "Cannot save copy of value, RegStack overflow!");
+				}
 			}
-			else if (location != 0) {
-				/* Copy value in R0 */
+			else if (location != target) {
+				/* Copy value in target reg */
 				ref.instructions.add(new ASMMov(new RegOperand(target), new RegOperand(location)));
 				r.copy(location, target);
 			}
 		}
 		else {
-			/* Free R0 */
-			if (!r.getReg(0).isFree()) {
+			/* Free target reg */
+			if (!r.getReg(target).isFree()) {
 				int free = r.findFree();
 				if (free != -1) {
-					/* Free Register, copy value of R0 to free location */
-					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));
-					r.copy(0, free);
-					r.free(0);
+					/* Free Register, copy value of target reg to free location */
+					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
+					r.copy(target, free);
+					r.free(target);
 				}
 				else {
-					/* Make Space in Reg Stack, copy value to StackSet */
+					/* RegStack is full, make Space in Reg Stack, copy value to StackSet */
 					// TODO
 				}
 			}
@@ -61,13 +62,16 @@ public class AsNIdRef extends AsNExpression {
 				/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
 				 * 		Load from Stack */
 				int off = st.getParameterByteOffset(i.origin);
-				ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(off)));
+				ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, off)));
 			}
 			else {
 				/* Load Declaration Location from Stack */
+				int off = st.getDeclarationInStackByteOffset(i.origin);
+				ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.FP), 
+					new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
 			}
 			
-			r.getReg(0).setDeclaration(i.origin);
+			r.getReg(target).setDeclaration(i.origin);
 		}
 		
 		return ref;

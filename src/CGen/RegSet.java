@@ -1,6 +1,5 @@
 package CGen;
 
-import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Declaration;
 
 public class RegSet {
@@ -13,37 +12,26 @@ public class RegSet {
 		
 		public STATUS status = STATUS.FREE;
 		
-		public Declaration value;
-		
-		public Expression expr;
+		public Declaration declaration;
 		
 		public RegState() {
 			
 		}
 		
 		public void free() {
-			this.value = null;
-			this.expr = null;
+			this.declaration = null;
 			this.status = STATUS.FREE;
 		}
 		
 		public void setDeclaration(Declaration value) {
-			this.value = value;
-			this.status = STATUS.USED;
-		}
-		
-		public void setExpression(Expression e) {
-			this.expr = e;
-			this.value = null;
+			this.declaration = value;
 			this.status = STATUS.USED;
 		}
 		
 		public void print() {
 			System.out.println("    Status: " + this.status.toString());
-			if (this.status == STATUS.USED) {
-				if (this.value != null) this.value.print(4, true);
-				else if (this.expr != null) this.expr.print(4, true);
-			}
+			if (this.status == STATUS.USED) 
+				this.declaration.print(4, true);
 		}
 		
 		public boolean isFree() {
@@ -75,7 +63,7 @@ public class RegSet {
 	public void copy(int from, int to) {
 		this.regs [to].status = this.regs [from].status;
 		// TODO Needs cloning
-		this.regs [to].value = this.regs [from].value;
+		this.regs [to].declaration = this.regs [from].declaration;
 	}
 	
 	public void print() {
@@ -88,28 +76,14 @@ public class RegSet {
 	
 	public boolean declarationLoaded(Declaration dec) {
 		for (int i = 0; i < regs.length; i++) {
-			if (regs [i].value != null && regs [i].value.equals(dec)) return true;
-		}
-		return false;
-	}
-	
-	public boolean expressionLoaded(Expression e) {
-		for (int i = 0; i < regs.length; i++) {
-			if (regs [i].expr != null && regs [i].expr.equals(e)) return true;
+			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return true;
 		}
 		return false;
 	}
 	
 	public int declarationRegLocation(Declaration dec) {
 		for (int i = 0; i < regs.length; i++) {
-			if (regs [i].value != null && regs [i].value.equals(dec)) return i;
-		}
-		return -1;
-	}
-	
-	public int ExpressionRegLocation(Expression e) {
-		for (int i = 0; i < regs.length; i++) {
-			if (regs [i].expr != null && regs [i].expr.equals(e)) return i;
+			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return i;
 		}
 		return -1;
 	}

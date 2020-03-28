@@ -17,6 +17,8 @@ import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
@@ -94,7 +96,7 @@ public class AsNFunction extends AsNNode {
 				func.patchBxToB(funcReturn);
 			}
 			
-			/* if (no new declarations on stack) */ func.instructions.remove(fpMov);
+			if (!st.newDecsOnStack) func.instructions.remove(fpMov);
 		}
 		else {
 			/* Patch used registers into push instruction at the start */
@@ -112,19 +114,21 @@ public class AsNFunction extends AsNNode {
 			func.patchFramePointerAddressing(push.operands.size() * 4);
 		
 		
-		if (hasCall || func.hasParamsInStack() || !used.isEmpty()) {
+		if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack) {
 			/* Add centralized stack reset and register restoring */
 			func.instructions.add(funcReturn);
 			
 			ASMPopStack pop = new ASMPopStack();
 			used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
 			
-			if (hasCall || func.hasParamsInStack() /* || New declarations on the stack */) {
+			if (hasCall || func.hasParamsInStack() || st.newDecsOnStack) {
 				func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
 			
-				/* Need to restore registers */
-				pop.operands.add(new RegOperand(REGISTER.FP));
-				pop.operands.add(new RegOperand(REGISTER.LR));
+				if (hasCall || func.hasParamsInStack()) {
+					/* Need to restore registers */
+					pop.operands.add(new RegOperand(REGISTER.FP));
+					pop.operands.add(new RegOperand(REGISTER.LR));
+				}
 			}
 			
 			func.instructions.add(pop);
@@ -152,13 +156,23 @@ public class AsNFunction extends AsNNode {
 		}
 	}
 	
-	public void patchFramePointerAddressing(int offset) {
+	public void patchFramePointerAddressing(int offset) throws CGEN_EXCEPTION {
 		for (ASMInstruction ins : this.instructions) {
 			if (ins instanceof ASMMemOp) {
 				ASMMemOp memOp = (ASMMemOp) ins;
 				if (memOp.op0.reg == REGISTER.FP) {
-					/* Frame Pointer relative addressing */
-					memOp.op1 = new ImmOperand(((ImmOperand) memOp.op1).value + offset);
+					if (memOp.op1 instanceof PatchableImmOperand) {
+						PatchableImmOperand op = (PatchableImmOperand) memOp.op1;
+						
+						/* Patch the offset for parameters because they are located under the pushed regs,
+						 * dont patch local data since its located above the pushed regs.
+						 */
+						if (op.dir == PATCH_DIR.UP) {
+							int val = op.patch(offset);
+							memOp.op1 = new ImmOperand(val);
+						}
+					}
+					else throw new CGEN_EXCEPTION(this.source.getSource(), "Cannot patch non-patchable imm operand!");
 				}
 			}
 		}

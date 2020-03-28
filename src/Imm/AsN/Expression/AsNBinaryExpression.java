@@ -127,8 +127,6 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				r.copy(0, target);
 			}
 		}
-		
-		r.getReg(target).setExpression(e);
 	}
 	
 	/**

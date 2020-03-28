@@ -11,8 +11,10 @@ import Imm.ASM.Processing.ASMDataP;
 import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Processing.ASMMult;
 import Imm.ASM.Processing.ASMMvn;
+import Imm.ASM.Stack.ASMLdrStack;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
+import Imm.ASM.Stack.ASMStrStack;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -222,6 +224,42 @@ public class ASMOptimizer {
 							for (RegOperand r : p.operands) {
 								if (r.reg == target) {
 									break;
+								}
+							}
+						}
+						else if (body.instructions.get(a) instanceof ASMLdrStack) {
+							ASMLdrStack p = (ASMLdrStack) body.instructions.get(a);
+							if (p.target.reg == target) {
+								break;
+							}
+							
+							if (p.op0.reg == target) {
+								clear = false;
+							}
+							
+							if (p.op1 instanceof RegOperand) {
+								RegOperand r = (RegOperand) p.op1;
+								if (r.reg == target) {
+									p.op1 = new ImmOperand(val);
+									OPT_DONE = true;
+								}
+							}
+						}
+						else if (body.instructions.get(a) instanceof ASMStrStack) {
+							ASMStrStack p = (ASMStrStack) body.instructions.get(a);
+							if (p.target.reg == target) {
+								break;
+							}
+							
+							if (p.op0.reg == target) {
+								clear = false;
+							}
+							
+							if (p.op1 instanceof RegOperand) {
+								RegOperand r = (RegOperand) p.op1;
+								if (r.reg == target) {
+									p.op1 = new ImmOperand(val);
+									OPT_DONE = true;
 								}
 							}
 						}
