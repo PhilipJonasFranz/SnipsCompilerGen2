@@ -26,11 +26,15 @@ public class AsNBody extends AsNNode {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
 		
+		/* File name comment */
 		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName()));
 		
+		
+		/* Create .data section annotation */
 		ASMSectionAnnotation data = new ASMSectionAnnotation(SECTION.DATA);
 		body.instructions.add(data);
 		
+		/* Count global variables */
 		int globals = 0;
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Declaration) {
@@ -38,17 +42,23 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
+		/* No globals, remove .data annotation */
 		if (globals == 0) body.instructions.remove(body.instructions.size() - 1);
 		
-		ASMSectionAnnotation text = new ASMSectionAnnotation(SECTION.TEXT);
-		if (globals > 0) body.instructions.add(text);
 		
-		/* Branch to main Function */
+		/* Add .text annotation if other sections exist */
+		if (globals > 0) 
+			body.instructions.add(new ASMSectionAnnotation(SECTION.TEXT));
+		
+		
+		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand());
 		if (!(p.programElements.get(0) instanceof Function && ((Function) p.programElements.get(0)).functionName.equals("main"))) {
 			body.instructions.add(branch);
 		}
 		
+		
+		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), new StackSet()).getInstructions();
@@ -63,6 +73,13 @@ public class AsNBody extends AsNNode {
 			
 			body.instructions.add(new ASMSeperator());
 		}
+		
+		
+		/* Main function not present */
+		if (((LabelOperand) branch.target).label == null) {
+			body.instructions.remove(branch);
+		}
+		
 		
 		return body;
 	}

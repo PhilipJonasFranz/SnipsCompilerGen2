@@ -4,15 +4,19 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
+import Snips.CompilerDriver;
 
 public abstract class ASMMemOp extends ASMInstruction {
 
+			/* --- NESTED --- */
 	public enum MEM_OP {
 		PRE_WRITEBACK, 
 		POST_WRITEBACK,
 		PRE_NO_WRITEBACK
 	}
 	
+	
+			/* --- FIELDS --- */
 	public MEM_OP memOp;
 	
 	public RegOperand target;
@@ -21,6 +25,8 @@ public abstract class ASMMemOp extends ASMInstruction {
 	
 	public Operand op1;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public ASMMemOp(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1) {
 		this.memOp = memOp;
 		this.target = target;
@@ -36,6 +42,36 @@ public abstract class ASMMemOp extends ASMInstruction {
 		this.op1 = op1;
 	}
 
-	public abstract String build();
+	
+			/* --- METHODS --- */
+	public String build(Class memOpClass) {
+		String operation = (memOpClass.equals(ASMLdrStack.class))? "ldr " : "str ";
+		if (this.memOp == MEM_OP.POST_WRITEBACK) {
+			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
+				this.op0.toString() + "]";
+			if (this.op1 != null) {
+				s += " " + this.op1.toString();
+			}
+			return s;
+		}
+		else if (this.memOp == MEM_OP.PRE_WRITEBACK) {
+			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
+				this.op0.toString();
+			if (this.op1 != null) {
+				s += ", " + this.op1.toString() + "]!";
+			}
+			else s += "]";
+			return s;
+		}
+		else {
+			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
+					this.op0.toString();
+			if (this.op1 != null) {
+				s += ", " + this.op1.toString();
+			}
+			s += "]";
+			return s;
+		}
+	}
 	
 }

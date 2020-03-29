@@ -97,7 +97,7 @@ public class StackSet {
 	}
 	
 	public void print() {
-		System.out.println("---- STACK TOP ----");
+		System.out.println("\n---- STACK TOP ----");
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
 			System.out.println(x.contentType.toString() + ": ");

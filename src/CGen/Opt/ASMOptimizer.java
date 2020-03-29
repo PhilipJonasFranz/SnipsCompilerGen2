@@ -289,7 +289,9 @@ public class ASMOptimizer {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			ASMInstruction ins = body.instructions.get(i);
 			if (ins instanceof ASMLabel) {
-				if (((ASMLabel) ins).name.equals("main")) usedLabels.add((ASMLabel) ins);
+				ASMLabel label = (ASMLabel) ins;
+				/* Label is used by default if its a function header */
+				if (label.isFunctionLabel) usedLabels.add((ASMLabel) ins);
 			}
 			if (ins instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) ins;

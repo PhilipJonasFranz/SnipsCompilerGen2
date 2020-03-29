@@ -3,9 +3,9 @@ This Test aims to verify the correct behaviour of the main function when paramet
 are passed throught the stack and registers, as well as a simple use case of the parameters.
 SOURCE
 int main(int a, int b, int c, int d) {
-	return a + b + c + d;
+	return a + b + c - d;
 }
 TESTCASES
-1 2 3 4 10
-2 2 2 2 8
-3 6 2 5 16
+1 2 3 4 2
+2 2 2 2 4
+3 6 2 5 6

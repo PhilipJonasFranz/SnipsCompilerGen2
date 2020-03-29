@@ -58,7 +58,7 @@ public class AsNFunction extends AsNNode {
 		
 		
 		/* Function Header and Entry Label */
-		func.instructions.add(new ASMLabel(func.source.functionName));
+		func.instructions.add(new ASMLabel(func.source.functionName, true));
 		
 		/* Save FP and lr by default */
 		ASMPushStack push = new ASMPushStack(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR));
@@ -69,11 +69,12 @@ public class AsNFunction extends AsNNode {
 		ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
 		func.instructions.add(fpMov);
 		
+		/* Save parameters in register */
+		func.clearReg(r, st, 0, 1, 2);
 		
 		/* Cast all statements and add all instructions */
-		for (Statement s : f.statements) {
+		for (Statement s : f.statements) 
 			func.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-		}
 		
 		
 		/* Check if other function is called within this function */
@@ -86,9 +87,8 @@ public class AsNFunction extends AsNNode {
 		
 		
 		if (!hasCall && !func.hasParamsInStack()) {
-			if (used.isEmpty()) {
+			if (used.isEmpty()) 
 				func.instructions.remove(push);
-			}
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();

@@ -25,10 +25,6 @@ public class Function extends SyntaxElement {
 	public List<Statement> statements;
 	
 			/* --- CONSTRUCTORS --- */
-	/**
-	 * Default constructor.
-	 * @param source See {@link #source}
-	 */
 	public Function(TYPE returnType, Token functionId, List<Declaration> parameters, List<Statement> statements, Source source) {
 		super(source);
 		this.returnType = returnType;

@@ -7,27 +7,40 @@ import Snips.CompilerDriver;
 
 public class ASMBranch extends ASMInstruction {
 
+			/* --- NESTED --- */
 	public enum BRANCH_TYPE {
 		B, BL, BX
 	}
 	
+	
+			/* --- FIELDS --- */
+	/**
+	 * The Type of the branch. See {@link #BRANCH_TYPE}.
+	 */
 	public BRANCH_TYPE type;
 	
+	/**
+	 * The target of this jump. This can be either a RegOperand, to jump to the contents of
+	 * given register, an imm operand, to jump to the value defined in the operand, or a 
+	 * label operand to jump to this label.
+	 */
 	public Operand target;
 	
-	public Cond cond;
 	
+			/* --- CONSTRUCTORS --- */
 	public ASMBranch(BRANCH_TYPE type, Operand target) {
 		this.type = type;
 		this.target = target;
 	}
 	
 	public ASMBranch(BRANCH_TYPE type, Cond cond, Operand target) {
+		super(cond);
 		this.type = type;
 		this.target = target;
-		this.cond = cond;
 	}
 	
+	
+			/* --- METHODS --- */
 	public String build() {
 		return CompilerDriver.printDepth + this.type.toString().toLowerCase() + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString();
 	}

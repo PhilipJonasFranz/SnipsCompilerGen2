@@ -3,7 +3,6 @@ package Imm.ASM.Stack;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
-import Snips.CompilerDriver;
 
 public class ASMStrStack extends ASMMemOp {
 
@@ -15,33 +14,13 @@ public class ASMStrStack extends ASMMemOp {
 		super(memOp, target, op0, op1, cond);
 	}
 
+			/* --- METHODS --- */
+	/**
+	 * Calls build of ASMMemOp with class as parameter.
+	 */
+	@Override
 	public String build() {
-		if (this.memOp == MEM_OP.POST_WRITEBACK) {
-			String s = CompilerDriver.printDepth + "str " + this.target.toString() + ", [" +
-				this.op0.toString() + "]";
-			if (this.op1 != null) {
-				s += " " + this.op1.toString();
-			}
-			return s;
-		}
-		else if (this.memOp == MEM_OP.PRE_WRITEBACK) {
-			String s = CompilerDriver.printDepth + "str " + this.target.toString() + ", [" +
-				this.op0.toString();
-			if (this.op1 != null) {
-				s += ", " + this.op1.toString() + "]!";
-			}
-			else s += "]";
-			return s;
-		}
-		else {
-			String s = CompilerDriver.printDepth + "str " + this.target.toString() + ", [" +
-					this.op0.toString();
-			if (this.op1 != null) {
-				s += ", " + this.op1.toString();
-			}
-			s += "]";
-			return s;
-		}
+		return super.build(this.getClass());
 	}
 	
 }
