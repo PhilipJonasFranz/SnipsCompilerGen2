@@ -5,6 +5,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.ASMMov;
 import Imm.ASM.Stack.ASMLdrStack;
+import Imm.ASM.Stack.ASMStrStack;
 import Imm.ASM.Stack.ASMMemOp.MEM_OP;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
@@ -32,8 +33,10 @@ public class AsNIdRef extends AsNExpression {
 					r.copy(target, free);
 				}
 				else {
-					// TODO No free reg to move copy to, save in stack
-					throw new CGEN_EXCEPTION(i.getSource(), "Cannot save copy of value, RegStack overflow!");
+					/* No free reg to move copy to, save in stack */
+					ref.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.SP), 
+						new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+					st.push(i.origin);
 				}
 			}
 			else if (location != target) {
@@ -50,11 +53,11 @@ public class AsNIdRef extends AsNExpression {
 					/* Free Register, copy value of target reg to free location */
 					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
 					r.copy(target, free);
-					r.free(target);
 				}
 				else {
-					/* RegStack is full, make Space in Reg Stack, copy value to StackSet */
-					// TODO
+					/* RegStack is full, push copy to StackSet */
+					ref.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+					st.push(r.getReg(target).declaration);
 				}
 			}
 			

@@ -1,0 +1,21 @@
+DESCRIPTION
+Combine the elements parameters in stack, local data in stack.
+SOURCE
+int foo(int x0, int x1) {
+	return x0 + x1;
+}
+
+int main(int a, int b, int c, int d) {
+	int b0 = foo(a, 0);
+	int b1 = foo(a, 1);
+	int b2 = foo(b, 2);
+	int b3 = foo(b, 3);
+	int b4 = foo(c, 4);
+	int b5 = foo(c, 5);
+	int b6 = foo(d, 6);
+	int b7 = foo(d, 7);
+	return b0 + b1 + b2 + b3 + b4 + b5 + b6 + b7;
+}
+TESTCASES
+0 0 0 0 28
+1 2 3 4 48

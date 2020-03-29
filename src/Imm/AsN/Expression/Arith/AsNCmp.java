@@ -23,19 +23,15 @@ public class AsNCmp extends AsNBinaryExpression {
 
 	public COND trueC, neg;
 	
-	public AsNCmp() {
-		/**
-		 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
-		 * expression is true, #0 if not.
-		 */
-	}
-	
+	/**
+	 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
+	 * expression is true, #0 if not.
+	 */
 	public static AsNCmp cast(Compare c, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNCmp cmp = new AsNCmp();
 		
 		/* Clear only R0, R1 since R2 is not needed */
-		cmp.clearReg(r, 0);
-		cmp.clearReg(r, 1);
+		cmp.clearReg(r, st, 0, 1);
 		
 		if (c.right() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());

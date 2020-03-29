@@ -73,7 +73,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			m.atomicPrecalc(b, solver);
 		}
 		else {
-			this.clearOperandRegs(r);
+			this.clearReg(r, st, 0, 1, 2);
 			
 			/* Partial Atomic Loading Left */
 			if (b.left() instanceof Atom) {
@@ -139,32 +139,6 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
 				this.instructions.add(new ASMMov(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
 			}
-		}
-	}
-	
-		/* --- REGISTER CLEARING --- */
-	/**
-	 * Clear R0, R1, R2 using {@link #clearReg(RegSet, int)}
-	 * @param r The current RegSet
-	 */
-	protected void clearOperandRegs(RegSet r) {
-		this.clearReg(r, 0);
-		this.clearReg(r, 1);
-		this.clearReg(r, 2);
-	}
-	
-	/**
-	 * Clear given reg under the current RegSet by searching for a free reg and copying the value
-	 * into it. Clears the given reg in the RegSet.
-	 * @param r The current RegSet
-	 * @param reg The Register to clear
-	 */
-	protected void clearReg(RegSet r, int reg) {
-		if (!r.getReg(reg).isFree()) {
-			int free = r.findFree();
-			this.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(reg)));
-			r.copy(reg, free);
-			r.free(reg);
 		}
 	}
 	

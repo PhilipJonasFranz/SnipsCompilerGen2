@@ -35,6 +35,7 @@ public class AsNAssignment extends AsNStatement {
 			else {
 				/* Store to stack */
 				
+				// TODO Implement Stack functionality
 				throw new CGEN_EXCEPTION(a.getSource(), "Assign origin not loaded!");
 			}
 		}

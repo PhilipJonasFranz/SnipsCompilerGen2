@@ -51,6 +51,10 @@ public class RegSet {
 		return this.regs [num];
 	}
 	
+	/**
+	 * Find the first register that has the status free.
+	 * @return The number of this register.
+	 */
 	public int findFree() {
 		for (int i = 3; i < 11; i++) {
 			if (regs [i].status == STATUS.FREE) {
@@ -60,9 +64,11 @@ public class RegSet {
 		return -1;
 	}
 	
+	/**
+	 * Copy the content and the status from the first to the second register.
+	 */
 	public void copy(int from, int to) {
 		this.regs [to].status = this.regs [from].status;
-		// TODO Needs cloning
 		this.regs [to].declaration = this.regs [from].declaration;
 	}
 	

@@ -15,6 +15,7 @@ public abstract class AsNStatement extends AsNNode {
 	public static AsNStatement cast(Statement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNStatement node = null;
+		
 		if (s instanceof CompoundStatement) {
 			node = AsNCompoundStatement.cast((CompoundStatement) s, r, st);
 		}

@@ -26,10 +26,13 @@ public class AsNInlineCall extends AsNExpression {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
 		
+		/* Clear the operand regs */
+		call.clearReg(r, st, 0, 1, 2);
+		
 		/* Load Mapping */
 		List<Pair<Declaration, Integer>> mapping = 
 			((AsNFunction) ic.calledFunction.castedNode).parameterMapping;
-		
+
 		/* Load Parameters in the Stack */
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);

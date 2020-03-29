@@ -71,8 +71,9 @@ public class AsNFunction extends AsNNode {
 		
 		
 		/* Cast all statements and add all instructions */
-		for (Statement s : f.statements) 
+		for (Statement s : f.statements) {
 			func.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+		}
 		
 		
 		/* Check if other function is called within this function */
@@ -137,7 +138,7 @@ public class AsNFunction extends AsNNode {
 		
 		/* Branch back */
 		func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
-		
+	
 		return func;
 	}
 	

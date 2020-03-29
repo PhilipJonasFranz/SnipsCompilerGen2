@@ -1,0 +1,26 @@
+DESCRIPTION
+Same as test_9, but change statement order.
+SOURCE
+int bar(int x, int y, int z, int u) {
+	return (z * u) + (x * y);
+}
+
+int foo(int x0, int x1) {
+	return x1 + x0;
+}
+
+int main(int a, int b, int c, int d) {
+	int b6 = foo(d, 6);
+	int b4 = foo(c, 4);
+	int b1 = foo(a, 1);
+	int b3 = foo(b, 3);
+	int t = bar(a, b, c, d);
+	int b0 = foo(a, 0);
+	int b2 = foo(b, 2);
+	int b5 = foo(c, 5);
+	int b7 = foo(d, 7);
+	return b2 + b0 + b1 + b3 + t + b4 + b5 + b6 + b7;
+}
+TESTCASES
+0 0 0 0 28
+1 2 3 4 62

@@ -27,7 +27,7 @@ public class TestDriver {
 		SUCCESS, FAIL, CRASH, TIMEOUT
 	}
 	
-	public boolean detailedCompilerMessages = true;
+	public boolean detailedCompilerMessages = false;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
@@ -135,6 +135,12 @@ public class TestDriver {
 				((crashed > 0)? ", " + crashed + " tests(s) crashed" : "")) + 
 				((timeout > 0)? ", " + timeout + " tests(s) timed out" : "") + ".", 
 				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
+		
+		if (crashed == 0 && timeout == 0 && failed == 0) 
+			new Message("[BUILD] Successful.", Message.Type.INFO);
+		else {
+			new Message("[BUILD] Failed.", Message.Type.FAIL);
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
