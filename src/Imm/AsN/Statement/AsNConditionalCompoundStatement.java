@@ -17,7 +17,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 			node = AsNIfStatement.cast((IfStatement) s, r, st);
 		}
 		else if (s instanceof WhileStatement) {
-			return AsNWhileStatement.cast((WhileStatement) s, r, st);
+			node = AsNWhileStatement.cast((WhileStatement) s, r, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 	

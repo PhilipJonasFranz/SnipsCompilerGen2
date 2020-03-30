@@ -38,12 +38,15 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 */
 	protected void popDeclarationScope(CompoundStatement s, RegSet r, StackSet st) {
 		List<Declaration> declarations = new ArrayList(); 
+		
+		/* Collect declarations from statements */
 		for (Statement s0 : s.body) {
 			if (s0 instanceof Declaration) {
 				declarations.add((Declaration) s0);
 			}
 		}
 		
+		/* Delete declaration out of the registers */
 		for (Declaration d : declarations) {
 			if (r.declarationLoaded(d)) {
 				int loc = r.declarationRegLocation(d);
@@ -51,10 +54,26 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			}
 		}
 		
+		/* Set the stack pointer to the new stack size */
 		int add = st.closeScope();
 		if (add != 0) {
 			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
 		}
+	}
+	
+	/**
+	 * Opens a new scope, inserts the body of the compound statement, closes the scope and resets the stack.
+	 */
+	protected void addBody(CompoundStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+		/* Open a new Scope in the stack */
+		st.openScope();
+		
+		/* True Body */
+		for (Statement s : a.body) 
+			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+		
+		/* Free all declarations in scope */
+		this.popDeclarationScope(a, r, st);
 	}
 	
 }

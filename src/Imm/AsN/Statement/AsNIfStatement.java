@@ -15,7 +15,6 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Arith.AsNCmp;
 
@@ -42,17 +41,8 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			
 			ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
 			
-			
-			st.openScope();
-			
-			/* True Body */
-			for (Statement s : a.body) {
-				if0.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-			}
-			
-			/* Free all declarations in scope */
-			if0.popDeclarationScope(a, r, st);
-			
+			/* Add Body */
+			if0.addBody(a, r, st);
 			
 			if (a.elseStatement != null) if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 			
@@ -62,7 +52,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				if (elseS.condition != null) {
 					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, st).getInstructions());
 					
-					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 					
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
@@ -70,20 +60,11 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(elseTarget)));
 				}
 				
-				
-				st.openScope();
-				
-				/* Body */
-				for (Statement s : elseS.body) {
-					if0.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-				}
-				
-				/* Free all declarations in scope */
-				if0.popDeclarationScope(a, r, st);
-				
+				/* Add Body */
+				if0.addBody(elseS, r, st);
 				
 				if (elseS.elseStatement != null) {
-					/* Jump to end */
+					/* Jump to end after body */
 					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 					if0.instructions.add(elseTarget);
 				}
@@ -109,6 +90,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		
 		IfStatement elseS = a.elseStatement;
 		
+		/* The target of the if/elseif/else chain */
 		ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
 		
 		ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
@@ -121,17 +103,8 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(endTarget)));
 		}
 		
-		
-		st.openScope();
-		
-		/* True Body */
-		for (Statement s : a.body) {
-			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-		}
-		
-		/* Free all declarations in scope */
-		this.popDeclarationScope(a, r, st);
-		
+		/* Add Body */
+		this.addBody(a, r, st);
 		
 		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 		
@@ -139,6 +112,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		if (elseS != null) this.instructions.add(elseTarget);
 		
 		while (elseS != null) {
+			/* Else If Statement */
 			if (elseS.condition != null) {
 				AsNExpression expr = AsNExpression.cast(elseS.condition, r, st);
 				
@@ -159,16 +133,8 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				}
 			}
 			
-			
-			st.openScope();
-			
-			/* Body */
-			for (Statement s : elseS.body)
-				this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-			
-			/* Free all declarations in scope */
-			this.popDeclarationScope(a, r, st);
-			
+			/* Add Body */
+			this.addBody(elseS, r, st);
 			
 			if (elseS.elseStatement != null) {
 				/* Jump to end */

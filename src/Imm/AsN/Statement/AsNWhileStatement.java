@@ -14,7 +14,6 @@ import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Arith.AsNCmp;
@@ -26,7 +25,9 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		
 		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
 		
-		if (expr instanceof AsNCmp) w.topComparison(a, (AsNCmp) expr, r, st);
+		if (expr instanceof AsNCmp) {
+			w.topComparison(a, (AsNCmp) expr, r, st);
+		}
 		else {
 			/* Loop Entrypoint */
 			ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
@@ -43,15 +44,8 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			/* Condition was false, jump to else */
 			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(whileEnd)));
 			
-			
-			st.openScope();
-			
-			/* True Body */
-			for (Statement s : a.body) {
-				w.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-			}
-			
-			w.popDeclarationScope(a, r, st);
+			/* Add Body */
+			w.addBody(a, r, st);
 			
 			/* Branch to loop start */
 			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));
@@ -70,7 +64,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		
 		COND neg = com.neg;
 		
-		/* Remove Conditional results */
+		/* Remove two mov instrutions */
 		com.instructions.remove(com.instructions.size() - 1);
 		com.instructions.remove(com.instructions.size() - 1);
 		
@@ -82,17 +76,10 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		/* Condition was false, no else, skip body */
 		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(whileEnd)));
 		
+		/* Add Body */
+		this.addBody(a, r, st);
 		
-		st.openScope();
-		
-		/* True Body */
-		for (Statement s : a.body) {
-			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
-		}
-		
-		this.popDeclarationScope(a, r, st);
-		
-		
+		/* Branch to loop Start */
 		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));
 		
 		this.instructions.add(whileEnd);
