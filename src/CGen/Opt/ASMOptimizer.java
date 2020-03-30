@@ -138,7 +138,11 @@ public class ASMOptimizer {
 						/* Substitute immediate value into move */
 						if (body.instructions.get(a) instanceof ASMMov) {
 							ASMMov move0 = (ASMMov) body.instructions.get(a);
-							if (move0.target.reg == target) break;
+							
+							if (move0.target.reg == target) {
+								if (move0.cond != null) clear = false;
+								break;
+							}
 							
 							if (move0.origin instanceof RegOperand && ((RegOperand) move0.origin).reg == target) {
 								move0.origin = new ImmOperand(val);
@@ -147,7 +151,11 @@ public class ASMOptimizer {
 						}
 						else if (body.instructions.get(a) instanceof ASMMvn) {
 							ASMMvn move0 = (ASMMvn) body.instructions.get(a);
-							if (move0.target.reg == target) break;
+							
+							if (move0.target.reg == target) {
+								if (move0.cond != null) clear = false;
+								break;
+							}
 							
 							if (move0.origin instanceof RegOperand && ((RegOperand) move0.origin).reg == target) {
 								move0.origin = new ImmOperand(val);

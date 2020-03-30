@@ -1,7 +1,5 @@
 package Imm.AST.Expression.Arith;
 
-import java.util.List;
-
 import Imm.AST.Expression.Expression;
 import Util.Source;
 
@@ -19,8 +17,4 @@ public class Add extends BinaryExpression {
 		super(left, right, Operator.ADD, source);
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 }

@@ -1,7 +1,5 @@
 package Imm.AST.Statement;
 
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -48,10 +46,6 @@ public class Declaration extends Statement {
 		}
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkDeclaration(this);
 	}

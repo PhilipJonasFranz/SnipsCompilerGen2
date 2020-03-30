@@ -50,10 +50,6 @@ public class Function extends SyntaxElement {
 		}
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkFunction(this);
 	}

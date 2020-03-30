@@ -18,9 +18,11 @@ import Imm.AST.SyntaxElement;
 
 public abstract class AsNNode {
 
+			/* --- FIELDS --- */
 	public List<ASMInstruction> instructions = new ArrayList();
 	
 	
+			/* --- METHODS --- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm node. 
 	 */

@@ -157,7 +157,7 @@ public class TestDriver {
 		
 		if (compile == null) {
 			new Message("-> A crash occured during compilation.", Message.Type.FAIL);
-			new Message("-> Tested code:", Message.Type.FAIL);
+			if (this.printResult) new Message("-> Tested code:", Message.Type.FAIL);
 			cd.compile(file, code);
 			return new Result(RET_TYPE.CRASH, 0, 0);
 		}

@@ -51,9 +51,10 @@ public class Token {
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
 		
-		/* Conditional */
+		/* Statements */
 		IF("if"),
 		ELSE("else"),
+		WHILE("while"),
 		
 		/* Functions */
 		RETURN("return"),

@@ -1,7 +1,5 @@
 package Imm.AST.Expression.Boolean;
 
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -28,10 +26,6 @@ public class Compare extends BinaryExpression {
 		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
 		this.left().print(d + this.printDepthStep, rec);
 		this.right().print(d + this.printDepthStep, rec);
-	}
-
-	public List<String> buildProgram(int pad) {
-		return null;
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

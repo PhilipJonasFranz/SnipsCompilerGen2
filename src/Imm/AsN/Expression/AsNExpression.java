@@ -13,6 +13,7 @@ import Imm.AsN.AsNNode;
 
 public abstract class AsNExpression extends AsNNode {
 
+			/* --- METHODS --- */
 	public static AsNExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		AsNExpression node = null;

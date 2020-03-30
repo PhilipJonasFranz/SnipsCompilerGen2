@@ -1,7 +1,5 @@
 package Imm.AST;
 
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AsN.AsNNode;
@@ -62,12 +60,6 @@ public abstract class SyntaxElement {
 	public Source getSource() {
 		return this.source;
 	}
-	
-	/**
-	 * [PURE] 
-	 * Create a source code representation of this syntax element. May be called recursiveley. 
-	 */
-	public abstract List<String> buildProgram(int pad);
 	
 	/**
 	 * Visitor relay for context checking

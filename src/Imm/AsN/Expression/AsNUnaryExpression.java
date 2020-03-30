@@ -9,6 +9,7 @@ import Imm.AST.Expression.Arith.UnaryExpression;
 
 public abstract class AsNUnaryExpression extends AsNExpression {
 
+			/* --- NESTED --- */
 	/**
 	 * Solve the binary expression for two given operands.
 	 */
@@ -17,6 +18,7 @@ public abstract class AsNUnaryExpression extends AsNExpression {
 	}
 	
 	
+			/* --- METHODS --- */
 	public static AsNUnaryExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());

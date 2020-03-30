@@ -30,6 +30,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
+			/* --- NESTED --- */
 	/**
 	 * Solve the binary expression for two given operands.
 	 */
@@ -38,6 +39,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	}
 	
 
+			/* --- METHODS --- */
 	public static AsNBinaryExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		AsNBinaryExpression node = null;

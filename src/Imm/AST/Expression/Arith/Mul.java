@@ -1,7 +1,5 @@
 package Imm.AST.Expression.Arith;
 
-import java.util.List;
-
 import Imm.AST.Expression.Expression;
 import Util.Source;
 
@@ -17,10 +15,6 @@ public class Mul extends BinaryExpression {
 	 */
 	public Mul(Expression left, Expression right, Source source) {
 		super(left, right, Operator.MUL, source);
-	}
-
-	public List<String> buildProgram(int pad) {
-		return null;
 	}
 
 }

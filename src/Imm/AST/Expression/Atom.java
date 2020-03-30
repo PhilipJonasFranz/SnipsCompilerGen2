@@ -1,7 +1,5 @@
 package Imm.AST.Expression;
 
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
@@ -33,10 +31,6 @@ public class Atom extends Expression {
 		System.out.println(this.pad(d) + "<" + this.type.typeString() + ">");
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkAtom(this);
 	}

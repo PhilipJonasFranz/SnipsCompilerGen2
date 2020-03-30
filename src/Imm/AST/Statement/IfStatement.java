@@ -11,21 +11,20 @@ import Util.Source;
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class IfStatement extends CompoundStatement {
+public class IfStatement extends ConditionalCompoundStatement {
 
 			/* --- FIELDS --- */
-	public Expression condition;
-	
 	public IfStatement elseStatement;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public IfStatement(Expression condition, List<Statement> body, Source source) {
-		super(body, source);
+		super(condition, body, source);
 		this.condition = condition;
 	}
 	
 	public IfStatement(List<Statement> body, Source source) {
-		super(body, source);
+		super(null, body, source);
 	}
 	
 	
@@ -62,10 +61,6 @@ public class IfStatement extends CompoundStatement {
 		}
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkIfStatement(this);
 	}

@@ -37,10 +37,6 @@ public class InlineCall extends Expression {
 		}
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkInlineCall(this);
 	}

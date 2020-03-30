@@ -27,6 +27,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.INT;
@@ -133,13 +134,16 @@ public class Parser {
 		else if (current.type == TokenType.RETURN) {
 			return this.parseReturn();
 		}
+		else if (current.type == TokenType.WHILE) {
+			return this.parseWhile();
+		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			return this.parseAssignment();
 		}
 		else if (current.type == TokenType.IF) {
 			return this.parseIf();
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
+		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.WHILE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
 	}
 	
 	public Statement parseIf() throws PARSE_EXCEPTION {
@@ -165,6 +169,15 @@ public class Parser {
 		}
 		
 		return if0;
+	}
+	
+	public WhileStatement parseWhile() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.WHILE).getSource();
+		accept(TokenType.LPAREN);
+		Expression condition = this.parseExpression();
+		accept(TokenType.RPAREN);
+		List<Statement> body = this.parseCompoundStatement();
+		return new WhileStatement(condition, body, source);
 	}
 	
 	public Assignment parseAssignment() throws PARSE_EXCEPTION {

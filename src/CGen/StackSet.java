@@ -3,17 +3,16 @@ package CGen;
 import java.util.Stack;
 
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Declaration;
 
 public class StackSet {
 
-	private Stack<StackCell> stack = new Stack();
-	
+			/* --- NESTED --- */
 	public enum CONTENT_TYPE {
-		REGISTER, DECLARATION, EXPRESSION;
+		REGISTER, DECLARATION;
 	}
 	
+
 	public class StackCell {
 		
 		private CONTENT_TYPE contentType;
@@ -21,10 +20,6 @@ public class StackSet {
 		private REGISTER reg;
 		
 		private Declaration declaration;
-		
-		public Expression expression;
-		
-		public StackCell reference;
 		
 		public StackCell(REGISTER reg) {
 			this.reg = reg;
@@ -34,11 +29,6 @@ public class StackSet {
 		public StackCell(Declaration dec) {
 			this.declaration = dec;
 			this.contentType = CONTENT_TYPE.DECLARATION;
-		}
-		
-		public StackCell(Expression e) {
-			this.expression = e;
-			this.contentType = CONTENT_TYPE.EXPRESSION;
 		}
 		
 		public CONTENT_TYPE getType() {
@@ -52,34 +42,29 @@ public class StackSet {
 		public Declaration getDeclaration() {
 			return this.declaration;
 		}
-		
-		public Expression getExpression() {
-			return this.expression;
-		}
-		
-		public void setReference(StackCell reference) {
-			this.reference = reference;
-		}
-		
 	}
 	
-	public StackSet() {
-		
-	}
 	
+			/* --- FIELDS --- */
+	private Stack<StackCell> stack = new Stack();
+	
+	private Stack<Integer> scopes = new Stack();
+
+	/**
+	* Wether new declarations have been pushed on the stack. Only used by AsNFunction to determine
+	* the registers to save/restore.
+	*/
+	public boolean newDecsOnStack = false;
+
+
+			/* --- METHODS --- */
 	public Stack getStack() {
 		return this.stack;
 	}
 	
-	public boolean newDecsOnStack = false;
-	
 	public void push(Declaration...dec) {
 		for (Declaration dec0 : dec) this.stack.push(new StackCell(dec0));
 		this.newDecsOnStack = true;
-	}
-	
-	public void push(Expression...e) {
-		for (Expression e0 : e) this.stack.push(new StackCell(e0));
 	}
 	
 	public void push(REGISTER...reg) {
@@ -103,9 +88,6 @@ public class StackSet {
 			System.out.println(x.contentType.toString() + ": ");
 			if (x.contentType == CONTENT_TYPE.DECLARATION) {
 				x.declaration.print(4, true);
-			}
-			else if (x.contentType == CONTENT_TYPE.EXPRESSION) {
-				x.expression.print(4, true);
 			}
 			else System.out.println("    " + x.reg.toString());
 		}
@@ -141,15 +123,36 @@ public class StackSet {
 		int x = 0;
 		int off = 0;
 		while (true) {
-			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER) {
+			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER) 
 				off = 4;
-			}
-			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
+			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) 
 				return off;
-			}
 			else off += 4;
 			x++;
 		}
+	}
+	
+	/**
+	 * Open a new scope, f.e. for the body of a compound statement.
+	 */
+	public void openScope() {
+		this.scopes.push(this.stack.size());
+	}
+	
+	/**
+	 * Pop all stack cells from the stack that were pushed within the scope or body of
+	 * a compound statement. Returns the amount of bytes the stack was reset. This amount
+	 * has to be added onto the stack pointer to reset the stack to the correct size.
+	 */
+	public int closeScope() {
+		int target = this.scopes.pop();
+		int add = 0;
+		while (this.stack.size() != target) {
+			this.stack.pop();
+			add++;
+		}
+		
+		return add * 4;
 	}
 	
 }

@@ -18,6 +18,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.BOOL;
 
@@ -89,6 +90,21 @@ public class ContextChecker {
 		}
 		
 		scopes.pop();
+		return null;
+	}
+	
+	public TYPE checkWhileStatement(WhileStatement w) throws CTX_EXCEPTION {
+		TYPE cond = w.condition.check(this);
+		if (!(cond instanceof BOOL)) {
+			throw new CTX_EXCEPTION(w.getSource(), "Condition is not boolean");
+		}
+		
+		this.scopes.push(new Scope(this.scopes.peek()));
+		for (Statement s : w.body) {
+			s.check(this);
+		}
+		this.scopes.pop();
+
 		return null;
 	}
 	

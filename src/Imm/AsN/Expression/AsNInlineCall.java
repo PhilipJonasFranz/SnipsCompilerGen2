@@ -22,6 +22,7 @@ import Util.Pair;
 
 public class AsNInlineCall extends AsNExpression {
 
+			/* --- METHODS --- */
 	public static AsNInlineCall cast(InlineCall ic, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;

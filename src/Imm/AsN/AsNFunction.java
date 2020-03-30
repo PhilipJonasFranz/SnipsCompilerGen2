@@ -29,11 +29,13 @@ import Util.Pair;
 
 public class AsNFunction extends AsNNode {
 
+			/* --- FIELDS --- */
 	public List<Pair<Declaration, Integer>> parameterMapping;
 	
-	Function source;
+	public Function source;
 	
 	
+			/* --- METHODS --- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
 	 */
@@ -218,7 +220,11 @@ public class AsNFunction extends AsNNode {
 		return used;
 	}
 	
-	public List<Pair<Declaration, Integer>> getParameterMapping() {
+	/**
+	 * Create a parameter mapping that assigns each parameter either a register or the stack
+	 * as a location.
+	 */
+	private List<Pair<Declaration, Integer>> getParameterMapping() {
 		int r = 0;
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		

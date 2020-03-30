@@ -22,6 +22,7 @@ import Snips.CompilerDriver;
 
 public class AsNBody extends AsNNode {
 
+			/* --- METHODS --- */
 	public static AsNBody cast(Program p) throws CGEN_EXCEPTION {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
@@ -64,9 +65,8 @@ public class AsNBody extends AsNNode {
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), new StackSet()).getInstructions();
 				
 				/* Patch Branch to Main Function */
-				if (((Function) s).functionName.equals("main")) {
+				if (((Function) s).functionName.equals("main")) 
 					((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
-				}
 				
 				body.instructions.addAll(ins);
 			}
@@ -76,10 +76,8 @@ public class AsNBody extends AsNNode {
 		
 		
 		/* Main function not present */
-		if (((LabelOperand) branch.target).label == null) {
+		if (((LabelOperand) branch.target).label == null) 
 			body.instructions.remove(branch);
-		}
-		
 		
 		return body;
 	}

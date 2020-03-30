@@ -15,6 +15,7 @@ import Imm.AST.Expression.IDRef;
 
 public class AsNIdRef extends AsNExpression {
 
+			/* --- METHODS --- */
 	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) throws CGEN_EXCEPTION {
 		AsNIdRef ref = new AsNIdRef();
 		i.castedNode = ref;

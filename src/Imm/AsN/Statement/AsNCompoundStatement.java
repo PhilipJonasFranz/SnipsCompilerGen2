@@ -6,19 +6,28 @@ import java.util.List;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.Processing.ASMAdd;
+import Imm.ASM.Util.Operands.ImmOperand;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.CompoundStatement;
+import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Statement;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
 	public static AsNCompoundStatement cast(CompoundStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
-		if (s instanceof IfStatement) {
-			return AsNIfStatement.cast((IfStatement) s, r, st);
+		AsNCompoundStatement node = null;
+		
+		if (s instanceof ConditionalCompoundStatement) {
+			node = AsNConditionalCompoundStatement.cast((ConditionalCompoundStatement) s, r, st);
 		}
-		else throw new CGEN_EXCEPTION(s.getSource(), "No cast available for " + s.getClass().getName());	
+		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
+		
+		s.castedNode = node;
+		return node;
 	}
 	
 	/**
@@ -40,6 +49,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 				int loc = r.declarationRegLocation(d);
 				r.getReg(loc).free();
 			}
+		}
+		
+		int add = st.closeScope();
+		if (add != 0) {
+			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
 		}
 	}
 	

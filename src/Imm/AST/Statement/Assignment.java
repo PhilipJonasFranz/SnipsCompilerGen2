@@ -1,7 +1,5 @@
 package Imm.AST.Statement;
 
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -21,6 +19,7 @@ public class Assignment extends Statement {
 	
 	public Expression value;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public Assignment(Token fieldName, Expression value, Source source) {
 		super(source);
@@ -37,10 +36,6 @@ public class Assignment extends Statement {
 		}
 	}
 
-	public List<String> buildProgram(int pad) {
-		return null;
-	}
-	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkAssignment(this);
 	}
