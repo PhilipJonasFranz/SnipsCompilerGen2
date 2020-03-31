@@ -20,8 +20,11 @@ import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
+import Imm.AST.Expression.Boolean.Not;
+import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.IfStatement;
@@ -211,7 +214,25 @@ public class Parser {
 	}
 	
 	public Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseCompare();
+			return this.parseOr();
+	}
+	
+	public Expression parseOr() throws PARSE_EXCEPTION {
+		Expression left = this.parseAnd();
+		while (current.type == TokenType.OR) {
+			accept();
+			left = new Or(left, this.parseAnd(), current.source);
+		}
+		return left;
+	}
+	
+	public Expression parseAnd() throws PARSE_EXCEPTION {
+		Expression left = this.parseCompare();
+		while (current.type == TokenType.AND) {
+			accept();
+			left = new And(left, this.parseCompare(), current.source);
+		}
+		return left;
 	}
 	
 	public Expression parseCompare() throws PARSE_EXCEPTION {
@@ -278,18 +299,29 @@ public class Parser {
 	}
 		
 	public Expression parseMulDiv() throws PARSE_EXCEPTION {
-		Expression left = this.parseAtom();
+		Expression left = this.parseNot();
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV) {
 			if (current.type == TokenType.MUL) {
 				accept();
-				left = new Mul(left, this.parseAtom(), current.source);
+				left = new Mul(left, this.parseNot(), current.source);
 			}
 			else {
 				accept();
-				left = new Div(left, this.parseAtom(), current.source);
+				left = new Div(left, this.parseNot(), current.source);
 			}
 		}
 		return left;
+	}
+	
+	public Expression parseNot() throws PARSE_EXCEPTION {
+		Expression not = null;
+		while (current.type == TokenType.NOT) {
+			accept();
+			not = new Not(this.parseNot(), current.source);
+		}
+		
+		if (not == null) not = this.parseAtom();
+		return not;
 	}
 	
 	public Expression parseAtom() throws PARSE_EXCEPTION {

@@ -19,20 +19,7 @@ import Util.Logging.Message;
 
 public class TestDriver {
 
-	/** The Milliseconds the program can run on the processor until it timeouts */
-	public long ttl = 200;
-	
-	/** Test result Status */
-	public enum RET_TYPE {	
-		SUCCESS, FAIL, CRASH, TIMEOUT
-	}
-	
-	public boolean detailedCompilerMessages = false;
-	
-	public boolean displayCompilerImmediateRepresentations = false;
-	
-	public boolean printResult = false;
-	
+			/* --- NESTED --- */
 	/** Result summary of a test */
 	public class Result {
 		
@@ -48,6 +35,24 @@ public class TestDriver {
 		
 	}
 	
+	/** Test result Status */
+	public enum RET_TYPE {	
+		SUCCESS, FAIL, CRASH, TIMEOUT
+	}
+	
+	
+			/* --- FIELDS --- */
+	/** The Milliseconds the program can run on the processor until it timeouts */
+	public long ttl = 200;
+	
+	public boolean detailedCompilerMessages = true;
+	
+	public boolean displayCompilerImmediateRepresentations = false;
+	
+	public boolean printResult = false;
+	
+	
+			/* --- METHODS --- */
 	public static void main(String [] args) {
 		new TestDriver(args);	
 	}
@@ -136,8 +141,10 @@ public class TestDriver {
 				((timeout > 0)? ", " + timeout + " tests(s) timed out" : "") + ".", 
 				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
 		
-		if (crashed == 0 && timeout == 0 && failed == 0) 
+		if (crashed == 0 && timeout == 0 && failed == 0) {
+			CompilerDriver.printAverageCompression();
 			new Message("[BUILD] Successful.", Message.Type.INFO);
+		}
 		else {
 			new Message("[BUILD] Failed.", Message.Type.FAIL);
 		}

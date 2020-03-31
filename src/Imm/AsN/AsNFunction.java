@@ -10,7 +10,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Stack.ASMMemOp;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;

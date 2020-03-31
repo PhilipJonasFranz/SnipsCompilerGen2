@@ -1,0 +1,13 @@
+SOURCE
+bool main(bool a, bool b, bool c) {
+	return (a && b) || !c;
+}
+TESTCASES
+0 0 0 1
+0 0 1 0
+0 1 0 1
+0 1 1 0
+1 0 0 1
+1 0 1 0
+1 1 0 1
+1 1 1 1

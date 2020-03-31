@@ -88,6 +88,7 @@ public class Token {
 		
 		/* Types */
 		INT("int", 					TokenGroup.TYPE),
+		BOOL("bool", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
 		/* Primitive Literals */

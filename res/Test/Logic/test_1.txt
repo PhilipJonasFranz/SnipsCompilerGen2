@@ -1,0 +1,8 @@
+SOURCE
+bool main(bool a) {
+	return !!a;
+}
+TESTCASES
+0 0
+1 1
+10 1

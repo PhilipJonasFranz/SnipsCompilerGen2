@@ -12,7 +12,9 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.IfStatement;
@@ -144,6 +146,7 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
 			}
 		}
+		else return d.type;
 		
 		return null;
 	}
@@ -161,7 +164,9 @@ public class ContextChecker {
 	public TYPE checkReturn(Return r) throws CTX_EXCEPTION {
 		TYPE t = r.value.check(this);
 		
-		if (t.isEqual(this.currentFunction.returnType)) return t;
+		if (t.isEqual(this.currentFunction.returnType)) {
+			return t;
+		}
 		else {
 			throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.returnType.typeString());
 		}
@@ -171,9 +176,24 @@ public class ContextChecker {
 		TYPE left = b.left().check(this);
 		TYPE right = b.right().check(this);
 		
-		if (left.isEqual(right)) return left;
+		if (left.isEqual(right)) {
+			b.type = left;
+			return left;
+		}
 		else {
 			throw new CTX_EXCEPTION(b.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
+		}
+	}
+	
+	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
+		TYPE op = u.operand().check(this);
+		
+		if (u instanceof Not && op.isEqual(new BOOL())) {
+			u.type = new BOOL();
+			return u.type;
+		}
+		else {
+			throw new CTX_EXCEPTION(u.getSource(), "Unknown Expression: " + u.getClass().getName());
 		}
 	}
 	
@@ -181,7 +201,10 @@ public class ContextChecker {
 		TYPE left = c.left().check(this);
 		TYPE right = c.right().check(this);
 		
-		if (left.isEqual(right)) return new BOOL();
+		if (left.isEqual(right)) {
+			c.type = new BOOL();
+			return c.type;
+		}
 		else {
 			throw new CTX_EXCEPTION(c.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
 		}
@@ -214,14 +237,16 @@ public class ContextChecker {
 			}
 		}
 		
-		return f.returnType;
+		i.type = f.returnType;
+		return i.type;
 	}
 	
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
 		Declaration d = this.scopes.peek().getField(i.id);
 		if (d != null) {
 			i.origin = d;
-			return d.type;
+			i.type = d.type;
+			return i.type;
 		}
 		else {
 			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.id);

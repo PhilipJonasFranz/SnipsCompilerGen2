@@ -6,12 +6,13 @@ import java.util.List;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.ASMCmp;
-import Imm.ASM.Processing.ASMDataP;
-import Imm.ASM.Processing.ASMMov;
-import Imm.ASM.Processing.ASMMult;
-import Imm.ASM.Processing.ASMMvn;
+import Imm.ASM.Processing.ASMBinaryData;
+import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMult;
+import Imm.ASM.Processing.Arith.ASMMvn;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Stack.ASMLdrStack;
+import Imm.ASM.Stack.ASMMemOp;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Stack.ASMStrStack;
@@ -49,8 +50,73 @@ public class ASMOptimizer {
 			this.removeImplicitStackAssignment(body);
 			
 			this.removeBranchesBeforeLabelToLabel(body);
-		}
 		
+			this.removeExpressionIndirectTargeting(body);
+		}
+	}
+	
+	public boolean hasTargetR0(ASMInstruction ins) {
+		if (ins instanceof ASMBinaryData) {
+			ASMBinaryData data = (ASMBinaryData) ins;
+			return data.target.reg == REGISTER.R0 && data.cond != null;
+		}
+		else if (ins instanceof ASMMemOp) {
+			ASMMemOp memOp = (ASMMemOp) ins;
+			return memOp.target.reg == REGISTER.R0;
+		}
+		else if (ins instanceof ASMPopStack) {
+			ASMPopStack pop = (ASMPopStack) ins;
+			return pop.operands.stream().filter(x -> x.reg == REGISTER.R0).count() > 0;
+		}
+		else return false;
+	}
+	
+	/**
+	 * add r0, r1, r2
+	 * mov r4, r0
+	 * Replace with:
+	 * add r4, r1, r2
+	 */
+	public void removeExpressionIndirectTargeting(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i);
+				if (mov.op1 instanceof RegOperand && ((RegOperand) mov.op1).reg == REGISTER.R0) {
+					if (body.instructions.get(i - 1) instanceof ASMBinaryData) {
+						ASMBinaryData data = (ASMBinaryData) body.instructions.get(i - 1);
+						if (data.target.reg == REGISTER.R0) {
+							
+							boolean replace = false;
+							for (int a = i; a < body.instructions.size(); a++) {
+								if (body.getInstructions().get(a) instanceof ASMBranch) {
+									break;
+								}
+								else if (this.hasTargetR0(body.getInstructions().get(a))) {
+									replace = true;
+									break;
+								}
+							}
+							
+							if (replace) {
+								/* Replace */
+								data.target = mov.target;
+								OPT_DONE = true;
+								
+								if (!this.hasTargetR0(body.instructions.get(i - 2))) {
+									body.instructions.remove(i);
+									i--;
+								}
+								else {
+									ASMInstruction rem = body.instructions.remove(i);
+									body.instructions.add(i - 1, rem);
+									i--;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -104,9 +170,9 @@ public class ASMOptimizer {
 			if (body.instructions.get(i - 1) instanceof ASMMov && body.instructions.get(i) instanceof ASMMov) {
 				ASMMov move0 = (ASMMov) body.instructions.get(i - 1);
 				ASMMov move1 = (ASMMov) body.instructions.get(i);
-				if (move0.origin instanceof RegOperand && move1.origin instanceof RegOperand) {
-					RegOperand op0 = (RegOperand) move0.origin;
-					RegOperand op1 = (RegOperand) move1.origin;
+				if (move0.op1 instanceof RegOperand && move1.op1 instanceof RegOperand) {
+					RegOperand op0 = (RegOperand) move0.op1;
+					RegOperand op1 = (RegOperand) move1.op1;
 					if (op0.reg == REGISTER.FP || op1.reg == REGISTER.FP) continue;
 					
 					if (op0.reg == move1.target.reg && move0.target.reg == op1.reg) {
@@ -123,8 +189,11 @@ public class ASMOptimizer {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMov) {
 				ASMMov move = (ASMMov) body.instructions.get(i);
-				if (move.origin instanceof ImmOperand) {
-					int val = ((ImmOperand) move.origin).value;
+				
+				if (move.cond != null) continue;
+				
+				if (move.op1 instanceof ImmOperand) {
+					int val = ((ImmOperand) move.op1).value;
 					REGISTER target = move.target.reg;
 					
 					boolean clear = true;
@@ -144,8 +213,8 @@ public class ASMOptimizer {
 								break;
 							}
 							
-							if (move0.origin instanceof RegOperand && ((RegOperand) move0.origin).reg == target) {
-								move0.origin = new ImmOperand(val);
+							if (move0.op1 instanceof RegOperand && ((RegOperand) move0.op1).reg == target) {
+								move0.op1 = new ImmOperand(val);
 								OPT_DONE = true;
 							}
 						}
@@ -157,13 +226,13 @@ public class ASMOptimizer {
 								break;
 							}
 							
-							if (move0.origin instanceof RegOperand && ((RegOperand) move0.origin).reg == target) {
-								move0.origin = new ImmOperand(val);
+							if (move0.op1 instanceof RegOperand && ((RegOperand) move0.op1).reg == target) {
+								move0.op1 = new ImmOperand(val);
 								OPT_DONE = true;
 							}
 						}
-						else if (body.instructions.get(a) instanceof ASMDataP) {
-							ASMDataP dataP = (ASMDataP) body.instructions.get(a);
+						else if (body.instructions.get(a) instanceof ASMBinaryData) {
+							ASMBinaryData dataP = (ASMBinaryData) body.instructions.get(a);
 							if (dataP.op1 instanceof RegOperand && ((RegOperand) dataP.op1).reg == target) {
 								dataP.op1 = new ImmOperand(val);
 								OPT_DONE = true;

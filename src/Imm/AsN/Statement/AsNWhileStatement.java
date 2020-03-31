@@ -6,7 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.ASMCmp;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -16,7 +16,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Arith.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
@@ -64,7 +64,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		
 		COND neg = com.neg;
 		
-		/* Remove two mov instrutions */
+		/* Remove two conditional mov instrutions */
 		com.instructions.remove(com.instructions.size() - 1);
 		com.instructions.remove(com.instructions.size() - 1);
 		

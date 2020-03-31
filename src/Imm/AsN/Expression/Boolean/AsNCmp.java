@@ -1,12 +1,10 @@
-package Imm.AsN.Expression.Arith;
+package Imm.AsN.Expression.Boolean;
 
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.ASMCmp;
-import Imm.ASM.Processing.ASMMov;
-import Imm.ASM.Stack.ASMPopStack;
-import Imm.ASM.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -41,13 +39,8 @@ public class AsNCmp extends AsNBinaryExpression {
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
-			cmp.instructions.addAll(AsNExpression.cast(c.right(), r, st).getInstructions());
-			cmp.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			r.free(0);
-			
-			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());
-			
-			cmp.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			/* Generate Loader code that places the operands in R0 and R1 */
+			cmp.generatePrimitiveLoaderCode(cmp, c, r, st, 0, 1);
 			
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}

@@ -1,11 +1,12 @@
-package Imm.ASM.Processing;
+package Imm.ASM.Processing.Arith;
 
+import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
 
-public class ASMAdd extends ASMDataP {
+public class ASMAdd extends ASMBinaryData {
 	
 	public ASMAdd(RegOperand target, RegOperand op0, Operand op1) {
 		super(target, op0, op1);
@@ -18,7 +19,7 @@ public class ASMAdd extends ASMDataP {
 	}
 	
 	public String build() {
-		return CompilerDriver.printDepth + "add" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
+		return CompilerDriver.printDepth + "add" + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
 	}
 
 }

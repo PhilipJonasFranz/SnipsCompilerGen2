@@ -7,7 +7,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Processing.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Stack.ASMStrStack;
 import Imm.ASM.Stack.ASMMemOp.MEM_OP;
 import Imm.ASM.Util.Operands.PatchableImmOperand;

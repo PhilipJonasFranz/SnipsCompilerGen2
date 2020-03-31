@@ -4,7 +4,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Processing.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Stack.ASMPopStack;
 import Imm.ASM.Stack.ASMPushStack;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -19,13 +19,17 @@ import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Or;
 import Imm.AsN.Expression.Arith.AsNAdd;
-import Imm.AsN.Expression.Arith.AsNCmp;
 import Imm.AsN.Expression.Arith.AsNLsl;
 import Imm.AsN.Expression.Arith.AsNLsr;
 import Imm.AsN.Expression.Arith.AsNMult;
 import Imm.AsN.Expression.Arith.AsNSub;
+import Imm.AsN.Expression.Boolean.AsNAnd;
+import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.INT;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
@@ -62,13 +66,61 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (e instanceof Lsr) {
 			node = AsNLsr.cast((Lsr) e, r, st);
 		}
+		else if (e instanceof And) {
+			node = AsNAnd.cast((And) e, r, st);
+		}
+		else if (e instanceof Or) {
+			node = AsNOr.cast((Or) e, r, st);
+		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	
 		e.castedNode = node;
 		return node;
 	}
 	
+	
 		/* --- OPERAND LOADING --- */
+	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, StackSet st, int target0, int target1) throws CGEN_EXCEPTION {
+		if (b.left() instanceof IDRef && b.right() instanceof IDRef) {
+			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, st, target0).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) b.right(), r, st, target1).getInstructions());
+		}
+		else if (b.left() instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(b.right(), r, st).getInstructions());
+			if (target1 != 0) {
+				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
+				r.copy(0, target1);
+			}
+			
+			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, st, target0).getInstructions());
+		}
+		else if (b.right() instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(b.left(), r, st).getInstructions());
+			if (target0 != 0) {
+				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(0)));
+				r.copy(0, target0);
+			}
+			
+			m.instructions.addAll(AsNIdRef.cast((IDRef) b.right(), r, st, target1).getInstructions());
+		}
+		else {
+			/* Compute left operand and push the result on the stack */
+			m.instructions.addAll(AsNExpression.cast(b.left(), r, st).getInstructions());
+			m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			r.free(0);
+			
+			/* Compute the right operand and move it to target location */
+			m.instructions.addAll(AsNExpression.cast(b.right(), r, st).getInstructions());
+			if (target1 != 0) {
+				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
+				r.copy(0, target1);
+			}
+			
+			/* Pop the left operand in the target register */
+			m.instructions.add(new ASMPopStack(new RegOperand(target0)));
+		}
+	}
+	
 	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
 		/* Total Atomic Loading */
 		if (b.left() instanceof Atom && b.right() instanceof Atom) {
@@ -79,26 +131,15 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			
 			/* Partial Atomic Loading Left */
 			if (b.left() instanceof Atom) {
-				m.loadRightOperand(b, 2, r, st);
+				this.loadOperand(b.right(), 2, r, st);
 				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.right() instanceof Atom) {
-				m.loadLeftOperand(b, 1, r, st);
+				this.loadOperand(b.left(), 1, r, st);
 				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
 			}
-			else {
-				m.instructions.addAll(AsNExpression.cast(b.left(), r, st).getInstructions());
-				m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-				r.free(0);
-				
-				m.instructions.addAll(AsNExpression.cast(b.right(), r, st).getInstructions());
-				
-				m.instructions.add(new ASMMov(new RegOperand(2), new RegOperand(0)));
-				r.copy(0, 2);
-				
-				m.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
-			}
+			else m.generatePrimitiveLoaderCode(m, b, r, st, 1, 2);
 			
 			/* Inject calculation into loader code */
 			m.instructions.add(inject);
@@ -106,14 +147,6 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Clean up Reg Set */
 			r.free(0, 1, 2);
 		}
-	}
-	
-	protected void loadLeftOperand(BinaryExpression b, int target, RegSet r, StackSet st) throws CGEN_EXCEPTION {
-		this.loadOperand(b.left(), target, r, st);
-	}
-	
-	protected void loadRightOperand(BinaryExpression b, int target, RegSet r, StackSet st) throws CGEN_EXCEPTION {
-		this.loadOperand(b.right(), target, r, st);
 	}
 	
 	protected void loadOperand(Expression e, int target, RegSet r, StackSet st) throws CGEN_EXCEPTION {

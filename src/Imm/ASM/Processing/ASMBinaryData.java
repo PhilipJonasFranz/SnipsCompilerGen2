@@ -5,10 +5,10 @@ import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 
-public abstract class ASMDataP extends ASMInstruction {
+public abstract class ASMBinaryData extends ASMInstruction {
 
 	public interface BinarySolver {
-		public int solve(int a, int b);
+		public int solve(int x, int y);
 	}
 	
 	public BinarySolver solver;
@@ -19,13 +19,15 @@ public abstract class ASMDataP extends ASMInstruction {
 	
 	public Operand op1;
 	
-	public ASMDataP(RegOperand target, RegOperand op0, Operand op1) {
+	public boolean updateConditionField = false;
+	
+	public ASMBinaryData(RegOperand target, RegOperand op0, Operand op1) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
-	public ASMDataP(RegOperand target, RegOperand op0, Operand op1, Cond cond) {
+	public ASMBinaryData(RegOperand target, RegOperand op0, Operand op1, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

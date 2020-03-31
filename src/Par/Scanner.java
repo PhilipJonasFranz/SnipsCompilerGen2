@@ -130,6 +130,12 @@ public class Scanner {
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;
 			}
+			else if (this.buffer.equals("bool")) {
+				tokens.add(new Token(TokenType.BOOL, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
 			else if (this.buffer.equals("return")) {
 				tokens.add(new Token(TokenType.RETURN, new Source(i, a)));
 				this.emptyBuffer();

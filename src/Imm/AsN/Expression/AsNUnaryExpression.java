@@ -3,9 +3,9 @@ package Imm.AsN.Expression;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.ASMInstruction;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Arith.UnaryExpression;
+import Imm.AST.Expression.Boolean.Not;
+import Imm.AsN.Expression.Boolean.AsNNot;
 
 public abstract class AsNUnaryExpression extends AsNExpression {
 
@@ -19,16 +19,16 @@ public abstract class AsNUnaryExpression extends AsNExpression {
 	
 	
 			/* --- METHODS --- */
-	public static AsNUnaryExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
-		/* Relay to Expression type */
-		throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
-	}
-	
-		/* --- OPERAND LOADING --- */
-	protected void generateLoaderCode(AsNUnaryExpression m, UnaryExpression u, RegSet r, StackSet st, UnarySolver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
+	public static AsNUnaryExpression cast(UnaryExpression u, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+		AsNUnaryExpression node = null;
 		
+		if (u instanceof Not) {
+			node = AsNNot.cast((Not) u, r, st);
+		}
+		else throw new CGEN_EXCEPTION(u.getSource(), "No injection cast available for " + u.getClass().getName());
+		
+		u.castedNode = node;
+		return node;
 	}
-	
-	ERROR
 	
 }

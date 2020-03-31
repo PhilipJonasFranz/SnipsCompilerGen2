@@ -48,6 +48,10 @@ public class CompilerDriver {
 	
 	public static String printDepth = "    ";
 	
+	public static List<Double> compressions = new ArrayList();
+	
+	public static int instructionsGenerated = 0;
+	
 	
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
@@ -133,11 +137,14 @@ public class CompilerDriver {
 			opt.optimize(body);
 			
 			double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
+			CompilerDriver.compressions.add(rate);
 			
 			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			
 			output = body.getInstructions().stream().map(x -> x.build()).collect(Collectors.toList());
 		
+			CompilerDriver.instructionsGenerated += output.size();
+			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
 				output.stream().forEach(x -> System.out.println("    " + x));
@@ -206,6 +213,16 @@ public class CompilerDriver {
 		CompilerDriver.silenced = value;
 		CompilerDriver.imm = imm;
 		CompilerDriver.printErrors = !value;
+	}
+	
+	public static void printAverageCompression() {
+		double [] rate = {0};
+		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
+		double r0 = Math.round(rate [0] * 100) / 100;
+		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
+		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
+		CompilerDriver.compressions.clear();
+		CompilerDriver.instructionsGenerated = 0;
 	}
 	
 }
