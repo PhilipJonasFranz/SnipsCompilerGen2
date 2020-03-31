@@ -55,6 +55,9 @@ public class ASMOptimizer {
 		}
 	}
 	
+	/**
+	 * Check if R0 is overwritten by given instruction.
+	 */
 	public boolean hasTargetR0(ASMInstruction ins) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
@@ -325,19 +328,8 @@ public class ASMOptimizer {
 						else if (body.instructions.get(a) instanceof ASMStrStack) {
 							ASMStrStack p = (ASMStrStack) body.instructions.get(a);
 							if (p.target.reg == target) {
-								break;
-							}
-							
-							if (p.op0.reg == target) {
 								clear = false;
-							}
-							
-							if (p.op1 instanceof RegOperand) {
-								RegOperand r = (RegOperand) p.op1;
-								if (r.reg == target) {
-									p.op1 = new ImmOperand(val);
-									OPT_DONE = true;
-								}
+								break;
 							}
 						}
 						else {

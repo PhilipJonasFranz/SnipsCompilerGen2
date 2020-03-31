@@ -4,7 +4,12 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Stack.ASMMemOp.MEM_OP;
+import Imm.ASM.Stack.ASMStrStack;
+import Imm.ASM.Util.Operands.PatchableImmOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Assignment;
 import Imm.AsN.Expression.AsNExpression;
 
@@ -13,7 +18,7 @@ public class AsNAssignment extends AsNStatement {
 	public static AsNAssignment cast(Assignment a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNAssignment assign = new AsNAssignment();
 		
-		/* Process value */
+		/* Compute value */
 		assign.instructions.addAll(AsNExpression.cast(a.value, r, st).getInstructions());
 		
 		/* Declaration already loaded, just move value into register */
@@ -34,9 +39,9 @@ public class AsNAssignment extends AsNStatement {
 			}
 			else {
 				/* Store to stack */
-				
-				// TODO Implement Stack functionality
-				throw new CGEN_EXCEPTION(a.getSource(), "Assign origin not loaded!");
+				int off = st.getDeclarationInStackByteOffset(a.origin);
+				assign.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
+						new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
 			}
 		}
 		

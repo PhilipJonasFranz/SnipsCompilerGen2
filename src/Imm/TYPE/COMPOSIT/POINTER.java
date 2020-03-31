@@ -22,5 +22,11 @@ public class POINTER extends TYPE {
 	public String typeString() {
 		return "*" + this.targetType.typeString();
 	}
+
+	@Override
+	public void setValue(String value) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

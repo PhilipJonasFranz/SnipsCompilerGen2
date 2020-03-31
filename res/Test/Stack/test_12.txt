@@ -1,0 +1,25 @@
+DESCRIPTION
+This test aims to verify the correct functionality of assignments to read and write from
+and to the stack.
+SOURCE
+int main(int a, int b) {
+	int b0 = a + b;
+	int b1 = a + b + 1;
+	int b2 = a + b + 2;
+	int b3 = a + b + 3;
+	int b4 = a + b + 4;
+	int b5 = a + b + 5;
+	int b6 = a + b + 6;
+	int b7 = a + b + 7;
+	int b8 = a + b + 8;
+	int b9 = a + b;
+	
+	b9 = a + b9;
+	b8 = 8;
+	
+	return b8 + b9;
+}
+TESTCASES
+0 0 8
+1 4 14
+4 1 17

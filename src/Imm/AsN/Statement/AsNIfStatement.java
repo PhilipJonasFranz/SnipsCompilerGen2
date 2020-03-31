@@ -33,11 +33,11 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			if0.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+			if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			
 			ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
 			/* Condition was false, jump to else */
-			if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(elseTarget)));
+			if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
 			
 			ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
 			
@@ -52,12 +52,12 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				if (elseS.condition != null) {
 					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, st).getInstructions());
 					
-					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 					
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
 					/* False Jump */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(elseTarget)));
+					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
 				}
 				
 				/* Add Body */

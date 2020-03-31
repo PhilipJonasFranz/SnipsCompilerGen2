@@ -22,5 +22,11 @@ public class ARRAY extends TYPE {
 	public String typeString() {
 		return this.elementType.typeString() + "[]";
 	}
+
+	@Override
+	public void setValue(String value) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

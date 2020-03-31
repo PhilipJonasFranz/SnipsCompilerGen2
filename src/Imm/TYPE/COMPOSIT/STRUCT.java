@@ -37,5 +37,11 @@ public class STRUCT extends TYPE {
 		s += ">";
 		return s;
 	}
+
+	@Override
+	public void setValue(String value) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

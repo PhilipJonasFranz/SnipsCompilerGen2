@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
@@ -86,6 +87,8 @@ public class CompilerDriver {
 	}
 
 	public List<String> compile(File file, List<String> code) {
+		LabelGen.reset();
+		
 		long start = System.currentTimeMillis();
 		
 		CompilerDriver.file = file;

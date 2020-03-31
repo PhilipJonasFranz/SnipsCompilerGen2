@@ -8,4 +8,8 @@ public class LabelGen {
 		return ".L" + c++;
 	}
 	
+	public static void reset() {
+		c = 0;
+	}
+	
 }

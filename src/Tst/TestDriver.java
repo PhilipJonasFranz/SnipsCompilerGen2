@@ -152,7 +152,6 @@ public class TestDriver {
 	
 	@SuppressWarnings("deprecation")
 	public Result test(String path, List<String> code, List<String> cases) throws InterruptedException {
-		
 		CompilerDriver cd = new CompilerDriver();
 		
 		cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
@@ -235,6 +234,8 @@ public class TestDriver {
 			else {
 				/* Wrong output */
 				new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL);
+				
+				/* Print inputted parameters */
 				String params = "-> Params: ";
 				if (sp.length == 1) params += "-";
 				else {

@@ -81,10 +81,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 		/* --- OPERAND LOADING --- */
 	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, StackSet st, int target0, int target1) throws CGEN_EXCEPTION {
+		/* Load both operands directley */
 		if (b.left() instanceof IDRef && b.right() instanceof IDRef) {
 			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, st, target0).getInstructions());
 			m.instructions.addAll(AsNIdRef.cast((IDRef) b.right(), r, st, target1).getInstructions());
 		}
+		/* Load the right operand, then the left directley */
 		else if (b.left() instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(b.right(), r, st).getInstructions());
 			if (target1 != 0) {
@@ -94,6 +96,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			
 			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, st, target0).getInstructions());
 		}
+		/* Load the left operand, then the right directley */
 		else if (b.right() instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(b.left(), r, st).getInstructions());
 			if (target0 != 0) {
