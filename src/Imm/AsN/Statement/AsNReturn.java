@@ -7,12 +7,12 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Statement.Return;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AsN.Expression.AsNExpression;
 
 public class AsNReturn extends AsNStatement {
 
-	public static AsNReturn cast(Return s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNReturn cast(ReturnStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNReturn ret = new AsNReturn();
 		
 		ret.instructions.addAll(AsNExpression.cast(s.value, r, st).getInstructions());

@@ -3,6 +3,7 @@ package Imm.AsN.Statement;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.Structural.ASMLabel;
 import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
@@ -10,6 +11,10 @@ import Imm.AST.Statement.WhileStatement;
 
 public abstract class AsNConditionalCompoundStatement extends AsNCompoundStatement {
 
+	public ASMLabel breakJump;
+	
+	public ASMLabel continueJump;
+	
 	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNConditionalCompoundStatement node = null;

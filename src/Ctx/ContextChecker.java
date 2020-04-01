@@ -16,10 +16,13 @@ import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CompoundStatement;
+import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.Return;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
@@ -34,6 +37,8 @@ public class ContextChecker {
 	Function currentFunction;
 	
 	SyntaxElement AST;
+	
+	Stack<CompoundStatement> compoundStack = new Stack();
 	
 	Stack<Scope> scopes = new Stack();
 	
@@ -97,6 +102,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkWhileStatement(WhileStatement w) throws CTX_EXCEPTION {
+		this.compoundStack.push(w);
+		
 		TYPE cond = w.condition.check(this);
 		if (!(cond instanceof BOOL)) {
 			throw new CTX_EXCEPTION(w.getSource(), "Condition is not boolean");
@@ -108,10 +115,13 @@ public class ContextChecker {
 		}
 		this.scopes.pop();
 
+		this.compoundStack.pop();
 		return null;
 	}
 	
 	public TYPE checkForStatement(ForStatement f) throws CTX_EXCEPTION {
+		this.compoundStack.push(f);
+		
 		this.scopes.push(new Scope(this.scopes.peek()));
 		f.iterator.check(this);
 		if (f.iterator.value == null) {
@@ -134,6 +144,7 @@ public class ContextChecker {
 		this.scopes.pop();
 		this.scopes.pop();
 
+		this.compoundStack.pop();
 		return null;
 	}
 	
@@ -188,7 +199,25 @@ public class ContextChecker {
 		return null;
 	}
 	
-	public TYPE checkReturn(Return r) throws CTX_EXCEPTION {
+	public TYPE checkBreak(BreakStatement b) throws CTX_EXCEPTION {
+		if (this.compoundStack.isEmpty()) {
+			throw new CTX_EXCEPTION(b.getSource(), "Can only break out of the scope of a loop");
+		}
+		else b.superLoop = this.compoundStack.peek();
+		
+		return null;
+	}
+	
+	public TYPE checkContinue(ContinueStatement c) throws CTX_EXCEPTION {
+		if (this.compoundStack.isEmpty()) {
+			throw new CTX_EXCEPTION(c.getSource(), "Can only continue in the scope of a loop");
+		}
+		else c.superLoop = this.compoundStack.peek();
+		
+		return null;
+	}
+	
+	public TYPE checkReturn(ReturnStatement r) throws CTX_EXCEPTION {
 		TYPE t = r.value.check(this);
 		
 		if (t.isEqual(this.currentFunction.returnType)) {

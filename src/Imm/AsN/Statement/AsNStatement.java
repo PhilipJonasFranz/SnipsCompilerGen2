@@ -4,9 +4,11 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CompoundStatement;
+import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.Return;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode;
 
@@ -19,8 +21,14 @@ public abstract class AsNStatement extends AsNNode {
 		if (s instanceof CompoundStatement) {
 			node = AsNCompoundStatement.cast((CompoundStatement) s, r, st);
 		}
-		else if (s instanceof Return) {
-			node = AsNReturn.cast((Return) s, r, st); 
+		else if (s instanceof ReturnStatement) {
+			node = AsNReturn.cast((ReturnStatement) s, r, st); 
+		}
+		else if (s instanceof BreakStatement) {
+			node = AsNBreak.cast((BreakStatement) s, r, st); 
+		}
+		else if (s instanceof ContinueStatement) {
+			node = AsNContinue.cast((ContinueStatement) s, r, st); 
 		}
 		else if (s instanceof Declaration) {
 			node = AsNDeclaration.cast((Declaration) s, r, st);

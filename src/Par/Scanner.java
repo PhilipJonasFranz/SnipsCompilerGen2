@@ -142,6 +142,18 @@ public class Scanner {
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;
 			}
+			else if (this.buffer.equals("break")) {
+				tokens.add(new Token(TokenType.BREAK, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("continue")) {
+				tokens.add(new Token(TokenType.CONTINUE, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
 			else if (this.buffer.equals("while")) {
 				tokens.add(new Token(TokenType.WHILE, new Source(i, a)));
 				this.emptyBuffer();

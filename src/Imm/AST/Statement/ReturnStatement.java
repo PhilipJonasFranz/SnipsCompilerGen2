@@ -9,7 +9,7 @@ import Util.Source;
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class Return extends Statement {
+public class ReturnStatement extends Statement {
 
 			/* --- FIELDS --- */
 	public Expression value;
@@ -19,7 +19,7 @@ public class Return extends Statement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Return(Expression value, Source source) {
+	public ReturnStatement(Expression value, Source source) {
 		super(source);
 		this.value = value;
 	}

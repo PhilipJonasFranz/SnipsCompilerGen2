@@ -24,6 +24,11 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForStatement cast(ForStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNForStatement f = new AsNForStatement();
+		a.castedNode = f;
+		
+		/* Create jump as target for continue statements */
+		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		f.continueJump = continueJump;
 		
 		/* Open new scope for iterator */
 		st.openScope();
@@ -40,6 +45,9 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		/* End of the loop */
 		ASMLabel forEnd = new ASMLabel(LabelGen.getLabel());
+		
+		/* Set jump target for break statements */
+		f.breakJump = forEnd;
 		
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
@@ -75,6 +83,9 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		/* Add body */
 		for (Statement s : a.body) 
 			f.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+		
+		/* Add jump for continue statements to use as target */
+		f.instructions.add(continueJump);
 		
 		/* Add increment */
 		f.instructions.addAll(AsNAssignment.cast(a.increment, r, st).getInstructions());

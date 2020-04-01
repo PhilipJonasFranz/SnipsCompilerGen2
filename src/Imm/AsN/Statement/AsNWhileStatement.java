@@ -22,6 +22,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNWhileStatement cast(WhileStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
 		AsNWhileStatement w = new AsNWhileStatement();
+		a.castedNode = w;
 		
 		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
 		
@@ -29,6 +30,10 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.topComparison(a, (AsNCmp) expr, r, st);
 		}
 		else {
+			/* Create jump as target for continue statements */
+			ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+			w.continueJump = continueJump;
+			
 			/* Loop Entrypoint */
 			ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
 			w.instructions.add(whileStart);
@@ -40,12 +45,16 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			
 			ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+			w.breakJump = whileEnd;
 			
 			/* Condition was false, jump to else */
 			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(whileEnd)));
 			
 			/* Add Body */
 			w.addBody(a, r, st);
+			
+			/* Add jump for continue statements to use as target */
+			w.instructions.add(continueJump);
 			
 			/* Branch to loop start */
 			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));
@@ -58,6 +67,8 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 	}
 	
 	protected void topComparison(WhileStatement a, AsNCmp com, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		this.continueJump = continueJump;
 		
 		ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
 		this.instructions.add(whileStart);
@@ -72,12 +83,16 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		this.instructions.addAll(com.getInstructions());
 		
 		ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+		this.breakJump = whileEnd;
 		
 		/* Condition was false, no else, skip body */
 		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(whileEnd)));
 		
 		/* Add Body */
 		this.addBody(a, r, st);
+		
+		/* Add jump for continue statements to use as target */
+		this.instructions.add(continueJump);
 		
 		/* Branch to loop Start */
 		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));

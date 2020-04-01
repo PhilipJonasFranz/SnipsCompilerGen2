@@ -26,10 +26,12 @@ import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.Return;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
@@ -144,6 +146,12 @@ public class Parser {
 		else if (current.type == TokenType.FOR) {
 			return this.parseFor();
 		}
+		else if (current.type == TokenType.BREAK) {
+			return this.parseBreak();
+		}
+		else if (current.type == TokenType.CONTINUE) {
+			return this.parseContinue();
+		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			return this.parseAssignment(true);
 		}
@@ -151,6 +159,18 @@ public class Parser {
 			return this.parseIf();
 		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.WHILE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
+	}
+	
+	public Statement parseBreak() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.BREAK).getSource();
+		accept(TokenType.SEMICOLON);
+		return new BreakStatement(source);
+	}
+	
+	public Statement parseContinue() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.CONTINUE).getSource();
+		accept(TokenType.SEMICOLON);
+		return new ContinueStatement(source);
 	}
 	
 	public Statement parseIf() throws PARSE_EXCEPTION {
@@ -230,11 +250,11 @@ public class Parser {
 		return new Declaration(id, type, value, source);
 	}
 	
-	public Return parseReturn() throws PARSE_EXCEPTION {
+	public ReturnStatement parseReturn() throws PARSE_EXCEPTION {
 		Token ret = accept(TokenType.RETURN);
 		Expression expr = this.parseExpression();
 		accept(TokenType.SEMICOLON);
-		return new Return(expr, ret.getSource());
+		return new ReturnStatement(expr, ret.getSource());
 	}
 	
 	public Expression parseExpression() throws PARSE_EXCEPTION {

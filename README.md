@@ -1,22 +1,25 @@
 # Snips Compiler Gen.2
 
+## Current Version: v.0
+
 ## Roadmap
 
-### v1.0
- - Implement break statement
- - Implement continue statement
+### v.1: Basic Functionality, primitive type support
  - Implement Switch statement
  - Implement do-while statement
 
-### v2.0
+### v.2: Extended type system
  - Implement Heap System
  - Implement Arrays
  - Implement Pass-by-value and pass-by-reference for non-primitive types
  
-### v3.0
+### v.3: Complex type system, advanced operations
+ - Implement increment and decrement
+ - Implement Arithmetic Operators
+ - Implement Direct ASM injection
  - Implement Structs
  - Implement Pointers
 
-### v4.0
+### v.4: Optimization, extended compilation control
  - Implement AST Optimizer
  - Implement Optimizer Annotations

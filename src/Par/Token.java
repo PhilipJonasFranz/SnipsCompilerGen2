@@ -56,6 +56,8 @@ public class Token {
 		ELSE("else"),
 		WHILE("while"),
 		FOR("for"),
+		BREAK("break"),
+		CONTINUE("continue"),
 		
 		/* Functions */
 		RETURN("return"),
