@@ -4,6 +4,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.ConditionalCompoundStatement;
+import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.WhileStatement;
 
@@ -18,6 +19,9 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 		}
 		else if (s instanceof WhileStatement) {
 			node = AsNWhileStatement.cast((WhileStatement) s, r, st);
+		}
+		else if (s instanceof ForStatement) {
+			node = AsNForStatement.cast((ForStatement) s, r, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 	

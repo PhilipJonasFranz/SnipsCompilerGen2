@@ -17,6 +17,7 @@ import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
@@ -105,6 +106,32 @@ public class ContextChecker {
 		for (Statement s : w.body) {
 			s.check(this);
 		}
+		this.scopes.pop();
+
+		return null;
+	}
+	
+	public TYPE checkForStatement(ForStatement f) throws CTX_EXCEPTION {
+		this.scopes.push(new Scope(this.scopes.peek()));
+		f.iterator.check(this);
+		if (f.iterator.value == null) {
+			throw new CTX_EXCEPTION(f.getSource(), "Iterator must have initial value");
+		}
+		
+		this.scopes.push(new Scope(this.scopes.peek()));
+		
+		TYPE cond = f.condition.check(this);
+		if (!(cond instanceof BOOL)) {
+			throw new CTX_EXCEPTION(f.getSource(), "Condition is not boolean");
+		}
+		
+		f.increment.check(this);
+		
+		for (Statement s : f.body) {
+			s.check(this);
+		}
+		
+		this.scopes.pop();
 		this.scopes.pop();
 
 		return null;

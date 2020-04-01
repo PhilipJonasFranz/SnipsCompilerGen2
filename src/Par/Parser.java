@@ -27,6 +27,7 @@ import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Return;
 import Imm.AST.Statement.Statement;
@@ -140,8 +141,11 @@ public class Parser {
 		else if (current.type == TokenType.WHILE) {
 			return this.parseWhile();
 		}
+		else if (current.type == TokenType.FOR) {
+			return this.parseFor();
+		}
 		else if (current.type == TokenType.IDENTIFIER) {
-			return this.parseAssignment();
+			return this.parseAssignment(true);
 		}
 		else if (current.type == TokenType.IF) {
 			return this.parseIf();
@@ -174,6 +178,26 @@ public class Parser {
 		return if0;
 	}
 	
+	public ForStatement parseFor() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.FOR).getSource();
+		accept(TokenType.LPAREN);
+		
+		/* Accepts semicolon */
+		Declaration iterator = this.parseDeclaration();
+		
+		Expression condition = this.parseExpression();
+		accept(TokenType.SEMICOLON);
+		
+		/* Dont accept semicolon */
+		Assignment increment = this.parseAssignment(false);
+		
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = this.parseCompoundStatement();
+		
+		return new ForStatement(iterator, condition, increment, body, source);
+	}
+	
 	public WhileStatement parseWhile() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.WHILE).getSource();
 		accept(TokenType.LPAREN);
@@ -183,11 +207,11 @@ public class Parser {
 		return new WhileStatement(condition, body, source);
 	}
 	
-	public Assignment parseAssignment() throws PARSE_EXCEPTION {
+	public Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
 		Token id = accept(TokenType.IDENTIFIER);
 		accept(TokenType.LET);
 		Expression value = this.parseExpression();
-		accept(TokenType.SEMICOLON);
+		if (acceptSemicolon) accept(TokenType.SEMICOLON);
 		return new Assignment(id, value, id.source);
 	}
 	
