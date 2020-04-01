@@ -224,8 +224,6 @@ public class CompilerDriver {
 		double r0 = Math.round(rate [0] * 100) / 100;
 		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
 		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
-		CompilerDriver.compressions.clear();
-		CompilerDriver.instructionsGenerated = 0;
 	}
 	
 }

@@ -45,7 +45,7 @@ public class TestDriver {
 	/** The Milliseconds the program can run on the processor until it timeouts */
 	public long ttl = 200;
 	
-	public boolean detailedCompilerMessages = true;
+	public boolean detailedCompilerMessages = false;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
@@ -179,7 +179,7 @@ public class TestDriver {
 		
 		/* Setup Runtime Environment */
 		for (int i = 0; i < cases.size(); i++) {
-			if (cases.size() > 1) new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
+			//if (cases.size() > 1) new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
 			String [] sp = cases.get(i).split(" ");
 			
 			boolean assemblyMessages = false;
@@ -220,8 +220,9 @@ public class TestDriver {
 					runThread.stop();
 					runThread = null;
 					new Message("The compiled program timed out!", Message.Type.FAIL);
+					if (cases.size() > 1) new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL);
+					fail++;
 					compile.stream().forEach(x -> System.out.println(x));
-					return new Result(RET_TYPE.TIMEOUT, 0, 0);
 				}
 			}
 			
@@ -233,6 +234,7 @@ public class TestDriver {
 			}
 			else {
 				/* Wrong output */
+				if (cases.size() > 1) new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL);
 				new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL);
 				
 				/* Print inputted parameters */
