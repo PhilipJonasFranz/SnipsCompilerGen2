@@ -13,6 +13,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.UnaryExpression;
+import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -340,6 +341,10 @@ public class ContextChecker {
 		
 		if (u instanceof Not && op.isEqual(new BOOL())) {
 			u.type = new BOOL();
+			return u.type;
+		}
+		else if (u instanceof UnaryMinus && op instanceof PRIMITIVE) {
+			u.type = op;
 			return u.type;
 		}
 		else {

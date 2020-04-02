@@ -1,0 +1,8 @@
+SOURCE
+int main(int a) {
+	return a + --(2 * -a);
+}
+TESTCASES
+0 0
+2 -2
+-2 2

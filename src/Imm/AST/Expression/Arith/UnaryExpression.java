@@ -12,7 +12,7 @@ import Util.Source;
 public abstract class UnaryExpression extends Expression {
 
 	public enum UnaryOperator {
-		NOT;
+		NOT, NEG;
 	}
 	
 	public UnaryOperator operator;

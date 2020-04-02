@@ -20,6 +20,7 @@ import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
@@ -451,6 +452,17 @@ public class Parser {
 		while (current.type == TokenType.NOT) {
 			accept();
 			not = new Not(this.parseNot(), current.source);
+		}
+		
+		if (not == null) not = this.parseUnaryMinus();
+		return not;
+	}
+	
+	protected Expression parseUnaryMinus() throws PARSE_EXCEPTION {
+		Expression not = null;
+		while (current.type == TokenType.SUB) {
+			accept();
+			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
 		
 		if (not == null) not = this.parseAtom();

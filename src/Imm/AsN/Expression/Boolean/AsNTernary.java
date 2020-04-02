@@ -28,10 +28,11 @@ public class AsNTernary extends AsNExpression {
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(t.condition, r, st);
 		
+		/* The Target that is branched to if the condition is false */
 		ASMLabel loadFalse = new ASMLabel(LabelGen.getLabel());
 		
+		/* The End Label Target */
 		ASMLabel end = new ASMLabel(LabelGen.getLabel());
-		
 		
 		if (expr instanceof AsNCmp) {
 			/* Top Comparison */

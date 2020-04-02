@@ -1,0 +1,18 @@
+SOURCE
+int main(int a, bool b) {
+	int c = (a == 3 && b)? 5 : ((a == 4 || b)? 8 : a * 4);
+	return c;
+}
+TESTCASES
+0 0 0
+1 0 4
+3 0 12
+4 0 8
+5 0 20
+6 0 24
+0 1 8
+1 1 8
+3 1 5
+4 1 8
+5 1 8
+6 1 8
