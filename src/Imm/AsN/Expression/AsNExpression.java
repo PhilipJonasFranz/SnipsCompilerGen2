@@ -9,7 +9,9 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.UnaryExpression;
+import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.AsNNode;
+import Imm.AsN.Expression.Boolean.AsNTernary;
 
 public abstract class AsNExpression extends AsNNode {
 
@@ -26,6 +28,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof InlineCall) {
 			node = AsNInlineCall.cast((InlineCall) e, r, st);
+		}
+		else if (e instanceof Ternary) {
+			node = AsNTernary.cast((Ternary) e, r, st);
 		}
 		else if (e instanceof IDRef) {
 			node = AsNIdRef.cast((IDRef) e, r, st, 0);

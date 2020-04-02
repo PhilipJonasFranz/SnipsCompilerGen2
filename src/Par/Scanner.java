@@ -98,6 +98,10 @@ public class Scanner {
 				tokens.add(new Token(TokenType.COMMA, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("?")) {
+				tokens.add(new Token(TokenType.TERN, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("*")) {
 				tokens.add(new Token(TokenType.MUL, new Source(i, a)));
 				this.emptyBuffer();
@@ -160,6 +164,12 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("while")) {
 				tokens.add(new Token(TokenType.WHILE, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("do")) {
+				tokens.add(new Token(TokenType.DO, new Source(i, a)));
 				this.emptyBuffer();
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;

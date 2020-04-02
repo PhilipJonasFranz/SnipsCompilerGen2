@@ -1,0 +1,18 @@
+SOURCE
+int main(int a) {
+	int c = 0;
+	do {
+		c = c + a + 1;
+		a = a - 1;
+		if (a == 2) break;
+	} while (a > 0);
+	
+	return c;
+}
+TESTCASES
+0 1
+1 2
+2 5
+3 4
+4 9
+5 15

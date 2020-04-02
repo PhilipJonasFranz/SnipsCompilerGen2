@@ -1,0 +1,12 @@
+SOURCE
+int main(int a) {
+	int c = (a == 3)? 5 : ((a == 4)? 8 : a * 4);
+	return c;
+}
+TESTCASES
+0 0
+1 4
+3 5
+4 8
+5 20
+6 24

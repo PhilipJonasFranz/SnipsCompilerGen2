@@ -55,6 +55,7 @@ public class Token {
 		IF("if"),
 		ELSE("else"),
 		WHILE("while"),
+		DO("do"),
 		FOR("for"),
 		BREAK("break"),
 		CONTINUE("continue"),
@@ -69,6 +70,7 @@ public class Token {
 		COLON(":"),
 		COMMA(","),
 		LET("="),
+		TERN("?"),
 		
 		/* Arithmetic Operators */
 		ADD("+"),

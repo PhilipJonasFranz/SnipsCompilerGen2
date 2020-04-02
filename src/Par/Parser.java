@@ -25,12 +25,14 @@ import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
+import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
@@ -124,7 +126,7 @@ public class Parser {
 		
 		accept(TokenType.RPAREN);
 		
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(true);
 		
 		return new Function(TYPE.fromToken(type), id, parameters, body, type.source);
 	}
@@ -145,6 +147,9 @@ public class Parser {
 		else if (current.type == TokenType.WHILE) {
 			return this.parseWhile();
 		}
+		else if (current.type == TokenType.DO) {
+			return this.parseDoWhile();
+		}
 		else if (current.type == TokenType.FOR) {
 			return this.parseFor();
 		}
@@ -163,7 +168,11 @@ public class Parser {
 		else if (current.type == TokenType.IF) {
 			return this.parseIf();
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.WHILE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
+		else throw new PARSE_EXCEPTION(current.source, current.type, 
+			TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+			TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+			TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+			TokenType.IF);
 	}
 	
 	protected SwitchStatement parseSwitch() throws PARSE_EXCEPTION {
@@ -198,7 +207,7 @@ public class Parser {
 		accept(TokenType.RPAREN);
 		accept(TokenType.COLON);
 		
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(false);
 		
 		return new CaseStatement(condition, body, source);
 	}
@@ -207,7 +216,7 @@ public class Parser {
 		Source source = accept(TokenType.DEFAULT).getSource();
 		accept(TokenType.COLON);
 		
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(false);
 		
 		return new DefaultStatement(body, source);
 	}
@@ -231,7 +240,7 @@ public class Parser {
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
 		
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(false);
 		
 		IfStatement if0 = new IfStatement(condition, body, source);
 		
@@ -241,7 +250,7 @@ public class Parser {
 				if0.elseStatement = (IfStatement) this.parseIf();
 			}
 			else {
-				List<Statement> elseBody = this.parseCompoundStatement();
+				List<Statement> elseBody = this.parseCompoundStatement(false);
 				if0.elseStatement = new IfStatement(elseBody, elseSource);
 			}
 		}
@@ -264,7 +273,7 @@ public class Parser {
 		
 		accept(TokenType.RPAREN);
 		
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(false);
 		
 		return new ForStatement(iterator, condition, increment, body, source);
 	}
@@ -274,8 +283,24 @@ public class Parser {
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
-		List<Statement> body = this.parseCompoundStatement();
+		List<Statement> body = this.parseCompoundStatement(false);
 		return new WhileStatement(condition, body, source);
+	}
+	
+	protected DoWhileStatement parseDoWhile() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.DO).getSource();
+		
+		List<Statement> body = this.parseCompoundStatement(true);
+		
+		accept(TokenType.WHILE);
+		
+		accept(TokenType.LPAREN);
+		Expression condition = this.parseExpression();
+		accept(TokenType.RPAREN);
+		
+		accept(TokenType.SEMICOLON);
+		
+		return new DoWhileStatement(condition, body, source);
 	}
 	
 	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
@@ -309,7 +334,20 @@ public class Parser {
 	}
 	
 	protected Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseOr();
+			return this.parseTernary();
+	}
+	
+	protected Expression parseTernary() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		Expression condition = this.parseOr();
+		if (current.type == TokenType.TERN) {
+			accept();
+			Expression left = this.parseExpression();
+			accept(TokenType.COLON);
+			Expression right = this.parseExpression();
+			return new Ternary(condition, left, right, source);
+		}
+		else return condition;
 	}
 	
 	protected Expression parseOr() throws PARSE_EXCEPTION {
@@ -467,12 +505,12 @@ public class Parser {
 		return type;
 	}
 	
-	protected List<Statement> parseCompoundStatement() throws PARSE_EXCEPTION {
+	protected List<Statement> parseCompoundStatement(boolean forceBraces) throws PARSE_EXCEPTION {
 		List<Statement> body = new ArrayList();
 		
 		/* Compound Statement with braces */
-		if (current.type == TokenType.LBRACE) {
-			accept();
+		if (current.type == TokenType.LBRACE || forceBraces) {
+			accept(TokenType.LBRACE);
 			while (current.type != TokenType.RBRACE) {
 				body.add(this.parseStatement());
 			}

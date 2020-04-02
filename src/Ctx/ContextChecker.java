@@ -15,6 +15,7 @@ import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Not;
+import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
@@ -22,6 +23,7 @@ import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
@@ -106,6 +108,24 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkWhileStatement(WhileStatement w) throws CTX_EXCEPTION {
+		this.compoundStack.push(w);
+		
+		TYPE cond = w.condition.check(this);
+		if (!(cond instanceof BOOL)) {
+			throw new CTX_EXCEPTION(w.getSource(), "Condition is not boolean");
+		}
+		
+		this.scopes.push(new Scope(this.scopes.peek()));
+		for (Statement s : w.body) {
+			s.check(this);
+		}
+		this.scopes.pop();
+
+		this.compoundStack.pop();
+		return null;
+	}
+	
+	public TYPE checkDoWhileStatement(DoWhileStatement w) throws CTX_EXCEPTION {
 		this.compoundStack.push(w);
 		
 		TYPE cond = w.condition.check(this);
@@ -283,6 +303,23 @@ public class ContextChecker {
 		else {
 			throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.returnType.typeString());
 		}
+	}
+	
+	public TYPE checkTernary(Ternary t) throws CTX_EXCEPTION {
+		TYPE type = t.condition.check(this);
+		if (!(type instanceof BOOL)) {
+			throw new CTX_EXCEPTION(t.condition.getSource(), "Ternary condition has to be of type BOOL, actual " + type.typeString());
+		}
+		
+		TYPE t0 = t.leftOperand.check(this);
+		TYPE t1 = t.rightOperand.check(this);
+		
+		if (!t0.isEqual(t1)) {
+			throw new CTX_EXCEPTION(t.condition.getSource(), "Both results of ternary operation have to be of the same type, " + t0.typeString() + " vs " + t1.typeString());
+		}
+		
+		t.type = t0;
+		return t.type;
 	}
 	
 	public TYPE checkBinaryExpression(BinaryExpression b) throws CTX_EXCEPTION {

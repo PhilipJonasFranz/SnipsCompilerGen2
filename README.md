@@ -5,8 +5,6 @@
 ## Roadmap
 
 ### v.1.0.0: Basic Functionality, primitive type support
- - Implement do-while statement
- - Implement Ternary Expression
  - Implement Bitwise Operations
  - Implement global variables
 
