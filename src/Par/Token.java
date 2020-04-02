@@ -77,6 +77,7 @@ public class Token {
 		SUB("-"),
 		MUL("*"),
 		DIV("/"),
+		MOD("%"),
 		
 		/* Logic Operators */
 		OR("||"),

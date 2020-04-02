@@ -45,6 +45,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
+import Snips.CompilerDriver;
 import Util.Source;
 
 public class Parser {
@@ -434,14 +435,24 @@ public class Parser {
 		
 	protected Expression parseMulDiv() throws PARSE_EXCEPTION {
 		Expression left = this.parseNot();
-		while (current.type == TokenType.MUL || current.type == TokenType.DIV) {
+		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
 				accept();
 				left = new Mul(left, this.parseNot(), current.source);
 			}
-			else {
+			else if (current.type == TokenType.DIV) {
 				accept();
 				left = new Div(left, this.parseNot(), current.source);
+			}
+			else {
+				Source source = accept().getSource();
+				List<Expression> params = new ArrayList();
+				params.add(left);
+				params.add(this.parseNot());
+				
+				/* Create inline call to libary function, add mod operator to referenced libaries */
+				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_mod"), params, source);
+				CompilerDriver.driver.referencedLibaries.add("lib/Operator/Mod/__op_mod.sn");
 			}
 		}
 		return left;

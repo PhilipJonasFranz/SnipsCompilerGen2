@@ -45,11 +45,11 @@ public class TestDriver {
 	/** The Milliseconds the program can run on the processor until it timeouts */
 	public long ttl = 200;
 	
-	public boolean detailedCompilerMessages = false;
+	public boolean detailedCompilerMessages = true;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
-	public boolean printResult = false;
+	public boolean printResult = true;
 	
 	
 			/* --- METHODS --- */
@@ -153,6 +153,7 @@ public class TestDriver {
 	@SuppressWarnings("deprecation")
 	public Result test(String path, List<String> code, List<String> cases) throws InterruptedException {
 		CompilerDriver cd = new CompilerDriver();
+		CompilerDriver.driver = cd;
 		
 		cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 		

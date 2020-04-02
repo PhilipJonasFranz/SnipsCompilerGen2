@@ -53,6 +53,7 @@ public class CompilerDriver {
 	
 	public static int instructionsGenerated = 0;
 	
+	public static CompilerDriver driver;
 	
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
@@ -63,6 +64,7 @@ public class CompilerDriver {
 		
 		/* Instantiate new Compiler instance with filepath as argument */
 		CompilerDriver scd = new CompilerDriver(args);
+		driver = scd;
 		
 		/* Errors occurred due to faulty parameters, abort */
 		if (!log.isEmpty()) {
@@ -78,6 +80,9 @@ public class CompilerDriver {
 		scd.compile(file, code);
 	}
 	
+	
+	public List<String> referencedLibaries = new ArrayList();
+	
 	public CompilerDriver(String [] args) {
 		this.readArgs(args);
 	}
@@ -85,7 +90,7 @@ public class CompilerDriver {
 	public CompilerDriver() {
 		
 	}
-
+	
 	public List<String> compile(File file, List<String> code) {
 		LabelGen.reset();
 		
@@ -175,6 +180,53 @@ public class CompilerDriver {
 		}
 		
 		return output;
+	}
+	
+	/**
+	 * Used to hot compile referenced libaries.
+	 * @param files The libary files to compile
+	 * @return A list of ASTs containing the contents of the files as AST.
+	 */
+	public List<SyntaxElement> hotCompile(List<String> files) {
+		List<SyntaxElement> ASTs = new ArrayList();
+		
+		/* Filter duplicates */
+		if (files.size() > 1) for (int i = 0; i < files.size(); i++) {
+			for (int a = i + 1; a < files.size(); a++) {
+				if (files.get(i).equals(files.get(a))) {
+					files.remove(a);
+					a--;
+				}
+			}
+		}
+		
+		for (String filePath : files) {
+			File file = new File(filePath);
+			List<String> code = Util.Util.readFile(file);
+			
+			SyntaxElement AST = null;
+			
+			try {
+				if (code == null) {
+					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
+				}
+				
+				Scanner scanner = new Scanner(code);
+				Deque deque = scanner.scan();
+				
+				Parser parser = new Parser(deque);
+				AST = parser.parse();
+			} catch (Exception e) {
+				if (printErrors) e.printStackTrace();
+			}
+			
+			if (AST == null) log.add(new Message("SNIPS -> Failed to compile libary " + filePath + ".", Message.Type.FAIL));
+			else log.add(new Message("SNIPS -> Hot compiled " + filePath, Message.Type.INFO));	
+			
+			ASTs.add(AST);
+		}
+		
+		return ASTs;
 	}
 	
 	public int getMessageTypeNumber(Message.Type type) {

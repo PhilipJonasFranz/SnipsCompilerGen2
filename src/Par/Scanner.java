@@ -206,6 +206,10 @@ public class Scanner {
 				tokens.add(new Token(TokenType.AND, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("%")) {
+				tokens.add(new Token(TokenType.MOD, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.startsWith("!")) {
 				if (this.buffer.length() == 1)return false;
 				if (this.buffer.equals("!=")) {
@@ -263,14 +267,14 @@ public class Scanner {
 				}
 			}
 			else {
-				if (this.buffer.matches("([a-z]|[A-Z])([a-z]|[A-Z]|[0-9])*")) {
+				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
 					this.ACC_STATE = ACCUM_STATE.ID;
 				}
 				else if (this.buffer.matches("[0-9]+")) {
 					this.ACC_STATE = ACCUM_STATE.INT;
 				}
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z])([a-z]|[A-Z]|[0-9])*")) && this.ACC_STATE == ACCUM_STATE.ID) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && this.ACC_STATE == ACCUM_STATE.ID) {
 					String ID = this.buffer.substring(0, this.buffer.length() - 1);
 					tokens.add(new Token(TokenType.IDENTIFIER, new Source(i, a), ID));
 					
