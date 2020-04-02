@@ -41,6 +41,7 @@ public class Token {
 	public enum TokenType {
 		
 		/* Structural */
+		COMMENT(""),
 		DIRECTIVE("#"),
 		EOF("<EOF>"),
 		

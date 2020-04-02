@@ -45,11 +45,11 @@ public class TestDriver {
 	/** The Milliseconds the program can run on the processor until it timeouts */
 	public long ttl = 200;
 	
-	public boolean detailedCompilerMessages = true;
+	public boolean detailedCompilerMessages = false;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
-	public boolean printResult = true;
+	public boolean printResult = false;
 	
 	
 			/* --- METHODS --- */

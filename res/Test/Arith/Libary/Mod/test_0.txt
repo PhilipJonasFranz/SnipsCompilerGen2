@@ -1,0 +1,10 @@
+SOURCE
+int main(int a, int b) {
+	return a % b;
+}
+TESTCASES
+1 1 0
+3 2 1
+5 3 2
+25 7 4
+213829 213 190

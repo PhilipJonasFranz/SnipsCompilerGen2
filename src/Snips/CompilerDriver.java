@@ -221,7 +221,7 @@ public class CompilerDriver {
 			}
 			
 			if (AST == null) log.add(new Message("SNIPS -> Failed to compile libary " + filePath + ".", Message.Type.FAIL));
-			else log.add(new Message("SNIPS -> Hot compiled " + filePath, Message.Type.INFO));	
+			else log.add(new Message("SNIPS -> Using " + filePath, Message.Type.INFO));	
 			
 			ASTs.add(AST);
 		}

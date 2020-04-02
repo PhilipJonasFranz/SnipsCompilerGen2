@@ -12,9 +12,8 @@ import Util.Source;
 public abstract class BinaryExpression extends Expression {
 
 	public enum Operator {
-		MUL, DIV, ADD, SUB, 
-		LSL, LSR, CMP, AND,
-		ORR;
+		MUL, ADD, SUB, ORR,
+		LSL, LSR, CMP, AND;
 	}
 	
 	public Expression leftOperand;

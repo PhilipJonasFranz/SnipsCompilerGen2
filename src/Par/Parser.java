@@ -15,7 +15,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.Arith.Add;
-import Imm.AST.Expression.Arith.Div;
 import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
@@ -441,8 +440,14 @@ public class Parser {
 				left = new Mul(left, this.parseNot(), current.source);
 			}
 			else if (current.type == TokenType.DIV) {
-				accept();
-				left = new Div(left, this.parseNot(), current.source);
+				Source source = accept().getSource();
+				List<Expression> params = new ArrayList();
+				params.add(left);
+				params.add(this.parseNot());
+				
+				/* Create inline call to libary function, add mod operator to referenced libaries */
+				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_div"), params, source);
+				CompilerDriver.driver.referencedLibaries.add("lib/Operator/Div/__op_div.sn");
 			}
 			else {
 				Source source = accept().getSource();
