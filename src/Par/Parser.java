@@ -27,12 +27,15 @@ import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -82,7 +85,6 @@ public class Parser {
 	 * @return The accepted token.
 	 */
 	protected Token accept() {
-		//System.out.println(current.spelling + " " + current.type.toString());
 		Token old = current;
 		current = tokenStream.pop();
 		return old;
@@ -92,7 +94,7 @@ public class Parser {
 		return parseProgram();
 	}
 	
-	public Program parseProgram() throws PARSE_EXCEPTION {
+	protected Program parseProgram() throws PARSE_EXCEPTION {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		while (this.current.type != TokenType.EOF) {
@@ -104,7 +106,7 @@ public class Parser {
 		return new Program(elements, source);
 	}
 	
-	public Function parseFunction() throws PARSE_EXCEPTION {
+	protected Function parseFunction() throws PARSE_EXCEPTION {
 		Token type = accept();
 		Token id = accept(TokenType.IDENTIFIER);
 		accept(TokenType.LPAREN);
@@ -127,13 +129,13 @@ public class Parser {
 		return new Function(TYPE.fromToken(type), id, parameters, body, type.source);
 	}
 	
-	public Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
+	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
 		Token type = accept(TokenGroup.TYPE);
 		Token id = accept(TokenType.IDENTIFIER);
 		return new Declaration(id, TYPE.fromToken(type), type.getSource());
 	}
 	
-	public Statement parseStatement() throws PARSE_EXCEPTION {
+	protected Statement parseStatement() throws PARSE_EXCEPTION {
 		if (current.type.group == TokenGroup.TYPE) {
 			return this.parseDeclaration();
 		}
@@ -152,6 +154,9 @@ public class Parser {
 		else if (current.type == TokenType.CONTINUE) {
 			return this.parseContinue();
 		}
+		else if (current.type == TokenType.SWITCH) {
+			return this.parseSwitch();
+		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			return this.parseAssignment(true);
 		}
@@ -161,19 +166,65 @@ public class Parser {
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.TYPE, TokenType.WHILE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.IF);
 	}
 	
-	public Statement parseBreak() throws PARSE_EXCEPTION {
+	protected SwitchStatement parseSwitch() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.SWITCH).getSource();
+		accept(TokenType.LPAREN);
+		Expression condition = this.parseExpression();
+		accept(TokenType.RPAREN);
+		accept(TokenType.LBRACE);
+		
+		List<CaseStatement> cases = new ArrayList();
+		DefaultStatement defaultStatement = null;
+		
+		while (current.type != TokenType.RBRACE) {
+			if (current.type == TokenType.CASE) {
+				cases.add(this.parseCase());
+			}
+			else {
+				defaultStatement = this.parseDefault();
+				break;
+			}
+		}
+		
+		accept(TokenType.RBRACE);
+		
+		return new SwitchStatement(condition, cases, defaultStatement, source);
+	}
+	
+	protected CaseStatement parseCase() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.CASE).getSource();
+		accept(TokenType.LPAREN);
+		Expression condition = this.parseExpression();
+		accept(TokenType.RPAREN);
+		accept(TokenType.COLON);
+		
+		List<Statement> body = this.parseCompoundStatement();
+		
+		return new CaseStatement(condition, body, source);
+	}
+	
+	protected DefaultStatement parseDefault() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.DEFAULT).getSource();
+		accept(TokenType.COLON);
+		
+		List<Statement> body = this.parseCompoundStatement();
+		
+		return new DefaultStatement(body, source);
+	}
+	
+	protected BreakStatement parseBreak() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.BREAK).getSource();
 		accept(TokenType.SEMICOLON);
 		return new BreakStatement(source);
 	}
 	
-	public Statement parseContinue() throws PARSE_EXCEPTION {
+	protected ContinueStatement parseContinue() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.CONTINUE).getSource();
 		accept(TokenType.SEMICOLON);
 		return new ContinueStatement(source);
 	}
 	
-	public Statement parseIf() throws PARSE_EXCEPTION {
+	protected IfStatement parseIf() throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		accept(TokenType.IF);
 		accept(TokenType.LPAREN);
@@ -198,7 +249,7 @@ public class Parser {
 		return if0;
 	}
 	
-	public ForStatement parseFor() throws PARSE_EXCEPTION {
+	protected ForStatement parseFor() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.FOR).getSource();
 		accept(TokenType.LPAREN);
 		
@@ -218,7 +269,7 @@ public class Parser {
 		return new ForStatement(iterator, condition, increment, body, source);
 	}
 	
-	public WhileStatement parseWhile() throws PARSE_EXCEPTION {
+	protected WhileStatement parseWhile() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.WHILE).getSource();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
@@ -227,7 +278,7 @@ public class Parser {
 		return new WhileStatement(condition, body, source);
 	}
 	
-	public Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
+	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
 		Token id = accept(TokenType.IDENTIFIER);
 		accept(TokenType.LET);
 		Expression value = this.parseExpression();
@@ -235,7 +286,7 @@ public class Parser {
 		return new Assignment(id, value, id.source);
 	}
 	
-	public Declaration parseDeclaration() throws PARSE_EXCEPTION {
+	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		TYPE type = this.parseType();
 		Token id = accept(TokenType.IDENTIFIER);
@@ -250,18 +301,18 @@ public class Parser {
 		return new Declaration(id, type, value, source);
 	}
 	
-	public ReturnStatement parseReturn() throws PARSE_EXCEPTION {
+	protected ReturnStatement parseReturn() throws PARSE_EXCEPTION {
 		Token ret = accept(TokenType.RETURN);
 		Expression expr = this.parseExpression();
 		accept(TokenType.SEMICOLON);
 		return new ReturnStatement(expr, ret.getSource());
 	}
 	
-	public Expression parseExpression() throws PARSE_EXCEPTION {
+	protected Expression parseExpression() throws PARSE_EXCEPTION {
 			return this.parseOr();
 	}
 	
-	public Expression parseOr() throws PARSE_EXCEPTION {
+	protected Expression parseOr() throws PARSE_EXCEPTION {
 		Expression left = this.parseAnd();
 		while (current.type == TokenType.OR) {
 			accept();
@@ -270,7 +321,7 @@ public class Parser {
 		return left;
 	}
 	
-	public Expression parseAnd() throws PARSE_EXCEPTION {
+	protected Expression parseAnd() throws PARSE_EXCEPTION {
 		Expression left = this.parseCompare();
 		while (current.type == TokenType.AND) {
 			accept();
@@ -279,7 +330,7 @@ public class Parser {
 		return left;
 	}
 	
-	public Expression parseCompare() throws PARSE_EXCEPTION {
+	protected Expression parseCompare() throws PARSE_EXCEPTION {
 		Expression left = this.parseShift();
 		if (current.type.group == TokenGroup.COMPARE) {
 			Source source = current.getSource();
@@ -312,7 +363,7 @@ public class Parser {
 		return left;
 	}
 	
-	public Expression parseShift() throws PARSE_EXCEPTION {
+	protected Expression parseShift() throws PARSE_EXCEPTION {
 		Expression left = this.parseAddSub();
 		while (current.type == TokenType.LSL || current.type == TokenType.LSR) {
 			if (current.type == TokenType.LSL) {
@@ -327,7 +378,7 @@ public class Parser {
 		return left;
 	}
 	
-	public Expression parseAddSub() throws PARSE_EXCEPTION {
+	protected Expression parseAddSub() throws PARSE_EXCEPTION {
 		Expression left = this.parseMulDiv();
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
@@ -342,7 +393,7 @@ public class Parser {
 		return left;
 	}
 		
-	public Expression parseMulDiv() throws PARSE_EXCEPTION {
+	protected Expression parseMulDiv() throws PARSE_EXCEPTION {
 		Expression left = this.parseNot();
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV) {
 			if (current.type == TokenType.MUL) {
@@ -357,7 +408,7 @@ public class Parser {
 		return left;
 	}
 	
-	public Expression parseNot() throws PARSE_EXCEPTION {
+	protected Expression parseNot() throws PARSE_EXCEPTION {
 		Expression not = null;
 		while (current.type == TokenType.NOT) {
 			accept();
@@ -368,7 +419,7 @@ public class Parser {
 		return not;
 	}
 	
-	public Expression parseAtom() throws PARSE_EXCEPTION {
+	protected Expression parseAtom() throws PARSE_EXCEPTION {
 		if (current.type == TokenType.LPAREN) {
 			accept();
 			Expression expression = this.parseExpression();
@@ -404,7 +455,7 @@ public class Parser {
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 	}
 
-	public TYPE parseType() {
+	protected TYPE parseType() {
 		TYPE type = null;
 		while (current.type.group == TokenGroup.TYPE) {
 			if (current.type == TokenType.INT) {

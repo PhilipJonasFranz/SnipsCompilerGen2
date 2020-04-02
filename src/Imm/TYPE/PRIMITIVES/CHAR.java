@@ -2,7 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.TYPE;
 
-public class CHAR extends TYPE<Character> {
+public class CHAR extends PRIMITIVE<Character> {
 
 	public CHAR(String value) {
 		super(value);

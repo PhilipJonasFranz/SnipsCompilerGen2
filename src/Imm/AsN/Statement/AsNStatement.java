@@ -10,6 +10,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.SwitchStatement;
 import Imm.AsN.AsNNode;
 
 public abstract class AsNStatement extends AsNNode {
@@ -36,7 +37,10 @@ public abstract class AsNStatement extends AsNNode {
 		else if (s instanceof Assignment) {
 			node = AsNAssignment.cast((Assignment) s, r, st); 
 		}
-		else throw new CGEN_EXCEPTION(s.getSource(), "No cast available for " + s.getClass().getName());
+		else if (s instanceof SwitchStatement) {
+			node = AsNSwitchStatement.cast((SwitchStatement) s, r, st); 
+		}
+		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());
 	
 		s.castedNode = node;
 		return node;

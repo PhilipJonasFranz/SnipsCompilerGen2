@@ -2,7 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.TYPE;
 
-public class BOOL extends TYPE<Boolean> {
+public class BOOL extends PRIMITIVE<Boolean> {
 
 	public BOOL() {
 	

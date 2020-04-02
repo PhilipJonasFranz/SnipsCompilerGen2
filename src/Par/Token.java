@@ -58,11 +58,15 @@ public class Token {
 		FOR("for"),
 		BREAK("break"),
 		CONTINUE("continue"),
+		SWITCH("switch"),
+		CASE("case"),
+		DEFAULT("default"),
 		
 		/* Functions */
 		RETURN("return"),
 		
 		SEMICOLON(";"),
+		COLON(":"),
 		COMMA(","),
 		LET("="),
 		

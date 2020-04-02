@@ -2,7 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.TYPE;
 
-public class INT extends TYPE<Integer> {
+public class INT extends PRIMITIVE<Integer> {
 
 	public INT() {
 	

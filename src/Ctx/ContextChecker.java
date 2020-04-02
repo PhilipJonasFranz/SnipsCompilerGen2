@@ -17,16 +17,20 @@ import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class ContextChecker {
 
@@ -213,6 +217,59 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(c.getSource(), "Can only continue in the scope of a loop");
 		}
 		else c.superLoop = this.compoundStack.peek();
+		
+		return null;
+	}
+	
+	public TYPE checkSwitchStatement(SwitchStatement s) throws CTX_EXCEPTION {
+		if (!(s.condition instanceof IDRef)) {
+			throw new CTX_EXCEPTION(s.condition.getSource(), "Switch Condition has to be variable reference");
+		}
+		
+		TYPE type = s.condition.check(this);
+		if (!(type instanceof PRIMITIVE)) {
+			throw new CTX_EXCEPTION(s.condition.getSource(), "Switch Condition type " + type.typeString() + " has to be a primitive type");
+		}
+		
+		if (s.defaultStatement == null) {
+			throw new CTX_EXCEPTION(s.getSource(), "Missing default statement");
+		}
+		
+		for (CaseStatement c : s.cases) {
+			c.check(this);
+		}
+		
+		s.defaultStatement.check(this);
+		
+		return null;
+	}
+	
+	public TYPE checkCaseStatement(CaseStatement c) throws CTX_EXCEPTION {
+		TYPE type = c.condition.check(this);
+		
+		if (!type.isEqual(c.superStatement.condition.type)) {
+			throw new CTX_EXCEPTION(c.condition.getSource(), "Condition type " + type.typeString() + " does not switch condition type " + c.superStatement.condition.type.typeString());
+		}
+		
+		this.scopes.push(new Scope(this.scopes.peek()));
+		
+		for (Statement s : c.body) {
+			s.check(this);
+		}
+		
+		this.scopes.pop();
+		
+		return null;
+	}
+	
+	public TYPE checkDefaultStatement(DefaultStatement d) throws CTX_EXCEPTION {
+		this.scopes.push(new Scope(this.scopes.peek()));
+		
+		for (Statement s : d.body) {
+			s.check(this);
+		}
+		
+		this.scopes.pop();
 		
 		return null;
 	}

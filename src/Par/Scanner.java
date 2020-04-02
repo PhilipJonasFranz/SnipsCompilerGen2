@@ -90,6 +90,10 @@ public class Scanner {
 				tokens.add(new Token(TokenType.SEMICOLON, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals(":")) {
+				tokens.add(new Token(TokenType.COLON, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals(",")) {
 				tokens.add(new Token(TokenType.COMMA, new Source(i, a)));
 				this.emptyBuffer();
@@ -162,6 +166,24 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("for")) {
 				tokens.add(new Token(TokenType.FOR, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("switch")) {
+				tokens.add(new Token(TokenType.SWITCH, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("case")) {
+				tokens.add(new Token(TokenType.CASE, new Source(i, a)));
+				this.emptyBuffer();
+				this.ACC_STATE = ACCUM_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("default")) {
+				tokens.add(new Token(TokenType.DEFAULT, new Source(i, a)));
 				this.emptyBuffer();
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;

@@ -2,7 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.TYPE;
 
-public class FLOAT extends TYPE<Float> {
+public class FLOAT extends PRIMITIVE<Float> {
 
 	public FLOAT(String value) {
 		super(value);
