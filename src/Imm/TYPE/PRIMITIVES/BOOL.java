@@ -22,7 +22,11 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	}
 	
 	public String typeString() {
-		return "BOOL";
+		return "BOOL" + ((this.value != null)? ": " + this.value : "");
+	}
+
+	public String sourceCodeRepresentation() {
+		return (this.value)? "1" : "0";
 	}
 	
 }

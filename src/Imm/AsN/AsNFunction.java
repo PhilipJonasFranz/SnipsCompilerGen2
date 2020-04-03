@@ -11,9 +11,9 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Memory.ASMMemOp;
-import Imm.ASM.Memory.ASMPopStack;
-import Imm.ASM.Memory.ASMPushStack;
+import Imm.ASM.Memory.Stack.ASMPopStack;
+import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -162,18 +162,18 @@ public class AsNFunction extends AsNNode {
 	
 	public void patchFramePointerAddressing(int offset) throws CGEN_EXCEPTION {
 		for (ASMInstruction ins : this.instructions) {
-			if (ins instanceof ASMMemOp) {
-				ASMMemOp memOp = (ASMMemOp) ins;
-				if (memOp.op0 != null && memOp.op0.reg == REGISTER.FP) {
-					if (memOp.op1 instanceof PatchableImmOperand) {
-						PatchableImmOperand op = (PatchableImmOperand) memOp.op1;
+			if (ins instanceof ASMStackOp) {
+				ASMStackOp stackOp = (ASMStackOp) ins;
+				if (stackOp.op0 != null && stackOp.op0.reg == REGISTER.FP) {
+					if (stackOp.op1 instanceof PatchableImmOperand) {
+						PatchableImmOperand op = (PatchableImmOperand) stackOp.op1;
 						
 						/* Patch the offset for parameters because they are located under the pushed regs,
 						 * dont patch local data since its located above the pushed regs.
 						 */
 						if (op.dir == PATCH_DIR.UP) {
 							int val = op.patch(offset);
-							memOp.op1 = new ImmOperand(val);
+							stackOp.op1 = new ImmOperand(val);
 						}
 					}
 					else throw new CGEN_EXCEPTION(this.source.getSource(), "Cannot patch non-patchable imm operand!");

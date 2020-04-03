@@ -5,9 +5,10 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.ASMLdr;
-import Imm.ASM.Memory.ASMLdrStack;
-import Imm.ASM.Memory.ASMMemOp.MEM_OP;
-import Imm.ASM.Memory.ASMStrStack;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Memory.Stack.ASMLdrStack;
+import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
+import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -56,7 +57,10 @@ public class AsNIdRef extends AsNExpression {
 			
 			ASMDataLabel label = map.resolve(i.origin);
 			
-			ref.instructions.add(new ASMLdr(new RegOperand(target), new LabelOperand(label)));
+			/* Load memory address */
+			ref.instructions.add(new ASMLdrLabel(new RegOperand(target), new LabelOperand(label)));
+			
+			/* Load value from memory */
 			ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
 		}
 		else {

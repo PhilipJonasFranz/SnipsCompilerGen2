@@ -8,12 +8,12 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Memory.ASMStrStack;
-import Imm.ASM.Memory.ASMMemOp.MEM_OP;
+import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
+import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.SyntaxElement;
 

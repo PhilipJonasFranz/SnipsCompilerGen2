@@ -24,5 +24,9 @@ public class INT extends PRIMITIVE<Integer> {
 	public String typeString() {
 		return "INT" + ((this.value != null)? ": " + this.value : "");
 	}
+
+	public String sourceCodeRepresentation() {
+		return "" + this.value;
+	}
 	
 }

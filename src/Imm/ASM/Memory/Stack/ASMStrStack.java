@@ -1,10 +1,10 @@
-package Imm.ASM.Memory;
+package Imm.ASM.Memory.Stack;
 
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 
-public class ASMStrStack extends ASMMemOp {
+public class ASMStrStack extends ASMStackOp {
 
 	public ASMStrStack(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1) {
 		super(memOp, target, op0, op1);

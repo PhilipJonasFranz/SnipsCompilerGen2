@@ -1,10 +1,10 @@
-package Imm.ASM.Memory;
+package Imm.ASM.Memory.Stack;
 
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 
-public class ASMLdrStack extends ASMMemOp {
+public class ASMLdrStack extends ASMStackOp {
 
 			/* --- CONSTRUCTORS --- */
 	public ASMLdrStack(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1) {

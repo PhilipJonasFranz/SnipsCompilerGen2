@@ -14,9 +14,9 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOperand;
 import Imm.ASM.Util.Operands.Memory.MemoryWordRefOperand;
@@ -25,7 +25,6 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
-import Imm.TYPE.PRIMITIVES.INT;
 import Snips.CompilerDriver;
 
 public class AsNBody extends AsNNode {
@@ -52,7 +51,7 @@ public class AsNBody extends AsNNode {
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Declaration) {
 				Declaration dec = (Declaration) s;
-				int value = ((INT) ((Atom) dec.value).type).getValue();
+				Atom value = (Atom) dec.value;
 				
 				/* Create instruction for .data Section */
 				ASMDataLabel dataEntry = new ASMDataLabel(dec.fieldName, new MemoryWordOperand(value));

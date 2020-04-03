@@ -104,9 +104,7 @@ public class Token {
 		
 		/* Primitive Literals */
 		INTLIT("intlit",			TokenGroup.LITERAL),
-		
-		TRUE("true",			TokenGroup.LITERAL),
-		FALSE("false",			TokenGroup.LITERAL);
+		BOOLLIT("boollit",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,

@@ -20,5 +20,9 @@ public class FLOAT extends PRIMITIVE<Float> {
 	public void setValue(String value) {
 		this.value = Float.parseFloat(value);
 	}
+
+	public String sourceCodeRepresentation() {
+		return "0";
+	}
 	
 }

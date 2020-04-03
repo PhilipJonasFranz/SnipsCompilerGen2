@@ -138,9 +138,9 @@ public class Parser {
 	}
 	
 	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
-		Token type = accept(TokenGroup.TYPE);
+		TYPE type = this.parseType();
 		Token id = accept(TokenType.IDENTIFIER);
-		return new Declaration(id, TYPE.fromToken(type), type.getSource());
+		return new Declaration(id, type, id.getSource());
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
@@ -535,7 +535,7 @@ public class Parser {
 			Token token = accept();
 			return new Atom(new INT(token.spelling), token, token.source);
 		}
-		else if (current.type == TokenType.TRUE || current.type == TokenType.FALSE) {
+		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
 			return new Atom(new BOOL(token.spelling), token, token.source);
 		}

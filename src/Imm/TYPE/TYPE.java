@@ -1,10 +1,5 @@
 package Imm.TYPE;
 
-import Imm.TYPE.PRIMITIVES.BOOL;
-import Imm.TYPE.PRIMITIVES.INT;
-import Par.Token;
-import Par.Token.TokenType;
-
 public abstract class TYPE<T> {
 
 			/* --- FIELDS --- */
@@ -36,18 +31,8 @@ public abstract class TYPE<T> {
 		return this.value;
 	}
 	
-	public static TYPE fromToken(Token token) {
-		// TODO Implement other types
-		if (token.type() == TokenType.INT) {
-			return new INT();
-		}
-		else if (token.type() == TokenType.BOOL) {
-			return new BOOL();
-		}
-		else return null;
-	}
-	
 	public abstract String typeString();
 	
+	public abstract String sourceCodeRepresentation();
 	
 }

@@ -1,15 +1,18 @@
 package Imm.ASM.Util.Operands.Memory;
 
+import Imm.AST.Expression.Atom;
+
 public class MemoryWordOperand extends MemoryOperand {
 
-	public int value;
+	public Atom value;
 	
-	public MemoryWordOperand(int value) {
-		this.value = value;
+	public MemoryWordOperand(Atom atom) {
+		this.value = atom;
 	}
 	
 	public String toString() {
-		return ".word " + this.value;
+		/* Use the type to string conversion to display type as number */
+		return ".word " + this.value.type.sourceCodeRepresentation();
 	}
 	
 }

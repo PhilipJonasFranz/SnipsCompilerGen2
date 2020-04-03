@@ -125,11 +125,11 @@ public class Scanner {
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("true")) {
-				tokens.add(new Token(TokenType.TRUE, new Source(i, a)));
+				tokens.add(new Token(TokenType.BOOLLIT, new Source(i, a), "true"));
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("false")) {
-				tokens.add(new Token(TokenType.FALSE, new Source(i, a)));
+				tokens.add(new Token(TokenType.BOOLLIT, new Source(i, a), "false"));
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("else")) {

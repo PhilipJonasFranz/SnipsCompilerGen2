@@ -1,0 +1,12 @@
+SOURCE
+int x = 3;
+bool y = true;
+bool z = false;
+
+int main(int a) {
+	return (y && z)? a * x : a;
+}
+TESTCASES
+0 0
+3 3
+4 4
