@@ -22,7 +22,7 @@ public class CHAR extends PRIMITIVE<Character> {
 	}
 
 	public String sourceCodeRepresentation() {
-		return (int) this.value;
+		return this.value.toString();
 	}
 	
 }

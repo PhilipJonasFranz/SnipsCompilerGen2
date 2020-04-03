@@ -42,14 +42,14 @@ public class TestDriver {
 	
 	
 			/* --- FIELDS --- */
-	/** The Milliseconds the program can run on the processor until it timeouts */
+	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200;
 	
 	public boolean detailedCompilerMessages = false;
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
-	public boolean printResult = true;
+	public boolean printResult = false;
 	
 	
 			/* --- METHODS --- */

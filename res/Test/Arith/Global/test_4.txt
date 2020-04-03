@@ -1,0 +1,11 @@
+SOURCE
+int x = 3;
+
+int main(int a) {
+	x = x * a;
+	return x;
+}
+TESTCASES
+0 0
+3 9
+4 12

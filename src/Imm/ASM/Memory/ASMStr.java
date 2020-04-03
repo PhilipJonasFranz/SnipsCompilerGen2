@@ -10,6 +10,10 @@ public class ASMStr extends ASMMemOp {
 		super(target, op0, op1);
 	}
 	
+	public ASMStr(RegOperand target, Operand op0) {
+		super(target, op0, null);
+	}
+	
 			/* --- METHODS --- */
 	/**
 	 * Calls build of ASMMemOp with class as parameter.

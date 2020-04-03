@@ -4,9 +4,13 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -27,23 +31,21 @@ public class AsNAssignment extends AsNStatement {
 			int reg = r.declarationRegLocation(a.origin);
 			assign.instructions.add(new ASMMov(new RegOperand(reg), new RegOperand(0)));
 		}
-		/* Not loaded, store value to stack or into register */
-		else {
-			int free = r.findFree();
+		/* Variable is global variable, store to memory */
+		else if (map.declarationLoaded(a.origin)) {
+			ASMDataLabel label = map.resolve(a.origin);
 			
-			if (free != -1) {
-				if (a.value != null) {
-					assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
-				}
-				assign.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(0)));
-				r.copy(0, free);
-			}
-			else {
-				/* Store to stack */
-				int off = st.getDeclarationInStackByteOffset(a.origin);
-				assign.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
-						new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
-			}
+			/* Load memory address */
+			assign.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
+			
+			/* Store computed to memory */
+			assign.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+		}
+		/* Store to stack */
+		else {
+			int off = st.getDeclarationInStackByteOffset(a.origin);
+			assign.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
+					new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
 		}
 		
 		return assign;

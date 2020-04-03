@@ -43,5 +43,11 @@ public class STRUCT extends TYPE {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String sourceCodeRepresentation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
