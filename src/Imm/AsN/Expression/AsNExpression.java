@@ -1,5 +1,6 @@
 package Imm.AsN.Expression;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -16,27 +17,27 @@ import Imm.AsN.Expression.Boolean.AsNTernary;
 public abstract class AsNExpression extends AsNNode {
 
 			/* --- METHODS --- */
-	public static AsNExpression cast(Expression e, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to Expression type */
 		AsNExpression node = null;
 		
 		if (e instanceof BinaryExpression) {
-			node = AsNBinaryExpression.cast((BinaryExpression) e, r, st);
+			node = AsNBinaryExpression.cast((BinaryExpression) e, r, map, st);
 		}
 		else if (e instanceof UnaryExpression) {
-			node = AsNUnaryExpression.cast((UnaryExpression) e, r, st);
+			node = AsNUnaryExpression.cast((UnaryExpression) e, r, map, st);
 		}
 		else if (e instanceof InlineCall) {
-			node = AsNInlineCall.cast((InlineCall) e, r, st);
+			node = AsNInlineCall.cast((InlineCall) e, r, map, st);
 		}
 		else if (e instanceof Ternary) {
-			node = AsNTernary.cast((Ternary) e, r, st);
+			node = AsNTernary.cast((Ternary) e, r, map, st);
 		}
 		else if (e instanceof IDRef) {
-			node = AsNIdRef.cast((IDRef) e, r, st, 0);
+			node = AsNIdRef.cast((IDRef) e, r, map, st, 0);
 		}
 		else if (e instanceof Atom) {
-			node = AsNAtom.cast((Atom) e, r, st); 
+			node = AsNAtom.cast((Atom) e, r, map, st); 
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	

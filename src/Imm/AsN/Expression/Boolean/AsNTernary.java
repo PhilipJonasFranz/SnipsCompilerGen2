@@ -1,6 +1,7 @@
 package Imm.AsN.Expression.Boolean;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -20,13 +21,13 @@ import Imm.AsN.Expression.AsNExpression;
 public class AsNTernary extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNTernary cast(Ternary t, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNTernary tern = new AsNTernary();
 		
 		tern.clearReg(r, st, 0, 1, 2);
 		
 		/* Cast condition */
-		AsNExpression expr = AsNExpression.cast(t.condition, r, st);
+		AsNExpression expr = AsNExpression.cast(t.condition, r, map, st);
 		
 		/* The Target that is branched to if the condition is false */
 		ASMLabel loadFalse = new ASMLabel(LabelGen.getLabel());
@@ -62,7 +63,7 @@ public class AsNTernary extends AsNExpression {
 		}
 		
 		/* Load true result */
-		tern.instructions.addAll(AsNExpression.cast(t.leftOperand, r, st).getInstructions());
+		tern.instructions.addAll(AsNExpression.cast(t.leftOperand, r, map, st).getInstructions());
 		
 		/* Branch to end */
 		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(end)));
@@ -71,7 +72,7 @@ public class AsNTernary extends AsNExpression {
 		tern.instructions.add(loadFalse);
 		
 		/* Load false result */
-		tern.instructions.addAll(AsNExpression.cast(t.rightOperand, r, st).getInstructions());
+		tern.instructions.addAll(AsNExpression.cast(t.rightOperand, r, map, st).getInstructions());
 		
 		/* Add end */
 		tern.instructions.add(end);

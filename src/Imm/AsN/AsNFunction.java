@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -39,7 +40,7 @@ public class AsNFunction extends AsNNode {
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNFunction func = new AsNFunction();
 		f.castedNode = func;
 		func.source = f;
@@ -76,7 +77,7 @@ public class AsNFunction extends AsNNode {
 		
 		/* Cast all statements and add all instructions */
 		for (Statement s : f.statements) 
-			func.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+			func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
 		
 		
 		/* Check if other function is called within this function */

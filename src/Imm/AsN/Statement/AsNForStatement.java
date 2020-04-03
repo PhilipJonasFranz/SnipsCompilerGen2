@@ -1,6 +1,7 @@
 package Imm.AsN.Statement;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -22,7 +23,7 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNForStatement cast(ForStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNForStatement f = new AsNForStatement();
 		a.castedNode = f;
 		
@@ -34,7 +35,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		st.openScope();
 		
 		/* Initialize iterator */
-		f.instructions.addAll(AsNDeclaration.cast(a.iterator, r, st).getInstructions());
+		f.instructions.addAll(AsNDeclaration.cast(a.iterator, r, map, st).getInstructions());
 		
 		/* Open scope for condition, body and increment statement */
 		st.openScope();
@@ -50,7 +51,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.breakJump = forEnd;
 		
 		/* Cast condition */
-		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
+		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
 		if (expr instanceof AsNCmp) {
 			/* Top Comparison */
@@ -82,13 +83,13 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		/* Add body */
 		for (Statement s : a.body) 
-			f.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+			f.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
 		
 		/* Add jump for continue statements to use as target */
 		f.instructions.add(continueJump);
 		
 		/* Add increment */
-		f.instructions.addAll(AsNAssignment.cast(a.increment, r, st).getInstructions());
+		f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */
 		f.popDeclarationScope(a, r, st);

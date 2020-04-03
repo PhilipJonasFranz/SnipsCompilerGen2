@@ -1,0 +1,8 @@
+SOURCE
+int x = 3;
+
+int main(int a) {
+	return a * x;
+}
+TESTCASES
+100

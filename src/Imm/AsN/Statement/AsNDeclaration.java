@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -15,11 +16,11 @@ import Imm.AsN.Expression.AsNExpression;
 
 public class AsNDeclaration extends AsNStatement {
 
-	public static AsNDeclaration cast(Declaration d, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNDeclaration cast(Declaration d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNDeclaration dec = new AsNDeclaration();
 		
 		// TODO Only works for 1 Word Datatypes */
-		dec.instructions.addAll(AsNExpression.cast(d.value, r, st).getInstructions());
+		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
 		
 		int free = r.findFree();
 		if (free != -1 && d.type.wordSize == 1) {

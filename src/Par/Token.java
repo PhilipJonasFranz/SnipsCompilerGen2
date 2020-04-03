@@ -103,7 +103,10 @@ public class Token {
 		TYPE("type", 				TokenGroup.TYPE),
 		
 		/* Primitive Literals */
-		INTLIT("intlit",			TokenGroup.LITERAL);
+		INTLIT("intlit",			TokenGroup.LITERAL),
+		
+		TRUE("true",			TokenGroup.LITERAL),
+		FALSE("false",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,

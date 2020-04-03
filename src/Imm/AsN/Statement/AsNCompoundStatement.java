@@ -3,6 +3,7 @@ package Imm.AsN.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -17,12 +18,12 @@ import Imm.AST.Statement.Statement;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
-	public static AsNCompoundStatement cast(CompoundStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNCompoundStatement cast(CompoundStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNCompoundStatement node = null;
 		
 		if (s instanceof ConditionalCompoundStatement) {
-			node = AsNConditionalCompoundStatement.cast((ConditionalCompoundStatement) s, r, st);
+			node = AsNConditionalCompoundStatement.cast((ConditionalCompoundStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 		
@@ -64,13 +65,13 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	/**
 	 * Opens a new scope, inserts the body of the compound statement, closes the scope and resets the stack.
 	 */
-	protected void addBody(CompoundStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	protected void addBody(CompoundStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Open a new Scope in the stack */
 		st.openScope();
 		
 		/* True Body */
 		for (Statement s : a.body) 
-			this.instructions.addAll(AsNStatement.cast(s, r, st).getInstructions());
+			this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */
 		this.popDeclarationScope(a, r, st);

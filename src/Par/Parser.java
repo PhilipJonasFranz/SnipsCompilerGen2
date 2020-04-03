@@ -41,6 +41,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
@@ -101,17 +102,21 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		while (this.current.type != TokenType.EOF) {
-			if (this.current.type().group == TokenGroup.TYPE) {
-				elements.add(this.parseFunction());
+			TYPE type = this.parseType();
+			Token identifier = accept(TokenType.IDENTIFIER);
+			
+			if (current.type == TokenType.LPAREN) {
+				elements.add(this.parseFunction(type, identifier));
+			}
+			else {
+				elements.add(this.parseGlobalDeclaration(type, identifier));
 			}
 		}
 		
 		return new Program(elements, source);
 	}
 	
-	protected Function parseFunction() throws PARSE_EXCEPTION {
-		Token type = accept();
-		Token id = accept(TokenType.IDENTIFIER);
+	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {
 		accept(TokenType.LPAREN);
 		
 		List<Declaration> parameters = new ArrayList();
@@ -129,7 +134,7 @@ public class Parser {
 		
 		List<Statement> body = this.parseCompoundStatement(true);
 		
-		return new Function(TYPE.fromToken(type), id, parameters, body, type.source);
+		return new Function(returnType, identifier, parameters, body, identifier.source);
 	}
 	
 	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
@@ -312,6 +317,18 @@ public class Parser {
 		return new Assignment(id, value, id.source);
 	}
 	
+	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier) throws PARSE_EXCEPTION {
+		Expression value = null;
+		
+		if (current.type == TokenType.LET) {
+			accept();
+			value = this.parseExpression();
+		}
+		
+		accept(TokenType.SEMICOLON);
+		return new Declaration(identifier, type, value, identifier.source);
+	}
+	
 	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		TYPE type = this.parseType();
@@ -445,7 +462,7 @@ public class Parser {
 				params.add(left);
 				params.add(this.parseNot());
 				
-				/* Create inline call to libary function, add mod operator to referenced libaries */
+				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_div"), params, source);
 				CompilerDriver.driver.referencedLibaries.add("lib/Operator/Div/__op_div.sn");
 			}
@@ -518,6 +535,10 @@ public class Parser {
 			Token token = accept();
 			return new Atom(new INT(token.spelling), token, token.source);
 		}
+		else if (current.type == TokenType.TRUE || current.type == TokenType.FALSE) {
+			Token token = accept();
+			return new Atom(new BOOL(token.spelling), token, token.source);
+		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 	}
 
@@ -527,6 +548,10 @@ public class Parser {
 			if (current.type == TokenType.INT) {
 				accept();
 				type = new INT();
+			}
+			else if (current.type == TokenType.BOOL) {
+				accept();
+				type = new BOOL();
 			}
 		}
 		

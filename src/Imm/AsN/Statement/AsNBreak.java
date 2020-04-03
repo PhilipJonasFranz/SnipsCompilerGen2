@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -11,7 +12,7 @@ import Imm.AST.Statement.BreakStatement;
 
 public class AsNBreak extends AsNStatement {
 
-	public static AsNBreak cast(BreakStatement b, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNBreak cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNBreak br = new AsNBreak();
 		
 		/* Retrieve the jump label target from the super loop */

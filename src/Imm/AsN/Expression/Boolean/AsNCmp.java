@@ -1,5 +1,6 @@
 package Imm.AsN.Expression.Boolean;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -28,19 +29,19 @@ public class AsNCmp extends AsNBinaryExpression {
 	 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
 	 * expression is true, #0 if not.
 	 */
-	public static AsNCmp cast(Compare c, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNCmp cast(Compare c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNCmp cmp = new AsNCmp();
 		
 		/* Clear only R0, R1 since R2 is not needed */
 		cmp.clearReg(r, st, 0, 1);
 		
 		if (c.right() instanceof Atom) {
-			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, st).getInstructions());
+			cmp.instructions.addAll(AsNExpression.cast(c.left(), r, map, st).getInstructions());
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.right()).type).value)));
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */
-			cmp.generatePrimitiveLoaderCode(cmp, c, r, st, 0, 1);
+			cmp.generatePrimitiveLoaderCode(cmp, c, r, map, st, 0, 1);
 			
 			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}

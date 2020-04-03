@@ -1,6 +1,7 @@
 package Imm.AsN.Statement;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -25,7 +26,7 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNSwitchStatement cast(SwitchStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNSwitchStatement cast(SwitchStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNSwitchStatement sw = new AsNSwitchStatement();
 		s.castedNode = sw;
 		
@@ -37,13 +38,13 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		ASMLabel next = new ASMLabel(LabelGen.getLabel());
 		
 		for (CaseStatement cs : s.cases) {
-			sw.evaluateCondition(cs.condition, r, st, next);
+			sw.evaluateCondition(cs.condition, r, map, st, next);
 			
 			/* Open scope for case body */
 			st.openScope();
 			
 			for (Statement s0 : cs.body) 
-				sw.instructions.addAll(AsNStatement.cast(s0, r, st).getInstructions());
+				sw.instructions.addAll(AsNStatement.cast(s0, r, map, st).getInstructions());
 			
 			/* Pop Case body scope */
 			sw.popDeclarationScope(cs, r, st);
@@ -62,7 +63,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		st.openScope();
 		
 		for (Statement s0 : s.defaultStatement.body) 
-			sw.instructions.addAll(AsNStatement.cast(s0, r, st).getInstructions());
+			sw.instructions.addAll(AsNStatement.cast(s0, r, map, st).getInstructions());
 		
 		sw.popDeclarationScope(s.defaultStatement, r, st);
 		
@@ -72,9 +73,9 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		return sw;
 	}
 	
-	public void evaluateCondition(Expression condition, RegSet r, StackSet st, ASMLabel next) throws CGEN_EXCEPTION {
+	public void evaluateCondition(Expression condition, RegSet r, MemoryMap map, StackSet st, ASMLabel next) throws CGEN_EXCEPTION {
 		/* Cast condition */
-		AsNExpression expr = AsNExpression.cast(condition, r, st);
+		AsNExpression expr = AsNExpression.cast(condition, r, map, st);
 		
 		if (expr instanceof AsNCmp) {
 			/* Top Comparison */

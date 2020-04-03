@@ -1,12 +1,13 @@
 package Imm.AsN.Expression;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Stack.ASMLdrStack;
-import Imm.ASM.Stack.ASMStrStack;
 import Imm.ASM.Stack.ASMMemOp.MEM_OP;
+import Imm.ASM.Stack.ASMStrStack;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -16,7 +17,7 @@ import Imm.AST.Expression.IDRef;
 public class AsNIdRef extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNIdRef cast(IDRef i, RegSet r, StackSet st, int target) throws CGEN_EXCEPTION {
+	public static AsNIdRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
 		AsNIdRef ref = new AsNIdRef();
 		i.castedNode = ref;
 		

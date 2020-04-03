@@ -1,5 +1,6 @@
 package Imm.AsN.Expression.Boolean;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -20,7 +21,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 public class AsNOr extends AsNBinaryExpression {
 
 			/* --- METHODS --- */
-	public static AsNOr cast(Or o, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNOr cast(Or o, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNOr or = new AsNOr();
 		
 		/* Clear only R0, R1 since R2 is not needed */
@@ -37,7 +38,7 @@ public class AsNOr extends AsNBinaryExpression {
 				or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			}
 			else {
-				or.instructions.addAll(AsNExpression.cast(o.right(), r, st).getInstructions());
+				or.instructions.addAll(AsNExpression.cast(o.right(), r, map, st).getInstructions());
 				
 				or.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				
@@ -51,7 +52,7 @@ public class AsNOr extends AsNBinaryExpression {
 				or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			}
 			else {
-				or.instructions.addAll(AsNExpression.cast(o.left(), r, st).getInstructions());
+				or.instructions.addAll(AsNExpression.cast(o.left(), r, map, st).getInstructions());
 				
 				or.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				
@@ -61,7 +62,7 @@ public class AsNOr extends AsNBinaryExpression {
 		}
 		else {
 			/* Load Operands */
-			or.generatePrimitiveLoaderCode(or, o, r, st, 0, 1);
+			or.generatePrimitiveLoaderCode(or, o, r, map, st, 0, 1);
 			
 			ASMOrr orr = new ASMOrr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
 			orr.updateConditionField = true;

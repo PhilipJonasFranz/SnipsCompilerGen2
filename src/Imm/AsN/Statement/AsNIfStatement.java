@@ -1,6 +1,7 @@
 package Imm.AsN.Statement;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -20,13 +21,13 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNIfStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNIfStatement cast(IfStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNIfStatement cast(IfStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNIfStatement if0 = new AsNIfStatement();
 		
-		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
+		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
 		if (expr instanceof AsNCmp) {
-			if0.topComparison(a, (AsNCmp) expr, r, st);
+			if0.topComparison(a, (AsNCmp) expr, r, map, st);
 			return if0;
 		}
 		else {
@@ -42,7 +43,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
 			
 			/* Add Body */
-			if0.addBody(a, r, st);
+			if0.addBody(a, r, map, st);
 			
 			if (a.elseStatement != null) if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 			
@@ -50,7 +51,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			if (elseS != null) if0.instructions.add(elseTarget);
 			while (elseS != null) {
 				if (elseS.condition != null) {
-					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, st).getInstructions());
+					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, map, st).getInstructions());
 					
 					if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 					
@@ -61,7 +62,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				}
 				
 				/* Add Body */
-				if0.addBody(elseS, r, st);
+				if0.addBody(elseS, r, map, st);
 				
 				if (elseS.elseStatement != null) {
 					/* Jump to end after body */
@@ -79,7 +80,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		}
 	}
 	
-	protected void topComparison(IfStatement a, AsNCmp com, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	protected void topComparison(IfStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		COND neg = com.neg;
 		
 		/* Remove Conditional results */
@@ -104,7 +105,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		/* Add Body */
-		this.addBody(a, r, st);
+		this.addBody(a, r, map, st);
 		
 		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endTarget)));
 		
@@ -114,10 +115,10 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		while (elseS != null) {
 			/* Else If Statement */
 			if (elseS.condition != null) {
-				AsNExpression expr = AsNExpression.cast(elseS.condition, r, st);
+				AsNExpression expr = AsNExpression.cast(elseS.condition, r, map, st);
 				
 				if (expr instanceof AsNCmp) {
-					this.topComparison(elseS, (AsNCmp) expr, r, st);
+					this.topComparison(elseS, (AsNCmp) expr, r, map, st);
 					this.instructions.add(endTarget);
 					return;
 				}
@@ -134,7 +135,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			}
 			
 			/* Add Body */
-			this.addBody(elseS, r, st);
+			this.addBody(elseS, r, map, st);
 			
 			if (elseS.elseStatement != null) {
 				/* Jump to end */

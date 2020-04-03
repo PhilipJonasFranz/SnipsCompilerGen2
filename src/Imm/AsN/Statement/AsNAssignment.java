@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -15,11 +16,11 @@ import Imm.AsN.Expression.AsNExpression;
 
 public class AsNAssignment extends AsNStatement {
 
-	public static AsNAssignment cast(Assignment a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNAssignment cast(Assignment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNAssignment assign = new AsNAssignment();
 		
 		/* Compute value */
-		assign.instructions.addAll(AsNExpression.cast(a.value, r, st).getInstructions());
+		assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
 		
 		/* Declaration already loaded, just move value into register */
 		if (r.declarationLoaded(a.origin)) {
@@ -32,7 +33,7 @@ public class AsNAssignment extends AsNStatement {
 			
 			if (free != -1) {
 				if (a.value != null) {
-					assign.instructions.addAll(AsNExpression.cast(a.value, r, st).getInstructions());
+					assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
 				}
 				assign.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(0)));
 				r.copy(0, free);

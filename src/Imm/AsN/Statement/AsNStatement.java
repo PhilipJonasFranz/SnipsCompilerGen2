@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -15,30 +16,30 @@ import Imm.AsN.AsNNode;
 
 public abstract class AsNStatement extends AsNNode {
 
-	public static AsNStatement cast(Statement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNStatement cast(Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNStatement node = null;
 		
 		if (s instanceof CompoundStatement) {
-			node = AsNCompoundStatement.cast((CompoundStatement) s, r, st);
+			node = AsNCompoundStatement.cast((CompoundStatement) s, r, map, st);
 		}
 		else if (s instanceof ReturnStatement) {
-			node = AsNReturn.cast((ReturnStatement) s, r, st); 
+			node = AsNReturn.cast((ReturnStatement) s, r, map, st); 
 		}
 		else if (s instanceof BreakStatement) {
-			node = AsNBreak.cast((BreakStatement) s, r, st); 
+			node = AsNBreak.cast((BreakStatement) s, r, map, st); 
 		}
 		else if (s instanceof ContinueStatement) {
-			node = AsNContinue.cast((ContinueStatement) s, r, st); 
+			node = AsNContinue.cast((ContinueStatement) s, r, map, st); 
 		}
 		else if (s instanceof Declaration) {
-			node = AsNDeclaration.cast((Declaration) s, r, st);
+			node = AsNDeclaration.cast((Declaration) s, r, map, st);
 		}
 		else if (s instanceof Assignment) {
-			node = AsNAssignment.cast((Assignment) s, r, st); 
+			node = AsNAssignment.cast((Assignment) s, r, map, st); 
 		}
 		else if (s instanceof SwitchStatement) {
-			node = AsNSwitchStatement.cast((SwitchStatement) s, r, st); 
+			node = AsNSwitchStatement.cast((SwitchStatement) s, r, map, st); 
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());
 	

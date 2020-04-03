@@ -1,5 +1,6 @@
 package Imm.AsN.Expression.Arith;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -14,14 +15,14 @@ import Imm.AsN.Expression.AsNUnaryExpression;
 public class AsNUnaryMinus extends AsNUnaryExpression {
 
 			/* --- METHODS --- */
-	public static AsNUnaryMinus cast(UnaryMinus m, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNUnaryMinus cast(UnaryMinus m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNUnaryMinus minus = new AsNUnaryMinus();
 		
 		/* Clear only R0 */
 		minus.clearReg(r, st, 0);
 		
 		/* Load Operand */
-		minus.instructions.addAll(AsNExpression.cast(m.operand(), r, st).getInstructions());
+		minus.instructions.addAll(AsNExpression.cast(m.operand(), r, map, st).getInstructions());
 	
 		/* 0 - Operand */
 		minus.instructions.add(new ASMRsb(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(0)));

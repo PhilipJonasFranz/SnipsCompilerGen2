@@ -3,6 +3,7 @@ package Imm.AsN;
 import java.util.ArrayList;
 import java.util.List;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -26,7 +27,7 @@ public abstract class AsNNode {
 	/**
 	 * Casts given syntax element based on the given reg set to a asm node. 
 	 */
-	public static AsNNode cast(SyntaxElement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNNode cast(SyntaxElement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		return null;
 	}
 	

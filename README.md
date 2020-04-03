@@ -8,7 +8,7 @@
  - Implement Bitwise Operations
  - Implement global variables
 
-### v.2.0.0: Extended type system
+### v.2.0.0: Extended type system, extended functionality
  - Implement import system
  - Implement Heap System
  - Implement Arrays

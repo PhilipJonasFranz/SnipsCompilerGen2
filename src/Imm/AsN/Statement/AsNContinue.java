@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -11,7 +12,7 @@ import Imm.AST.Statement.ContinueStatement;
 
 public class AsNContinue extends AsNStatement {
 
-	public static AsNContinue cast(ContinueStatement c, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNContinue cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNContinue con = new AsNContinue();
 		
 		/* Retrieve the jump label target from the super loop */

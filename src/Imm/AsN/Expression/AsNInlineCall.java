@@ -2,6 +2,7 @@ package Imm.AsN.Expression;
 
 import java.util.List;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -23,7 +24,7 @@ import Util.Pair;
 public class AsNInlineCall extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNInlineCall cast(InlineCall ic, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNInlineCall cast(InlineCall ic, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
 		
@@ -38,7 +39,7 @@ public class AsNInlineCall extends AsNExpression {
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.tpl_2() == -1) {
-				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, map, st).getInstructions());
 				call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				r.getReg(0).free();
 			}
@@ -48,7 +49,7 @@ public class AsNInlineCall extends AsNExpression {
 		for (int i = mapping.size() - 1; i >= 0; i--) {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.tpl_2() != -1) {
-				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, st).getInstructions());
+				call.instructions.addAll(AsNExpression.cast(ic.parameters.get(i), r, map, st).getInstructions());
 				
 				/* Leave First Parameter directley in R0 */
 				if (p.tpl_2() > 0) call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));

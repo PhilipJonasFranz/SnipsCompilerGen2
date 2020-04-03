@@ -1,5 +1,6 @@
 package Imm.AsN.Expression.Arith;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -11,10 +12,10 @@ import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNLsl extends AsNBinaryExpression {
 
-	public static AsNLsl cast(Lsl l, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNLsl cast(Lsl l, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNLsl lsl = new AsNLsl();
 		
-		lsl.generateLoaderCode(lsl, l, r, st, (x, y) -> x << y, 
+		lsl.generateLoaderCode(lsl, l, r, map, st, (x, y) -> x << y, 
 				new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 			
 		return lsl;

@@ -2,6 +2,7 @@ package Imm.AsN;
 
 import java.util.List;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -26,6 +27,8 @@ public class AsNBody extends AsNNode {
 	public static AsNBody cast(Program p) throws CGEN_EXCEPTION {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
+		
+		MemoryMap map = new MemoryMap();
 		
 		/* File name comment */
 		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName()));
@@ -62,7 +65,7 @@ public class AsNBody extends AsNNode {
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
-				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), new StackSet()).getInstructions();
+				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, new StackSet()).getInstructions();
 				
 				/* Patch Branch to Main Function */
 				if (((Function) s).functionName.equals("main")) 

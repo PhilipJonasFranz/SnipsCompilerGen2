@@ -124,6 +124,14 @@ public class Scanner {
 				tokens.add(new Token(TokenType.IF, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("true")) {
+				tokens.add(new Token(TokenType.TRUE, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("false")) {
+				tokens.add(new Token(TokenType.FALSE, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("else")) {
 				tokens.add(new Token(TokenType.ELSE, new Source(i, a)));
 				this.emptyBuffer();

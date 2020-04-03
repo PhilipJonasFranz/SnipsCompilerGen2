@@ -1,0 +1,14 @@
+int __op_mod(int a, int b) {
+    int s = b;
+    while (s <= a) {
+        s = s << 1;
+    }
+    int r = a;
+    while (r >= b) {
+        s = s >> 1;
+        if (s <= r) {    
+            r = r - s;
+        }
+    }
+    return r;
+}

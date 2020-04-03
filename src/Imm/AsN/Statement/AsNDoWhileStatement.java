@@ -1,6 +1,7 @@
 package Imm.AsN.Statement;
 
 import CGen.LabelGen;
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -20,14 +21,14 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNDoWhileStatement w = new AsNDoWhileStatement();
 		a.castedNode = w;
 		
-		AsNExpression expr = AsNExpression.cast(a.condition, r, st);
+		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
 		if (expr instanceof AsNCmp) {
-			w.topComparison(a, (AsNCmp) expr, r, st);
+			w.topComparison(a, (AsNCmp) expr, r, map, st);
 		}
 		else {
 			ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
@@ -42,7 +43,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.add(whileStart);
 			
 			/* Add Body */
-			w.addBody(a, r, st);
+			w.addBody(a, r, map, st);
 			
 			/* Add jump for continue statements to use as target */
 			w.instructions.add(continueJump);
@@ -66,7 +67,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		return w;
 	}
 	
-	protected void topComparison(DoWhileStatement a, AsNCmp com, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	protected void topComparison(DoWhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
 		this.continueJump = continueJump;
 		
@@ -77,7 +78,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		this.instructions.add(whileStart);
 		
 		/* Add Body */
-		this.addBody(a, r, st);
+		this.addBody(a, r, map, st);
 		
 		/* Add jump for continue statements to use as target */
 		this.instructions.add(continueJump);

@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -16,21 +17,21 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	
 	public ASMLabel continueJump;
 	
-	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Relay to statement type cast */
 		AsNConditionalCompoundStatement node = null;
 		
 		if (s instanceof IfStatement) {
-			node = AsNIfStatement.cast((IfStatement) s, r, st);
+			node = AsNIfStatement.cast((IfStatement) s, r, map, st);
 		}
 		else if (s instanceof WhileStatement) {
-			node = AsNWhileStatement.cast((WhileStatement) s, r, st);
+			node = AsNWhileStatement.cast((WhileStatement) s, r, map, st);
 		}
 		else if (s instanceof DoWhileStatement) {
-			node = AsNDoWhileStatement.cast((DoWhileStatement) s, r, st);
+			node = AsNDoWhileStatement.cast((DoWhileStatement) s, r, map, st);
 		}
 		else if (s instanceof ForStatement) {
-			node = AsNForStatement.cast((ForStatement) s, r, st);
+			node = AsNForStatement.cast((ForStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 	

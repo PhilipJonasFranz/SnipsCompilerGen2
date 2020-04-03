@@ -1,5 +1,6 @@
 package Imm.AsN.Expression.Boolean;
 
+import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
@@ -20,7 +21,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 public class AsNAnd extends AsNBinaryExpression {
 
 			/* --- METHODS --- */
-	public static AsNAnd cast(And a, RegSet r, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNAnd cast(And a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNAnd and = new AsNAnd();
 		
 		/* Clear only R0, R1 since R2 is not needed */
@@ -37,7 +38,7 @@ public class AsNAnd extends AsNBinaryExpression {
 				and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			}
 			else {
-				and.instructions.addAll(AsNExpression.cast(a.right(), r, st).getInstructions());
+				and.instructions.addAll(AsNExpression.cast(a.right(), r, map, st).getInstructions());
 				
 				and.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				
@@ -51,7 +52,7 @@ public class AsNAnd extends AsNBinaryExpression {
 				and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			}
 			else {
-				and.instructions.addAll(AsNExpression.cast(a.left(), r, st).getInstructions());
+				and.instructions.addAll(AsNExpression.cast(a.left(), r, map, st).getInstructions());
 				
 				and.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				
@@ -61,7 +62,7 @@ public class AsNAnd extends AsNBinaryExpression {
 		}
 		else {
 			/* Load Operands */
-			and.generatePrimitiveLoaderCode(and, a, r, st, 0, 1);
+			and.generatePrimitiveLoaderCode(and, a, r, map, st, 0, 1);
 			
 			/* Perform and */
 			ASMAdd and0 = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(0));
