@@ -1,6 +1,6 @@
 package Imm.ASM.Util.Operands;
 
-import Imm.ASM.Structural.ASMLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 
 public class LabelOperand extends Operand {
 

@@ -1,8 +1,10 @@
 package CGen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.AST.Statement.Declaration;
 
 public class MemoryMap {
@@ -25,25 +27,25 @@ public class MemoryMap {
 			/* --- FIELDS --- */
 	private List<MemoryCell> map = new ArrayList();
 
-	/**
-	* Wether new declarations have been pushed on the stack. Only used by AsNFunction to determine
-	* the registers to save/restore.
-	*/
-	public boolean newDecsOnStack = false;
+	private HashMap<Declaration, ASMDataLabel> cellMapping = new HashMap();
 
-
+	
 			/* --- METHODS --- */
 	public List getMemory() {
 		return this.map;
 	}
 	
 	public boolean declarationLoaded(Declaration dec) {
-		return this.map.stream().filter(x -> x.equals(dec)).count() > 0;
+		return this.map.stream().filter(x -> x.declaration.equals(dec)).count() > 0;
 	}
 	
-	public void push(Declaration...dec) {
-		for (Declaration dec0 : dec) this.map.add(new MemoryCell(dec0));
-		this.newDecsOnStack = true;
+	public ASMDataLabel resolve(Declaration dec) {
+		return this.cellMapping.get(dec);
+	}
+	
+	public void add(Declaration dec, ASMDataLabel dataLabel) {
+		this.map.add(new MemoryCell(dec));
+		this.cellMapping.put(dec, dataLabel);
 	}
 	
 	public void print() {

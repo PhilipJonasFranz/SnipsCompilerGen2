@@ -4,10 +4,13 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMLdrStack;
+import Imm.ASM.Memory.ASMMemOp.MEM_OP;
+import Imm.ASM.Memory.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Stack.ASMLdrStack;
-import Imm.ASM.Stack.ASMMemOp.MEM_OP;
-import Imm.ASM.Stack.ASMStrStack;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -47,21 +50,17 @@ public class AsNIdRef extends AsNExpression {
 				r.copy(location, target);
 			}
 		}
+		/* Load declaration from global memory */
+		else if (map.declarationLoaded(i.origin)) {
+			ref.freeTargetReg(target, r, st);
+			
+			ASMDataLabel label = map.resolve(i.origin);
+			
+			ref.instructions.add(new ASMLdr(new RegOperand(target), new LabelOperand(label)));
+			ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
+		}
 		else {
-			/* Free target reg */
-			if (!r.getReg(target).isFree()) {
-				int free = r.findFree();
-				if (free != -1) {
-					/* Free Register, copy value of target reg to free location */
-					ref.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
-					r.copy(target, free);
-				}
-				else {
-					/* RegStack is full, push copy to StackSet */
-					ref.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
-					st.push(r.getReg(target).declaration);
-				}
-			}
+			ref.freeTargetReg(target, r, st);
 			
 			if (st.getParameterByteOffset(i.origin) != -1) {
 				/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
@@ -80,6 +79,23 @@ public class AsNIdRef extends AsNExpression {
 		}
 		
 		return ref;
+	}
+	
+	protected void freeTargetReg(int target, RegSet r, StackSet st) {
+		/* Free target reg */
+		if (!r.getReg(target).isFree()) {
+			int free = r.findFree();
+			if (free != -1) {
+				/* Free Register, copy value of target reg to free location */
+				this.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
+				r.copy(target, free);
+			}
+			else {
+				/* RegStack is full, push copy to StackSet */
+				this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+				st.push(r.getReg(target).declaration);
+			}
+		}
 	}
 	
 }

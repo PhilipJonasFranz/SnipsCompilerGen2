@@ -1,4 +1,4 @@
-package Imm.ASM.Stack;
+package Imm.ASM.Memory;
 
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
@@ -20,7 +20,7 @@ public class ASMStrStack extends ASMMemOp {
 	 */
 	@Override
 	public String build() {
-		return super.build(this.getClass());
+		return super.build("str");
 	}
 	
 }

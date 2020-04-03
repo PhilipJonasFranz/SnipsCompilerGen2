@@ -11,11 +11,11 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMMemOp;
+import Imm.ASM.Memory.ASMPopStack;
+import Imm.ASM.Memory.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Stack.ASMMemOp;
-import Imm.ASM.Stack.ASMPopStack;
-import Imm.ASM.Stack.ASMPushStack;
-import Imm.ASM.Structural.ASMLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
@@ -164,7 +164,7 @@ public class AsNFunction extends AsNNode {
 		for (ASMInstruction ins : this.instructions) {
 			if (ins instanceof ASMMemOp) {
 				ASMMemOp memOp = (ASMMemOp) ins;
-				if (memOp.op0.reg == REGISTER.FP) {
+				if (memOp.op0 != null && memOp.op0.reg == REGISTER.FP) {
 					if (memOp.op1 instanceof PatchableImmOperand) {
 						PatchableImmOperand op = (PatchableImmOperand) memOp.op1;
 						

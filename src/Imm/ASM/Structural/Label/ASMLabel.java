@@ -1,4 +1,4 @@
-package Imm.ASM.Structural;
+package Imm.ASM.Structural.Label;
 
 import Imm.ASM.ASMInstruction;
 

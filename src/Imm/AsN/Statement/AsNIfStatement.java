@@ -8,7 +8,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOperand;

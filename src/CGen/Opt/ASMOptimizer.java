@@ -6,18 +6,19 @@ import java.util.List;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdrStack;
+import Imm.ASM.Memory.ASMMemOp;
+import Imm.ASM.Memory.ASMPopStack;
+import Imm.ASM.Memory.ASMPushStack;
+import Imm.ASM.Memory.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMMvn;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Stack.ASMLdrStack;
-import Imm.ASM.Stack.ASMMemOp;
-import Imm.ASM.Stack.ASMPopStack;
-import Imm.ASM.Stack.ASMPushStack;
-import Imm.ASM.Stack.ASMStrStack;
-import Imm.ASM.Structural.ASMLabel;
 import Imm.ASM.Structural.ASMSeperator;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -359,8 +360,8 @@ public class ASMOptimizer {
 			ASMInstruction ins = body.instructions.get(i);
 			if (ins instanceof ASMLabel) {
 				ASMLabel label = (ASMLabel) ins;
-				/* Label is used by default if its a function header */
-				if (label.isFunctionLabel) usedLabels.add((ASMLabel) ins);
+				/* Label is used by default if its a function header or a data label */
+				if (label.isFunctionLabel || label instanceof ASMDataLabel) usedLabels.add((ASMLabel) ins);
 			}
 			if (ins instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) ins;

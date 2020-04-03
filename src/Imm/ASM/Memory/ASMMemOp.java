@@ -1,7 +1,8 @@
-package Imm.ASM.Stack;
+package Imm.ASM.Memory;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Snips.CompilerDriver;
@@ -41,12 +42,30 @@ public abstract class ASMMemOp extends ASMInstruction {
 		this.op0 = op0;
 		this.op1 = op1;
 	}
+	
+	public ASMMemOp(RegOperand target, Operand op) {
+		this.target = target;
+		this.op1 = op;
+	}
 
 	
 			/* --- METHODS --- */
-	public String build(Class memOpClass) {
-		String operation = (memOpClass.equals(ASMLdrStack.class))? "ldr " : "str ";
-		if (this.memOp == MEM_OP.POST_WRITEBACK) {
+	public String build(String operation) {
+		operation += " ";
+		if (this.memOp == null) {
+			/* Load Label */
+			if (this.op1 instanceof LabelOperand) {
+				String s = CompilerDriver.printDepth + operation + this.target.toString() + ", " +
+					this.op1.toString();
+				return s;
+			}
+			else {
+				String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
+					this.op1.toString() + "]";
+				return s;
+			}
+		}
+		else if (this.memOp == MEM_OP.POST_WRITEBACK) {
 			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
 				this.op0.toString() + "]";
 			if (this.op1 != null) {

@@ -1,7 +1,10 @@
-package Imm.ASM.Structural;
+package Imm.ASM.Structural.Label;
 
 import Imm.ASM.Util.Operands.Memory.MemoryOperand;
 
+/**
+ * Describes f.E. the ASM Line: [name]: .word [variableName]
+ */
 public class ASMDataLabel extends ASMLabel {
 
 	public MemoryOperand memoryOperand;

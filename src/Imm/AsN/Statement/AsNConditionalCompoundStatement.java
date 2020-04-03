@@ -4,7 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Structural.ASMLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;

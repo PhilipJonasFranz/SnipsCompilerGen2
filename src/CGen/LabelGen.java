@@ -12,4 +12,8 @@ public class LabelGen {
 		c = 0;
 	}
 	
+	public static String mapToAddressName(String name) {
+		return getLabel() + "_" + name;
+	}
+	
 }
