@@ -474,6 +474,7 @@ public class ContextChecker {
 		if (init.elements.size() > 1) {
 			for (int i = 1; i < init.elements.size(); i++) {
 				TYPE typeX = init.elements.get(i).check(this);
+				init.elements.get(i).type = typeX;
 				if (!typeX.isEqual(type0)) {
 					throw new CTX_EXCEPTION(init.getSource(), "Structure init elements have to have same type: " + type0.typeString() + " vs " + typeX.typeString());
 				}
@@ -481,7 +482,6 @@ public class ContextChecker {
 		}
 		
 		init.type = new ARRAY(type0, init.elements.size());
-		
 		return init.type;
 	}
 	

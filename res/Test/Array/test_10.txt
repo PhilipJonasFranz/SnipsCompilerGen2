@@ -1,0 +1,16 @@
+SOURCE
+int bar(int [3] y) {
+	return y [2];
+}
+
+int foo(int [3] [3] y) {
+	return bar(y [2]);
+}
+
+int main(int b) {
+	int [3] [3] m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+	return foo(m) + b;
+}
+TESTCASES
+0 9
+4 13

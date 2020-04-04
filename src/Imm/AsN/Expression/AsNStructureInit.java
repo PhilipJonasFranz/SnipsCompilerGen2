@@ -16,14 +16,18 @@ public class AsNStructureInit extends AsNExpression {
 		AsNStructureInit init = new AsNStructureInit();
 		s.castedNode = init;
 		
+		r.free(0);
+		
 		/* Compute all elements, push them push them with dummy value on the stack */
 		for (int i = 0; i < s.elements.size(); i++) {
 			/* Compute Value */
 			init.instructions.addAll(AsNExpression.cast(s.elements.get(i), r, map, st).getInstructions());
 			
 			/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-			init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			st.push(REGISTER.R0);
+			if (!(s.elements.get(i) instanceof StructureInit)) {
+				init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				st.push(REGISTER.R0);
+			}
 		}
 		
 		return init;

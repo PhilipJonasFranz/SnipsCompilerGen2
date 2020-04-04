@@ -1,5 +1,5 @@
 SOURCE
-int det(int [9] m) {
+int sarrus(int [9] m) {
 	return (m [0] * m [4] * m [8]) + (m [1] * m [5] * m [6]) + (m [2] * m [3] * m [7]) -
 		   (m [6] * m [4] * m [2]) + (m [7] * m [5] * m [0]) + (m [8] * m [3] * m [1]);
 }
@@ -9,7 +9,7 @@ int main() {
 	             0, 3, 8, 
 	             1, 0, 4};
 	                 
-	return det(m);
+	return sarrus(m);
 }
 TESTCASES
 78

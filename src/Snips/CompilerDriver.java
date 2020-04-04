@@ -41,13 +41,15 @@ public class CompilerDriver {
 		logoPrinted = false, 
 		useTerminalColors = true, 
 		silenced = true,
-		imm = false;
+		imm = false,
+		enableComments = true;
 	
 	public static String outputPath;
 	
 	public static boolean printErrors = true;
 	
 	public static String printDepth = "    ";
+	public static int commentDistance = 25;
 	
 	public static List<Double> compressions = new ArrayList();
 	
@@ -149,7 +151,9 @@ public class CompilerDriver {
 			
 			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			
-			output = body.getInstructions().stream().map(x -> x.build()).collect(Collectors.toList());
+			output = body.getInstructions().stream().map(x -> {
+				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
+			}).collect(Collectors.toList());
 		
 			CompilerDriver.instructionsGenerated += output.size();
 			

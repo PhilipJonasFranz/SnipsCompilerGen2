@@ -335,6 +335,7 @@ public class Parser {
 	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		TYPE type = this.parseType();
+		
 		Token id = accept(TokenType.IDENTIFIER);
 		
 		Expression value = null;
@@ -593,7 +594,7 @@ public class Parser {
 			}
 		}
 		
-		if (current.type == TokenType.LBRACKET) {
+		while (current.type == TokenType.LBRACKET) {
 			accept();
 			Expression length = this.parseExpression();
 			accept(TokenType.RBRACKET);

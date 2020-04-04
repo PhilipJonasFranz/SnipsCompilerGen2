@@ -1,0 +1,13 @@
+SOURCE
+int add(int [2] [2] m) {
+	return m [0] [0] + m [0] [1] +
+		   m [1] [0] + m [1] [1];
+}
+
+int main() {
+	int [2] [2] m = {{3, 6}, 
+	                 {2, 4}};
+	return add(m);
+}
+TESTCASES
+15

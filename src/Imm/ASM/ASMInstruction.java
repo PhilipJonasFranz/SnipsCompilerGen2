@@ -1,5 +1,6 @@
 package Imm.ASM;
 
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
 
 public abstract class ASMInstruction {
@@ -9,6 +10,8 @@ public abstract class ASMInstruction {
 	 * The condition operand of this instruction for conditional instruction execution. 
 	 */
 	public Cond cond;
+	
+	public ASMComment comment;
 	
 	
 			/* --- CONSTRUCTORS --- */

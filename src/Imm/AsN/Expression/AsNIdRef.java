@@ -13,6 +13,7 @@ import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -63,7 +64,9 @@ public class AsNIdRef extends AsNExpression {
 			ASMDataLabel label = map.resolve(i.origin);
 			
 			/* Load memory address */
-			ref.instructions.add(new ASMLdrLabel(new RegOperand(target), new LabelOperand(label)));
+			ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label));
+			ins.comment = new ASMComment("Load from .data section");
+			ref.instructions.add(ins);
 			
 			/* Load value from memory */
 			ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
@@ -77,13 +80,16 @@ public class AsNIdRef extends AsNExpression {
 					
 					r.free(0);
 					
+					// TODO Load multiple array dimensions
+					
 					/* Origin is in parameter stack */
 					if (st.getParameterByteOffset(i.origin) != -1) {
 						int offset = st.getParameterByteOffset(i.origin);
 						
 						offset += (arr.getLength() - 1) * 4;
 						
-						for (int a = 0; a < arr.getLength(); a++) {
+						/* Copy memory location with the size of the array */
+						for (int a = 0; a < arr.wordsize(); a++) {
 							ref.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 							ref.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 							ref.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
@@ -95,7 +101,8 @@ public class AsNIdRef extends AsNExpression {
 					else {
 						int offset = st.getDeclarationInStackByteOffset(i.origin);
 						
-						for (int a = 0; a < arr.getLength(); a++) {
+						/* Copy memory location with the size of the array */
+						for (int a = 0; a < arr.wordsize(); a++) {
 							ref.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
 							ref.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 							ref.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
