@@ -9,8 +9,10 @@ import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Arith.UnaryMinus;
@@ -32,7 +34,9 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Snips.CompilerDriver;
 
@@ -325,8 +329,20 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Ternary condition has to be of type BOOL, actual " + type.typeString());
 		}
 		
+		if (t.condition instanceof StructureInit) {
+			throw new CTX_EXCEPTION(t.condition.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
+		
 		TYPE t0 = t.leftOperand.check(this);
 		TYPE t1 = t.rightOperand.check(this);
+		
+		if (t.leftOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(t.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
+		
+		if (t.rightOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(t.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
 		
 		if (!t0.isEqual(t1)) {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Both results of ternary operation have to be of the same type, " + t0.typeString() + " vs " + t1.typeString());
@@ -340,6 +356,14 @@ public class ContextChecker {
 		TYPE left = b.left().check(this);
 		TYPE right = b.right().check(this);
 		
+		if (b.leftOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
+		
+		if (b.rightOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
+		
 		if (left.isEqual(right)) {
 			b.type = left;
 			return left;
@@ -351,6 +375,10 @@ public class ContextChecker {
 	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
 		TYPE op = u.operand().check(this);
+		
+		if (u.operand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(u.operand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
 		
 		if (u instanceof Not && op.isEqual(new BOOL())) {
 			u.type = new BOOL();
@@ -368,6 +396,14 @@ public class ContextChecker {
 	public TYPE checkCompare(Compare c) throws CTX_EXCEPTION {
 		TYPE left = c.left().check(this);
 		TYPE right = c.right().check(this);
+		
+		if (c.leftOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(c.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
+		
+		if (c.rightOperand instanceof StructureInit) {
+			throw new CTX_EXCEPTION(c.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		}
 		
 		if (left.isEqual(right)) {
 			c.type = new BOOL();
@@ -399,6 +435,10 @@ public class ContextChecker {
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
+			if (i.parameters.get(a) instanceof StructureInit) {
+				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
+			}
+			
 			TYPE paramType = i.parameters.get(a).check(this);
 			if (!paramType.isEqual(f.parameters.get(a).type)) {
 				throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
@@ -418,6 +458,60 @@ public class ContextChecker {
 		}
 		else {
 			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.id);
+		}
+	}
+	
+	public TYPE checkStructureInit(StructureInit init) throws CTX_EXCEPTION {
+		if (init.elements.isEmpty()) {
+			throw new CTX_EXCEPTION(init.getSource(), "Structure init must have at least one element");
+		}
+		
+		TYPE type0 = init.elements.get(0).check(this);
+		if (init.elements.size() > 1) {
+			for (int i = 1; i < init.elements.size(); i++) {
+				TYPE typeX = init.elements.get(i).check(this);
+				if (!typeX.isEqual(type0)) {
+					throw new CTX_EXCEPTION(init.getSource(), "Structure init elements have to have same type: " + type0.typeString() + " vs " + typeX.typeString());
+				}
+			}
+		}
+		
+		init.type = new ARRAY(type0, init.elements.size());
+		
+		return init.type;
+	}
+	
+	public TYPE checkElementSelect(ElementSelect select) throws CTX_EXCEPTION {
+		if (select.selection.isEmpty()) {
+			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
+		}
+		
+		if (select.getShadowRef() instanceof IDRef) {
+			IDRef ref = (IDRef) select.getShadowRef();
+			select.idRef = ref;
+			
+			TYPE type0 = ref.check(this);
+			
+			for (int i = 0; i < select.selection.size(); i++) {
+				TYPE stype = select.selection.get(i).check(this);
+				if (!(stype instanceof INT)) {
+					throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
+				}
+				else {
+					if (!(type0 instanceof ARRAY)) {
+						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
+					}
+					else {
+						type0 = ((ARRAY) type0).elementType;
+					}
+				}
+			}
+			
+			select.type = type0;
+			return select.type;
+		}
+		else {
+			throw new CTX_EXCEPTION(select.getShadowRef().getSource(), "Element select must start with variable reference");
 		}
 	}
 	

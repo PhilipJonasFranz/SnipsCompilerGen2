@@ -86,6 +86,14 @@ public class Scanner {
 				tokens.add(new Token(TokenType.RBRACE, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("[")) {
+				tokens.add(new Token(TokenType.LBRACKET, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("]")) {
+				tokens.add(new Token(TokenType.RBRACKET, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals(";")) {
 				tokens.add(new Token(TokenType.SEMICOLON, new Source(i, a)));
 				this.emptyBuffer();

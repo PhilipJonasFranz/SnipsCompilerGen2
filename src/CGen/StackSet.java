@@ -75,8 +75,21 @@ public class StackSet {
 		this.stack.pop();
 	}
 	
-	public void pop(int x) {
+	public void popXCells(int x) {
 		for (int i = 0; i < x; i++) {
+			this.stack.pop();
+		}
+	}
+	
+	public void popXWords(int x) {
+		int words = 0;
+		while (words < x) {
+			if (this.stack.peek().contentType == CONTENT_TYPE.REGISTER) {
+				words++;
+			}
+			else {
+				words += this.stack.peek().declaration.type.wordsize();
+			}
 			this.stack.pop();
 		}
 	}
@@ -120,16 +133,17 @@ public class StackSet {
 	 * Finds the offset to a local variable in the stack.
 	 */
 	public int getDeclarationInStackByteOffset(Declaration dec) {
-		int x = 0;
 		int off = 0;
-		while (true) {
-			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER) 
+		for (int i = 0; i < stack.size(); i++) {
+			if (stack.get(i).contentType == CONTENT_TYPE.REGISTER) 
 				off = 4;
-			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) 
-				return off;
-			else off += 4;
-			x++;
+			else if (stack.get(i).contentType == CONTENT_TYPE.DECLARATION) {
+				if (stack.get(i).declaration.equals(dec)) break;
+				off += (stack.get(i).declaration.type.wordsize() * 4);
+			}
 		}
+		
+		return off;
 	}
 	
 	/**

@@ -1,7 +1,6 @@
 package REv.Modules.Tools;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -41,15 +40,6 @@ public class Util {
 			c--;
 		}
 		return num;
-	}
-	
-	public static int [] [] loadProgram(int [] [] memory, int [] [] program, int address) {
-		address /= 4;
-		for (int [] data : program) {
-			memory [address] = data.clone();
-			address++;
-		}
-		return memory;
 	}
 	
 	public static int [] toBinary(int num) {
@@ -95,24 +85,6 @@ public class Util {
 		}
 	}
 	
-	/**
-	 * Writes the given list of strings into the file at given filePath.
-	 * @param lines The lines to write
-	 * @param filePath The file to write in.
-	 */
-	public static void writeBinaryInFile(int [] [] code, String filePath) {
-		try (FileWriter w = new FileWriter(filePath)) {
-			for (int [] line : code) {
-				String l = "";
-				for (int i = 0; i < line.length; i++)l += "" + line [i];
-				w.write(l);
-				w.write(System.getProperty("line.separator"));
-			}
-		} catch (IOException e) {
-		
-		}
-	}
-	
 	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) {
 		// Load Devices
 		XMLNode devices = head.getNode("Devices");
@@ -136,12 +108,6 @@ public class Util {
 		return pcu;
 	}
 	
-    public static String toHexString(int [] num) {
-    	String hex = "";
-    	for (int i = 0; i < 32; i += 4)hex += Integer.toHexString(toDecimal(new int [] {num [i], num [i + 1], num [i + 2], num [i + 3]}));
-    	return hex.toUpperCase();
-    }
-    
     public static void sleep() {
     	try {
 			Thread.sleep(1);

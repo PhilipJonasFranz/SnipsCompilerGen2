@@ -18,7 +18,7 @@ public class MemoryMap {
 		
 		public MemoryCell(Declaration dec) {
 			this.declaration = dec;
-			this.wordSize = dec.type.wordSize;
+			this.wordSize = dec.type.wordsize();
 		}
 		
 		public Declaration getDeclaration() {

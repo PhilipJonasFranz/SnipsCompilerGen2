@@ -5,9 +5,11 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -29,6 +31,12 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof InlineCall) {
 			node = AsNInlineCall.cast((InlineCall) e, r, map, st);
+		}
+		else if (e instanceof StructureInit) {
+			node = AsNStructureInit.cast((StructureInit) e, r, map, st); 
+		}
+		else if (e instanceof ElementSelect) {
+			node = AsNElementSelect.cast((ElementSelect) e, r, map, st); 
 		}
 		else if (e instanceof Ternary) {
 			node = AsNTernary.cast((Ternary) e, r, map, st);

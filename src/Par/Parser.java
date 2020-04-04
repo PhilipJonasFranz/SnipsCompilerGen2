@@ -11,9 +11,11 @@ import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
@@ -40,6 +42,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
@@ -352,7 +355,26 @@ public class Parser {
 	}
 	
 	protected Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseTernary();
+			return this.parseStructureInit();
+	}
+	
+	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
+		if (current.type == TokenType.LBRACE) {
+			Source source = accept().getSource();
+			List<Expression> elements = new ArrayList();
+			while (current.type != TokenType.RBRACE) {
+				Expression expr = this.parseExpression();
+				elements.add(expr);
+				if (current.type == TokenType.COMMA) {
+					accept();
+				}
+				else break;
+			}
+			
+			accept(TokenType.RBRACE);
+			return new StructureInit(elements, source);
+		}
+		else return this.parseTernary();
 	}
 	
 	protected Expression parseTernary() throws PARSE_EXCEPTION {
@@ -498,8 +520,24 @@ public class Parser {
 			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
 		
-		if (not == null) not = this.parseAtom();
+		if (not == null) not = this.parseElementSelect();
 		return not;
+	}
+	
+	protected Expression parseElementSelect() throws PARSE_EXCEPTION {
+		Expression ref = this.parseAtom();
+		
+		if (current.type == TokenType.LBRACKET) {
+			List<Expression> selection = new ArrayList();
+			while (current.type == TokenType.LBRACKET) {
+				accept();
+				selection.add(this.parseExpression());
+				accept(TokenType.RBRACKET);
+			}
+			
+			return new ElementSelect(ref, selection, ref.getSource());
+		}
+		else return ref;
 	}
 	
 	protected Expression parseAtom() throws PARSE_EXCEPTION {
@@ -542,9 +580,9 @@ public class Parser {
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 	}
 
-	protected TYPE parseType() {
+	protected TYPE parseType() throws PARSE_EXCEPTION {
 		TYPE type = null;
-		while (current.type.group == TokenGroup.TYPE) {
+		if (current.type.group == TokenGroup.TYPE) {
 			if (current.type == TokenType.INT) {
 				accept();
 				type = new INT();
@@ -553,6 +591,13 @@ public class Parser {
 				accept();
 				type = new BOOL();
 			}
+		}
+		
+		if (current.type == TokenType.LBRACKET) {
+			accept();
+			Expression length = this.parseExpression();
+			accept(TokenType.RBRACKET);
+			type = new ARRAY(type, length);
 		}
 		
 		return type;

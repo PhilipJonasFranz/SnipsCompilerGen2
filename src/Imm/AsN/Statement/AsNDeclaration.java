@@ -19,19 +19,28 @@ public class AsNDeclaration extends AsNStatement {
 	public static AsNDeclaration cast(Declaration d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNDeclaration dec = new AsNDeclaration();
 		
-		// TODO Only works for 1 Word Datatypes */
+		/* Load value, either in R0 or on the stack */
 		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
 		
 		int free = r.findFree();
-		if (free != -1 && d.type.wordSize == 1) {
+		if (free != -1 && d.type.wordsize() == 1) {
 			/* Free Register exists and declaration fits into a register */
 			dec.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(0)));
 			r.getReg(free).setDeclaration(d);
 		}
 		else {
-			/* Push declaration on the stack */
-			dec.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+			if (d.type.wordsize() == 1) {
+				/* Push declaration on the stack */
+				dec.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+			}
+			else {
+				/* Pop Elements only, elements are already on the stack */
+				st.popXWords(d.type.wordsize());
+			}
+			
+			/* Push the declaration that covers the popped area */
 			st.push(d);
+			
 			r.getReg(0).free();
 		}
 		

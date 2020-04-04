@@ -10,6 +10,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNAtom extends AsNExpression {
 
@@ -19,6 +20,9 @@ public class AsNAtom extends AsNExpression {
 		a.castedNode = atom;
 		
 		atom.clearReg(r, st, 0);
+		
+		/* Make sure only primitives can be in an atom */
+		assert(a.type instanceof PRIMITIVE);
 		
 		atom.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(Integer.parseInt(((INT) a.type).sourceCodeRepresentation()))));
 		

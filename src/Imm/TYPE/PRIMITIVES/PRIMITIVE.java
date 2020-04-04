@@ -13,4 +13,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		this.setValue(initialValue);
 	}
 	
+	public int wordsize() {
+		return 1;
+	}
+	
 }

@@ -49,6 +49,8 @@ public class Token {
 		RPAREN(")"),
 		LBRACE("{"),
 		RBRACE("}"),
+		LBRACKET("["),
+		RBRACKET("]"),
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
 		

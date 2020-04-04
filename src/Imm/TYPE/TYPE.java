@@ -3,7 +3,7 @@ package Imm.TYPE;
 public abstract class TYPE<T> {
 
 			/* --- FIELDS --- */
-	public int wordSize = 1;
+	protected int wordSize = 1;
 	
 	public T value;
 	
@@ -34,5 +34,7 @@ public abstract class TYPE<T> {
 	public abstract String typeString();
 	
 	public abstract String sourceCodeRepresentation();
+	
+	public abstract int wordsize();
 	
 }
