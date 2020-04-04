@@ -113,6 +113,12 @@ public class AsNIdRef extends AsNExpression {
 					/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
 					 * 		Load from Stack */
 					int off = st.getParameterByteOffset(i.origin);
+					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, off)));
+				}
+				else {
+					/* Load Declaration Location from Stack */
+					int off = st.getDeclarationInStackByteOffset(i.origin);
+					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.FP), 
 						new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
 				}
 				

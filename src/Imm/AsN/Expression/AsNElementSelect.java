@@ -29,12 +29,7 @@ public class AsNElementSelect extends AsNExpression {
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
 			select.loadIndex(s, s.selection.get(0), r, map, st);
 			
-			st.print();
-			
 			int offset = st.getParameterByteOffset(s.idRef.origin);
-			
-			s.idRef.origin.print(0, true);
-			System.out.println("OFFSET: " + offset + " L: " + ((s.idRef.origin.type.wordsize() - 1) * 4));
 			
 			/* Offset to start of array */
 			offset += (s.idRef.origin.type.wordsize() - 1) * 4;
