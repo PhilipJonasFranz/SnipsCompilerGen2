@@ -1,0 +1,13 @@
+SOURCE
+int foo(int [3] x, int i) {
+	return x [i];
+}
+
+int main(int b) {
+	int [3] x = {1, 2, 3};
+	return foo(x, b);
+}
+TESTCASES
+0 1
+1 2
+2 3

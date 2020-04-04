@@ -124,7 +124,10 @@ public class StackSet {
 				off = 0;
 				foundHook = true;
 			}
-			else off += 4;
+			else {
+				if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
+				else off += 4;
+			}
 			x++;
 		}
 	}

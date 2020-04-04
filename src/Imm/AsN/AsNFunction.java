@@ -14,6 +14,7 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
+import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -114,8 +115,7 @@ public class AsNFunction extends AsNNode {
 		
 		
 		/* Patch offset based on amount of pushed registers excluding LR and FP */
-		if (!used.isEmpty()) 
-			func.patchFramePointerAddressing(push.operands.size() * 4);
+		func.patchFramePointerAddressing(push.operands.size() * 4);
 		
 		
 		if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack) {
@@ -177,6 +177,20 @@ public class AsNFunction extends AsNNode {
 						}
 					}
 					else throw new CGEN_EXCEPTION(this.source.getSource(), "Cannot patch non-patchable imm operand!");
+				}
+			}
+			else if (ins instanceof ASMBinaryData) {
+				ASMBinaryData binary = (ASMBinaryData) ins;
+				
+				if (binary.op0 != null && binary.op0.reg == REGISTER.FP) {
+					if (binary.op1 instanceof PatchableImmOperand) {
+						PatchableImmOperand op = (PatchableImmOperand) binary.op1;
+						
+						if (op.dir == PATCH_DIR.UP) {
+							int val = op.patch(offset);
+							binary.op1 = new ImmOperand(val);
+						}
+					}
 				}
 			}
 		}

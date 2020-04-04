@@ -1,0 +1,17 @@
+DESCRIPTION
+This test aims to verify the correct behaviour when passing multiple arrays as parameter of a call
+through the stack.
+SOURCE
+int foo(int [3] x, int [3] y, int i) {
+	return x [i] + y [i] * 2;
+}
+
+int main(int b) {
+	int [3] x = {1, 2, 3};
+	int [3] y = {4, 5, 6};
+	return foo(x, y, b);
+}
+TESTCASES
+0 9
+1 12
+2 15
