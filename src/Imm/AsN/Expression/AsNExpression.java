@@ -45,7 +45,7 @@ public abstract class AsNExpression extends AsNNode {
 			node = AsNIdRef.cast((IDRef) e, r, map, st, 0);
 		}
 		else if (e instanceof Atom) {
-			node = AsNAtom.cast((Atom) e, r, map, st); 
+			node = AsNAtom.cast((Atom) e, r, map, st, 0); 
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	

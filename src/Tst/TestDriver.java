@@ -141,8 +141,9 @@ public class TestDriver {
 				((timeout > 0)? ", " + timeout + " tests(s) timed out" : "") + ".", 
 				(failed == 0 && crashed == 0)? Message.Type.INFO : Message.Type.FAIL);
 		
+		CompilerDriver.printAverageCompression();
+		
 		if (crashed == 0 && timeout == 0 && failed == 0) {
-			CompilerDriver.printAverageCompression();
 			new Message("[BUILD] Successful.", Message.Type.INFO);
 		}
 		else {

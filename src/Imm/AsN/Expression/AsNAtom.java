@@ -7,15 +7,13 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
-import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNAtom extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
 		AsNAtom atom = new AsNAtom();
 		a.castedNode = atom;
 		
@@ -24,7 +22,7 @@ public class AsNAtom extends AsNExpression {
 		/* Make sure only primitives can be in an atom */
 		assert(a.type instanceof PRIMITIVE);
 		
-		atom.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(Integer.parseInt(((INT) a.type).sourceCodeRepresentation()))));
+		atom.instructions.add(new ASMMov(new RegOperand(target), new ImmOperand(Integer.parseInt(a.type.sourceCodeRepresentation()))));
 		
 		return atom;
 	}

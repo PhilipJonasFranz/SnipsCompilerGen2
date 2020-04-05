@@ -4,7 +4,6 @@ import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
-import Snips.CompilerDriver;
 
 public class ASMLsr extends ASMBinaryData {
 
@@ -19,12 +18,7 @@ public class ASMLsr extends ASMBinaryData {
 	}
 	
 	public String build() {
-		if (this.target.reg == this.op0.reg) {
-			return CompilerDriver.printDepth + "lsr" + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.op0.toString() + ", " + this.op1.toString();
-		}
-		else {
-			return CompilerDriver.printDepth + "lsr" + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
-		}
+		return super.build("lsr");
 	}
 
 }

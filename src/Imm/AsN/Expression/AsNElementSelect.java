@@ -29,6 +29,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.ElementSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNElementSelect extends AsNExpression {
 
@@ -126,10 +127,15 @@ public class AsNElementSelect extends AsNExpression {
 			for (int i = 0; i < s.selection.size(); i++) {
 				this.instructions.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
 				
-				int bytes = superType.elementType.wordsize() * 4;
-				
-				this.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
-				this.instructions.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+				if (superType.elementType instanceof PRIMITIVE) {
+					this.instructions.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+				}
+				else {
+					int bytes = superType.elementType.wordsize() * 4;
+					
+					this.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
+					this.instructions.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+				}
 				
 				/* Add to sum */
 				this.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));

@@ -1,8 +1,8 @@
 # Snips Compiler Gen.2 v.0.0.1-DEVELOP
 ## What is Snips?
- Snips is a C/Java oriented proramming language. This brings familiar programming concepts to the table,
- like functions, conditionals, loops, arrays, global variables and a wide roster of built in operators, 
- as well as support for functionality like recursion. 
+ Snips is a lightweigth C/Java oriented proramming language. This brings familiar programming concepts to 
+ the table, like functions, conditionals, loops, arrays, global variables and a wide roster of built in 
+ operators, as well as support for functionality like recursion. 
  Currently supported data types are Integers and Booleans, as well as multi-dimensional arrays of them.
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue and return.

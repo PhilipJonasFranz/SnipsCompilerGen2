@@ -4,6 +4,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
+import Snips.CompilerDriver;
 
 public abstract class ASMBinaryData extends ASMInstruction {
 
@@ -18,6 +19,14 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	public RegOperand op0;
 	
 	public Operand op1;
+	
+	public enum SHIFT_TYPE {
+		LSL, LSR, ASR, ROR;
+	}
+	
+	public SHIFT_TYPE shiftType;
+	
+	public int shiftDist;
 	
 	public boolean updateConditionField = false;
 	
@@ -34,6 +43,12 @@ public abstract class ASMBinaryData extends ASMInstruction {
 		this.op1 = op1;
 	}
 	
-	public abstract String build();
+	public String build(String operation) {
+		String s = CompilerDriver.printDepth + operation + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
+		if (this.shiftType != null) {
+			s += ", " + this.shiftType.toString().toLowerCase() + " #" + this.shiftDist;
+		}
+		return s;
+	}
 
 }
