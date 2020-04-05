@@ -4,6 +4,11 @@ import Snips.CompilerDriver;
 import Util.Source;
 import Util.Logging.Message;
 
+/**
+ * Thrown when internal modules are missing or when the user input leads to an invalid combination
+ * of components. Latteral should mostly not occur since invalid combinations are filtered by the context 
+ * checker.
+ */
 public class CGEN_EXCEPTION extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;

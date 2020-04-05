@@ -4,6 +4,9 @@ import Snips.CompilerDriver;
 import Util.Source;
 import Util.Logging.Message;
 
+/**
+ * Thrown when the user input led to an illegal combination of components.
+ */
 public class CTX_EXCEPTION extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;

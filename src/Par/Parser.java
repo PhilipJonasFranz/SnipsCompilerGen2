@@ -29,6 +29,9 @@ import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.ElementSelectLhsId;
+import Imm.AST.Lhs.LhsId;
+import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
@@ -314,11 +317,25 @@ public class Parser {
 	}
 	
 	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
-		Expression target = this.parseElementSelect();
+		LhsId target = this.parseLhsIdentifer();
 		accept(TokenType.LET);
 		Expression value = this.parseExpression();
 		if (acceptSemicolon) accept(TokenType.SEMICOLON);
 		return new Assignment(target, value, target.getSource());
+	}
+	
+	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
+		Expression target = this.parseElementSelect();
+		if (target instanceof ElementSelect) {
+			return new ElementSelectLhsId((ElementSelect) target, target.getSource());
+		}
+		else if (target instanceof IDRef) {
+			return new SimpleLhsId((IDRef) target, target.getSource());
+		}
+		else {
+			throw new PARSE_EXCEPTION(current.source, current.type, 
+					TokenType.IDENTIFIER);
+		}
 	}
 	
 	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier) throws PARSE_EXCEPTION {

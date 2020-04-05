@@ -52,11 +52,11 @@ public class AsNAssignment extends AsNStatement {
 			}
 			else if (a.origin.type instanceof ARRAY) {
 				/* Assign Array */
-				if (a.target.type instanceof PRIMITIVE) {
+				if (a.lhsId.origin.type instanceof PRIMITIVE) {
 					/* Assign single array cell */
 					// TODO
 				}
-				else if (a.target.type instanceof ARRAY) {
+				else if (a.lhsId.origin.type instanceof ARRAY) {
 					/* Assign sub array */
 					// TODO
 				}
