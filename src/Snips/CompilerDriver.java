@@ -46,7 +46,7 @@ public class CompilerDriver {
 	
 	public static String outputPath;
 	
-	public static boolean printErrors = true;
+	public static boolean printErrors = false;
 	
 	public static String printDepth = "    ";
 	public static int commentDistance = 25;

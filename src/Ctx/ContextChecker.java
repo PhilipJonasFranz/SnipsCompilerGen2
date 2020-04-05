@@ -226,8 +226,8 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
 			}
 		}
-		else return d.type;
 		
+		/* No need to set type here, is done while parsing */
 		return null;
 	}
 	
@@ -474,7 +474,6 @@ public class ContextChecker {
 		if (init.elements.size() > 1) {
 			for (int i = 1; i < init.elements.size(); i++) {
 				TYPE typeX = init.elements.get(i).check(this);
-				init.elements.get(i).type = typeX;
 				if (!typeX.isEqual(type0)) {
 					throw new CTX_EXCEPTION(init.getSource(), "Structure init elements have to have same type: " + type0.typeString() + " vs " + typeX.typeString());
 				}

@@ -4,6 +4,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class ARRAY extends TYPE {
 
@@ -11,11 +12,19 @@ public class ARRAY extends TYPE {
 	
 	private Expression length0;
 	
+	private TYPE coreType;
+	
 	public int length;
 	
 	public ARRAY(TYPE elementType, Expression length) {
 		super(null);
 		this.elementType = elementType;
+		if (elementType instanceof PRIMITIVE) {
+			this.coreType = elementType;
+		}
+		else {
+			this.coreType = ((ARRAY) elementType).coreType;
+		}
 		this.length0 = length;
 		this.wordSize = elementType.wordsize();
 	}
@@ -23,6 +32,12 @@ public class ARRAY extends TYPE {
 	public ARRAY(TYPE elementType, int length) {
 		super(null);
 		this.elementType = elementType;
+		if (elementType instanceof PRIMITIVE) {
+			this.coreType = elementType;
+		}
+		else {
+			this.coreType = ((ARRAY) elementType).coreType;
+		}
 		this.length = length;
 		this.wordSize = elementType.wordsize() * length;
 	}
@@ -31,6 +46,7 @@ public class ARRAY extends TYPE {
 		if (this.length0 == null) return this.length;
 		else {
 			this.length = ((INT) ((Atom) this.length0).type).value;
+			this.length0 = null;
 			this.wordSize = this.elementType.wordsize() * this.length;
 			return this.length;
 		}
@@ -45,7 +61,13 @@ public class ARRAY extends TYPE {
 	}
 
 	public String typeString() {
-		return this.elementType.typeString() + "[" + this.getLength() + "]";
+		String s = this.coreType.typeString() + "[" + this.getLength() + "]";
+		TYPE t = this.elementType;
+		while (!(t instanceof PRIMITIVE)) {
+			s += "[" + ((ARRAY) t).getLength() + "]";
+			t = ((ARRAY) t).elementType;
+		}
+		return s;
 	}
 
 	public void setValue(String value) {

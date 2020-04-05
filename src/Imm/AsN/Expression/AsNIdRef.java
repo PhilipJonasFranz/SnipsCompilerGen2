@@ -10,9 +10,7 @@ import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
-import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -76,40 +74,7 @@ public class AsNIdRef extends AsNExpression {
 			/* Load copy on stack */
 			if (i.origin.type.wordsize() > 1) {
 				if (i.origin.type instanceof ARRAY) {
-					ARRAY arr = (ARRAY) i.origin.type;
-					
-					r.free(0);
-					
-					// TODO Load multiple array dimensions
-					
-					/* Origin is in parameter stack */
-					if (st.getParameterByteOffset(i.origin) != -1) {
-						int offset = st.getParameterByteOffset(i.origin);
-						
-						offset += (arr.getLength() - 1) * 4;
-						
-						/* Copy memory location with the size of the array */
-						for (int a = 0; a < arr.wordsize(); a++) {
-							ref.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
-							ref.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
-							ref.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-							offset -= 4;
-							st.push(REGISTER.R0);
-						}
-					}
-					/* Origin is in local stack */
-					else {
-						int offset = st.getDeclarationInStackByteOffset(i.origin);
-						
-						/* Copy memory location with the size of the array */
-						for (int a = 0; a < arr.wordsize(); a++) {
-							ref.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
-							ref.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
-							ref.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-							offset += 4;
-							st.push(REGISTER.R0);
-						}
-					}
+					ref.loadArray(i, r, st);
 				}
 			}
 			/* Load in register */
@@ -134,6 +99,39 @@ public class AsNIdRef extends AsNExpression {
 		}
 		
 		return ref;
+	}
+	
+	protected void loadArray(IDRef i, RegSet r, StackSet st) {
+		ARRAY arr = (ARRAY) i.origin.type;
+		
+		r.free(0);
+		
+		/* Origin is in parameter stack */
+		if (st.getParameterByteOffset(i.origin) != -1) {
+			int offset = st.getParameterByteOffset(i.origin);
+			
+			offset += (arr.getLength() - 1) * 4;
+			
+			/* Copy memory location with the size of the array */
+			for (int a = 0; a < arr.wordsize(); a++) {
+				this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
+				this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				offset -= 4;
+				st.push(REGISTER.R0);
+			}
+		}
+		/* Origin is in local stack */
+		else {
+			int offset = st.getDeclarationInStackByteOffset(i.origin);
+			
+			/* Copy memory location with the size of the array */
+			for (int a = 0; a < arr.wordsize(); a++) {
+				this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(-offset)));
+				this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				offset += 4;
+				st.push(REGISTER.R0);
+			}
+		}
 	}
 	
 	protected void freeTargetReg(int target, RegSet r, StackSet st) {

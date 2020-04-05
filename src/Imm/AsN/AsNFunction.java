@@ -11,6 +11,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
@@ -189,6 +190,20 @@ public class AsNFunction extends AsNNode {
 						if (op.dir == PATCH_DIR.UP) {
 							int val = op.patch(offset);
 							binary.op1 = new ImmOperand(val);
+						}
+					}
+				}
+			}
+			else if (ins instanceof ASMMemOp) {
+				ASMMemOp mem = (ASMMemOp) ins;
+				
+				if (mem.op0 != null && mem.op0 instanceof RegOperand && ((RegOperand) mem.op0).reg == REGISTER.FP) {
+					if (mem.op1 instanceof PatchableImmOperand) {
+						PatchableImmOperand op = (PatchableImmOperand) mem.op1;
+						
+						if (op.dir == PATCH_DIR.UP) {
+							int val = op.patch(offset);
+							mem.op1 = new ImmOperand(val);
 						}
 					}
 				}

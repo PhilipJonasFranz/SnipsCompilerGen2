@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
@@ -594,11 +595,16 @@ public class Parser {
 			}
 		}
 		
+		Stack<Expression> dimensions = new Stack();
 		while (current.type == TokenType.LBRACKET) {
 			accept();
 			Expression length = this.parseExpression();
 			accept(TokenType.RBRACKET);
-			type = new ARRAY(type, length);
+			dimensions.push(length);
+		}
+		
+		while (!dimensions.isEmpty()) {
+			type = new ARRAY(type, dimensions.pop());
 		}
 		
 		return type;
