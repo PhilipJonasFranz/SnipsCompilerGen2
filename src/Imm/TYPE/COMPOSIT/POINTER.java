@@ -25,14 +25,17 @@ public class POINTER extends TYPE {
 
 	@Override
 	public void setValue(String value) {
-		// TODO Auto-generated method stub
-		
+		return;
 	}
 
 	@Override
 	public String sourceCodeRepresentation() {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int wordsize() {
+		return 1;
 	}
 	
 }

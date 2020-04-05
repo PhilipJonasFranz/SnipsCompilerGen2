@@ -34,7 +34,51 @@ public class AsNElementSelect extends AsNExpression {
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
 			if (s.type instanceof ARRAY) {
 				// TODO -> ERROR Array\10
+				ARRAY arr = (ARRAY) s.type;
+
+				ASMMov sum = new ASMMov(new RegOperand(REGISTER.R2), new ImmOperand(0));
+				sum.comment = new ASMComment("Calculate save location");
+				select.instructions.add(sum);
+				
+				ARRAY superType = (ARRAY) s.idRef.origin.type;
+				
+				for (int i = 0; i < s.selection.size(); i++) {
+					/* Evaluate Expression */
+					select.instructions.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
+					
+					int bytes = superType.elementType.wordsize() * 4;
+					
+					select.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
+					select.instructions.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+					
+					/* Add to sum */
+					select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+					
+					/* Next element in chain */
+					if (!(superType.elementType instanceof ARRAY)) break;
+					else superType = (ARRAY) superType.elementType;
+				}
+				
 				/* Load part of array that is a parameter */
+				int offset = st.getParameterByteOffset(s.idRef.origin);
+				
+				/* Offset to start of array */
+				offset += (s.idRef.origin.type.wordsize() - 1) * 4;
+				
+				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+				start.comment = new ASMComment("Start of structure in stack");
+				select.instructions.add(start);
+				
+				/* Subtract sum */
+				select.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+				
+				/* Loop through array word size and copy values */
+				offset = 0;
+				for (int a = 0; a < arr.wordsize(); a++) {
+					select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					select.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+					offset -= 4;
+				}
 			}
 			else {
 				if (s.selection.size() == 1) {
@@ -123,7 +167,7 @@ public class AsNElementSelect extends AsNExpression {
 				offset = 0;
 				
 				/* Copy memory location with the size of the array */
-				for (int a = 0; a < arr.getLength(); a++) {
+				for (int a = 0; a < arr.wordsize(); a++) {
 					select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 					select.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 					offset -= 4;
