@@ -232,10 +232,26 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkAssignment(Assignment a) throws CTX_EXCEPTION {
-		TYPE t = a.value.check(this);
-		Declaration dec = scopes.peek().getField(a.fieldName);
+		if (!(a.target instanceof IDRef) && !(a.target instanceof ElementSelect)) {
+			throw new CTX_EXCEPTION(a.getSource(), "Left Side of assignment has to be variable reference.");
+		}
+		
+		TYPE targetType = a.target.check(this);
+		
+		String fieldName = null;
+		if (a.target instanceof IDRef) {
+			fieldName = ((IDRef) a.target).id;
+		}
+		else {
+			fieldName = ((ElementSelect) a.target).idRef.id;
+		}
+		
+		Declaration dec = scopes.peek().getField(fieldName);
 		a.origin = dec;
-		if (!t.isEqual(dec.type)) {
+		
+		TYPE t = a.value.check(this);
+		
+		if (!t.isEqual(targetType)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
 		}
 		return null;

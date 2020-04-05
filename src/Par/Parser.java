@@ -314,11 +314,11 @@ public class Parser {
 	}
 	
 	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
-		Token id = accept(TokenType.IDENTIFIER);
+		Expression target = this.parseElementSelect();
 		accept(TokenType.LET);
 		Expression value = this.parseExpression();
 		if (acceptSemicolon) accept(TokenType.SEMICOLON);
-		return new Assignment(id, value, id.source);
+		return new Assignment(target, value, target.getSource());
 	}
 	
 	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier) throws PARSE_EXCEPTION {

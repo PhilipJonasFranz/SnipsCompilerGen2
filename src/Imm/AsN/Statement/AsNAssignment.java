@@ -17,6 +17,8 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Assignment;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNAssignment extends AsNStatement {
 
@@ -43,9 +45,25 @@ public class AsNAssignment extends AsNStatement {
 		}
 		/* Store to stack */
 		else {
-			int off = st.getDeclarationInStackByteOffset(a.origin);
-			assign.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
+			if (a.origin.type instanceof PRIMITIVE) {
+				int off = st.getDeclarationInStackByteOffset(a.origin);
+				assign.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
 					new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
+			}
+			else if (a.origin.type instanceof ARRAY) {
+				/* Assign Array */
+				if (a.target.type instanceof PRIMITIVE) {
+					/* Assign single array cell */
+					// TODO
+				}
+				else if (a.target.type instanceof ARRAY) {
+					/* Assign sub array */
+					// TODO
+				}
+			}
+			else {
+				// TODO Pointer, Struct...
+			}
 		}
 		
 		return assign;

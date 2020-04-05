@@ -4,7 +4,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
-import Par.Token;
 import Util.Source;
 
 /**
@@ -13,7 +12,7 @@ import Util.Source;
 public class Assignment extends Statement {
 
 			/* --- FIELDS --- */
-	public String fieldName;
+	public Expression target;
 	
 	public Declaration origin;
 	
@@ -21,16 +20,17 @@ public class Assignment extends Statement {
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public Assignment(Token fieldName, Expression value, Source source) {
+	public Assignment(Expression target, Expression value, Source source) {
 		super(source);
-		this.fieldName = fieldName.spelling;
+		this.target = target;
 		this.value = value;
 	}
 	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Assign " + this.fieldName);
+		System.out.println(this.pad(d) + "Assign");
+		this.target.print(d + this.printDepthStep, rec);
 		if (rec) {
 			this.value.print(d + this.printDepthStep, rec);
 		}
