@@ -8,13 +8,15 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Processing.Logic.ASMCmn;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
@@ -174,7 +176,7 @@ public class AsNElementSelect extends AsNExpression {
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			/* Move counter in R2 */
-			this.instructions.add(new ASMMov(new RegOperand(REGISTER.R2), new ImmOperand(0)));
+			this.instructions.add(new ASMSub(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
@@ -183,15 +185,14 @@ public class AsNElementSelect extends AsNExpression {
 			ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
 			
 			/* Check if whole sub array was loaded */
-			this.instructions.add(new ASMCmn(new RegOperand(REGISTER.R2), new ImmOperand(arr.wordsize() * 4)));
+			this.instructions.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 			
 			/* Branch to loop end */
 			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
 			
 			/* Load value and push it on the stack */
-			this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
 			this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			this.instructions.add(new ASMSub(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new ImmOperand(4)));
 			
 			/* Branch to loop start */
 			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
