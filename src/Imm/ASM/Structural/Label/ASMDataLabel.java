@@ -15,7 +15,7 @@ public class ASMDataLabel extends ASMLabel {
 	}
 	
 	public String build() {
-		return this.name + ": " + this.memoryOperand.toString();
+		return super.build() + this.memoryOperand.toString();
 	}
 	
 }

@@ -13,11 +13,17 @@ public class RegOperand extends Operand {
 	}
 	
 	public RegOperand(int reg) {
-		if (reg == 11) this.reg = REGISTER.FP;
-		else if (reg == 13) this.reg = REGISTER.SP;
-		else if (reg == 14) this.reg = REGISTER.LR;
-		else if (reg == 15) this.reg = REGISTER.PC;
-		else this.reg = REGISTER.valueOf("R" + reg);
+		this.reg = toReg(reg);
+	}
+	
+	public static REGISTER toReg(int reg0) {
+		REGISTER reg;
+		if (reg0 == 11) reg = REGISTER.FP;
+		else if (reg0 == 13) reg = REGISTER.SP;
+		else if (reg0 == 14) reg = REGISTER.LR;
+		else if (reg0 == 15) reg = REGISTER.PC;
+		else reg = REGISTER.valueOf("R" + reg0);
+		return reg;
 	}
 
 	public String toString() {

@@ -38,6 +38,13 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNElementSelect extends AsNExpression {
 
+			/* --- NESTED --- */
+	public enum SELECT_TYPE {
+		LOCAL_SINGLE, LOCAL_SUB,
+		PARAM_SINGLE, PARAM_SUB;
+	}
+	
+	
 			/* --- METHODS --- */
 	public static AsNElementSelect cast(ElementSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNElementSelect select = new AsNElementSelect();
@@ -178,11 +185,6 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		
 		return copy;
-	}
-	
-	public enum SELECT_TYPE {
-		LOCAL_SINGLE, LOCAL_SUB,
-		PARAM_SINGLE, PARAM_SUB;
 	}
 	
 	/**

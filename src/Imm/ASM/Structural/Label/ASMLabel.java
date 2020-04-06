@@ -18,7 +18,7 @@ public class ASMLabel extends ASMInstruction {
 	}
 	
 	public String build() {
-		return this.name + ":";
+		return this.name + ": ";
 	}
 	
 }
