@@ -111,24 +111,50 @@ public class AsNIdRef extends AsNExpression {
 			int offset = st.getParameterByteOffset(i.origin);
 			
 			/* Copy memory location with the size of the array */
+			int regs = 0;
 			for (int a = 0; a < arr.wordsize(); a++) {
-				this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
-				this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				if (regs < 3) {
+					this.instructions.add(new ASMLdr(new RegOperand(regs), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
+					regs++;
+				}
+				if (regs == 3) {
+					this.flush(regs);
+					regs = 0;
+				}
 				offset += 4;
 				st.push(REGISTER.R0);
 			}
+			
+			this.flush(regs);
 		}
 		/* Origin is in local stack */
 		else {
 			int offset = st.getDeclarationInStackByteOffset(i.origin);
 			
 			/* Copy memory location with the size of the array */
+			int regs = 0;
 			for (int a = 0; a < arr.wordsize(); a++) {
-				this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(-offset)));
-				this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				if (regs < 3) {
+					this.instructions.add(new ASMLdr(new RegOperand(regs), new RegOperand(REGISTER.FP), new ImmOperand(-offset)));
+					regs++;
+				}
+				if (regs == 3) {
+					this.flush(regs);
+					regs = 0;
+				}
 				offset += 4;
 				st.push(REGISTER.R0);
 			}
+			
+			this.flush(regs);
+		}
+	}
+	
+	protected void flush(int regs) {
+		if (regs > 0) {
+			if (regs == 3) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+			else if (regs == 2) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+			else this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 		}
 	}
 	

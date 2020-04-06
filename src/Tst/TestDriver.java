@@ -61,6 +61,7 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver.printLogo();
 		CompilerDriver.useTerminalColors = true;
+		CompilerDriver.silenced = false;
 		
 		List<String> paths = new ArrayList();
 		

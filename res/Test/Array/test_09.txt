@@ -1,12 +1,12 @@
 SOURCE
-int foo(int [3] [3] y) {
-	return y [2] [2];
+int foo(int [3] [2] y) {
+	return y [2] [1];
 }
 
 int main(int b) {
-	int [3] [3] m = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+	int [3] [2] m = {{1, 2}, {4, 5}, {7, 8}};
 	return foo(m) + b;
 }
 TESTCASES
-0 9
-4 13
+0 8
+4 12
