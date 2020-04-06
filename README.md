@@ -13,7 +13,7 @@
 
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
  - Implement import system
- - Implement Arrays WIP: Global Arrays, Array and Sub array assignment
+ - Implement Arrays WIP: Global Arrays
  - Implement Heap System
  - Implement Pointers
  - Implement Addressof and Dereference Operators
