@@ -23,7 +23,6 @@ public class Assignment extends Statement {
 			/* --- CONSTRUCTORS --- */
 	public Assignment(LhsId target, Expression value, Source source) {
 		super(source);
-		//this.target = target;
 		this.lhsId = target;
 		this.value = value;
 	}
@@ -32,8 +31,8 @@ public class Assignment extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign");
-		this.lhsId.print(d + this.printDepthStep, rec);
 		if (rec) {
+			this.lhsId.print(d + this.printDepthStep, rec);
 			this.value.print(d + this.printDepthStep, rec);
 		}
 	}

@@ -26,6 +26,10 @@ public abstract class LhsId extends SyntaxElement {
 			/* --- METHODS --- */
 	public abstract void print(int d, boolean rec);
 
+	/**
+	 * Implementations provide their own check implementations, since they relay to 
+	 * internal components and have to set {@link #origin} after checking.
+	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXCEPTION;
 	
 	public abstract String getFieldName();

@@ -6,7 +6,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
-public class ARRAY extends TYPE {
+public class ARRAY extends COMPOSIT {
 
 	public TYPE elementType;
 	
@@ -17,7 +17,6 @@ public class ARRAY extends TYPE {
 	public int length;
 	
 	public ARRAY(TYPE elementType, Expression length) {
-		super(null);
 		this.elementType = elementType;
 		if (elementType instanceof PRIMITIVE) {
 			this.coreType = elementType;
@@ -30,7 +29,6 @@ public class ARRAY extends TYPE {
 	}
 	
 	public ARRAY(TYPE elementType, int length) {
-		super(null);
 		this.elementType = elementType;
 		if (elementType instanceof PRIMITIVE) {
 			this.coreType = elementType;
@@ -61,7 +59,7 @@ public class ARRAY extends TYPE {
 	}
 
 	public String typeString() {
-		String s = this.coreType.typeString() + "[" + this.getLength() + "]";
+		String s = this.coreType.typeString().split(":") [0] + "[" + this.getLength() + "]";
 		TYPE t = this.elementType;
 		while (!(t instanceof PRIMITIVE)) {
 			s += "[" + ((ARRAY) t).getLength() + "]";

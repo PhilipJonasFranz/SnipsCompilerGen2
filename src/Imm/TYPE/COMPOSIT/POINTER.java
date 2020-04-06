@@ -2,7 +2,7 @@ package Imm.TYPE.COMPOSIT;
 
 import Imm.TYPE.TYPE;
 
-public class POINTER extends TYPE {
+public class POINTER extends COMPOSIT {
 
 	TYPE targetType;
 	

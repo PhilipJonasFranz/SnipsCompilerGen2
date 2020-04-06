@@ -4,7 +4,7 @@ import java.util.List;
 
 import Imm.TYPE.TYPE;
 
-public class STRUCT extends TYPE {
+public class STRUCT extends COMPOSIT {
 
 	List<TYPE> types;
 	

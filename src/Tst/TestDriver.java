@@ -170,14 +170,15 @@ public class TestDriver {
 			return new Result(RET_TYPE.CRASH, 0, 0);
 		}
 		
+		boolean printedOutput = this.printResult;
+		
 		if (this.printResult) {
-			compile.stream().forEach(System.out::println);
+			compile.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
+			printedOutput = true;
 		}
 		
 		int succ = 0;
 		int fail = 0;
-		
-		boolean printedOutput = this.printResult;
 		
 		/* Setup Runtime Environment */
 		for (int i = 0; i < cases.size(); i++) {
@@ -254,7 +255,7 @@ public class TestDriver {
 				
 				if (!printedOutput) {
 					new Message("-> Outputted Assemby Program: ", Message.Type.FAIL);
-					compile.stream().forEach(x -> System.out.println(x));
+					compile.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
 				}
 				printedOutput = true;
 				
