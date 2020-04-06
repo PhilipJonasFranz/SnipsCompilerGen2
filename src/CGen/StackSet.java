@@ -139,7 +139,8 @@ public class StackSet {
 		int off = 0;
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).contentType == CONTENT_TYPE.REGISTER) 
-				off = 4;
+				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;
+				else off += 4;
 			else if (stack.get(i).contentType == CONTENT_TYPE.DECLARATION) {
 				if (stack.get(i).declaration.equals(dec)) break;
 				off += (stack.get(i).declaration.type.wordsize() * 4);

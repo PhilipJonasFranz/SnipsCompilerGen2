@@ -110,13 +110,11 @@ public class AsNIdRef extends AsNExpression {
 		if (st.getParameterByteOffset(i.origin) != -1) {
 			int offset = st.getParameterByteOffset(i.origin);
 			
-			offset += (arr.getLength() - 1) * 4;
-			
 			/* Copy memory location with the size of the array */
 			for (int a = 0; a < arr.wordsize(); a++) {
 				this.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 				this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-				offset -= 4;
+				offset += 4;
 				st.push(REGISTER.R0);
 			}
 		}

@@ -21,7 +21,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
-		for (int i = 0; i < s.elements.size(); i++) {
+		for (int i = s.elements.size() - 1; i >= 0; i--) {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
 			if (s.elements.get(i) instanceof Atom) {
 				Atom atom = (Atom) s.elements.get(i);

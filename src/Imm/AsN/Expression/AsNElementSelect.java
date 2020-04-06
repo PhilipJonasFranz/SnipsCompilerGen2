@@ -43,10 +43,8 @@ public class AsNElementSelect extends AsNExpression {
 		/* Array is parameter, load from parameter stack */
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
 			
-			/* Load part of array that is a parameter */
-			int offset = st.getParameterByteOffset(s.idRef.origin);
 			/* Offset to start of array */
-			offset += (s.idRef.origin.type.wordsize() - 1) * 4;
+			int offset = st.getParameterByteOffset(s.idRef.origin);
 			
 			if (s.type instanceof ARRAY) {
 				select.loadSumR2(s, r, map, st, true);
@@ -56,7 +54,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.add(start);
 				
 				/* Subtract sum */
-				select.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 				
 				/* Loop through array word size and copy values */
 				select.subArrayCopy(s);
@@ -69,7 +67,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 				
 				/* Subtract offset */
-				select.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 				
 				/* Load */
 				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
@@ -77,6 +75,7 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else {
 			int offset = st.getDeclarationInStackByteOffset(s.idRef.origin);
+			offset += (s.idRef.origin.type.wordsize() - 1) * 4;
 			
 			if (s.type instanceof ARRAY) {
 				/* Load block offset */
@@ -88,7 +87,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.add(sub);
 			
 				/* Sub the offset to the start of the sub structure from the start in R1 */
-				ASMSub block = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2));
+				ASMAdd block = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2));
 				block.comment = new ASMComment("Start of sub structure in stack");
 				select.instructions.add(block);
 				
@@ -103,7 +102,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
 				
 				/* Location - block offset */
-				select.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 			
 				/* Load */
 				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
@@ -157,8 +156,8 @@ public class AsNElementSelect extends AsNExpression {
 	 * of the sub structure is located in R1.
 	 */
 	protected void subArrayCopy(ElementSelect s) {
-		int offset = 0;
 		ARRAY arr = (ARRAY) s.type;
+		int offset = arr.wordsize() * 4;
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
 			boolean r0 = false;
@@ -182,7 +181,7 @@ public class AsNElementSelect extends AsNExpression {
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			/* Move counter in R2 */
-			this.instructions.add(new ASMSub(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
+			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
@@ -197,7 +196,7 @@ public class AsNElementSelect extends AsNExpression {
 			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
 			
 			/* Load value and push it on the stack */
-			this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
+			this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
 			this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			
 			/* Branch to loop start */
