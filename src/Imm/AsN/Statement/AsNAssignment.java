@@ -108,8 +108,6 @@ public class AsNAssignment extends AsNStatement {
 	protected void copyArray(ElementSelect select) {
 		ARRAY arr = (ARRAY) select.type;
 		
-		this.instructions.add(new ASMComment("Store sub structure at target location"));
-		
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
 			int offset = 0;

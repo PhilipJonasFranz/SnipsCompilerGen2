@@ -170,6 +170,7 @@ public class CompilerDriver {
 		int warn = this.getMessageTypeNumber(Message.Type.WARN);
 		
 		/* Compilation finished ... */
+		if (err > 0) silenced = false;
 		log.add(new Message("Compilation " + 
 				/* ... successfully */
 				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
@@ -178,7 +179,7 @@ public class CompilerDriver {
 		
 		log.clear();
 		
-		if (outputPath != null) {
+		if (outputPath != null && output != null) {
 			Util.Util.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, Message.Type.INFO));
 		}
