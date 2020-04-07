@@ -9,6 +9,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.StructureInit;
+import Imm.AsN.AsNNode;
 
 public class AsNStructureInit extends AsNExpression {
 
@@ -32,7 +33,7 @@ public class AsNStructureInit extends AsNExpression {
 				
 				/* If group size is 3, push them on the stack */
 				if (regs == 3) {
-					init.flush(regs);
+					flush(regs, init);
 					regs = 0;
 				}
 				
@@ -40,7 +41,7 @@ public class AsNStructureInit extends AsNExpression {
 			}
 			else {
 				/* Flush all atoms to clear regs */
-				init.flush(regs);
+				flush(regs, init);
 				regs = 0;
 				
 				init.instructions.addAll(AsNExpression.cast(s.elements.get(i), r, map, st).getInstructions());
@@ -54,16 +55,23 @@ public class AsNStructureInit extends AsNExpression {
 		}
 		
 		/* Flush remaining atoms */
-		init.flush(regs);
+		flush(regs, init);
 		
 		return init;
 	}
 	
-	protected void flush(int regs) {
+	/**
+	 * Shared with AsNIDRef.<br>
+	 * Flush {@link #regs} on the stack. The flushed regs can be R0, R1, R2, based on regs.
+	 * F. e. if regs is 1, only R0 is flushed. If regs equals 3, R2, R1, R0 are flushed.<br>
+	 * The push order is so that f.E. R2 would end up at a higher address in the stack than R0.<br>
+	 * Requires that regs is between 0 and 3.
+	 */
+	public static void flush(int regs, AsNNode node) {
 		if (regs > 0) {
-			if (regs == 3) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else if (regs == 2) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			if (regs == 3) node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+			else if (regs == 2) node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+			else node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 		}
 	}
 	

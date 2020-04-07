@@ -60,13 +60,18 @@ public class CompilerDriver {
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
-			System.out.println(new Message("No input file specified!", Message.Type.FAIL).getMessage());
+			System.out.println(new Message("No input file specified! See -help for argument information.", Message.Type.FAIL).getMessage());
 			System.exit(0);
 		}
 		
 		/* Instantiate new Compiler instance with filepath as argument */
 		CompilerDriver scd = new CompilerDriver(args);
 		driver = scd;
+		
+		if (outputPath == null) {
+			System.out.println(new Message("No output file specified! See -help for argument information.", Message.Type.FAIL).getMessage());
+			System.exit(0);
+		}
 		
 		/* Errors occurred due to faulty parameters, abort */
 		if (!log.isEmpty()) {
@@ -212,9 +217,8 @@ public class CompilerDriver {
 			SyntaxElement AST = null;
 			
 			try {
-				if (code == null) {
+				if (code == null) 
 					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
-				}
 				
 				Scanner scanner = new Scanner(code);
 				Deque deque = scanner.scan();
@@ -226,7 +230,7 @@ public class CompilerDriver {
 			}
 			
 			if (AST == null) log.add(new Message("SNIPS -> Failed to compile libary " + filePath + ".", Message.Type.FAIL));
-			else log.add(new Message("SNIPS -> Using " + filePath, Message.Type.INFO));	
+			else log.add(new Message("SNIPS -> Hot compiled libary " + filePath, Message.Type.INFO));	
 			
 			ASTs.add(AST);
 		}
@@ -248,6 +252,11 @@ public class CompilerDriver {
 	}
 	
 	public void readArgs(String [] args) {
+		if (args [0].equals("-help")) {
+			printHelp();
+			System.exit(0);
+		}
+		
 		file = new File(args [0]);
 		
 		if (args.length > 1) {
@@ -267,6 +276,16 @@ public class CompilerDriver {
 		}
 		
 		if (silenced) logoPrinted = true;
+	}
+	
+	public void printHelp() {
+		silenced = false;
+		new Message("Arguments: ", Message.Type.INFO);
+		System.out.println(CompilerDriver.printDepth + "-[Path]   : First argument, set input file");
+		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
+		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
+		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
+		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
 	}
 	
 	public void setBurstMode(boolean value, boolean imm) {

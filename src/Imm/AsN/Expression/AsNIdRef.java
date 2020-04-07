@@ -7,7 +7,6 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
-import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
@@ -57,7 +56,7 @@ public class AsNIdRef extends AsNExpression {
 		}
 		/* Load declaration from global memory */
 		else if (map.declarationLoaded(i.origin)) {
-			ref.freeTargetReg(target, r, st);
+			ref.clearReg(r, st, target);
 			
 			ASMDataLabel label = map.resolve(i.origin);
 			
@@ -79,7 +78,7 @@ public class AsNIdRef extends AsNExpression {
 			}
 			/* Load in register */
 			else {
-				ref.freeTargetReg(target, r, st);
+				ref.clearReg(r, st, target);
 				
 				if (st.getParameterByteOffset(i.origin) != -1) {
 					/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
@@ -118,14 +117,14 @@ public class AsNIdRef extends AsNExpression {
 					regs++;
 				}
 				if (regs == 3) {
-					this.flush(regs);
+					AsNStructureInit.flush(regs, this);
 					regs = 0;
 				}
 				offset += 4;
 				st.push(REGISTER.R0);
 			}
 			
-			this.flush(regs);
+			AsNStructureInit.flush(regs, this);
 		}
 		/* Origin is in local stack */
 		else {
@@ -139,39 +138,14 @@ public class AsNIdRef extends AsNExpression {
 					regs++;
 				}
 				if (regs == 3) {
-					this.flush(regs);
+					AsNStructureInit.flush(regs, this);
 					regs = 0;
 				}
 				offset += 4;
 				st.push(REGISTER.R0);
 			}
 			
-			this.flush(regs);
-		}
-	}
-	
-	protected void flush(int regs) {
-		if (regs > 0) {
-			if (regs == 3) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else if (regs == 2) this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else this.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-		}
-	}
-	
-	protected void freeTargetReg(int target, RegSet r, StackSet st) {
-		/* Free target reg */
-		if (!r.getReg(target).isFree()) {
-			int free = r.findFree();
-			if (free != -1) {
-				/* Free Register, copy value of target reg to free location */
-				this.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(target)));
-				r.copy(target, free);
-			}
-			else {
-				/* RegStack is full, push copy to StackSet */
-				this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(target), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
-				st.push(r.getReg(target).declaration);
-			}
+			AsNStructureInit.flush(regs, this);
 		}
 	}
 	
