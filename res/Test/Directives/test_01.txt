@@ -1,0 +1,11 @@
+SOURCE
+#include <res\Test\Directives\exclude_import2.sn>
+
+int main(int a) {
+	if (a == 2) a = 3;
+	return foo(a) / 2;
+}
+TESTCASES
+0 0
+1 2
+2 6

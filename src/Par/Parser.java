@@ -11,6 +11,10 @@ import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Directive.CompileDirective;
+import Imm.AST.Directive.CompileDirective.COMP_DIR;
+import Imm.AST.Directive.Directive;
+import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
@@ -112,19 +116,68 @@ public class Parser {
 	protected Program parseProgram() throws PARSE_EXCEPTION {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
+		
+		List<Directive> include = new ArrayList();
+		List<Directive> directives = new ArrayList();
+		
 		while (this.current.type != TokenType.EOF) {
-			TYPE type = this.parseType();
-			Token identifier = accept(TokenType.IDENTIFIER);
-			
-			if (current.type == TokenType.LPAREN) {
-				elements.add(this.parseFunction(type, identifier));
+			if (current.type == TokenType.DIRECTIVE) {
+				Directive dir = this.parseDirective();
+				
+				if (dir instanceof IncludeDirective) {
+					include.add(dir);
+				}
+				else directives.add(dir);
 			}
 			else {
-				elements.add(this.parseGlobalDeclaration(type, identifier));
+				TYPE type = this.parseType();
+				Token identifier = accept(TokenType.IDENTIFIER);
+				
+				SyntaxElement element = null;
+				if (current.type == TokenType.LPAREN) {
+					element = this.parseFunction(type, identifier);
+				}
+				else {
+					element = this.parseGlobalDeclaration(type, identifier);
+				}
+				
+				elements.add(element);
+				if (!directives.isEmpty()) {
+					element.directives.addAll(directives);
+					directives.clear();
+				}
 			}
 		}
 		
-		return new Program(elements, source);
+		Program program = new Program(elements, source);
+		program.directives.addAll(include);
+		
+		return program;
+	}
+	
+	public Directive parseDirective() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.DIRECTIVE).getSource();
+		if (current.type == TokenType.INCLUDE) {
+			accept();
+			accept(TokenType.CMPLT);
+			String path = "";
+			while (current.type != TokenType.CMPGT) {
+				path += accept().spelling;
+			}
+			accept();
+			return new IncludeDirective(path, source);
+		}
+		else if (current.type == TokenType.IDENTIFIER) {
+			COMP_DIR dir;
+			String s = accept(TokenType.IDENTIFIER).spelling.toLowerCase();
+			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
+			else if (s.equals("libary")) dir = COMP_DIR.LIBARY;
+			else if (s.equals("unroll")) dir = COMP_DIR.UNROLL;
+			else throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
+			
+			return new CompileDirective(dir, source);
+		}
+		else throw new PARSE_EXCEPTION(source, TokenType.INCLUDE, TokenType.IDENTIFIER);
 	}
 	
 	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {

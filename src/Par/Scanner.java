@@ -1,6 +1,5 @@
 package Par;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,25 +15,16 @@ public class Scanner {
 	}
 	
 	public LinkedList<Token> scan() {
-		
-		List<Token> directives = new ArrayList();
-		
 		ScannerFSM sFSM = new ScannerFSM(new LinkedList());
+		
 		for (int i = 0; i < input.size(); i++) {
 			input.set(i, input.get(i).replace("\t", "    "));
 			for (int a = 0; a < input.get(i).length(); a++) {
-				if (input.get(i).charAt(a) == '#') {
-					String dir = input.get(i).substring(a);
-					directives.add(new Token(TokenType.DIRECTIVE, new Source(i, a), dir));
-					a = input.get(i).length();
-					break;
-				}
-				else sFSM.readChar(input.get(i).charAt(a), i + 1, a);
+				sFSM.readChar(input.get(i).charAt(a), i + 1, a);
 			}
 		}
 		
 		LinkedList<Token> tokens = sFSM.tokens;
-		for (int i = 0; i < directives.size(); i++)tokens.add(i, directives.get(i));
 		tokens.add(new Token(TokenType.EOF, new Source(0, 0), null));
 		
 		return tokens;
@@ -94,6 +84,10 @@ public class Scanner {
 				tokens.add(new Token(TokenType.RBRACKET, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals(".")) {
+				tokens.add(new Token(TokenType.DOT, new Source(i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals(";")) {
 				tokens.add(new Token(TokenType.SEMICOLON, new Source(i, a)));
 				this.emptyBuffer();
@@ -137,6 +131,18 @@ public class Scanner {
 				tokens.add(new Token(TokenType.NOT, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
 				this.buffer = this.buffer.substring(1);
 				this.checkState(i, a);
+			}
+			else if (this.buffer.equals("#")) {
+				tokens.add(new Token(TokenType.DIRECTIVE, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("include")) {
+				tokens.add(new Token(TokenType.INCLUDE, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("\\")) {
+				tokens.add(new Token(TokenType.BACKSL, new Source(i, a)));
+				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("if")) {
 				tokens.add(new Token(TokenType.IF, new Source(i, a)));

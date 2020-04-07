@@ -19,6 +19,7 @@ public class Token {
 	public Token(TokenType type, Source source) {
 		this.type = type;
 		this.source = source;
+		this.spelling = type.spelling;
 	}
 	
 	public boolean equals(Token token) {
@@ -43,6 +44,9 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
+		INCLUDE("include"),
+		BACKSL("\\"),
+		USCORE("_"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),
@@ -69,6 +73,7 @@ public class Token {
 		/* Functions */
 		RETURN("return"),
 		
+		DOT("."),
 		SEMICOLON(";"),
 		COLON(":"),
 		COMMA(","),

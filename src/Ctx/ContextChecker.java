@@ -39,7 +39,6 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Snips.CompilerDriver;
 
 public class ContextChecker {
 
@@ -57,18 +56,6 @@ public class ContextChecker {
 	
 	public ContextChecker(SyntaxElement AST) {
 		this.AST = AST;
-		
-		/* Import libary functions */
-		CompilerDriver driver = new CompilerDriver();
-		List<SyntaxElement> ASTs = driver.hotCompile(CompilerDriver.driver.referencedLibaries);
-		
-		Program head = (Program) AST;
-		for (SyntaxElement ast : ASTs) {
-			Program p0 = (Program) ast;
-			for (SyntaxElement s : p0.programElements) {
-				head.programElements.add(0, s);
-			}
-		}
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {

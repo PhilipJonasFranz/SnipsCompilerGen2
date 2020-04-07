@@ -65,12 +65,12 @@ public class TestDriver {
 		
 		List<String> paths = new ArrayList();
 		
-		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
 			for (String s : args) {
 				if (s.endsWith(".sn")) paths.add(s);
 				else {
-					paths.addAll(this.getTestFiles(s).stream().filter(x -> x.endsWith(".txt")).collect(Collectors.toList()));
+					paths.addAll(this.getTestFiles(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 				}
 			}
 		}

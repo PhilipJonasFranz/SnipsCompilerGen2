@@ -14,6 +14,8 @@ import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Directive.Directive;
+import Imm.AST.Directive.IncludeDirective;
 import Imm.AsN.AsNBody;
 import Par.Parser;
 import Par.Scanner;
@@ -135,6 +137,13 @@ public class CompilerDriver {
 			if (imm) AST.print(4, true);
 			
 			
+			/* --- PROCESS IMPORTS --- */
+			this.addDependencies((Program) AST);
+			
+			log.add(new Message("SNIPS -> Imported libaries.", Message.Type.INFO));
+			if (imm) AST.print(4, true);
+			
+			
 					/* --- CONTEXT CHECKING --- */
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
@@ -227,24 +236,82 @@ public class CompilerDriver {
 				if (code == null) 
 					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
 				
+				
 						/* --- SCANNING --- */
 				Scanner scanner = new Scanner(code);
 				Deque deque = scanner.scan();
 				
+				
 						/* --- PARSING --- */
 				Parser parser = new Parser(deque);
 				AST = parser.parse();
+				
+				
+						/* --- PROCESS IMPORTS --- */
+				this.addDependencies((Program) AST);
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
 			}
 			
-			if (AST == null) log.add(new Message("SNIPS -> Failed to compile libary " + filePath + ".", Message.Type.FAIL));
-			else log.add(new Message("SNIPS -> Hot compiled libary " + filePath, Message.Type.INFO));	
+			if (AST == null) log.add(new Message("SNIPS -> Failed to import libary " + filePath + ".", Message.Type.FAIL));
+			else log.add(new Message("SNIPS -> Imported libary " + filePath, Message.Type.INFO));	
+			
+			((Program) AST).fileName = filePath;
 			
 			ASTs.add(AST);
 		}
 		
 		return ASTs;
+	}
+
+	/**
+	 * Import depencendies listed by include directives
+	 * @param importer The program that lists the include directives
+	 */
+	public void addDependencies(Program importer) {
+		List<Directive> imports = importer.directives;
+		List<SyntaxElement> ASTs = new ArrayList();
+		for (String s : this.referencedLibaries) {
+			List<String> file0 = new ArrayList();
+			file0.add(s);
+			
+			CompilerDriver driver = new CompilerDriver();
+			ASTs.addAll(driver.hotCompile(file0));
+		}
+		
+		for (Directive dir : imports) {
+			if (dir instanceof IncludeDirective) {
+				IncludeDirective inc = (IncludeDirective) dir;
+				
+				List<String> file0 = new ArrayList();
+				file0.add(inc.file);
+				
+				CompilerDriver driver = new CompilerDriver();
+				ASTs.addAll(driver.hotCompile(file0));
+			}
+		}
+		
+		if (ASTs.size() > 1) for (int i = 0; i < ASTs.size(); i++) {
+			for (int a = i + 1; a < ASTs.size(); a++) {
+				Program p0 = (Program) ASTs.get(i);
+				Program p1 = (Program) ASTs.get(a);
+				
+				if (p0.fileName.equals(p1.fileName)) {
+					ASTs.remove(a);
+					a--;
+				}
+			}
+		}
+		
+		Program program = (Program) importer;
+		int c = 0;
+		for (int i = 0; i < ASTs.size(); i++) {
+			Program p = (Program) ASTs.get(i);
+			for (int a = 0; a < p.programElements.size(); a++) {
+				program.programElements.add(c, p.programElements.get(a));
+				c++;
+			}
+		}
 	}
 	
 	public int getMessageTypeNumber(Message.Type type) {
