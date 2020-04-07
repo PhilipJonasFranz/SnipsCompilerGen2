@@ -134,14 +134,12 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			if (imm) AST.print(4, true);
-			
-			
 			/* --- PROCESS IMPORTS --- */
-			this.addDependencies((Program) AST);
-			
-			log.add(new Message("SNIPS -> Imported libaries.", Message.Type.INFO));
-			if (imm) AST.print(4, true);
+			Program p = (Program) AST;
+			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
+				this.addDependencies(p);
+				p.directives.clear();
+			}
 			
 			
 					/* --- CONTEXT CHECKING --- */
@@ -153,6 +151,9 @@ public class CompilerDriver {
 			} catch (CTX_EXCEPTION e) {
 				throw e;
 			}
+			
+			if (imm) AST.print(4, true);
+			
 			
 					/* --- CODE GENERATION --- */
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
@@ -271,6 +272,7 @@ public class CompilerDriver {
 	public void addDependencies(Program importer) {
 		List<Directive> imports = importer.directives;
 		List<SyntaxElement> ASTs = new ArrayList();
+		
 		for (String s : this.referencedLibaries) {
 			List<String> file0 = new ArrayList();
 			file0.add(s);
@@ -357,7 +359,7 @@ public class CompilerDriver {
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
-		System.out.println(CompilerDriver.printDepth + "-[Path]   : First argument, set input file");
+		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");

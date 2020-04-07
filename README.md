@@ -9,10 +9,9 @@
  continue and return.
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Implement import system
  - Implement Arrays WIP: Global Arrays
- - Implement Heap System
  - Implement Pointers
+ - Implement Heap System
  - Implement Addressof and Dereference Operators
  - Implement Pass-by-value and pass-by-reference for non-primitive types
  
