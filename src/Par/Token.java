@@ -85,7 +85,11 @@ public class Token {
 		/* Logic Operators */
 		OR("||"),
 		AND("&&"),
-		NOT("!"),
+		NEG("!"),
+		NOT("~"),
+		XOR("^"),
+		BITOR("|"),
+		ADDROF("&"),
 		
 		/* Comparators */
 		CMPEQ("==", 				TokenGroup.COMPARE),

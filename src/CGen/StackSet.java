@@ -2,6 +2,7 @@ package CGen;
 
 import java.util.Stack;
 
+import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Declaration;
 
@@ -81,7 +82,7 @@ public class StackSet {
 		}
 	}
 	
-	public void popXWords(int x) {
+	public void popXWords(int x) throws CGEN_EXCEPTION {
 		int words = 0;
 		while (words < x) {
 			if (this.stack.peek().contentType == CONTENT_TYPE.REGISTER) {
@@ -91,6 +92,10 @@ public class StackSet {
 				words += this.stack.peek().declaration.type.wordsize();
 			}
 			this.stack.pop();
+		}
+		
+		if (words != x) {
+			throw new CGEN_EXCEPTION("Unable to pop " + x + " Words from the stack, could only pop " + words);
 		}
 	}
 	

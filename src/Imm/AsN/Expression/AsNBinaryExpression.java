@@ -16,6 +16,9 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.Arith.BitAnd;
+import Imm.AST.Expression.Arith.BitOr;
+import Imm.AST.Expression.Arith.BitXor;
 import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
@@ -24,6 +27,9 @@ import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AsN.Expression.Arith.AsNAdd;
+import Imm.AsN.Expression.Arith.AsNBitAnd;
+import Imm.AsN.Expression.Arith.AsNBitOr;
+import Imm.AsN.Expression.Arith.AsNBitXor;
 import Imm.AsN.Expression.Arith.AsNLsl;
 import Imm.AsN.Expression.Arith.AsNLsr;
 import Imm.AsN.Expression.Arith.AsNMult;
@@ -72,6 +78,15 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 		else if (e instanceof Or) {
 			node = AsNOr.cast((Or) e, r, map, st);
+		}
+		else if (e instanceof BitOr) {
+			node = AsNBitOr.cast((BitOr) e, r, map, st);
+		}
+		else if (e instanceof BitAnd) {
+			node = AsNBitAnd.cast((BitAnd) e, r, map, st);
+		}
+		else if (e instanceof BitXor) {
+			node = AsNBitXor.cast((BitXor) e, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	

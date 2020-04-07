@@ -128,6 +128,16 @@ public class Scanner {
 				this.buffer = this.buffer.substring(1);
 				this.checkState(i, a);
 			}
+			else if (this.buffer.equals("^")) {
+				tokens.add(new Token(TokenType.XOR, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+				this.buffer = this.buffer.substring(1);
+				this.checkState(i, a);
+			}
+			else if (this.buffer.equals("~")) {
+				tokens.add(new Token(TokenType.NOT, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+				this.buffer = this.buffer.substring(1);
+				this.checkState(i, a);
+			}
 			else if (this.buffer.equals("if")) {
 				tokens.add(new Token(TokenType.IF, new Source(i, a)));
 				this.emptyBuffer();
@@ -214,13 +224,29 @@ public class Scanner {
 				this.ACC_STATE = ACCUM_STATE.NONE;
 				return true;
 			}
-			else if (this.buffer.equals("||")) {
-				tokens.add(new Token(TokenType.OR, new Source(i, a)));
-				this.emptyBuffer();
+			else if (this.buffer.startsWith("|")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("||")) {
+					tokens.add(new Token(TokenType.OR, new Source(i, a)));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.BITOR, new Source(i, a - this.buffer.length())));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
-			else if (this.buffer.equals("&&")) {
-				tokens.add(new Token(TokenType.AND, new Source(i, a)));
-				this.emptyBuffer();
+			else if (this.buffer.startsWith("&")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("&&")) {
+					tokens.add(new Token(TokenType.AND, new Source(i, a)));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.ADDROF, new Source(i, a - this.buffer.length())));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
 			else if (this.buffer.equals("%")) {
 				tokens.add(new Token(TokenType.MOD, new Source(i, a)));
@@ -233,7 +259,7 @@ public class Scanner {
 					this.emptyBuffer();
 				}
 				else {
-					tokens.add(new Token(TokenType.NOT, new Source(i, a), this.buffer.substring(0, 1)));
+					tokens.add(new Token(TokenType.NEG, new Source(i, a), this.buffer.substring(0, 1)));
 					this.buffer = this.buffer.substring(1);
 					this.checkState(i, a);
 				}

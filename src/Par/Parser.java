@@ -18,6 +18,10 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.Add;
+import Imm.AST.Expression.Arith.BitAnd;
+import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.BitOr;
+import Imm.AST.Expression.Arith.BitXor;
 import Imm.AST.Expression.Arith.Lsl;
 import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
@@ -419,10 +423,37 @@ public class Parser {
 	}
 	
 	protected Expression parseAnd() throws PARSE_EXCEPTION {
-		Expression left = this.parseCompare();
+		Expression left = this.parseBitOr();
 		while (current.type == TokenType.AND) {
 			accept();
-			left = new And(left, this.parseCompare(), current.source);
+			left = new And(left, this.parseBitOr(), current.source);
+		}
+		return left;
+	}
+	
+	protected Expression parseBitOr() throws PARSE_EXCEPTION {
+		Expression left = this.parseBitXor();
+		while (current.type == TokenType.BITOR) {
+			accept();
+			left = new BitOr(left, this.parseBitXor(), current.source);
+		}
+		return left;
+	}
+	
+	protected Expression parseBitXor() throws PARSE_EXCEPTION {
+		Expression left = this.parseBitAnd();
+		while (current.type == TokenType.XOR) {
+			accept();
+			left = new BitXor(left, this.parseBitAnd(), current.source);
+		}
+		return left;
+	}
+	
+	protected Expression parseBitAnd() throws PARSE_EXCEPTION {
+		Expression left = this.parseCompare();
+		while (current.type == TokenType.ADDROF) {
+			accept();
+			left = new BitAnd(left, this.parseCompare(), current.source);
 		}
 		return left;
 	}
@@ -523,9 +554,15 @@ public class Parser {
 	
 	protected Expression parseNot() throws PARSE_EXCEPTION {
 		Expression not = null;
-		while (current.type == TokenType.NOT) {
-			accept();
-			not = new Not(this.parseNot(), current.source);
+		while (current.type == TokenType.NEG || current.type == TokenType.NOT) {
+			if (current.type == TokenType.NEG) {
+				accept();
+				not = new Not(this.parseNot(), current.source);
+			}
+			else {
+				accept(TokenType.NOT);
+				not = new BitNot(this.parseNot(), current.source);
+			}
 		}
 		
 		if (not == null) not = this.parseUnaryMinus();

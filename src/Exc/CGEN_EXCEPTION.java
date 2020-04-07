@@ -23,8 +23,13 @@ public class CGEN_EXCEPTION extends Exception {
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
+	public CGEN_EXCEPTION(String message) {
+		this.message = message;
+		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
+	}
+	
 	public String getMessage() {
-		return message + ", " + this.location.getSourceMarker();
+		return message + ((this.location != null)? ", " + this.location.getSourceMarker() : "");
 	}
 	
 }

@@ -19,7 +19,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Statement.CaseStatement;
-import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
@@ -40,14 +39,8 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		for (CaseStatement cs : s.cases) {
 			sw.evaluateCondition(cs.condition, r, map, st, next);
 			
-			/* Open scope for case body */
-			st.openScope();
-			
-			for (Statement s0 : cs.body) 
-				sw.instructions.addAll(AsNStatement.cast(s0, r, map, st).getInstructions());
-			
-			/* Pop Case body scope */
-			sw.popDeclarationScope(cs, r, st);
+			/* Add body */
+			sw.addBody(cs, r, map, st);
 			
 			/* Branch to switch end */
 			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(end)));
@@ -59,13 +52,8 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 			next = new ASMLabel(LabelGen.getLabel());
 		}
 		
-		/* Handle Default Statement */
-		st.openScope();
-		
-		for (Statement s0 : s.defaultStatement.body) 
-			sw.instructions.addAll(AsNStatement.cast(s0, r, map, st).getInstructions());
-		
-		sw.popDeclarationScope(s.defaultStatement, r, st);
+		/* Add default body */
+		sw.addBody(s.defaultStatement, r, map, st);
 		
 		/* Add end jump */
 		sw.instructions.add(end);

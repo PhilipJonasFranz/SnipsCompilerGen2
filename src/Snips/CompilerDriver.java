@@ -99,16 +99,14 @@ public class CompilerDriver {
 	}
 	
 	public List<String> compile(File file, List<String> code) {
-		LabelGen.reset();
-		
 		long start = System.currentTimeMillis();
 		
+		/* Setup & set settings */
+		List<String> output = null;
+		LabelGen.reset();
 		CompilerDriver.file = file;
-		
 		printLogo();
 		log.clear();
-		
-		List<String> output = null;
 		
 		try {
 			if (code == null) {
@@ -117,21 +115,27 @@ public class CompilerDriver {
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
-				code.stream().forEach(x -> System.out.println("    " + x));
+				code.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
+			
+					/* --- SCANNING --- */
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
 			Scanner scanner = new Scanner(code);
 			Deque deque = scanner.scan();
 			
+			
+					/* --- PARSING --- */
 			log.add(new Message("SNIPS_PARSE -> Starting...", Message.Type.INFO));
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
 			if (imm) AST.print(4, true);
 			
+			
+					/* --- CONTEXT CHECKING --- */
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
 			try {
@@ -141,31 +145,34 @@ public class CompilerDriver {
 				throw e;
 			}
 			
+					/* --- CODE GENERATION --- */
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
 			AsNBody body = AsNBody.cast((Program) AST);
 		
-			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
 			
+					/* --- OPTIMIZING --- */
 			double before = body.getInstructions().size();
-			
+			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
 			ASMOptimizer opt = new ASMOptimizer();
 			opt.optimize(body);
 			
 			double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 			CompilerDriver.compressions.add(rate);
-			
 			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			
+			
+					/* --- OUTPUT BUILDING --- */
 			output = body.getInstructions().stream().map(x -> {
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
-			CompilerDriver.instructionsGenerated += output.size();
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
-				output.stream().forEach(x -> System.out.println("    " + x));
+				output.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
 			}
+			
+			CompilerDriver.instructionsGenerated += output.size();
 		} catch (Exception e) {
 			if (printErrors) e.printStackTrace();
 		}
@@ -220,9 +227,11 @@ public class CompilerDriver {
 				if (code == null) 
 					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
 				
+						/* --- SCANNING --- */
 				Scanner scanner = new Scanner(code);
 				Deque deque = scanner.scan();
 				
+						/* --- PARSING --- */
 				Parser parser = new Parser(deque);
 				AST = parser.parse();
 			} catch (Exception e) {
@@ -242,8 +251,8 @@ public class CompilerDriver {
 		return (int) log.stream().filter(x -> x.messageType == type).count();
 	}
 	
-	/* Print out all lines of the SNIPS logo */
 	public static void printLogo() {
+		/* Print out all lines of the SNIPS logo */
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
