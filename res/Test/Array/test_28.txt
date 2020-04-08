@@ -1,0 +1,16 @@
+SOURCE
+int [2] [2] vec = {{3, 7}, {2, 0}};
+	
+int foo(int [2] [2] v, int x, int y) {
+	v = {{1, 5}, {9, 2}};
+	return v [x] [y];
+}
+
+int main(int x, int y) { 
+	return foo(vec, x, y);
+}
+TESTCASES
+0 0 1
+0 1 5
+1 0 9
+1 1 2

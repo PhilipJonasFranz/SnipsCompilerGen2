@@ -117,10 +117,9 @@ public class StackSet {
 	 * is not a parameter.
 	 */
 	public int getParameterByteOffset(Declaration dec) {
-		int x = 0;
 		int off = 0;
 		boolean foundHook = false;
-		while (true) {
+		for (int x = 0; x < stack.size(); x++) {
 			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
 				if (!foundHook) return -1;
 				else return off;
@@ -133,15 +132,15 @@ public class StackSet {
 				if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
 				else off += 4;
 			}
-			x++;
 		}
+		return -1;
 	}
 	
 	/**
 	 * Finds the offset to a local variable in the stack.
 	 */
 	public int getDeclarationInStackByteOffset(Declaration dec) {
-		int off = 0;
+		int off = 4;
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).contentType == CONTENT_TYPE.REGISTER) 
 				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;

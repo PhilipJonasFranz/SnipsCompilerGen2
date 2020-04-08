@@ -15,6 +15,7 @@ import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -29,6 +30,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Lhs.ElementSelectLhsId;
+import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AsN.Expression.AsNElementSelect;
 import Imm.AsN.Expression.AsNElementSelect.SELECT_TYPE;
@@ -49,13 +51,14 @@ public class AsNAssignment extends AsNStatement {
 			int reg = r.declarationRegLocation(a.origin);
 			assign.instructions.add(new ASMMov(new RegOperand(reg), new RegOperand(0)));
 		}
-		/* Variable is global variable, store to memory */
-		else if (map.declarationLoaded(a.origin)) {
+		/* Variable is global variable and type is primitive, store to memory.
+		 * 		Other types in memory are handled down below. */
+		else if (map.declarationLoaded(a.origin) && a.origin.type instanceof PRIMITIVE) {
 			ASMDataLabel label = map.resolve(a.origin);
 			
 			/* Load memory address */
 			assign.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
-			
+				
 			/* Store computed to memory */
 			assign.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
@@ -73,21 +76,31 @@ public class AsNAssignment extends AsNStatement {
 					
 					/* Assign sub Array */
 					if (select.type instanceof ARRAY) {
+						/* Save to param Stack */
 						if (st.getParameterByteOffset(a.origin) != -1) 
 							AsNElementSelect.injectAddressLoader(SELECT_TYPE.PARAM_SUB, assign, select, r, map, st);
+						/* Save to global memory */
+						else if (map.resolve(a.origin) != null) 
+							AsNElementSelect.injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, assign, select, r, map, st);
+						/* Save to local stack */
 						else 
 							AsNElementSelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, assign, select, r, map, st);
 					
 						/* Data is on stack, copy to location */
-						assign.copyArray(select);
+						assign.copyArray((ARRAY) select.type);
 					}
 					/* Assign single array cell */
 					else {
 						/* Push value on the stack */
 						assign.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 						
+						/* Save to param Stack */
 						if (st.getParameterByteOffset(a.origin) != -1) 
 							AsNElementSelect.injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, assign, select, r, map, st);
+						/* Save to global memory */
+						else if (map.resolve(a.origin) != null) 
+							AsNElementSelect.injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, assign, select, r, map, st);
+						/* Save to local stack */
 						else 
 							AsNElementSelect.injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, assign, select, r, map, st);
 						
@@ -95,6 +108,42 @@ public class AsNAssignment extends AsNStatement {
 						assign.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 						assign.instructions.add(new ASMStr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
 					}
+				}
+				else if (a.lhsId instanceof SimpleLhsId) {
+					SimpleLhsId lhs = (SimpleLhsId) a.lhsId;
+				
+					/* Use light variations of the addressing injector from AsNElementSelect, since we 
+					 * dont have to add the sum to the sub structure.
+					 */
+					
+					/* Parameter */
+					if (st.getParameterByteOffset(a.origin) != -1) {
+						int offset = st.getParameterByteOffset(a.origin);
+						
+						ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+						start.comment = new ASMComment("Start of structure in stack");
+						assign.instructions.add(start);
+					}
+					else if (map.resolve(a.origin) != null) {
+						ASMDataLabel label = map.resolve(a.origin);
+						
+						ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label));
+						load.comment = new ASMComment("Load data section address");
+						assign.instructions.add(load);
+					}
+					/* Local */
+					else {
+						int offset = st.getDeclarationInStackByteOffset(a.origin);
+						offset += (a.origin.type.wordsize() - 1) * 4;
+						
+						/* Load the start of the structure into R1 */
+						ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset));
+						sub.comment = new ASMComment("Start of structure in stack");
+						assign.instructions.add(sub);
+					}
+					
+					/* Copy array */
+					assign.copyArray((ARRAY) lhs.origin.type);
 				}
 			}
 			else {
@@ -105,9 +154,7 @@ public class AsNAssignment extends AsNStatement {
 		return assign;
 	}
 	
-	protected void copyArray(ElementSelect select) {
-		ARRAY arr = (ARRAY) select.type;
-		
+	protected void copyArray(ARRAY arr) {
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
 			int offset = 0;

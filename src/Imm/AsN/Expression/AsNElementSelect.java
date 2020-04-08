@@ -59,42 +59,36 @@ public class AsNElementSelect extends AsNExpression {
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
 			if (s.type instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
-				
-				/* Loop through array word size and copy values */
-				select.instructions.addAll(subArrayCopy(s));
 			}
 			else {
 				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
-				
-				/* Load */
-				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 			}
 		}
-		else if (map.resolve(s.idRef.origin) != null) {
+		else if (map.declarationLoaded(s.idRef.origin)) {
 			/* Data Memory */
 			if (s.type instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
 			}
 			else {
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
-				
-				/* Load */
-				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 			}
 		}
 		else {
 			if (s.type instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
-				
-				/* Copy memory location with the size of the array */
-				select.instructions.addAll(subArrayCopy(s));
 			}
 			else {
 				injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
-				
-				/* Load */
-				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 			}
+		}
+		
+		if (s.type instanceof ARRAY) {
+			/* Loop through array word size and copy values */
+			select.instructions.addAll(subArrayCopy(s));
+		}
+		else {
+			/* Load */
+			select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 		}
 		
 		return select;
@@ -272,6 +266,19 @@ public class AsNElementSelect extends AsNExpression {
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+		}
+		else if (selectType == SELECT_TYPE.GLOBAL_SUB) {
+			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			
+			ASMDataLabel label = map.resolve(s.idRef.origin);
+		
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label));
+			load.comment = new ASMComment("Load data section address");
+			node.instructions.add(load);
+			
+			/* Add sum */
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		
 		}
 	}
 	
