@@ -136,9 +136,10 @@ public class AsNElementSelect extends AsNExpression {
 		List<ASMInstruction> copy = new ArrayList();
 		
 		ARRAY arr = (ARRAY) s.type;
-		int offset = arr.wordsize() * 4;
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
+			int offset = (arr.wordsize() - 1) * 4;
+			
 			boolean r0 = false;
 			for (int a = 0; a < arr.wordsize(); a++) {
 				if (!r0) {
@@ -147,7 +148,7 @@ public class AsNElementSelect extends AsNExpression {
 				}
 				else {
 					copy.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
-					copy.add(new ASMPushStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+					copy.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 					r0 = false;
 				}
 				offset -= 4;
