@@ -12,6 +12,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
@@ -22,6 +23,7 @@ import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -41,7 +43,8 @@ public class AsNElementSelect extends AsNExpression {
 			/* --- NESTED --- */
 	public enum SELECT_TYPE {
 		LOCAL_SINGLE, LOCAL_SUB,
-		PARAM_SINGLE, PARAM_SUB;
+		PARAM_SINGLE, PARAM_SUB,
+		GLOBAL_SINGLE, GLOBAL_SUB;
 	}
 	
 	
@@ -62,6 +65,18 @@ public class AsNElementSelect extends AsNExpression {
 			}
 			else {
 				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
+				
+				/* Load */
+				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+			}
+		}
+		else if (map.resolve(s.idRef.origin) != null) {
+			/* Data Memory */
+			if (s.type instanceof ARRAY) {
+				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
+			}
+			else {
+				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
 				
 				/* Load */
 				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
@@ -233,7 +248,7 @@ public class AsNElementSelect extends AsNExpression {
 			/* Get offset of parameter relative to fp */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 			
-			/* Subtract offset */
+			/* Add offset */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SUB) {
@@ -243,8 +258,20 @@ public class AsNElementSelect extends AsNExpression {
 			start.comment = new ASMComment("Start of structure in stack");
 			node.instructions.add(start);
 			
-			/* Subtract sum */
+			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		}
+		else if (selectType == SELECT_TYPE.GLOBAL_SINGLE) {
+			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			
+			ASMDataLabel label = map.resolve(s.idRef.origin);
+			
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label));
+			load.comment = new ASMComment("Load data section address");
+			node.instructions.add(load);
+			
+			/* Add sum */
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 	}
 	

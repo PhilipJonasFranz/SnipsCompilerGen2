@@ -74,6 +74,10 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
+		if (f.returnType.wordsize() > 1) {
+			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.returnType.typeString());
+		}
+		
 		this.functions.add(f);
 		
 		scopes.push(new Scope(scopes.peek()));
@@ -309,8 +313,8 @@ public class ContextChecker {
 	public TYPE checkReturn(ReturnStatement r) throws CTX_EXCEPTION {
 		TYPE t = r.value.check(this);
 		
-		if (t.wordsize() > 1) {
-			throw new CTX_EXCEPTION(r.getSource(), "Functions can only return primitive types or pointers, actual : " + t.typeString());
+		if (!t.isEqual(currentFunction.returnType)) {
+			throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + t.typeString() + " vs " + currentFunction.returnType.typeString());
 		}
 		
 		if (t.isEqual(this.currentFunction.returnType)) {
