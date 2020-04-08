@@ -1,5 +1,6 @@
 SOURCE
 #include<res\Test\Directives\exclude_mult.sn>
+#include<res\Test\Directives\exclude_import3.sn>
 
 int main(int x, int y) {
 	int [2] [2] m = {{1, 2}, {3, 4}};

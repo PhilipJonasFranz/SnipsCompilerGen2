@@ -136,8 +136,31 @@ public class CompilerDriver {
 			
 			/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
+			p.fileName = file.getPath();
 			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
-				this.addDependencies(p);
+				List<SyntaxElement> dependencies = this.addDependencies(p);
+				
+				/* An error occured during importing, probably loop in dependencies */
+				if (dependencies == null) {
+					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libaries, possible loop in #include statements.");
+				}
+				
+				/* Print out imported libaries */
+				for (SyntaxElement s : dependencies) {
+					log.add(new Message("SNIPS -> Imported libary " + ((Program) s).fileName, Message.Type.INFO));
+				}
+				
+				/* Add libaries to AST, duplicates were already filtered */
+				int c = 0;
+				for (int i = 0; i < dependencies.size(); i++) {
+					Program p0 = (Program) dependencies.get(i);
+					for (int a = 0; a < p0.programElements.size(); a++) {
+						p.programElements.add(c, p0.programElements.get(a));
+						c++;
+					}
+				}
+				
+				/* Clear program directives */
 				p.directives.clear();
 			}
 			
@@ -217,16 +240,6 @@ public class CompilerDriver {
 	public List<SyntaxElement> hotCompile(List<String> files) {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
-		/* Filter duplicates */
-		if (files.size() > 1) for (int i = 0; i < files.size(); i++) {
-			for (int a = i + 1; a < files.size(); a++) {
-				if (files.get(i).equals(files.get(a))) {
-					files.remove(a);
-					a--;
-				}
-			}
-		}
-		
 		for (String filePath : files) {
 			File file = new File(filePath);
 			List<String> code = Util.Util.readFile(file);
@@ -246,21 +259,26 @@ public class CompilerDriver {
 						/* --- PARSING --- */
 				Parser parser = new Parser(deque);
 				AST = parser.parse();
+				((Program) AST).fileName = file.getPath();
 				
 				
 						/* --- PROCESS IMPORTS --- */
-				this.addDependencies((Program) AST);
+				List<SyntaxElement> dependencies = this.addDependencies((Program) AST);
+				
+				if (dependencies == null) return null;
+				else {
+					this.removeDuplicates(dependencies);
+					ASTs.addAll(dependencies);
+				}
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
+				log.add(new Message("SNIPS -> Failed to import libary " + filePath + ".", Message.Type.FAIL));
 			}
-			
-			if (AST == null) log.add(new Message("SNIPS -> Failed to import libary " + filePath + ".", Message.Type.FAIL));
-			else log.add(new Message("SNIPS -> Imported libary " + filePath, Message.Type.INFO));	
-			
-			((Program) AST).fileName = filePath;
 			
 			ASTs.add(AST);
 		}
+		
+		this.removeDuplicates(ASTs);
 		
 		return ASTs;
 	}
@@ -269,7 +287,7 @@ public class CompilerDriver {
 	 * Import depencendies listed by include directives
 	 * @param importer The program that lists the include directives
 	 */
-	public void addDependencies(Program importer) {
+	public List<SyntaxElement> addDependencies(Program importer) {
 		List<Directive> imports = importer.directives;
 		List<SyntaxElement> ASTs = new ArrayList();
 		
@@ -281,18 +299,41 @@ public class CompilerDriver {
 			ASTs.addAll(driver.hotCompile(file0));
 		}
 		
-		for (Directive dir : imports) {
-			if (dir instanceof IncludeDirective) {
-				IncludeDirective inc = (IncludeDirective) dir;
-				
-				List<String> file0 = new ArrayList();
-				file0.add(inc.file);
-				
-				CompilerDriver driver = new CompilerDriver();
-				ASTs.addAll(driver.hotCompile(file0));
+		try {
+			for (Directive dir : imports) {
+				if (dir instanceof IncludeDirective) {
+					IncludeDirective inc = (IncludeDirective) dir;
+					
+					if (inc.file.equals(importer.fileName)) continue;
+					for (int i = 0; i < ASTs.size(); i++) {
+						if (((Program) ASTs.get(i)).fileName.equals(inc.file)) {
+							continue;
+						}
+					}
+					
+					List<String> file0 = new ArrayList();
+					file0.add(inc.file);
+					
+					CompilerDriver driver = new CompilerDriver();
+					List<SyntaxElement> dependencies = driver.hotCompile(file0);
+					
+					/* Error during importing, propagate back */
+					if (dependencies == null) return null;
+					else {
+						ASTs.addAll(dependencies);
+					}
+				}
 			}
+		} catch (StackOverflowError st) {
+			return null;
 		}
 		
+		this.removeDuplicates(ASTs);
+		
+		return ASTs;
+	}
+	
+	public void removeDuplicates(List<SyntaxElement> ASTs) {
 		if (ASTs.size() > 1) for (int i = 0; i < ASTs.size(); i++) {
 			for (int a = i + 1; a < ASTs.size(); a++) {
 				Program p0 = (Program) ASTs.get(i);
@@ -302,16 +343,6 @@ public class CompilerDriver {
 					ASTs.remove(a);
 					a--;
 				}
-			}
-		}
-		
-		Program program = (Program) importer;
-		int c = 0;
-		for (int i = 0; i < ASTs.size(); i++) {
-			Program p = (Program) ASTs.get(i);
-			for (int a = 0; a < p.programElements.size(); a++) {
-				program.programElements.add(c, p.programElements.get(a));
-				c++;
 			}
 		}
 	}
