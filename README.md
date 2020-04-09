@@ -13,7 +13,7 @@
 ### How to use
  If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips [Full Path to file to compile]". With "snips -help" you can get more information on the arguments.
 
-If you want to run the code instead, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res\Test\Arith\Static\test_00.txt" or a list of directories, f.E. "res\Test\Arith\ res\Test\Stack\".
+If you want to run the code instead, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
  Code examples and testcases can be found under res/Test/.
 ## Included Modules
@@ -21,11 +21,11 @@ If you want to run the code instead, you can run either the CompilerDriver.java 
  Under src/REv/Modules/RAsm/ you can find an assembler that is used by the test driver to assemble the outputted program and run it on the SWARM32Pc. The Assembler will work with the code that the Compiler outputs, but it does not fully support all instructions and does not follow any compilation conventions. I do not recommend to use it anywhere else than in combination with this project.
 ### SWARM32Pc
  Under src/REv/CPU/ you can find a virtual machine, which implements a subset of the ARM Instruction Set. Again, this is used to test the output of the Compiler. Since the processor does not support all instructions i would not recommend to use it somewhere else. Supported instructions are: 
- - b/bl/bx
+ - b, bl, bx
  - All data processing operations
- - mrs/msr
- - mul/mla
- - ldr/str
+ - mrs, msr
+ - mul, mla
+ - ldr, str
  
 All instructions do support the condition field. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 ### XML-Parser
