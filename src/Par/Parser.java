@@ -633,9 +633,9 @@ public class Parser {
 	
 	protected Expression parseDeref() throws PARSE_EXCEPTION {
 		Expression addr = null;
-		while (current.type == TokenType.MUL) {
+		if (current.type == TokenType.MUL) {
 			Source source = accept().getSource();
-			addr = new Deref(this.parseNot(), source);
+			addr = new Deref(this.parseDeref(), source);
 		}
 		
 		if (addr == null) addr = this.parseNot();

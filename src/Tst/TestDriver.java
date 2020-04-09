@@ -49,7 +49,7 @@ public class TestDriver {
 	
 	public boolean displayCompilerImmediateRepresentations = false;
 	
-	public boolean printResult = true;
+	public boolean printResult = false;
 	
 	
 			/* --- METHODS --- */

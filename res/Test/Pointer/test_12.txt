@@ -1,0 +1,12 @@
+SOURCE
+int get(int [2] [2]* p, int x) {
+	return *p [0] [x];
+}
+
+int main(int x) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	return get(&v + 2, x);
+}
+TESTCASES
+0 3
+1 4
