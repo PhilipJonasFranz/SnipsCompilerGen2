@@ -43,6 +43,7 @@ import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
+import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
@@ -121,7 +122,10 @@ public class Parser {
 		List<Directive> directives = new ArrayList();
 		
 		while (this.current.type != TokenType.EOF) {
-			if (current.type == TokenType.DIRECTIVE) {
+			if (current.type == TokenType.COMMENT) {
+				elements.add(this.parseComment());
+			}
+			else if (current.type == TokenType.DIRECTIVE) {
 				Directive dir = this.parseDirective();
 				
 				if (dir instanceof IncludeDirective) {
@@ -153,6 +157,11 @@ public class Parser {
 		program.directives.addAll(include);
 		
 		return program;
+	}
+	
+	public Comment parseComment() throws PARSE_EXCEPTION {
+		Token comment = accept(TokenType.COMMENT);
+		return new Comment(comment, comment.getSource());
 	}
 	
 	public Directive parseDirective() throws PARSE_EXCEPTION {
@@ -208,7 +217,10 @@ public class Parser {
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
-		if (current.type.group == TokenGroup.TYPE) {
+		if (current.type == TokenType.COMMENT) {
+			return this.parseComment();
+		}
+		else if (current.type.group == TokenGroup.TYPE) {
 			return this.parseDeclaration();
 		}
 		else if (current.type == TokenType.RETURN) {

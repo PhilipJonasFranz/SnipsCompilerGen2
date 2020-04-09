@@ -18,6 +18,7 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMMvn;
 import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -289,8 +290,11 @@ public class ASMOptimizer {
 							break;
 						}
 						
+						if (body.instructions.get(a) instanceof ASMComment) {
+							continue;
+						}
 						/* Substitute immediate value into move */
-						if (body.instructions.get(a) instanceof ASMMov) {
+						else if (body.instructions.get(a) instanceof ASMMov) {
 							ASMMov move0 = (ASMMov) body.instructions.get(a);
 							
 							if (move0.target.reg == target) {
@@ -516,6 +520,10 @@ public class ASMOptimizer {
 				ASMBranch b = (ASMBranch) body.instructions.get(i);
 				if (b.cond == null && b.type != BRANCH_TYPE.BL) {
 					while (i < body.instructions.size() - 1 && !(body.instructions.get(i + 1) instanceof ASMLabel) && !(body.instructions.get(i + 1) instanceof ASMSeperator)) {
+						if (body.instructions.get(i + 1) instanceof ASMComment) {
+							i++;
+							continue;
+						}
 						body.instructions.remove(i + 1);
 						OPT_DONE = true;
 					}

@@ -6,6 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
@@ -40,6 +41,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof SwitchStatement) {
 			node = AsNSwitchStatement.cast((SwitchStatement) s, r, map, st); 
+		}
+		else if (s instanceof Comment) {
+			node = AsNComment.cast((Comment) s, r, map, st); 
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());
 	
