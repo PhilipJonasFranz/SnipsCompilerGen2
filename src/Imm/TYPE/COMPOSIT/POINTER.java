@@ -1,41 +1,53 @@
 package Imm.TYPE.COMPOSIT;
 
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class POINTER extends COMPOSIT {
 
-	TYPE targetType;
+	/** The type that this pointer capsules. */
+	public TYPE targetType;
+
+	public TYPE coreType;
 	
-	public POINTER(String value, TYPE targetType) {
-		super(value);
+	public POINTER(TYPE targetType) {
+		super(null);
 		this.targetType = targetType;
+		
+		if (targetType instanceof PRIMITIVE) {
+			this.coreType = targetType;
+		}
+		else if (targetType instanceof COMPOSIT) {
+			this.coreType = ((COMPOSIT) targetType).getCoreType();
+		}
 	}
 
 	public boolean isEqual(TYPE type) {
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
-			return this.targetType.isEqual(pointer.targetType);
+			return this.coreType.isEqual(pointer.coreType);
 		}
 		else return false;
 	}
 	
 	public String typeString() {
-		return "*" + this.targetType.typeString();
+		return this.targetType.typeString() + "*";
 	}
 
-	@Override
 	public void setValue(String value) {
 		return;
 	}
 
-	@Override
 	public String sourceCodeRepresentation() {
 		return null;
 	}
 
-	@Override
 	public int wordsize() {
 		return 1;
+	}
+
+	public TYPE getCoreType() {
+		return this.coreType;
 	}
 	
 }

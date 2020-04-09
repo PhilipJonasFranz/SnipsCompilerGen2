@@ -4,7 +4,9 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -46,6 +48,12 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof Atom) {
 			node = AsNAtom.cast((Atom) e, r, map, st, 0); 
+		}
+		else if (e instanceof AddressOf) {
+			node = AsNAddressOf.cast((AddressOf) e, r, map, st, 0); 
+		}
+		else if (e instanceof Deref) {
+			node = AsNDeref.cast((Deref) e, r, map, st, 0); 
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	

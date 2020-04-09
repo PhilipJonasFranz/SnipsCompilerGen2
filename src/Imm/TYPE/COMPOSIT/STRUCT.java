@@ -56,5 +56,9 @@ public class STRUCT extends COMPOSIT {
 		}
 		return sum;
 	}
+
+	public TYPE getCoreType() {
+		return this;
+	}
 	
 }

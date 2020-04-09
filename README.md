@@ -1,7 +1,7 @@
-# Snips Compiler Gen.2 v.1.0.4-RELEASE
+# Snips Compiler Gen.2 v.1.0.5-RELEASE
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
- the table, like functions, conditionals, loops, arrays, global variables and a wide roster of built in 
+ the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
  operators, as well as support for functionality like recursion. 
  Currently supported data types are Integers and Booleans, as well as multi-dimensional arrays of said 
  types.
@@ -34,7 +34,9 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Implement Pointers
+ - Implement Pointers WIP
+ - Implement Void Type and Functions
+ - Implement Non-Inline Calls
  - Implement Heap System
  - Implement Addressof and Dereference Operators
  - Implement Pass-by-value and pass-by-reference for non-primitive types

@@ -10,6 +10,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.StructureInit;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNStructureInit extends AsNExpression {
 
@@ -47,7 +48,7 @@ public class AsNStructureInit extends AsNExpression {
 				init.instructions.addAll(AsNExpression.cast(s.elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-				if (!(s.elements.get(i) instanceof StructureInit)) {
+				if (!(s.elements.get(i).type instanceof ARRAY)) {
 					init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 					st.push(REGISTER.R0);
 				}

@@ -1,0 +1,11 @@
+SOURCE
+int get(int [3]* p) {
+	return *p [0] + 1;
+}
+
+int main() {
+	int [3] v = {3, 6, 7};
+	return get(&v);
+}
+TESTCASES
+4

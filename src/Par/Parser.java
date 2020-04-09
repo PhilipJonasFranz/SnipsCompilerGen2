@@ -15,7 +15,9 @@ import Imm.AST.Directive.CompileDirective;
 import Imm.AST.Directive.CompileDirective.COMP_DIR;
 import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
+import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -56,6 +58,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
@@ -587,17 +590,17 @@ public class Parser {
 	}
 		
 	protected Expression parseMulDiv() throws PARSE_EXCEPTION {
-		Expression left = this.parseNot();
+		Expression left = this.parseAddressOf();
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
 				accept();
-				left = new Mul(left, this.parseNot(), current.source);
+				left = new Mul(left, this.parseAddressOf(), current.source);
 			}
 			else if (current.type == TokenType.DIV) {
 				Source source = accept().getSource();
 				List<Expression> params = new ArrayList();
 				params.add(left);
-				params.add(this.parseNot());
+				params.add(this.parseAddressOf());
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_div"), params, source);
@@ -607,7 +610,7 @@ public class Parser {
 				Source source = accept().getSource();
 				List<Expression> params = new ArrayList();
 				params.add(left);
-				params.add(this.parseNot());
+				params.add(this.parseAddressOf());
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_mod"), params, source);
@@ -615,6 +618,28 @@ public class Parser {
 			}
 		}
 		return left;
+	}
+	
+	protected Expression parseAddressOf() throws PARSE_EXCEPTION {
+		Expression addr = null;
+		while (current.type == TokenType.ADDROF) {
+			Source source = accept().getSource();
+			addr = new AddressOf(this.parseDeref(), source);
+		}
+		
+		if (addr == null) addr = this.parseDeref();
+		return addr;
+	}
+	
+	protected Expression parseDeref() throws PARSE_EXCEPTION {
+		Expression addr = null;
+		while (current.type == TokenType.MUL) {
+			Source source = accept().getSource();
+			addr = new Deref(this.parseNot(), source);
+		}
+		
+		if (addr == null) addr = this.parseNot();
+		return addr;
 	}
 	
 	protected Expression parseNot() throws PARSE_EXCEPTION {
@@ -724,6 +749,11 @@ public class Parser {
 		
 		while (!dimensions.isEmpty()) {
 			type = new ARRAY(type, dimensions.pop());
+		}
+		
+		while (current.type == TokenType.MUL) {
+			accept();
+			type = new POINTER(type);
 		}
 		
 		return type;

@@ -1,0 +1,17 @@
+SOURCE
+int bar(int [2] v0, int [2] v1, int x) {
+	int [2] [2] v = {v1, v0};
+	return v [0] [x] + v [1] [x];
+}
+
+int get(int [2] [2]* p, int x) {
+	return bar(*p [1], *p [0], x);
+}
+
+int main(int x) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	return get(&v, x);
+}
+TESTCASES
+0 4
+1 6

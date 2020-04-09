@@ -135,7 +135,8 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			/* --- PROCESS IMPORTS --- */
+			
+					/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
 			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {

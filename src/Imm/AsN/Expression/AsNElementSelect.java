@@ -36,6 +36,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNElementSelect extends AsNExpression {
@@ -55,40 +56,68 @@ public class AsNElementSelect extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		/* Array is parameter, load from parameter stack */
-		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-			if (s.type instanceof ARRAY) {
-				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
+		if (s.type instanceof POINTER) {
+			POINTER p = (POINTER) s.type;
+			
+			if (p.targetType instanceof ARRAY) {
+				select.instructions.addAll(loadSumR2(s, r, map, st, true));
+				
+				AsNElementSelect.loadPointer(select, s, r, map, st, 1);
+				
+				/* Add sum */
+				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			
+				/* Loop through array word size and copy values */
+				select.instructions.addAll(subArrayCopy((ARRAY) p.targetType));
 			}
 			else {
-				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
-			}
-		}
-		else if (map.declarationLoaded(s.idRef.origin)) {
-			/* Data Memory */
-			if (s.type instanceof ARRAY) {
-				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
-			}
-			else {
-				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
+				select.instructions.addAll(loadSumR2(s, r, map, st, false));
+				
+				AsNElementSelect.loadPointer(select, s, r, map, st, 0);
+				
+				/* Add sum */
+				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+			
+				/* Load */
+				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 			}
 		}
 		else {
-			if (s.type instanceof ARRAY) {
-				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
+			/* Array is parameter, load from parameter stack */
+			if (st.getParameterByteOffset(s.idRef.origin) != -1) {
+				if (s.type instanceof ARRAY) {
+					injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
+				}
+				else {
+					injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
+				}
+			}
+			else if (map.declarationLoaded(s.idRef.origin)) {
+				/* Data Memory */
+				if (s.type instanceof ARRAY) {
+					injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
+				}
+				else {
+					injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
+				}
 			}
 			else {
-				injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
+				if (s.type instanceof ARRAY) {
+					injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
+				}
+				else {
+					injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
+				}
 			}
-		}
-		
-		if (s.type instanceof ARRAY) {
-			/* Loop through array word size and copy values */
-			select.instructions.addAll(subArrayCopy(s));
-		}
-		else {
-			/* Load */
-			select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+			
+			if (s.type instanceof ARRAY) {
+				/* Loop through array word size and copy values */
+				select.instructions.addAll(subArrayCopy((ARRAY) s.type));
+			}
+			else {
+				/* Load */
+				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+			}
 		}
 		
 		return select;
@@ -103,7 +132,11 @@ public class AsNElementSelect extends AsNExpression {
 			sum.comment = new ASMComment("Calculate offset of sub structure");
 			load.add(sum);
 			
-			ARRAY superType = (ARRAY) s.idRef.origin.type;
+			ARRAY superType = null;
+			if (s.idRef.type instanceof POINTER) {
+				superType = (ARRAY) ((POINTER) s.idRef.type).targetType;
+			}
+			else superType = (ARRAY) s.idRef.origin.type;
 			
 			/* Handle selections differently, since last selection does not result in primitive. 
 			 * 		This algorithm is a custom variation of the loadSumR2 method. */
@@ -141,10 +174,9 @@ public class AsNElementSelect extends AsNExpression {
 	 * Copy memory location the size of the word size of the type of s, assumes that the start
 	 * of the sub structure is located in R1.
 	 */
-	public static List<ASMInstruction> subArrayCopy(ElementSelect s) {
+	public static List<ASMInstruction> subArrayCopy(ARRAY arr) {
 		List<ASMInstruction> copy = new ArrayList();
 		
-		ARRAY arr = (ARRAY) s.type;
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
 			int offset = (arr.wordsize() - 1) * 4;
@@ -238,7 +270,7 @@ public class AsNElementSelect extends AsNExpression {
 		else if (selectType == SELECT_TYPE.PARAM_SINGLE) {
 			/* Load offset of target in array */
 			node.instructions.addAll(loadSumR2(s, r, map, st, false));
-				
+			
 			/* Get offset of parameter relative to fp */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 			
@@ -280,6 +312,11 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 		
 		}
+	}
+	
+	public static void loadPointer(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
+		node.instructions.addAll(AsNIdRef.cast(s.idRef, r, map, st, target).getInstructions());
+		node.instructions.add(new ASMLsl(new RegOperand(target), new RegOperand(target), new ImmOperand(2)));
 	}
 	
 }

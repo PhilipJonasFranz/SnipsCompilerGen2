@@ -8,7 +8,9 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
@@ -36,6 +38,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
@@ -366,13 +369,20 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (left.isEqual(right)) {
+		if (left instanceof POINTER) {
+			POINTER p = (POINTER) left;
+			if (right.isEqual(p.getCoreType())) {
+				b.type = p;
+			}
+		}
+		else if (left.isEqual(right)) {
 			b.type = left;
-			return left;
 		}
 		else {
 			throw new CTX_EXCEPTION(b.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
 		}
+	
+		return b.type;
 	}
 	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
@@ -446,8 +456,9 @@ public class ContextChecker {
 			}
 			
 			TYPE paramType = i.parameters.get(a).check(this);
+			
 			if (!paramType.isEqual(f.parameters.get(a).type)) {
-				throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
 			}
 		}
 		
@@ -486,6 +497,35 @@ public class ContextChecker {
 		return init.type;
 	}
 	
+	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
+		TYPE t = aof.expression.check(this);
+		
+		if (!(aof.expression instanceof IDRef)) {
+			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference.");
+		}
+		
+		aof.type = new POINTER(t);
+		return aof.type;
+	}
+	
+	public TYPE checkDeref(Deref deref) throws CTX_EXCEPTION {
+		TYPE t = deref.expression.check(this);
+		
+		if (t instanceof POINTER) {
+			POINTER p = (POINTER) t;
+			
+			if (deref.expression instanceof IDRef || deref.expression instanceof ElementSelect) {
+				deref.type = p.targetType;
+			}
+			else deref.type = p.coreType;
+		}
+		else {
+			throw new CTX_EXCEPTION(deref.getSource(), "Cannot dereference non pointer, actual " + t.typeString());
+		}
+		
+		return deref.type;
+	}
+	
 	public TYPE checkElementSelect(ElementSelect select) throws CTX_EXCEPTION {
 		if (select.selection.isEmpty()) {
 			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
@@ -497,17 +537,38 @@ public class ContextChecker {
 			
 			TYPE type0 = ref.check(this);
 			
-			for (int i = 0; i < select.selection.size(); i++) {
-				TYPE stype = select.selection.get(i).check(this);
-				if (!(stype instanceof INT)) {
-					throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
-				}
-				else {
-					if (!(type0 instanceof ARRAY)) {
-						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
+			if (type0 instanceof POINTER) {
+				/* Unwrap from pointer, select, and wrap back in pointer */
+				TYPE type1 = ((POINTER) type0).targetType;
+				
+				for (int i = 0; i < select.selection.size(); i++) {
+					TYPE stype = select.selection.get(i).check(this);
+					if (!(stype instanceof INT)) {
+						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
 					}
 					else {
-						type0 = ((ARRAY) type0).elementType;
+						if (!(type1 instanceof ARRAY)) {
+							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
+						}
+						else type1 = ((ARRAY) type1).elementType;
+					}
+				}
+				
+				type0 = new POINTER(type1);
+			}
+			else {
+				for (int i = 0; i < select.selection.size(); i++) {
+					TYPE stype = select.selection.get(i).check(this);
+					if (!(stype instanceof INT)) {
+						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
+					}
+					else {
+						if (!(type0 instanceof ARRAY)) {
+							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
+						}
+						else {
+							type0 = ((ARRAY) type0).elementType;
+						}
 					}
 				}
 			}

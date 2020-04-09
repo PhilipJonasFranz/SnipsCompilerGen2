@@ -85,5 +85,9 @@ public class ARRAY extends COMPOSIT {
 		}
 		return this.wordSize;
 	}
+
+	public TYPE getCoreType() {
+		return this.coreType;
+	}
 	
 }

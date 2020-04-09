@@ -1,0 +1,12 @@
+SOURCE
+int get(int* p) {
+	return *p;
+}
+
+int main(int x) {
+	return get(&x);
+}
+TESTCASES
+0 0
+1 1
+2 2

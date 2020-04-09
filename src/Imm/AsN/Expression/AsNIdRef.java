@@ -118,6 +118,7 @@ public class AsNIdRef extends AsNExpression {
 		/* Origin is in parameter stack */
 		if (st.getParameterByteOffset(i.origin) != -1) {
 			int offset = st.getParameterByteOffset(i.origin);
+			offset += (arr.wordsize() - 1) * 4;
 			
 			/* Copy memory location with the size of the array */
 			int regs = 0;
@@ -130,7 +131,7 @@ public class AsNIdRef extends AsNExpression {
 					AsNStructureInit.flush(regs, this);
 					regs = 0;
 				}
-				offset += 4;
+				offset -= 4;
 				st.push(REGISTER.R0);
 			}
 			

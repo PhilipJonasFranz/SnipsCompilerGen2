@@ -17,4 +17,6 @@ public abstract class COMPOSIT<T> extends TYPE<T> {
 		return 1;
 	}
 	
+	public abstract TYPE getCoreType();
+	
 }
