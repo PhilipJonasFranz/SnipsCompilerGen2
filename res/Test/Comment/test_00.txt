@@ -1,0 +1,16 @@
+SOURCE
+/*Comment A*/
+// Comment B
+int main(int a) {
+	/* Comment C
+	 * ...
+	 * End Comment C */
+	// Comment D
+	a = a + 2;
+	return a;
+}
+
+/* Final Comment */
+TESTCASES
+0 2
+2 4

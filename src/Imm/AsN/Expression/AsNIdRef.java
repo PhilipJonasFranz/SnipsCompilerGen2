@@ -9,6 +9,7 @@ import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -58,22 +59,31 @@ public class AsNIdRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			ASMDataLabel label = map.resolve(i.origin);
-			
-			/* Load memory address */
-			ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label));
-			ins.comment = new ASMComment("Load from .data section");
-			ref.instructions.add(ins);
-			
-			/* Load value from memory */
-			ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
+			if (i.origin.type.wordsize() == 1) {
+				/* Load value from memory */
+				
+				ASMDataLabel label = map.resolve(i.origin);
+				
+				/* Load memory address */
+				ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label));
+				ins.comment = new ASMComment("Load from .data section");
+				ref.instructions.add(ins);
+				
+				ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
+			}
+			else {
+				/* Copy on stack */
+				if (i.origin.type instanceof ARRAY) {
+					ref.loadArray(i, r, map, st);
+				}
+			}
 		}
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
 			if (i.origin.type.wordsize() > 1) {
 				if (i.origin.type instanceof ARRAY) {
-					ref.loadArray(i, r, st);
+					ref.loadArray(i, r, map, st);
 				}
 			}
 			/* Load in register */
@@ -100,7 +110,7 @@ public class AsNIdRef extends AsNExpression {
 		return ref;
 	}
 	
-	protected void loadArray(IDRef i, RegSet r, StackSet st) {
+	protected void loadArray(IDRef i, RegSet r, MemoryMap map, StackSet st) {
 		ARRAY arr = (ARRAY) i.origin.type;
 		
 		r.free(0);
@@ -125,6 +135,30 @@ public class AsNIdRef extends AsNExpression {
 			}
 			
 			AsNStructureInit.flush(regs, this);
+		}
+		/* Origin is in global map */
+		else if (map.declarationLoaded(i.origin)) {
+			ASMDataLabel label = map.resolve(i.origin);
+			
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R2), new LabelOperand(label));
+			load.comment = new ASMComment("Load data section address");
+			this.instructions.add(load);
+			
+			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new ImmOperand((arr.wordsize() - 1) * 4)));
+			
+			/* Copy memory location with the size of the array */
+			int regs = 0;
+			for (int a = 0; a < arr.wordsize(); a++) {
+				if (regs < 2) {
+					this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(regs), new RegOperand(REGISTER.R2), new ImmOperand(-4)));
+					regs++;
+				}
+				if (regs == 2) {
+					AsNStructureInit.flush(regs, this);
+					regs = 0;
+				}
+				st.push(REGISTER.R0);
+			}
 		}
 		/* Origin is in local stack */
 		else {

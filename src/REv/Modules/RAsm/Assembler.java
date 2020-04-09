@@ -30,8 +30,13 @@ public class Assembler {
 		List<Instruction> in = new ArrayList();
 		
 		/* ---- Pre-Processor ---- */
+		int c = 0;
 		for (int i = 0; i < input.size(); i++) {
-			in.add(new Instruction(input.get(i).toLowerCase(), i));
+			String s = input.get(i).toLowerCase();
+			String [] sp = s.split("\n");
+			for (String s0 : sp) {
+				in.add(new Instruction(s0, c++));
+			}
 		}
 		
 		/* Remove Comments */

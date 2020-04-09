@@ -1,0 +1,9 @@
+SOURCE
+int [2] [2] vec = {{3, 7}, {2, 0}};
+
+int main() { 
+	int [2] v0 = vec [0];
+	return v0 [0];
+}
+TESTCASES
+3

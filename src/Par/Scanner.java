@@ -35,11 +35,13 @@ public class Scanner {
 		/**
 		 * Defines the current accumulation state of the scanner.
 		 */
-		private enum ACCUM_STATE {
-			NONE, ID, INT, FLOAT
+		private enum ACC_STATE {
+			NONE, ID, INT, FLOAT, COMMENT
 		}
 		
-		private ACCUM_STATE ACC_STATE = ACCUM_STATE.NONE;
+		private ACC_STATE state = ACC_STATE.NONE;
+		
+		private int lastLine = 0;
 		
 		private LinkedList<Token> tokens;
 		
@@ -52,13 +54,51 @@ public class Scanner {
 		public boolean readChar(char c, int i, int a) {
 			if (this.buffer.isEmpty() && ("" + c).trim().equals(""))return false;
 			else {
-				this.buffer = this.buffer.trim();
+				if (this.state != ACC_STATE.COMMENT) this.buffer = this.buffer.trim();
 				this.buffer = buffer + c;
-				return this.checkState(i, a);
+				boolean b = this.checkState(i, a);
+				this.lastLine = i;
+				return b;
 			}
 		}
 		
 		public boolean checkState(int i, int a) {
+			if (this.state == ACC_STATE.COMMENT) {
+				if (i != this.lastLine && this.buffer.startsWith("//")) {
+					/* End of single line comment */
+					this.state = ACC_STATE.NONE;
+					tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(3, this.buffer.length() - 1).trim()));
+					this.buffer = this.buffer.substring(this.buffer.length() - 1);
+				}
+				else if ((i != this.lastLine || this.buffer.endsWith("*/")) && this.buffer.startsWith("/*")) {
+					if (this.buffer.endsWith("*/")) {
+						/* End of multiple line comment */
+						this.state = ACC_STATE.NONE;
+						this.buffer = this.buffer.trim();
+						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 2).trim()));
+						this.emptyBuffer();
+					}
+					else {
+						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 1).trim()));
+						this.buffer = this.buffer.substring(this.buffer.length() - 1);
+					}
+				}
+				else if (this.buffer.trim().startsWith("*")) {
+					if (this.buffer.trim().endsWith("*/")) {
+						/* End of multiple line comment */
+						this.state = ACC_STATE.NONE;
+						this.buffer = this.buffer.trim();
+						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 2)));
+						this.emptyBuffer();
+					}
+					else if (i != this.lastLine) {
+						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.trim().substring(1).trim()));
+						this.emptyBuffer();
+					}
+				}
+				return false;
+			}
+			
 			if (this.buffer.equals("(")) {
 				tokens.add(new Token(TokenType.LPAREN, new Source(i, a)));
 				this.emptyBuffer();
@@ -69,7 +109,7 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("{")) {
 				tokens.add(new Token(TokenType.LBRACE, new Source(i, a)));
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("}")) {
@@ -108,9 +148,21 @@ public class Scanner {
 				tokens.add(new Token(TokenType.MUL, new Source(i, a)));
 				this.emptyBuffer();
 			}
-			else if (this.buffer.equals("/")) {
-				tokens.add(new Token(TokenType.DIV, new Source(i, a)));
-				this.emptyBuffer();
+			else if (this.buffer.startsWith("/")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("//")) {
+					this.state = ACC_STATE.COMMENT;
+					return false;
+				}
+				else if (this.buffer.equals("/*")) {
+					this.state = ACC_STATE.COMMENT;
+					return false;
+				}
+				else {
+					tokens.add(new Token(TokenType.DIV, new Source(i, a - this.buffer.length())));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
 			else if (this.buffer.equals("+")) {
 				tokens.add(new Token(TokenType.ADD, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
@@ -167,67 +219,67 @@ public class Scanner {
 			else if (this.buffer.equals("int")) {
 				tokens.add(new Token(TokenType.INT, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("bool")) {
 				tokens.add(new Token(TokenType.BOOL, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("return")) {
 				tokens.add(new Token(TokenType.RETURN, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("break")) {
 				tokens.add(new Token(TokenType.BREAK, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("continue")) {
 				tokens.add(new Token(TokenType.CONTINUE, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("while")) {
 				tokens.add(new Token(TokenType.WHILE, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("do")) {
 				tokens.add(new Token(TokenType.DO, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("for")) {
 				tokens.add(new Token(TokenType.FOR, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("switch")) {
 				tokens.add(new Token(TokenType.SWITCH, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("case")) {
 				tokens.add(new Token(TokenType.CASE, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.equals("default")) {
 				tokens.add(new Token(TokenType.DEFAULT, new Source(i, a)));
 				this.emptyBuffer();
-				this.ACC_STATE = ACCUM_STATE.NONE;
+				this.state = ACC_STATE.NONE;
 				return true;
 			}
 			else if (this.buffer.startsWith("|")) {
@@ -316,24 +368,24 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					this.ACC_STATE = ACCUM_STATE.ID;
+					this.state = ACC_STATE.ID;
 				}
 				else if (this.buffer.matches("[0-9]+")) {
-					this.ACC_STATE = ACCUM_STATE.INT;
+					this.state = ACC_STATE.INT;
 				}
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && this.ACC_STATE == ACCUM_STATE.ID) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && this.state == ACC_STATE.ID) {
 					String ID = this.buffer.substring(0, this.buffer.length() - 1);
 					tokens.add(new Token(TokenType.IDENTIFIER, new Source(i, a), ID));
 					
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
-					this.ACC_STATE = ACCUM_STATE.NONE;
+					this.state = ACC_STATE.NONE;
 					this.checkState(i, a);
 				}
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("[0-9]+")) && this.ACC_STATE == ACCUM_STATE.INT) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("[0-9]+")) && this.state == ACC_STATE.INT) {
 					tokens.add(new Token(TokenType.INTLIT, new Source(i, a), this.buffer.substring(0, this.buffer.length() - 1)));
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
-					this.ACC_STATE = ACCUM_STATE.NONE;
+					this.state = ACC_STATE.NONE;
 					this.checkState(i, a);
 				}
 			}

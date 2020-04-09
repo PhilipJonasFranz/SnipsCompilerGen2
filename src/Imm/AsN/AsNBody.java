@@ -23,8 +23,9 @@ import Imm.ASM.Util.Operands.Memory.MemoryWordRefOperand;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.Atom;
+import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AsN.Statement.AsNComment;
 import Snips.CompilerDriver;
 
 public class AsNBody extends AsNNode {
@@ -51,10 +52,9 @@ public class AsNBody extends AsNNode {
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Declaration) {
 				Declaration dec = (Declaration) s;
-				Atom value = (Atom) dec.value;
 				
 				/* Create instruction for .data Section */
-				ASMDataLabel dataEntry = new ASMDataLabel(dec.fieldName, new MemoryWordOperand(value));
+				ASMDataLabel dataEntry = new ASMDataLabel(dec.fieldName, new MemoryWordOperand(dec.value));
 				body.instructions.add(dataEntry);
 				
 				/* Create address reference instruction for .text section */
@@ -96,6 +96,9 @@ public class AsNBody extends AsNNode {
 				
 				body.instructions.addAll(ins);
 				body.instructions.add(new ASMSeperator());
+			}
+			else if (s instanceof Comment) {
+				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
 			}
 		}
 		

@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.1.0.2-RELEASE
+# Snips Compiler Gen.2 v.1.0.4-RELEASE
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, global variables and a wide roster of built in 
@@ -11,9 +11,9 @@
  The compiler outputs ARM Assembly. 
 ## Usage
 ### How to use
- If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips [Full Path to your File]". With "snips -help" you can get more information on the arguments.
+ If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips [Full Path to file to compile]". With "snips -help" you can get more information on the arguments.
 
-If you want to run the code instead, you can run the either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res\Test\Arith\Static\test_00.txt" or a list of directories, f.E. "res\Test\Arith\ res\Test\Stack\".
+If you want to run the code instead, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res\Test\Arith\Static\test_00.txt" or a list of directories, f.E. "res\Test\Arith\ res\Test\Stack\".
 ### Code Examples
  Code examples and testcases can be found under res/Test/.
 ## Included Modules
@@ -34,7 +34,6 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Implement Arrays WIP: Global Arrays
  - Implement Pointers
  - Implement Heap System
  - Implement Addressof and Dereference Operators

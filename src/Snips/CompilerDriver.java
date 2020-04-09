@@ -12,6 +12,7 @@ import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
+import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Directive.Directive;
@@ -195,7 +196,7 @@ public class CompilerDriver {
 			
 			
 					/* --- OUTPUT BUILDING --- */
-			output = body.getInstructions().stream().map(x -> {
+			output = body.getInstructions().stream().filter(x -> ((x instanceof ASMComment)? enableComments : true)).map(x -> {
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
@@ -372,6 +373,7 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
+				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -392,6 +394,7 @@ public class CompilerDriver {
 		new Message("Arguments: ", Message.Type.INFO);
 		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
+		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
