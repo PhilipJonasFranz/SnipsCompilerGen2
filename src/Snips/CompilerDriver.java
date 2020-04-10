@@ -144,12 +144,12 @@ public class CompilerDriver {
 				
 				/* An error occured during importing, probably loop in dependencies */
 				if (dependencies == null) {
-					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libaries, possible loop in #include statements.");
+					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libraries, possible loop in #include statements.");
 				}
 				
 				/* Print out imported libaries */
 				for (SyntaxElement s : dependencies) {
-					log.add(new Message("SNIPS -> Imported libary " + ((Program) s).fileName, Message.Type.INFO));
+					log.add(new Message("SNIPS -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
 				}
 				
 				/* Add libaries to AST, duplicates were already filtered */
@@ -274,7 +274,7 @@ public class CompilerDriver {
 				}
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
-				log.add(new Message("SNIPS -> Failed to import libary " + filePath + ".", Message.Type.FAIL));
+				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", Message.Type.FAIL));
 			}
 			
 			ASTs.add(AST);
