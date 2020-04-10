@@ -1,14 +1,10 @@
 package Imm.AsN.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
@@ -68,7 +64,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 			
 				/* Loop through array word size and copy values */
-				select.instructions.addAll(subArrayCopy((ARRAY) p.targetType));
+				subArrayCopy(select, (ARRAY) p.targetType);
 			}
 			else {
 				loadSumR2(select, s, r, map, st, false);
@@ -112,7 +108,7 @@ public class AsNElementSelect extends AsNExpression {
 			
 			if (s.type instanceof ARRAY) {
 				/* Loop through array word size and copy values */
-				select.instructions.addAll(subArrayCopy((ARRAY) s.type));
+				subArrayCopy(select, (ARRAY) s.type);
 			}
 			else {
 				/* Load */
@@ -171,8 +167,7 @@ public class AsNElementSelect extends AsNExpression {
 	 * Copy memory location the size of the word size of the type of s, assumes that the start
 	 * of the sub structure is located in R1.
 	 */
-	public static List<ASMInstruction> subArrayCopy(ARRAY arr) {
-		List<ASMInstruction> copy = new ArrayList();
+	public static void subArrayCopy(AsNNode node, ARRAY arr) {
 		
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
@@ -181,49 +176,47 @@ public class AsNElementSelect extends AsNExpression {
 			boolean r0 = false;
 			for (int a = 0; a < arr.wordsize(); a++) {
 				if (!r0) {
-					copy.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 				    r0 = true;
 				}
 				else {
-					copy.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
-					copy.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 					r0 = false;
 				}
 				offset -= 4;
 			}
 			
 			if (r0) {
-				copy.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			}
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			/* Move counter in R2 */
-			copy.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
-			copy.add(loopStart);
+			node.instructions.add(loopStart);
 			
 			ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
 			
 			/* Check if whole sub array was loaded */
-			copy.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			node.instructions.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 			
 			/* Branch to loop end */
-			copy.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
 			
 			/* Load value and push it on the stack */
-			copy.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
-			copy.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			node.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+			node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			
 			/* Branch to loop start */
-			copy.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
 			
-			copy.add(loopEnd);
+			node.instructions.add(loopEnd);
 		}
-		
-		return copy;
 	}
 	
 	/**

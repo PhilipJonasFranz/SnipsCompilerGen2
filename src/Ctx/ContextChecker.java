@@ -498,10 +498,6 @@ public class ContextChecker {
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
-			if (i.parameters.get(a) instanceof StructureInit) {
-				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
-			}
-			
 			TYPE paramType = i.parameters.get(a).check(this);
 			
 			if (!paramType.isEqual(f.parameters.get(a).type)) {

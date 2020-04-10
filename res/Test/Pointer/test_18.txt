@@ -1,0 +1,17 @@
+SOURCE
+void set(int [2] [2]* p, int [2] v) {
+	*p [1] [0] = v [1];
+	*p [1] [1] = v [0];
+	return;
+}
+
+int main(int x, int y) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	set(&v, {5, 6});
+	return v [x] [y];
+}
+TESTCASES
+0 0 1
+0 1 2
+1 0 6
+1 1 5
