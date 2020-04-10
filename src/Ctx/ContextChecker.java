@@ -592,7 +592,19 @@ public class ContextChecker {
 						if (!(type1 instanceof ARRAY)) {
 							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
 						}
-						else type1 = ((ARRAY) type1).elementType;
+						else {
+							ARRAY arr = (ARRAY) type1;
+							
+							if (select.selection.get(i) instanceof Atom) {
+								Atom a = (Atom) select.selection.get(i);
+								int value = (int) a.type.getValue();
+								if (value < 0 || value >= arr.getLength()) {
+									throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + type1.typeString());
+								}
+							}
+							
+							type1 = ((ARRAY) type1).elementType;
+						}
 					}
 				}
 				
@@ -609,6 +621,16 @@ public class ContextChecker {
 							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
 						}
 						else {
+							ARRAY arr = (ARRAY) type0;
+							
+							if (select.selection.get(i) instanceof Atom) {
+								Atom a = (Atom) select.selection.get(i);
+								int value = (int) a.type.getValue();
+								if (value < 0 || value >= arr.getLength()) {
+									throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + type0.typeString());
+								}
+							}
+							
 							type0 = ((ARRAY) type0).elementType;
 						}
 					}

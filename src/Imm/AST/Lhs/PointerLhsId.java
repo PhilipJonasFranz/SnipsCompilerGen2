@@ -26,7 +26,8 @@ public class PointerLhsId extends LhsId {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		this.deref.print(d, rec);
+		System.out.println(this.pad(d) + "PointerLhsId");
+		this.deref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
