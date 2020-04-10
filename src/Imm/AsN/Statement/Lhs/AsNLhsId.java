@@ -6,6 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Lhs.ElementSelectLhsId;
 import Imm.AST.Lhs.LhsId;
+import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AsN.Statement.AsNStatement;
 
@@ -24,6 +25,9 @@ public class AsNLhsId extends AsNStatement {
 		}
 		else if (lhs instanceof ElementSelectLhsId) {
 			id = AsNElementSelectLhsId.cast((ElementSelectLhsId) lhs, r, map, st);
+		}
+		else if (lhs instanceof PointerLhsId) {
+			id = AsNPointerLhsId.cast((PointerLhsId) lhs, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(lhs.getSource(), "No injection cast available for " + lhs.getClass().getName());
 	

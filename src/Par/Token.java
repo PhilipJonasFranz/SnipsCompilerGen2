@@ -109,6 +109,7 @@ public class Token {
 		LSR(">>"),
 		
 		/* Types */
+		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),

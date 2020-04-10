@@ -7,14 +7,35 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Deref;
+import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.Arith.UnaryExpression;
+import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CaseStatement;
+import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ConditionalCompoundStatement;
+import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.SwitchStatement;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -40,7 +61,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	protected void popDeclarationScope(CompoundStatement s, RegSet r, StackSet st) {
 		List<Declaration> declarations = new ArrayList(); 
 		
-		/* Collect declarations from statements */
+		/* Collect declarations from statements, ignore sub-compounds, they will do the same */
 		for (Statement s0 : s.body) {
 			if (s0 instanceof Declaration) {
 				declarations.add((Declaration) s0);
@@ -69,12 +90,137 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		/* Open a new Scope in the stack */
 		st.openScope();
 		
-		/* True Body */
-		for (Statement s : a.body) 
-			this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+		/* Body */
+		for (int i = 0; i < a.body.size(); i++) {
+			Statement s = a.body.get(i);
+			this.loadStatement(a, s, r, map, st);
+		}
 		
 		/* Free all declarations in scope */
 		this.popDeclarationScope(a, r, st);
+	}
+	
+	public void loadStatement(CompoundStatement a, Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+		if (s instanceof Declaration) {
+			Declaration dec = (Declaration) s;
+			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
+			
+			if (r.declarationLoaded(dec)) {
+				boolean hasAddress = this.hasAddressReference(a, dec); 
+				if (hasAddress) {
+					int location = r.declarationRegLocation(dec);
+					
+					ASMPushStack push = new ASMPushStack(new RegOperand(location));
+					push.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+					this.instructions.add(push);
+					
+					st.push(dec);
+					r.free(location);
+				}
+			}
+		}
+		else this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+	}
+	
+	public boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXCEPTION {
+		if (s instanceof CompoundStatement) {
+			CompoundStatement cs = (CompoundStatement) s;
+			
+			boolean ref = false;
+			
+			for (Statement s0 : cs.body) {
+				ref |= this.hasAddressReference(s0, dec);
+			}
+			
+			return ref;
+		}
+		else if (s instanceof ReturnStatement) {
+			ReturnStatement ret = (ReturnStatement) s;
+			if (ret.value == null) return false;
+			else return this.hasAddressReference(ret.value, dec);
+		}
+		else if (s instanceof Declaration) {
+			if (s.equals(dec)) return false;
+			else return this.hasAddressReference(((Declaration) s).value, dec);
+		}
+		else if (s instanceof Assignment) {
+			return this.hasAddressReference(((Assignment) s).value, dec);
+		}
+		else if (s instanceof FunctionCall) {
+			boolean hasRef = false;
+			FunctionCall fc = (FunctionCall) s;
+			for (Expression e0 : fc.parameters) {
+				hasRef |= this.hasAddressReference(e0, dec);
+			}
+			return hasRef;
+		}
+		else if (s instanceof SwitchStatement) {
+			boolean hasRef = false;
+			SwitchStatement sw = (SwitchStatement) s;
+			for (CaseStatement c : sw.cases) {
+				hasRef |= this.hasAddressReference(c, dec);
+			}
+			
+			hasRef |= this.hasAddressReference(sw.defaultStatement, dec);
+			return hasRef;
+		}
+		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
+			return false;
+		}
+		else throw new CGEN_EXCEPTION(s.getSource(), "Cannot check references for " + s.getClass().getName());
+	}
+	
+	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXCEPTION {
+		if (e instanceof BinaryExpression) {
+			BinaryExpression b = (BinaryExpression) e;
+			return this.hasAddressReference(b.leftOperand, dec) || this.hasAddressReference(b.rightOperand, dec);
+		}
+		else if (e instanceof UnaryExpression) {
+			UnaryExpression u = (UnaryExpression) e;
+			return this.hasAddressReference(u.operand, dec);
+		}
+		else if (e instanceof InlineCall) {
+			boolean hasRef = false;
+			InlineCall ic = (InlineCall) e;
+			for (Expression e0 : ic.parameters) {
+				hasRef |= this.hasAddressReference(e0, dec);
+			}
+			return hasRef;
+		}
+		else if (e instanceof Deref) {
+			return this.hasAddressReference(((Deref) e).expression, dec);
+		}
+		else if (e instanceof StructureInit) {
+			boolean hasRef = false;
+			StructureInit init = (StructureInit) e;
+			for (Expression e0 : init.elements) {
+				hasRef |= this.hasAddressReference(e0, dec);
+			}
+			return hasRef;
+		}
+		else if (e instanceof ElementSelect) {
+			boolean hasRef = false;
+			ElementSelect sel = (ElementSelect) e;
+			for (Expression e0 : sel.selection) {
+				hasRef |= this.hasAddressReference(e0, dec);
+			}
+			return hasRef;
+		}
+		else if (e instanceof Ternary) {
+			boolean hasRef = false;
+			Ternary ter = (Ternary) e;
+			hasRef |= this.hasAddressReference(ter.condition, dec);
+			hasRef |= this.hasAddressReference(ter.leftOperand, dec);
+			hasRef |= this.hasAddressReference(ter.rightOperand, dec);
+			return hasRef;
+		}
+		else if (e instanceof AddressOf) {
+			return true;
+		}
+		else if (e instanceof IDRef || e instanceof Atom) {
+			return false;
+		}
+		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());
 	}
 	
 }

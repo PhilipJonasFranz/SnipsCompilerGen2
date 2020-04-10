@@ -41,6 +41,7 @@ import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Lhs.ElementSelectLhsId;
 import Imm.AST.Lhs.LhsId;
+import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
@@ -51,6 +52,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
+import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
@@ -62,6 +64,7 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
@@ -247,7 +250,10 @@ public class Parser {
 		else if (current.type == TokenType.SWITCH) {
 			return this.parseSwitch();
 		}
-		else if (current.type == TokenType.IDENTIFIER) {
+		else if (current.type == TokenType.IDENTIFIER && this.tokenStream.peek().type == TokenType.LPAREN) {
+			return this.parseFunctionCall();
+		}
+		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL) {
 			return this.parseAssignment(true);
 		}
 		else if (current.type == TokenType.IF) {
@@ -258,6 +264,25 @@ public class Parser {
 			TokenType.DO, TokenType.FOR, TokenType.BREAK, 
 			TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
 			TokenType.IF);
+	}
+	
+	protected FunctionCall parseFunctionCall() throws PARSE_EXCEPTION {
+		Token identifier = accept(TokenType.IDENTIFIER);
+		
+		accept(TokenType.LPAREN);
+		
+		List<Expression> params = new ArrayList();
+		while (current.type != TokenType.RPAREN) {
+			params.add(this.parseExpression());
+			if (current.type == TokenType.COMMA) {
+				accept();
+			}
+			else break;
+		}
+		accept(TokenType.RPAREN);
+		accept(TokenType.SEMICOLON);
+		
+		return new FunctionCall(identifier, params, identifier.getSource());
 	}
 	
 	protected SwitchStatement parseSwitch() throws PARSE_EXCEPTION {
@@ -397,16 +422,21 @@ public class Parser {
 	}
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
-		Expression target = this.parseElementSelect();
-		if (target instanceof ElementSelect) {
-			return new ElementSelectLhsId((ElementSelect) target, target.getSource());
-		}
-		else if (target instanceof IDRef) {
-			return new SimpleLhsId((IDRef) target, target.getSource());
+		if (current.type == TokenType.MUL) {
+			Source source = accept().getSource();
+			return new PointerLhsId(new Deref(this.parseElementSelect(), source), source);
 		}
 		else {
-			throw new PARSE_EXCEPTION(current.source, current.type, 
-					TokenType.IDENTIFIER);
+			Expression target = this.parseElementSelect();
+			if (target instanceof ElementSelect) {
+				return new ElementSelectLhsId((ElementSelect) target, target.getSource());
+			}
+			else if (target instanceof IDRef) {
+				return new SimpleLhsId((IDRef) target, target.getSource());
+			}
+			else {
+				throw new PARSE_EXCEPTION(current.source, current.type, TokenType.IDENTIFIER);
+			}
 		}
 	}
 	
@@ -440,9 +470,18 @@ public class Parser {
 	
 	protected ReturnStatement parseReturn() throws PARSE_EXCEPTION {
 		Token ret = accept(TokenType.RETURN);
-		Expression expr = this.parseExpression();
-		accept(TokenType.SEMICOLON);
-		return new ReturnStatement(expr, ret.getSource());
+		
+		if (current.type == TokenType.SEMICOLON) {
+			/* Void return */
+			accept();
+			return new ReturnStatement(null, ret.getSource());
+		}
+		else {
+			/* Value return */
+			Expression expr = this.parseExpression();
+			accept(TokenType.SEMICOLON);
+			return new ReturnStatement(expr, ret.getSource());
+		}
 	}
 	
 	protected Expression parseExpression() throws PARSE_EXCEPTION {
@@ -729,14 +768,7 @@ public class Parser {
 	protected TYPE parseType() throws PARSE_EXCEPTION {
 		TYPE type = null;
 		if (current.type.group == TokenGroup.TYPE) {
-			if (current.type == TokenType.INT) {
-				accept();
-				type = new INT();
-			}
-			else if (current.type == TokenType.BOOL) {
-				accept();
-				type = new BOOL();
-			}
+			type = PRIMITIVE.fromToken(accept());
 		}
 		
 		Stack<Expression> dimensions = new Stack();

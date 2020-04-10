@@ -31,6 +31,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
+import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
@@ -42,6 +43,7 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.PRIMITIVES.VOID;
 
 public class ContextChecker {
 
@@ -112,7 +114,7 @@ public class ContextChecker {
 		this.currentFunction = f;
 		
 		/* Check body */
-		for (Statement s : f.statements) {
+		for (Statement s : f.body) {
 			s.check(this);
 		}
 		
@@ -314,17 +316,26 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkReturn(ReturnStatement r) throws CTX_EXCEPTION {
-		TYPE t = r.value.check(this);
-		
-		if (!t.isEqual(currentFunction.returnType)) {
-			throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + t.typeString() + " vs " + currentFunction.returnType.typeString());
-		}
-		
-		if (t.isEqual(this.currentFunction.returnType)) {
-			return t;
+		if (r.value != null) {
+			TYPE t = r.value.check(this);
+			
+			if (!t.isEqual(currentFunction.returnType)) {
+				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + t.typeString() + " vs " + currentFunction.returnType.typeString());
+			}
+			
+			if (t.isEqual(this.currentFunction.returnType)) {
+				return t;
+			}
+			else {
+				throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.returnType.typeString());
+			}
 		}
 		else {
-			throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.returnType.typeString());
+			if (!(currentFunction.returnType instanceof VOID)) {
+				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.returnType.typeString());
+			}
+			
+			return new VOID();
 		}
 	}
 	
@@ -464,6 +475,41 @@ public class ContextChecker {
 		
 		i.type = f.returnType;
 		return i.type;
+	}
+	
+	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
+		Function f = null;
+		for (Function f0 : this.functions) {
+			if (f0.functionName.equals(i.functionName)) {
+				f = f0;
+				break;
+			}
+		}
+		
+		if (f == null) {
+			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.functionName);
+		}
+		else {
+			i.calledFunction = f;
+		}
+		
+		if (i.parameters.size() != f.parameters.size()) {
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
+		}
+		
+		for (int a = 0; a < f.parameters.size(); a++) {
+			if (i.parameters.get(a) instanceof StructureInit) {
+				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
+			}
+			
+			TYPE paramType = i.parameters.get(a).check(this);
+			
+			if (!paramType.isEqual(f.parameters.get(a).type)) {
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
+			}
+		}
+		
+		return new VOID();
 	}
 	
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {

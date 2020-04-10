@@ -60,7 +60,7 @@ public class AsNElementSelect extends AsNExpression {
 			POINTER p = (POINTER) s.type;
 			
 			if (p.targetType instanceof ARRAY) {
-				select.instructions.addAll(loadSumR2(s, r, map, st, true));
+				loadSumR2(select, s, r, map, st, true);
 				
 				AsNElementSelect.loadPointer(select, s, r, map, st, 1);
 				
@@ -71,7 +71,7 @@ public class AsNElementSelect extends AsNExpression {
 				select.instructions.addAll(subArrayCopy((ARRAY) p.targetType));
 			}
 			else {
-				select.instructions.addAll(loadSumR2(s, r, map, st, false));
+				loadSumR2(select, s, r, map, st, false);
 				
 				AsNElementSelect.loadPointer(select, s, r, map, st, 0);
 				
@@ -123,14 +123,12 @@ public class AsNElementSelect extends AsNExpression {
 		return select;
 	}
 	
-	public static List<ASMInstruction> loadSumR2(ElementSelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
-		List<ASMInstruction> load = new ArrayList();
-		
+	public static void loadSumR2(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
 		/* Sum */
 		if (s.selection.size() > 1 || block) {
 			ASMMov sum = new ASMMov(new RegOperand(REGISTER.R2), new ImmOperand(0));
 			sum.comment = new ASMComment("Calculate offset of sub structure");
-			load.add(sum);
+			node.instructions.add(sum);
 			
 			ARRAY superType = null;
 			if (s.idRef.type instanceof POINTER) {
@@ -141,20 +139,20 @@ public class AsNElementSelect extends AsNExpression {
 			/* Handle selections differently, since last selection does not result in primitive. 
 			 * 		This algorithm is a custom variation of the loadSumR2 method. */
 			for (int i = 0; i < s.selection.size(); i++) {
-				load.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
+				node.instructions.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
 				
 				if (superType.elementType instanceof PRIMITIVE) {
-					load.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+					node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 				}
 				else {
 					int bytes = superType.elementType.wordsize() * 4;
 					
-					load.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
-					load.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+					node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
+					node.instructions.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 				}
 				
 				/* Add to sum */
-				load.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 				
 				/* Next element in chain */
 				if (!(superType.elementType instanceof ARRAY)) break;
@@ -163,11 +161,10 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else {
 			/* Load Index and multiply with 4 to convert index to byte offset */
-			load.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
-			load.add(new ASMLsl(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+			node.instructions.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
+			node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 		}
 		
-		return load;
 	}
 	
 	/**
@@ -245,7 +242,7 @@ public class AsNElementSelect extends AsNExpression {
 		
 		if (selectType == SELECT_TYPE.LOCAL_SINGLE) {
 			/* Load offset of target in array */
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			loadSumR2(node, s, r, map, st, false);
 			
 			/* Load offset of array in memory */
 			node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
@@ -255,7 +252,7 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else if (selectType == SELECT_TYPE.LOCAL_SUB) {
 			/* Load block offset */
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			/* Load the start of the structure into R1 */
 			ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset));
@@ -269,7 +266,7 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SINGLE) {
 			/* Load offset of target in array */
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			loadSumR2(node, s, r, map, st, false);
 			
 			/* Get offset of parameter relative to fp */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
@@ -278,7 +275,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SUB) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
 			start.comment = new ASMComment("Start of structure in stack");
@@ -288,7 +285,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.GLOBAL_SINGLE) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			loadSumR2(node, s, r, map, st, false);
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 			
@@ -300,7 +297,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.GLOBAL_SUB) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 		

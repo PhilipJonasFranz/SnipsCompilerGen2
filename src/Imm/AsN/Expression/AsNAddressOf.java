@@ -30,17 +30,10 @@ public class AsNAddressOf extends AsNExpression {
 		
 		IDRef ref = (IDRef) a.expression;
 		
-		if (r.declarationLoaded(ref.origin)) {
-			/* Needs to be pushed on the stack, then get reference to cell */
-			st.push(ref.origin);
-			
-			/* Get address from local stack */
-			int offset = st.getDeclarationInStackByteOffset(ref.origin);
-			
-			/* Load offset of array in memory */
-			aof.instructions.add(new ASMSub(new RegOperand(target), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
-		}
-		else if (map.declarationLoaded(ref.origin)) {
+		/* Declaration cannot be loaded in regset since the AST was scanned for addressof-nodes,
+		 * and was pushed on the stack. */
+		
+		if (map.declarationLoaded(ref.origin)) {
 			/* Get address from global memory */
 			ASMDataLabel label = map.resolve(ref.origin);
 			

@@ -44,7 +44,7 @@ public abstract class AsNNode {
 	 * @param r The current RegSet
 	 * @param regs The Register to clear
 	 */
-	protected void clearReg(RegSet r, StackSet st, int...regs) {
+	public void clearReg(RegSet r, StackSet st, int...regs) {
 		for (int reg : regs) {
 			if (!r.getReg(reg).isFree()) {
 				int free = r.findFree();

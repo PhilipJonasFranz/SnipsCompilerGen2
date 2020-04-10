@@ -4,6 +4,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -29,13 +30,18 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		TYPE t = ctx.checkElementSelect(this.selection);
-		this.origin = this.selection.idRef.origin;
+		TYPE t = ctx.checkDeref(this.deref);
 		return t;
 	}
 
 	public String getFieldName() {
-		return selection.idRef.id;
+		if (deref.expression instanceof IDRef) {
+			return ((IDRef) deref.expression).origin.fieldName;
+		}
+		else if (deref.expression instanceof ElementSelect) {
+			return ((ElementSelect) deref.expression).idRef.origin.fieldName;
+		}
+		else return null;
 	}
 	
 }

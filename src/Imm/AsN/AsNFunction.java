@@ -17,6 +17,7 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -26,11 +27,10 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.Statement;
-import Imm.AsN.Statement.AsNStatement;
+import Imm.AsN.Statement.AsNCompoundStatement;
 import Util.Pair;
 
-public class AsNFunction extends AsNNode {
+public class AsNFunction extends AsNCompoundStatement {
 
 			/* --- FIELDS --- */
 	public List<Pair<Declaration, Integer>> parameterMapping;
@@ -77,9 +77,27 @@ public class AsNFunction extends AsNNode {
 		/* Save parameters in register */
 		func.clearReg(r, st, 0, 1, 2);
 		
+		for (int i = 0; i < f.parameters.size(); i++) {
+			Declaration dec = f.parameters.get(i);
+			if (r.declarationLoaded(dec)) {
+				if (func.hasAddressReference(f, dec)) {
+					int location = r.declarationRegLocation(dec);
+					
+					ASMPushStack push0 = new ASMPushStack(new RegOperand(location));
+					push0.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+					func.instructions.add(push0);
+					
+					st.push(dec);
+					r.free(location);
+				}
+			}
+		}
+		
 		/* Cast all statements and add all instructions */
-		for (Statement s : f.statements) 
-			func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+		for (int i = 0; i < f.body.size(); i++) { 
+			func.loadStatement(f, f.body.get(i), r, map, st);
+			//func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+		}
 		
 		
 		/* Check if other function is called within this function */

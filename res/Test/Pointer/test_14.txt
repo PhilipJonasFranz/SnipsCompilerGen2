@@ -1,0 +1,21 @@
+SOURCE
+void set(int [3]* p, int v, int x) {
+	*p [x] = v;
+	return;
+}
+
+int main(int x, int y) {
+	int [3] v = {1, 2, 3};
+	set(&v, 5, x);
+	return v [y];
+}
+TESTCASES
+0 0 5
+1 0 1
+2 0 1
+0 1 2
+1 1 5
+2 1 2
+0 2 3
+1 2 3
+2 2 5

@@ -29,7 +29,7 @@ public class ReturnStatement extends Statement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Return");
 		if (rec) {
-			this.value.print(d + this.printDepthStep, rec);
+			if (this.value != null) this.value.print(d + this.printDepthStep, rec);
 		}
 	}
 
