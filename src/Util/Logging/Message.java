@@ -20,11 +20,21 @@ public class Message {
 	
 	public Type messageType;
 	
-	private String message;
+	protected String message;
 	
 	public Message(String message, Type type) {
 		this.message = message;
 		this.messageType = type;
+		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
+	}
+	
+	public Message(String message, Type type, boolean buffered) {
+		this.message = message;
+		this.messageType = type;
+		if (!CompilerDriver.silenced && !buffered) System.out.println(this.getMessage());
+	}
+	
+	public void flush() {
 		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
 	}
 	
