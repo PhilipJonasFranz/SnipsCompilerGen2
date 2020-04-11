@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -74,8 +73,12 @@ public class CompilerDriver {
 		driver = scd;
 		
 		if (outputPath == null) {
-			System.out.println(new Message("No output file specified! See -help for argument information.", Message.Type.FAIL).getMessage());
-			System.exit(0);
+			outputPath = args [0];
+			if (outputPath.contains("\\")) {
+				while (!outputPath.endsWith("\\")) outputPath = outputPath.substring(0, outputPath.length() - 1);
+			}
+			
+			outputPath += "out.s";
 		}
 		
 		/* Errors occurred due to faulty parameters, abort */
@@ -168,13 +171,9 @@ public class CompilerDriver {
 					/* --- CONTEXT CHECKING --- */
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
-			try {
-				ctx.check();
-				log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
-			} catch (CTX_EXCEPTION e) {
-				throw e;
-			}
-			
+			ctx.check();
+			log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
+		
 			if (imm) AST.print(4, true);
 			
 			

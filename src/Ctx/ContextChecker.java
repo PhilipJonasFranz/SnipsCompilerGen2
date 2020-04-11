@@ -381,10 +381,10 @@ public class ContextChecker {
 		}
 		
 		if (left instanceof POINTER) {
-			POINTER p = (POINTER) left;
-			if (right.isEqual(p.getCoreType())) {
-				b.type = p;
+			if (!(right instanceof INT)) {
+				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.typeString());
 			}
+			b.type = left;
 		}
 		else if (left.isEqual(right)) {
 			b.type = left;
