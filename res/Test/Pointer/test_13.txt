@@ -1,12 +1,18 @@
 SOURCE
-int get(int [2] [2]* p, int x) {
-	return *p [0] [x] * *p [1] [x];
+void set(int* p, int [2] [2] v) {
+	*p = v;
+	return;
 }
 
-int main(int x) {
+int main(int x, int y) {
 	int [2] [2] v = {{1, 2}, {3, 4}};
-	return get(&v, x);
+	set(&v, {{5, 6}, {9, 8}});
+	v [0] [1] = 7;
+	v [1] [1] = v [0] [0] * 10;
+	return v [x] [y];
 }
 TESTCASES
-0 3
-1 8
+0 0 5
+0 1 7
+1 0 9
+1 1 50

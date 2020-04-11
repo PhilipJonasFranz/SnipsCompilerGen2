@@ -1,17 +1,16 @@
 SOURCE
-int bar(int [2] v0, int [2] v1, int x) {
-	int [2] [2] v = {v1, v0};
-	return v [0] [x] + v [1] [x];
+void set(int* p, int [2] v) {
+	*(p + 2) = v;
+	return;
 }
 
-int get(int [2] [2]* p, int x) {
-	return bar(*p [1], *p [0], x);
-}
-
-int main(int x) {
+int main(int x, int y) {
 	int [2] [2] v = {{1, 2}, {3, 4}};
-	return get(&v, x);
+	set(&v, {5, 6});
+	return v [x] [y];
 }
 TESTCASES
-0 4
-1 6
+0 0 1
+0 1 2
+1 0 5
+1 1 6

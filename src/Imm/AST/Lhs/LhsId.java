@@ -16,6 +16,8 @@ public abstract class LhsId extends SyntaxElement {
 	/* Set during context checking */
 	public Declaration origin;
 	
+	public TYPE expressionType;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public LhsId(Source source) {

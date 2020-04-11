@@ -31,7 +31,7 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		TYPE t = ctx.checkDeref(this.deref);
+		TYPE t = ctx.checkExpression(deref.expression);
 		return t;
 	}
 

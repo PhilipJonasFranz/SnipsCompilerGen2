@@ -32,4 +32,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		else return null;
 	}
 	
+	public TYPE getCoreType() {
+		return this;
+	}
+	
 }

@@ -34,4 +34,6 @@ public abstract class TYPE<T> {
 	
 	public abstract int wordsize();
 	
+	public abstract TYPE getCoreType();
+	
 }

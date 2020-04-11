@@ -1,11 +1,21 @@
 SOURCE
-int get(int [3]* p) {
-	return *p [0] + 1;
+void set(int* p, int v, int x) {
+	*(p + x) = v;
+	return;
 }
 
-int main() {
-	int [3] v = {3, 6, 7};
-	return get(&v);
+int main(int x, int y) {
+	int [3] v = {1, 2, 3};
+	set(&v, 5, x);
+	return v [y];
 }
 TESTCASES
-4
+0 0 5
+1 0 1
+2 0 1
+0 1 2
+1 1 5
+2 1 2
+0 2 3
+1 2 3
+2 2 5

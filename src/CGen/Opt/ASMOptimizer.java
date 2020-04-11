@@ -51,6 +51,10 @@ public class ASMOptimizer {
 		while (OPT_DONE) {
 			OPT_DONE = false;
 			
+			this.removeExpressionIndirectTargeting(body);
+			
+			this.removeOperandIndirectTargeting(body);
+			
 			this.constantOperandPropagation(body);
 			
 			this.clearInstructionsAfterBranch(body);
@@ -62,10 +66,6 @@ public class ASMOptimizer {
 			this.removeImplicitStackAssignment(body);
 			
 			this.removeBranchesBeforeLabelToLabel(body);
-		
-			this.removeExpressionIndirectTargeting(body);
-			
-			this.removeOperandIndirectTargeting(body);
 		}
 	}
 	

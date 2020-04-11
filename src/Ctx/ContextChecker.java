@@ -13,6 +13,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
@@ -77,6 +78,10 @@ public class ContextChecker {
 		}
 		
 		return null;
+	}
+	
+	public TYPE checkExpression(Expression e) throws CTX_EXCEPTION {
+		return e.check(this);
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
@@ -239,9 +244,19 @@ public class ContextChecker {
 		
 		TYPE t = a.value.check(this);
 		
-		if (!t.isEqual(targetType)) {
+		if (targetType instanceof POINTER) {
+			POINTER p = (POINTER) targetType;
+			
+			if (!p.getCoreType().isEqual(t.getCoreType())) {
+				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
+			}
+		}
+		else if (!t.isEqual(targetType)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
 		}
+		
+		a.lhsId.expressionType = t;
+				
 		return null;
 	}
 	
@@ -607,13 +622,8 @@ public class ContextChecker {
 		if (t instanceof POINTER) {
 			POINTER p = (POINTER) t;
 			
-			if (deref.expression instanceof IDRef || deref.expression instanceof ElementSelect) {
-				deref.type = p.targetType;
-			}
-			else {
-				/* Pointer arithmetic, use core type */
-				deref.type = p.coreType;
-			}
+			/* Set to core type */
+			deref.type = p.coreType;
 		}
 		else {
 			throw new CTX_EXCEPTION(deref.getSource(), "Cannot dereference non pointer, actual " + t.typeString());

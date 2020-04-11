@@ -25,7 +25,6 @@ import Imm.AST.Statement.Assignment;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Statement.Lhs.AsNLhsId;
-import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNAssignment extends AsNStatement {
 
@@ -45,11 +44,11 @@ public class AsNAssignment extends AsNStatement {
 	 * Assumes that the base address of the array or the start address of the sub array is located in R1.
 	 * @param arr The array to copy.
 	 */
-	public static void copyArray(ARRAY arr, AsNNode node) {
+	public static void copyArray(int size, AsNNode node) {
 		/* Do it sequentially for 8 or less words to copy */
-		if (arr.wordsize() <= 8) {
+		if (size <= 8) {
 			int offset = 0;
-			for (int a = 0; a < arr.wordsize(); a++) {
+			for (int a = 0; a < size; a++) {
 				/* Pop data from stack */
 				node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
 				
@@ -63,7 +62,7 @@ public class AsNAssignment extends AsNStatement {
 			// TODO: Test this implementation
 			
 			/* Move counter in R2 */
-			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
