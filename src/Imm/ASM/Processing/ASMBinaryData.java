@@ -9,10 +9,14 @@ import Snips.CompilerDriver;
 public abstract class ASMBinaryData extends ASMInstruction {
 
 			/* --- NESTED --- */
+	/** Used to solve a binary expression between two operands. 
+	 * Implementations are defined by classes extending from this class.
+	 */
 	public interface BinarySolver {
 		public int solve(int x, int y);
 	}
 	
+	/** Used ot describe the type of the operand shift */
 	public enum SHIFT_TYPE {
 		LSL, LSR, ASR, ROR;
 	}
@@ -25,12 +29,16 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	
 	public Operand op1;
 	
+	/** The solver for the implementation */
 	public BinarySolver solver;
 	
+	/** The shift type. If set to null, no shift is applied. */
 	public SHIFT_TYPE shiftType;
 	
+	/** The amount of shift that is applied. */
 	public int shiftDist;
 	
+	/** Wether to update the condition field when executing this instruction. */
 	public boolean updateConditionField = false;
 	
 	

@@ -9,6 +9,7 @@ import Snips.CompilerDriver;
 public abstract class ASMStackOp extends ASMInstruction {
 
 			/* --- NESTED --- */
+	/** Used to describe the writeback and indexing behaviour */
 	public enum MEM_OP {
 		PRE_WRITEBACK, 
 		POST_WRITEBACK,
@@ -17,6 +18,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 	
 	
 			/* --- FIELDS --- */
+	/** Writeback and indexing behaviour */
 	public MEM_OP memOp;
 	
 	public RegOperand target;
