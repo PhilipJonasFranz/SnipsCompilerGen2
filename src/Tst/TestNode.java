@@ -70,7 +70,7 @@ public class TestNode {
 		for (int i = 0; i < d; i++) s += " ";
 		System.out.println(s + this.testPackage);
 		for (Pair<String, List<Message>> tests : this.tests) {
-			System.out.println(s + "    " + "Test: " + tests.t0);
+			System.out.println(s + "    " + "Test: " + tests.getFirst());
 		}
 		
 		for (Entry<String, TestNode> entry : this.childPackages.entrySet()) {

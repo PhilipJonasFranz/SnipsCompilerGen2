@@ -1,14 +1,15 @@
 package Util;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class Source {
 
+			/* --- FIELDS --- */
 	private int row, col;
 	
-	public Source(int row, int col) {
-		this.row = row;
-		this.col = col;
-	}
 	
+			/* --- METHODS --- */
 	public String getSourceMarker() {
 		return "line: " + this.row + ", column: " + this.col;
 	}

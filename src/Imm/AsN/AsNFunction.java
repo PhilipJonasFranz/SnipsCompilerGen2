@@ -53,12 +53,12 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		/* Set Params in Registers */
 		for (Pair<Declaration, Integer> p : func.parameterMapping) {
-			if (p.tpl_2() == -1) 
+			if (p.getSecond() == -1) 
 				/* Paramter is in stack, push in stackSet */
-				st.push(p.t0);
+				st.push(p.getFirst());
 			else 
 				/* Load Declaration into register */
-				r.getReg(p.tpl_2()).setDeclaration(p.tpl_1());
+				r.getReg(p.getSecond()).setDeclaration(p.getFirst());
 		}
 		
 		
@@ -233,7 +233,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Check if parameters are passed in the stack.
 	 */
 	public boolean hasParamsInStack() {
-		return this.parameterMapping.stream().map(x -> x.tpl_2()).filter(x -> x == -1).count() > 0;
+		return this.parameterMapping.stream().map(x -> x.getSecond()).filter(x -> x == -1).count() > 0;
 	}
 	
 	/**

@@ -50,7 +50,7 @@ public class AsNFunctionCall extends AsNStatement {
 		/* Load Parameters in the Stack */
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);
-			if (p.tpl_2() == -1) {
+			if (p.getSecond() == -1) {
 				stackMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				if (parameters.get(i).type.wordsize() == 1) {
@@ -65,12 +65,12 @@ public class AsNFunctionCall extends AsNStatement {
 		/* Load Parameters in the registers */
 		for (int i = mapping.size() - 1; i >= 0; i--) {
 			Pair<Declaration, Integer> p = mapping.get(i);
-			if (p.tpl_2() != -1) {
+			if (p.getSecond() != -1) {
 				regMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
 				/* Leave First Parameter directley in R0 */
-				if (p.tpl_2() > 0) {
+				if (p.getSecond() > 0) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
 				r.getReg(0).free();
@@ -94,8 +94,8 @@ public class AsNFunctionCall extends AsNStatement {
 		if (stackMapping > 0) {
 			int size = 0;
 			for (Pair<Declaration, Integer> p  : mapping) {
-				if (p.tpl_2() == -1) {
-					size += p.tpl_1().type.wordsize();
+				if (p.getSecond() == -1) {
+					size += p.getFirst().type.wordsize();
 				}
 			}
 			

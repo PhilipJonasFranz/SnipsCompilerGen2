@@ -1,18 +1,19 @@
 package Imm.TYPE;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public abstract class TYPE<T> {
 
 			/* --- FIELDS --- */
 	protected int wordSize = 1;
 	
+	@Getter
 	public T value;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public TYPE() {
-		
-	}
-	
 	public TYPE(String initialValue) {
 		this.setValue(initialValue);
 	}
@@ -25,10 +26,6 @@ public abstract class TYPE<T> {
 	
 	public boolean hasValue() {
 		return this.value != null;
-	}
-	
-	public T getValue() {
-		return this.value;
 	}
 	
 	public abstract String typeString();

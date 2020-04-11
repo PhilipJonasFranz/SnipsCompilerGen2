@@ -2,12 +2,14 @@ package Imm.TYPE.COMPOSIT;
 
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import lombok.Getter;
 
 public class POINTER extends COMPOSIT {
 
 	/** The type that this pointer capsules. */
 	public TYPE targetType;
 
+	@Getter
 	public TYPE coreType;
 	
 	public POINTER(TYPE targetType) {
@@ -46,8 +48,4 @@ public class POINTER extends COMPOSIT {
 		return 1;
 	}
 
-	public TYPE getCoreType() {
-		return this.coreType;
-	}
-	
 }

@@ -2,6 +2,7 @@ package Util.Logging;
 
 import Snips.CompilerDriver;
 
+/** This message prints itself without message type header. */
 public class SimpleMessage extends Message {
 	
 	public SimpleMessage(String message) {

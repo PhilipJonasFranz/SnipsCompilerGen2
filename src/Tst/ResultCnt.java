@@ -1,19 +1,19 @@
 package Tst;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResultCnt {
 		
+			/* --- FIELDS --- */
 	public int failed = 0, crashed = 0, timeout = 0;
 	
-	public ResultCnt() {
-		
-	}
 	
-	public ResultCnt(int f, int c, int t) {
-		this.failed = f;
-		this.crashed = c;
-		this.timeout = t;
-	}
-	
+			/* --- METHODS --- */
 	public void add(ResultCnt cnt) {
 		this.failed += cnt.failed;
 		this.crashed += cnt.crashed;

@@ -2,6 +2,7 @@ package Util.Logging;
 
 import Snips.CompilerDriver;
 
+/** A message that has a status header, a message type and a capsuled message string. */
 public class Message {
 	
 	public final String ANSI_RESET  = "\u001B[0m";
@@ -34,6 +35,7 @@ public class Message {
 		if (!CompilerDriver.silenced && !buffered) System.out.println(this.getMessage());
 	}
 	
+	/** Flush the buffered message to the console. */
 	public void flush() {
 		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
 	}

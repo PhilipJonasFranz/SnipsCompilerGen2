@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import REv.CPU.ProcessorUnit;
-import REv.Modules.Tools.XMLParser;
-import REv.Modules.Tools.XMLParser.XMLNode;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
+import Util.XMLParser;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
+import Util.XMLParser.XMLNode;
 
 public class TestDriver {
 
@@ -108,16 +108,16 @@ public class TestDriver {
 		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
-		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.failed == 0 && res.crashed == 0 && res.timeout == 0)? " successfully in " + 
-				(System.currentTimeMillis() - start) + " Millis" : ", " + res.failed + " test(s) failed" + 
-				((res.crashed > 0)? ", " + res.crashed + " tests(s) crashed" : "")) + 
-				((res.timeout> 0)? ", " + res.timeout + " tests(s) timed out" : "") + ".", 
-				(res.failed == 0 && res.failed == 0)? Message.Type.INFO : Message.Type.FAIL);
+		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? " successfully in " + 
+				(System.currentTimeMillis() - start) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
+				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
+				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
+				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
 		
 		CompilerDriver.printAverageCompression();
 		
 		/* Print Build status */
-		if (res.crashed == 0 && res.timeout == 0 && res.failed == 0) {
+		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
 			new Message("[BUILD] Successful.", Message.Type.INFO);
 		}
 		else new Message("[BUILD] Failed.", Message.Type.FAIL);
@@ -154,16 +154,16 @@ public class TestDriver {
 			resCnt.push(new ResultCnt());
 			
 			/* Run test and save test feedback in pair */
-			test.t1.addAll(runTest(node.getPackagePath() + test.t0));
+			test.getSecond().addAll(runTest(node.getPackagePath() + test.getFirst()));
 			
 			/* Get result */
 			ResultCnt res = resCnt.pop();
-			if (res.timeout > 0 || res.crashed > 0 || res.failed > 0) {
+			if (res.getTimeout() > 0 || res.getFailed() > 0 || res.getCrashed() > 0) {
 				if (!printedHead) {
 					headMessage.flush();
 					printedHead = true;
 				}
-				test.t1.stream().forEach(x -> x.flush());
+				test.getSecond().stream().forEach(x -> x.flush());
 			}
 			
 			/* Add result to package results */
@@ -172,7 +172,7 @@ public class TestDriver {
 		
 		/* Get package results */
 		ResultCnt res = resCnt.pop();
-		if ((res.timeout > 0 || res.crashed > 0 || res.failed > 0) && !node.tests.isEmpty()) {
+		if ((res.getTimeout() > 0 || res.getCrashed() > 0 || res.getFailed() > 0) && !node.tests.isEmpty()) {
 			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
 		}
 		

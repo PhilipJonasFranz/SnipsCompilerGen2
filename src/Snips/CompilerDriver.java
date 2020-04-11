@@ -21,7 +21,9 @@ import Imm.AsN.AsNBody;
 import Par.Parser;
 import Par.Scanner;
 import Util.Logging.Message;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class CompilerDriver {
 
 	/* The Input File */
@@ -95,10 +97,6 @@ public class CompilerDriver {
 	
 	public CompilerDriver(String [] args) {
 		this.readArgs(args);
-	}
-	
-	public CompilerDriver() {
-		
 	}
 	
 	public List<String> compile(File file, List<String> code) {

@@ -5,6 +5,7 @@ import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import lombok.Getter;
 
 public class ARRAY extends COMPOSIT {
 
@@ -12,6 +13,7 @@ public class ARRAY extends COMPOSIT {
 	
 	private Expression length0;
 	
+	@Getter
 	private TYPE coreType;
 	
 	public int length;
@@ -86,8 +88,4 @@ public class ARRAY extends COMPOSIT {
 		return this.wordSize;
 	}
 
-	public TYPE getCoreType() {
-		return this.coreType;
-	}
-	
 }
