@@ -7,15 +7,12 @@ import Snips.CompilerDriver;
 public class ASMLdrLabel extends ASMLdr {
 
 			/* --- CONSTRUCTORS --- */
+	/** Example Usage: ldr r0, a_label */
 	public ASMLdrLabel(RegOperand target, LabelOperand op0) {
 		super(target, op0, null);
 	}
 	
 			/* --- METHODS --- */
-	/**
-	 * Calls build of ASMMemOp with class as parameter.
-	 */
-	@Override
 	public String build() {
 		String s = CompilerDriver.printDepth + "ldr " + target.toString();
 		s += ", " + this.op0.toString();

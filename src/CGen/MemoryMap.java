@@ -6,38 +6,51 @@ import java.util.List;
 
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.AST.Statement.Declaration;
+import lombok.Getter;
 
 public class MemoryMap {
 
 			/* --- NESTED --- */
+	/**
+	 * Memory cell to describe an entry in the memory cell. The cells can have
+	 * different word sizes based on the declaration they capsule.
+	 */
 	public class MemoryCell {
 		
-		public int wordSize;
-		
+				/* --- FIELDS --- */
+		/** The declaration that this cell houses */
+		@Getter
 		private Declaration declaration;
 		
+		
+				/* --- CONSTRUCTORS --- */
 		public MemoryCell(Declaration dec) {
 			this.declaration = dec;
-			this.wordSize = dec.type.wordsize();
 		}
 		
-		public Declaration getDeclaration() {
-			return this.declaration;
+		
+				/* --- METHODS --- */
+		/** Returns the word size of the type of the capsuled declaration. */
+		public int wordsize() {
+			return this.declaration.type.wordsize();
 		}
+		
 	}
 	
 	
 			/* --- FIELDS --- */
+	/** The map that houses all active memory cells. */
+	@Getter
 	private List<MemoryCell> map = new ArrayList();
 
+	/**
+	 * This hash map stores the pairs of declarations stored in the data memory and their
+	 * corresponding data label.
+	 */
 	private HashMap<Declaration, ASMDataLabel> cellMapping = new HashMap();
 
 	
 			/* --- METHODS --- */
-	public List getMemory() {
-		return this.map;
-	}
-	
 	/**
 	 * Check wether given declaration is loaded in the memory map.
 	 */
@@ -52,38 +65,17 @@ public class MemoryMap {
 		return this.cellMapping.get(dec);
 	}
 	
-	public void free(Declaration dec) {
-		this.cellMapping.remove(dec);
-		for (int i = 0; i < this.map.size(); i++) {
-			if (this.map.get(i).declaration != null && this.map.get(i).declaration.equals(dec)) {
-				this.map.remove(i);
-				return;
-			}
-		}
-	}
-	
-	public int getByteOffset(Declaration dec) {
-		int offset = 0;
-		for (int i = 0; i < this.map.size(); i++) {
-			if (this.map.get(i).declaration != null && this.map.get(i).declaration.equals(dec)) {
-				break;
-			}
-			else offset += this.map.get(i).wordSize;
-		}
-		
-		return offset * 4;
-	}
-	
 	/**
-	 * Add the given declaration to the memory map, 
-	 * @param dec
-	 * @param dataLabel
+	 * Add the given declaration to the memory map and wraps it in a new memory cell.
+	 * @param dec The declaration to add.
+	 * @param dataLabel The data label linked to the declaration.
 	 */
 	public void add(Declaration dec, ASMDataLabel dataLabel) {
 		this.map.add(new MemoryCell(dec));
 		this.cellMapping.put(dec, dataLabel);
 	}
 	
+	/** Prints out the memory layout. */
 	public void print() {
 		System.out.println("\n---- MEMORY START ----");
 		for (int i = 0; i < this.map.size(); i++) {

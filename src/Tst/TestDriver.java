@@ -6,9 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,107 +26,19 @@ public class TestDriver {
 	/** Result summary of a test */
 	public class Result {
 		
+				/* --- FIELDS --- */
+		/** The return type status of the test */
 		public RET_TYPE res;
 		
+		/* The amount of test cases that succeded and that failed. */
 		public int succ, fail;
 		
+		
+				/* --- CONSTRUCTORS --- */
 		public Result(RET_TYPE res, int succ, int fail) {
 			this.res = res;
 			this.succ = succ;
 			this.fail = fail;
-		}
-		
-	}
-	
-	public class ResultCnt {
-		
-		public int failed = 0, crashed = 0, timeout = 0;
-		
-		public ResultCnt() {
-			
-		}
-		
-		public ResultCnt(int f, int c, int t) {
-			this.failed = f;
-			this.crashed = c;
-			this.timeout = t;
-		}
-		
-		public void add(ResultCnt cnt) {
-			this.failed += cnt.failed;
-			this.crashed += cnt.crashed;
-			this.timeout += cnt.timeout;
-		}
-		
-	}
-	
-	public class TestNode {
-		
-		public TestNode parent;
-		
-		public String testPackage;
-		
-		public HashMap<String, TestNode> childPackages = new HashMap();
-		
-		public List<TestNode> childs = new ArrayList();
-		
-		public List<Pair<String, List<Message>>> tests = new ArrayList();
-		
-		public TestNode(List<String> files) {
-			this.testPackage = "";
-			
-			List<String> cut = files.stream().map(x -> x.substring(testPackage.length())).collect(Collectors.toList());
-			
-			for (String file : cut) {
-				this.addTest(file);
-			}
-		}
-		
-		public TestNode(TestNode parent, String testPackage) {
-			this.parent = parent;
-			this.testPackage = testPackage;
-		}
-		
-		public String getPackagePath() {
-			if (this.parent == null) return "";
-			else return this.parent.getPackagePath() + this.testPackage + "/";
-		}
-		
-		public void addTest(String file) {
-			if (!file.contains("\\")) {
-				this.tests.add(new Pair<String, List<Message>>(file, new ArrayList()));
-			}
-			else {
-				String subPackage = "";
-				while (!file.startsWith("\\")) {
-					subPackage += "" + file.charAt(0);
-					file = file.substring(1);
-				}
-				file = file.substring(1);
-				
-				if (!this.childPackages.containsKey(subPackage)) {
-					TestNode node = new TestNode(this, subPackage);
-					this.childPackages.put(subPackage, node);
-					this.childs.add(node);
-				}
-				
-				if (this.childPackages.containsKey(subPackage)) {
-					this.childPackages.get(subPackage).addTest(file);
-				}
-			}
-		}
-		
-		public void print(int d) {
-			String s = "";
-			for (int i = 0; i < d; i++) s += " ";
-			System.out.println(s + this.testPackage);
-			for (Pair<String, List<Message>> tests : this.tests) {
-				System.out.println(s + "    " + "Test: " + tests.t0);
-			}
-			
-			for (Entry<String, TestNode> entry : this.childPackages.entrySet()) {
-				entry.getValue().print(d + 4);
-			}
 		}
 		
 	}
@@ -143,18 +53,20 @@ public class TestDriver {
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200;
 	
+	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
 	
+	/** Print the compiler immediate representations */
 	public boolean displayCompilerImmediateRepresentations = false;
 	
+	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	/** The Result Stack used to propagate package test results back up */
+	Stack<ResultCnt> resCnt = new Stack();
 	
-			/* --- METHODS --- */
-	public static void main(String [] args) {
-		new TestDriver(args);	
-	}
-	
+
+			/* --- CONSTRUCTORS --- */
 	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
 		CompilerDriver.printLogo();
@@ -163,6 +75,7 @@ public class TestDriver {
 		
 		List<String> paths = new ArrayList();
 		
+		/* Add add files to the paths list */
 		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
 			for (String s : args) {
@@ -173,14 +86,15 @@ public class TestDriver {
 			}
 		}
 		
+		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
 			new Message("Could not find any tests, make sure the path starts from the res/ folder.", Message.Type.WARN);
 			new Message("Make sure the test files are .txt files.", Message.Type.WARN);
 			System.exit(0);
 		}
 		
+		/* Setup Test Node Tree */
 		new Message("Starting run, found " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ".", Message.Type.INFO);
-		
 		TestNode head = new TestNode(paths);
 		new Message("Successfully built package tree.", Message.Type.INFO);
 		
@@ -189,10 +103,11 @@ public class TestDriver {
 		/* Base Layer */
 		resCnt.push(new ResultCnt());
 		
+		/* Test the main package */
 		testPackage(head);
 		
+		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
-		
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.failed == 0 && res.crashed == 0 && res.timeout == 0)? " successfully in " + 
 				(System.currentTimeMillis() - start) + " Millis" : ", " + res.failed + " test(s) failed" + 
 				((res.crashed > 0)? ", " + res.crashed + " tests(s) crashed" : "")) + 
@@ -201,16 +116,25 @@ public class TestDriver {
 		
 		CompilerDriver.printAverageCompression();
 		
+		/* Print Build status */
 		if (res.crashed == 0 && res.timeout == 0 && res.failed == 0) {
 			new Message("[BUILD] Successful.", Message.Type.INFO);
 		}
-		else {
-			new Message("[BUILD] Failed.", Message.Type.FAIL);
-		}
+		else new Message("[BUILD] Failed.", Message.Type.FAIL);
 	}
 	
+	
+			/* --- METHODS --- */
+	/** Launch a new test driver run with given arguments. */
+	public static void main(String [] args) {
+		new TestDriver(args);	
+	}
+	
+	/**
+	 * Tests the package defined by given node as well as all child packages of the node.
+	 */
 	public void testPackage(TestNode node) {
-		boolean buffered = !(detailedCompilerMessages || displayCompilerImmediateRepresentations || printResult);
+		boolean buffered = (!detailedCompilerMessages && !displayCompilerImmediateRepresentations && !printResult) || node.tests.isEmpty();
 		
 		Message headMessage = new Message("Testing Package " + node.getPackagePath(), Message.Type.INFO, buffered);
 		boolean printedHead = false;
@@ -218,19 +142,22 @@ public class TestDriver {
 		/* Push summary for package */
 		resCnt.push(new ResultCnt());
 		
+		/* Test all child nodes */
 		if (!node.childs.isEmpty()) {
 			for (TestNode node0 : node.childs) {
 				testPackage(node0);
 			}
 		}
 		
+		/* Run all tests in package */
 		for (Pair<String, List<Message>> test : node.tests) {
 			resCnt.push(new ResultCnt());
 			
+			/* Run test and save test feedback in pair */
 			test.t1.addAll(runTest(node.getPackagePath() + test.t0));
 			
+			/* Get result */
 			ResultCnt res = resCnt.pop();
-			
 			if (res.timeout > 0 || res.crashed > 0 || res.failed > 0) {
 				if (!printedHead) {
 					headMessage.flush();
@@ -239,19 +166,19 @@ public class TestDriver {
 				test.t1.stream().forEach(x -> x.flush());
 			}
 			
+			/* Add result to package results */
 			resCnt.peek().add(res);
 		}
 		
+		/* Get package results */
 		ResultCnt res = resCnt.pop();
-		
 		if ((res.timeout > 0 || res.crashed > 0 || res.failed > 0) && !node.tests.isEmpty()) {
 			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
 		}
 		
+		/* Add package results to super package results */
 		resCnt.peek().add(res);
 	}
-	
-	Stack<ResultCnt> resCnt = new Stack();
 	
 	public List<Message> runTest(String file) {
 		boolean buffered = !(detailedCompilerMessages || displayCompilerImmediateRepresentations || printResult);
@@ -265,6 +192,7 @@ public class TestDriver {
 			List<String> code = new ArrayList();
 			List<String> testcases = new ArrayList();
 			
+			/* Extract contents out of the file */
 			int i = 0;
 			if (content.get(0).equals("DESCRIPTION")) {
 				while (!content.get(i).equals("SOURCE")) {
@@ -292,12 +220,14 @@ public class TestDriver {
 			/* Run test */
 			Result res = this.test(file, code, testcases, buffer);
 			
+			/* Evaluate result */
 			if (res.fail > 0) resCnt.peek().failed++;
 			else if (res.res == RET_TYPE.CRASH) resCnt.peek().crashed++;
 			else if (res.res == RET_TYPE.TIMEOUT) resCnt.peek().timeout++;
 			else buffer.add(new Message("Test finished successfully.", Message.Type.INFO, true));
 		
 		} catch (Exception e) {
+			/* Test crashed */
 			buffer.add(new Message("-> Test " + file + " ran into an error!", Message.Type.FAIL, true));
 			resCnt.peek().crashed++;
 			e.printStackTrace();
@@ -337,7 +267,6 @@ public class TestDriver {
 		
 		/* Setup Runtime Environment */
 		for (int i = 0; i < cases.size(); i++) {
-			//if (cases.size() > 1) new Message("Running testcase " + (i + 1) + "/" + cases.size(), Message.Type.INFO);
 			String [] sp = cases.get(i).split(" ");
 			
 			boolean assemblyMessages = false;
@@ -370,8 +299,8 @@ public class TestDriver {
 				}
 			});
 			
-			long start = System.currentTimeMillis();
 			runThread.start();
+			long start = System.currentTimeMillis();
 			while (runThread.isAlive()) {
 				if (System.currentTimeMillis() - start > ttl) {
 					runThread.interrupt();

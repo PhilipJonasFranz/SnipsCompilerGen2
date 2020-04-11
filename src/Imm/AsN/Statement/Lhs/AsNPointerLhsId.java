@@ -106,6 +106,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		}
 		else {
 			/* Arithmetic */
+			// TODO
 		}
 		
 		return id;

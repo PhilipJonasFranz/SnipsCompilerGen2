@@ -3,6 +3,9 @@ package Imm.ASM;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
 
+/**
+ * Acts as a base class for all assembly instructions.
+ */
 public abstract class ASMInstruction {
 
 			/* --- FIELDS --- */
@@ -11,6 +14,9 @@ public abstract class ASMInstruction {
 	 */
 	public Cond cond;
 	
+	/**
+	 * A comment attatched to this instruction. Will be added after the instruction when building.
+	 */
 	public ASMComment comment;
 	
 	
