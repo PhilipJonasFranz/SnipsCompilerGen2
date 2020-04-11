@@ -46,8 +46,9 @@ public class CompilerDriver {
 		useTerminalColors = true, 
 		silenced = true,
 		imm = false,
-		enableComments = true;
-	
+		enableComments = true,
+		disableWarnings = false;
+			
 	public static String outputPath;
 	
 	public static boolean printErrors = false;
@@ -371,6 +372,7 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
+				else if (args [i].equals("-warn"))disableWarnings = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
@@ -393,6 +395,7 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
+		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");

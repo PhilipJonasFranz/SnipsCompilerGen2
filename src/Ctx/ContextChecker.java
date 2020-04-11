@@ -46,6 +46,8 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Snips.CompilerDriver;
+import Util.Logging.Message;
 
 public class ContextChecker {
 
@@ -629,14 +631,18 @@ public class ContextChecker {
 	public TYPE checkDeref(Deref deref) throws CTX_EXCEPTION {
 		TYPE t = deref.expression.check(this);
 		
-		if (t instanceof POINTER) {
-			POINTER p = (POINTER) t;
-			
+		/* Dereference pointer or primitive type */
+		if (t instanceof POINTER || t instanceof PRIMITIVE) {
 			/* Set to core type */
-			deref.type = p.coreType;
+			deref.type = t.getCoreType();
 		}
 		else {
-			throw new CTX_EXCEPTION(deref.getSource(), "Cannot dereference non pointer, actual " + t.typeString());
+			throw new CTX_EXCEPTION(deref.expression.getSource(), "Cannot dereference type " + t.typeString());
+		}
+		
+		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
+		if (t instanceof PRIMITIVE) {
+			if (!CompilerDriver.disableWarnings) new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN);
 		}
 		
 		return deref.type;
