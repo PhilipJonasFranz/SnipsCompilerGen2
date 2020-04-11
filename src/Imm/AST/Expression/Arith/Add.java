@@ -1,5 +1,6 @@
 package Imm.AST.Expression.Arith;
 
+import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Util.Source;
 

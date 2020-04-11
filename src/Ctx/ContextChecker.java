@@ -10,17 +10,18 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
-import Imm.AST.Expression.Arith.BinaryExpression;
+import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
-import Imm.AST.Expression.Arith.UnaryExpression;
 import Imm.AST.Expression.Arith.UnaryMinus;
+import Imm.AST.Expression.Boolean.BoolBinaryExpression;
+import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
-import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
@@ -380,10 +381,23 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
+		if (left.wordsize() > 1) {
+			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+		}
+		
+		if (right.wordsize() > 1) {
+			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+		}
+		
 		if (left instanceof POINTER) {
 			if (!(right instanceof INT)) {
 				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.typeString());
 			}
+			
+			if (b.left() instanceof ElementSelect) {
+				throw new CTX_EXCEPTION(b.getSource(), "Cannot add to element select during pointer arithmetic");
+			}
+			
 			b.type = left;
 		}
 		else if (left.isEqual(right)) {
@@ -396,6 +410,43 @@ public class ContextChecker {
 		return b.type;
 	}
 	
+	/**
+	 * Overrides binary expression.<br>
+	 * Checks for:<br>
+	 * - Both operand types have to be of type BOOL<br>
+	 */
+	public TYPE checkBoolBinaryExpression(BoolBinaryExpression b) throws CTX_EXCEPTION {
+		TYPE left = b.left().check(this);
+		TYPE right = b.right().check(this);
+		
+		if (!(left instanceof BOOL)) {
+			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.typeString());
+		}
+		
+		if (!(right instanceof BOOL)) {
+			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.typeString());
+		}
+		
+		b.type = left;
+		return b.type;
+	}
+	
+	/**
+	 * Overrides unary expression.<br>
+	 * Checks for:<br>
+	 * - Operand type has to be of type BOOL<br>
+	 */
+	public TYPE checkBoolUnaryExpression(BoolUnaryExpression b) throws CTX_EXCEPTION {
+		TYPE t = b.operand().check(this);
+		
+		if (!(t instanceof BOOL)) {
+			throw new CTX_EXCEPTION(b.operand.getSource(), "Expected bool, actual " + t.typeString());
+		}
+		
+		b.type = t;
+		return b.type;
+	}
+	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
 		TYPE op = u.operand().check(this);
 		
@@ -403,11 +454,7 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(u.operand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (u instanceof Not && op.isEqual(new BOOL())) {
-			u.type = new BOOL();
-			return u.type;
-		}
-		else if (u instanceof BitNot && op instanceof PRIMITIVE) {
+		if (u instanceof BitNot && op instanceof PRIMITIVE) {
 			u.type = op;
 			return u.type;
 		}
@@ -550,6 +597,10 @@ public class ContextChecker {
 		return aof.type;
 	}
 	
+	/**
+	 * Checks for:<br>
+	 * - Operand type is pointer.y
+	 */
 	public TYPE checkDeref(Deref deref) throws CTX_EXCEPTION {
 		TYPE t = deref.expression.check(this);
 		
@@ -559,7 +610,10 @@ public class ContextChecker {
 			if (deref.expression instanceof IDRef || deref.expression instanceof ElementSelect) {
 				deref.type = p.targetType;
 			}
-			else deref.type = p.coreType;
+			else {
+				/* Pointer arithmetic, use core type */
+				deref.type = p.coreType;
+			}
 		}
 		else {
 			throw new CTX_EXCEPTION(deref.getSource(), "Cannot dereference non pointer, actual " + t.typeString());
@@ -568,6 +622,13 @@ public class ContextChecker {
 		return deref.type;
 	}
 	
+	/**
+	 * Checks for:<br>
+	 * - At least one selection has to be made<br>
+	 * - Checks that the shadow ref is an IDRef<br>
+	 * - Checks that the types of the selection are of type int<br>
+	 * - Amount of selections does not exceed structure dimension<br>
+	 */
 	public TYPE checkElementSelect(ElementSelect select) throws CTX_EXCEPTION {
 		if (select.selection.isEmpty()) {
 			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
@@ -579,69 +640,42 @@ public class ContextChecker {
 			
 			TYPE type0 = ref.check(this);
 			
-			if (type0 instanceof POINTER) {
-				/* Unwrap from pointer, select, and wrap back in pointer */
-				TYPE type1 = ((POINTER) type0).targetType;
-				
-				for (int i = 0; i < select.selection.size(); i++) {
-					TYPE stype = select.selection.get(i).check(this);
-					if (!(stype instanceof INT)) {
-						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
-					}
-					else {
-						if (!(type1 instanceof ARRAY)) {
-							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
-						}
-						else {
-							ARRAY arr = (ARRAY) type1;
-							
-							if (select.selection.get(i) instanceof Atom) {
-								Atom a = (Atom) select.selection.get(i);
-								int value = (int) a.type.getValue();
-								if (value < 0 || value >= arr.getLength()) {
-									throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + type1.typeString());
-								}
-							}
-							
-							type1 = ((ARRAY) type1).elementType;
-						}
-					}
+			/* If pointer, unwrap it */
+			TYPE chain = (type0 instanceof POINTER)? ((POINTER) type0).targetType : type0;
+			
+			/* Check selection chain */
+			for (int i = 0; i < select.selection.size(); i++) {
+				TYPE stype = select.selection.get(i).check(this);
+				if (!(stype instanceof INT)) {
+					throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
 				}
-				
-				type0 = new POINTER(type1);
-			}
-			else {
-				for (int i = 0; i < select.selection.size(); i++) {
-					TYPE stype = select.selection.get(i).check(this);
-					if (!(stype instanceof INT)) {
-						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
+				else {
+					if (!(chain instanceof ARRAY)) {
+						throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
 					}
 					else {
-						if (!(type0 instanceof ARRAY)) {
-							throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
-						}
-						else {
-							ARRAY arr = (ARRAY) type0;
-							
-							if (select.selection.get(i) instanceof Atom) {
-								Atom a = (Atom) select.selection.get(i);
-								int value = (int) a.type.getValue();
-								if (value < 0 || value >= arr.getLength()) {
-									throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + type0.typeString());
-								}
+						ARRAY arr = (ARRAY) chain;
+						
+						if (select.selection.get(i) instanceof Atom) {
+							Atom a = (Atom) select.selection.get(i);
+							int value = (int) a.type.getValue();
+							if (value < 0 || value >= arr.getLength()) {
+								throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + chain.typeString());
 							}
-							
-							type0 = ((ARRAY) type0).elementType;
 						}
+						
+						chain = ((ARRAY) chain).elementType;
 					}
 				}
 			}
 			
-			select.type = type0;
+			if (type0 instanceof POINTER) chain = new POINTER(chain);
+			
+			select.type = chain;
 			return select.type;
 		}
 		else {
-			throw new CTX_EXCEPTION(select.getShadowRef().getSource(), "Element select must start with variable reference");
+			throw new CTX_EXCEPTION(select.getShadowRef().getSource(), "Can only select from variable reference");
 		}
 	}
 	

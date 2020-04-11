@@ -6,13 +6,16 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
 import Util.Source;
+import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
  */
 public class ElementSelect extends Expression {
 
-	private Expression idRef0;
+	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
+	@Getter
+	private Expression shadowRef;
 	
 	public IDRef idRef;
 	
@@ -26,17 +29,13 @@ public class ElementSelect extends Expression {
 	 */
 	public ElementSelect(Expression ref, List<Expression> selection, Source source) {
 		super(source);
-		this.idRef0 = ref;
+		this.shadowRef = ref;
 		this.selection = selection;
 	}
 	
-	public Expression getShadowRef() {
-		return this.idRef0;
-	}
-
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ElementSelect");
-		this.idRef0.print(d + this.printDepthStep, rec);
+		this.shadowRef.print(d + this.printDepthStep, rec);
 		for (Expression e : this.selection) {
 			e.print(d + this.printDepthStep, rec);
 		}

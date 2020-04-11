@@ -1,8 +1,7 @@
-package Imm.AST.Expression.Arith;
+package Imm.AST.Expression;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
 

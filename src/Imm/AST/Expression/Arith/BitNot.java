@@ -1,6 +1,7 @@
 package Imm.AST.Expression.Arith;
 
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.UnaryExpression;
 import Util.Source;
 
 /**

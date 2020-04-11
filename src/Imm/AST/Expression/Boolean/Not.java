@@ -1,13 +1,12 @@
 package Imm.AST.Expression.Boolean;
 
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.Arith.UnaryExpression;
 import Util.Source;
 
 /**
  * This class represents a superclass for all Expressions.
  */
-public class Not extends UnaryExpression {
+public class Not extends BoolUnaryExpression {
 	
 			/* --- CONSTRUCTORS --- */
 	/**
