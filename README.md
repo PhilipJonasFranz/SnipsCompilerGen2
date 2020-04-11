@@ -38,7 +38,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  
 ### v.3.0.0-RELEASE: Complex type system, advanced operations
  - Implement increment and decrement
- - Implement Arithmetic Operators
+ - Implement Arithmetic Assignment Operators
  - Implement Heap System
  - Implement Structs
 
