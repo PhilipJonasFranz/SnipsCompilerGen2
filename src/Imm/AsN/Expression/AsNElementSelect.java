@@ -52,68 +52,40 @@ public class AsNElementSelect extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		if (s.type instanceof POINTER) {
-			POINTER p = (POINTER) s.type;
-			
-			if (p.targetType instanceof ARRAY) {
-				loadSumR2(select, s, r, map, st, true);
-				
-				AsNElementSelect.loadPointer(select, s, r, map, st, 1);
-				
-				/* Add sum */
-				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
-			
-				/* Loop through array word size and copy values */
-				subArrayCopy(select, (ARRAY) p.targetType);
+		/* Array is parameter, load from parameter stack */
+		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
+			if (s.type instanceof ARRAY) {
+				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
 			}
 			else {
-				loadSumR2(select, s, r, map, st, false);
-				
-				AsNElementSelect.loadPointer(select, s, r, map, st, 0);
-				
-				/* Add sum */
-				select.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
-			
-				/* Load */
-				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
+			}
+		}
+		else if (map.declarationLoaded(s.idRef.origin)) {
+			/* Data Memory */
+			if (s.type instanceof ARRAY) {
+				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
+			}
+			else {
+				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
 			}
 		}
 		else {
-			/* Array is parameter, load from parameter stack */
-			if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-				if (s.type instanceof ARRAY) {
-					injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
-				}
-				else {
-					injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
-				}
-			}
-			else if (map.declarationLoaded(s.idRef.origin)) {
-				/* Data Memory */
-				if (s.type instanceof ARRAY) {
-					injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
-				}
-				else {
-					injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
-				}
-			}
-			else {
-				if (s.type instanceof ARRAY) {
-					injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
-				}
-				else {
-					injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
-				}
-			}
-			
 			if (s.type instanceof ARRAY) {
-				/* Loop through array word size and copy values */
-				subArrayCopy(select, (ARRAY) s.type);
+				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
 			}
 			else {
-				/* Load */
-				select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+				injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
 			}
+		}
+		
+		if (s.type instanceof ARRAY) {
+			/* Loop through array word size and copy values */
+			subArrayCopy(select, (ARRAY) s.type);
+		}
+		else {
+			/* Load */
+			select.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 		}
 		
 		return select;
@@ -300,7 +272,6 @@ public class AsNElementSelect extends AsNExpression {
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
-		
 		}
 	}
 	

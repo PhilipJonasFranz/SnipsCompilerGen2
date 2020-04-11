@@ -111,10 +111,7 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Declaration d : f.parameters) {
-			d.check(this);
-			this.scopes.peek().addDeclaration(d);
-		}
+		for (Declaration d : f.parameters) d.check(this);
 		
 		head.functions.add(f);
 		this.currentFunction = f;
@@ -222,13 +219,21 @@ public class ContextChecker {
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
-			if (t.isEqual(d.type)) {
-				scopes.peek().addDeclaration(d);
+			
+			if (d.type instanceof POINTER) {
+				POINTER p = (POINTER) d.type;
+				if (!t.getCoreType().isEqual(p.getCoreType())) {
+					throw new CTX_EXCEPTION(d.getSource(), "Pointer type does not match declaration type: " + t.typeString() + " vs. " + p.getCoreType().typeString());
+				}
 			}
 			else {
-				throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
+				if (!t.isEqual(d.type)) {
+					throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
+				}
 			}
 		}
+		
+		scopes.peek().addDeclaration(d);
 		
 		/* No need to set type here, is done while parsing */
 		return null;
@@ -244,6 +249,7 @@ public class ContextChecker {
 		
 		TYPE t = a.value.check(this);
 		
+		/* If target type is a pointer, only the core types have to match */
 		if (targetType instanceof POINTER) {
 			POINTER p = (POINTER) targetType;
 			
@@ -251,6 +257,7 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
 			}
 		}
+		/* If not, the types have to be equal */
 		else if (!t.isEqual(targetType)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
 		}
@@ -409,8 +416,11 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.typeString());
 			}
 			
-			if (b.left() instanceof ElementSelect) {
-				throw new CTX_EXCEPTION(b.getSource(), "Cannot add to element select during pointer arithmetic");
+			b.type = left;
+		}
+		else if (right instanceof POINTER) {
+			if (!(left instanceof INT)) {
+				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + left.typeString());
 			}
 			
 			b.type = left;
@@ -608,7 +618,7 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference.");
 		}
 		
-		aof.type = new POINTER(t);
+		aof.type = new POINTER(t.getCoreType());
 		return aof.type;
 	}
 	
