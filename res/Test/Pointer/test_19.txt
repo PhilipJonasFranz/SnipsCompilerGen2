@@ -1,16 +1,17 @@
 SOURCE
-void set(int [2] [2]* p, int [2] [2] v) {
-	*p = v;
-	return;
+void set(int** p) {
+		/* Set m [0] [1] */
+	*(*p + 1) = 8;
+	
+		/* Set m [1] [0] */
+	**(p + 1) = 7;
 }
 
-int main(int x, int y) {
-	int [2] [2] v = {{1, 2}, {3, 4}};
-	set(&v, {{5, 6}, {9, 8}});
-	return v [x] [y];
+int main() {
+	int [2] [2] m = {{3, 6}, {1, 2}};
+	int*[2] p = {&m[0], &m[1]};
+	set(&p);
+	return m [0] [1] + m [1] [1];
 }
 TESTCASES
-0 0 5
-0 1 6
-1 0 9
-1 1 8
+10

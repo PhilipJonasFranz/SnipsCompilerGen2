@@ -89,9 +89,11 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				}
 				
 				/* Copy array */
-				AsNAssignment.copyArray((ARRAY) lhs.origin.type, id);
+				AsNAssignment.copyArray(((ARRAY) lhs.origin.type).wordsize(), id);
 			}
 		}
+		
+		r.free(0, 1, 2);
 		
 		return id;
 	}

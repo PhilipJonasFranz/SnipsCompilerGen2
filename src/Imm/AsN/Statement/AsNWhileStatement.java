@@ -8,6 +8,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -63,6 +64,8 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			/* While End Label */
 			w.instructions.add(whileEnd);
 		}
+		
+		w.instructions.get(0).comment = new ASMComment("Evaluate condition");
 		
 		return w;
 	}

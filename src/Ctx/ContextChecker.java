@@ -13,6 +13,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
@@ -45,6 +46,8 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Snips.CompilerDriver;
+import Util.Logging.Message;
 
 public class ContextChecker {
 
@@ -79,6 +82,10 @@ public class ContextChecker {
 		return null;
 	}
 	
+	public TYPE checkExpression(Expression e) throws CTX_EXCEPTION {
+		return e.check(this);
+	}
+	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
 		if (f.returnType.wordsize() > 1) {
 			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.returnType.typeString());
@@ -106,10 +113,7 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Declaration d : f.parameters) {
-			d.check(this);
-			this.scopes.peek().addDeclaration(d);
-		}
+		for (Declaration d : f.parameters) d.check(this);
 		
 		head.functions.add(f);
 		this.currentFunction = f;
@@ -217,13 +221,21 @@ public class ContextChecker {
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
-			if (t.isEqual(d.type)) {
-				scopes.peek().addDeclaration(d);
+			
+			if (d.type instanceof POINTER) {
+				POINTER p = (POINTER) d.type;
+				if (!t.getCoreType().isEqual(p.getCoreType())) {
+					throw new CTX_EXCEPTION(d.getSource(), "Pointer type does not match declaration type: " + t.typeString() + " vs. " + p.getCoreType().typeString());
+				}
 			}
 			else {
-				throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
+				if (!t.isEqual(d.type)) {
+					throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
+				}
 			}
 		}
+		
+		scopes.peek().addDeclaration(d);
 		
 		/* No need to set type here, is done while parsing */
 		return null;
@@ -239,9 +251,21 @@ public class ContextChecker {
 		
 		TYPE t = a.value.check(this);
 		
-		if (!t.isEqual(targetType)) {
+		/* If target type is a pointer, only the core types have to match */
+		if (targetType instanceof POINTER) {
+			POINTER p = (POINTER) targetType;
+			
+			if (!p.getCoreType().isEqual(t.getCoreType())) {
+				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
+			}
+		}
+		/* If not, the types have to be equal */
+		else if (!t.isEqual(targetType)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
 		}
+		
+		a.lhsId.expressionType = t;
+				
 		return null;
 	}
 	
@@ -394,8 +418,11 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.typeString());
 			}
 			
-			if (b.left() instanceof ElementSelect) {
-				throw new CTX_EXCEPTION(b.getSource(), "Cannot add to element select during pointer arithmetic");
+			b.type = left;
+		}
+		else if (right instanceof POINTER) {
+			if (!(left instanceof INT)) {
+				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + left.typeString());
 			}
 			
 			b.type = left;
@@ -555,6 +582,11 @@ public class ContextChecker {
 		return new VOID();
 	}
 	
+	/**
+	 * Checks for:<br>
+	 * - Sets the origin of the reference<br>
+	 * - Sets the type of the reference
+	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
 		Declaration d = this.scopes.peek().getField(i.id);
 		if (d != null) {
@@ -589,11 +621,12 @@ public class ContextChecker {
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef)) {
-			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference.");
+		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ElementSelect)) {
+			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or element select.");
 		}
 		
-		aof.type = new POINTER(t);
+		aof.type = new POINTER(t.getCoreType());
+		
 		return aof.type;
 	}
 	
@@ -604,19 +637,22 @@ public class ContextChecker {
 	public TYPE checkDeref(Deref deref) throws CTX_EXCEPTION {
 		TYPE t = deref.expression.check(this);
 		
-		if (t instanceof POINTER) {
+		/* Dereference pointer or primitive type */
+		if (t instanceof PRIMITIVE) {
+			/* Set to core type */
+			deref.type = t.getCoreType();
+		}
+		else if (t instanceof POINTER) {
 			POINTER p = (POINTER) t;
-			
-			if (deref.expression instanceof IDRef || deref.expression instanceof ElementSelect) {
-				deref.type = p.targetType;
-			}
-			else {
-				/* Pointer arithmetic, use core type */
-				deref.type = p.coreType;
-			}
+			deref.type = p.targetType;
 		}
 		else {
-			throw new CTX_EXCEPTION(deref.getSource(), "Cannot dereference non pointer, actual " + t.typeString());
+			throw new CTX_EXCEPTION(deref.expression.getSource(), "Cannot dereference type " + t.typeString());
+		}
+		
+		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
+		if (t instanceof PRIMITIVE) {
+			if (!CompilerDriver.disableWarnings) new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN);
 		}
 		
 		return deref.type;

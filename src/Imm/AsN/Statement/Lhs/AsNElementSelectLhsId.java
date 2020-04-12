@@ -38,7 +38,7 @@ public class AsNElementSelectLhsId extends AsNLhsId {
 				AsNElementSelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			AsNAssignment.copyArray((ARRAY) select.type, id);
+			AsNAssignment.copyArray(((ARRAY) select.type).wordsize(), id);
 		}
 		/* Assign single array cell */
 		else {

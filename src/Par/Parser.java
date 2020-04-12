@@ -423,8 +423,8 @@ public class Parser {
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
 		if (current.type == TokenType.MUL) {
-			Source source = accept().getSource();
-			return new PointerLhsId(new Deref(this.parseElementSelect(), source), source);
+			Source source = current.getSource();
+			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
 			Expression target = this.parseElementSelect();
@@ -766,9 +766,11 @@ public class Parser {
 	}
 
 	protected TYPE parseType() throws PARSE_EXCEPTION {
-		TYPE type = null;
-		if (current.type.group == TokenGroup.TYPE) {
-			type = PRIMITIVE.fromToken(accept());
+		TYPE type = PRIMITIVE.fromToken(accept(TokenGroup.TYPE));
+		
+		while (current.type == TokenType.MUL) {
+			accept();
+			type = new POINTER(type);
 		}
 		
 		Stack<Expression> dimensions = new Stack();
@@ -781,11 +783,6 @@ public class Parser {
 		
 		while (!dimensions.isEmpty()) {
 			type = new ARRAY(type, dimensions.pop());
-		}
-		
-		while (current.type == TokenType.MUL) {
-			accept();
-			type = new POINTER(type);
 		}
 		
 		return type;

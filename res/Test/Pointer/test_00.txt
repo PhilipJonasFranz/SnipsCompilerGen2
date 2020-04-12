@@ -1,13 +1,14 @@
 SOURCE
-int get(int [3]* p, int i) {
-	return *(p + i);
+int get(int* p, int x, int y) {
+	return *(p + (x << 1) + y);
 }
 
-int main(int i) {
-	int [3] v = {3, 6, 7};
-	return get(&v, i);
+int main(int x, int y) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	return get(&v, x, y);
 }
 TESTCASES
-0 3
-1 6
-2 7
+0 0 1
+0 1 2
+1 0 3
+1 1 4

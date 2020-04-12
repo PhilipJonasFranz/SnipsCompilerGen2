@@ -24,7 +24,7 @@ public class ARRAY extends COMPOSIT {
 			this.coreType = elementType;
 		}
 		else {
-			this.coreType = ((ARRAY) elementType).coreType;
+			this.coreType = elementType.getCoreType();
 		}
 		this.length0 = length;
 		this.wordSize = elementType.wordsize();
@@ -36,7 +36,7 @@ public class ARRAY extends COMPOSIT {
 			this.coreType = elementType;
 		}
 		else {
-			this.coreType = ((ARRAY) elementType).coreType;
+			this.coreType = elementType.getCoreType();
 		}
 		this.length = length;
 		this.wordSize = elementType.wordsize() * length;
@@ -63,7 +63,7 @@ public class ARRAY extends COMPOSIT {
 	public String typeString() {
 		String s = this.coreType.typeString().split(":") [0] + "[" + this.getLength() + "]";
 		TYPE t = this.elementType;
-		while (!(t instanceof PRIMITIVE)) {
+		while (t instanceof ARRAY) {
 			s += "[" + ((ARRAY) t).getLength() + "]";
 			t = ((ARRAY) t).elementType;
 		}
@@ -85,6 +85,7 @@ public class ARRAY extends COMPOSIT {
 			this.length = ((INT) ((Atom) this.length0).type).value;
 			this.wordSize = this.elementType.wordsize() * this.length;
 		}
+		
 		return this.wordSize;
 	}
 

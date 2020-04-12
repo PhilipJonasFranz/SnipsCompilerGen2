@@ -1,20 +1,12 @@
 SOURCE
-int get(int [3] [3]* p, int [3] [3]* q, int x, int y) {
-	return *(p + (3 * x) + y) + *(q [x] [y]);
+int get(int* p, int x) {
+	return *(p + x) * *(p + 2 + x);
 }
 
-int main(int x, int y) {
-	int [3] [3] v = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-	int [3] [3] w = {{9, 8, 7}, {6, 5, 4}, {3, 2, 1}};
-	return get(&v, &w, x, y);
+int main(int x) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	return get(&v, x);
 }
 TESTCASES
-0 0 10
-0 1 10
-0 2 10
-1 0 10
-1 1 10
-1 2 10
-2 0 10
-2 1 10
-2 2 10
+0 3
+1 8

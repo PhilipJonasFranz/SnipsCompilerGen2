@@ -11,6 +11,7 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -88,7 +89,9 @@ public class AsNFunctionCall extends AsNStatement {
 		
 		/* Branch to function */
 		ASMLabel functionLabel = (ASMLabel) f.castedNode.instructions.get(0);
-		call.instructions.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel)));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
+		branch.comment = new ASMComment("Call " + f.functionName);
+		call.instructions.add(branch);
 		
 		/* Shrink Stack if parameters were passed through it */
 		if (stackMapping > 0) {
@@ -101,6 +104,8 @@ public class AsNFunctionCall extends AsNStatement {
 			
 			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
 		}
+		
+		if (!f.parameters.isEmpty()) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}
 	
 }
