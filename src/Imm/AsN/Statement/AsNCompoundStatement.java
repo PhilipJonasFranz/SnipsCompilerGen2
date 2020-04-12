@@ -216,8 +216,13 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (e instanceof AddressOf) {
 			AddressOf aof = (AddressOf) e;
-			if (((IDRef) aof.expression).origin.equals(dec)) return true;
-			else return false;
+			if (aof.expression instanceof IDRef) {
+				if (((IDRef) aof.expression).origin.equals(dec)) return true;
+			}
+			else {
+				if (((ElementSelect) aof.expression).idRef.origin.equals(dec)) return true;
+			}
+			return false;
 		}
 		else if (e instanceof IDRef || e instanceof Atom) {
 			return false;
