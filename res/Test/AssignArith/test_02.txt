@@ -1,0 +1,9 @@
+SOURCE
+int main(int b) {
+	int* p = &b;
+	*p += 5;
+}
+TESTCASES
+0 5
+4 9
+-2 3

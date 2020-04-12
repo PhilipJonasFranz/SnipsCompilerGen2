@@ -17,10 +17,12 @@ import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Decrement;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.Increment;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.Add;
@@ -44,6 +46,7 @@ import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.Comment;
@@ -415,10 +418,63 @@ public class Parser {
 	
 	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
 		LhsId target = this.parseLhsIdentifer();
-		accept(TokenType.LET);
+		ASSIGN_ARITH arith = this.parseAssignOperator();
 		Expression value = this.parseExpression();
 		if (acceptSemicolon) accept(TokenType.SEMICOLON);
-		return new Assignment(target, value, target.getSource());
+		return new Assignment(arith, target, value, target.getSource());
+	}
+	
+	protected ASSIGN_ARITH parseAssignOperator() throws PARSE_EXCEPTION {
+		if (current.type == TokenType.LET) {
+			accept();
+			return ASSIGN_ARITH.NONE;
+		}
+		else if (current.type == TokenType.ADD) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.ADD_ASSIGN;
+		}
+		else if (current.type == TokenType.SUB) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.SUB_ASSIGN;
+		}
+		else if (current.type == TokenType.MUL) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.MUL_ASSIGN;
+		}
+		else if (current.type == TokenType.DIV) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.DIV_ASSIGN;
+		}
+		else if (current.type == TokenType.ADDROF) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.AND_ASSIGN;
+		}
+		else if (current.type == TokenType.BITOR) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.ORR_ASSIGN;
+		}
+		else if (current.type == TokenType.XOR) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.XOR_ASSIGN;
+		}
+		else if (current.type == TokenType.LSL) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.LSL_ASSIGN;
+		}
+		else if (current.type == TokenType.LSR) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.LSR_ASSIGN;
+		}
+		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LET);
 	}
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
@@ -710,7 +766,7 @@ public class Parser {
 	}
 	
 	protected Expression parseElementSelect() throws PARSE_EXCEPTION {
-		Expression ref = this.parseAtom();
+		Expression ref = this.parseIncrDecr();
 		
 		if (current.type == TokenType.LBRACKET) {
 			List<Expression> selection = new ArrayList();
@@ -723,6 +779,20 @@ public class Parser {
 			return new ElementSelect(ref, selection, ref.getSource());
 		}
 		else return ref;
+	}
+	
+	protected Expression parseIncrDecr() throws PARSE_EXCEPTION {
+		Expression ref = this.parseAtom();
+		
+		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+			Source source = accept().getSource();
+			if (current.type == TokenType.INCR) {
+				ref = new Increment(ref, source);
+			}
+			else ref = new Decrement(ref, source);
+		}
+		
+		return ref;
 	}
 	
 	protected Expression parseAtom() throws PARSE_EXCEPTION {

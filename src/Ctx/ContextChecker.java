@@ -39,6 +39,7 @@ import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -251,6 +252,8 @@ public class ContextChecker {
 		
 		TYPE t = a.value.check(this);
 		
+		TYPE ctype = t;
+		
 		/* If target type is a pointer, only the core types have to match */
 		if (targetType instanceof POINTER) {
 			POINTER p = (POINTER) targetType;
@@ -258,14 +261,32 @@ public class ContextChecker {
 			if (!p.getCoreType().isEqual(t.getCoreType())) {
 				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
 			}
+			
+			ctype = t.getCoreType();
 		}
 		/* If not, the types have to be equal */
 		else if (!t.isEqual(targetType)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
 		}
 		
+		if (a.assignArith != ASSIGN_ARITH.NONE) {
+			if (!(t instanceof PRIMITIVE)) {
+				throw new CTX_EXCEPTION(a.getSource(), "Assign arith operation is only applicable for primitive types");
+			}
+			
+			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.XOR_ASSIGN) {
+				if (!(ctype instanceof BOOL)) {
+					throw new CTX_EXCEPTION(a.getSource(), "Expression type " + t.typeString() + " is not applicable for boolean assign operator");
+				}
+			}
+			else if (a.assignArith != ASSIGN_ARITH.NONE) {
+				if (!(ctype instanceof INT)) {
+					throw new CTX_EXCEPTION(a.getSource(), "Expression type " + t.typeString() + " is not applicable for assign operator");
+				}
+			}
+		}
+		
 		a.lhsId.expressionType = t;
-				
 		return null;
 	}
 	

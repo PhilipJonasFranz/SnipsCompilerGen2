@@ -186,19 +186,22 @@ public class ASMOptimizer {
 						
 						if (body.instructions.get(i) instanceof ASMBinaryData && !(body.instructions.get(i) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) body.instructions.get(i);
+							boolean remove = false;
 							if (data.op0 != null && data.op0.reg == RegOperand.toReg(a)) {
 								/* Replace */
 								data.op0 = target;
 								OPT_DONE = true;
-								
-								body.instructions.remove(i - 1);
-								i--;
+								remove = true;
 							}
-							else if (data.op1 != null && data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == RegOperand.toReg(a)) {
+							
+							if (data.op1 != null && data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == RegOperand.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
 								OPT_DONE = true;
-								
+								remove = true;
+							}
+							
+							if (remove) {
 								body.instructions.remove(i - 1);
 								i--;
 							}
@@ -395,11 +398,15 @@ public class ASMOptimizer {
 						}
 						else if (body.instructions.get(a) instanceof ASMPopStack) {
 							ASMPopStack p = (ASMPopStack) body.instructions.get(a);
+							boolean end = false;
 							for (RegOperand r : p.operands) {
 								if (r.reg == target) {
+									end = true;
 									break;
 								}
 							}
+							
+							if (end) break;
 						}
 						else if (body.instructions.get(a) instanceof ASMLdrStack) {
 							ASMLdrStack p = (ASMLdrStack) body.instructions.get(a);

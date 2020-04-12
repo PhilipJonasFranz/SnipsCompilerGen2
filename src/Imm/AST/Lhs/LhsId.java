@@ -3,6 +3,7 @@ package Imm.AST.Lhs;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -17,6 +18,8 @@ public abstract class LhsId extends SyntaxElement {
 	public Declaration origin;
 	
 	public TYPE expressionType;
+	
+	public Assignment assign;
 	
 	
 			/* --- CONSTRUCTORS --- */

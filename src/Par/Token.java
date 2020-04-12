@@ -86,6 +86,8 @@ public class Token {
 		MUL("*"),
 		DIV("/"),
 		MOD("%"),
+		INCR("++"),
+		DECR("--"),
 		
 		/* Logic Operators */
 		OR("||"),

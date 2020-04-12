@@ -103,7 +103,7 @@ public class RegSet {
 	
 	/** Check wether given declaration is loaded in any register. */
 	public boolean declarationLoaded(Declaration dec) {
-		for (int i = 0; i < regs.length; i++) {
+		for (int i = 3; i < regs.length; i++) {
 			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return true;
 		}
 		return false;
@@ -113,7 +113,7 @@ public class RegSet {
 	 * Get the register number where given declaration is loaded. Returns -1 if the declaration is not loaded. 
 	 */
 	public int declarationRegLocation(Declaration dec) {
-		for (int i = 0; i < regs.length; i++) {
+		for (int i = 3; i < regs.length; i++) {
 			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return i;
 		}
 		return -1;

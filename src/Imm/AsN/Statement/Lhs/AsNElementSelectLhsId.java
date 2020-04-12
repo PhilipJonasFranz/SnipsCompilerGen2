@@ -1,9 +1,13 @@
 package Imm.AsN.Statement.Lhs;
 
+import java.util.List;
+
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -11,6 +15,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Lhs.ElementSelectLhsId;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNElementSelect;
 import Imm.AsN.Expression.AsNElementSelect.SELECT_TYPE;
 import Imm.AsN.Statement.AsNAssignment;
@@ -55,8 +60,22 @@ public class AsNElementSelectLhsId extends AsNLhsId {
 			else 
 				AsNElementSelect.injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, id, select, r, map, st);
 			
-			/* Pop the value off the stack and store it at the target location */
-			id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			/* Create assign injector */
+			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
+				/* Pop the value off the stack */
+				id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R2)));
+				
+				id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+				
+				/* Create assign injector */
+				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 1, 2, true, true);
+				id.instructions.addAll(inj);
+			}
+			else 
+				/* Pop the value off the stack */
+				id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			
+			/* Store at target location */
 			id.instructions.add(new ASMStr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
 		}
 	

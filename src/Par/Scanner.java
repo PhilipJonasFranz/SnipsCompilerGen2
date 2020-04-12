@@ -164,15 +164,29 @@ public class Scanner {
 					this.checkState(i, a);
 				}
 			}
-			else if (this.buffer.equals("+")) {
-				tokens.add(new Token(TokenType.ADD, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-				this.buffer = this.buffer.substring(1);
-				this.checkState(i, a);
+			else if (this.buffer.startsWith("+")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("++")) {
+					tokens.add(new Token(TokenType.INCR, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.ADD, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
-			else if (this.buffer.equals("-")) {
-				tokens.add(new Token(TokenType.SUB, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-				this.buffer = this.buffer.substring(1);
-				this.checkState(i, a);
+			else if (this.buffer.startsWith("-")) {
+				if (this.buffer.length() == 1)return false;
+				if (this.buffer.equals("--")) {
+					tokens.add(new Token(TokenType.DECR, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.SUB, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
+					this.buffer = this.buffer.substring(1);
+					this.checkState(i, a);
+				}
 			}
 			else if (this.buffer.equals("^")) {
 				tokens.add(new Token(TokenType.XOR, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));

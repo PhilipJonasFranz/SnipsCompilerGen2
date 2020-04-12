@@ -1,0 +1,9 @@
+SOURCE
+int main(int b) {
+	for (int i = 0; i < 10; i += 1) b += 1;
+	return b;
+}
+TESTCASES
+0 10
+2 12
+-3 7
