@@ -423,8 +423,8 @@ public class Parser {
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
 		if (current.type == TokenType.MUL) {
-			Source source = accept().getSource();
-			return new PointerLhsId(new Deref(this.parseElementSelect(), source), source);
+			Source source = current.getSource();
+			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
 			Expression target = this.parseElementSelect();

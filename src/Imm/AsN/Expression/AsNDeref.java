@@ -6,6 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Processing.Arith.ASMLsl;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -24,10 +25,14 @@ public class AsNDeref extends AsNExpression {
 		ref.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
 		
 		/* Convert to bytes */
-		ref.instructions.add(new ASMLsl(new RegOperand(target), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+		ASMLsl lsl = new ASMLsl(new RegOperand(target), new RegOperand(REGISTER.R0), new ImmOperand(2));
+		lsl.comment = new ASMComment("Convert to bytes");
+		ref.instructions.add(lsl);
 		
 		/* Load from memory */
-		ref.instructions.add(new ASMLdr(new RegOperand(target), new RegOperand(target)));
+		ASMLdr load = new ASMLdr(new RegOperand(target), new RegOperand(target));
+		load.comment = new ASMComment("Load from address");
+		ref.instructions.add(load);
 		
 		return ref;
 	}

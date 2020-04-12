@@ -582,6 +582,11 @@ public class ContextChecker {
 		return new VOID();
 	}
 	
+	/**
+	 * Checks for:<br>
+	 * - Sets the origin of the reference<br>
+	 * - Sets the type of the reference
+	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
 		Declaration d = this.scopes.peek().getField(i.id);
 		if (d != null) {
@@ -616,11 +621,12 @@ public class ContextChecker {
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef)) {
-			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference.");
+		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ElementSelect)) {
+			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or element select.");
 		}
 		
 		aof.type = new POINTER(t.getCoreType());
+		
 		return aof.type;
 	}
 	
@@ -632,9 +638,13 @@ public class ContextChecker {
 		TYPE t = deref.expression.check(this);
 		
 		/* Dereference pointer or primitive type */
-		if (t instanceof POINTER || t instanceof PRIMITIVE) {
+		if (t instanceof PRIMITIVE) {
 			/* Set to core type */
 			deref.type = t.getCoreType();
+		}
+		else if (t instanceof POINTER) {
+			POINTER p = (POINTER) t;
+			deref.type = p.targetType;
 		}
 		else {
 			throw new CTX_EXCEPTION(deref.expression.getSource(), "Cannot dereference type " + t.typeString());

@@ -4,9 +4,11 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
 import Util.Source;
+import lombok.Getter;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -14,13 +16,16 @@ import Util.Source;
 public class PointerLhsId extends LhsId {
 
 			/* --- FIELDS --- */
+	@Getter
+	private Expression shadowDeref;
+	
 	public Deref deref;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public PointerLhsId(Deref deref, Source source) {
+	public PointerLhsId(Expression deref, Source source) {
 		super(source);
-		this.deref = deref;
+		this.shadowDeref = deref;
 	}
 	
 	
@@ -31,6 +36,11 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+		if (!(this.shadowDeref instanceof Deref)) {
+			throw new CTX_EXCEPTION(this.getSource(), "Left hand identifer is not a dereference");
+		}
+		else this.deref = (Deref) this.shadowDeref;
+		
 		TYPE t = ctx.checkExpression(deref.expression);
 		return t;
 	}

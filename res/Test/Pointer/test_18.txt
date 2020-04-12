@@ -1,8 +1,11 @@
-DESCRIPTION
-This test verifys the functionality of arrays containing pointers.
 SOURCE
+void set(int** p) {
+	*(*p + 1) = 8;
+}
+
 int get(int** p, int off) {
-	return *(*p + off) - *(*(p + 1) + off);
+	set(p);
+	return *(*p + off) + *(*(p + 1) + off);
 }
 
 int main(int off) {
@@ -12,7 +15,7 @@ int main(int off) {
 	return get(&p, off);
 }
 TESTCASES
-0 4
-1 1
-2 5
-3 -2
+0 6
+1 10
+2 13
+3 4

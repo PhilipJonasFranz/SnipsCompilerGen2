@@ -33,6 +33,7 @@ public class AsNAssignment extends AsNStatement {
 		
 		/* Compute value */
 		assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
+		assign.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		/* Store value at location specified by lhs */
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());

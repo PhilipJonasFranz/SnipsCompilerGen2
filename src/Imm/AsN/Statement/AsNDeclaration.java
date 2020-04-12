@@ -7,6 +7,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
@@ -21,6 +22,7 @@ public class AsNDeclaration extends AsNStatement {
 		
 		/* Load value, either in R0 or on the stack */
 		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
+		dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
 		if (free != -1 && d.type.wordsize() == 1) {
