@@ -6,6 +6,7 @@ import Imm.ASM.Util.Operands.RegOperand;
 
 public class ASMStrStack extends ASMStackOp {
 
+			/* --- CONSTRUCTORS --- */
 	public ASMStrStack(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1) {
 		super(memOp, target, op0, op1);
 	}
@@ -18,7 +19,6 @@ public class ASMStrStack extends ASMStackOp {
 	/**
 	 * Calls build of ASMMemOp with class as parameter.
 	 */
-	@Override
 	public String build() {
 		return super.build("str");
 	}

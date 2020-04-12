@@ -23,7 +23,8 @@ public class SimpleLhsId extends LhsId {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		this.ref.print(d, rec);
+		System.out.println(this.pad(d) + "SimpleLhsId");
+		this.ref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

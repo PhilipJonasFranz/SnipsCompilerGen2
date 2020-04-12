@@ -1,0 +1,16 @@
+SOURCE
+void set(int* p, int v, int x, int y) {
+	*(p + (2 * x) + y) = v;
+	return;
+}
+
+int main(int x, int y) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	set(&v, 5, x, y);
+	return v [1] [y];
+}
+TESTCASES
+0 0 3
+0 1 4
+1 0 5
+1 1 5

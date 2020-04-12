@@ -20,7 +20,6 @@ public class ASMLdrStack extends ASMStackOp {
 	/**
 	 * Calls build of ASMMemOp with class as parameter.
 	 */
-	@Override
 	public String build() {
 		return super.build("ldr");
 	}

@@ -83,7 +83,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		/* Add body, dont use addBody() because of custom scope handling */
 		for (Statement s : a.body) 
-			f.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+			f.loadStatement(a, s, r, map, st);
 		
 		/* Add jump for continue statements to use as target */
 		f.instructions.add(continueJump);

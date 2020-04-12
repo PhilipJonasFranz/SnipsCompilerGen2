@@ -1,4 +1,4 @@
-package REv.Modules.Tools;
+package Util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.List;
 
 public class XMLParser {
 
+			/* --- FIELDS --- */
 	/**
 	 * The root of the XML-file data tree.
 	 */
@@ -17,9 +18,10 @@ public class XMLParser {
 	List<String> file;
 	
 	
-	//NESTED
+			/* --- NESTED --- */
 	public static class XMLNode {
 		
+				/* --- FIELDS --- */
 		/**
 		 * The ID of this node.
 		 */
@@ -36,7 +38,7 @@ public class XMLParser {
 		public List<XMLNode> children = new ArrayList();
 		
 		
-		//CONSTRUCTORS
+				/* --- CONSTRUCTORS --- */
 		public XMLNode(List<String> in) {
 			this.parse(in);
 		}
@@ -51,7 +53,7 @@ public class XMLParser {
 		}
 		
 		
-		//METHODS
+				/* --- METHODS --- */
 		/**
 		 * Creates recursiveley the data tree structure of the XML file.
 		 */
@@ -154,7 +156,7 @@ public class XMLParser {
 	}
 	
 	
-	//CONSTRUCTORS
+			/* --- CONSTRUCTORS --- */
 	public XMLParser(File f) {
 		this.file = Util.readFile(f);
 		this.root = new XMLNode(this.file);

@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 
 public class Util {
 
+			/* --- METHODS --- */
+	/** Reads the contents of given file and returns a list containing each line as a string. */
 	public static List<String> readFile(File file) {
 		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {
 			return s.collect(Collectors.toList());
@@ -19,6 +21,7 @@ public class Util {
 		}
 	}
 
+	/** Writes in given file path, each string in a seperate file. */
 	public static void writeInFile(List<String> content, String filePath) {
 		try (FileWriter w = new FileWriter(filePath)) {
 			for (String s : content) {

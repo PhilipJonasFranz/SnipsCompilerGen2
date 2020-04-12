@@ -14,6 +14,7 @@ public class ElementSelectLhsId extends LhsId {
 			/* --- FIELDS --- */
 	public ElementSelect selection;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public ElementSelectLhsId(ElementSelect selection, Source source) {
 		super(source);
@@ -23,7 +24,8 @@ public class ElementSelectLhsId extends LhsId {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		this.selection.print(d, true);
+		System.out.println(this.pad(d) + "ElementSelectLhsId");
+		this.selection.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

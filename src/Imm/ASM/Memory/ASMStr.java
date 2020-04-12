@@ -18,7 +18,6 @@ public class ASMStr extends ASMMemOp {
 	/**
 	 * Calls build of ASMMemOp with class as parameter.
 	 */
-	@Override
 	public String build() {
 		return super.build("str");
 	}

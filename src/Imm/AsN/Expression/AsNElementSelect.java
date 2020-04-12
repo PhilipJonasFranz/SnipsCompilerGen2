@@ -1,14 +1,10 @@
 package Imm.AsN.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
@@ -36,6 +32,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNElementSelect extends AsNExpression {
@@ -84,7 +81,7 @@ public class AsNElementSelect extends AsNExpression {
 		
 		if (s.type instanceof ARRAY) {
 			/* Loop through array word size and copy values */
-			select.instructions.addAll(subArrayCopy(s));
+			subArrayCopy(select, (ARRAY) s.type);
 		}
 		else {
 			/* Load */
@@ -94,34 +91,36 @@ public class AsNElementSelect extends AsNExpression {
 		return select;
 	}
 	
-	public static List<ASMInstruction> loadSumR2(ElementSelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
-		List<ASMInstruction> load = new ArrayList();
-		
+	public static void loadSumR2(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
 		/* Sum */
 		if (s.selection.size() > 1 || block) {
 			ASMMov sum = new ASMMov(new RegOperand(REGISTER.R2), new ImmOperand(0));
 			sum.comment = new ASMComment("Calculate offset of sub structure");
-			load.add(sum);
+			node.instructions.add(sum);
 			
-			ARRAY superType = (ARRAY) s.idRef.origin.type;
+			ARRAY superType = null;
+			if (s.idRef.type instanceof POINTER) {
+				superType = (ARRAY) ((POINTER) s.idRef.type).targetType;
+			}
+			else superType = (ARRAY) s.idRef.origin.type;
 			
 			/* Handle selections differently, since last selection does not result in primitive. 
 			 * 		This algorithm is a custom variation of the loadSumR2 method. */
 			for (int i = 0; i < s.selection.size(); i++) {
-				load.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
+				node.instructions.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
 				
 				if (superType.elementType instanceof PRIMITIVE) {
-					load.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+					node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 				}
 				else {
 					int bytes = superType.elementType.wordsize() * 4;
 					
-					load.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
-					load.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+					node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new ImmOperand(bytes)));
+					node.instructions.add(new ASMMult(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 				}
 				
 				/* Add to sum */
-				load.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 				
 				/* Next element in chain */
 				if (!(superType.elementType instanceof ARRAY)) break;
@@ -130,21 +129,18 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else {
 			/* Load Index and multiply with 4 to convert index to byte offset */
-			load.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
-			load.add(new ASMLsl(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+			node.instructions.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
+			node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 		}
 		
-		return load;
 	}
 	
 	/**
 	 * Copy memory location the size of the word size of the type of s, assumes that the start
 	 * of the sub structure is located in R1.
 	 */
-	public static List<ASMInstruction> subArrayCopy(ElementSelect s) {
-		List<ASMInstruction> copy = new ArrayList();
+	public static void subArrayCopy(AsNNode node, ARRAY arr) {
 		
-		ARRAY arr = (ARRAY) s.type;
 		/* Do it sequentially for 8 or less words to copy */
 		if (arr.wordsize() <= 8) {
 			int offset = (arr.wordsize() - 1) * 4;
@@ -152,49 +148,47 @@ public class AsNElementSelect extends AsNExpression {
 			boolean r0 = false;
 			for (int a = 0; a < arr.wordsize(); a++) {
 				if (!r0) {
-					copy.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 				    r0 = true;
 				}
 				else {
-					copy.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
-					copy.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 					r0 = false;
 				}
 				offset -= 4;
 			}
 			
 			if (r0) {
-				copy.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			}
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			/* Move counter in R2 */
-			copy.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
-			copy.add(loopStart);
+			node.instructions.add(loopStart);
 			
 			ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
 			
 			/* Check if whole sub array was loaded */
-			copy.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			node.instructions.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 			
 			/* Branch to loop end */
-			copy.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
 			
 			/* Load value and push it on the stack */
-			copy.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
-			copy.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			node.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+			node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			
 			/* Branch to loop start */
-			copy.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
 			
-			copy.add(loopEnd);
+			node.instructions.add(loopEnd);
 		}
-		
-		return copy;
 	}
 	
 	/**
@@ -213,7 +207,7 @@ public class AsNElementSelect extends AsNExpression {
 		
 		if (selectType == SELECT_TYPE.LOCAL_SINGLE) {
 			/* Load offset of target in array */
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			loadSumR2(node, s, r, map, st, false);
 			
 			/* Load offset of array in memory */
 			node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
@@ -223,7 +217,7 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else if (selectType == SELECT_TYPE.LOCAL_SUB) {
 			/* Load block offset */
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			/* Load the start of the structure into R1 */
 			ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset));
@@ -237,8 +231,8 @@ public class AsNElementSelect extends AsNExpression {
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SINGLE) {
 			/* Load offset of target in array */
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
-				
+			loadSumR2(node, s, r, map, st, false);
+			
 			/* Get offset of parameter relative to fp */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 			
@@ -246,7 +240,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SUB) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
 			start.comment = new ASMComment("Start of structure in stack");
@@ -256,7 +250,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.GLOBAL_SINGLE) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, false));
+			loadSumR2(node, s, r, map, st, false);
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 			
@@ -268,7 +262,7 @@ public class AsNElementSelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
 		}
 		else if (selectType == SELECT_TYPE.GLOBAL_SUB) {
-			node.instructions.addAll(loadSumR2(s, r, map, st, true));
+			loadSumR2(node, s, r, map, st, true);
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 		
@@ -278,8 +272,12 @@ public class AsNElementSelect extends AsNExpression {
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
-		
 		}
+	}
+	
+	public static void loadPointer(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
+		node.instructions.addAll(AsNIdRef.cast(s.idRef, r, map, st, target).getInstructions());
+		node.instructions.add(new ASMLsl(new RegOperand(target), new RegOperand(target), new ImmOperand(2)));
 	}
 	
 }

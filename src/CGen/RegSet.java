@@ -4,55 +4,73 @@ import Imm.AST.Statement.Declaration;
 
 public class RegSet {
 
+			/* --- NESTED --- */
+	/** Used to identify the state of a register */
 	public enum STATUS {
 		USED, FREE, RESERVED;
 	}
 	
-	public class RegState {
+	/**
+	 * A reg capsuled a status field, and a declaration statement. When a reg is free,
+	 * the declaration is set to null. If its used, the declaration will contain the variable
+	 * currently stored in the register. If the reg is reserved, it will never contain anything.
+	 */
+	public class Reg {
 		
+				/* --- FIELDS --- */
+		/** The status of the Register */
 		public STATUS status = STATUS.FREE;
 		
+		/** The declaration that is currently in the register. */
 		public Declaration declaration;
 		
-		public RegState() {
-			
-		}
-		
+				/* --- METHODS --- */
+		/** Free the register, set the declaration to null and set the status to free */
 		public void free() {
 			this.declaration = null;
 			this.status = STATUS.FREE;
 		}
 		
+		/** Set the declaration of the reg to the given one and set the status to used. */
 		public void setDeclaration(Declaration value) {
 			this.declaration = value;
 			this.status = STATUS.USED;
 		}
 		
+		/** Print out the register status and contents. */
 		public void print() {
 			System.out.println("    Status: " + this.status.toString());
 			if (this.status == STATUS.USED) 
 				this.declaration.print(4, true);
 		}
 		
+		/** Return wether the reg status is free. */
 		public boolean isFree() {
 			return this.status == STATUS.FREE;
 		}
 		
 	}
 	
-	private RegState [] regs = new RegState [16]; 
 	
+			/* --- FIELDS --- */
+	/** The register array. */
+	private Reg [] regs = new Reg [16]; 
+	
+	
+			/* --- CONSTRUCTORS --- */
+	/** Create a new RegSet object, initialize the regs, set regs 11-15 to reserved. */
 	public RegSet() {
-		for (int i = 0; i < regs.length; i++) regs [i] = new RegState();
+		for (int i = 0; i < regs.length; i++) regs [i] = new Reg();
 		for (int i = 11; i < regs.length; i++) regs [i].status = STATUS.RESERVED;
 	}
 	
-	public RegState getReg(int num) {
+	/** Returns the {@link num} reg. */
+	public Reg getReg(int num) {
 		return this.regs [num];
 	}
 	
 	/**
-	 * Find the first register that has the status free.
+	 * Find the lowest register number that has the status free.
 	 * @return The number of this register.
 	 */
 	public int findFree() {
@@ -72,6 +90,9 @@ public class RegSet {
 		this.regs [to].declaration = this.regs [from].declaration;
 	}
 	
+	/** 
+	 * Prints out the reg set and all of its registers via Reg.print().
+	 */
 	public void print() {
 		System.out.println("RegSet State:");
 		for (int i = 0; i < regs.length; i++) {
@@ -80,6 +101,7 @@ public class RegSet {
 		}
 	}
 	
+	/** Check wether given declaration is loaded in any register. */
 	public boolean declarationLoaded(Declaration dec) {
 		for (int i = 0; i < regs.length; i++) {
 			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return true;
@@ -87,6 +109,9 @@ public class RegSet {
 		return false;
 	}
 	
+	/** 
+	 * Get the register number where given declaration is loaded. Returns -1 if the declaration is not loaded. 
+	 */
 	public int declarationRegLocation(Declaration dec) {
 		for (int i = 0; i < regs.length; i++) {
 			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return i;
@@ -94,6 +119,7 @@ public class RegSet {
 		return -1;
 	}
 	
+	/** Free all given regs */
 	public void free(int...regs) {
 		for (int r : regs) this.regs [r].free();
 	}

@@ -1,0 +1,19 @@
+SOURCE
+int get(int* p, int x, int y) {
+	return *(p + (3 * x) + y);
+}
+
+int main(int x, int y) {
+	int [3] [3] v = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+	return get(&v, x, y);
+}
+TESTCASES
+0 0 1
+0 1 2
+0 2 3
+1 0 4
+1 1 5
+1 2 6
+2 0 7
+2 1 8
+2 2 9

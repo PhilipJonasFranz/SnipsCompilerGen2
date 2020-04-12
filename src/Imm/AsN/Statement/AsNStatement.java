@@ -10,6 +10,7 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
@@ -23,6 +24,9 @@ public abstract class AsNStatement extends AsNNode {
 		
 		if (s instanceof CompoundStatement) {
 			node = AsNCompoundStatement.cast((CompoundStatement) s, r, map, st);
+		}
+		else if (s instanceof FunctionCall) {
+			node = AsNFunctionCall.cast((FunctionCall) s, r, map, st); 
 		}
 		else if (s instanceof ReturnStatement) {
 			node = AsNReturn.cast((ReturnStatement) s, r, map, st); 

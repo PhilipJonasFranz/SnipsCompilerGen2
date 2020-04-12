@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -21,7 +20,9 @@ import Imm.AsN.AsNBody;
 import Par.Parser;
 import Par.Scanner;
 import Util.Logging.Message;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class CompilerDriver {
 
 	/* The Input File */
@@ -45,8 +46,9 @@ public class CompilerDriver {
 		useTerminalColors = true, 
 		silenced = true,
 		imm = false,
-		enableComments = true;
-	
+		enableComments = true,
+		disableWarnings = false;
+			
 	public static String outputPath;
 	
 	public static boolean printErrors = false;
@@ -72,8 +74,12 @@ public class CompilerDriver {
 		driver = scd;
 		
 		if (outputPath == null) {
-			System.out.println(new Message("No output file specified! See -help for argument information.", Message.Type.FAIL).getMessage());
-			System.exit(0);
+			outputPath = args [0];
+			if (outputPath.contains("\\")) {
+				while (!outputPath.endsWith("\\")) outputPath = outputPath.substring(0, outputPath.length() - 1);
+			}
+			
+			outputPath += "out.s";
 		}
 		
 		/* Errors occurred due to faulty parameters, abort */
@@ -95,10 +101,6 @@ public class CompilerDriver {
 	
 	public CompilerDriver(String [] args) {
 		this.readArgs(args);
-	}
-	
-	public CompilerDriver() {
-		
 	}
 	
 	public List<String> compile(File file, List<String> code) {
@@ -135,7 +137,8 @@ public class CompilerDriver {
 			Parser parser = new Parser(deque);
 			SyntaxElement AST = parser.parse();
 			
-			/* --- PROCESS IMPORTS --- */
+			
+					/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
 			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
@@ -143,12 +146,12 @@ public class CompilerDriver {
 				
 				/* An error occured during importing, probably loop in dependencies */
 				if (dependencies == null) {
-					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libaries, possible loop in #include statements.");
+					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libraries, possible loop in #include statements.");
 				}
 				
 				/* Print out imported libaries */
 				for (SyntaxElement s : dependencies) {
-					log.add(new Message("SNIPS -> Imported libary " + ((Program) s).fileName, Message.Type.INFO));
+					log.add(new Message("SNIPS -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
 				}
 				
 				/* Add libaries to AST, duplicates were already filtered */
@@ -169,13 +172,9 @@ public class CompilerDriver {
 					/* --- CONTEXT CHECKING --- */
 			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
 			ContextChecker ctx = new ContextChecker(AST);
-			try {
-				ctx.check();
-				log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
-			} catch (CTX_EXCEPTION e) {
-				throw e;
-			}
-			
+			ctx.check();
+			log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
+		
 			if (imm) AST.print(4, true);
 			
 			
@@ -273,7 +272,7 @@ public class CompilerDriver {
 				}
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
-				log.add(new Message("SNIPS -> Failed to import libary " + filePath + ".", Message.Type.FAIL));
+				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", Message.Type.FAIL));
 			}
 			
 			ASTs.add(AST);
@@ -373,6 +372,7 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
+				else if (args [i].equals("-warn"))disableWarnings = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
@@ -395,6 +395,7 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
+		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");

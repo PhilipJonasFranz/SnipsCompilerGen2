@@ -1,0 +1,21 @@
+SOURCE
+void set(int** p) {
+	*(*p + 1) = 8;
+}
+
+int get(int** p, int off) {
+	set(p);
+	return *(*p + off) + *(*(p + 1) + off);
+}
+
+int main(int off) {
+	int [2] [2] v = {{5, 3}, {9, 1}};
+	int [2] [2] w = {{1, 2}, {4, 3}};
+	int*[2] p = {&v, &w};
+	return get(&p, off);
+}
+TESTCASES
+0 6
+1 10
+2 13
+3 4

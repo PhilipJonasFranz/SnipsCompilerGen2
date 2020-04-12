@@ -68,7 +68,7 @@ public class AsNBody extends AsNNode {
 		}
 		
 		/* No globals, remove .data annotation */
-		if (!globals) body.instructions.remove(body.instructions.size() - 1);
+		if (!globals) body.instructions.remove(data);
 		
 		
 		/* Add .text annotation if other sections exist */

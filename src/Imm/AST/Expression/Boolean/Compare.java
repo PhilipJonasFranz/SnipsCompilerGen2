@@ -2,8 +2,8 @@ package Imm.AST.Expression.Boolean;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.Arith.BinaryExpression;
 import Imm.TYPE.TYPE;
 import Util.Source;
 

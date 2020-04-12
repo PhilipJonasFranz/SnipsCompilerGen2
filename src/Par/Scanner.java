@@ -216,6 +216,12 @@ public class Scanner {
 				tokens.add(new Token(TokenType.OR, new Source(i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("void")) {
+				tokens.add(new Token(TokenType.VOID, new Source(i, a)));
+				this.emptyBuffer();
+				this.state = ACC_STATE.NONE;
+				return true;
+			}
 			else if (this.buffer.equals("int")) {
 				tokens.add(new Token(TokenType.INT, new Source(i, a)));
 				this.emptyBuffer();

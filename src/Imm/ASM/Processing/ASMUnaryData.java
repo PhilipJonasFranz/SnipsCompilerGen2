@@ -8,6 +8,9 @@ import Imm.ASM.Util.Operands.RegOperand;
 public abstract class ASMUnaryData extends ASMInstruction {
 
 			/* --- NESTED --- */
+	/** Used to solve a unary expression for given operand. 
+	 * Implementations are defined by classes extending from this class.
+	 */
 	public interface UnarySolver {
 		public int solve(int x);
 	}
@@ -18,8 +21,10 @@ public abstract class ASMUnaryData extends ASMInstruction {
 	
 	public Operand op0;
 	
+	/** The solver for the implementation */
 	public UnarySolver solver;
 	
+	/** Wether to update the condition field when executing this instruction. */
 	public boolean updateConditionField = false;
 	
 	

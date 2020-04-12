@@ -1,21 +1,16 @@
 package REv.Modules.Tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import REv.CPU.ProcessorUnit;
 import REv.Devices.Device;
 import REv.Modules.RAsm.Assembler;
-import REv.Modules.Tools.XMLParser.XMLNode;
+import Util.XMLParser.XMLNode;
 
 public class Util {
 
+			/* --- METHODS --- */
 	public static int toDecimal(int [] num) {
     	int s = 0;
     	int c = num.length;
@@ -77,14 +72,6 @@ public class Util {
     	return result;
     }
     
-	public static List<String> readFile(File file) {
-		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {
-			return s.collect(Collectors.toList());
-		} catch (IOException e) {
-			return null;
-		}
-	}
-	
 	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) {
 		// Load Devices
 		XMLNode devices = head.getNode("Devices");

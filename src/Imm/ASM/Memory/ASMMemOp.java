@@ -9,20 +9,21 @@ import Snips.CompilerDriver;
 public abstract class ASMMemOp extends ASMInstruction {
 
 			/* --- FIELDS --- */
+	/** The target of the memory operation, or the origin when loading */
 	public RegOperand target;
 	
-	public Operand op0;
-	
-	public Operand op1;
+	public Operand op0, op1;
 	
 	
 			/* --- CONSTRUCTORS --- */
+	/** Example Usage: ldr/str r0, [r1, #2] */
 	public ASMMemOp(RegOperand target, Operand op0, Operand op1) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
+	/** Example Usage: ldr/str r0, [r1] */
 	public ASMMemOp(RegOperand target, Operand op0, Operand op1, Cond cond) {
 		super(cond);
 		this.target = target;

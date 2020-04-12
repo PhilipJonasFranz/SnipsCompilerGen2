@@ -30,18 +30,30 @@ import Imm.AsN.AsNBody;
 import Util.Logging.Message;
 import Util.Logging.Message.Type;
 
+/**
+ * This optimizer can simplify a sequence of asm instructions. By doing so
+ * the optimizer will not change the behaviour of the program itself.<br>
+ * The optimizer follows an internal logic of the Compiler, so this optimizer
+ * will not work for any Assembly program, since it may violate the compiler internal
+ * logic. This will lead to context changing optimizations.
+ */
 public class ASMOptimizer {
 
-	public ASMOptimizer() {
-		
-	}
-	
+			/* --- FIELDS --- */
+	/** Wether an optimization was done in this cycle and a new iteration should be launched. */
 	boolean OPT_DONE = true;
+
 	
+			/* --- METHODS --- */
+	/** Optimize given body. */
 	public void optimize(AsNBody body) {
-	
+		/* While an optimization was done in this iteration */
 		while (OPT_DONE) {
 			OPT_DONE = false;
+			
+			this.removeExpressionIndirectTargeting(body);
+			
+			this.removeOperandIndirectTargeting(body);
 			
 			this.constantOperandPropagation(body);
 			
@@ -54,10 +66,6 @@ public class ASMOptimizer {
 			this.removeImplicitStackAssignment(body);
 			
 			this.removeBranchesBeforeLabelToLabel(body);
-		
-			this.removeExpressionIndirectTargeting(body);
-			
-			this.removeOperandIndirectTargeting(body);
 		}
 	}
 	
@@ -81,9 +89,9 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * add r0, r1, r2
-	 * mov r4, r0
-	 * Replace with:
+	 * add r0, r1, r2<br>
+	 * mov r4, r0<br>
+	 * Replace with:<br>
 	 * add r4, r1, r2
 	 */
 	protected void removeExpressionIndirectTargeting(AsNBody body) {
@@ -133,9 +141,9 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * mov r0, rx
-	 * cmp rx, r1
-	 * Replace with:
+	 * mov r0, rx<br>
+	 * cmp rx, r1<br>
+	 * Replace with:<br>
 	 * cmp rx, r1
 	 */
 	protected void removeOperandIndirectTargeting(AsNBody body) {
@@ -202,7 +210,7 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * b .Lx <-- Remove this line
+	 * b .Lx <-- Remove this line<br>
 	 * .Lx: 
 	 */
 	protected void removeBranchesBeforeLabelToLabel(AsNBody body) {
@@ -223,9 +231,9 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * push { r0 }
-	 * pop { r1 }
-	 * Replace with:
+	 * push { r0 }<br>
+	 * pop { r1 }<br>
+	 * Replace with:<br>
 	 * mov r1, r0
 	 */
 	protected void removeImplicitStackAssignment(AsNBody body) {
@@ -244,7 +252,7 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * mov r1, r0
+	 * mov r1, r0<br>
 	 * mov r0, r1 <-- Delete this line
 	 */
 	protected void removeDoubleCrossing(AsNBody body) {
@@ -511,7 +519,7 @@ public class ASMOptimizer {
 	}
 	
 	/**
-	 * b .L1
+	 * b .L1<br>
 	 * ... <- Remove these Lines until Label or newline
 	 */
 	protected void clearInstructionsAfterBranch(AsNBody body) {

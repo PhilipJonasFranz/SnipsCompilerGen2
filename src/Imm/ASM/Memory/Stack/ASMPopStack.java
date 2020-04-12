@@ -11,8 +11,12 @@ import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {
 
+			/* --- FIELDS --- */
+	/** The list of operands that are popped in the order of the list. */
 	public List<RegOperand> operands;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public ASMPopStack(RegOperand...operands) {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
@@ -22,8 +26,12 @@ public class ASMPopStack extends ASMInstruction {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 
+	
+			/* --- METHODS --- */
 	public String build() {
-		String s = CompilerDriver.printDepth + "pop" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " { ";
+		String s = CompilerDriver.printDepth + "pop" + 
+					((this.cond != null)? this.cond.getCondPostfix() : "" ) + 
+					" { ";
 		for (int i = 0; i < operands.size(); i++) {
 			s += operands.get(i).toString();
 			if (i < operands.size() - 1) s += ", ";

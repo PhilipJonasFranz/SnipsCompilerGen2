@@ -5,50 +5,55 @@ import java.util.Stack;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Declaration;
+import lombok.Getter;
 
 public class StackSet {
 
 			/* --- NESTED --- */
+	/** Used to identify the contents of a stack cell. */
 	public enum CONTENT_TYPE {
 		REGISTER, DECLARATION;
 	}
 	
-
+	/**
+	 * A stack cell capsules a content type, and a register or a declaration. The wordsize of the stack cell
+	 * is 1 if the content type is a register, and the word size of the type of the declaration if the content
+	 * type is a declaration.
+	 */
 	public class StackCell {
 		
-		private CONTENT_TYPE contentType;
+		/** The content type of the cell. */
+		@Getter
+		private CONTENT_TYPE type;
 		
+		/** The stored register. */
+		@Getter
 		private REGISTER reg;
 		
+		/** The stored declaration */
+		@Getter
 		private Declaration declaration;
 		
+		/** Create a new stack cell, set the type to register and set given register. */
 		public StackCell(REGISTER reg) {
 			this.reg = reg;
-			this.contentType = CONTENT_TYPE.REGISTER;
+			this.type = CONTENT_TYPE.REGISTER;
 		}
 		
+		/** Create a new stack cell, set the type to declaration and set given declaration. */
 		public StackCell(Declaration dec) {
 			this.declaration = dec;
-			this.contentType = CONTENT_TYPE.DECLARATION;
-		}
-		
-		public CONTENT_TYPE getType() {
-			return this.contentType;
-		}
-		
-		public REGISTER getReg() {
-			return this.reg;
-		}
-		
-		public Declaration getDeclaration() {
-			return this.declaration;
+			this.type = CONTENT_TYPE.DECLARATION;
 		}
 	}
 	
 	
 			/* --- FIELDS --- */
+	@Getter
+	/** The stack that houses the stack cells. */
 	private Stack<StackCell> stack = new Stack();
 	
+	/** The stack that contains the scope sizes. See {@link #closeScope()} for more information. */
 	private Stack<Integer> scopes = new Stack();
 
 	/**
@@ -59,33 +64,41 @@ public class StackSet {
 
 
 			/* --- METHODS --- */
-	public Stack getStack() {
-		return this.stack;
-	}
-	
+	/** Push all given declarations on the stack and wrap them in stack cells. 
+	 * The first given declaration will end up on the bottom of the newly pushed stack section.
+	 */
 	public void push(Declaration...dec) {
 		for (Declaration dec0 : dec) this.stack.push(new StackCell(dec0));
 		this.newDecsOnStack = true;
 	}
 	
+	/** Push all given registers on the stack and wrap them in stack cells. 
+	 * The first given register will end up on the bottom of the newly pushed stack section.
+	 */
 	public void push(REGISTER...reg) {
 		for (REGISTER reg0 : reg) this.stack.push(new StackCell(reg0));
 	}
 	
+	/** Pop a stack cell from the stack top. */
 	public void pop() {
 		this.stack.pop();
 	}
 	
+	/** Pop x cells from the top of the stack */
 	public void popXCells(int x) {
 		for (int i = 0; i < x; i++) {
 			this.stack.pop();
 		}
 	}
 	
+	/** 
+	 * Pop given amount of words from the stack. Throws an CGEN_EXCEPTION if not exactly x words can be popped.
+	 * This will mostly be caused by an internal compilation logic error.
+	 */
 	public void popXWords(int x) throws CGEN_EXCEPTION {
 		int words = 0;
 		while (words < x) {
-			if (this.stack.peek().contentType == CONTENT_TYPE.REGISTER) {
+			if (this.stack.peek().type == CONTENT_TYPE.REGISTER) {
 				words++;
 			}
 			else {
@@ -99,12 +112,13 @@ public class StackSet {
 		}
 	}
 	
+	/** Prints out the stack layout and the contents of the stack cells. */
 	public void print() {
 		System.out.println("\n---- STACK TOP ----");
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
-			System.out.println(x.contentType.toString() + ": ");
-			if (x.contentType == CONTENT_TYPE.DECLARATION) {
+			System.out.println(x.type.toString() + ": ");
+			if (x.type == CONTENT_TYPE.DECLARATION) {
 				x.declaration.print(4, true);
 			}
 			else System.out.println("    " + x.reg.toString());
@@ -120,16 +134,16 @@ public class StackSet {
 		int off = 0;
 		boolean foundHook = false;
 		for (int x = 0; x < stack.size(); x++) {
-			if (stack.get(x).contentType == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
+			if (stack.get(x).type == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
 				if (!foundHook) return -1;
 				else return off;
 			}
-			else if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
+			else if (stack.get(x).type == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
 				off = 0;
 				foundHook = true;
 			}
 			else {
-				if (stack.get(x).contentType == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
+				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
 				else off += 4;
 			}
 		}
@@ -142,10 +156,10 @@ public class StackSet {
 	public int getDeclarationInStackByteOffset(Declaration dec) {
 		int off = 4;
 		for (int i = 0; i < stack.size(); i++) {
-			if (stack.get(i).contentType == CONTENT_TYPE.REGISTER) 
+			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
 				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;
 				else off += 4;
-			else if (stack.get(i).contentType == CONTENT_TYPE.DECLARATION) {
+			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
 				if (stack.get(i).declaration.equals(dec)) break;
 				off += (stack.get(i).declaration.type.wordsize() * 4);
 			}
@@ -155,7 +169,9 @@ public class StackSet {
 	}
 	
 	/**
-	 * Open a new scope, f.e. for the body of a compound statement.
+	 * Open a new scope, f.e. for the body of a compound statement. Also pushes the current stack size
+	 * on the scopes stack, so that when popping this scope, the amount of words to be added to the 
+	 * sp can be determined.
 	 */
 	public void openScope() {
 		this.scopes.push(this.stack.size());
