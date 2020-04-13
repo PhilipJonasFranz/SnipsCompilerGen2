@@ -24,6 +24,7 @@ public class Program extends SyntaxElement {
 	
 	public List<STRUCT> structs = new ArrayList();
 	
+	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.

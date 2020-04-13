@@ -13,6 +13,7 @@ import lombok.Getter;
  */
 public class ElementSelect extends Expression {
 
+			/* --- FIELDS --- */
 	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
 	@Getter
 	private Expression shadowRef;
@@ -33,6 +34,8 @@ public class ElementSelect extends Expression {
 		this.selection = selection;
 	}
 	
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ElementSelect");
 		this.shadowRef.print(d + this.printDepthStep, rec);

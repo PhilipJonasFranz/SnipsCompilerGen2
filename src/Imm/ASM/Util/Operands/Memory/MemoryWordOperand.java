@@ -36,7 +36,7 @@ public class MemoryWordOperand extends MemoryOperand {
 					String v = null;
 					if (init.elements.get(i) instanceof UnaryMinus) {
 						UnaryMinus minus = (UnaryMinus) init.elements.get(i);
-						v = "-" + ((Atom) minus.operand).type.sourceCodeRepresentation();
+						v = "-" + ((Atom) minus.getOperand()).type.sourceCodeRepresentation();
 					}
 					else v = ((Atom) init.elements.get(i)).type.sourceCodeRepresentation();
 					s += CompilerDriver.printDepth + CompilerDriver.printDepth + ".word " + v + "\n";

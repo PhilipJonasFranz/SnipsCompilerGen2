@@ -19,6 +19,7 @@ public class Declaration extends Statement {
 	
 	public Expression value;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.

@@ -1,0 +1,15 @@
+SOURCE
+int s = 0; // In global memory
+
+int main(int a) {
+	for (int i = 0; i < a; i++) {
+		s += i + 1;
+	}
+	return s;
+}
+TESTCASES
+0 0
+1 1
+2 3
+3 6
+4 10

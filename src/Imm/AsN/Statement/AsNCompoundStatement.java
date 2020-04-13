@@ -179,11 +179,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXCEPTION {
 		if (e instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) e;
-			return this.hasAddressReference(b.leftOperand, dec) || this.hasAddressReference(b.rightOperand, dec);
+			return this.hasAddressReference(b.left, dec) || this.hasAddressReference(b.right, dec);
 		}
 		else if (e instanceof UnaryExpression) {
 			UnaryExpression u = (UnaryExpression) e;
-			return this.hasAddressReference(u.operand, dec);
+			return this.hasAddressReference(u.getOperand(), dec);
 		}
 		else if (e instanceof InlineCall) {
 			boolean hasRef = false;

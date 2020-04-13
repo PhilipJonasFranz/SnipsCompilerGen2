@@ -24,6 +24,7 @@ public class Function extends CompoundStatement {
 	
 	public List<Declaration> parameters;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public Function(TYPE returnType, Token functionId, List<Declaration> parameters, List<Statement> statements, Source source) {
 		super(statements, source);

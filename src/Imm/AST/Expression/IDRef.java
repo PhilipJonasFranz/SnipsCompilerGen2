@@ -12,11 +12,13 @@ import Util.Source;
  */
 public class IDRef extends Expression {
 
+			/* --- FIELDS --- */
 	/* The name of the referenced variable */
 	public String id;
 	
 	/* Set during context checking */
 	public Declaration origin;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -28,6 +30,8 @@ public class IDRef extends Expression {
 		this.id = id.spelling;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "IDRef: " + this.id);
 	}

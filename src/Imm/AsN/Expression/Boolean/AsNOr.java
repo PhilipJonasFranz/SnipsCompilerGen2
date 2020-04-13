@@ -27,18 +27,18 @@ public class AsNOr extends AsNBinaryExpression {
 		/* Clear only R0, R1 since R2 is not needed */
 		or.clearReg(r, st, 0, 1);
 		
-		if (o.left() instanceof Atom && o.right() instanceof Atom) {
-			int value0 = ((INT) ((Atom) o.left()).type).value;
-			int value1 = ((INT) ((Atom) o.right()).type).value;
+		if (o.getLeft() instanceof Atom && o.getRight() instanceof Atom) {
+			int value0 = ((INT) ((Atom) o.getLeft()).type).value;
+			int value1 = ((INT) ((Atom) o.getRight()).type).value;
 			or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 == 1 || value1 == 1)? 1 : 0), new Cond(COND.NE)));
 		}
-		else if (o.left() instanceof Atom) {
-			int value = ((INT) ((Atom) o.left()).type).value;
+		else if (o.getLeft() instanceof Atom) {
+			int value = ((INT) ((Atom) o.getLeft()).type).value;
 			if (value == 1) {
 				or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			}
 			else {
-				or.instructions.addAll(AsNExpression.cast(o.right(), r, map, st).getInstructions());
+				or.instructions.addAll(AsNExpression.cast(o.getRight(), r, map, st).getInstructions());
 				
 				or.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				
@@ -46,13 +46,13 @@ public class AsNOr extends AsNBinaryExpression {
 				or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(COND.NE)));
 			}
 		}
-		else if (o.right() instanceof Atom) {
-			int value = ((INT) ((Atom) o.right()).type).value;
+		else if (o.getRight() instanceof Atom) {
+			int value = ((INT) ((Atom) o.getRight()).type).value;
 			if (value == 1) {
 				or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1)));
 			}
 			else {
-				or.instructions.addAll(AsNExpression.cast(o.left(), r, map, st).getInstructions());
+				or.instructions.addAll(AsNExpression.cast(o.getLeft(), r, map, st).getInstructions());
 				
 				or.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 				

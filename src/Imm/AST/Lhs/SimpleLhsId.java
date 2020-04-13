@@ -14,6 +14,7 @@ public class SimpleLhsId extends LhsId {
 			/* --- FIELDS --- */
 	public IDRef ref;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public SimpleLhsId(IDRef ref, Source source) {
 		super(source);

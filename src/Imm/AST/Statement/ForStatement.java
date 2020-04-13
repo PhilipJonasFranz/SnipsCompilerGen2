@@ -14,9 +14,11 @@ import Util.Source;
  */
 public class ForStatement extends ConditionalCompoundStatement {
 
+			/* --- FIELDS --- */
 	public Declaration iterator;
 	
 	public Statement increment;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public ForStatement(Declaration iterator, Expression condition, Statement increment, List<Statement> body, Source source) {

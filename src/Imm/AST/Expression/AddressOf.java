@@ -24,6 +24,8 @@ public class AddressOf extends Expression {
 		this.expression = expression;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "AddressOf");
 		this.expression.print(d + this.printDepthStep, rec);

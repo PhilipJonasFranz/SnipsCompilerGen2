@@ -9,6 +9,7 @@ import Imm.AST.Directive.Directive;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Util.Source;
+import lombok.Getter;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -24,9 +25,10 @@ public abstract class SyntaxElement {
 	public AsNNode castedNode;
 	
 	/**
-	 * [NON-CRITICAL]
+	 * [NON-CRITICAL]<br>
 	 * The location of this syntax element in the source code, row and column representation. 
 	 */
+	@Getter
 	Source source;
 	
 	
@@ -57,14 +59,6 @@ public abstract class SyntaxElement {
 		String pad = "";
 		for (int i = 0; i < w; i++) pad += " ";
 		return pad;
-	}
-	
-	/** 
-	 * [PURE] <br>
-	 * Returns the {@link #source} object of this syntax element.
-	 */
-	public Source getSource() {
-		return this.source;
 	}
 	
 	/**

@@ -10,7 +10,9 @@ import Util.Source;
  */
 public class ContinueStatement extends Statement {
 
+			/* --- FIELDS --- */
 	public CompoundStatement superLoop;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

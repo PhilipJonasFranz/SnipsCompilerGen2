@@ -37,6 +37,8 @@ public class IDRefWriteback extends Expression {
 		this.shadowRef = expression;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
 		this.shadowRef.print(d + this.printDepthStep, rec);

@@ -6,7 +6,9 @@ import Util.Source;
 
 public abstract class CompoundStatement extends Statement {
 
+			/* --- FIELDS --- */
 	public List<Statement> body;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

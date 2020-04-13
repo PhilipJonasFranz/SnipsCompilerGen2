@@ -12,6 +12,7 @@ import Util.Source;
  */
 public class StructureInit extends Expression {
 
+			/* --- FIELDS --- */
 	public List<Expression> elements;
 	
 	
@@ -24,7 +25,9 @@ public class StructureInit extends Expression {
 		super(source);
 		this.elements = elements;
 	}
+	
 
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "StructureInit " + this.type.typeString());
 		for (Expression e : this.elements) {

@@ -12,6 +12,7 @@ import Util.Source;
 
 public class FunctionCall extends Statement {
 
+			/* --- FIELDS --- */
 	public String functionName;
 	
 	public Function calledFunction;
@@ -30,6 +31,8 @@ public class FunctionCall extends Statement {
 		this.parameters = parameters;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Function Call: " + this.functionName);
 		for (Expression e : this.parameters) {

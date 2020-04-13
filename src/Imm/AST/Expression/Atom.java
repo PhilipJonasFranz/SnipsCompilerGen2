@@ -11,10 +11,12 @@ import Util.Source;
  */
 public class Atom extends Expression {
 
+			/* --- FIELDS --- */
 	/* Type information and potential value */
 	public TYPE type;
 	
 	public String spelling;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -27,6 +29,8 @@ public class Atom extends Expression {
 		this.spelling = id.spelling;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "<" + this.type.typeString() + ">");
 	}

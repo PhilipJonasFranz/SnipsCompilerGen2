@@ -7,7 +7,9 @@ import Util.Source;
 
 public abstract class ConditionalCompoundStatement extends CompoundStatement {
 
+			/* --- FIELDS --- */
 	public Expression condition;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

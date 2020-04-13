@@ -417,23 +417,23 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkBinaryExpression(BinaryExpression b) throws CTX_EXCEPTION {
-		TYPE left = b.left().check(this);
-		TYPE right = b.right().check(this);
+		TYPE left = b.getLeft().check(this);
+		TYPE right = b.getRight().check(this);
 		
-		if (b.leftOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (b.left instanceof StructureInit) {
+			throw new CTX_EXCEPTION(b.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (b.rightOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (b.right instanceof StructureInit) {
+			throw new CTX_EXCEPTION(b.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (left.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
 		}
 		
 		if (right.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
 		}
 		
 		if (left instanceof POINTER) {
@@ -466,15 +466,15 @@ public class ContextChecker {
 	 * - Both operand types have to be of type BOOL<br>
 	 */
 	public TYPE checkBoolBinaryExpression(BoolBinaryExpression b) throws CTX_EXCEPTION {
-		TYPE left = b.left().check(this);
-		TYPE right = b.right().check(this);
+		TYPE left = b.getLeft().check(this);
+		TYPE right = b.getRight().check(this);
 		
 		if (!(left instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.typeString());
 		}
 		
 		if (!(right instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.typeString());
+			throw new CTX_EXCEPTION(b.right.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.typeString());
 		}
 		
 		b.type = left;
@@ -487,10 +487,10 @@ public class ContextChecker {
 	 * - Operand type has to be of type BOOL<br>
 	 */
 	public TYPE checkBoolUnaryExpression(BoolUnaryExpression b) throws CTX_EXCEPTION {
-		TYPE t = b.operand().check(this);
+		TYPE t = b.getOperand().check(this);
 		
 		if (!(t instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.operand.getSource(), "Expected bool, actual " + t.typeString());
+			throw new CTX_EXCEPTION(b.getOperand().getSource(), "Expected bool, actual " + t.typeString());
 		}
 		
 		b.type = t;
@@ -498,10 +498,10 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
-		TYPE op = u.operand().check(this);
+		TYPE op = u.getOperand().check(this);
 		
-		if (u.operand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(u.operand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (u.getOperand() instanceof StructureInit) {
+			throw new CTX_EXCEPTION(u.getOperand().getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (u instanceof BitNot && op instanceof PRIMITIVE) {
@@ -518,15 +518,15 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkCompare(Compare c) throws CTX_EXCEPTION {
-		TYPE left = c.left().check(this);
-		TYPE right = c.right().check(this);
+		TYPE left = c.getLeft().check(this);
+		TYPE right = c.getRight().check(this);
 		
-		if (c.leftOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(c.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (c.left instanceof StructureInit) {
+			throw new CTX_EXCEPTION(c.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (c.rightOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(c.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (c.right instanceof StructureInit) {
+			throw new CTX_EXCEPTION(c.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (left.isEqual(right)) {

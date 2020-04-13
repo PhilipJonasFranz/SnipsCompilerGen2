@@ -20,6 +20,7 @@ public class SwitchStatement extends Statement {
 	
 	public DefaultStatement defaultStatement;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public SwitchStatement(Expression condition, List<CaseStatement> cases, DefaultStatement defaultStatement, Source source) {
 		super(source);

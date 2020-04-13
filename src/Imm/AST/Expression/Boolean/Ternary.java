@@ -8,12 +8,15 @@ import Util.Source;
 
 public class Ternary extends Expression {
 	
+			/* --- FIELDS --- */
 	public Expression condition;
 	
 	public Expression leftOperand;
 	
 	public Expression rightOperand;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public Ternary(Expression condition, Expression left, Expression right, Source source) {
 		super(source);
 		this.condition = condition;
@@ -21,6 +24,8 @@ public class Ternary extends Expression {
 		this.rightOperand = right;
 	}
 	
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Ternary");
 		this.condition.print(d + this.printDepthStep, rec);
