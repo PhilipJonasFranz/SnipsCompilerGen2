@@ -13,7 +13,7 @@ public class AsNTypeCast extends AsNExpression {
 		AsNTypeCast t = new AsNTypeCast();
 		tc.castedNode = t;
 		
-		/* Do nothing for now */
+		/* Do nothing for now, type cast is only used during context checking to change expression type */
 		
 		return t;
 	}

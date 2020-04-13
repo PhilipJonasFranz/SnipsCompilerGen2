@@ -2,9 +2,11 @@ SOURCE
 int main(bool a, bool b) {
 	bool[2] v = {a, b};
 	
-	int[2] v0 = (int[2]) v;
+	bool* b0 = &v;
 	
-	return v0 [0] + v0 [1];
+	int* i0 = (int*) b0;
+	
+	return *i0 + *(i0 + 1);
 }
 TESTCASES
 0 0 0
