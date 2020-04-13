@@ -1,0 +1,6 @@
+SOURCE
+int main() {
+	return sizeof(int);
+}
+TESTCASES
+1

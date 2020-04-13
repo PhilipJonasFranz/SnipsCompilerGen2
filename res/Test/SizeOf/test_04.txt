@@ -1,0 +1,7 @@
+SOURCE
+int main(int x) {
+	int [2] a = {x, x + 2};
+	return sizeof(a);
+}
+TESTCASES
+2

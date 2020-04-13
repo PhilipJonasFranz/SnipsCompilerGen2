@@ -9,15 +9,17 @@ import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.UnaryMinus;
@@ -639,6 +641,19 @@ public class ContextChecker {
 		
 		init.type = new ARRAY(type0, init.elements.size());
 		return init.type;
+	}
+	
+	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXCEPTION {
+		sot.type = new INT();
+		return sot.type;
+	}
+	
+	public TYPE checkSizeOfExpression(SizeOfExpression soe) throws CTX_EXCEPTION {
+		TYPE t = soe.expression.check(this);
+		soe.sizeType = t;
+		
+		soe.type = new INT();
+		return soe.type;
 	}
 	
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {

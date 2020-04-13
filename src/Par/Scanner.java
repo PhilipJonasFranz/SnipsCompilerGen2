@@ -32,11 +32,13 @@ public class Scanner {
 	
 	private static class ScannerFSM {
 		
+		//List<String> structIds = new ArrayList();
+		
 		/**
 		 * Defines the current accumulation state of the scanner.
 		 */
 		private enum ACC_STATE {
-			NONE, ID, INT, FLOAT, COMMENT
+			NONE, ID, STRUCT_ID, INT, FLOAT, COMMENT
 		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
@@ -204,6 +206,10 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("include")) {
 				tokens.add(new Token(TokenType.INCLUDE, new Source(i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("sizeof")) {
+				tokens.add(new Token(TokenType.SIZEOF, new Source(i, a)));
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("\\")) {

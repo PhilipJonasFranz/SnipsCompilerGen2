@@ -5,15 +5,17 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.AsNNode;
@@ -52,6 +54,12 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof Atom) {
 			node = AsNAtom.cast((Atom) e, r, map, st, 0); 
+		}
+		else if (e instanceof SizeOfType) {
+			node = AsNSizeOfType.cast((SizeOfType) e, r, map, st, 0);
+		}
+		else if (e instanceof SizeOfExpression) {
+			node = AsNSizeOfExpression.cast((SizeOfExpression) e, r, map, st, 0);
 		}
 		else if (e instanceof AddressOf) {
 			node = AsNAddressOf.cast((AddressOf) e, r, map, st, 0); 

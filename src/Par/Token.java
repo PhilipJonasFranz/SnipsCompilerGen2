@@ -44,7 +44,6 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
-		INCLUDE("include"),
 		BACKSL("\\"),
 		USCORE("_"),
 		EOF("<EOF>"),
@@ -58,7 +57,7 @@ public class Token {
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
 		
-		/* Statements */
+		/* Keywords */
 		IF("if"),
 		ELSE("else"),
 		WHILE("while"),
@@ -69,8 +68,8 @@ public class Token {
 		SWITCH("switch"),
 		CASE("case"),
 		DEFAULT("default"),
-		
-		/* Functions */
+		INCLUDE("include"),
+		SIZEOF("sizeof"),
 		RETURN("return"),
 		
 		DOT("."),

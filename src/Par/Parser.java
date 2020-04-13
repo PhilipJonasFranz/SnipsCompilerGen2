@@ -16,15 +16,17 @@ import Imm.AST.Directive.CompileDirective.COMP_DIR;
 import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitNot;
@@ -697,17 +699,17 @@ public class Parser {
 	}
 		
 	protected Expression parseMulDiv() throws PARSE_EXCEPTION {
-		Expression left = this.parseAddressOf();
+		Expression left = this.parseSizeOf();
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
 				accept();
-				left = new Mul(left, this.parseAddressOf(), current.source);
+				left = new Mul(left, this.parseSizeOf(), current.source);
 			}
 			else if (current.type == TokenType.DIV) {
 				Source source = accept().getSource();
 				List<Expression> params = new ArrayList();
 				params.add(left);
-				params.add(this.parseAddressOf());
+				params.add(this.parseSizeOf());
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_div"), params, source);
@@ -717,7 +719,7 @@ public class Parser {
 				Source source = accept().getSource();
 				List<Expression> params = new ArrayList();
 				params.add(left);
-				params.add(this.parseAddressOf());
+				params.add(this.parseSizeOf());
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_mod"), params, source);
@@ -725,6 +727,27 @@ public class Parser {
 			}
 		}
 		return left;
+	}
+	
+	protected Expression parseSizeOf() throws PARSE_EXCEPTION {
+		Expression sof = null;
+		while (current.type == TokenType.SIZEOF) {
+			Source source = accept().getSource();
+			accept(TokenType.LPAREN);
+			
+			/* Size of Type */
+			if (current.type.group == TokenGroup.TYPE) {
+				TYPE type = this.parseType();
+				sof = new SizeOfType(type, source);
+			}
+			/* Size of Expression */
+			else sof = new SizeOfExpression(this.parseExpression(), source);
+			
+			accept(TokenType.RPAREN);
+		}
+		
+		if (sof == null) sof = this.parseAddressOf();
+		return sof;
 	}
 	
 	protected Expression parseAddressOf() throws PARSE_EXCEPTION {

@@ -14,15 +14,17 @@ import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.AssignWriteback;
@@ -234,7 +236,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			IDRefWriteback id = (IDRefWriteback) e;
 			return this.hasAddressReference(id.getShadowRef(), dec);
 		}
-		else if (e instanceof IDRef || e instanceof Atom) {
+		else if (e instanceof SizeOfExpression) {
+			SizeOfExpression soe = (SizeOfExpression) e;
+			return this.hasAddressReference(soe.expression, dec);
+		}
+		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType) {
 			return false;
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());

@@ -1,0 +1,7 @@
+SOURCE
+int main(int x) {
+	int* p = &x;
+	return sizeof(p);
+}
+TESTCASES
+1
