@@ -15,6 +15,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitOr;
@@ -38,6 +39,7 @@ import Imm.AsN.Expression.Boolean.AsNAnd;
 import Imm.AsN.Expression.Boolean.AsNCmp;
 import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
@@ -97,39 +99,57 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 		/* --- OPERAND LOADING --- */
 	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXCEPTION {
+		
+		/* Some assertions for debug purposes */
+		if (b.getLeft() instanceof TypeCast) {
+			assert(b.getLeft().type instanceof PRIMITIVE);
+		}
+		
+		if (b.getRight() instanceof TypeCast) {
+			assert(b.getRight().type instanceof PRIMITIVE);
+		}
+		
+		/* If operands are TypeCasts, unrwrap expression from type cast */
+		Expression left = (b.getLeft() instanceof TypeCast)? ((TypeCast) b.getLeft()).expression : b.getLeft();
+		Expression right = (b.getRight() instanceof TypeCast)? ((TypeCast) b.getRight()).expression : b.getRight();
+		
 		/* Load both operands directley */
-		if (b.getLeft() instanceof IDRef && b.getRight() instanceof IDRef) {
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.getLeft(), r, map, st, target0).getInstructions());
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.getRight(), r, map, st, target1).getInstructions());
+		if (left instanceof IDRef && right instanceof IDRef) {
+			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		/* Load the right operand, then the left directley */
-		else if (b.getLeft() instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(b.getRight(), r, map, st).getInstructions());
+		else if (left instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
 			if (target1 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
 				r.copy(0, target1);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.getLeft(), r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
 		}
 		/* Load the left operand, then the right directley */
-		else if (b.getRight() instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(b.getLeft(), r, map, st).getInstructions());
+		else if (right instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			if (target0 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(0)));
 				r.copy(0, target0);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.getRight(), r, map, st, target1).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		else {
+			r.free(0, 1, 2);
+			
 			/* Compute left operand and push the result on the stack */
-			m.instructions.addAll(AsNExpression.cast(b.getLeft(), r, map, st).getInstructions());
+			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			r.free(0);
 			
 			/* Compute the right operand and move it to target location */
-			m.instructions.addAll(AsNExpression.cast(b.getRight(), r, map, st).getInstructions());
+			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
+			
+			/* Check if instructions were added, if not, this means that the operand is already loaded in the correct location */
 			if (target1 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
 				r.copy(0, target1);

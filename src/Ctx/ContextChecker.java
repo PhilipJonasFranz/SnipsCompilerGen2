@@ -20,6 +20,7 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.UnaryMinus;
@@ -694,6 +695,17 @@ public class ContextChecker {
 		}
 		
 		return deref.type;
+	}
+	
+	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXCEPTION {
+		TYPE t = tc.expression.check(this);
+		
+		if (t.wordsize() != tc.castType.wordsize()) {
+			throw new CTX_EXCEPTION(tc.getSource(), "Expression type word size must be equal to cast type: " + t.typeString() + " (" + t.wordsize() + ") vs " + tc.castType.typeString() + " (" + tc.castType.wordsize() + ")");
+		}
+		
+		tc.type = tc.castType;
+		return tc.castType;
 	}
 	
 	public TYPE checkIDRefWriteback(IDRefWriteback i) throws CTX_EXCEPTION {

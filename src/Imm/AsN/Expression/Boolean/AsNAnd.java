@@ -30,7 +30,7 @@ public class AsNAnd extends AsNBinaryExpression {
 		if (a.getLeft() instanceof Atom && a.getRight() instanceof Atom) {
 			int value0 = ((INT) ((Atom) a.getLeft()).type).value;
 			int value1 = ((INT) ((Atom) a.getRight()).type).value;
-			and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 == 0 || value1 == 0)? 0 : 1), new Cond(COND.NE)));
+			and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 == 0 || value1 == 0)? 0 : 1)));
 		}
 		else if (a.getLeft() instanceof Atom) {
 			int value = ((INT) ((Atom) a.getLeft()).type).value;

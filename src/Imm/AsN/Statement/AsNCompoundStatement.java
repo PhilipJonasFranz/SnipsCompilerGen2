@@ -25,6 +25,7 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.AssignWriteback;
@@ -239,6 +240,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (e instanceof SizeOfExpression) {
 			SizeOfExpression soe = (SizeOfExpression) e;
 			return this.hasAddressReference(soe.expression, dec);
+		}
+		else if (e instanceof TypeCast) {
+			TypeCast tc = (TypeCast) e;
+			return this.hasAddressReference(tc.expression, dec);
 		}
 		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType) {
 			return false;

@@ -27,6 +27,7 @@ import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitNot;
@@ -768,8 +769,24 @@ public class Parser {
 			addr = new Deref(this.parseDeref(), source);
 		}
 		
-		if (addr == null) addr = this.parseNot();
+		if (addr == null) addr = this.parseTypeCast();
 		return addr;
+	}
+	
+	protected Expression parseTypeCast() throws PARSE_EXCEPTION {
+		Expression cast = null;
+		while (current.type == TokenType.LPAREN && this.tokenStream.peek().type.group == TokenGroup.TYPE) {
+			Source source = accept().getSource();
+			TYPE castType = this.parseType();
+			accept(TokenType.RPAREN);
+			
+			Expression cast0 = this.parseNot();
+			
+			cast = new TypeCast(cast0, castType, source);
+		}
+		
+		if (cast == null) cast = this.parseNot();
+		return cast;
 	}
 	
 	protected Expression parseNot() throws PARSE_EXCEPTION {

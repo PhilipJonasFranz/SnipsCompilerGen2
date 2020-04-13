@@ -22,7 +22,7 @@ public class AsNDeclaration extends AsNStatement {
 		
 		/* Load value, either in R0 or on the stack */
 		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
-		dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
 		if (free != -1 && d.type.wordsize() == 1) {

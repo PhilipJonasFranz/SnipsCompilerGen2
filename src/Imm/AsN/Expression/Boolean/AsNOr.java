@@ -30,7 +30,7 @@ public class AsNOr extends AsNBinaryExpression {
 		if (o.getLeft() instanceof Atom && o.getRight() instanceof Atom) {
 			int value0 = ((INT) ((Atom) o.getLeft()).type).value;
 			int value1 = ((INT) ((Atom) o.getRight()).type).value;
-			or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 == 1 || value1 == 1)? 1 : 0), new Cond(COND.NE)));
+			or.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 != 0 || value1 != 0)? 1 : 0)));
 		}
 		else if (o.getLeft() instanceof Atom) {
 			int value = ((INT) ((Atom) o.getLeft()).type).value;

@@ -1,0 +1,10 @@
+SOURCE
+bool main(int a, int b) {
+	return ((bool) a) || ((bool) b);
+}
+TESTCASES
+0 0 0
+10 0 1
+0 10 1
+10 5 1
+5 10 1

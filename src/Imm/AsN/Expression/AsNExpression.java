@@ -16,6 +16,7 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.AsNNode;
@@ -66,6 +67,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof Deref) {
 			node = AsNDeref.cast((Deref) e, r, map, st, 0); 
+		}
+		else if (e instanceof TypeCast) {
+			node = AsNTypeCast.cast((TypeCast) e, r, map, st); 
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	
