@@ -11,6 +11,7 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.UnaryExpression;
@@ -45,6 +46,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof IDRef) {
 			node = AsNIdRef.cast((IDRef) e, r, map, st, 0);
+		}
+		else if (e instanceof IDRefWriteback) {
+			node = AsNIDRefWriteback.cast((IDRefWriteback) e, r, map, st);
 		}
 		else if (e instanceof Atom) {
 			node = AsNAtom.cast((Atom) e, r, map, st, 0); 

@@ -17,12 +17,12 @@ import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.Decrement;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.Increment;
+import Imm.AST.Expression.IDRefWriteback;
+import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.Arith.Add;
@@ -45,6 +45,7 @@ import Imm.AST.Lhs.ElementSelectLhsId;
 import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
@@ -382,7 +383,7 @@ public class Parser {
 		accept(TokenType.SEMICOLON);
 		
 		/* Dont accept semicolon */
-		Assignment increment = this.parseAssignment(false);
+		Statement increment = this.parseAssignment(false);
 		
 		accept(TokenType.RPAREN);
 		
@@ -416,12 +417,23 @@ public class Parser {
 		return new DoWhileStatement(condition, body, source);
 	}
 	
-	protected Assignment parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
-		LhsId target = this.parseLhsIdentifer();
-		ASSIGN_ARITH arith = this.parseAssignOperator();
-		Expression value = this.parseExpression();
-		if (acceptSemicolon) accept(TokenType.SEMICOLON);
-		return new Assignment(arith, target, value, target.getSource());
+	protected Statement parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
+		if (tokenStream.peek().type == TokenType.INCR || tokenStream.peek().type == TokenType.DECR) {
+			Token id = accept();
+			ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+			
+			accept();
+			if (acceptSemicolon) accept(TokenType.SEMICOLON);
+			
+			return new AssignWriteback(new IDRefWriteback(idWb, new IDRef(id, id.getSource()), id.getSource()), id.getSource());
+		}
+		else {
+			LhsId target = this.parseLhsIdentifer();
+			ASSIGN_ARITH arith = this.parseAssignOperator();
+			Expression value = this.parseExpression();
+			if (acceptSemicolon) accept(TokenType.SEMICOLON);
+			return new Assignment(arith, target, value, target.getSource());
+		}
 	}
 	
 	protected ASSIGN_ARITH parseAssignOperator() throws PARSE_EXCEPTION {
@@ -785,11 +797,15 @@ public class Parser {
 		Expression ref = this.parseAtom();
 		
 		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
-			Source source = accept().getSource();
+			Source source = current.getSource();
 			if (current.type == TokenType.INCR) {
-				ref = new Increment(ref, source);
+				accept();
+				ref = new IDRefWriteback(ID_WRITEBACK.INCR, ref, source);
 			}
-			else ref = new Decrement(ref, source);
+			else {
+				accept();
+				ref = new IDRefWriteback(ID_WRITEBACK.DECR, ref, source);
+			}
 		}
 		
 		return ref;

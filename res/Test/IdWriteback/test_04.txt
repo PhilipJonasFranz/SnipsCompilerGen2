@@ -1,0 +1,9 @@
+SOURCE
+int main(int a) {
+	int s = a++ + 10 - a-- + a++;
+	return s;
+}
+TESTCASES
+0 9
+1 10
+-1 8

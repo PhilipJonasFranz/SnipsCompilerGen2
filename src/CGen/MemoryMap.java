@@ -8,6 +8,10 @@ import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.AST.Statement.Declaration;
 import lombok.Getter;
 
+/**
+ * The memory map is used to lay out the static .data memory and get the memory offsets of the
+ * variables store in it.
+ */
 public class MemoryMap {
 
 			/* --- NESTED --- */

@@ -20,10 +20,12 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
@@ -164,6 +166,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			hasRef |= this.hasAddressReference(sw.defaultStatement, dec);
 			return hasRef;
 		}
+		else if (s instanceof AssignWriteback) {
+			AssignWriteback awb = (AssignWriteback) s;
+			return this.hasAddressReference(awb.getShadowRef(), dec);
+		}
 		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
 			return false;
 		}
@@ -223,6 +229,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 				if (((ElementSelect) aof.expression).idRef.origin.equals(dec)) return true;
 			}
 			return false;
+		}
+		else if (e instanceof IDRefWriteback) {
+			IDRefWriteback id = (IDRefWriteback) e;
+			return this.hasAddressReference(id.getShadowRef(), dec);
 		}
 		else if (e instanceof IDRef || e instanceof Atom) {
 			return false;

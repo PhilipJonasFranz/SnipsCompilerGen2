@@ -1,5 +1,7 @@
 package Imm.ASM;
 
+import java.util.HashMap;
+
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
 
@@ -9,6 +11,12 @@ import Imm.ASM.Util.Cond;
 public abstract class ASMInstruction {
 
 			/* --- FIELDS --- */
+	public enum OPT_FLAG {
+		WRITEBACK;
+	}
+	
+	public HashMap<OPT_FLAG, Boolean> optFlags = new HashMap();
+	
 	/**
 	 * The condition operand of this instruction for conditional instruction execution. 
 	 */

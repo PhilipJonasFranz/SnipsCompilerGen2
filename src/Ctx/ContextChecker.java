@@ -15,6 +15,7 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.UnaryExpression;
@@ -24,7 +25,9 @@ import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.CompoundStatement;
@@ -39,7 +42,6 @@ import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -677,6 +679,39 @@ public class ContextChecker {
 		}
 		
 		return deref.type;
+	}
+	
+	public TYPE checkIDRefWriteback(IDRefWriteback i) throws CTX_EXCEPTION {
+		if (i.getShadowRef() instanceof IDRef) {
+			IDRef ref = (IDRef) i.getShadowRef();
+			i.idRef = ref;
+			
+			TYPE t = ref.check(this);
+			
+			if (!(t instanceof PRIMITIVE)) {
+				throw new CTX_EXCEPTION(i.idRef.getSource(), "Can only be applied to primitive types");
+			}
+			
+			i.type = t;
+		}
+		else {
+			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
+		}
+		
+		return i.type;
+	}
+	
+	public TYPE checkAssignWriteback(AssignWriteback i) throws CTX_EXCEPTION {
+		if (i.getShadowRef() instanceof IDRefWriteback) {
+			IDRefWriteback wb = (IDRefWriteback) i.getShadowRef();
+			wb.check(this);
+			i.idWb = wb;
+		}
+		else {
+			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
+		}
+		
+		return null;
 	}
 	
 	/**

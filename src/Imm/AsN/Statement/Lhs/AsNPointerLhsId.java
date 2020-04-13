@@ -48,7 +48,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
 				id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
 				
-				/* Save address in R1 */
+				/* Create assign injector, save address in R1 */
 				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
 				id.instructions.addAll(inj);
 			}

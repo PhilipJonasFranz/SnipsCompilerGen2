@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
@@ -183,6 +184,11 @@ public class ASMOptimizer {
 					if (mov.target.reg == RegOperand.toReg(a) && mov.op1 instanceof RegOperand) {
 						RegOperand target = (RegOperand) mov.op1;
 						if (target.reg == REGISTER.R0 || target.reg == REGISTER.R1 || target.reg == REGISTER.R2) break;
+						
+						/* Writeback flag is set, cannot substitute, since mov copies operand */
+						if (body.instructions.get(i).optFlags.containsKey(OPT_FLAG.WRITEBACK)) {
+							break;
+						}
 						
 						if (body.instructions.get(i) instanceof ASMBinaryData && !(body.instructions.get(i) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) body.instructions.get(i);

@@ -9,9 +9,17 @@ import lombok.Getter;
 /**
  * This class represents a superclass for all Expressions.
  */
-public class Increment extends Expression {
+public class IDRefWriteback extends Expression {
 
+			/* --- NESTED --- */
+	public enum ID_WRITEBACK {
+		INCR, DECR;
+	}
+	
+	
 			/* --- FIELDS --- */
+	public ID_WRITEBACK idWb;
+	
 	@Getter
 	private Expression shadowRef;
 	
@@ -23,8 +31,9 @@ public class Increment extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Increment(Expression expression, Source source) {
+	public IDRefWriteback(ID_WRITEBACK idWb, Expression expression, Source source) {
 		super(source);
+		this.idWb = idWb;
 		this.shadowRef = expression;
 	}
 
@@ -34,7 +43,7 @@ public class Increment extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		return ctx.checkIncrement(this);
+		return ctx.checkIDRefWriteback(this);
 	}
 	
 }
