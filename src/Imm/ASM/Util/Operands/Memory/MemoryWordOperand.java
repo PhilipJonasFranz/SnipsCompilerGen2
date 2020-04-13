@@ -2,7 +2,7 @@ package Imm.ASM.Util.Operands.Memory;
 
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Snips.CompilerDriver;
 
@@ -27,10 +27,10 @@ public class MemoryWordOperand extends MemoryOperand {
 			s += ".word " + atom.type.sourceCodeRepresentation();
 		}
 		else {
-			StructureInit init = (StructureInit) val;
+			ArrayInit init = (ArrayInit) val;
 			for (int i = 0; i < init.elements.size(); i++) {
-				if (init.elements.get(i) instanceof StructureInit) {
-					s += toString((StructureInit) init.elements.get(i));
+				if (init.elements.get(i) instanceof ArrayInit) {
+					s += toString((ArrayInit) init.elements.get(i));
 				}
 				else {
 					String v = null;

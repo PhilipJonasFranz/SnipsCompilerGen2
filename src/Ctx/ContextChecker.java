@@ -12,12 +12,12 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.UnaryMinus;
@@ -393,18 +393,18 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Ternary condition has to be of type BOOL, actual " + type.typeString());
 		}
 		
-		if (t.condition instanceof StructureInit) {
+		if (t.condition instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		TYPE t0 = t.leftOperand.check(this);
 		TYPE t1 = t.rightOperand.check(this);
 		
-		if (t.leftOperand instanceof StructureInit) {
+		if (t.leftOperand instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (t.rightOperand instanceof StructureInit) {
+		if (t.rightOperand instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
@@ -420,11 +420,11 @@ public class ContextChecker {
 		TYPE left = b.getLeft().check(this);
 		TYPE right = b.getRight().check(this);
 		
-		if (b.left instanceof StructureInit) {
+		if (b.left instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(b.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (b.right instanceof StructureInit) {
+		if (b.right instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(b.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
@@ -500,7 +500,7 @@ public class ContextChecker {
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
 		TYPE op = u.getOperand().check(this);
 		
-		if (u.getOperand() instanceof StructureInit) {
+		if (u.getOperand() instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(u.getOperand().getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
@@ -521,11 +521,11 @@ public class ContextChecker {
 		TYPE left = c.getLeft().check(this);
 		TYPE right = c.getRight().check(this);
 		
-		if (c.left instanceof StructureInit) {
+		if (c.left instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(c.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (c.right instanceof StructureInit) {
+		if (c.right instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(c.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
@@ -559,7 +559,7 @@ public class ContextChecker {
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
-			if (i.parameters.get(a) instanceof StructureInit) {
+			if (i.parameters.get(a) instanceof ArrayInit) {
 				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
 			}
 			
@@ -622,7 +622,7 @@ public class ContextChecker {
 		}
 	}
 	
-	public TYPE checkStructureInit(StructureInit init) throws CTX_EXCEPTION {
+	public TYPE checkStructureInit(ArrayInit init) throws CTX_EXCEPTION {
 		if (init.elements.isEmpty()) {
 			throw new CTX_EXCEPTION(init.getSource(), "Structure init must have at least one element");
 		}
@@ -644,7 +644,7 @@ public class ContextChecker {
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ElementSelect)) {
+		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ArraySelect)) {
 			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or element select.");
 		}
 		
@@ -721,7 +721,7 @@ public class ContextChecker {
 	 * - Checks that the types of the selection are of type int<br>
 	 * - Amount of selections does not exceed structure dimension<br>
 	 */
-	public TYPE checkElementSelect(ElementSelect select) throws CTX_EXCEPTION {
+	public TYPE checkElementSelect(ArraySelect select) throws CTX_EXCEPTION {
 		if (select.selection.isEmpty()) {
 			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
 		}

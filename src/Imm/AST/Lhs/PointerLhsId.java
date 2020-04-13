@@ -3,7 +3,7 @@ package Imm.AST.Lhs;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
@@ -49,8 +49,8 @@ public class PointerLhsId extends LhsId {
 		if (deref.expression instanceof IDRef) {
 			return ((IDRef) deref.expression).origin.fieldName;
 		}
-		else if (deref.expression instanceof ElementSelect) {
-			return ((ElementSelect) deref.expression).idRef.origin.fieldName;
+		else if (deref.expression instanceof ArraySelect) {
+			return ((ArraySelect) deref.expression).idRef.origin.fieldName;
 		}
 		else return null;
 	}

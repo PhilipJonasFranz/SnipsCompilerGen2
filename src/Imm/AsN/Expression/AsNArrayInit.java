@@ -8,15 +8,15 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 
-public class AsNStructureInit extends AsNExpression {
+public class AsNArrayInit extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
-		AsNStructureInit init = new AsNStructureInit();
+	public static AsNArrayInit cast(ArrayInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+		AsNArrayInit init = new AsNArrayInit();
 		s.castedNode = init;
 		
 		r.free(0, 1, 2);

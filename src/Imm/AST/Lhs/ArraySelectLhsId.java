@@ -2,21 +2,21 @@ package Imm.AST.Lhs;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class ElementSelectLhsId extends LhsId {
+public class ArraySelectLhsId extends LhsId {
 
 			/* --- FIELDS --- */
-	public ElementSelect selection;
+	public ArraySelect selection;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ElementSelectLhsId(ElementSelect selection, Source source) {
+	public ArraySelectLhsId(ArraySelect selection, Source source) {
 		super(source);
 		this.selection = selection;
 	}

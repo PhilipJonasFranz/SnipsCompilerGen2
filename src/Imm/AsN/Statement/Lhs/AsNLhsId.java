@@ -17,7 +17,7 @@ import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Lhs.ElementSelectLhsId;
+import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
@@ -38,8 +38,8 @@ public class AsNLhsId extends AsNStatement {
 		if (lhs instanceof SimpleLhsId) {
 			id = AsNSimpleLhsId.cast((SimpleLhsId) lhs, r, map, st);
 		}
-		else if (lhs instanceof ElementSelectLhsId) {
-			id = AsNElementSelectLhsId.cast((ElementSelectLhsId) lhs, r, map, st);
+		else if (lhs instanceof ArraySelectLhsId) {
+			id = AsNArraySelectLhsId.cast((ArraySelectLhsId) lhs, r, map, st);
 		}
 		else if (lhs instanceof PointerLhsId) {
 			id = AsNPointerLhsId.cast((PointerLhsId) lhs, r, map, st);

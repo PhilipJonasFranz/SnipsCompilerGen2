@@ -128,14 +128,14 @@ public class AsNIdRef extends AsNExpression {
 					regs++;
 				}
 				if (regs == 3) {
-					AsNStructureInit.flush(regs, this);
+					AsNArrayInit.flush(regs, this);
 					regs = 0;
 				}
 				offset -= 4;
 				st.push(REGISTER.R0);
 			}
 			
-			AsNStructureInit.flush(regs, this);
+			AsNArrayInit.flush(regs, this);
 		}
 		/* Origin is in global map */
 		else if (map.declarationLoaded(i.origin)) {
@@ -155,7 +155,7 @@ public class AsNIdRef extends AsNExpression {
 					regs++;
 				}
 				if (regs == 2) {
-					AsNStructureInit.flush(regs, this);
+					AsNArrayInit.flush(regs, this);
 					regs = 0;
 				}
 				st.push(REGISTER.R0);
@@ -173,14 +173,14 @@ public class AsNIdRef extends AsNExpression {
 					regs++;
 				}
 				if (regs == 3) {
-					AsNStructureInit.flush(regs, this);
+					AsNArrayInit.flush(regs, this);
 					regs = 0;
 				}
 				offset += 4;
 				st.push(REGISTER.R0);
 			}
 			
-			AsNStructureInit.flush(regs, this);
+			AsNArrayInit.flush(regs, this);
 		}
 	}
 	

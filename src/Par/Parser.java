@@ -18,13 +18,13 @@ import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitNot;
@@ -41,7 +41,7 @@ import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Expression.Boolean.Ternary;
-import Imm.AST.Lhs.ElementSelectLhsId;
+import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
@@ -496,8 +496,8 @@ public class Parser {
 		}
 		else {
 			Expression target = this.parseElementSelect();
-			if (target instanceof ElementSelect) {
-				return new ElementSelectLhsId((ElementSelect) target, target.getSource());
+			if (target instanceof ArraySelect) {
+				return new ArraySelectLhsId((ArraySelect) target, target.getSource());
 			}
 			else if (target instanceof IDRef) {
 				return new SimpleLhsId((IDRef) target, target.getSource());
@@ -570,7 +570,7 @@ public class Parser {
 			}
 			
 			accept(TokenType.RBRACE);
-			return new StructureInit(elements, source);
+			return new ArrayInit(elements, source);
 		}
 		else return this.parseTernary();
 	}
@@ -788,7 +788,7 @@ public class Parser {
 				accept(TokenType.RBRACKET);
 			}
 			
-			return new ElementSelect(ref, selection, ref.getSource());
+			return new ArraySelect(ref, selection, ref.getSource());
 		}
 		else return ref;
 	}

@@ -1,12 +1,12 @@
 package Imm.ASM.Util.Operands.Memory;
 
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 
 public class MemorySkipOperand extends MemoryOperand {
 
-	public StructureInit init;
+	public ArrayInit init;
 	
-	public MemorySkipOperand(StructureInit init) {
+	public MemorySkipOperand(ArrayInit init) {
 		this.init = init;
 	}
 	

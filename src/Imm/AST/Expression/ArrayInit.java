@@ -10,7 +10,7 @@ import Util.Source;
 /**
  * This class represents a superclass for all Expressions.
  */
-public class StructureInit extends Expression {
+public class ArrayInit extends Expression {
 
 			/* --- FIELDS --- */
 	public List<Expression> elements;
@@ -21,7 +21,7 @@ public class StructureInit extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructureInit(List<Expression> elements, Source source) {
+	public ArrayInit(List<Expression> elements, Source source) {
 		super(source);
 		this.elements = elements;
 	}

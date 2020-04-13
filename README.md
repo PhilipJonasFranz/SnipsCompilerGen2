@@ -41,8 +41,11 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  
 ### v.3.0.0-RELEASE: Complex type system, advanced operations
  - Implement Arithmetic Assignment Operators WIP
- - Implement Heap System
  - Implement Structs
+ - Implement Struct Select
+ - Implement sizeof operation
+ - Implement Type Casting
+ - Implement Heap System, implement malloc and free operation
 
 ### v.4.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer

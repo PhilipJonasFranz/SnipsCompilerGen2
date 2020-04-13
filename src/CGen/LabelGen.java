@@ -33,4 +33,10 @@ public class LabelGen {
 		return getLabel() + "_" + name;
 	}
 	
+	private static int i = 0;
+	
+	public static String importLabelPrefix(String base) {
+		return ".I" + i++ + "_" + base;
+	}
+	
 }

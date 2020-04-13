@@ -11,7 +11,7 @@ import lombok.Getter;
 /**
  * This class represents a superclass for all Expressions.
  */
-public class ElementSelect extends Expression {
+public class ArraySelect extends Expression {
 
 			/* --- FIELDS --- */
 	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
@@ -28,7 +28,7 @@ public class ElementSelect extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public ElementSelect(Expression ref, List<Expression> selection, Source source) {
+	public ArraySelect(Expression ref, List<Expression> selection, Source source) {
 		super(source);
 		this.shadowRef = ref;
 		this.selection = selection;

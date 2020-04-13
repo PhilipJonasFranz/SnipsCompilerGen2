@@ -17,12 +17,12 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Statement.AssignWriteback;
@@ -196,17 +196,17 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (e instanceof Deref) {
 			return this.hasAddressReference(((Deref) e).expression, dec);
 		}
-		else if (e instanceof StructureInit) {
+		else if (e instanceof ArrayInit) {
 			boolean hasRef = false;
-			StructureInit init = (StructureInit) e;
+			ArrayInit init = (ArrayInit) e;
 			for (Expression e0 : init.elements) {
 				hasRef |= this.hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
-		else if (e instanceof ElementSelect) {
+		else if (e instanceof ArraySelect) {
 			boolean hasRef = false;
-			ElementSelect sel = (ElementSelect) e;
+			ArraySelect sel = (ArraySelect) e;
 			for (Expression e0 : sel.selection) {
 				hasRef |= this.hasAddressReference(e0, dec);
 			}
@@ -226,7 +226,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 				if (((IDRef) aof.expression).origin.equals(dec)) return true;
 			}
 			else {
-				if (((ElementSelect) aof.expression).idRef.origin.equals(dec)) return true;
+				if (((ArraySelect) aof.expression).idRef.origin.equals(dec)) return true;
 			}
 			return false;
 		}

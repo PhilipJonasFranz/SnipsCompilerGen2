@@ -4,17 +4,31 @@ import java.util.HashMap;
 
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
+import lombok.NoArgsConstructor;
 
 /**
  * Acts as a base class for all assembly instructions.
  */
+@NoArgsConstructor
 public abstract class ASMInstruction {
 
 			/* --- FIELDS --- */
+	/** 
+	 * Flags that can be applied to {@link #optFlags} to interfere with the asm optimizer. 
+	 */
 	public enum OPT_FLAG {
+		/** 
+		 * This flag is set if a binary expression is part of a increment or decrement operation.
+		 *  Setting this flag will prevent the optimizer to fuze statements<br>
+		 *  mov r0, rx<br>
+		 *  add r1, r0, #1<br>
+		 *  into<br>
+		 *  add r1, rx, #1<br>
+		 */
 		WRITEBACK;
 	}
 	
+	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */
 	public HashMap<OPT_FLAG, Boolean> optFlags = new HashMap();
 	
 	/**
@@ -29,12 +43,6 @@ public abstract class ASMInstruction {
 	
 	
 			/* --- CONSTRUCTORS --- */
-	/**
-	 * Default Constructor.
-	 */
-	public ASMInstruction() {
-	}
-	
 	/**
 	 * Constructor for instruction with conditional.
 	 */

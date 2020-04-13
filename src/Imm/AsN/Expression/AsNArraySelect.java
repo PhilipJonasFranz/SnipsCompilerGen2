@@ -29,13 +29,13 @@ import Imm.ASM.Util.Operands.PatchableImmOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
-public class AsNElementSelect extends AsNExpression {
+public class AsNArraySelect extends AsNExpression {
 
 			/* --- NESTED --- */
 	public enum SELECT_TYPE {
@@ -46,8 +46,8 @@ public class AsNElementSelect extends AsNExpression {
 	
 	
 			/* --- METHODS --- */
-	public static AsNElementSelect cast(ElementSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
-		AsNElementSelect select = new AsNElementSelect();
+	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+		AsNArraySelect select = new AsNArraySelect();
 		s.castedNode = select;
 		
 		r.free(0, 1, 2);
@@ -91,7 +91,7 @@ public class AsNElementSelect extends AsNExpression {
 		return select;
 	}
 	
-	public static void loadSumR2(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
+	public static void loadSumR2(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
 		/* Sum */
 		if (s.selection.size() > 1 || block) {
 			ASMMov sum = new ASMMov(new RegOperand(REGISTER.R2), new ImmOperand(0));
@@ -196,7 +196,7 @@ public class AsNElementSelect extends AsNExpression {
 	 * This method calculates the start of an array or sub array either on the local or parameter stack, and
 	 * moves the result in R0 if the target is a single cell, or into R1 if the target is a sub structure.
 	 */
-	public static void injectAddressLoader(SELECT_TYPE selectType, AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void injectAddressLoader(SELECT_TYPE selectType, AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		
 		int offset = 0;
 		if (selectType == SELECT_TYPE.LOCAL_SINGLE || selectType == SELECT_TYPE.LOCAL_SUB) {
@@ -275,7 +275,7 @@ public class AsNElementSelect extends AsNExpression {
 		}
 	}
 	
-	public static void loadPointer(AsNNode node, ElementSelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
+	public static void loadPointer(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
 		node.instructions.addAll(AsNIdRef.cast(s.idRef, r, map, st, target).getInstructions());
 		node.instructions.add(new ASMLsl(new RegOperand(target), new RegOperand(target), new ImmOperand(2)));
 	}
