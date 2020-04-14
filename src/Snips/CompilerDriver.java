@@ -16,9 +16,15 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
+import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
+import Par.Token;
+import Par.Token.TokenType;
+import Util.Source;
 import Util.Logging.Message;
 import lombok.NoArgsConstructor;
 
@@ -95,6 +101,15 @@ public class CompilerDriver {
 		/* Perform compilation */
 		scd.compile(file, code);
 	}
+	
+	/* Reserved Declarations */
+	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, new Source(0, 0)), new Source(0, 0));
+	public static boolean heap_referenced = false;
+	public static Declaration HEAP_START = new Declaration(
+													new Token(TokenType.IDENTIFIER, new Source(0, 0), "HEAP_START"), 
+													new INT(), 
+													zero_atom, 
+													new Source(0, 0));
 	
 	
 	public List<String> referencedLibaries = new ArrayList();

@@ -1,0 +1,9 @@
+SOURCE
+int* main(int a) {
+	int* p = (int*) resv(sizeof(a));
+	int* n = (int*) resv(5);
+	int* m = (int*) resv(3);
+	free(m);
+	free(n);
+}
+TESTCASES

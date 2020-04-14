@@ -90,7 +90,9 @@ public class Scanner {
 						/* End of multiple line comment */
 						this.state = ACC_STATE.NONE;
 						this.buffer = this.buffer.trim();
-						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 2)));
+						if (!this.buffer.equals("*/"))
+							tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 2)));
+						
 						this.emptyBuffer();
 					}
 					else if (i != this.lastLine) {

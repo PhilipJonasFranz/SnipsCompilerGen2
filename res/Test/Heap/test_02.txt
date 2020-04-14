@@ -1,0 +1,17 @@
+SOURCE
+int* create() {
+	int* v = (int*) resv(3);
+	*v = 4;
+	*(v + 1) = 2;
+	*(v + 2) = 5;
+	
+	return v;
+}
+
+int main(int a) {
+	int* v = create();
+	
+	return *(v + 1);
+}
+TESTCASES
+2

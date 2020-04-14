@@ -1,0 +1,23 @@
+void free(int* p) {
+	/* Jump to block head */
+	p -= 1;
+
+	/* Load Block Size */
+	int size = *p;
+	
+	/* Store negated block size */
+	*p = -size;
+	
+	int* ptr = p + size;
+	while (*ptr < 0) {
+		int size0 = *ptr;
+		
+		/* Add size to freed block */
+		*p = *p + size0;
+		
+		/* Shift pointer to next block */
+		ptr -= size0;
+	}
+	
+	return;
+}

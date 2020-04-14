@@ -80,6 +80,10 @@ public class ContextChecker {
 	
 	public TYPE checkProgram(Program p) throws CTX_EXCEPTION {
 		scopes.push(new Scope(null));
+		
+		/* Add global reserved declarations */
+		scopes.peek().addDeclaration(CompilerDriver.HEAP_START);
+		
 		this.head = p;
 		for (SyntaxElement s : p.programElements) {
 			s.check(this);

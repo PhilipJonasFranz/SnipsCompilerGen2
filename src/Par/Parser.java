@@ -289,6 +289,10 @@ public class Parser {
 		accept(TokenType.RPAREN);
 		accept(TokenType.SEMICOLON);
 		
+		if (identifier.spelling.equals("free")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/Memory/free.sn");
+		}
+		
 		return new FunctionCall(identifier, params, identifier.getSource());
 	}
 	
@@ -873,6 +877,10 @@ public class Parser {
 				}
 				accept(TokenType.RPAREN);
 				
+				if (id.spelling.equals("resv")) {
+					CompilerDriver.heap_referenced = true;
+					CompilerDriver.driver.referencedLibaries.add("lib/Memory/resv.sn");
+				}
 				return new InlineCall(id, parameters, id.getSource());
 			}
 			else {

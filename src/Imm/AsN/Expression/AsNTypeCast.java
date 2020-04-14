@@ -13,7 +13,8 @@ public class AsNTypeCast extends AsNExpression {
 		AsNTypeCast t = new AsNTypeCast();
 		tc.castedNode = t;
 		
-		/* Do nothing for now, type cast is only used during context checking to change expression type */
+		/* Relay to capsuled expression for now */
+		t.instructions.addAll(AsNExpression.cast(tc.expression, r, map, st).getInstructions());
 		
 		return t;
 	}
