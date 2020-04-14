@@ -81,7 +81,8 @@ public class Scanner {
 						this.emptyBuffer();
 					}
 					else {
-						tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 1).trim()));
+						if (!buffer.trim().equals("/*"))
+							tokens.add(new Token(TokenType.COMMENT, new Source(i, a), this.buffer.substring(2, this.buffer.length() - 1).trim()));
 						this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					}
 				}

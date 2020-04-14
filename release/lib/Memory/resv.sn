@@ -1,0 +1,52 @@
+/*
+ * Reseve a memory block with given size + 1. The block size has to be increased
+ * by one to accomodate the block metadata. The function returns a void pointer to 
+ * the start of the reserved memory section + 1. This means the pointer points to
+ * the start of the memory thats actually supposed to be used.
+ */
+void* resv(int size) {
+	/* Add block header to size */
+	size += 1;
+	
+	/* Get reference to heap start */
+	int* mem_loc = &HEAP_START;
+	
+	while (*mem_loc != 0) {
+		/* Memory Section is allocated or free */
+			
+		/* Load block size from memory */
+		int val = *mem_loc;
+		
+		if (val < 0) {
+			/*Memory location is free, check size */
+			val = -val;
+			if (val == size) {
+				/* Fits */
+				*mem_loc = size;
+				return (void*) (mem_loc + 1);
+			}
+			else {
+				/* Check if next block would be 0 */
+				if (*(mem_loc + val) == 0) {
+					*mem_loc = size;
+					return (void*) (mem_loc + 1);	
+				}
+				else {
+					/* Rest, subtract size, store at offset */
+					val -= size;
+					*mem_loc = size;
+					*(mem_loc + size) = -val;
+					return (void*) (mem_loc + 1);
+				}			
+			}
+		}
+		else {
+			/* Memory section is allocated, skip */
+			mem_loc += val;
+		}
+	}
+	
+	/* End reached, create new block */
+	*mem_loc = size;
+	return (void*) (mem_loc + 1);
+}
