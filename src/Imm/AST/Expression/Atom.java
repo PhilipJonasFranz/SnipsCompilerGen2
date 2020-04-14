@@ -13,8 +13,6 @@ public class Atom extends Expression {
 
 			/* --- FIELDS --- */
 	/* Type information and potential value */
-	public TYPE type;
-	
 	public String spelling;
 	
 	

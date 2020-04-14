@@ -1,0 +1,18 @@
+SOURCE
+int main(int a) {
+	int s = 0;
+	while (a > 0) {
+		int x = a * 2;
+		int* p = &x;
+		if (x == 4) {
+			break; // Break
+		}
+		int y = x;
+		s = s + x + y;
+		a = a - 1;
+	}
+	
+	return s;
+}
+TESTCASES
+4 28

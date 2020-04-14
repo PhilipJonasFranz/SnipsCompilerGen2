@@ -41,6 +41,7 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
+import Imm.AsN.AsNNode;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -63,28 +64,31 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * @param s The CapsuledStatement containing the Statements.
 	 * @param r The current RegSet
 	 */
-	protected void popDeclarationScope(CompoundStatement s, RegSet r, StackSet st) {
-		List<Declaration> declarations = new ArrayList(); 
-		
-		/* Collect declarations from statements, ignore sub-compounds, they will do the same */
-		for (Statement s0 : s.body) {
-			if (s0 instanceof Declaration) {
-				declarations.add((Declaration) s0);
+	public static void popDeclarationScope(AsNNode node, CompoundStatement s, RegSet r, StackSet st, boolean close) {
+		if (close) {
+			List<Declaration> declarations = new ArrayList(); 
+			
+			/* Collect declarations from statements, ignore sub-compounds, they will do the same */
+			for (Statement s0 : s.body) {
+				if (s0 instanceof Declaration) {
+					declarations.add((Declaration) s0);
+				}
 			}
-		}
-		
-		/* Delete declaration out of the registers */
-		for (Declaration d : declarations) {
-			if (r.declarationLoaded(d)) {
-				int loc = r.declarationRegLocation(d);
-				r.getReg(loc).free();
+			
+			/* Delete declaration out of the registers */
+			for (Declaration d : declarations) {
+				if (r.declarationLoaded(d)) {
+					int loc = r.declarationRegLocation(d);
+					r.getReg(loc).free();
+				}
 			}
 		}
 		
 		/* Set the stack pointer to the new stack size */
-		int add = st.closeScope();
+		int add = st.closeScope(s, close);
+		
 		if (add != 0) {
-			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
 		}
 	}
 	
@@ -93,7 +97,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 */
 	protected void addBody(CompoundStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Open a new Scope in the stack */
-		st.openScope();
+		st.openScope(a);
 		
 		/* Body */
 		for (int i = 0; i < a.body.size(); i++) {
@@ -102,7 +106,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		
 		/* Free all declarations in scope */
-		this.popDeclarationScope(a, r, st);
+		popDeclarationScope(this, a, r, st, true);
 	}
 	
 	public void loadStatement(CompoundStatement a, Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {

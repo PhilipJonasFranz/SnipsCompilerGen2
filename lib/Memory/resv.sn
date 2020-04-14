@@ -10,14 +10,32 @@ void* resv(int size) {
 	
 	/* Get reference to heap start */
 	int* mem_loc = &HEAP_START;
-	
+		
 	while (*mem_loc != 0) {
 		/* Memory Section is allocated or free */
-			
+		
 		/* Load block size from memory */
 		int val = *mem_loc;
 		
 		if (val < 0) {
+			
+			/* Defragment Heap */
+			while (true) {
+				int val0 = *(mem_loc - val);
+				if (val0 > 0) break;
+				else if (val0 == 0) {
+					val = 0; // All structures to end are free
+					break;
+				}
+				else val += val0; // Add to current size
+			}
+			
+			*mem_loc = val; // Write defragmented size to heap
+			
+			if (val == 0) {
+				*(mem_loc + size) = 0;
+			}
+			
 			/*Memory location is free, check size */
 			val = -val;
 			if (val == size) {
@@ -25,20 +43,14 @@ void* resv(int size) {
 				*mem_loc = size;
 				return (void*) (mem_loc + 1);
 			}
-			else {
-				/* Check if next block would be 0 */
-				if (*(mem_loc + val) == 0) {
-					*mem_loc = size;
-					return (void*) (mem_loc + 1);	
-				}
-				else {
-					/* Rest, subtract size, store at offset */
-					val -= size;
-					*mem_loc = size;
-					*(mem_loc + size) = -val;
-					return (void*) (mem_loc + 1);
-				}			
+			else if (val > size) {
+				/* Rest, subtract size, store at offset */
+				val -= size;
+				*mem_loc = size;
+				*(mem_loc + size) = -val;
+				return (void*) (mem_loc + 1);	
 			}
+			else mem_loc -= val;
 		}
 		else {
 			/* Memory section is allocated, skip */

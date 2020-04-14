@@ -18,6 +18,12 @@ public class AsNBreak extends AsNStatement {
 		/* Retrieve the jump label target from the super loop */
 		ASMLabel target = ((AsNConditionalCompoundStatement) b.superLoop.castedNode).breakJump;
 		
+		/* Resets the stack. When declarations are made and a break statement is called, 
+		 * the normal loop exit is not taken, and thus the stack resetting is skipped.
+		 * By passing the parameter false the stack set and reg set is not changed, but the
+		 * correct offsets are determined. */
+		AsNCompoundStatement.popDeclarationScope(br, b.superLoop, r, st, false);
+		
 		/* Jump to the label */
 		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(target)));
 		
