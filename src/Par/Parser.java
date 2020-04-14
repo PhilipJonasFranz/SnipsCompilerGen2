@@ -290,7 +290,7 @@ public class Parser {
 		accept(TokenType.SEMICOLON);
 		
 		if (identifier.spelling.equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/Memory/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
 		}
 		
 		return new FunctionCall(identifier, params, identifier.getSource());
@@ -718,7 +718,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_div"), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/Operator/Div/__op_div.sn");
+				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
 			}
 			else {
 				Source source = accept().getSource();
@@ -728,7 +728,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new Token(TokenType.IDENTIFIER, source, "__op_mod"), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/Operator/Mod/__op_mod.sn");
+				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
 			}
 		}
 		return left;
@@ -879,7 +879,7 @@ public class Parser {
 				
 				if (id.spelling.equals("resv")) {
 					CompilerDriver.heap_referenced = true;
-					CompilerDriver.driver.referencedLibaries.add("lib/Memory/resv.sn");
+					CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 				}
 				return new InlineCall(id, parameters, id.getSource());
 			}

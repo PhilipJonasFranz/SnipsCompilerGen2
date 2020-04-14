@@ -18,7 +18,6 @@ void* resv(int size) {
 		int val = *mem_loc;
 		
 		if (val < 0) {
-			
 			/* Defragment Heap */
 			while (true) {
 				int val0 = *(mem_loc - val);
