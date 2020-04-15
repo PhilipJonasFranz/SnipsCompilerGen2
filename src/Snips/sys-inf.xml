@@ -1,0 +1,7 @@
+<Inf>
+	<Version>1.5.2</Version>
+	<Library>
+		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>
+		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
+	</Library>
+</Inf>

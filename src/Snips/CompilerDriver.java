@@ -29,10 +29,9 @@ import Par.Token;
 import Par.Token.TokenType;
 import Util.Source;
 import Util.Util;
+import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class CompilerDriver {
 
 	/* The Input File */
@@ -70,6 +69,8 @@ public class CompilerDriver {
 	public static int instructionsGenerated = 0;
 	
 	public static CompilerDriver driver;
+	
+	public XMLNode sys_config;
 	
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
@@ -119,30 +120,23 @@ public class CompilerDriver {
 	
 	public CompilerDriver(String [] args) {
 		this.readArgs(args);
+		this.readConfig();
 	}
 	
-	public static String version;
+	public CompilerDriver() {
+		this.readConfig();
+	}
+	
+	public void readConfig() {
+		/* Read Configuration */
+		List<String> conf = Util.readFile(new File("src\\Snips\\sys-inf.xml"));
+		if (conf == null) conf = readFromJar("sys-inf.xml");
+		
+		sys_config  = new XMLNode(conf);
+	}
 	
 	public String getVersionString() {
-		if (version != null) {
-			return version;
-		}
-		else {
-			/* Try to read form file */
-			List<String> readme = Util.readFile(new File("res/README.md"));
-			
-			/* Try to read from jar */
-			if (readme == null) 
-				readme = readFromJar("README.md");
-			
-			/* Both attempts failed. */
-			if (readme == null) {
-				return "Unknown Version.";
-			}
-			
-			version = readme.get(0).split("Gen.2") [1].trim();
-			return version;
-		}
+		return sys_config.getValue("Version");
 	}
 	
 	public List<String> readFromJar(String path) {
@@ -303,13 +297,24 @@ public class CompilerDriver {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
+			for (XMLNode c : sys_config.getNode("Library").children) {
+				String [] v = c.value.split(":");
+				if (v [0].equals(filePath)) {
+					filePath = v [1];
+				}
+			}
+			
 			File file = new File(filePath);
+			
+			/* Read from file */
 			List<String> code = Util.readFile(file);
 			
+			/* Read from jar */
 			if (code == null) {
 				code = readFromJar(filePath);
 			}
 			
+			/* Libary was not found */
 			if (code == null) {
 				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
 			}
