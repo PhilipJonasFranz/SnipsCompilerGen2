@@ -22,7 +22,7 @@ List* create() {
 	List* lp = (List*) malloc(sizeof(List));
 
 	/* Initialize list, set pointers to 0 */
-	*lp = List::{(ListNode*) 0, (ListNode*) 0};
+	*lp = List::((ListNode*) 0, (ListNode*) 0);
 
 	return lp;
 }
@@ -35,7 +35,7 @@ void add(List* lp, int x) {
 	ListNode* n = (ListNode*) malloc(sizeof(ListNode));
 
 	/* Initialize the new List Node, set the next pointer to null */
-	*n = ListNode::{(ListNode*) 0, x};
+	*n = ListNode::((ListNode*) 0, x);
 
 	if (lp->head == 0) {
 		lp->head = n; // Dereference through pointer

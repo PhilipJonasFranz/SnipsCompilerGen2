@@ -60,7 +60,7 @@ public class TestDriver {
 	public boolean displayCompilerImmediateRepresentations = false;
 	
 	/** Print the assembly compilation results */
-	public boolean printResult = true;
+	public boolean printResult = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();

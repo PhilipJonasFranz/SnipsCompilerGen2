@@ -10,8 +10,9 @@ struct Line2D {
 }
 
 int main(int x) {
-	Line2D l = Line2D::(Point2D::(x + 2, x * 3), Point2D::(x, x + 1));
-	return l.p0.y;
+	Line2D* l = (Line2D*) resv(sizeof(Line2D));
+	*l = Line2D::(Point2D::(x + 2, x * 3), Point2D::(x, x + 1));
+	return l->p0.y;
 }
 TESTCASES
 0 0

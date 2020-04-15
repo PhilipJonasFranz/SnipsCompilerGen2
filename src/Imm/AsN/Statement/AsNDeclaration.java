@@ -36,7 +36,9 @@ public class AsNDeclaration extends AsNStatement {
 				dec.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
 			}
 			else {
-				/* Pop Elements only, elements are already on the stack */
+				/* Pop R0 placeholders pushed by structure init from stack set, but dont add the assembly code 
+				 * to do so, this is so that below the correct declaration can be pushed and lines up with 
+				 * the values on the stack */
 				st.popXWords(d.type.wordsize());
 			}
 			
