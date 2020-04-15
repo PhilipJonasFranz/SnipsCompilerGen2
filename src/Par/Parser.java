@@ -560,10 +560,10 @@ public class Parser {
 	}
 	
 	protected Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseStructureInit();
+			return this.parseArrayInit();
 	}
 	
-	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
+	protected Expression parseArrayInit() throws PARSE_EXCEPTION {
 		if (current.type == TokenType.LBRACE) {
 			Source source = accept().getSource();
 			List<Expression> elements = new ArrayList();

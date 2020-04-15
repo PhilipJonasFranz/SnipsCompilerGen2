@@ -69,7 +69,8 @@ public class TestDriver {
 			/* --- CONSTRUCTORS --- */
 	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
-		CompilerDriver.printLogo();
+		CompilerDriver comp = new CompilerDriver();
+		comp.printLogo();
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		

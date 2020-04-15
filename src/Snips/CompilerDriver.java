@@ -1,7 +1,10 @@
 package Snips;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
@@ -25,6 +28,7 @@ import Par.Scanner;
 import Par.Token;
 import Par.Token.TokenType;
 import Util.Source;
+import Util.Util;
 import Util.Logging.Message;
 import lombok.NoArgsConstructor;
 
@@ -41,8 +45,7 @@ public class CompilerDriver {
 			"	| |_____ |       ||   ||   |_| || |_____   ",
 			"	|_____  ||  _    ||   ||    ___||_____  |  ",
 			"	 _____| || | \\   ||   ||   |     _____| | ",
-			"	|_______||_|  \\__||___||___|    |_______| ",
-			"    		                            Gen.2  "};
+			"	|_______||_|  \\__||___||___|    |_______| "};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -96,7 +99,7 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
-		List<String> code = Util.Util.readFile(file);
+		List<String> code = Util.readFile(file);
 		
 		/* Perform compilation */
 		scd.compile(file, code);
@@ -116,6 +119,49 @@ public class CompilerDriver {
 	
 	public CompilerDriver(String [] args) {
 		this.readArgs(args);
+	}
+	
+	public static String version;
+	
+	public String getVersionString() {
+		if (version != null) {
+			return version;
+		}
+		else {
+			/* Try to read form file */
+			List<String> readme = Util.readFile(new File("res/README.md"));
+			
+			/* Try to read from jar */
+			if (readme == null) 
+				readme = readFromJar("README.md");
+			
+			/* Both attempts failed. */
+			if (readme == null) {
+				return "Unknown Version.";
+			}
+			
+			version = readme.get(0).split("Gen.2") [1].trim();
+			return version;
+		}
+	}
+	
+	public List<String> readFromJar(String path) {
+		List<String> lines = new ArrayList();
+	    
+		try {
+			InputStream is = getClass().getResourceAsStream(path);
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		    String line;
+		    while ((line = br.readLine()) != null)  {
+		    	lines.add(line);
+		    }
+		    br.close();
+		    is.close();
+		} catch (Exception e) {
+			return null;
+		}
+	    
+	    return lines;
 	}
 	
 	public List<String> compile(File file, List<String> code) {
@@ -240,7 +286,7 @@ public class CompilerDriver {
 		log.clear();
 		
 		if (outputPath != null && output != null) {
-			Util.Util.writeInFile(output, outputPath);
+			Util.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, Message.Type.INFO));
 		}
 		
@@ -251,22 +297,27 @@ public class CompilerDriver {
 	 * Used to hot compile referenced libaries.
 	 * @param files The libary files to compile
 	 * @return A list of ASTs containing the contents of the files as AST.
+	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> hotCompile(List<String> files) {
+	public List<SyntaxElement> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
 			File file = new File(filePath);
-			List<String> code = Util.Util.readFile(file);
+			List<String> code = Util.readFile(file);
+			
+			if (code == null) {
+				code = readFromJar(filePath);
+			}
+			
+			if (code == null) {
+				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
+			}
 			
 			SyntaxElement AST = null;
 			
 			try {
-				if (code == null) 
-					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
-				
-				
-						/* --- SCANNING --- */
+					/* --- SCANNING --- */
 				Scanner scanner = new Scanner(code);
 				Deque deque = scanner.scan();
 				
@@ -301,8 +352,9 @@ public class CompilerDriver {
 	/**
 	 * Import depencendies listed by include directives
 	 * @param importer The program that lists the include directives
+	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> addDependencies(Program importer) {
+	public List<SyntaxElement> addDependencies(Program importer) throws SNIPS_EXCEPTION {
 		List<Directive> imports = importer.directives;
 		List<SyntaxElement> ASTs = new ArrayList();
 		
@@ -366,18 +418,28 @@ public class CompilerDriver {
 		return (int) log.stream().filter(x -> x.messageType == type).count();
 	}
 	
-	public static void printLogo() {
+	public void printLogo() {
 		/* Print out all lines of the SNIPS logo */
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
 		for (String s : logo)System.out.println(s);
+		
+		String ver = "Gen.2 " + getVersionString();
+		int l = ver.length();
+		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
+		ver = "\t" + ver;
+		System.out.println(ver);
 		System.out.println();
 	}
 	
 	public void readArgs(String [] args) {
 		if (args [0].equals("-help")) {
 			printHelp();
+			System.exit(0);
+		}
+		else if (args [0].equals("-info")) {
+			printInfo();
 			System.exit(0);
 		}
 		
@@ -407,6 +469,7 @@ public class CompilerDriver {
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
+		System.out.println(CompilerDriver.printDepth + "-info     : Print Version Compiler Version and information");
 		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
@@ -414,6 +477,11 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
+	}
+	
+	public void printInfo() {
+		silenced = false;
+		new Message("Version: Snips Compiler Gen.2 " + getVersionString(), Message.Type.INFO);
 	}
 	
 	public void setBurstMode(boolean value, boolean imm) {

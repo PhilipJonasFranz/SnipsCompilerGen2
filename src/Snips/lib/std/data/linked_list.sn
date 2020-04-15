@@ -63,3 +63,20 @@ bool contains(List* lp, int x) {
 	/* Not found */
 	return false;
 }
+
+/*
+ * Finds the first node in the list that has given value.
+ * Returns a pointer to this list node.
+ */
+int* find(List* lp, int x) {
+	ListNode* n = lp->head;
+	while (n->next != 0) {
+		if (n->value == x) {
+			return n;
+		}
+		/* Jump to next */
+		n = n->next;
+	}
+	/* Not found */
+	return -1;
+}
