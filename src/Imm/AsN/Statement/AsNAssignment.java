@@ -42,10 +42,11 @@ public class AsNAssignment extends AsNStatement {
 	}
 	
 	/**
-	 * Assumes that the base address of the array or the start address of the sub array is located in R1.
-	 * @param arr The array to copy.
+	 * Assumes that the base address of the array or the start address of the memory section is located in R1.
+	 * Pops the word it copies of the stack.
+	 * @param size The amound of words to copy.
 	 */
-	public static void copyArray(int size, AsNNode node) {
+	public static void copyStackSection(int size, AsNNode node) {
 		/* Do it sequentially for 8 or less words to copy */
 		if (size <= 8) {
 			int offset = 0;

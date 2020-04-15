@@ -1,0 +1,17 @@
+SOURCE
+struct Point2D {
+	int x;
+	int y;
+}
+
+struct Line2D {
+	Point2D p0;
+	Point2D p1;
+}
+
+int main() {
+	Line2D l = Line2D::(Point2D::(1, 2), Point2D::(3, 4));
+	return l.p0.y;
+}
+TESTCASES
+2

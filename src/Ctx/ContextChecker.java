@@ -20,6 +20,8 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
@@ -43,11 +45,13 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
@@ -135,6 +139,135 @@ public class ContextChecker {
 		
 		scopes.pop();
 		return null;
+	}
+	
+	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
+		/* Set the declarations in the struct type */
+		e.struct.fields = e.declarations;
+		
+		return e.struct;
+	}
+	
+	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
+		if (e.elements.size() != e.typedef.declarations.size()) {
+			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
+		}
+		
+		for (int i = 0; i < e.elements.size(); i++) {
+			TYPE t = e.elements.get(i).check(this);
+			if (!t.isEqual(e.typedef.declarations.get(i).type)) {
+				throw new CTX_EXCEPTION(e.getSource(), "Expression type does not match struct field type: " + t.typeString() + " vs " + e.typedef.declarations.get(i).type.typeString());
+			}
+		}
+		
+		e.type = e.typedef.struct;
+		return e.type;
+	}
+	
+	public TYPE checkStructSelect(StructSelect e) throws CTX_EXCEPTION {
+		
+		/* This method links origins and types manually. This is partially due to the fact
+		 * that for example, a field in a struct does not count as a field identifier in the
+		 * current scope when referencing it. If it was to the check() method, it would report
+		 * an duplicate identifier. */
+		
+		TYPE type = null;
+		
+		/* Get Base Type */
+		if (e.selector instanceof IDRef) {
+			IDRef sel = (IDRef) e.selector;
+			/* Link automatically, identifier is local */
+			type = sel.check(this);
+		}
+		else if (e.selector instanceof ArraySelect) {
+			ArraySelect arr = (ArraySelect) e.selector;
+			type = arr.check(this);
+		}
+		else {
+			throw new CTX_EXCEPTION(e.getSource(), "Base must be variable reference");
+		}
+		
+		if (type == null) {
+			throw new CTX_EXCEPTION(e.getSource(), "Cannot determine type");
+		}
+		
+		/* First selections does deref, this means that the base must be a pointer */
+		if (e.deref) {
+			if (type instanceof POINTER) {
+				POINTER p0 = (POINTER) type;
+				type = p0.targetType;
+			}
+			else {
+				throw new CTX_EXCEPTION(e.selector.getSource(), "Cannot deref non pointer, actual " + type.typeString());
+			}
+		}
+		
+		if (!(type instanceof STRUCT)) {
+			throw new CTX_EXCEPTION(e.getSource(), "Can only select from struct type, actual " + type.typeString());
+		}
+		
+		Expression sel = e.selection;
+		
+		while (true) {
+			if (type instanceof STRUCT) {
+				STRUCT struct = (STRUCT) type;
+				
+				if (sel instanceof StructSelect) {
+					StructSelect sel0 = (StructSelect) sel;
+					
+					if (sel0.selector instanceof IDRef) {
+						type = findField(struct, (IDRef) sel0.selector);
+						
+						if (sel0.deref) {
+							if (!(type instanceof POINTER)) {
+								throw new CTX_EXCEPTION(sel.getSource(), "Cannot deref non pointer, actual " + type.typeString());
+							}
+							else {
+								/* Unwrap pointer, selection does dereference */
+								POINTER p0 = (POINTER) type;
+								type = p0.targetType;
+							}
+						}
+					}
+					else {
+						throw new CTX_EXCEPTION(sel.getSource(), sel0.getClass().getName() + " cannot be a selector");
+					}
+					
+					/* Next selection in chain */
+					sel = sel0.selection;
+				}
+				else if (sel instanceof IDRef) {
+					/* Last selection */
+					type = findField(struct, (IDRef) sel);
+					break;
+				}
+				else {
+					throw new CTX_EXCEPTION(sel.getSource(), sel.getClass().getName() + " cannot be a selector");
+				}
+			}
+			else {
+				throw new CTX_EXCEPTION(e.getSource(), "Cannot select from non struct, actual " + type.typeString());
+			}
+			
+		}
+		
+		e.type = type;
+		return e.type;
+	}
+	
+	private TYPE findField(STRUCT struct, IDRef ref0) throws CTX_EXCEPTION {
+		/* The ID the current selection targets */
+		if (struct.hasField(ref0.id)) {
+			/* Link manually, identifier is not part of current scope */
+			ref0.origin = struct.getField(ref0.id);
+			ref0.type = ref0.origin.type;
+			
+			/* Next type in chain */
+			return ref0.type;
+		}
+		else {
+			throw new CTX_EXCEPTION(ref0.getSource(), "The selected field " + ref0.id + " in the structure " + struct.typeString() + " does not exist");
+		}
 	}
 	
 	public TYPE checkWhileStatement(WhileStatement w) throws CTX_EXCEPTION {
@@ -629,7 +762,7 @@ public class ContextChecker {
 		}
 	}
 	
-	public TYPE checkStructureInit(ArrayInit init) throws CTX_EXCEPTION {
+	public TYPE checkArrayInit(ArrayInit init) throws CTX_EXCEPTION {
 		if (init.elements.isEmpty()) {
 			throw new CTX_EXCEPTION(init.getSource(), "Structure init must have at least one element");
 		}
@@ -752,7 +885,7 @@ public class ContextChecker {
 	 * - Checks that the types of the selection are of type int<br>
 	 * - Amount of selections does not exceed structure dimension<br>
 	 */
-	public TYPE checkElementSelect(ArraySelect select) throws CTX_EXCEPTION {
+	public TYPE checkArraySelect(ArraySelect select) throws CTX_EXCEPTION {
 		if (select.selection.isEmpty()) {
 			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
 		}

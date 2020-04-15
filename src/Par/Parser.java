@@ -27,6 +27,8 @@ import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
@@ -63,6 +65,7 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
@@ -75,6 +78,7 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
+import Util.Pair;
 import Util.Source;
 
 public class Parser {
@@ -85,9 +89,12 @@ public class Parser {
 	
 	HashMap<String, STRUCT> structs = new HashMap();
 	
+	List<Pair<Token, StructTypedef>> structIds = new ArrayList();
+	
 	public Parser(Deque tokens) throws SNIPS_EXCEPTION {
 		if (tokens == null) throw new SNIPS_EXCEPTION("SNIPS_PARSE -> Tokens are null!");
 		tokenStream = tokens;
+		
 		current = tokenStream.pop();
 	}
 	
@@ -146,6 +153,9 @@ public class Parser {
 				}
 				else directives.add(dir);
 			}
+			else if (current.type == TokenType.STRUCT) {
+				elements.add(this.parseStructTypedef());
+			}
 			else {
 				TYPE type = this.parseType();
 				Token identifier = accept(TokenType.IDENTIFIER);
@@ -175,6 +185,22 @@ public class Parser {
 	public Comment parseComment() throws PARSE_EXCEPTION {
 		Token comment = accept(TokenType.COMMENT);
 		return new Comment(comment, comment.getSource());
+	}
+	
+	public StructTypedef parseStructTypedef() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.STRUCT).getSource();
+		Token id = accept(TokenType.STRUCTID);
+		accept(TokenType.LBRACE);
+		
+		List<Declaration> declarations = new ArrayList();
+		while (current.type != TokenType.RBRACE) {
+			declarations.add(this.parseDeclaration());
+		}
+		accept(TokenType.RBRACE);
+		
+		StructTypedef def = new StructTypedef(id, declarations, source);
+		this.structIds.add(new Pair<Token, StructTypedef>(id, def));
+		return def;
 	}
 	
 	public Directive parseDirective() throws PARSE_EXCEPTION {
@@ -502,7 +528,7 @@ public class Parser {
 			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
-			Expression target = this.parseElementSelect();
+			Expression target = this.parseArraySelect();
 			if (target instanceof ArraySelect) {
 				return new ArraySelectLhsId((ArraySelect) target, target.getSource());
 			}
@@ -560,7 +586,33 @@ public class Parser {
 	}
 	
 	protected Expression parseExpression() throws PARSE_EXCEPTION {
-			return this.parseArrayInit();
+			return this.parseStructureInit();
+	}
+	
+	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
+		if (current.type == TokenType.STRUCTID) {
+			Token id = accept();
+			StructTypedef def = this.getStructTypedef(id);
+			
+			accept(TokenType.COLON);
+			accept(TokenType.COLON);
+			
+			accept(TokenType.LPAREN);
+			
+			List<Expression> elements = new ArrayList();
+			while (current.type != TokenType.RBRACE) {
+				Expression expr = this.parseExpression();
+				elements.add(expr);
+				if (current.type == TokenType.COMMA) {
+					accept();
+				}
+				else break;
+			}
+			
+			accept(TokenType.RPAREN);
+			return new StructureInit(def, elements, id.getSource());
+		}
+		else return this.parseArrayInit();
 	}
 	
 	protected Expression parseArrayInit() throws PARSE_EXCEPTION {
@@ -817,11 +869,26 @@ public class Parser {
 			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
 		
-		if (not == null) not = this.parseElementSelect();
+		if (not == null) not = this.parseStructSelect();
 		return not;
 	}
 	
-	protected Expression parseElementSelect() throws PARSE_EXCEPTION {
+	protected Expression parseStructSelect() throws PARSE_EXCEPTION {
+		Expression ref = this.parseArraySelect();
+		
+		if (current.type == TokenType.DOT) {
+			accept();
+			ref = new StructSelect(ref, this.parseStructSelect(), false, ref.getSource());
+		}
+		else if (current.type == TokenType.UNION_ACCESS) {
+			accept();
+			ref = new StructSelect(ref, this.parseStructSelect(), true, ref.getSource());
+		}
+		
+		return ref;
+	}
+	
+	protected Expression parseArraySelect() throws PARSE_EXCEPTION {
 		Expression ref = this.parseIncrDecr();
 		
 		if (current.type == TokenType.LBRACKET) {
@@ -898,9 +965,25 @@ public class Parser {
 		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 	}
+	
+	public StructTypedef getStructTypedef(Token token) {
+		for (Pair<Token, StructTypedef> p : this.structIds) {
+			if (p.getFirst().spelling.equals(token.spelling)) {
+				return p.getSecond();
+			}
+		}
+		return null;
+	}
 
 	protected TYPE parseType() throws PARSE_EXCEPTION {
-		TYPE type = PRIMITIVE.fromToken(accept(TokenGroup.TYPE));
+		TYPE type = null;
+		Token token = accept(TokenGroup.TYPE);
+		
+		StructTypedef def = this.getStructTypedef(token);
+		if (def != null) {
+			type = def.struct;
+		}
+		else type = PRIMITIVE.fromToken(token);
 		
 		while (current.type == TokenType.MUL) {
 			accept();

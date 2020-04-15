@@ -46,6 +46,7 @@ public class Token {
 		DIRECTIVE("#"),
 		BACKSL("\\"),
 		USCORE("_"),
+		STRUCT("struct"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),
@@ -56,6 +57,7 @@ public class Token {
 		RBRACKET("]"),
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
+		UNION_ACCESS("->"),
 		
 		/* Keywords */
 		IF("if"),
@@ -113,6 +115,7 @@ public class Token {
 		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
+		STRUCTID("", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
 		/* Primitive Literals */

@@ -25,6 +25,8 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -249,7 +251,15 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			TypeCast tc = (TypeCast) e;
 			return this.hasAddressReference(tc.expression, dec);
 		}
-		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType) {
+		else if (e instanceof StructureInit) {
+			StructureInit s = (StructureInit) e;
+			boolean ref = false;
+			for (Expression e0 : s.elements) {
+				ref |= this.hasAddressReference(e0, dec);
+			}
+			return ref;
+		}
+		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());

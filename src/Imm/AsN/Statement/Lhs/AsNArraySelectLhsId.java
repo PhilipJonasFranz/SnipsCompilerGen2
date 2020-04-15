@@ -43,7 +43,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			AsNAssignment.copyArray(((ARRAY) select.type).wordsize(), id);
+			AsNAssignment.copyStackSection(((ARRAY) select.type).wordsize(), id);
 		}
 		/* Assign single array cell */
 		else {

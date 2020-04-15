@@ -16,6 +16,8 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -41,8 +43,14 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof ArrayInit) {
 			node = AsNArrayInit.cast((ArrayInit) e, r, map, st); 
 		}
+		else if (e instanceof StructureInit) {
+			node = AsNStructureInit.cast((StructureInit) e, r, map, st); 
+		}
 		else if (e instanceof ArraySelect) {
 			node = AsNArraySelect.cast((ArraySelect) e, r, map, st); 
+		}
+		else if (e instanceof StructSelect) {
+			node = AsNStructSelect.cast((StructSelect) e, r, map, st); 
 		}
 		else if (e instanceof Ternary) {
 			node = AsNTernary.cast((Ternary) e, r, map, st);

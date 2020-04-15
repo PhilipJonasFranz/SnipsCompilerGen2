@@ -1,5 +1,6 @@
 package Par;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class Scanner {
 	
 	private static class ScannerFSM {
 		
-		//List<String> structIds = new ArrayList();
+		List<String> structIds = new ArrayList();
 		
 		/**
 		 * Defines the current accumulation state of the scanner.
@@ -187,6 +188,10 @@ public class Scanner {
 					tokens.add(new Token(TokenType.DECR, new Source(i, a), this.buffer));
 					this.emptyBuffer();
 				}
+				else if (this.buffer.equals("->")) {
+					tokens.add(new Token(TokenType.UNION_ACCESS, new Source(i, a), this.buffer));
+					this.emptyBuffer();
+				}
 				else {
 					tokens.add(new Token(TokenType.SUB, new Source(i, a - this.buffer.length()), this.buffer.substring(0, 1)));
 					this.buffer = this.buffer.substring(1);
@@ -311,6 +316,12 @@ public class Scanner {
 				this.state = ACC_STATE.NONE;
 				return true;
 			}
+			else if (this.buffer.equals("struct")) {
+				tokens.add(new Token(TokenType.STRUCT, new Source(i, a)));
+				this.emptyBuffer();
+				this.state = ACC_STATE.STRUCT_ID;
+				return true;
+			}
 			else if (this.buffer.startsWith("|")) {
 				if (this.buffer.length() == 1)return false;
 				if (this.buffer.equals("||")) {
@@ -397,15 +408,24 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					this.state = ACC_STATE.ID;
+					if (this.state != ACC_STATE.STRUCT_ID) this.state = ACC_STATE.ID;
 				}
 				else if (this.buffer.matches("[0-9]+")) {
 					this.state = ACC_STATE.INT;
 				}
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && this.state == ACC_STATE.ID) {
-					String ID = this.buffer.substring(0, this.buffer.length() - 1);
-					tokens.add(new Token(TokenType.IDENTIFIER, new Source(i, a), ID));
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID)) {
+					String id = this.buffer.substring(0, this.buffer.length() - 1);
+					
+					if (this.state == ACC_STATE.ID) {
+						if (this.structIds.contains(id))
+							tokens.add(new Token(TokenType.STRUCTID, new Source(i, a), id));
+						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(i, a), id));
+					}
+					else {
+						this.structIds.add(id);
+						tokens.add(new Token(TokenType.STRUCTID, new Source(i, a), id));
+					}
 					
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;

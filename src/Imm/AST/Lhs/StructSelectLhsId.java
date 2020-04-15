@@ -9,14 +9,14 @@ import Util.Source;
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class ArraySelectLhsId extends LhsId {
+public class StructSelectLhsId extends LhsId {
 
 			/* --- FIELDS --- */
 	public ArraySelect selection;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ArraySelectLhsId(ArraySelect selection, Source source) {
+	public StructSelectLhsId(ArraySelect selection, Source source) {
 		super(source);
 		this.selection = selection;
 	}
@@ -37,5 +37,7 @@ public class ArraySelectLhsId extends LhsId {
 	public String getFieldName() {
 		return selection.idRef.id;
 	}
+	
+	ERROR
 	
 }

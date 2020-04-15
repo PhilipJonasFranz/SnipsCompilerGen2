@@ -55,9 +55,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 			
 			id.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
-		else {
-			AsNAssignment.copyArray(lhs.expressionType.wordsize(), id);
-		}
+		else AsNAssignment.copyStackSection(lhs.expressionType.wordsize(), id);
 		
 		return id;
 	}

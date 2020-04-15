@@ -37,7 +37,7 @@ public class ArraySelect extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "ElementSelect");
+		System.out.println(this.pad(d) + "ArraySelect");
 		this.shadowRef.print(d + this.printDepthStep, rec);
 		for (Expression e : this.selection) {
 			e.print(d + this.printDepthStep, rec);
@@ -45,7 +45,7 @@ public class ArraySelect extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		return ctx.checkElementSelect(this);
+		return ctx.checkArraySelect(this);
 	}
 	
 }
