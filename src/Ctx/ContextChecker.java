@@ -73,8 +73,11 @@ public class ContextChecker {
 	
 	Stack<Scope> scopes = new Stack();
 	
+	public static ContextChecker checker;
+	
 	public ContextChecker(SyntaxElement AST) {
 		this.AST = AST;
+		checker = this;
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {
@@ -94,15 +97,22 @@ public class ContextChecker {
 				Function f = (Function) s;
 				/* Check main function as entrypoint, if a function is called, context is provided
 				 * and then checked */
-				if (f.functionName.equals("main") && !f.provisosTypes.isEmpty()) {
+				if (f.functionName.equals("main") && !f.manager.provisosTypes.isEmpty()) {
 					throw new CTX_EXCEPTION(f.getSource(), "Function main cannot hold proviso types");
 				}
 				
-				if (f.provisosTypes.isEmpty()) {
-					f.check(this);
+				/* Check for duplicate function name */
+				for (Function f0 : head.functions) {
+					if (f0.functionName.equals(f.functionName)) {
+						throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.functionName);
+					}
 				}
-				else {
-					this.functions.add(f);
+				
+				this.functions.add(f);
+				
+				/* Check only functions with no provisos, proviso functions will be hot checked. */
+				if (f.manager.provisosTypes.isEmpty()) {
+					f.check(this);
 				}
 			}
 			else s.check(this);
@@ -117,26 +127,11 @@ public class ContextChecker {
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
 		
-		if (!f.provisosTypes.isEmpty()) {
-			/* Clone the return type for this proviso config */
-			f.provisosCalls.get(f.provisosCalls.size() - 1).second.first = f.getReturnType().clone();
-		}
-		
 		if (f.getReturnType().wordsize() > 1) {
 			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
 		}
 		
-		/* Prevent duplicates when checking provisos */
-		if (!this.functions.contains(f)) this.functions.add(f);
-		
 		scopes.push(new Scope(scopes.peek()));
-		
-		/* Check for duplicate function name */
-		for (Function f0 : head.functions) {
-			if (f0.functionName.equals(f.functionName) && f.provisosTypes.isEmpty()) {
-				throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.functionName);
-			}
-		}
 		
 		/* Check for duplicate function parameters */
 		if (f.parameters.size() > 1) {
@@ -698,6 +693,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		/* Find the called function */
 		Function f = null;
 		for (Function f0 : this.functions) {
 			if (f0.functionName.equals(i.functionName)) {
@@ -713,12 +709,17 @@ public class ContextChecker {
 			i.calledFunction = f;
 		}
 		
-		/* Provide context by the inline call */
-		if (!f.provisosTypes.isEmpty()) {
-			//System.out.println("Providing Context");
-			f.setContext(i.provisosTypes);
-			//System.out.println("Hot check");
-			f.check(this);
+		if (!f.manager.provisosTypes.isEmpty()) {
+			if (f.manager.containsMapping(i.provisosTypes)) {
+				/* Mapping already exists, just return return type of this specific mapping */
+				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+			}
+			else {
+				/* Create a new context, check function for this specific context */
+				f.setContext(i.provisosTypes);
+				f.check(this);
+				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+			}
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
@@ -737,9 +738,9 @@ public class ContextChecker {
 			}
 		}
 		
-		i.setType(f.getReturnType().clone());
-		
-		f.releaseContext();
+		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.provisosTypes)) {
+			i.setType(f.getReturnType().clone());
+		}
 		
 		return i.getType();
 	}
@@ -759,12 +760,17 @@ public class ContextChecker {
 		else {
 			i.calledFunction = f;
 		}
-		
-		if (!f.provisosTypes.isEmpty()) {
-			//System.out.println("Providing Context");
-			f.setContext(i.provisosTypes);
-			//System.out.println("Hot check");
-			f.check(this);
+
+		if (!f.manager.provisosTypes.isEmpty()) {
+			if (f.manager.containsMapping(i.provisosTypes)) {
+				/* Mapping already exists, just return return type of this specific mapping */
+				return new VOID();
+			}
+			else {
+				/* Create a new context, check function for this specific context */
+				f.setContext(i.provisosTypes);
+				f.check(this);
+			}
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
@@ -875,7 +881,7 @@ public class ContextChecker {
 		TYPE t = tc.expression.check(this);
 		
 		if (t.wordsize() != tc.castType.wordsize()) {
-			throw new CTX_EXCEPTION(tc.getSource(), "Expression type word size must be equal to cast type: " + t.typeString() + " (" + t.wordsize() + ") vs " + tc.castType.typeString() + " (" + tc.castType.wordsize() + ")");
+			throw new CTX_EXCEPTION(tc.getSource(), "Cannot cast " + t.typeString() + " to " + tc.castType.typeString());
 		}
 		
 		tc.setType(tc.castType);

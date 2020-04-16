@@ -43,7 +43,8 @@ public class PROVISO extends TYPE<Void> {
 	
 	public boolean isEqual(TYPE type) {
 		if (this.context == null)
-			return type instanceof PROVISO && ((PROVISO) type).placeholderName.equals(this.placeholderName);
+			return true;
+			//return type instanceof PROVISO && ((PROVISO) type).placeholderName.equals(this.placeholderName);
 		else {
 			if (type instanceof PROVISO) {
 				PROVISO p = (PROVISO) type;

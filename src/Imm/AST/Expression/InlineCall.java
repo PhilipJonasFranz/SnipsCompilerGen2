@@ -19,6 +19,8 @@ public class InlineCall extends Expression {
 	/** Reference to the AST node of the called function */
 	public Function calledFunction;
 	
+	public Function caller;
+	
 	/** List of the provisos types this function is templated with */
 	public List<TYPE> provisosTypes;
 	
@@ -41,7 +43,9 @@ public class InlineCall extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Inline Call: " + this.functionName);
+		System.out.print(this.pad(d) + "Inline Call: " + this.functionName);
+		for (TYPE t : this.provisosTypes) System.out.print(", " + t.typeString());
+		System.out.println();
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}
@@ -52,7 +56,7 @@ public class InlineCall extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		System.out.println("Applied Context: " + this.getClass().getName());
+		//System.out.println("Applied Context: " + this.getClass().getName());
 		
 		for (int i = 0; i < this.provisosTypes.size(); i++) {
 			TYPE pro = this.provisosTypes.get(i);
@@ -62,7 +66,11 @@ public class InlineCall extends Expression {
 				for (int a = 0; a < context.size(); a++) {
 					/* Found proviso in function head, set context */
 					if (context.get(a).isEqual(pro0)) {
-						pro0.setContext(context.get(a));
+						if (context.get(a) instanceof PROVISO) {
+							PROVISO pro1 = (PROVISO) context.get(a);
+							pro0.setContext(pro1.getContext());
+						}
+						else pro0.setContext(context.get(a));
 						break;
 					}
 				}

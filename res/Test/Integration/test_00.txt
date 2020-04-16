@@ -1,11 +1,11 @@
 SOURCE
-int fib(int n) {
+T fib<T>(T n) {
 	if (n < 3) return 1;
-	else return fib(n - 1) + fib(n - 2);
+	else return fib<T>(n - 1) + fib<T>(n - 2);
 }
 
 int main(int a) {
-	return fib(a);
+	return fib<int>(a);
 }
 TESTCASES
 1 1

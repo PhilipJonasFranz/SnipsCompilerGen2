@@ -6,6 +6,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -34,18 +35,24 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, fc.provisosTypes, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, null, fc.provisosTypes, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, Function caller, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		call.clearReg(r, st, 0, 1, 2);
 		
-		/* Load Mapping */
+		try {
+			f.setContext(provisos);
+		} catch (CTX_EXCEPTION e) {
+			e.printStackTrace();
+		}
+		
+		/* Reload mapping for context */
 		List<Pair<Declaration, Integer>> mapping = 
-			((AsNFunction) f.castedNode).parameterMapping;
+			((AsNFunction) f.castedNode).getParameterMapping();
 
 		int stackMapping = 0;
 		
@@ -89,17 +96,7 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		/* Branch to function */
-		String target = f.functionName;
-		
-		if (!f.provisosTypes.isEmpty()) {
-			/* Search for correct proviso and add postfix to target */
-			for (int i = 0; i < f.provisosCalls.size(); i++) {
-				if (f.provisosCalls.get(i).second.second.equals(provisos)) {
-					target += f.provisosCalls.get(i).first;
-					break;
-				}
-			}
-		}
+		String target = f.functionName + f.manager.getPostfix(provisos);
 		
 		ASMLabel functionLabel = new ASMLabel(target);
 		

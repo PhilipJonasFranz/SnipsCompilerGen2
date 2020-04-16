@@ -3,8 +3,8 @@ package Imm.AST;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
 import Ctx.ContextChecker;
+import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Directive.Directive;
 import Imm.AST.Statement.CompoundStatement;
@@ -13,7 +13,6 @@ import Imm.AST.Statement.Statement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Par.Token;
-import Util.Pair;
 import Util.Source;
 
 /**
@@ -22,11 +21,7 @@ import Util.Source;
 public class Function extends CompoundStatement {
 
 			/* --- FIELDS --- */
-	/** List of the provisos types this function is templated with */
-	public List<TYPE> provisosTypes;
-	
-	/** A list that contains the combinations of types this function was templated with */
-	public List<Pair<String, Pair<TYPE, List<TYPE>>>> provisosCalls = new ArrayList();
+	public ProvisoManager manager;
 	
 	private TYPE returnType;
 	
@@ -40,9 +35,14 @@ public class Function extends CompoundStatement {
 		super(statements, source);
 		this.returnType = returnType;
 		this.functionName = functionId.spelling;
-		this.provisosTypes = proviso;
 		this.parameters = parameters;
-		this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>("", new Pair<TYPE, List<TYPE>>(this.returnType, new ArrayList())));
+		
+		this.manager = new ProvisoManager(this.getSource(), proviso);
+		
+		if (proviso.isEmpty()) {
+			/* Add default mapping */
+			this.manager.addProvisoMapping(null, new ArrayList());
+		}
 	}
 	
 	
@@ -71,28 +71,18 @@ public class Function extends CompoundStatement {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		
 		/* Apply context to existing proviso types */
-		for (int i = 0; i < this.provisosTypes.size(); i++) {
-			TYPE pro = this.provisosTypes.get(i);
-			if (!(pro instanceof PROVISO)) {
-				throw new CTX_EXCEPTION(this.getSource(), "Provided Type " + pro.typeString() + " is not a proviso type.");
-			}
-			
-			PROVISO pro0 = (PROVISO) pro;
-			//System.out.println("Applied " + context.get(i).typeString() + " to proviso " + pro0.typeString());
-			pro0.setContext(context.get(i));
-			//System.out.println("New proviso: " + pro0.typeString());
-		}
+		this.manager.setContext(context);
 		
 		/* Apply to parameters */
 		for (Declaration d : this.parameters) {
-			d.setContext(this.provisosTypes);
+			d.setContext(this.manager.provisosTypes);
 		}
 		
 		/* Apply to return type */
 		if (this.returnType instanceof PROVISO) {
 			PROVISO ret = (PROVISO) this.returnType;
-			for (int i = 0; i < this.provisosTypes.size(); i++) {
-				TYPE pro = this.provisosTypes.get(i);
+			for (int i = 0; i < this.manager.provisosTypes.size(); i++) {
+				TYPE pro = this.manager.provisosTypes.get(i);
 				
 				if (pro.isEqual(ret)) {
 					//System.out.println("Applied " + context.get(i).typeString() + " to return proviso " + ret.typeString());
@@ -104,19 +94,17 @@ public class Function extends CompoundStatement {
 		
 		/* Apply to body */
 		for (Statement s : this.body) {
-			s.setContext(this.provisosTypes);
+			s.setContext(this.manager.provisosTypes);
 		}
 		
-		/* Add a new proviso entry, with a label for this special proviso combination, an empty return type and the context */
-		if (this.provisosCalls.size() == 1 && this.provisosCalls.get(0).first.equals("")) this.provisosCalls.remove(0);
-		this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(LabelGen.getLabel(), new Pair<TYPE, List<TYPE>>(null, context)));
+		if (!this.manager.containsMapping(context)) {
+			/* Save this context mapping, save copy of return type */
+			this.manager.addProvisoMapping(this.getReturnType().clone(), context);
+		}
 	}
 
 	public void releaseContext() {
-		for (int i = 0; i < this.provisosTypes.size(); i++) {
-			PROVISO pro0 = (PROVISO) this.provisosTypes.get(i);
-			pro0.releaseContext();
-		}
+		this.manager.releaseContext();
 		
 		for (Declaration d : this.parameters) {
 			d.releaseContext();

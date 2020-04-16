@@ -50,7 +50,7 @@ public class FunctionCall extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		System.out.println("Applied Context: " + this.getClass().getName());
+		//System.out.println("Applied Context: " + this.getClass().getName());
 		
 		for (int i = 0; i < this.provisosTypes.size(); i++) {
 			TYPE pro = this.provisosTypes.get(i);

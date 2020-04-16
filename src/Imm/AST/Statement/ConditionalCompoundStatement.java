@@ -25,12 +25,12 @@ public abstract class ConditionalCompoundStatement extends CompoundStatement {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		super.setContext(context);
-		this.condition.setContext(context);
+		if (this.condition != null) this.condition.setContext(context);
 	}
 
 	public void releaseContext() {
 		super.releaseContext();
-		this.condition.releaseContext();
+		if (this.condition != null) this.condition.releaseContext();
 	}
 
 }

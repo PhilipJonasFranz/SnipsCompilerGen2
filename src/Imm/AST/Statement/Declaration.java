@@ -83,7 +83,8 @@ public class Declaration extends Statement {
 	public TYPE getType() {
 		if (this.type instanceof PROVISO) {
 			PROVISO p = (PROVISO) this.type;
-			return p.getContext();
+			if (p.hasContext()) return p.getContext();
+			else return p;
 		}
 		else return this.type;
 	}

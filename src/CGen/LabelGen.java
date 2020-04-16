@@ -18,6 +18,10 @@ public class LabelGen {
 		return ".L" + c++;
 	}
 	
+	public static String getProvisoPostfix() {
+		return "_P" + c++;
+	}
+	
 	/**
 	 * Resets the label generator. Note that all labels created after resetting are not
 	 * guaranteed to be unique.

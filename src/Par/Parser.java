@@ -139,7 +139,6 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
-		
 		Token old = current;
 		current = tokenStream.get(0);
 		tokenStream.remove(0);
@@ -966,7 +965,12 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			Token id = accept();
-					
+			
+			/* Convert next token */
+			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
+				this.tokenStream.get(0).type = TokenType.PROVISO;
+			}
+			
 			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
 				/* Inline Call */
 				List<TYPE> proviso = this.parseProviso();

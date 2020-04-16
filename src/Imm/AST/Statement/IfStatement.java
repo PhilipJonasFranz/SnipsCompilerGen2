@@ -65,4 +65,16 @@ public class IfStatement extends ConditionalCompoundStatement {
 		return ctx.checkIfStatement(this);
 	}
 	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		super.setContext(context);
+		if (this.condition != null) this.condition.setContext(context);
+		if (this.elseStatement != null) this.elseStatement.setContext(context);
+	}
+
+	public void releaseContext() {
+		super.releaseContext();
+		if (this.condition != null) this.condition.releaseContext();
+		if (this.elseStatement != null) this.elseStatement.releaseContext();
+	}
+	
 }

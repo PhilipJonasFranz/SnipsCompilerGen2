@@ -1,13 +1,12 @@
 SOURCE
-T get<T>(T t) {
-	return t;
+int toInt<K>(K k) {
+	return (int) k;
 }
 
 int main() {
-	int x = get<int>(5);
-	int [3] a = {1, 2, 3};
-	int* y = get<int*>(&a);
-	return x + *(y + 1);
+	bool v = true;
+	int x = (int) v;
+	return x;
 }
 TESTCASES
-7
+1

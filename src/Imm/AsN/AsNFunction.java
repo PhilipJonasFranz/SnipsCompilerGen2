@@ -52,17 +52,15 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		List<ASMInstruction> all = new ArrayList();
 		
-		for (int k = 0; k < f.provisosCalls.size(); k++) {
-			
+		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {
+			/* Reset regs and stack */
 			r = new RegSet();
-			
 			st = new StackSet();
 			
-			if (!f.provisosCalls.get(k).first.equals("")) {
+			if (!f.manager.provisosCalls.get(k).first.equals("")) {
 				/* Set the current proviso call scheme */
 				try {
-					f.setContext(f.provisosCalls.get(k).second.second);
-					f.provisosCalls.remove(f.provisosCalls.size() - 1);
+					f.setContext(f.manager.provisosCalls.get(k).second.second);
 				} catch (CTX_EXCEPTION e) {
 					
 				}
@@ -83,15 +81,15 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
-			ASMLabel label = new ASMLabel(func.source.functionName + f.provisosCalls.get(k).first, true);
+			ASMLabel label = new ASMLabel(func.source.functionName + f.manager.provisosCalls.get(k).first, true);
 			
 			String com = "";
-			if (f.provisosCalls.get(k).first.equals("")) {
+			if (f.manager.provisosCalls.get(k).first.equals("")) {
 				com = "Function: " + f.functionName;
 			}
 			else {
 				com = ((k == 0)? "Function: " + f.functionName + ", " : "") + "Provisos: ";
-				List<TYPE> types = f.provisosCalls.get(k).second.second;
+				List<TYPE> types = f.manager.provisosCalls.get(k).second.second;
 				for (int x = 0; x < types.size(); x++) {
 					com += types.get(x).typeString() + ", ";
 				}
@@ -197,17 +195,17 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Branch back */
 			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
 			
-			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) {
+			if (f.manager.provisosCalls.size() > 1 && k < f.manager.provisosCalls.size() - 1) {
 				func.instructions.add(new ASMSeperator());
 			}
 			
-			if (!f.provisosTypes.isEmpty()) {
+			if (!f.manager.provisosTypes.isEmpty()) {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
 		}
 		
-		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
+		if (!f.manager.provisosTypes.isEmpty()) func.instructions.addAll(all);
 	
 		return func;
 	}
@@ -320,11 +318,12 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Create a parameter mapping that assigns each parameter either a register or the stack
 	 * as a location.
 	 */
-	private List<Pair<Declaration, Integer>> getParameterMapping() {
+	public List<Pair<Declaration, Integer>> getParameterMapping() {
 		int r = 0;
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
+			//dec.print(0, true);
 			int wordSize = dec.getType().wordsize();
 			if (wordSize == 1 && r < 3) {
 				/* Load in register */

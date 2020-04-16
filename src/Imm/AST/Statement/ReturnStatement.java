@@ -42,7 +42,7 @@ public class ReturnStatement extends Statement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		//System.out.println("Applied Context: " + this.getClass().getName());
-		this.value.setContext(context);
+		if (this.value != null) this.value.setContext(context);
 	}
 
 	public void releaseContext() {
