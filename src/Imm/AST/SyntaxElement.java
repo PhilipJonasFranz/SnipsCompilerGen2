@@ -61,6 +61,10 @@ public abstract class SyntaxElement {
 		return pad;
 	}
 	
+	public abstract void setContext(List<TYPE> context) throws CTX_EXCEPTION;
+	
+	public abstract void releaseContext();
+	
 	/**
 	 * Visitor relay for context checking
 	 */

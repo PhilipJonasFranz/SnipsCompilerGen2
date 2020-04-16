@@ -46,7 +46,7 @@ public class AsNStructSelect extends AsNExpression {
 			else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 				/* In Local Stack */
 				int offset = st.getDeclarationInStackByteOffset(ref.origin);
-				offset += (ref.origin.type.wordsize() - 1) * 4;
+				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
 				sel.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
@@ -84,7 +84,7 @@ public class AsNStructSelect extends AsNExpression {
 		
 		while (true) {
 			/* Current selector type */
-			TYPE type = sel0.selector.type;
+			TYPE type = sel0.selector.getType();
 			
 			/* Current selection */
 			Expression selection = sel0.selection;
@@ -130,7 +130,7 @@ public class AsNStructSelect extends AsNExpression {
 			
 		}
 		
-		if (s.type.wordsize() > 1) {
+		if (s.getType().wordsize() > 1) {
 			/* Move address in R1 */
 			sel.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
 			

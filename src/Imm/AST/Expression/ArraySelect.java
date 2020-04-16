@@ -47,5 +47,19 @@ public class ArraySelect extends Expression {
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkArraySelect(this);
 	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.shadowRef.setContext(context);
+		for (Expression e : this.selection) {
+			e.setContext(context);
+		}
+	}
+
+	public void releaseContext() {
+		this.shadowRef.releaseContext();
+		for (Expression e : this.selection) {
+			e.releaseContext();
+		}
+	}
 	
 }

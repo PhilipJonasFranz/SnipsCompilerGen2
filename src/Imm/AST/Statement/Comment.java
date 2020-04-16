@@ -1,5 +1,7 @@
 package Imm.AST.Statement;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
@@ -29,6 +31,14 @@ public class Comment extends Statement {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return null;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		return;
+	}
+
+	public void releaseContext() {
+		return;
 	}
 	
 }

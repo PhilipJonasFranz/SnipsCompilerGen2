@@ -25,13 +25,13 @@ public class AsNDeclaration extends AsNStatement {
 		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
-		if (free != -1 && d.type.wordsize() == 1) {
+		if (free != -1 && d.getType().wordsize() == 1) {
 			/* Free Register exists and declaration fits into a register */
 			dec.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(0)));
 			r.getReg(free).setDeclaration(d);
 		}
 		else {
-			if (d.type.wordsize() == 1) {
+			if (d.getType().wordsize() == 1) {
 				/* Push declaration on the stack */
 				dec.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
 			}
@@ -39,7 +39,7 @@ public class AsNDeclaration extends AsNStatement {
 				/* Pop R0 placeholders pushed by structure init from stack set, but dont add the assembly code 
 				 * to do so, this is so that below the correct declaration can be pushed and lines up with 
 				 * the values on the stack */
-				st.popXWords(d.type.wordsize());
+				st.popXWords(d.getType().wordsize());
 			}
 			
 			/* Push the declaration that covers the popped area */

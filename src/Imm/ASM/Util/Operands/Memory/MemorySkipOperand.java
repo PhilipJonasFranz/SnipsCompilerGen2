@@ -12,7 +12,7 @@ public class MemorySkipOperand extends MemoryOperand {
 	
 	public String toString() {
 		/* Use the type to string conversion to display type as number */
-		return ".skip" + init.type.wordsize() * 4;
+		return ".skip" + init.getType().wordsize() * 4;
 	}
 	
 }

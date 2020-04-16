@@ -37,7 +37,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		
 		if (c.getRight() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.getLeft(), r, map, st).getInstructions());
-			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.getRight()).type).value)));
+			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.getRight()).getType()).value)));
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */

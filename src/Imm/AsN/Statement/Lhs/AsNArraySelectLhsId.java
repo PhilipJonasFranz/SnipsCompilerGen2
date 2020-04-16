@@ -31,7 +31,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 		ArraySelect select = lhs.selection;
 		
 		/* Assign sub Array */
-		if (select.type instanceof ARRAY) {
+		if (select.getType() instanceof ARRAY) {
 			/* Save to param Stack */
 			if (st.getParameterByteOffset(select.idRef.origin) != -1) 
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.PARAM_SUB, id, select, r, map, st);
@@ -43,7 +43,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			AsNAssignment.copyStackSection(((ARRAY) select.type).wordsize(), id);
+			AsNAssignment.copyStackSection(((ARRAY) select.getType()).wordsize(), id);
 		}
 		/* Assign single array cell */
 		else {

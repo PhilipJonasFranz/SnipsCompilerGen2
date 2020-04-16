@@ -47,5 +47,13 @@ public class Program extends SyntaxElement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.check();
 	}
+
+	public void setContext(List<TYPE> setContext) {
+		return;
+	}
+
+	public void releaseContext() {
+		return;
+	}
 	
 }

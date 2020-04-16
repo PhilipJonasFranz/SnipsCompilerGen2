@@ -20,9 +20,9 @@ public class AsNAtom extends AsNExpression {
 		atom.clearReg(r, st, 0);
 		
 		/* Make sure only primitives can be in an atom */
-		assert(a.type instanceof PRIMITIVE);
+		assert(a.getType() instanceof PRIMITIVE);
 		
-		atom.instructions.add(new ASMMov(new RegOperand(target), new ImmOperand(Integer.parseInt(a.type.sourceCodeRepresentation()))));
+		atom.instructions.add(new ASMMov(new RegOperand(target), new ImmOperand(Integer.parseInt(a.getType().sourceCodeRepresentation()))));
 		
 		return atom;
 	}

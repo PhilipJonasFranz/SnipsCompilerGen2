@@ -408,15 +408,23 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID) this.state = ACC_STATE.ID;
+					if (this.state != ACC_STATE.STRUCT_ID) {
+						this.state = ACC_STATE.ID;
+					}
 				}
 				else if (this.buffer.matches("[0-9]+")) {
 					this.state = ACC_STATE.INT;
 				}
 				
+				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID)) {
-					String id = this.buffer.substring(0, this.buffer.length() - 1);
+					/* Ignore Empty buffer */
+					if (this.buffer.trim().isEmpty()) {
+						return false;
+					}
 					
+					String id = this.buffer.substring(0, this.buffer.length() - 1);
+				
 					if (this.state == ACC_STATE.ID) {
 						if (this.structIds.contains(id))
 							tokens.add(new Token(TokenType.STRUCTID, new Source(i, a), id));

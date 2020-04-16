@@ -1,5 +1,7 @@
 package Imm.AST.Expression.Boolean;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -35,6 +37,18 @@ public class Ternary extends Expression {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkTernary(this);
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.condition.setContext(context);
+		this.leftOperand.setContext(context);
+		this.rightOperand.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.condition.releaseContext();
+		this.leftOperand.releaseContext();
+		this.rightOperand.releaseContext();
 	}
 	
 }

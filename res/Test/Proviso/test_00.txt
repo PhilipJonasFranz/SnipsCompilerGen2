@@ -1,0 +1,12 @@
+SOURCE
+T get<T>() {
+	return (T) 5;
+}
+
+int main() {
+	int x = get<int>();
+	bool b = get<bool>();
+	return (b)? x : 2;
+}
+TESTCASES
+5

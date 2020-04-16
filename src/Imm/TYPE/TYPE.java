@@ -1,5 +1,7 @@
 package Imm.TYPE;
 
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Par.Token;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,5 +37,13 @@ public abstract class TYPE<T> {
 	public abstract int wordsize();
 	
 	public abstract TYPE getCoreType();
+	
+	public static TYPE fromToken(Token token) {
+		TYPE t = PRIMITIVE.fromToken(token);
+		if (t == null) return new PROVISO(token.spelling);
+		else return t;
+	}
+	
+	public abstract TYPE clone();
 	
 }

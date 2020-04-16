@@ -54,7 +54,7 @@ public class AsNFunctionCall extends AsNStatement {
 			if (p.getSecond() == -1) {
 				stackMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
-				if (parameters.get(i).type.wordsize() == 1) {
+				if (parameters.get(i).getType().wordsize() == 1) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
 				r.getReg(0).free();
@@ -98,7 +98,7 @@ public class AsNFunctionCall extends AsNStatement {
 			int size = 0;
 			for (Pair<Declaration, Integer> p  : mapping) {
 				if (p.getSecond() == -1) {
-					size += p.getFirst().type.wordsize();
+					size += p.getFirst().getType().wordsize();
 				}
 			}
 			

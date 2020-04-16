@@ -24,7 +24,7 @@ public class STRUCT extends COMPOSIT {
 			if (struct.fields.size() == this.fields.size()) {
 				boolean isEqual = true;
 				for (int i = 0; i < this.fields.size(); i++) {
-					isEqual &= this.fields.get(i).type.isEqual(struct.fields.get(i).type);
+					isEqual &= this.fields.get(i).getType().isEqual(struct.fields.get(i).getType());
 				}
 				return isEqual;
 			}
@@ -48,7 +48,7 @@ public class STRUCT extends COMPOSIT {
 			if (dec.fieldName.equals(name)) {
 				return offset * 4;
 			}
-			else offset += dec.type.wordsize();
+			else offset += dec.getType().wordsize();
 		}
 		return -1;
 	}
@@ -65,7 +65,7 @@ public class STRUCT extends COMPOSIT {
 	public String typeString() {
 		String s = this.typedef.structName + "<";
 		for (Declaration t : fields) {
-			s += t.type.typeString() + ",";
+			s += t.getType().typeString() + ",";
 		}
 		s = s.substring(0, s.length() - 1);
 		s += ">";
@@ -83,7 +83,7 @@ public class STRUCT extends COMPOSIT {
 	public int wordsize() {
 		int sum = 0;
 		for (Declaration dec : this.fields) {
-			sum += dec.type.wordsize();
+			sum += dec.getType().wordsize();
 		}
 		return sum;
 	}
@@ -91,6 +91,11 @@ public class STRUCT extends COMPOSIT {
 	public TYPE getCoreType() {
 		/* Struct acts as its own type, so its is own core type. */
 		return this;
+	}
+
+	public TYPE clone() {
+		STRUCT s = new STRUCT(this.typedef);
+		return s;
 	}
 	
 }

@@ -1,7 +1,10 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -37,6 +40,36 @@ public class TypeCast extends Expression {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkTypeCast(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		//System.out.println("Applied Context: " + this.getClass().getName());
+		
+		if (this.castType instanceof PROVISO) {
+			PROVISO pro = (PROVISO) this.castType;
+			boolean found = false;
+			for (int i = 0; i < context.size(); i++) {
+				if (context.get(i).isEqual(pro)) {
+					pro.setContext(context.get(i));
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found) {
+				throw new CTX_EXCEPTION(this.getSource(), "Unknown proviso " + pro.typeString());
+			}
+		}
+		
+		this.expression.setContext(context);
+	}
+
+	public void releaseContext() {
+		if (this.castType instanceof PROVISO) {
+			PROVISO pro = (PROVISO) this.castType;
+			pro.releaseContext();
+		}
+		this.expression.releaseContext();
 	}
 	
 }

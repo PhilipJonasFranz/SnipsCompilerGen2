@@ -1,8 +1,11 @@
 package Imm.AST.Statement;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Par.Token;
 import Util.Source;
@@ -15,7 +18,7 @@ public class Declaration extends Statement {
 			/* --- FIELDS --- */
 	public String fieldName;
 		
-	public TYPE type;
+	private TYPE type;
 	
 	public Expression value;
 	
@@ -49,6 +52,30 @@ public class Declaration extends Statement {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkDeclaration(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		System.out.println("Applied Context: " + this.getClass().getName());
+		if (this.value != null) this.value.setContext(context);
+	}
+
+	public void releaseContext() {
+		if (this.value != null) this.value.releaseContext();
+	}
+	
+	/** 
+	 * Return the current context, or the actual type.
+	 */
+	public TYPE getType() {
+		if (this.type instanceof PROVISO) {
+			PROVISO p = (PROVISO) this.type;
+			return p.getContext();
+		}
+		else return this.type;
+	}
+	
+	public void setType(TYPE type) {
+		this.type = type;
 	}
 	
 }

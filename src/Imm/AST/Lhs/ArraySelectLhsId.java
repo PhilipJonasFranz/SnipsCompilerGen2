@@ -1,5 +1,7 @@
 package Imm.AST.Lhs;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.ArraySelect;
@@ -36,6 +38,14 @@ public class ArraySelectLhsId extends LhsId {
 
 	public String getFieldName() {
 		return selection.idRef.id;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.selection.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.selection.releaseContext();
 	}
 	
 }

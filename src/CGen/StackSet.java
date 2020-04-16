@@ -104,7 +104,7 @@ public class StackSet {
 				words++;
 			}
 			else {
-				words += this.stack.peek().declaration.type.wordsize();
+				words += this.stack.peek().declaration.getType().wordsize();
 			}
 			this.stack.pop();
 		}
@@ -145,7 +145,7 @@ public class StackSet {
 				foundHook = true;
 			}
 			else {
-				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
+				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.getType().wordsize() * 4;
 				else off += 4;
 			}
 		}
@@ -163,7 +163,7 @@ public class StackSet {
 				else off += 4;
 			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
 				if (stack.get(i).declaration.equals(dec)) break;
-				off += (stack.get(i).declaration.type.wordsize() * 4);
+				off += (stack.get(i).declaration.getType().wordsize() * 4);
 			}
 		}
 		

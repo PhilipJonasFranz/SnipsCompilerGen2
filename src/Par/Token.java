@@ -115,6 +115,7 @@ public class Token {
 		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
+		PROVISO("",					TokenGroup.TYPE), 
 		STRUCTID("", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
@@ -132,7 +133,7 @@ public class Token {
 		
 		final String spelling;
 		
-		final TokenGroup group;
+		TokenGroup group;
 		
 		private TokenType(String spelling, TokenGroup tokenGroup) {
 			this.spelling = spelling;

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -184,7 +183,7 @@ public class CompilerDriver {
 					/* --- SCANNING --- */
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
 			Scanner scanner = new Scanner(code);
-			Deque deque = scanner.scan();
+			List<Token> deque = scanner.scan();
 			
 			
 					/* --- PARSING --- */
@@ -231,6 +230,8 @@ public class CompilerDriver {
 			log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
 		
 			if (imm) AST.print(4, true);
+			
+			//AST.print(0, true);
 			
 			
 					/* --- CODE GENERATION --- */
@@ -324,7 +325,7 @@ public class CompilerDriver {
 			try {
 					/* --- SCANNING --- */
 				Scanner scanner = new Scanner(code);
-				Deque deque = scanner.scan();
+				List<Token> deque = scanner.scan();
 				
 				
 						/* --- PARSING --- */

@@ -1,5 +1,7 @@
 package Imm.AST.Lhs;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Deref;
@@ -53,6 +55,14 @@ public class PointerLhsId extends LhsId {
 			return ((ArraySelect) deref.expression).idRef.origin.fieldName;
 		}
 		else return null;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.shadowDeref.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.shadowDeref.releaseContext();
 	}
 	
 }

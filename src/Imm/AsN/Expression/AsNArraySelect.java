@@ -54,7 +54,7 @@ public class AsNArraySelect extends AsNExpression {
 		
 		/* Array is parameter, load from parameter stack */
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-			if (s.type instanceof ARRAY) {
+			if (s.getType() instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
 			}
 			else {
@@ -63,7 +63,7 @@ public class AsNArraySelect extends AsNExpression {
 		}
 		else if (map.declarationLoaded(s.idRef.origin)) {
 			/* Data Memory */
-			if (s.type instanceof ARRAY) {
+			if (s.getType() instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
 			}
 			else {
@@ -71,7 +71,7 @@ public class AsNArraySelect extends AsNExpression {
 			}
 		}
 		else {
-			if (s.type instanceof ARRAY) {
+			if (s.getType() instanceof ARRAY) {
 				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
 			}
 			else {
@@ -79,9 +79,9 @@ public class AsNArraySelect extends AsNExpression {
 			}
 		}
 		
-		if (s.type instanceof ARRAY) {
+		if (s.getType() instanceof ARRAY) {
 			/* Loop through array word size and copy values */
-			subArrayCopy(select, (ARRAY) s.type);
+			subArrayCopy(select, (ARRAY) s.getType());
 		}
 		else {
 			/* Load */
@@ -99,10 +99,10 @@ public class AsNArraySelect extends AsNExpression {
 			node.instructions.add(sum);
 			
 			ARRAY superType = null;
-			if (s.idRef.type instanceof POINTER) {
-				superType = (ARRAY) ((POINTER) s.idRef.type).targetType;
+			if (s.idRef.getType() instanceof POINTER) {
+				superType = (ARRAY) ((POINTER) s.idRef.getType()).targetType;
 			}
-			else superType = (ARRAY) s.idRef.origin.type;
+			else superType = (ARRAY) s.idRef.origin.getType();
 			
 			/* Handle selections differently, since last selection does not result in primitive. 
 			 * 		This algorithm is a custom variation of the loadSumR2 method. */
@@ -201,7 +201,7 @@ public class AsNArraySelect extends AsNExpression {
 		int offset = 0;
 		if (selectType == SELECT_TYPE.LOCAL_SINGLE || selectType == SELECT_TYPE.LOCAL_SUB) {
 			offset = st.getDeclarationInStackByteOffset(s.idRef.origin);
-			offset += (s.idRef.origin.type.wordsize() - 1) * 4;
+			offset += (s.idRef.origin.getType().wordsize() - 1) * 4;
 		}
 		else offset = st.getParameterByteOffset(s.idRef.origin);
 		

@@ -45,7 +45,7 @@ public class ARRAY extends COMPOSIT {
 	public int getLength() {
 		if (this.length0 == null) return this.length;
 		else {
-			this.length = ((INT) ((Atom) this.length0).type).value;
+			this.length = ((INT) ((Atom) this.length0).getType()).value;
 			this.length0 = null;
 			this.wordSize = this.elementType.wordsize() * this.length;
 			return this.length;
@@ -82,11 +82,16 @@ public class ARRAY extends COMPOSIT {
 	@Override
 	public int wordsize() {
 		if (this.length0 != null) {
-			this.length = ((INT) ((Atom) this.length0).type).value;
+			this.length = ((INT) ((Atom) this.length0).getType()).value;
 			this.wordSize = this.elementType.wordsize() * this.length;
 		}
 		
 		return this.wordSize;
+	}
+
+	public TYPE clone() {
+		ARRAY arr = new ARRAY(this.elementType.clone(), this.length0);
+		return arr;
 	}
 
 }

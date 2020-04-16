@@ -277,7 +277,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
-			int wordSize = dec.type.wordsize();
+			int wordSize = dec.getType().wordsize();
 			if (wordSize == 1 && r < 3) {
 				/* Load in register */
 				mapping.add(new Pair(dec, r));

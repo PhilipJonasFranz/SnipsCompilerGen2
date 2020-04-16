@@ -56,10 +56,10 @@ public class AsNTernary extends AsNExpression {
 			tern.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			tern.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+			tern.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			
 			/* Condition was false, jump to else */
-			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(loadFalse)));
+			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loadFalse)));
 		}
 		
 		/* Load true result */

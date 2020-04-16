@@ -50,5 +50,13 @@ public class StructTypedef extends SyntaxElement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkStructTypedef(this);
 	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		for (Declaration dec : this.declarations) dec.setContext(context);
+	}
+
+	public void releaseContext() {
+		for (Declaration dec : this.declarations) dec.releaseContext();
+	}
 	
 }

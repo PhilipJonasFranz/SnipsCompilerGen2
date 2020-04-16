@@ -1,5 +1,7 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
@@ -46,6 +48,14 @@ public class IDRefWriteback extends Expression {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkIDRefWriteback(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.shadowRef.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.shadowRef.releaseContext();
 	}
 	
 }

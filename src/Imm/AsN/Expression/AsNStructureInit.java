@@ -62,7 +62,7 @@ public class AsNStructureInit extends AsNExpression {
 				node.instructions.addAll(AsNExpression.cast(elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-				if (!(elements.get(i).type instanceof ARRAY || elements.get(i).type instanceof STRUCT)) {
+				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
 					node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 					st.push(REGISTER.R0);
 				}

@@ -28,12 +28,12 @@ public class AsNAnd extends AsNBinaryExpression {
 		and.clearReg(r, st, 0, 1);
 		
 		if (a.getLeft() instanceof Atom && a.getRight() instanceof Atom) {
-			int value0 = ((INT) ((Atom) a.getLeft()).type).value;
-			int value1 = ((INT) ((Atom) a.getRight()).type).value;
+			int value0 = ((INT) ((Atom) a.getLeft()).getType()).value;
+			int value1 = ((INT) ((Atom) a.getRight()).getType()).value;
 			and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand((value0 == 0 || value1 == 0)? 0 : 1)));
 		}
 		else if (a.getLeft() instanceof Atom) {
-			int value = ((INT) ((Atom) a.getLeft()).type).value;
+			int value = ((INT) ((Atom) a.getLeft()).getType()).value;
 			if (value == 0) {
 				and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			}
@@ -47,7 +47,7 @@ public class AsNAnd extends AsNBinaryExpression {
 			}
 		}
 		else if (a.getRight() instanceof Atom) {
-			int value = ((INT) ((Atom) a.getRight()).type).value;
+			int value = ((INT) ((Atom) a.getRight()).getType()).value;
 			if (value == 0) {
 				and.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			}

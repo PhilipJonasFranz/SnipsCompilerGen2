@@ -1,5 +1,7 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
@@ -38,6 +40,14 @@ public class IDRef extends Expression {
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkIDRef(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		return;
+	}
+
+	public void releaseContext() {
+		return;
 	}
 	
 }

@@ -59,7 +59,7 @@ public class AsNIdRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			if (i.origin.type.wordsize() == 1) {
+			if (i.origin.getType().wordsize() == 1) {
 				/* Load value from memory */
 				
 				ASMDataLabel label = map.resolve(i.origin);
@@ -73,7 +73,7 @@ public class AsNIdRef extends AsNExpression {
 			}
 			else {
 				/* Copy on stack */
-				if (i.origin.type instanceof ARRAY) {
+				if (i.origin.getType() instanceof ARRAY) {
 					ref.loadArray(i, r, map, st);
 				}
 			}
@@ -81,8 +81,8 @@ public class AsNIdRef extends AsNExpression {
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
-			if (i.origin.type.wordsize() > 1) {
-				if (i.origin.type instanceof ARRAY) {
+			if (i.origin.getType().wordsize() > 1) {
+				if (i.origin.getType() instanceof ARRAY) {
 					ref.loadArray(i, r, map, st);
 				}
 			}
@@ -111,7 +111,7 @@ public class AsNIdRef extends AsNExpression {
 	}
 	
 	protected void loadArray(IDRef i, RegSet r, MemoryMap map, StackSet st) {
-		ARRAY arr = (ARRAY) i.origin.type;
+		ARRAY arr = (ARRAY) i.origin.getType();
 		
 		r.free(0);
 		

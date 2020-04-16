@@ -52,7 +52,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		}
 		/* Variable is global variable and type is primitive, store to memory.
 		 * 		Other types in memory are handled down below. */
-		else if (map.declarationLoaded(ref.origin) && ref.origin.type instanceof PRIMITIVE) {
+		else if (map.declarationLoaded(ref.origin) && ref.origin.getType() instanceof PRIMITIVE) {
 			ASMDataLabel label = map.resolve(ref.origin);
 			
 			/* Load memory address */
@@ -71,7 +71,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		}
 		/* Store to stack */
 		else {
-			if (ref.origin.type instanceof PRIMITIVE) {
+			if (ref.origin.getType() instanceof PRIMITIVE) {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
 				
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
@@ -86,7 +86,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
 					new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
 			}
-			else if (ref.origin.type instanceof ARRAY) {
+			else if (ref.origin.getType() instanceof ARRAY) {
 				/* Use light variations of the addressing injector from AsNElementSelect, since we 
 				 * dont have to add the sum to the sub structure.
 				 */
@@ -109,7 +109,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				/* Local */
 				else {
 					int offset = st.getDeclarationInStackByteOffset(ref.origin);
-					offset += (ref.origin.type.wordsize() - 1) * 4;
+					offset += (ref.origin.getType().wordsize() - 1) * 4;
 					
 					/* Load the start of the structure into R1 */
 					ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset));
@@ -118,7 +118,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				}
 				
 				/* Copy array */
-				AsNAssignment.copyStackSection(((ARRAY) lhs.origin.type).wordsize(), id);
+				AsNAssignment.copyStackSection(((ARRAY) lhs.origin.getType()).wordsize(), id);
 			}
 		}
 		

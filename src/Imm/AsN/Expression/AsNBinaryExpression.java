@@ -102,11 +102,11 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		
 		/* Some assertions for debug purposes */
 		if (b.getLeft() instanceof TypeCast) {
-			assert(b.getLeft().type instanceof PRIMITIVE);
+			assert(b.getLeft().getType() instanceof PRIMITIVE);
 		}
 		
 		if (b.getRight() instanceof TypeCast) {
-			assert(b.getRight().type instanceof PRIMITIVE);
+			assert(b.getRight().getType() instanceof PRIMITIVE);
 		}
 		
 		/* If operands are TypeCasts, unrwrap expression from type cast */
@@ -171,12 +171,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Partial Atomic Loading Left */
 			if (b.getLeft() instanceof Atom) {
 				this.loadOperand(b.getRight(), 2, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.getLeft()).type).value)));
+				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.getLeft()).getType()).value)));
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.getRight() instanceof Atom) {
 				this.loadOperand(b.getLeft(), 1, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.getRight()).type).value)));
+				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.getRight()).getType()).value)));
 			}
 			else m.generatePrimitiveLoaderCode(m, b, r, map, st, 1, 2);
 			
@@ -209,8 +209,8 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	protected void atomicPrecalc(BinaryExpression b, BinarySolver s) {
 		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
 			Atom l0 = (Atom) b.getLeft(), r0 = (Atom) b.getRight();
-			if (l0.type instanceof INT && r0.type instanceof INT) {
-				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
+			if (l0.getType() instanceof INT && r0.getType() instanceof INT) {
+				INT i0 = (INT) l0.getType(), i1 = (INT) r0.getType();
 				this.instructions.add(new ASMMov(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
 			}
 		}

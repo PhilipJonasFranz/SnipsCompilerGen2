@@ -24,7 +24,7 @@ public class MemoryWordOperand extends MemoryOperand {
 		String s = "";
 		if (val instanceof Atom) {
 			Atom atom = (Atom) val;
-			s += ".word " + atom.type.sourceCodeRepresentation();
+			s += ".word " + atom.getType().sourceCodeRepresentation();
 		}
 		else {
 			ArrayInit init = (ArrayInit) val;
@@ -36,9 +36,9 @@ public class MemoryWordOperand extends MemoryOperand {
 					String v = null;
 					if (init.elements.get(i) instanceof UnaryMinus) {
 						UnaryMinus minus = (UnaryMinus) init.elements.get(i);
-						v = "-" + ((Atom) minus.getOperand()).type.sourceCodeRepresentation();
+						v = "-" + ((Atom) minus.getOperand()).getType().sourceCodeRepresentation();
 					}
-					else v = ((Atom) init.elements.get(i)).type.sourceCodeRepresentation();
+					else v = ((Atom) init.elements.get(i)).getType().sourceCodeRepresentation();
 					s += CompilerDriver.printDepth + CompilerDriver.printDepth + ".word " + v + "\n";
 				}
 			}

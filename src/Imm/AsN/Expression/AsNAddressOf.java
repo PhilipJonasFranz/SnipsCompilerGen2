@@ -55,7 +55,7 @@ public class AsNAddressOf extends AsNExpression {
 			else {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(ref.origin);
-				offset += (ref.origin.type.wordsize() - 1) * 4;
+				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOperand(target), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
@@ -64,7 +64,7 @@ public class AsNAddressOf extends AsNExpression {
 		else if (a.expression instanceof ArraySelect) {
 			ArraySelect select = (ArraySelect) a.expression;
 			
-			if (select.type instanceof ARRAY)
+			if (select.getType() instanceof ARRAY)
 				AsNArraySelect.loadSumR2(aof, select, r, map, st, true);
 			else 
 				AsNArraySelect.loadSumR2(aof, select, r, map, st, false);
@@ -88,7 +88,7 @@ public class AsNAddressOf extends AsNExpression {
 			else {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(origin);
-				offset += (origin.type.wordsize() - 1) * 4;
+				offset += (origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));

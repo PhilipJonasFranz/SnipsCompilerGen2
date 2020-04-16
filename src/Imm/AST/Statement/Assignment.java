@@ -1,5 +1,7 @@
 package Imm.AST.Statement;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -52,6 +54,16 @@ public class Assignment extends Statement {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkAssignment(this);
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.lhsId.setContext(context);
+		this.value.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.lhsId.releaseContext();
+		this.value.releaseContext();
 	}
 	
 }

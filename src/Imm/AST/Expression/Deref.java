@@ -1,5 +1,7 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
@@ -33,6 +35,14 @@ public class Deref extends Expression {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkDeref(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.expression.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.expression.releaseContext();
 	}
 	
 }

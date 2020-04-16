@@ -48,4 +48,10 @@ public class POINTER extends COMPOSIT {
 		return 1;
 	}
 
+	public TYPE clone() {
+		POINTER p = new POINTER(this.targetType.clone());
+		p.coreType = this.coreType.clone();
+		return p;
+	}
+
 }

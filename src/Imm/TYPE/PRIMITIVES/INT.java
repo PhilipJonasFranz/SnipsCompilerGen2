@@ -1,5 +1,6 @@
 package Imm.TYPE.PRIMITIVES;
 
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 
 public class INT extends PRIMITIVE<Integer> {
@@ -18,7 +19,11 @@ public class INT extends PRIMITIVE<Integer> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		return type instanceof INT;
+		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			return p.isEqual(this);
+		}
+		else return type instanceof INT;
 	}
 	
 	public String typeString() {
@@ -27,6 +32,12 @@ public class INT extends PRIMITIVE<Integer> {
 
 	public String sourceCodeRepresentation() {
 		return "" + this.value;
+	}
+	
+	public TYPE clone() {
+		INT b = new INT();
+		if (this.value != null) b.setValue(this.value + "");
+		return b;
 	}
 	
 }

@@ -29,4 +29,10 @@ public class VOID extends PRIMITIVE<Void> {
 		return null;
 	}
 	
+	public TYPE clone() {
+		VOID b = new VOID();
+		if (this.value != null) b.setValue(this.value + "");
+		return b;
+	}
+	
 }
