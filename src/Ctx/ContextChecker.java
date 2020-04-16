@@ -117,6 +117,11 @@ public class ContextChecker {
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
 		
+		if (!f.provisosTypes.isEmpty()) {
+			/* Clone the return type for this proviso config */
+			f.provisosCalls.get(f.provisosCalls.size() - 1).second.first = f.getReturnType().clone();
+		}
+		
 		if (f.getReturnType().wordsize() > 1) {
 			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
 		}
@@ -156,7 +161,7 @@ public class ContextChecker {
 		
 		this.currentFunction.pop();
 		scopes.pop();
-		return null;
+		return f.getReturnType();
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {

@@ -55,7 +55,21 @@ public class Declaration extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		System.out.println("Applied Context: " + this.getClass().getName());
+		//System.out.println("Applied Context: " + this.getClass().getName());
+		
+		/* Apply to declaration type */
+		if (this.type instanceof PROVISO) {
+			PROVISO p = (PROVISO) this.type;
+			for (int i = 0; i < context.size(); i++) {
+				TYPE pro = context.get(i);
+				
+				if (pro.isEqual(p)) {
+					p.setContext(context.get(i));
+				}
+			}
+		}
+		
+		/* Apply to value */
 		if (this.value != null) this.value.setContext(context);
 	}
 

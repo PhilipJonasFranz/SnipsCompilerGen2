@@ -24,6 +24,7 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.TYPE;
 import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
@@ -33,12 +34,12 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, fc.provisosTypes, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		call.clearReg(r, st, 0, 1, 2);
 		
@@ -88,7 +89,20 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		/* Branch to function */
-		ASMLabel functionLabel = (ASMLabel) f.castedNode.instructions.get(0);
+		String target = f.functionName;
+		
+		if (!f.provisosTypes.isEmpty()) {
+			/* Search for correct proviso and add postfix to target */
+			for (int i = 0; i < f.provisosCalls.size(); i++) {
+				if (f.provisosCalls.get(i).second.second.equals(provisos)) {
+					target += f.provisosCalls.get(i).first;
+					break;
+				}
+			}
+		}
+		
+		ASMLabel functionLabel = new ASMLabel(target);
+		
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
 		branch.comment = new ASMComment("Call " + f.functionName);
 		call.instructions.add(branch);

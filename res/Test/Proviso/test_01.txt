@@ -1,0 +1,13 @@
+SOURCE
+T get<T>(T t) {
+	return t;
+}
+
+int main() {
+	int x = get<int>(5);
+	int [3] a = {1, 2, 3};
+	int* y = get<int*>(&a);
+	return x + *(y + 1);
+}
+TESTCASES
+7

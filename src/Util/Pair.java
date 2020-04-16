@@ -10,9 +10,9 @@ public class Pair<K, V> {
 
 			/* --- FIELDS --- */
 	/** The first component. */
-	private K first;
+	public K first;
 	
 	/* The second component */
-	private V second;
+	public V second;
 	
 }
