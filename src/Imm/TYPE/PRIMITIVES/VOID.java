@@ -18,7 +18,8 @@ public class VOID extends PRIMITIVE<Void> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		return type instanceof VOID;
+		/* Acts as dont care */
+		return true;
 	}
 	
 	public String typeString() {

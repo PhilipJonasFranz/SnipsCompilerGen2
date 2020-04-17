@@ -5,6 +5,7 @@ import java.util.List;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.VOID;
 
 public class STRUCT extends COMPOSIT {
 
@@ -19,6 +20,7 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public boolean isEqual(TYPE type) {
+		if (type instanceof VOID) return true;
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
 			if (struct.fields.size() == this.fields.size()) {

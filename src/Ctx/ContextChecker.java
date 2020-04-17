@@ -144,7 +144,12 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Declaration d : f.parameters) d.check(this);
+		for (Declaration d : f.parameters) {
+			d.check(this);
+			if (d.getType().getCoreType() instanceof VOID) {
+				new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN);
+			}
+		}
 		
 		head.functions.add(f);
 		this.currentFunction.push(f);
@@ -224,21 +229,21 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(e.getSource(), "Can only select from struct type, actual " + type.typeString());
 		}
 		
-		Expression sel = e.selection;
+		Expression selection = e.selection;
 		
 		while (true) {
 			if (type instanceof STRUCT) {
 				STRUCT struct = (STRUCT) type;
 				
-				if (sel instanceof StructSelect) {
-					StructSelect sel0 = (StructSelect) sel;
+				if (selection instanceof StructSelect) {
+					StructSelect sel0 = (StructSelect) selection;
 					
 					if (sel0.selector instanceof IDRef) {
 						type = findField(struct, (IDRef) sel0.selector);
 						
 						if (sel0.deref) {
 							if (!(type instanceof POINTER)) {
-								throw new CTX_EXCEPTION(sel.getSource(), "Cannot deref non pointer, actual " + type.typeString());
+								throw new CTX_EXCEPTION(selection.getSource(), "Cannot deref non pointer, actual " + type.typeString());
 							}
 							else {
 								/* Unwrap pointer, selection does dereference */
@@ -247,20 +252,48 @@ public class ContextChecker {
 							}
 						}
 					}
+					else if (sel0.selector instanceof ArraySelect) {
+						/* Push disjunct scope */
+						this.scopes.push(new Scope(null));
+						
+						/* Add declarations for struct */
+						for (Declaration dec : struct.fields) 
+							this.scopes.peek().addDeclaration(dec);
+						
+						ArraySelect arr = (ArraySelect) sel0.selector;
+						type = arr.check(this);
+						
+						this.scopes.pop();
+					}
 					else {
-						throw new CTX_EXCEPTION(sel.getSource(), sel0.getClass().getName() + " cannot be a selector");
+						throw new CTX_EXCEPTION(selection.getSource(), sel0.selector.getClass().getName() + " cannot be a selector");
 					}
 					
 					/* Next selection in chain */
-					sel = sel0.selection;
+					selection = sel0.selection;
 				}
-				else if (sel instanceof IDRef) {
+				else if (selection instanceof IDRef) {
 					/* Last selection */
-					type = findField(struct, (IDRef) sel);
+					type = findField(struct, (IDRef) selection);
+					break;
+				}
+				else if (selection instanceof ArraySelect) {
+					/* Push disjunct scope */
+					this.scopes.push(new Scope(null));
+					
+					/* Add declarations for struct */
+					for (Declaration dec : struct.fields) 
+						this.scopes.peek().addDeclaration(dec);
+					
+					ArraySelect arr = (ArraySelect) selection;
+					type = arr.check(this);
+					
+					this.scopes.pop();
+					
 					break;
 				}
 				else {
-					throw new CTX_EXCEPTION(sel.getSource(), sel.getClass().getName() + " cannot be a selector");
+					throw new CTX_EXCEPTION(selection.getSource(), selection.getClass().getName() + " cannot be a selector");
 				}
 			}
 			else {
@@ -717,7 +750,9 @@ public class ContextChecker {
 			else {
 				/* Create a new context, check function for this specific context */
 				f.setContext(i.provisosTypes);
+				this.scopes.push(new Scope(this.scopes.get(0)));
 				f.check(this);
+				this.scopes.pop();
 				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
 			}
 		}
@@ -762,14 +797,14 @@ public class ContextChecker {
 		}
 
 		if (!f.manager.provisosTypes.isEmpty()) {
-			if (f.manager.containsMapping(i.provisosTypes)) {
-				/* Mapping already exists, just return return type of this specific mapping */
-				return new VOID();
-			}
-			else {
+			if (!f.manager.containsMapping(i.provisosTypes)) {
 				/* Create a new context, check function for this specific context */
 				f.setContext(i.provisosTypes);
+				
+				/* Create new scope that points to the global scope */
+				this.scopes.push(new Scope(this.scopes.get(0)));
 				f.check(this);
+				this.scopes.pop();
 			}
 		}
 		
@@ -795,6 +830,7 @@ public class ContextChecker {
 	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
 		Declaration d = this.scopes.peek().getField(i.id);
+		
 		if (d != null) {
 			i.origin = d;
 			i.setType(d.getType());

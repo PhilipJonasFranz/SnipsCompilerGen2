@@ -139,6 +139,7 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
+		//System.out.println(current.type.toString() + " " + current.spelling);
 		Token old = current;
 		current = tokenStream.get(0);
 		tokenStream.remove(0);
@@ -307,7 +308,8 @@ public class Parser {
 		else if (current.type == TokenType.SWITCH) {
 			return this.parseSwitch();
 		}
-		else if (current.type == TokenType.IDENTIFIER && this.tokenStream.get(0).type == TokenType.LPAREN) {
+		else if (current.type == TokenType.IDENTIFIER && 
+				(this.tokenStream.get(0).type == TokenType.LPAREN || this.tokenStream.get(0).type == TokenType.CMPLT)) {
 			return this.parseFunctionCall();
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL) {
@@ -1028,21 +1030,26 @@ public class Parser {
 		}
 		else type = TYPE.fromToken(token);
 		
-		while (current.type == TokenType.MUL) {
-			accept();
-			type = new POINTER(type);
-		}
-		
-		Stack<Expression> dimensions = new Stack();
-		while (current.type == TokenType.LBRACKET) {
-			accept();
-			Expression length = this.parseExpression();
-			accept(TokenType.RBRACKET);
-			dimensions.push(length);
-		}
-		
-		while (!dimensions.isEmpty()) {
-			type = new ARRAY(type, dimensions.pop());
+		while (true) {
+			Token c0 = current;
+			while (current.type == TokenType.MUL) {
+				accept();
+				type = new POINTER(type);
+			}
+			
+			Stack<Expression> dimensions = new Stack();
+			while (current.type == TokenType.LBRACKET) {
+				accept();
+				Expression length = this.parseExpression();
+				accept(TokenType.RBRACKET);
+				dimensions.push(length);
+			}
+			
+			while (!dimensions.isEmpty()) {
+				type = new ARRAY(type, dimensions.pop());
+			}
+			
+			if (current.equals(c0)) break;
 		}
 		
 		return type;

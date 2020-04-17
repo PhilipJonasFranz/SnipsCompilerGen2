@@ -1,0 +1,17 @@
+SOURCE
+struct Nib {
+	int k;
+}
+
+struct Test {
+	Nib [2] x;
+	int y;
+}
+
+int main(int x) {
+	Test test = Test::({Nib::(2), Nib::(8)}, 5);
+	Nib n0 = test.x [1];
+	return n0.k;
+}
+TESTCASES
+8

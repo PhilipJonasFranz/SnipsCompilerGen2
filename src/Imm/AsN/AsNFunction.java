@@ -60,13 +60,15 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (!f.manager.provisosCalls.get(k).first.equals("")) {
 				/* Set the current proviso call scheme */
 				try {
+					//System.out.print("Setting translation context for " + f.functionName + ": ");
+					//for (TYPE t : f.manager.provisosCalls.get(k).second.second) System.out.print(t.typeString() + ", ");
+					//System.out.println();
 					f.setContext(f.manager.provisosCalls.get(k).second.second);
 				} catch (CTX_EXCEPTION e) {
 					
 				}
 			}
 			
-			// TODO Do for specific proviso cases
 			/* Setup Parameter Mapping */
 			func.parameterMapping = func.getParameterMapping();
 			
@@ -83,19 +85,19 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Function Header and Entry Label, add proviso specific postfix */
 			ASMLabel label = new ASMLabel(func.source.functionName + f.manager.provisosCalls.get(k).first, true);
 			
+			/* Generate comment with function name and potential proviso types */
 			String com = "";
 			if (f.manager.provisosCalls.get(k).first.equals("")) {
 				com = "Function: " + f.functionName;
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.functionName + ", " : "") + "Provisos: ";
+				com = ((k == 0)? "Function: " + f.functionName + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
 				List<TYPE> types = f.manager.provisosCalls.get(k).second.second;
 				for (int x = 0; x < types.size(); x++) {
 					com += types.get(x).typeString() + ", ";
 				}
 				com = com.trim().substring(0, com.trim().length() - 1);
 			}
-			
 			label.comment = new ASMComment(com);
 			
 			func.instructions.add(label);

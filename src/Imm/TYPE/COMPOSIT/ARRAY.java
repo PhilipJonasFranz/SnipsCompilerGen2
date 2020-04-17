@@ -5,6 +5,7 @@ import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import lombok.Getter;
 
 public class ARRAY extends COMPOSIT {
@@ -53,6 +54,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
+		if (type instanceof VOID) return true;
 		if (type instanceof ARRAY) {
 			ARRAY array = (ARRAY) type;
 			return this.elementType.isEqual(array.elementType) && this.getLength() == array.getLength();

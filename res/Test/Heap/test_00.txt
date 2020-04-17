@@ -5,5 +5,8 @@ int* main(int a) {
 	int* m = (int*) resv(3);
 	free(m);
 	free(n);
+	
+	bool[3]* mat = (bool[3]*) resv(3);
+	free(mat);
 }
 TESTCASES

@@ -39,7 +39,9 @@ public class FunctionCall extends Statement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Function Call: " + this.functionName);
+		System.out.print(this.pad(d) + "Function Call: " + this.functionName);
+		for (TYPE t : this.provisosTypes) System.out.print(", " + t.typeString());
+		System.out.println();
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}

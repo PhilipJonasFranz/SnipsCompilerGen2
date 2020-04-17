@@ -2,6 +2,7 @@ package Imm.TYPE.COMPOSIT;
 
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import lombok.Getter;
 
 public class POINTER extends COMPOSIT {
@@ -25,6 +26,7 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
+		if (type instanceof VOID) return true;
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
 			return this.coreType.isEqual(pointer.coreType);

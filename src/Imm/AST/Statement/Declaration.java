@@ -7,6 +7,7 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Par.Token;
 import Util.Source;
 
@@ -58,11 +59,15 @@ public class Declaration extends Statement {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		
 		/* Apply to declaration type */
-		if (this.type instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.type;
+		TYPE type0 = this.type;
+		if (type0 instanceof POINTER) {
+			type0 = ((POINTER) type0).targetType;
+		}
+		
+		if (type0 instanceof PROVISO) {
+			PROVISO p = (PROVISO) type0;
 			for (int i = 0; i < context.size(); i++) {
 				TYPE pro = context.get(i);
-				
 				if (pro.isEqual(p)) {
 					p.setContext(context.get(i));
 				}

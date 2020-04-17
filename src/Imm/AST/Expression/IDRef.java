@@ -35,7 +35,7 @@ public class IDRef extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "IDRef: " + this.id + "<" + this.getType().typeString() + ">");
+		System.out.println(this.pad(d) + "IDRef: " + this.id + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

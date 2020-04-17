@@ -3,7 +3,7 @@
  * the memory address, but the memory block will not be registered to be used anymore and
  * thus can be overwritten.
  */
-void free(int* p) {
+void free(void* p) {
 	/* Jump to block head */
 	p -= 1;
 

@@ -19,6 +19,7 @@ public class INT extends PRIMITIVE<Integer> {
 	}
 
 	public boolean isEqual(TYPE type) {
+		if (type instanceof VOID) return true;
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);

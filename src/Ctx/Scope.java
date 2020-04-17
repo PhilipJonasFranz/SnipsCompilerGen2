@@ -1,6 +1,7 @@
 package Ctx;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
@@ -22,6 +23,15 @@ public class Scope {
 	/** Create a new scope and set the parent scope. */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;
+	}
+	
+	public void print(int d) {
+		if (d != 0) System.out.println("--- SCOPE ---");
+		else System.out.println("--- TOP SCOPE ---");
+		for (Entry<String, Declaration> dec : this.declarations.entrySet()) {
+			dec.getValue().print(d, true);
+		}
+		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */

@@ -106,13 +106,14 @@ public class CompilerDriver {
 	}
 	
 	/* Reserved Declarations */
-	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, new Source(0, 0)), new Source(0, 0));
+	public static Source nullSource = new Source("Default", 0, 0);
+	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(
-													new Token(TokenType.IDENTIFIER, new Source(0, 0), "HEAP_START"), 
+													new Token(TokenType.IDENTIFIER, nullSource, "HEAP_START"), 
 													new INT(), 
 													zero_atom, 
-													new Source(0, 0));
+													nullSource);
 	
 	
 	public List<String> referencedLibaries = new ArrayList();
@@ -182,7 +183,7 @@ public class CompilerDriver {
 			
 					/* --- SCANNING --- */
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
-			Scanner scanner = new Scanner(code);
+			Scanner scanner = new Scanner(file.getName(), code);
 			List<Token> deque = scanner.scan();
 			
 			
@@ -324,7 +325,7 @@ public class CompilerDriver {
 			
 			try {
 					/* --- SCANNING --- */
-				Scanner scanner = new Scanner(code);
+				Scanner scanner = new Scanner(file.getName(), code);
 				List<Token> deque = scanner.scan();
 				
 				

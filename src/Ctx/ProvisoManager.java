@@ -37,10 +37,14 @@ public class ProvisoManager {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		if (context.size() != this.provisosTypes.size()) {
+			throw new CTX_EXCEPTION(source, "Missmatching number of provided provisos, expected " + this.provisosTypes.size() + ", got " + context.size());
+		}
+		
 		for (int i = 0; i < this.provisosTypes.size(); i++) {
 			TYPE pro = this.provisosTypes.get(i);
 			if (!(pro instanceof PROVISO)) {
-				throw new CTX_EXCEPTION(source, "Provided Type " + pro.typeString() + " is not a proviso type.");
+				throw new CTX_EXCEPTION(source, "Provided Type " + pro.typeString() + " is not a proviso type");
 			}
 			
 			PROVISO pro0 = (PROVISO) pro;
@@ -109,7 +113,8 @@ public class ProvisoManager {
 			return;
 		}
 		else {
-			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(LabelGen.getProvisoPostfix(), new Pair<TYPE, List<TYPE>>(type, context)));
+			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
+			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(postfix, new Pair<TYPE, List<TYPE>>(type, context)));
 		}
 	}
 	
