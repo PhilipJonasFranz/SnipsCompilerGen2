@@ -1,0 +1,14 @@
+SOURCE
+int getDiff<K, V>(K k, V v) {
+	int f = (int) k;
+	if (f == 0) return (int) v;
+	else return getDiff<V, K>((V) ((K) v), k - 1);
+}
+
+int main(bool x, int y) {
+	return getDiff<bool, int>(x, y);
+}
+TESTCASES
+5 1 3
+1 5 4
+0 1 1

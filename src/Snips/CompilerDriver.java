@@ -37,13 +37,13 @@ public class CompilerDriver {
 	public static File file;
 	
 	public static String [] logo = {
-			"	 _______  __    _  ___  _______  _______",
-			"	|       ||  \\  | ||   ||       ||       |",
-			"	|  _____||   \\_| ||   ||    _  ||  _____|",
-			"	| |_____ |       ||   ||   |_| || |_____",
-			"	|_____  ||  _    ||   ||    ___||_____  |",
-			"	 _____| || | \\   ||   ||   |     _____| |",
-			"	|_______||_|  \\__||___||___|    |_______|"};
+		"	 _______  __    _  ___  _______  _______",
+		"	|       ||  \\  | ||   ||       ||       |",
+		"	|  _____||   \\_| ||   ||    _  ||  _____|",
+		"	| |_____ |       ||   ||   |_| || |_____",
+		"	|_____  ||  _    ||   ||    ___||_____  |",
+		"	 _____| || | \\   ||   ||   |     _____| |",
+		"	|_______||_|  \\__||___||___|    |_______|"};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -54,6 +54,7 @@ public class CompilerDriver {
 		silenced = true,
 		imm = false,
 		enableComments = true,
+		disableOptimizer = false,
 		disableWarnings = false;
 			
 	public static String outputPath;
@@ -119,8 +120,8 @@ public class CompilerDriver {
 	public List<String> referencedLibaries = new ArrayList();
 	
 	public CompilerDriver(String [] args) {
-		this.readArgs(args);
 		this.readConfig();
+		this.readArgs(args);
 	}
 	
 	public CompilerDriver() {
@@ -243,12 +244,15 @@ public class CompilerDriver {
 					/* --- OPTIMIZING --- */
 			double before = body.getInstructions().size();
 			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
-			ASMOptimizer opt = new ASMOptimizer();
-			opt.optimize(body);
 			
-			double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-			CompilerDriver.compressions.add(rate);
-			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+			if (!disableOptimizer) {
+				ASMOptimizer opt = new ASMOptimizer();
+				opt.optimize(body);
+			
+				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
+				CompilerDriver.compressions.add(rate);
+				log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+			}
 			
 			
 					/* --- OUTPUT BUILDING --- */
@@ -457,6 +461,7 @@ public class CompilerDriver {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
 				else if (args [i].equals("-warn"))disableWarnings = true;
+				else if (args [i].equals("-opt"))disableOptimizer = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
@@ -481,6 +486,7 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
 		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
+		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");

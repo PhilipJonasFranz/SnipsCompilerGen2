@@ -54,6 +54,10 @@ public class ProvisoManager {
 		}
 	}
 	
+	public boolean isActiveContext(List<TYPE> context) {
+		return this.mappingIsEqual(context, this.provisosTypes);
+	}
+	
 	public void releaseContext() {
 		for (int i = 0; i < this.provisosTypes.size(); i++) {
 			PROVISO pro0 = (PROVISO) this.provisosTypes.get(i);

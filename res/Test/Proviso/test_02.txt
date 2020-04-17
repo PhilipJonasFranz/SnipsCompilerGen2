@@ -1,0 +1,12 @@
+SOURCE
+int toInt<K>(K k) {
+	return (int) k;
+}
+
+int main() {
+	bool v = true;
+	int x = (int) v;
+	return x;
+}
+TESTCASES
+1

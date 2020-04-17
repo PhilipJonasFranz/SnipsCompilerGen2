@@ -1,0 +1,46 @@
+SOURCE
+/*
+ * Multiplicate the given matricies. Both matricies have to have the given
+ * dimension. Returns a pointer to the resulting matrix.
+ */
+int* __mat_mult(int* m, int* n, int dimX, int dimY) {
+	int* r = (int*) resv(dimX * dimY);
+	for (int i = 0; i < dimX; i++) {
+		for (int j = 0; j < dimY; j++) {
+			int sum = 0;
+			for (int k = 0; k < dimY; k++) {
+				sum += *(m + (i * dimY) + k) * *(n + (k * dimY) + j);
+			}
+			*(r + (i * dimY) + j) = sum;
+		}
+	}
+
+	return r;
+}
+
+int* allocMatrix(int w, int h) {
+	int* p = (int*) resv(w * h);
+	for (int i = 0; i < h; i++) {
+		for (int a = 0; a < w; a++) {
+			*(p + (i * h) + a) = (i * h) + a;
+		}
+	}
+	return p;
+}
+
+int main(int x) {
+	int* p = allocMatrix(3, 3);
+	int* q = allocMatrix(3, 3);
+	int* mul = __mat_mult(p, q, 3, 3);
+	return *(mul + x);
+}
+TESTCASES
+0 15
+1 18
+2 21
+3 42
+4 54
+5 66
+6 69
+7 90
+8 111

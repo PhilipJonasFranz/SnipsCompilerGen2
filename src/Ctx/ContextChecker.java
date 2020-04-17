@@ -48,6 +48,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -768,7 +769,21 @@ public class ContextChecker {
 			
 			TYPE paramType = i.parameters.get(a).check(this);
 			
-			if (!paramType.isEqual(f.parameters.get(a).getType())) {
+			TYPE functionParamType = f.parameters.get(a).getType();
+			
+			/* Switch out function parameter dynamically with inline call proviso type */
+			if (f.parameters.get(a).getRawType() instanceof PROVISO) {
+				PROVISO p = (PROVISO) f.parameters.get(a).getRawType();
+				for (int k = 0; k < f.manager.provisosTypes.size(); k++) {
+					PROVISO p0 = (PROVISO) f.manager.provisosTypes.get(k);
+					if (p0.placeholderName.equals(p.placeholderName)) {
+						functionParamType = i.provisosTypes.get(k);
+						break;
+					}
+				}
+			}
+			
+			if (!paramType.isEqual(functionParamType)) {
 				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
 		}
