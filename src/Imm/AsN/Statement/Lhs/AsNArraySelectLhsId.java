@@ -43,12 +43,13 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			AsNAssignment.copyStackSection(((ARRAY) select.getType()).wordsize(), id);
+			AsNAssignment.copyStackSection(((ARRAY) select.getType()).wordsize(), id, st);
 		}
 		/* Assign single array cell */
 		else {
 			/* Push value on the stack */
 			id.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			st.push(REGISTER.R0);
 			
 			/* Save to param Stack */
 			if (st.getParameterByteOffset(select.idRef.origin) != -1) 
@@ -71,9 +72,11 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 1, 2, true, true);
 				id.instructions.addAll(inj);
 			}
-			else 
+			else {
 				/* Pop the value off the stack */
 				id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			}
+			st.popXWords(1);
 			
 			/* Store at target location */
 			id.instructions.add(new ASMStr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));

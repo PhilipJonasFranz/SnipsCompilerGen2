@@ -24,7 +24,7 @@ public class StructPointerSelectLhsId extends LhsId {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "ElementSelectLhsId");
+		System.out.println(this.pad(d) + "StructPointerSelectLhsId");
 		this.selection.print(d + this.printDepthStep, rec);
 	}
 

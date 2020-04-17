@@ -41,11 +41,14 @@ public class AsNStructSelect extends AsNExpression {
 		
 		if (s.getType().wordsize() > 1) {
 			/* Copy memory section */
-			// TODO
+			AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
+			
+			/* Create dummy stack entries for newly copied struct on stack */
+			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REGISTER.R0);
 		}
 		else {
 			/* Load */
-			ASMLdr load = new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0));
+			ASMLdr load = new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
 			load.comment = new ASMComment("Load field from struct");
 			sel.instructions.add(load);
 		}
@@ -61,8 +64,8 @@ public class AsNStructSelect extends AsNExpression {
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
 				
-				/* Just move in R0 */
-				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(loc)));
+				/* Just move in R1 */
+				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
 			}
 			else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 				/* In Local Stack */
@@ -70,13 +73,13 @@ public class AsNStructSelect extends AsNExpression {
 				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
-				node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+				node.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
 			}
 			else if (st.getParameterByteOffset(ref.origin) != -1) {
 				/* In Parameter Stack */
 				int offset = st.getParameterByteOffset(ref.origin);
 				
-				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
 				start.comment = new ASMComment("Start of structure in stack");
 				node.instructions.add(start);
 			}
@@ -85,12 +88,12 @@ public class AsNStructSelect extends AsNExpression {
 				ASMDataLabel label = map.resolve(ref.origin);
 				
 				/* Load data label */
-				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label)));
+				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
 			}
 		}
 		
 		if (select.deref) {
-			ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2));
+			ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2));
 			lsl.comment = new ASMComment("Convert to bytes");
 			node.instructions.add(lsl);
 		}
@@ -98,7 +101,7 @@ public class AsNStructSelect extends AsNExpression {
 		if (!node.instructions.isEmpty())
 			node.instructions.get(0).comment = new ASMComment("Load field location");
 		
-		/* Base address is now in R0 */
+		/* Base address is now in R1 */
 		
 		/* Base Type */
 		StructSelect sel0 = select;
@@ -143,39 +146,36 @@ public class AsNStructSelect extends AsNExpression {
 			/* If current selection derefs and its not the last selection in the chain */
 			if (sel0.deref && !(sel0.selector instanceof IDRef)) {
 				/* Deref, just load current address */
-				node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1)));
 			}
 			
 			/* Base Case reached */
-			if (selection instanceof IDRef || selection instanceof ArraySelect) {
+			if (!(selection instanceof StructSelect)) {
 				break;
 			}
 			/* Keep selecting */
-			else {
-				sel0 = (StructSelect) sel0.selection;
-			}
-			
+			else sel0 = (StructSelect) sel0.selection;
 		}
 	}
 	
 	private static void injectArraySelect(AsNNode node, ArraySelect arr, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Push current on stack */
-		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1)));
 		
 		/* Load the struture offset in R2 */
 		if (arr.getType().wordsize() > 1)
 			AsNArraySelect.loadSumR2(node, arr, r, map, st, true);
 		else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
 		
-		node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+		node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 		
 		/* Add sum to current */
-		node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+		node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 	}
 	
 	private static void injectIDRef(AsNNode node, STRUCT struct, IDRef ref) {
 		int offset = struct.getFieldByteOffset(ref.id);
-		if (offset != 0) node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(offset)));
+		if (offset != 0) node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 	}
 	
 }

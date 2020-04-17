@@ -13,7 +13,7 @@ int main() {
 	Test* test = (Test*) resv(sizeof(Test));
 	*test = Test::({Nib::(2, 9), Nib::(8, 9)}, 5);
 	Nib n0 = test->x [1];
-	return n0.y;
+	return n0.y + test->y;
 }
 TESTCASES
-9
+14

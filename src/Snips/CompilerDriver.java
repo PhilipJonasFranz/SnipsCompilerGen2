@@ -500,7 +500,8 @@ public class CompilerDriver {
 	public static void printAverageCompression() {
 		double [] rate = {0};
 		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
-		double r0 = Math.round(rate [0] * 100) / 100;
+		double r0 = rate [0];
+		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
 		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
 	}

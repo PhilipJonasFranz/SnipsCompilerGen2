@@ -81,7 +81,7 @@ public class AsNArraySelect extends AsNExpression {
 		
 		if (s.getType() instanceof ARRAY) {
 			/* Loop through array word size and copy values */
-			subArrayCopy(select, (ARRAY) s.getType());
+			subStructureCopy(select, ((ARRAY) s.getType()).wordsize());
 		}
 		else {
 			/* Load */
@@ -139,14 +139,14 @@ public class AsNArraySelect extends AsNExpression {
 	 * Copy memory location the size of the word size of the type of s, assumes that the start
 	 * of the sub structure is located in R1.
 	 */
-	public static void subArrayCopy(AsNNode node, ARRAY arr) {
+	public static void subStructureCopy(AsNNode node, int size) {
 		
 		/* Do it sequentially for 8 or less words to copy */
-		if (arr.wordsize() <= 8) {
-			int offset = (arr.wordsize() - 1) * 4;
+		if (size <= 8) {
+			int offset = (size - 1) * 4;
 			
 			boolean r0 = false;
-			for (int a = 0; a < arr.wordsize(); a++) {
+			for (int a = 0; a < size; a++) {
 				if (!r0) {
 					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 				    r0 = true;
@@ -166,7 +166,7 @@ public class AsNArraySelect extends AsNExpression {
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			/* Move counter in R2 */
-			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(arr.wordsize() * 4)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");
