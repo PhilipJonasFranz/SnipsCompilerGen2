@@ -248,10 +248,10 @@ public class CompilerDriver {
 		
 			
 					/* --- OPTIMIZING --- */
-			double before = body.getInstructions().size();
-			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
-			
 			if (!disableOptimizer) {
+				double before = body.getInstructions().size();
+				log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
+				
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
 			
@@ -274,7 +274,7 @@ public class CompilerDriver {
 			
 			CompilerDriver.instructionsGenerated += output.size();
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (printErrors) e.printStackTrace();
 		}
 		
 		/* Report Status */

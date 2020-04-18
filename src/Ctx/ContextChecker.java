@@ -792,6 +792,10 @@ public class ContextChecker {
 			i.setType(f.getReturnType().clone());
 		}
 		
+		if (i.getType() instanceof VOID) {
+			throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
+		}
+		
 		return i.getType();
 	}
 	
