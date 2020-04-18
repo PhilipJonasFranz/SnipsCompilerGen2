@@ -54,7 +54,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type instanceof VOID) return true;
+		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof ARRAY) {
 			ARRAY array = (ARRAY) type;
 			return this.elementType.isEqual(array.elementType) && this.getLength() == array.getLength();

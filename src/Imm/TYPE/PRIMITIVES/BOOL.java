@@ -18,7 +18,7 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type instanceof VOID) return true;
+		if (type.getCoreType() instanceof VOID) return true;
 		return type instanceof BOOL;
 	}
 	

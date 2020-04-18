@@ -198,7 +198,7 @@ public class CompilerDriver {
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
 			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
-				List<SyntaxElement> dependencies = this.addDependencies(p);
+				List<SyntaxElement> dependencies = this.addDependencies(p.directives, p.fileName);
 				
 				/* An error occured during importing, probably loop in dependencies */
 				if (dependencies == null) {
@@ -340,7 +340,7 @@ public class CompilerDriver {
 				
 				
 						/* --- PROCESS IMPORTS --- */
-				List<SyntaxElement> dependencies = this.addDependencies((Program) AST);
+				List<SyntaxElement> dependencies = this.addDependencies(((Program) AST).directives, ((Program) AST).fileName);
 				
 				if (dependencies == null) return null;
 				else {
@@ -365,8 +365,7 @@ public class CompilerDriver {
 	 * @param importer The program that lists the include directives
 	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> addDependencies(Program importer) throws SNIPS_EXCEPTION {
-		List<Directive> imports = importer.directives;
+	public List<SyntaxElement> addDependencies(List<Directive> imports, String fileName) throws SNIPS_EXCEPTION {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
 		for (String s : this.referencedLibaries) {
@@ -382,7 +381,7 @@ public class CompilerDriver {
 				if (dir instanceof IncludeDirective) {
 					IncludeDirective inc = (IncludeDirective) dir;
 					
-					if (inc.file.equals(importer.fileName)) continue;
+					if (inc.file.equals(fileName)) continue;
 					for (int i = 0; i < ASTs.size(); i++) {
 						if (((Program) ASTs.get(i)).fileName.equals(inc.file)) {
 							continue;

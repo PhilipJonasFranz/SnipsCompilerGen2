@@ -38,7 +38,7 @@ public class StructureInit extends Expression {
 
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "StructureInit " + this.getType().typeString());
+		System.out.println(this.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 		for (Expression e : this.elements) {
 			e.print(d + this.printDepthStep, rec);
 		}

@@ -2,6 +2,7 @@ package Imm.TYPE;
 
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token;
+import Util.Logging.Message;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,7 +41,10 @@ public abstract class TYPE<T> {
 	
 	public static TYPE fromToken(Token token) {
 		TYPE t = PRIMITIVE.fromToken(token);
-		if (t == null) return new PROVISO(token.spelling);
+		if (t == null) {
+			new Message("Unknown Type, creating " + new PROVISO(token.spelling).typeString(), Message.Type.WARN);
+			return new PROVISO(token.spelling);
+		}
 		else return t;
 	}
 	

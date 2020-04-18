@@ -1,0 +1,13 @@
+SOURCE
+struct Test {
+	int x;
+	int y;
+}
+
+int main() {
+	Test test = Test::(3, 5);
+	test.x = 8;
+	return test.x + test.y;
+}
+TESTCASES
+13

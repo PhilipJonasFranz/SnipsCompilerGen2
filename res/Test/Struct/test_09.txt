@@ -1,3 +1,4 @@
+SOURCE
 /*
  * A single list entry, contains a pointer to the next node
  * and a value.
@@ -25,18 +26,6 @@ List* create() {
 	*lp = List::((ListNode*) 0, (ListNode*) 0);
 
 	return lp;
-}
-
-/*
- * Free the list by freeing all contained list nodes, and the list itself.
- */
-void destroy(List* l) {
-	ListNode* n = l->head;
-	while ((int) n != 0) {
-		free(n);
-		n = n->next;
-	}
-	free(l);
 }
 
 /*
@@ -76,36 +65,15 @@ int get(List* lp, int i) {
 	return n->value;	
 }
 
-/*
- * Check if given list contains given value.
- */
-bool contains(List* lp, int x) {
-	ListNode* n = lp->head;
-	while (n->next != 0) {
-		if (n->value == x) {
-			/* Value found */
-			return true;
-		}
-		/* Jump to next */
-		n = n->next;
-	}
-	/* Not found */
-	return false;
+int main(int x) {
+	List* l = create();
+	add(l, 10);
+	add(l, 5);
+	add(l, 12);
+	
+	return get(l, x);
 }
-
-/*
- * Finds the first node in the list that has given value.
- * Returns a pointer to this list node.
- */
-int* find(List* lp, int x) {
-	ListNode* n = lp->head;
-	while (n->next != 0) {
-		if (n->value == x) {
-			return n;
-		}
-		/* Jump to next */
-		n = n->next;
-	}
-	/* Not found */
-	return -1;
-}
+TESTCASES
+0 10
+1 5
+2 12

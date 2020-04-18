@@ -144,17 +144,21 @@ public class AsNStructSelect extends AsNExpression {
 			}
 
 			/* If current selection derefs and its not the last selection in the chain */
-			if (sel0.deref && !(sel0.selector instanceof IDRef)) {
-				/* Deref, just load current address */
-				node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1)));
+			if (sel0.selection instanceof StructSelect) {
+				StructSelect sel1 = (StructSelect) sel0.selection;
+				if (sel1.deref) {
+					/* Deref, just load current address */
+					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1)));
+					node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2)));
+				}
 			}
 			
-			/* Base Case reached */
-			if (!(selection instanceof StructSelect)) {
-				break;
-			}
 			/* Keep selecting */
-			else sel0 = (StructSelect) sel0.selection;
+			if (selection instanceof StructSelect) {
+				sel0 = (StructSelect) sel0.selection;
+			}
+			/* Base Case reached */
+			else break;
 		}
 	}
 	

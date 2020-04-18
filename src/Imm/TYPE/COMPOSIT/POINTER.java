@@ -26,16 +26,28 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type instanceof VOID) return true;
+		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
-			return this.coreType.isEqual(pointer.coreType);
+			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {
+				STRUCT s0 = (STRUCT) this.getCoreType();
+				STRUCT s1 = (STRUCT) pointer.getCoreType();
+				return s0.typedef.structName.equals(s1.typedef.structName);
+			}
+			else if (pointer.getCoreType() instanceof STRUCT || this.getCoreType() instanceof STRUCT) {
+				return false;
+			}
+			else return this.coreType.isEqual(pointer.coreType);
 		}
 		else return false;
 	}
 	
 	public String typeString() {
-		return this.targetType.typeString() + "*";
+		if (this.targetType instanceof STRUCT) {
+			STRUCT s = (STRUCT) this.targetType;
+			return "STRUCT<" + s.typedef.structName + ">*";
+		}
+		else return this.targetType.typeString() + "*";
 	}
 
 	public void setValue(String value) {

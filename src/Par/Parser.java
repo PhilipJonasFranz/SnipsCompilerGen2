@@ -49,6 +49,7 @@ import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
+import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
@@ -79,6 +80,7 @@ import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
+import Util.Logging.Message;
 
 public class Parser {
 
@@ -154,6 +156,7 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
+		boolean incEnd = false;
 		List<Directive> include = new ArrayList();
 		List<Directive> directives = new ArrayList();
 		
@@ -165,31 +168,41 @@ public class Parser {
 			else if (current.type == TokenType.DIRECTIVE) {
 				Directive dir = this.parseDirective();
 				
+				if (incEnd) {
+					new Message("All include statements should be at the head of the file", Message.Type.WARN);
+				}
+				
 				if (dir instanceof IncludeDirective) {
 					include.add(dir);
 				}
-				else directives.add(dir);
-			}
-			else if (current.type == TokenType.STRUCT) {
-				elements.add(this.parseStructTypedef());
+				else {
+					incEnd = true;
+					directives.add(dir);
+				}
 			}
 			else {
-				TYPE type = this.parseType();
-				
-				Token identifier = accept(TokenType.IDENTIFIER);
-				
-				SyntaxElement element = null;
-				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-					element = this.parseFunction(type, identifier);
+				incEnd = true;
+				if (current.type == TokenType.STRUCT) {
+					elements.add(this.parseStructTypedef());
 				}
 				else {
-					element = this.parseGlobalDeclaration(type, identifier);
-				}
-				
-				elements.add(element);
-				if (!directives.isEmpty()) {
-					element.directives.addAll(directives);
-					directives.clear();
+					TYPE type = this.parseType();
+					
+					Token identifier = accept(TokenType.IDENTIFIER);
+					
+					SyntaxElement element = null;
+					if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
+						element = this.parseFunction(type, identifier);
+					}
+					else {
+						element = this.parseGlobalDeclaration(type, identifier);
+					}
+					
+					elements.add(element);
+					if (!directives.isEmpty()) {
+						element.directives.addAll(directives);
+						directives.clear();
+					}
 				}
 			}
 		}
@@ -208,16 +221,17 @@ public class Parser {
 	public StructTypedef parseStructTypedef() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.STRUCT).getSource();
 		Token id = accept(TokenType.STRUCTID);
+		
+		StructTypedef def = new StructTypedef(id, new ArrayList(), source);
+		this.structIds.add(new Pair<Token, StructTypedef>(id, def));
+		
 		accept(TokenType.LBRACE);
 		
-		List<Declaration> declarations = new ArrayList();
 		while (current.type != TokenType.RBRACE) {
-			declarations.add(this.parseDeclaration());
+			def.declarations.add(this.parseDeclaration());
 		}
 		accept(TokenType.RBRACE);
 		
-		StructTypedef def = new StructTypedef(id, declarations, source);
-		this.structIds.add(new Pair<Token, StructTypedef>(id, def));
 		return def;
 	}
 	
@@ -556,12 +570,15 @@ public class Parser {
 			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
-			Expression target = this.parseArraySelect();
+			Expression target = this.parseStructSelect();
 			if (target instanceof ArraySelect) {
 				return new ArraySelectLhsId((ArraySelect) target, target.getSource());
 			}
 			else if (target instanceof IDRef) {
 				return new SimpleLhsId((IDRef) target, target.getSource());
+			}
+			else if (target instanceof StructSelect) {
+				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
 			else {
 				throw new PARSE_EXCEPTION(current.source, current.type, TokenType.IDENTIFIER);
@@ -1021,15 +1038,17 @@ public class Parser {
 	protected TYPE parseType() throws PARSE_EXCEPTION {
 		TYPE type = null;
 		Token token = null;
+		
 		if (current.type == TokenType.IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		StructTypedef def = this.getStructTypedef(token);
+		
 		if (def != null) {
 			type = def.struct;
 		}
 		else type = TYPE.fromToken(token);
-		
+
 		while (true) {
 			Token c0 = current;
 			while (current.type == TokenType.MUL) {

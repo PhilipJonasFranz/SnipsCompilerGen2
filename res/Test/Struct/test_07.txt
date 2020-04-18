@@ -1,0 +1,18 @@
+SOURCE
+struct Test {
+	int x;
+	int y;
+}
+
+struct MainTest {
+	Test test;
+	int x;
+}
+
+int main() {
+	MainTest m = MainTest::(Test::(3, 8), 5);
+	m.test.x = 9;
+	return m.test.x + m.test.y + (m.x * 2);
+}
+TESTCASES
+27

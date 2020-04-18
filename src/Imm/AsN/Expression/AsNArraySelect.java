@@ -137,7 +137,7 @@ public class AsNArraySelect extends AsNExpression {
 	
 	/**
 	 * Copy memory location the size of the word size of the type of s, assumes that the start
-	 * of the sub structure is located in R1.
+	 * of the sub structure is located in R1. Push the copied section on the stack.
 	 */
 	public static void subStructureCopy(AsNNode node, int size) {
 		

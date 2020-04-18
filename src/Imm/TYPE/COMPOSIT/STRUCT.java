@@ -20,7 +20,7 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (type instanceof VOID) return true;
+		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
 			if (struct.fields.size() == this.fields.size()) {

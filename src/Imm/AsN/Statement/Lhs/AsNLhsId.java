@@ -21,6 +21,7 @@ import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
+import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Statement.AsNStatement;
@@ -43,6 +44,9 @@ public class AsNLhsId extends AsNStatement {
 		}
 		else if (lhs instanceof PointerLhsId) {
 			id = AsNPointerLhsId.cast((PointerLhsId) lhs, r, map, st);
+		}
+		else if (lhs instanceof StructSelectLhsId) {
+			id = AsNStructSelectLhsId.cast((StructSelectLhsId) lhs, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(lhs.getSource(), "No injection cast available for " + lhs.getClass().getName());
 	
