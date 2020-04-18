@@ -26,6 +26,8 @@ import Par.Parser;
 import Par.Scanner;
 import Par.Token;
 import Par.Token.TokenType;
+import PreP.PreProcessor;
+import PreP.PreProcessor.LineObject;
 import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
@@ -70,7 +72,7 @@ public class CompilerDriver {
 	
 	public static CompilerDriver driver;
 	
-	public XMLNode sys_config;
+	public static XMLNode sys_config;
 	
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
@@ -144,7 +146,7 @@ public class CompilerDriver {
 		List<String> lines = new ArrayList();
 	    
 		try {
-			InputStream is = getClass().getResourceAsStream(path);
+			InputStream is = CompilerDriver.class.getResourceAsStream(path);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		    String line;
 		    while ((line = br.readLine()) != null)  {
@@ -174,6 +176,9 @@ public class CompilerDriver {
 				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
 			}
 			
+			PreProcessor preProcess = new PreProcessor(code, file.getName());
+			List<LineObject> preCode = preProcess.getProcessed();
+			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
 				code.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
@@ -184,7 +189,7 @@ public class CompilerDriver {
 			
 					/* --- SCANNING --- */
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
-			Scanner scanner = new Scanner(file.getName(), code);
+			Scanner scanner = new Scanner(preCode);
 			List<Token> deque = scanner.scan();
 			
 			
@@ -268,7 +273,7 @@ public class CompilerDriver {
 			
 			CompilerDriver.instructionsGenerated += output.size();
 		} catch (Exception e) {
-			if (printErrors) e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		/* Report Status */
@@ -328,8 +333,11 @@ public class CompilerDriver {
 			SyntaxElement AST = null;
 			
 			try {
+				PreProcessor preProcess = new PreProcessor(code, file.getName());
+				List<LineObject> lines = preProcess.getProcessed();
+				
 					/* --- SCANNING --- */
-				Scanner scanner = new Scanner(file.getName(), code);
+				Scanner scanner = new Scanner(lines);
 				List<Token> deque = scanner.scan();
 				
 				

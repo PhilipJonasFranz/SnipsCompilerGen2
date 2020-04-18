@@ -81,7 +81,7 @@ int get(List* lp, int i) {
  */
 bool contains(List* lp, int x) {
 	ListNode* n = lp->head;
-	while (n->next != 0) {
+	while ((int) n->next != 0) {
 		if (n->value == x) {
 			/* Value found */
 			return true;
@@ -97,9 +97,9 @@ bool contains(List* lp, int x) {
  * Finds the first node in the list that has given value.
  * Returns a pointer to this list node.
  */
-int* find(List* lp, int x) {
+ListNode* find(List* lp, int x) {
 	ListNode* n = lp->head;
-	while (n->next != 0) {
+	while ((int) n->next != 0) {
 		if (n->value == x) {
 			return n;
 		}
@@ -107,5 +107,5 @@ int* find(List* lp, int x) {
 		n = n->next;
 	}
 	/* Not found */
-	return -1;
+	return (ListNode*) 0;
 }

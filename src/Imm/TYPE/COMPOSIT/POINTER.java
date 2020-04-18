@@ -45,7 +45,7 @@ public class POINTER extends COMPOSIT {
 	public String typeString() {
 		if (this.targetType instanceof STRUCT) {
 			STRUCT s = (STRUCT) this.targetType;
-			return "STRUCT<" + s.typedef.structName + ">*";
+			return "STRUCT<" + ((s.typedef != null)? s.typedef.structName  : "?") + ">*";
 		}
 		else return this.targetType.typeString() + "*";
 	}
