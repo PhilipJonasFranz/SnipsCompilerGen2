@@ -176,15 +176,16 @@ public class CompilerDriver {
 				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
 			}
 			
-			PreProcessor preProcess = new PreProcessor(code, file.getName());
-			List<LineObject> preCode = preProcess.getProcessed();
-			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
 				code.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
+			
+					/* --- PRE-PROCESSING --- */
+			PreProcessor preProcess = new PreProcessor(code, file.getName());
+			List<LineObject> preCode = preProcess.getProcessed();
 			
 			
 					/* --- SCANNING --- */

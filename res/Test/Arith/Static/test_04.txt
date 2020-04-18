@@ -4,3 +4,10 @@ int main() {
 }
 TESTCASES
 55
+OUTPUT
+/* --test_04.txt */
+main:                         /* Function: main */
+    mov r2, #54
+    mov r0, #55
+    bx lr
+    

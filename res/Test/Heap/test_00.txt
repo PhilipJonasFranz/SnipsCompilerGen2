@@ -10,3 +10,195 @@ int* main(int a) {
 	free(mat);
 }
 TESTCASES
+OUTPUT
+/* --test_00.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                         /* Function: resv */
+    push { r3, r4, r5, r6, r7, r8, r9 }
+    mov r3, r0
+/* Add block header to size */
+    add r3, r3, #1
+/* Get reference to heap start */
+    ldr r0, .L0_HEAP_START    /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r4, r0
+.L2:                          /* Evaluate condition */
+    lsl r0, r4, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    cmp r0, #0
+    beq .L3
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    lsl r0, r4, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r5, r0
+    mov r6, r0
+    cmp r5, #0
+    bge .L5
+/* Defragment Heap */
+.L7:                          /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne .L8
+    sub r0, r4, r5
+    lsl r0, r0, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r7, r0
+    cmp r7, #0
+    ble .L10
+    b .L8
+.L10: 
+    cmp r7, #0
+    bne .L12
+    mov r0, #0                /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b .L8
+.L12: 
+    add r5, r5, r7
+/* Add to current size */
+    b .L7
+.L8: 
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+/* Write defragmented size to heap */
+    mov r7, r0
+    cmp r5, #0
+    bne .L13
+    mov r0, #0                /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+.L13: 
+/* Memory location is free, check size */
+    rsb r0, r5, #0
+    mov r5, r0
+    cmp r0, r3
+    bne .L16
+/* Fits */
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r8, r0                /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+    b .L19
+.L16: 
+    cmp r5, r3
+    ble .L18
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r9, r0                /* Evaluate Expression */
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r1, r4                /* Evaluate Expression */
+    mov r2, #1
+    add r0, r1, #1
+    b .L19
+.L18: 
+    sub r4, r4, r5
+    b .L4
+.L5: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+.L4: 
+    b .L2
+.L3: 
+/* End reached, create new block */
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r5, r0                /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+.L19: 
+    pop { r3, r4, r5, r6, r7, r8, r9 }
+    bx lr
+    
+/* Frees the memory block the given pointer points to. The pointer object will keep */
+/* the memory address, but the memory block will not be registered to be used anymore and */
+/* thus can be overwritten. */
+free:                         /* Function: free */
+    push { r3, r4, r5, r6, r7, r8, r9 }
+    mov r3, r0
+/* Jump to block head */
+    sub r3, r3, #1
+/* Load Block Size */
+    lsl r0, r3, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r4, r0
+/* Store negated block size */
+    mov r5, r0                /* Evaluate Expression */
+    rsb r0, r4, #0
+    lsl r1, r3, #2
+    str r0, [r1]
+    mov r6, r0                /* Evaluate Expression */
+    add r7, r3, r4
+.L21:                         /* Evaluate condition */
+    lsl r0, r7, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    cmp r0, #0
+    bge .L22
+    lsl r0, r7, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r8, r0
+/* Add size to freed block */
+    mov r9, r0                /* Evaluate Expression */
+    lsl r0, r3, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r1, r0
+    add r0, r1, r8
+    lsl r1, r3, #2
+    str r0, [r1]
+/* Shift pointer to next block */
+    sub r7, r7, r8
+    b .L21
+.L22: 
+    pop { r3, r4, r5, r6, r7, r8, r9 }
+    bx lr
+    
+main:                         /* Function: main */
+    push { r3, r4, r5, r6, r7, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #1                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r4, r0
+    mov r0, #5                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r5, r0
+    mov r0, #3                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r6, r0
+    bl free                   /* Call free */
+    mov r0, r5                /* Load parameters */
+    bl free                   /* Call free */
+    mov r0, #3                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r7, r0
+    bl free                   /* Call free */
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, fp, lr }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

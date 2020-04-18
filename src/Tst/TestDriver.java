@@ -192,6 +192,7 @@ public class TestDriver {
 			/* Extract contents */
 			List<String> code = new ArrayList();
 			List<String> testcases = new ArrayList();
+			List<String> writeback = new ArrayList();
 			
 			/* Extract contents out of the file */
 			int i = 0;
@@ -211,15 +212,22 @@ public class TestDriver {
 				code.add(content.get(i));
 				i++;
 			}
-			while (i < content.size()) {
+			while (i < content.size() && !content.get(i).equals("OUTPUT")) {
 				testcases.add(content.get(i));
 				i++;
+			}
+			
+			for (int a = 0; a < content.size(); a++) {
+				if (content.get(a).equals("OUTPUT")) {
+					break;
+				}
+				else writeback.add(content.get(a));
 			}
 		
 			buffer.add(new Message("Testing file " + file, Message.Type.INFO, buffered));
 			
 			/* Run test */
-			Result res = this.test(file, code, testcases, buffer);
+			Result res = this.test(file, code, testcases, buffer, content);
 			
 			/* Evaluate result */
 			if (res.fail > 0) resCnt.peek().failed++;
@@ -238,7 +246,7 @@ public class TestDriver {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer) throws InterruptedException {
+	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer, List<String> content) throws InterruptedException {
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
 		
@@ -254,6 +262,12 @@ public class TestDriver {
 			if (this.printResult) buffer.add(new Message("-> Tested code:", Message.Type.FAIL, true));
 			cd.compile(file, code);
 			return new Result(RET_TYPE.CRASH, 0, 0);
+		}
+		else {
+			/* Write output */
+			content.add("OUTPUT");
+			content.addAll(compile);
+			Util.writeInFile(content, path);
 		}
 		
 		boolean printedOutput = this.printResult;

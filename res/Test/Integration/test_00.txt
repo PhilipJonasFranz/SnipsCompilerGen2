@@ -15,3 +15,46 @@ TESTCASES
 5 5
 8 21
 10 55
+OUTPUT
+/* --test_00.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+fib_P0:                       /* Function: fib, Provisos: INT */
+    push { r3, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    cmp r3, #3
+    bge .L3
+    mov r0, #1                /* Evaluate Expression */
+    b .L4
+.L3: 
+    mov r1, r3                /* Evaluate Expression */
+    mov r2, #1
+    sub r0, r1, #1
+    bl fib_P0                 /* Call fib */
+    push { r0 }
+    mov r1, r3                /* Load parameters */
+    mov r2, #2
+    sub r0, r1, #2
+    bl fib_P0                 /* Call fib */
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
+.L4: 
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    
+main:                         /* Function: main */
+    push { r3, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    bl fib_P0                 /* Call fib */
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    
+.L1_HEAP_START: .word HEAP_START

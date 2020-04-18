@@ -5,3 +5,23 @@ int main(int x) {
 }
 TESTCASES
 1
+OUTPUT
+/* --test_03.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3 }
+    mov fp, sp
+    mov r3, r0
+    push { r3 }               /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #4            /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r3, r0
+    mov r0, #1                /* Evaluate Expression */
+    mov sp, fp
+    pop { r3 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

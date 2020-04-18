@@ -10,3 +10,32 @@ TESTCASES
 4 8
 5 20
 6 24
+OUTPUT
+/* --test_02.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4 }
+    mov r3, r0
+    cmp r3, #3
+    bne .L1
+    mov r0, #5
+    b .L2
+.L1: 
+    cmp r3, #4
+    bne .L3
+    mov r0, #8
+    b .L4
+.L3: 
+    mov r1, r3
+    mov r2, #4
+    mul r0, r1, r2
+.L4: 
+.L2: 
+    mov r4, r0
+    pop { r3, r4 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

@@ -23,3 +23,50 @@ TESTCASES
 0 0 8
 1 4 14
 4 1 17
+OUTPUT
+/* --test_12.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4, r5, r6, r7, r8, r9, r10 }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    add r5, r3, r4
+    add r1, r3, r4
+    add r6, r1, #1
+    add r1, r3, r4
+    add r7, r1, #2
+    add r1, r3, r4
+    add r8, r1, #3
+    add r1, r3, r4
+    add r9, r1, #4
+    add r1, r3, r4
+    add r10, r1, #5
+    add r1, r3, r4
+    add r0, r1, #6
+    push { r0 }
+    add r1, r3, r4
+    add r0, r1, #7
+    push { r0 }
+    add r1, r3, r4
+    add r0, r1, #8
+    push { r0 }
+    add r0, r3, r4
+    push { r0 }
+    mov r1, r3                /* Evaluate Expression */
+    ldr r2, [fp, #-16]
+    add r0, r1, r2
+    str r0, [fp, #-16]
+    mov r0, #8                /* Evaluate Expression */
+    str r0, [fp, #-12]
+    ldr r1, [fp, #-12]        /* Evaluate Expression */
+    ldr r2, [fp, #-16]
+    add r0, r1, r2
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, r8, r9, r10 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

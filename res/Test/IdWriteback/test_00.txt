@@ -7,3 +7,21 @@ TESTCASES
 0 1
 -1 0
 2 3
+OUTPUT
+/* --test_00.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4 }
+    mov r3, r0
+    add r3, r0, #1
+    mov r2, r0
+    mov r1, #5
+    add r4, r1, r2
+    mov r0, r3                /* Evaluate Expression */
+    pop { r3, r4 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

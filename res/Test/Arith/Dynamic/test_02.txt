@@ -12,3 +12,40 @@ int main() {
 }
 TESTCASES
 128
+OUTPUT
+/* --test_02.txt */
+    b main
+bar:                          /* Function: bar */
+    push { r3 }
+    mov r3, r0
+    pop { r3 }
+    bx lr
+    
+foo:                          /* Function: foo */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #8                /* Evaluate Expression */
+    bl bar                    /* Call bar */
+    push { r0 }
+    mov r0, #8                /* Load parameters */
+    bl bar                    /* Call bar */
+    mov r2, r0
+    pop { r1 }
+    mul r0, r1, r2
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    
+main:                         /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl foo                    /* Evaluate Expression */
+    push { r0 }
+    bl foo                    /* Call foo */
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    

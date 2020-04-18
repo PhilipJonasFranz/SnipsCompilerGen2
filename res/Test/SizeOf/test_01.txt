@@ -4,3 +4,14 @@ int main() {
 }
 TESTCASES
 3
+OUTPUT
+/* --test_01.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    mov r0, #3                /* Evaluate Expression */
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

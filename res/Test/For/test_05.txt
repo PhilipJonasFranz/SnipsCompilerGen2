@@ -17,3 +17,32 @@ TESTCASES
 5 9
 6 15
 7 22
+OUTPUT
+/* --test_05.txt */
+main:                         /* Function: main */
+    push { r3, r4, r5 }
+    mov r3, r0
+    mov r4, #0
+    mov r0, #0                /* Evaluate Expression */
+    mov r5, #0
+.L1: 
+    cmp r5, r3
+    bge .L2
+    cmp r5, #3
+    bge .L3
+    b .L0
+.L3: 
+    add r1, r4, r5
+    mov r2, #1
+    add r4, r1, #1
+.L0: 
+    mov r1, r5                /* Evaluate Expression */
+    mov r2, #1
+    add r0, r1, #1
+    mov r5, r0
+    b .L1
+.L2: 
+    mov r0, r4                /* Evaluate Expression */
+    pop { r3, r4, r5 }
+    bx lr
+    

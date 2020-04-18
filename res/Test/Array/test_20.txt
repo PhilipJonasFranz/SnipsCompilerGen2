@@ -8,3 +8,23 @@ TESTCASES
 0 3
 1 -2
 2 5
+OUTPUT
+/* --test_20.txt */
+.data
+vec: 
+        .word 3
+        .word -2
+        .word 5
+    
+.text
+main:                         /* Function: main */
+    push { r3 }
+    mov r3, r0
+    lsl r2, r3, #2
+    ldr r0, .L0_vec           /* Load data section address */
+    add r0, r0, r2
+    ldr r0, [r0]
+    pop { r3 }
+    bx lr
+    
+.L0_vec: .word vec
