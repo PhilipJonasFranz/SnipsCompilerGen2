@@ -227,7 +227,7 @@ public class TestDriver {
 			buffer.add(new Message("Testing file " + file, Message.Type.INFO, buffered));
 			
 			/* Run test */
-			Result res = this.test(file, code, testcases, buffer, content);
+			Result res = this.test(file, code, testcases, buffer, writeback);
 			
 			/* Evaluate result */
 			if (res.fail > 0) resCnt.peek().failed++;
