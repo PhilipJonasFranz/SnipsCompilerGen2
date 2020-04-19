@@ -36,7 +36,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Improve Import System: Rename Variables from libraries to allow for same name in different files
+ - Implement Namespaces for imports
  - Implement Direct ASM injection
  
 ### v.3.0.0-RELEASE: Complex type system, advanced operations

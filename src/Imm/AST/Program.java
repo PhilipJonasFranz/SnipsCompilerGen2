@@ -7,7 +7,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Directive.Directive;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Source;
 
 /**
@@ -21,8 +20,6 @@ public class Program extends SyntaxElement {
 	public List<SyntaxElement> programElements;
 	
 	public List<Function> functions = new ArrayList();
-	
-	public List<STRUCT> structs = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */
