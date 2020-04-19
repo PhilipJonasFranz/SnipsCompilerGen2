@@ -554,12 +554,14 @@ public class Parser {
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.XOR_ASSIGN;
 		}
-		else if (current.type == TokenType.LSL) {
+		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) {
+			accept();
 			accept();
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSL_ASSIGN;
 		}
-		else if (current.type == TokenType.LSR) {
+		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT) {
+			accept();
 			accept();
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSR_ASSIGN;
@@ -777,12 +779,15 @@ public class Parser {
 	
 	protected Expression parseShift() throws PARSE_EXCEPTION {
 		Expression left = this.parseAddSub();
-		while (current.type == TokenType.LSL || current.type == TokenType.LSR) {
-			if (current.type == TokenType.LSL) {
+		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
+			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
+			if (current.type == TokenType.CMPLT) {
+				accept();
 				accept();
 				left = new Lsl(left, this.parseAddSub(), current.source);
 			}
 			else {
+				accept();
 				accept();
 				left = new Lsr(left, this.parseAddSub(), current.source);
 			}

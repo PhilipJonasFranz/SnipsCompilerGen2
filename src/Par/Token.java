@@ -107,10 +107,6 @@ public class Token {
 		CMPGE(">=", 				TokenGroup.COMPARE),
 		CMPGT(">", 					TokenGroup.COMPARE),
 		
-		/* Shift Operators */
-		LSL("<<"),
-		LSR(">>"),
-		
 		/* Types */
 		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),

@@ -2,19 +2,31 @@
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
- operators, as well as support for functionality like recursion. 
+ operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality and namespaces are supported.
  Currently supported data types are Integers and Booleans, as well as multi-dimensional arrays of said 
- types.
+ types. Also, Structs can be created and initialized with Proviso Types.
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue and return.
 ### The compiler
- The compiler outputs ARM Assembly. 
+ The compiler pipeline consists out of various stages:
+ 
+ - Reading the code to compile
+ - Pre Processing and resolving static imports
+ - Scanning the code and converting it into a token stream
+ - Parsing the token stream, creating an AST
+ - Processing dynamic imports
+ - Context checking and creating the DAST
+ - Code Generation, create list of Assembly instructions
+ - Assembly Optimizer, local changes while keeping original functionality
+
+ The compiler will output ARM Assembly. 
+ 
 ## Usage & Setup
 ### Running the executable
  If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips [Full Path to file to compile]". With "snips -help" you can get more information on the arguments.
 
 ### Running the code
-The project uses the lombok plugin. If you want to modify the code and built the project, you will have to install the plugin.
+The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
  Code examples and testcases can be found under res/Test/.
@@ -37,15 +49,22 @@ All instructions do support the condition field. See https://iitd-plos.github.io
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
  - Implement Namespaces for imports
- - Implement Direct ASM injection
  
 ### v.3.0.0-RELEASE: Complex type system, advanced operations
- - Implement Arithmetic Assignment Operators WIP
  - Implement Sizeof for Heap Objects
  
 ### v.4.0.0-RELEASE: Templating, Struct extending
  - Implement Struct Extending
-
+- Implement Direct ASM injection
+ 
 ### v.5.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer
  - Implement Optimizer Annotations
+
+### Todo
+ - Implement missing assignment arith injectors
+
+### Known issues
+ - Cannot set Proviso type to Struct with proviso type
+ - Unprecise error messages related to incorrect struct names while parsing
+ 

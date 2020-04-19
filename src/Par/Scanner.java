@@ -381,10 +381,6 @@ public class Scanner {
 					tokens.add(new Token(TokenType.CMPLE, new Source(fileName, i, a), this.buffer));
 					this.emptyBuffer();
 				}
-				else if (this.buffer.equals("<<")) {
-					tokens.add(new Token(TokenType.LSL, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
 				else {
 					tokens.add(new Token(TokenType.CMPLT, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
 					this.buffer = this.buffer.substring(1);
@@ -395,10 +391,6 @@ public class Scanner {
 				if (this.buffer.length() == 1)return false;
 				if (this.buffer.equals(">=")) {
 					tokens.add(new Token(TokenType.CMPGE, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else if (this.buffer.equals(">>")) {
-					tokens.add(new Token(TokenType.LSR, new Source(fileName, i, a), this.buffer));
 					this.emptyBuffer();
 				}
 				else {
