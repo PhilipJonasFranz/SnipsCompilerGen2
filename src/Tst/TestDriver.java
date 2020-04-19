@@ -51,7 +51,7 @@ public class TestDriver {
 	
 			/* --- FIELDS --- */
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
-	public long ttl = 200;
+	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
 	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
@@ -66,6 +66,10 @@ public class TestDriver {
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
+	
+	public int progress = 0, amount;
+	
+	public long start, firstStart;
 	
 
 			/* --- CONSTRUCTORS --- */
@@ -89,6 +93,8 @@ public class TestDriver {
 			}
 		}
 		
+		amount = paths.size();
+		
 		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
 			new Message("Could not find any tests, make sure the path starts from the res/ folder.", Message.Type.WARN);
@@ -101,10 +107,13 @@ public class TestDriver {
 		TestNode head = new TestNode(paths);
 		new Message("Successfully built package tree.", Message.Type.INFO);
 		
-		long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
+		firstStart = start;
 		
 		/* Base Layer */
 		resCnt.push(new ResultCnt());
+		
+		start = System.currentTimeMillis();
 		
 		/* Test the main package */
 		testPackage(head);
@@ -112,7 +121,7 @@ public class TestDriver {
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? " successfully in " + 
-				(System.currentTimeMillis() - start) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
+				(System.currentTimeMillis() - firstStart) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
 				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
 				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
 				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
@@ -158,6 +167,7 @@ public class TestDriver {
 			
 			/* Run test and save test feedback in pair */
 			test.getSecond().addAll(runTest(node.getPackagePath() + test.getFirst()));
+			progress++;
 			
 			/* Get result */
 			ResultCnt res = resCnt.pop();
@@ -177,6 +187,11 @@ public class TestDriver {
 		ResultCnt res = resCnt.pop();
 		if ((res.getTimeout() > 0 || res.getCrashed() > 0 || res.getFailed() > 0) && !node.tests.isEmpty()) {
 			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
+		}
+		
+		if (System.currentTimeMillis() - start > progressIndicatorSpeed) {
+			new Message("Progress: " + progress + "/" + amount + " test(s), total time: " + (System.currentTimeMillis() - firstStart) + " ms", Message.Type.INFO);
+			start = System.currentTimeMillis();
 		}
 		
 		/* Add package results to super package results */

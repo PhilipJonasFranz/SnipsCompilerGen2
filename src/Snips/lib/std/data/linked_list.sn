@@ -30,8 +30,8 @@ List<T>* create<T>() {
 /*
  * Free the list by freeing all contained list nodes, and the list itself.
  */
-void destroy<T>(List<T>* l) {
-	ListNode<T>* n = l->head;
+void destroy(List* l) {
+	ListNode* n = l->head;
 	while ((int) n != 0) {
 		free(n);
 		n = n->next;

@@ -3,5 +3,6 @@
 	<Library>
 		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
+		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
 	</Library>
 </Inf>

@@ -13,7 +13,7 @@ int main(int x, int y) {
 	
 	if (contains<int*>(l, &v0) && contains<int*>(l, &v1) && contains<int*>(l, &v2)) {
 		int* r = get<int*>(l, x);
-		destroy<int*>(l);
+		destroy(l);
 		return *(r + y);
 	}
 	else return 0;
