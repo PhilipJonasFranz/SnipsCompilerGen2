@@ -16,9 +16,9 @@ import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
 import Util.XMLParser;
+import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
-import Util.XMLParser.XMLNode;
 
 public class TestDriver {
 
@@ -61,6 +61,8 @@ public class TestDriver {
 	
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
+	
+	public boolean writebackResults = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -265,9 +267,11 @@ public class TestDriver {
 		}
 		else {
 			/* Write output */
-			content.add("OUTPUT");
-			content.addAll(compile);
-			Util.writeInFile(content, path);
+			if (writebackResults) {
+				content.add("OUTPUT");
+				content.addAll(compile);
+				Util.writeInFile(content, path);
+			}
 		}
 		
 		boolean printedOutput = this.printResult;

@@ -43,8 +43,8 @@ public class PointerLhsId extends LhsId {
 		}
 		else this.deref = (Deref) this.shadowDeref;
 		
-		TYPE t = ctx.checkExpression(deref.expression);
-		return t;
+		this.expressionType = deref.check(ctx);
+		return this.expressionType;
 	}
 
 	public String getFieldName() {

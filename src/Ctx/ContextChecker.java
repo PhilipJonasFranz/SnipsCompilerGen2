@@ -30,6 +30,7 @@ import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
@@ -167,24 +168,30 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
 		/* Set the declarations in the struct type */
-		e.struct.fields = e.declarations;
-		
 		return e.struct;
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
-		if (e.elements.size() != e.typedef.declarations.size()) {
+		/* Create a new Struct Instance and apply provisos provided by e */
+		try {
+			e.createStructInstance();
+		} catch (StackOverflowError e0) {
+			throw new CTX_EXCEPTION(e.getSource(), e0.getMessage());
+		}
+		
+		if (e.elements.size() != e.structType.typedef.fields.size()) {
 			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
 		}
 		
 		for (int i = 0; i < e.elements.size(); i++) {
 			TYPE t = e.elements.get(i).check(this);
-			if (!t.isEqual(e.typedef.declarations.get(i).getType())) {
-				throw new CTX_EXCEPTION(e.getSource(), "Expression type does not match struct field type: " + t.typeString() + " vs " + e.typedef.declarations.get(i).getType().typeString());
+			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
+				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
 			}
 		}
 		
-		e.setType(e.typedef.struct);
+		e.setType(e.structType);
+		
 		return e.getType();
 	}
 	
@@ -258,7 +265,7 @@ public class ContextChecker {
 						this.scopes.push(new Scope(null));
 						
 						/* Add declarations for struct */
-						for (Declaration dec : struct.fields) 
+						for (Declaration dec : struct.typedef.fields) 
 							this.scopes.peek().addDeclaration(dec);
 						
 						ArraySelect arr = (ArraySelect) sel0.selector;
@@ -283,7 +290,7 @@ public class ContextChecker {
 					this.scopes.push(new Scope(null));
 					
 					/* Add declarations for struct */
-					for (Declaration dec : struct.fields) 
+					for (Declaration dec : struct.typedef.fields) 
 						this.scopes.peek().addDeclaration(dec);
 					
 					ArraySelect arr = (ArraySelect) selection;
@@ -414,19 +421,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
+		d.setType(ProvisoManager.setHiddenContext(d.getType()));
+		
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
-			if (d.getType() instanceof POINTER) {
-				POINTER p = (POINTER) d.getType();
-				if (!t.getCoreType().isEqual(p.getCoreType())) {
-					throw new CTX_EXCEPTION(d.getSource(), "Pointer type does not match declaration type: " + t.typeString() + " vs. " + p.getCoreType().typeString());
-				}
-			}
-			else {
-				if (!t.isEqual(d.getType())) {
-					throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
-				}
+			if (!d.getType().isEqual(t)) {
+				throw new CTX_EXCEPTION(d.getSource(), ((t instanceof STRUCT)? "Struct" : "Variable") + " type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
 			}
 		}
 		
@@ -438,6 +439,8 @@ public class ContextChecker {
 	
 	public TYPE checkAssignment(Assignment a) throws CTX_EXCEPTION {
 		TYPE targetType = a.lhsId.check(this);
+		
+		if (a.lhsId instanceof PointerLhsId) targetType = new POINTER(targetType);
 		
 		String fieldName = a.lhsId.getFieldName();
 		
@@ -460,7 +463,7 @@ public class ContextChecker {
 		}
 		/* If not, the types have to be equal */
 		else if (!t.isEqual(targetType)) {
-			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.getType().typeString() + " vs. " + t.typeString());
+			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		
 		if (a.assignArith != ASSIGN_ARITH.NONE) {

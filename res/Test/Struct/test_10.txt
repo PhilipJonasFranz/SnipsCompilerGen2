@@ -1,0 +1,13 @@
+SOURCE
+struct Data<T> {
+	T value;
+}
+
+int main(int x) {
+	Data<int[2]> data = Data<int[2]>::({x, x * 2});
+	return data.value [1];
+}
+TESTCASES
+0 0
+1 2
+2 4

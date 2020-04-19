@@ -1,5 +1,6 @@
 package Imm.TYPE.COMPOSIT;
 
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
@@ -39,13 +40,17 @@ public class POINTER extends COMPOSIT {
 			}
 			else return this.coreType.isEqual(pointer.coreType);
 		}
+		else if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			return this.isEqual(p.getContext());
+		}
 		else return false;
 	}
 	
 	public String typeString() {
 		if (this.targetType instanceof STRUCT) {
 			STRUCT s = (STRUCT) this.targetType;
-			return "STRUCT<" + ((s.typedef != null)? s.typedef.structName  : "?") + ">*";
+			return "STRUCT<" + ((s.typedef != null)? s.typedef.structName : "?") + ">*";
 		}
 		else return this.targetType.typeString() + "*";
 	}
@@ -63,9 +68,17 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public TYPE clone() {
-		POINTER p = new POINTER(this.targetType.clone());
-		p.coreType = this.coreType.clone();
-		return p;
+		if (this.targetType instanceof STRUCT) {
+			POINTER p = new POINTER(this.targetType);
+			p.coreType = this.coreType;
+			return p;
+		}
+		else {
+			TYPE target = this.targetType.clone();
+			POINTER p = new POINTER(target);
+			p.coreType = this.coreType.clone();
+			return p;
+		}
 	}
 
 }

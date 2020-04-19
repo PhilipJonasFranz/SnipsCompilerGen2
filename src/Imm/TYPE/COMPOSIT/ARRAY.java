@@ -2,6 +2,7 @@ package Imm.TYPE.COMPOSIT;
 
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
@@ -55,9 +56,17 @@ public class ARRAY extends COMPOSIT {
 
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
+		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			if (p.hasContext()) return this.isEqual(p.getContext());
+			else return false;
+		}
 		if (type instanceof ARRAY) {
 			ARRAY array = (ARRAY) type;
 			return this.elementType.isEqual(array.elementType) && this.getLength() == array.getLength();
+		}
+		else if (type instanceof POINTER) {
+			return this.getCoreType().isEqual(type.getCoreType());
 		}
 		else return false;
 	}
@@ -92,7 +101,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public TYPE clone() {
-		ARRAY arr = new ARRAY(this.elementType.clone(), this.length0);
+		ARRAY arr = new ARRAY(this.elementType.clone(), this.getLength());
 		return arr;
 	}
 

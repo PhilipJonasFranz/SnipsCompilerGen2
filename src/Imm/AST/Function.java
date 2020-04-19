@@ -79,18 +79,7 @@ public class Function extends CompoundStatement {
 		}
 		
 		/* Apply to return type */
-		if (this.returnType instanceof PROVISO) {
-			PROVISO ret = (PROVISO) this.returnType;
-			for (int i = 0; i < this.manager.provisosTypes.size(); i++) {
-				TYPE pro = this.manager.provisosTypes.get(i);
-				
-				if (pro.isEqual(ret)) {
-					//System.out.println("Applied " + context.get(i).typeString() + " to return proviso " + ret.typeString());
-					ret.setContext(context.get(i));
-					//System.out.println("New return proviso: " + ret.typeString());
-				}
-			}
-		}
+		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType);
 		
 		/* Apply to body */
 		for (Statement s : this.body) {

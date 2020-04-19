@@ -5,8 +5,12 @@ import java.util.List;
 
 import CGen.LabelGen;
 import Exc.CTX_EXCEPTION;
+import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Pair;
 import Util.Source;
 
@@ -120,6 +124,57 @@ public class ProvisoManager {
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
 			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(postfix, new Pair<TYPE, List<TYPE>>(type, context)));
 		}
+	}
+	
+	public static void setContext(List<TYPE> context, TYPE type) throws CTX_EXCEPTION {
+		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			for (TYPE t : context) {
+				if (p.isEqual(t)) {
+					p.setContext(t);
+					break;
+				}
+			}
+		}
+		else if (type instanceof ARRAY) {
+			ARRAY arr = (ARRAY) type;
+			setContext(context, arr.elementType);
+		}
+		else if (type instanceof POINTER) {
+			POINTER p = (POINTER) type;
+			setContext(context, p.targetType);
+		}
+		else if (type instanceof STRUCT) {
+			STRUCT s = (STRUCT) type;
+			
+			for (Declaration d : s.typedef.fields) {
+				if (!(d.getType() instanceof POINTER)) {
+					setContext(context, d.getType());
+				}
+			}
+		}
+	}
+	
+	public static TYPE setHiddenContext(TYPE type) throws CTX_EXCEPTION {
+		if (type instanceof PROVISO) {
+			return type;
+		}
+		else if (type instanceof ARRAY) {
+			ARRAY arr = (ARRAY) type;
+			arr.elementType = setHiddenContext(arr.elementType);
+			return arr;
+		}
+		else if (type instanceof POINTER) {
+			POINTER p = (POINTER) type;
+			p.targetType = setHiddenContext(p.targetType);
+			return p;
+		}
+		else if (type instanceof STRUCT) {
+			STRUCT s = (STRUCT) type;
+			s = s.typedef.constructStructType(s.proviso);
+			return s;
+		}
+		else return type;
 	}
 	
 }

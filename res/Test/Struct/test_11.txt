@@ -1,0 +1,18 @@
+SOURCE
+struct Capsule<T> {
+	T cap;
+}
+
+struct Data<T> {
+	T value;
+	Capsule<T> c;
+}
+
+int main(int x) {
+	Data<int[2]> data = Data<int[2]>::({x, x * 2}, Capsule<int[2]>::({3, 4}));
+	return data.value [1];
+}
+TESTCASES
+0 0
+1 2
+2 4

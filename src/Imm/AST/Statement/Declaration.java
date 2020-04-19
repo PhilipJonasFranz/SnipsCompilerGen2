@@ -8,6 +8,7 @@ import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Par.Token;
 import Util.Source;
 
@@ -18,7 +19,7 @@ public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
 	public String fieldName;
-		
+	
 	private TYPE type;
 	
 	public Expression value;
@@ -42,6 +43,12 @@ public class Declaration extends Statement {
 		this.value = value;
 	}
 	
+	private Declaration(String id, TYPE type, Source source) {
+		super(source);
+		this.fieldName = id;
+		this.type = type;
+	}
+	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
@@ -56,12 +63,12 @@ public class Declaration extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
 		/* Apply to declaration type */
 		TYPE type0 = this.type;
+		boolean pointer = false;
 		if (type0 instanceof POINTER) {
 			type0 = ((POINTER) type0).targetType;
+			pointer = true;
 		}
 		
 		if (type0 instanceof PROVISO) {
@@ -72,6 +79,12 @@ public class Declaration extends Statement {
 					p.setContext(context.get(i));
 				}
 			}
+		}
+		else if (type0 instanceof STRUCT) {
+			STRUCT s = (STRUCT) type0;
+			if (!pointer) s.typedef.setContext(context);
+			
+			s.proviso = context;
 		}
 		
 		/* Apply to value */
@@ -100,6 +113,11 @@ public class Declaration extends Statement {
 	
 	public void setType(TYPE type) {
 		this.type = type;
+	}
+	
+	public Declaration clone() {
+		Declaration clone = new Declaration(this.fieldName, this.type.clone(), this.getSource());
+		return clone;
 	}
 	
 }

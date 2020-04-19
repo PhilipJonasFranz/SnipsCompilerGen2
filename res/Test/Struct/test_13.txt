@@ -1,0 +1,19 @@
+SOURCE
+struct ListNode<T> {
+	T value;
+}
+
+ListNode* create<T>(T v) {
+	ListNode<T>* n = (ListNode<T>*) resv(1);
+	*n = ListNode<T>::(v);
+	return n;
+}
+
+int main(int x) {
+	ListNode<int>* node = create<int>(x);
+	return node->value;
+}
+TESTCASES
+0 0
+1 1
+2 2
