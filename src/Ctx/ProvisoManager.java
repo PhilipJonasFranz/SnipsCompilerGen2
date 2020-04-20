@@ -148,6 +148,7 @@ public class ProvisoManager {
 			STRUCT s = (STRUCT) type;
 			
 			for (Declaration d : s.typedef.fields) {
+				/* Prevent Recursion */
 				if (!(d.getType() instanceof POINTER)) {
 					setContext(context, d.getType());
 				}

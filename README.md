@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.1.7.7-RELEASE
+# Snips Compiler Gen.2 v.1.7.8-RELEASE
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
@@ -19,6 +19,8 @@
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, local changes while keeping original functionality
 
+ The compiler uses a built-in system libary, located at src/Snips/lib. 
+ 
  The compiler will output ARM Assembly. 
  
 ## Usage & Setup

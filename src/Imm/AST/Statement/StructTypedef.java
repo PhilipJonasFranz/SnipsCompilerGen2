@@ -66,10 +66,14 @@ public class StructTypedef extends SyntaxElement {
 			
 			ProvisoManager.setContext(con0, p0);
 		}
-				
+		
+		for (int i = 0; i < context.size(); i++) {
+			context.set(i, ProvisoManager.setHiddenContext(context.get(i)));
+		}
+			
 		/* Apply new internal proviso mapping to capsuled declarations */
 		for (Declaration dec : this.fields) {
-			ProvisoManager.setContext(this.proviso, dec.getType());
+			ProvisoManager.setContext(context, dec.getType());
 		}
 	}
 
@@ -82,7 +86,9 @@ public class StructTypedef extends SyntaxElement {
 		for (TYPE t : this.proviso) prov0.add(t.clone());
 		
 		List<Declaration> dec0 = new ArrayList();
-		for (Declaration dec : this.fields) dec0.add(dec.clone());
+		for (Declaration dec : this.fields) {
+			dec0.add(dec.clone());
+		}
 		
 		StructTypedef clone = new StructTypedef(this.structName, prov0, dec0, this.getSource());
 		
@@ -95,13 +101,11 @@ public class StructTypedef extends SyntaxElement {
 	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXCEPTION {
 		STRUCT clone = this.struct.clone();
 		
-		/* Create copy of template */
-		clone.typedef = this.clone();
-		
 		if (this.proviso.size() != proviso.size()) {
 			throw new CTX_EXCEPTION(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
 		}
 		
+		clone.typedef.struct = clone;
 		clone.typedef.setContext(proviso);
 		
 		/* Assign proviso */

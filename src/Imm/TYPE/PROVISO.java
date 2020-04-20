@@ -28,7 +28,12 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public TYPE getContext() {
-		return this.context;
+		if (this.context instanceof PROVISO) {
+			PROVISO p = (PROVISO) this.context;
+			if (p.hasContext()) return p.getContext();
+			else return p;
+		}
+		else return this.context;
 	}
 	
 	public boolean hasContext() {

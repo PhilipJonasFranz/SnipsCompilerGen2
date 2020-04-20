@@ -1,6 +1,7 @@
 SOURCE
 struct Data<T> {
 	T value;
+	int v;
 }
 
 struct Cap<V> {
@@ -8,7 +9,7 @@ struct Cap<V> {
 }
 
 int main(int x) {
-	Data<Cap<int[2]>> data = Data<Cap<int[2]>>::(Cap<int[2]>::({x, x * 2}));
+	Data<Cap<int[2]>> data = Data<Cap<int[2]>>::(Cap<int[2]>::({x, x * 2}), 4);
 	return data.value.val [1];
 }
 TESTCASES
@@ -25,9 +26,17 @@ main:                         /* Function: main */
     push { r3 }
     mov fp, sp
     mov r3, r0
+    mov r0, #4                /* Evaluate Expression */
     push { r0 }
+    mov r1, r3
+    mov r2, #2
+    mul r0, r1, r2
     push { r0 }
-    sub r1, fp, #8            /* Evaluate Expression */
+    mov r0, r3
+    push { r0 }
+    sub r1, fp, #12           /* Evaluate Expression */
+    mov r2, #4
+    add r1, r1, #4
     ldr r0, [r1]              /* Load field from struct */
     mov sp, fp
     pop { r3 }

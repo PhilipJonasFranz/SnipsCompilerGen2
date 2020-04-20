@@ -117,6 +117,7 @@ public class STRUCT extends COMPOSIT {
 		
 		/* Create a copy of the typedef */
 		s.typedef = this.typedef.clone();
+		s.typedef.struct = s;
 		
 		return s;
 	}
