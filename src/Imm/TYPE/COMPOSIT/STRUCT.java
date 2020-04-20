@@ -86,6 +86,14 @@ public class STRUCT extends COMPOSIT {
 		}
 		s = s.substring(0, s.length() - 1);
 		s += ">";
+		
+		if (!this.proviso.isEmpty()) {
+			s += " {";
+			for (TYPE t : this.proviso) s += t.typeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += "}";
+		}
+		
 		return s;
 	}
 

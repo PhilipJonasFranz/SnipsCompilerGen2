@@ -3,8 +3,8 @@ struct ListNode<T> {
 	T value;
 }
 
-ListNode* create<T>(T v) {
-	ListNode<T>* n = (ListNode<T>*) resv(1);
+ListNode<T>* create<T>(T v) {
+	ListNode<T>* n = (ListNode<T>*) resv(sizeof(ListNode<T>*));
 	*n = ListNode<T>::(v);
 	return n;
 }

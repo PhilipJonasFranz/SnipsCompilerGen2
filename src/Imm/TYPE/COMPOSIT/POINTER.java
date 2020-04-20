@@ -42,7 +42,8 @@ public class POINTER extends COMPOSIT {
 		}
 		else if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
-			return this.isEqual(p.getContext());
+			if (p.hasContext()) return this.isEqual(p.getContext());
+			else return false;
 		}
 		else return false;
 	}

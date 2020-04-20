@@ -3,12 +3,11 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Par.Token;
 import Util.Source;
 
@@ -64,28 +63,7 @@ public class Declaration extends Statement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		/* Apply to declaration type */
-		TYPE type0 = this.type;
-		boolean pointer = false;
-		if (type0 instanceof POINTER) {
-			type0 = ((POINTER) type0).targetType;
-			pointer = true;
-		}
-		
-		if (type0 instanceof PROVISO) {
-			PROVISO p = (PROVISO) type0;
-			for (int i = 0; i < context.size(); i++) {
-				TYPE pro = context.get(i);
-				if (pro.isEqual(p)) {
-					p.setContext(context.get(i));
-				}
-			}
-		}
-		else if (type0 instanceof STRUCT) {
-			STRUCT s = (STRUCT) type0;
-			if (!pointer) s.typedef.setContext(context);
-			
-			s.proviso = context;
-		}
+		ProvisoManager.setContext(context, this.type);
 		
 		/* Apply to value */
 		if (this.value != null) this.value.setContext(context);

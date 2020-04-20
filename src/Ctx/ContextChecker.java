@@ -883,6 +883,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXCEPTION {
+		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType);
 		sot.setType(new INT());
 		return sot.getType();
 	}
@@ -936,6 +937,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXCEPTION {
+		tc.castType = ProvisoManager.setHiddenContext(tc.castType);
+		
 		TYPE t = tc.expression.check(this);
 		
 		if (t.wordsize() != tc.castType.wordsize()) {
