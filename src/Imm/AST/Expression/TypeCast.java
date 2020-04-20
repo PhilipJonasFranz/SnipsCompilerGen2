@@ -44,9 +44,13 @@ public class TypeCast extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
+		//System.out.println("Context: ");
+		//context.stream().forEach(x -> System.out.println(x.typeString()));
 		
+		/** Apply context to cast type */
 		ProvisoManager.setContext(context, this.castType);
+		
+		//System.out.println("R: " + this.castType.typeString());
 		
 		this.expression.setContext(context);
 	}

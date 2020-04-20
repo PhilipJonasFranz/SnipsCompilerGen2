@@ -68,28 +68,31 @@ public class Function extends CompoundStatement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
 		/* Apply context to existing proviso types */
 		this.manager.setContext(context);
 		
 		/* Apply to parameters */
-		for (Declaration d : this.parameters) {
+		for (Declaration d : this.parameters) 
 			d.setContext(this.manager.provisosTypes);
-		}
 		
 		/* Apply to return type */
 		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType);
 		
-		/* Apply to body */
-		for (Statement s : this.body) {
-			s.setContext(this.manager.provisosTypes);
-		}
-		
+		/* Add to mapping pool */
 		if (!this.manager.containsMapping(context)) {
 			/* Save this context mapping, save copy of return type */
 			this.manager.addProvisoMapping(this.getReturnType().clone(), context);
 		}
+		
+		/* Apply to body */
+		for (Statement s : this.body) {
+			/* Create clone of mapping, since mapping is destroyed somehow after calling setContext with it */
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.manager.provisosTypes) clone.add(t.clone());
+			
+			s.setContext(clone);
+		}
+		
 	}
 
 	public void releaseContext() {

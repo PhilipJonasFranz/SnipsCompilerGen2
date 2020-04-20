@@ -29,13 +29,6 @@ public class STRUCT extends COMPOSIT {
 		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
-			if (!this.proviso.isEmpty()) {
-				for (int i = 0; i < this.proviso.size(); i++) {
-					if (!this.typedef.fields.get(i).getType().isEqual(struct.typedef.fields.get(i).getType())) {
-						return false;
-					}
-				}
-			}
 			
 			if (struct.typedef.fields.size() == this.typedef.fields.size()) {
 				boolean isEqual = true;

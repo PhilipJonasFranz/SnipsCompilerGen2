@@ -33,6 +33,19 @@ public class POINTER extends COMPOSIT {
 			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {
 				STRUCT s0 = (STRUCT) this.getCoreType();
 				STRUCT s1 = (STRUCT) pointer.getCoreType();
+				
+				if (!s0.proviso.isEmpty()) {
+					if (s0.proviso.size() != s1.proviso.size()) return false;
+					else {
+						for (int i = 0; i < s0.proviso.size(); i++) {
+							if (!s0.proviso.get(i).isEqual(s1.proviso.get(i))) {
+								System.out.println("Proviso not equal: " + s0.proviso.get(i).typeString() + " " + s1.proviso.get(i).typeString());
+								return false;
+							}
+						}
+					}
+				}
+				
 				return s0.typedef.structName.equals(s1.typedef.structName);
 			}
 			else if (pointer.getCoreType() instanceof STRUCT || this.getCoreType() instanceof STRUCT) {

@@ -78,7 +78,7 @@ public class PROVISO extends TYPE<Void> {
 	public int wordsize() {
 		if (this.context != null) return this.context.wordsize();
 		else {
-			throw new SNIPS_EXCEPTION("Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
+			throw new SNIPS_EXCEPTION("INTERNAL : Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
 		}
 	}
 	

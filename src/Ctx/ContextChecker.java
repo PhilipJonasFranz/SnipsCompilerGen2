@@ -624,7 +624,7 @@ public class ContextChecker {
 		}
 		
 		if (right.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + right.typeString());
 		}
 		
 		if (left instanceof POINTER) {
@@ -747,17 +747,17 @@ public class ContextChecker {
 		}
 		
 		if (!f.manager.provisosTypes.isEmpty()) {
-			if (f.manager.containsMapping(i.provisosTypes)) {
+			if (f.manager.containsMapping(i.proviso)) {
 				/* Mapping already exists, just return return type of this specific mapping */
-				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 			else {
 				/* Create a new context, check function for this specific context */
-				f.setContext(i.provisosTypes);
+				f.setContext(i.proviso);
 				this.scopes.push(new Scope(this.scopes.get(0)));
 				f.check(this);
 				this.scopes.pop();
-				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 		}
 		
@@ -780,7 +780,7 @@ public class ContextChecker {
 				for (int k = 0; k < f.manager.provisosTypes.size(); k++) {
 					PROVISO p0 = (PROVISO) f.manager.provisosTypes.get(k);
 					if (p0.placeholderName.equals(p.placeholderName)) {
-						functionParamType = i.provisosTypes.get(k);
+						functionParamType = i.proviso.get(k);
 						break;
 					}
 				}
@@ -791,7 +791,7 @@ public class ContextChecker {
 			}
 		}
 		
-		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.provisosTypes)) {
+		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) {
 			i.setType(f.getReturnType().clone());
 		}
 		
@@ -819,9 +819,9 @@ public class ContextChecker {
 		}
 
 		if (!f.manager.provisosTypes.isEmpty()) {
-			if (!f.manager.containsMapping(i.provisosTypes)) {
+			if (!f.manager.containsMapping(i.proviso)) {
 				/* Create a new context, check function for this specific context */
-				f.setContext(i.provisosTypes);
+				f.setContext(i.proviso);
 				
 				/* Create new scope that points to the global scope */
 				this.scopes.push(new Scope(this.scopes.get(0)));
@@ -836,7 +836,6 @@ public class ContextChecker {
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
 			TYPE paramType = i.parameters.get(a).check(this);
-			
 			if (!paramType.isEqual(f.parameters.get(a).getType())) {
 				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
