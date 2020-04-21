@@ -86,11 +86,7 @@ public class Function extends CompoundStatement {
 		
 		/* Apply to body */
 		for (Statement s : this.body) {
-			/* Create clone of mapping, since mapping is destroyed somehow after calling setContext with it */
-			List<TYPE> clone = new ArrayList();
-			for (TYPE t : this.manager.provisosTypes) clone.add(t.clone());
-			
-			s.setContext(clone);
+			s.setContext(this.manager.provisosTypes);
 		}
 		
 	}

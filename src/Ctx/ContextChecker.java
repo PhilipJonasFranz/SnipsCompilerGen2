@@ -247,7 +247,10 @@ public class ContextChecker {
 					StructSelect sel0 = (StructSelect) selection;
 					
 					if (sel0.selector instanceof IDRef) {
-						type = findField(struct, (IDRef) sel0.selector);
+						IDRef ref = (IDRef) sel0.selector;
+						
+						type = findField(struct, ref);
+						type = ProvisoManager.setHiddenContext(type);
 						
 						if (sel0.deref) {
 							if (!(type instanceof POINTER)) {
@@ -281,8 +284,11 @@ public class ContextChecker {
 					selection = sel0.selection;
 				}
 				else if (selection instanceof IDRef) {
+					IDRef ref = (IDRef) selection;
+					
 					/* Last selection */
-					type = findField(struct, (IDRef) selection);
+					type = findField(struct, ref);
+					
 					break;
 				}
 				else if (selection instanceof ArraySelect) {
@@ -452,17 +458,7 @@ public class ContextChecker {
 		TYPE ctype = t;
 		
 		/* If target type is a pointer, only the core types have to match */
-		if (targetType instanceof POINTER) {
-			POINTER p = (POINTER) targetType;
-			
-			if (!p.getCoreType().isEqual(t.getCoreType())) {
-				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
-			}
-			
-			ctype = t.getCoreType();
-		}
-		/* If not, the types have to be equal */
-		else if (!t.isEqual(targetType)) {
+		if (!targetType.isEqual(t)) {
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		

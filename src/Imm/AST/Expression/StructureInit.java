@@ -52,7 +52,7 @@ public class StructureInit extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		
+		this.typedef.setContext(context);
 	}
 
 	public void releaseContext() {

@@ -129,7 +129,7 @@ public class ProvisoManager {
 			PROVISO p = (PROVISO) type;
 			for (TYPE t : context) {
 				if (p.isEqual(t)) {
-					p.setContext(t);
+					p.setContext(t.clone());
 					break;
 				}
 			}
@@ -145,27 +145,28 @@ public class ProvisoManager {
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
-			/**
-			 * ISSUE LIES HERE
-			 */
-			
-			mapContextTo(context, s.proviso);
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : context) clone.add(t.clone());
+			mapContextTo(s.proviso, clone);
 			
 			for (Declaration d : s.typedef.fields) {
 				/* Prevent Recursion */
 				if (!(d.getType() instanceof POINTER)) {
-					setContext(context, d.getType());
+					setContext(clone, d.getType());
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Maps the proviso types of the second argument to the first.
+	 */
 	public static void mapContextTo(List<TYPE> target, List<TYPE> source) {
 		for (int i = 0; i < target.size(); i++) {
 			for (int a = 0; a < source.size(); a++) {
 				if (target.get(i) instanceof PROVISO && target.get(i).isEqual(source.get(a))) {
 					PROVISO p = (PROVISO) target.get(i);
-					p.setContext(source.get(a));
+					p.setContext(source.get(a).clone());
 				}
 			}
 		}
@@ -187,8 +188,9 @@ public class ProvisoManager {
 		}
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
-			s = s.typedef.constructStructType(s.proviso);
-			return s;
+			STRUCT clone = s.clone();
+			clone = clone.typedef.constructStructType(clone.proviso);
+			return clone;
 		}
 		else return type;
 	}

@@ -99,19 +99,18 @@ public class StructTypedef extends SyntaxElement {
 	 * Construct a new Struct Type based on this template and set given proviso as context.
 	 */
 	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXCEPTION {
-		STRUCT clone = this.struct.clone();
+		/* Do not clone type, struct types and typedef are already cloned during parsing */
 		
 		if (this.proviso.size() != proviso.size()) {
 			throw new CTX_EXCEPTION(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
 		}
 		
-		clone.typedef.struct = clone;
-		clone.typedef.setContext(proviso);
+		this.setContext(proviso);
 		
 		/* Assign proviso */
-		clone.proviso = proviso;
+		this.struct.proviso = proviso;
 		
-		return clone;
+		return this.struct;
 	}
 	
 }

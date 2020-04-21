@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.1.7.10-RELEASE
+# Snips Compiler Gen.2 v.1.7.11-RELEASE
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
@@ -67,6 +67,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  - Implement missing assignment arith injectors
 
 ### Known issues
+ - Missing type error messages when using proviso on functions in combination with struct pointers
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  

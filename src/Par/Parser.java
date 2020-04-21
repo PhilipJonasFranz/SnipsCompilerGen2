@@ -1053,7 +1053,7 @@ public class Parser {
 		StructTypedef def = this.getStructTypedef(token);
 		
 		if (def != null) {
-			type = def.struct;
+			type = def.struct.clone();
 			
 			List<TYPE> proviso = this.parseProviso();
 			

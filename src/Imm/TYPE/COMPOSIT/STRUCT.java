@@ -7,6 +7,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Snips.CompilerDriver;
 
 public class STRUCT extends COMPOSIT {
 
@@ -73,20 +74,33 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public String typeString() {
-		String s = this.typedef.structName + "<";
-		for (Declaration t : this.typedef.fields) {
-			s += t.getType().typeString() + ",";
-		}
-		s = s.substring(0, s.length() - 1);
-		s += ">";
+		String s = this.typedef.structName;
 		
+		if (this.typedef.fields.size() > 0) {
+			s += "<";
+			for (Declaration t : this.typedef.fields) {
+				if (t.getType().getCoreType().isEqual(this)) {
+					s+= t.getType().getCoreType().typeString() + ",";
+				}
+				else s += t.getType().typeString() + ",";
+			}
+			s = s.substring(0, s.length() - 1);
+			s += ">";
+		}
+		
+		if (CompilerDriver.printProvisoTypes) s += this.getProvisoString();
+		
+		return s;
+	}
+	
+	public String getProvisoString() {
+		String s = "";
 		if (!this.proviso.isEmpty()) {
 			s += " {";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
 			s = s.substring(0, s.length() - 2);
 			s += "}";
 		}
-		
 		return s;
 	}
 
@@ -119,6 +133,8 @@ public class STRUCT extends COMPOSIT {
 		/* Create a copy of the typedef */
 		s.typedef = this.typedef.clone();
 		s.typedef.struct = s;
+		
+		assert(this.typedef.fields.size() == s.typedef.fields.size());
 		
 		return s;
 	}
