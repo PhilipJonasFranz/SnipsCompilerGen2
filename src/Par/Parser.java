@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
@@ -95,7 +94,7 @@ public class Parser {
 	
 	List<String> activeProvisos = new ArrayList();
 	
-	List<TYPE> toClone = new ArrayList();
+	List<Pair<TYPE, List<TYPE>>> toClone = new ArrayList();
 	
 	public Parser(List tokens) throws SNIPS_EXCEPTION {
 		if (tokens == null) throw new SNIPS_EXCEPTION("SNIPS_PARSE -> Tokens are null!");
@@ -155,12 +154,11 @@ public class Parser {
 		Program p = parseProgram();
 		
 		/* Clone all struct type instances that were parsed from the SSOT */
-		for (TYPE t : this.toClone) {
-			if (t instanceof STRUCT) {
-				STRUCT s = (STRUCT) t;
-				List<TYPE> proviso = s.proviso;
-				s = s.typedef.struct.clone();
-				s.proviso = proviso;
+		for (Pair<TYPE, List<TYPE>> p0 : this.toClone) {
+			if (p0.first instanceof STRUCT) {
+				STRUCT s = (STRUCT) p0.first;
+				
+				s.typedef = s.typedef.clone();
 			}
 		}
 		
@@ -655,10 +653,9 @@ public class Parser {
 	
 	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
 		if (current.type == TokenType.STRUCTID) {
-			Token id = accept();
-			StructTypedef def = this.getStructTypedef(id);
+			Source source = current.getSource();
 			
-			List<TYPE> proviso = this.parseProviso();
+			TYPE type = this.parseType();
 			
 			accept(TokenType.COLON);
 			accept(TokenType.COLON);
@@ -676,7 +673,7 @@ public class Parser {
 			}
 			
 			accept(TokenType.RPAREN);
-			return new StructureInit(def, proviso, elements, id.getSource());
+			return new StructureInit((STRUCT) type, elements, source);
 		}
 		else return this.parseArrayInit();
 	}
@@ -1048,9 +1045,9 @@ public class Parser {
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 	}
 	
-	public StructTypedef getStructTypedef(Token token) {
+	public StructTypedef getStructTypedef(String spelling) {
 		for (Pair<Token, StructTypedef> p : this.structIds) {
-			if (p.getFirst().spelling.equals(token.spelling)) {
+			if (p.getFirst().spelling.equals(spelling)) {
 				return p.getSecond();
 			}
 		}
@@ -1064,7 +1061,7 @@ public class Parser {
 		if (current.type == TokenType.IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
-		StructTypedef def = this.getStructTypedef(token);
+		StructTypedef def = this.getStructTypedef(token.spelling);
 		
 		if (def != null) {
 			/* 
@@ -1073,23 +1070,16 @@ public class Parser {
 			 * for to indicate that this type needs cloning after parsing ends.
 			 */
 			type = def.struct;
-			this.toClone.add(type);
-			
+		
 			List<TYPE> proviso = this.parseProviso();
 			
-			if (type instanceof STRUCT) {
-				STRUCT s = (STRUCT) type;
-				s.proviso = proviso;
-			}
-			else {
-				if (!proviso.isEmpty()) {
-					/* Throw a 'Parser Context Exception', since we know that this would be an error in CTX anyway */
-					try {
-						throw new CTX_EXCEPTION(token.getSource(), "Cannot apply proviso to a non struct type");
-					} catch (Exception e) {}
-					throw new PARSE_EXCEPTION(current.source, TokenType.CMPLT, TokenType.MUL, TokenType.LBRACKET);
-				}
-			}
+			STRUCT s = def.struct.clone();
+			s.typedef = def;
+			s.proviso = proviso;
+		
+			type = s;
+			
+			this.toClone.add(new Pair<TYPE, List<TYPE>>(type, proviso));
 		}
 		else {
 			type = TYPE.fromToken(token);

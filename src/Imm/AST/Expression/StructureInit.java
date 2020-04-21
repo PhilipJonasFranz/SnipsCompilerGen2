@@ -4,7 +4,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Source;
@@ -12,11 +11,6 @@ import Util.Source;
 public class StructureInit extends Expression {
 
 			/* --- FIELDS --- */
-	/** List of the provisos types this function is templated with */
-	public List<TYPE> proviso;
-	
-	private StructTypedef typedef;
-	
 	public STRUCT structType;
 	
 	public List<Expression> elements;
@@ -27,10 +21,9 @@ public class StructureInit extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructureInit(StructTypedef typedef, List<TYPE> proviso, List<Expression> elements, Source source) {
+	public StructureInit(STRUCT structType, List<Expression> elements, Source source) {
 		super(source);
-		this.typedef = typedef;
-		this.proviso = proviso;
+		this.structType = structType;
 		this.elements = elements;
 	}
 	
@@ -44,7 +37,7 @@ public class StructureInit extends Expression {
 	}
 	
 	public void createStructInstance() throws CTX_EXCEPTION {
-		this.structType = this.typedef.constructStructType(this.proviso);
+		this.structType = this.structType.typedef.constructStructType(this.structType.proviso);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
@@ -52,7 +45,7 @@ public class StructureInit extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		this.typedef.setContext(context);
+		this.structType.typedef.setContext(context);
 	}
 
 	public void releaseContext() {

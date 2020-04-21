@@ -9,6 +9,9 @@ struct Cap<V> {
 }
 
 int main(int x) {
+	Cap<int> c0 = Cap<int>::(5);
+	Cap<bool> c1 = Cap<bool>::(true);
+
 	Data<Cap<int[2]>> data = Data<Cap<int[2]>>::(Cap<int[2]>::({x, x * 2}), 4);
 	return data.value.val [1] + data.v;
 }
