@@ -437,6 +437,9 @@ public class ContextChecker {
 			TYPE t = d.value.check(this);
 			
 			if (!d.getType().isEqual(t)) {
+				if (t instanceof POINTER || d.getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
 				throw new CTX_EXCEPTION(d.getSource(), ((t instanceof STRUCT)? "Struct" : "Variable") + " type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
 			}
 		}
@@ -463,6 +466,9 @@ public class ContextChecker {
 		
 		/* If target type is a pointer, only the core types have to match */
 		if (!targetType.isEqual(t)) {
+			if (targetType instanceof POINTER || t instanceof POINTER) {
+				CompilerDriver.printProvisoTypes = true;
+			}
 			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		

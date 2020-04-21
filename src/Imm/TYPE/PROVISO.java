@@ -68,7 +68,9 @@ public class PROVISO extends TYPE<Void> {
 		String s = "";
 		if (this.context == null || CompilerDriver.includeProvisoInTypeString) {
 			s += "PROVISO<";
-			s += this.placeholderName + ", " + this.context.typeString() + ">";
+			s += this.placeholderName;
+			if (this.context != null) s += ", " + this.context.typeString();
+			s += ">";
 			return s;
 		}
 		else return this.context.typeString();

@@ -244,8 +244,6 @@ public class CompilerDriver {
 		
 			if (imm) AST.print(4, true);
 			
-			//AST.print(0, true);
-			
 			
 					/* --- CODE GENERATION --- */
 			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
