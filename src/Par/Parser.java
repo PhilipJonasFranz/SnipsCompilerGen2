@@ -95,6 +95,8 @@ public class Parser {
 	
 	List<String> activeProvisos = new ArrayList();
 	
+	List<TYPE> toClone = new ArrayList();
+	
 	public Parser(List tokens) throws SNIPS_EXCEPTION {
 		if (tokens == null) throw new SNIPS_EXCEPTION("SNIPS_PARSE -> Tokens are null!");
 		tokenStream = tokens;
@@ -150,7 +152,19 @@ public class Parser {
 	}
 	
 	public SyntaxElement parse() throws PARSE_EXCEPTION {
-		return parseProgram();
+		Program p = parseProgram();
+		
+		/* Clone all struct type instances that were parsed from the SSOT */
+		for (TYPE t : this.toClone) {
+			if (t instanceof STRUCT) {
+				STRUCT s = (STRUCT) t;
+				List<TYPE> proviso = s.proviso;
+				s = s.typedef.struct.clone();
+				s.proviso = proviso;
+			}
+		}
+		
+		return p;
 	}
 	
 	protected Program parseProgram() throws PARSE_EXCEPTION {
@@ -1053,7 +1067,13 @@ public class Parser {
 		StructTypedef def = this.getStructTypedef(token);
 		
 		if (def != null) {
-			type = def.struct.clone();
+			/* 
+			 * Create a reference to the SSOT, since the SSOT may be still in parsing. Create 
+			 * copy at the end of parsing when SSOT is definetley finished. Add type to list toClone
+			 * for to indicate that this type needs cloning after parsing ends.
+			 */
+			type = def.struct;
+			this.toClone.add(type);
 			
 			List<TYPE> proviso = this.parseProviso();
 			

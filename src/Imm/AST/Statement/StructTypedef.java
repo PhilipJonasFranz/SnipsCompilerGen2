@@ -92,6 +92,8 @@ public class StructTypedef extends SyntaxElement {
 		
 		StructTypedef clone = new StructTypedef(this.structName, prov0, dec0, this.getSource());
 		
+		assert(clone.fields.size() == this.fields.size());
+		
 		return clone;
 	}
 	

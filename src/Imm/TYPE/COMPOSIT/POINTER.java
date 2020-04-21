@@ -76,7 +76,7 @@ public class POINTER extends COMPOSIT {
 	public String typeString() {
 		if (this.targetType instanceof STRUCT) {
 			STRUCT s = (STRUCT) this.targetType;
-			String t = ((s.typedef != null)? s.typeString() : "?") + "*";
+			String t = ((s.typedef != null)? s.typedef.structName : "?") + "*";
 			if (CompilerDriver.printProvisoTypes) t += s.getProvisoString();
 			return t;
 		}
@@ -96,12 +96,21 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public TYPE clone() {
-		POINTER p = new POINTER(this.targetType.clone());
-		
-		/* Make sure cloned type is equal to this type */
-		assert (p.typeString().equals(this.typeString()));
-		
-		return p;
+		if (this.targetType instanceof STRUCT) {
+			/* 
+			 * Cannot clone the struct pointer since it may be recursive, but can guarantee that
+			 * it can point to itself.
+			 */
+			return new POINTER(this.targetType);
+		}
+		else {
+			POINTER p = new POINTER(this.targetType.clone());
+			
+			/* Make sure cloned type is equal to this type */
+			assert (p.typeString().equals(this.typeString()));
+			
+			return p;
+		}
 	}
 
 }

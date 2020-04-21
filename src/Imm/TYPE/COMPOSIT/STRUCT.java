@@ -79,10 +79,7 @@ public class STRUCT extends COMPOSIT {
 		if (this.typedef.fields.size() > 0) {
 			s += "<";
 			for (Declaration t : this.typedef.fields) {
-				if (t.getType().getCoreType().isEqual(this)) {
-					s+= t.getType().getCoreType().typeString() + ",";
-				}
-				else s += t.getType().typeString() + ",";
+				s += t.getType().typeString() + ",";
 			}
 			s = s.substring(0, s.length() - 1);
 			s += ">";
