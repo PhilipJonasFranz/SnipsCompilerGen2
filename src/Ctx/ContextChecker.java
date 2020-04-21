@@ -172,12 +172,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
-		/* Create a new Struct Instance and apply provisos provided by e */
-		try {
-			e.createStructInstance();
-		} catch (StackOverflowError e0) {
-			throw new CTX_EXCEPTION(e.getSource(), e0.getMessage());
+		
+		for (int i = 0; i < e.structType.typedef.proviso.size(); i++) {
+			PROVISO p = (PROVISO) e.structType.typedef.proviso.get(i);
+			p.setContext(e.structType.proviso.get(i));
 		}
+		
+		ProvisoManager.setContext(e.structType.typedef.proviso, e.structType);
 		
 		if (e.elements.size() != e.structType.typedef.fields.size()) {
 			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
@@ -186,6 +187,9 @@ public class ContextChecker {
 		for (int i = 0; i < e.elements.size(); i++) {
 			TYPE t = e.elements.get(i).check(this);
 			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
+				if (t instanceof POINTER || e.structType.typedef.fields.get(i).getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
 				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
 			}
 		}
@@ -783,6 +787,9 @@ public class ContextChecker {
 			}
 			
 			if (!paramType.isEqual(functionParamType)) {
+				if (paramType instanceof POINTER || i.parameters.get(a).getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
 				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
 		}
@@ -833,6 +840,9 @@ public class ContextChecker {
 		for (int a = 0; a < f.parameters.size(); a++) {
 			TYPE paramType = i.parameters.get(a).check(this);
 			if (!paramType.isEqual(f.parameters.get(a).getType())) {
+				if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
 				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
 		}

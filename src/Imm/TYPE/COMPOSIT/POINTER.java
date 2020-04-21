@@ -32,25 +32,20 @@ public class POINTER extends COMPOSIT {
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
 			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {
-				/* 
-				 * Only compare struct names, cannot check further down since struct type may be recursive
-				 * and proviso cannot be propagated recursiveley down.
-				 */
+				/* Compare Struct Names and provided provisos */
 				STRUCT s0 = (STRUCT) this.getCoreType();
 				STRUCT s1 = (STRUCT) pointer.getCoreType();
 				
-				// TODO: Should check for Provisos, but not when struct type is recursive, so maybe check for struct type and continue
-				/*if (!s0.proviso.isEmpty()) {
+				if (!s0.proviso.isEmpty()) {
 					if (s0.proviso.size() != s1.proviso.size()) return false;
 					else {
 						for (int i = 0; i < s0.proviso.size(); i++) {
 							if (!s0.proviso.get(i).isEqual(s1.proviso.get(i))) {
-								System.out.println("Proviso not equal: " + s0.proviso.get(i).typeString() + " " + s1.proviso.get(i).typeString());
 								return false;
 							}
 						}
 					}
-				}*/
+				}
 				
 				return s0.typedef.structName.equals(s1.typedef.structName);
 			}

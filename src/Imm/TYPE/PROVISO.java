@@ -1,6 +1,7 @@
 package Imm.TYPE;
 
 import Exc.SNIPS_EXCEPTION;
+import Snips.CompilerDriver;
 
 public class PROVISO extends TYPE<Void> {
 
@@ -49,17 +50,13 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (this.context == null)
-			return true;
-			//return type instanceof PROVISO && ((PROVISO) type).placeholderName.equals(this.placeholderName);
+		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			return p.placeholderName.equals(this.placeholderName);
+		}
 		else {
-			if (type instanceof PROVISO) {
-				PROVISO p = (PROVISO) type;
-				return p.placeholderName.equals(this.placeholderName);
-			}
-			else {
-				return this.context.isEqual(type);
-			}
+			if (this.context == null) return false;
+			else return this.context.isEqual(type);
 		}
 	}
 	
@@ -68,7 +65,13 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public String typeString() {
-		return "PROVISO<" + ((this.context != null)? this.placeholderName + ", " + this.context.typeString() : this.placeholderName) + ">";
+		String s = "";
+		if (this.context == null || CompilerDriver.includeProvisoInTypeString) {
+			s += "PROVISO<";
+			s += this.placeholderName + ", " + this.context.typeString() + ">";
+			return s;
+		}
+		else return this.context.typeString();
 	}
 	
 	public String sourceCodeRepresentation() {

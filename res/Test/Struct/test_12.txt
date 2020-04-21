@@ -5,9 +5,7 @@ int main(int x) {
 	List<int>* l = create<int>();
 	add<int>(l, 10);
 	add<int>(l, 5);
-	
-	// TODO: Should throw error, possibly because pointers dont check proviso types
-	add<bool>(l, 12);
+	add<int>(l, 12);
 	
 	int r = get<int>(l, x);
 	

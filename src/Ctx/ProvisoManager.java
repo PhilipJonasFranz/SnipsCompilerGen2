@@ -153,6 +153,11 @@ public class ProvisoManager {
 				/* Prevent Recursion */
 				if (!(d.getType() instanceof POINTER)) {
 					setContext(clone, d.getType());
+					
+					if (d.getType() instanceof STRUCT) {
+						STRUCT s0 = (STRUCT) d.getType();
+						s0 = (STRUCT) setHiddenContext(s0);
+					}
 				}
 			}
 		}
@@ -188,9 +193,17 @@ public class ProvisoManager {
 		}
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
-			STRUCT clone = s.clone();
-			clone = clone.typedef.constructStructType(clone.proviso);
-			return clone;
+			
+			/* Map initialization proviso types to proviso head listing */
+			for (int i = 0; i < s.typedef.proviso.size(); i++) {
+				PROVISO p = (PROVISO) s.typedef.proviso.get(i);
+				p.setContext(s.proviso.get(i));
+			}
+			
+			/* Propagate initialized proviso mapping on the fields */
+			ProvisoManager.setContext(s.typedef.proviso, s);
+			
+			return s;
 		}
 		else return type;
 	}
