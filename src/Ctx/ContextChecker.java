@@ -30,6 +30,7 @@ import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
@@ -167,24 +168,30 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
 		/* Set the declarations in the struct type */
-		e.struct.fields = e.declarations;
-		
 		return e.struct;
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
-		if (e.elements.size() != e.typedef.declarations.size()) {
+		/* Create a new Struct Instance and apply provisos provided by e */
+		try {
+			e.createStructInstance();
+		} catch (StackOverflowError e0) {
+			throw new CTX_EXCEPTION(e.getSource(), e0.getMessage());
+		}
+		
+		if (e.elements.size() != e.structType.typedef.fields.size()) {
 			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
 		}
 		
 		for (int i = 0; i < e.elements.size(); i++) {
 			TYPE t = e.elements.get(i).check(this);
-			if (!t.isEqual(e.typedef.declarations.get(i).getType())) {
-				throw new CTX_EXCEPTION(e.getSource(), "Expression type does not match struct field type: " + t.typeString() + " vs " + e.typedef.declarations.get(i).getType().typeString());
+			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
+				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
 			}
 		}
 		
-		e.setType(e.typedef.struct);
+		e.setType(e.structType);
+		
 		return e.getType();
 	}
 	
@@ -240,7 +247,10 @@ public class ContextChecker {
 					StructSelect sel0 = (StructSelect) selection;
 					
 					if (sel0.selector instanceof IDRef) {
-						type = findField(struct, (IDRef) sel0.selector);
+						IDRef ref = (IDRef) sel0.selector;
+						
+						type = findField(struct, ref);
+						type = ProvisoManager.setHiddenContext(type);
 						
 						if (sel0.deref) {
 							if (!(type instanceof POINTER)) {
@@ -258,7 +268,7 @@ public class ContextChecker {
 						this.scopes.push(new Scope(null));
 						
 						/* Add declarations for struct */
-						for (Declaration dec : struct.fields) 
+						for (Declaration dec : struct.typedef.fields) 
 							this.scopes.peek().addDeclaration(dec);
 						
 						ArraySelect arr = (ArraySelect) sel0.selector;
@@ -274,8 +284,11 @@ public class ContextChecker {
 					selection = sel0.selection;
 				}
 				else if (selection instanceof IDRef) {
+					IDRef ref = (IDRef) selection;
+					
 					/* Last selection */
-					type = findField(struct, (IDRef) selection);
+					type = findField(struct, ref);
+					
 					break;
 				}
 				else if (selection instanceof ArraySelect) {
@@ -283,7 +296,7 @@ public class ContextChecker {
 					this.scopes.push(new Scope(null));
 					
 					/* Add declarations for struct */
-					for (Declaration dec : struct.fields) 
+					for (Declaration dec : struct.typedef.fields) 
 						this.scopes.peek().addDeclaration(dec);
 					
 					ArraySelect arr = (ArraySelect) selection;
@@ -414,19 +427,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
+		d.setType(ProvisoManager.setHiddenContext(d.getType()));
+		
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
-			if (d.getType() instanceof POINTER) {
-				POINTER p = (POINTER) d.getType();
-				if (!t.getCoreType().isEqual(p.getCoreType())) {
-					throw new CTX_EXCEPTION(d.getSource(), "Pointer type does not match declaration type: " + t.typeString() + " vs. " + p.getCoreType().typeString());
-				}
-			}
-			else {
-				if (!t.isEqual(d.getType())) {
-					throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
-				}
+			if (!d.getType().isEqual(t)) {
+				throw new CTX_EXCEPTION(d.getSource(), ((t instanceof STRUCT)? "Struct" : "Variable") + " type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
 			}
 		}
 		
@@ -439,6 +446,8 @@ public class ContextChecker {
 	public TYPE checkAssignment(Assignment a) throws CTX_EXCEPTION {
 		TYPE targetType = a.lhsId.check(this);
 		
+		if (a.lhsId instanceof PointerLhsId) targetType = new POINTER(targetType);
+		
 		String fieldName = a.lhsId.getFieldName();
 		
 		Declaration dec = scopes.peek().getField(fieldName);
@@ -449,18 +458,8 @@ public class ContextChecker {
 		TYPE ctype = t;
 		
 		/* If target type is a pointer, only the core types have to match */
-		if (targetType instanceof POINTER) {
-			POINTER p = (POINTER) targetType;
-			
-			if (!p.getCoreType().isEqual(t.getCoreType())) {
-				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
-			}
-			
-			ctype = t.getCoreType();
-		}
-		/* If not, the types have to be equal */
-		else if (!t.isEqual(targetType)) {
-			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.getType().typeString() + " vs. " + t.typeString());
+		if (!targetType.isEqual(t)) {
+			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		
 		if (a.assignArith != ASSIGN_ARITH.NONE) {
@@ -621,7 +620,7 @@ public class ContextChecker {
 		}
 		
 		if (right.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + right.typeString());
 		}
 		
 		if (left instanceof POINTER) {
@@ -744,17 +743,17 @@ public class ContextChecker {
 		}
 		
 		if (!f.manager.provisosTypes.isEmpty()) {
-			if (f.manager.containsMapping(i.provisosTypes)) {
+			if (f.manager.containsMapping(i.proviso)) {
 				/* Mapping already exists, just return return type of this specific mapping */
-				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 			else {
 				/* Create a new context, check function for this specific context */
-				f.setContext(i.provisosTypes);
+				f.setContext(i.proviso);
 				this.scopes.push(new Scope(this.scopes.get(0)));
 				f.check(this);
 				this.scopes.pop();
-				i.setType(f.manager.getMappingReturnType(i.provisosTypes));
+				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 		}
 		
@@ -777,7 +776,7 @@ public class ContextChecker {
 				for (int k = 0; k < f.manager.provisosTypes.size(); k++) {
 					PROVISO p0 = (PROVISO) f.manager.provisosTypes.get(k);
 					if (p0.placeholderName.equals(p.placeholderName)) {
-						functionParamType = i.provisosTypes.get(k);
+						functionParamType = i.proviso.get(k);
 						break;
 					}
 				}
@@ -788,7 +787,7 @@ public class ContextChecker {
 			}
 		}
 		
-		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.provisosTypes)) {
+		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) {
 			i.setType(f.getReturnType().clone());
 		}
 		
@@ -816,9 +815,9 @@ public class ContextChecker {
 		}
 
 		if (!f.manager.provisosTypes.isEmpty()) {
-			if (!f.manager.containsMapping(i.provisosTypes)) {
+			if (!f.manager.containsMapping(i.proviso)) {
 				/* Create a new context, check function for this specific context */
-				f.setContext(i.provisosTypes);
+				f.setContext(i.proviso);
 				
 				/* Create new scope that points to the global scope */
 				this.scopes.push(new Scope(this.scopes.get(0)));
@@ -833,7 +832,6 @@ public class ContextChecker {
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
 			TYPE paramType = i.parameters.get(a).check(this);
-			
 			if (!paramType.isEqual(f.parameters.get(a).getType())) {
 				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
@@ -880,6 +878,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXCEPTION {
+		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType);
 		sot.setType(new INT());
 		return sot.getType();
 	}
@@ -933,6 +932,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXCEPTION {
+		tc.castType = ProvisoManager.setHiddenContext(tc.castType);
+		
 		TYPE t = tc.expression.check(this);
 		
 		if (t.wordsize() != tc.castType.wordsize()) {

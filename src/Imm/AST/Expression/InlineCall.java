@@ -22,7 +22,7 @@ public class InlineCall extends Expression {
 	public Function caller;
 	
 	/** List of the provisos types this function is templated with */
-	public List<TYPE> provisosTypes;
+	public List<TYPE> proviso;
 	
 	/** The Expressions used as parameters */
 	public List<Expression> parameters;
@@ -36,7 +36,7 @@ public class InlineCall extends Expression {
 	public InlineCall(Token functionName, List<TYPE> proviso, List<Expression> parameters, Source source) {
 		super(source);
 		this.functionName = functionName.spelling;
-		this.provisosTypes = proviso;
+		this.proviso = proviso;
 		this.parameters = parameters;
 	}
 
@@ -44,7 +44,7 @@ public class InlineCall extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "Inline Call: " + this.functionName);
-		for (TYPE t : this.provisosTypes) System.out.print(", " + t.typeString());
+		for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
 		System.out.println();
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
@@ -58,8 +58,8 @@ public class InlineCall extends Expression {
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		
-		for (int i = 0; i < this.provisosTypes.size(); i++) {
-			TYPE pro = this.provisosTypes.get(i);
+		for (int i = 0; i < this.proviso.size(); i++) {
+			TYPE pro = this.proviso.get(i);
 			
 			if (pro instanceof PROVISO) {
 				PROVISO pro0 = (PROVISO) pro;
@@ -83,8 +83,8 @@ public class InlineCall extends Expression {
 	}
 
 	public void releaseContext() {
-		for (int i = 0; i < this.provisosTypes.size(); i++) {
-			TYPE pro = this.provisosTypes.get(i);
+		for (int i = 0; i < this.proviso.size(); i++) {
+			TYPE pro = this.proviso.get(i);
 			
 			if (pro instanceof PROVISO) {
 				PROVISO pro0 = (PROVISO) pro;

@@ -1,88 +1,42 @@
 SOURCE
-int getDiff<K, V>(K k, V v) {
-	int f = (int) k;
-	if (f == 0) return (int) v;
-	else return getDiff<V, K>((V) ((K) v), k - 1);
+struct Data<T> {
+	T v;
 }
 
-int main(bool x, int y) {
-	return getDiff<bool, int>(x, y);
+int main() {
+	int [2] q = {1, 4};
+	Data<int*> data = Data<int*>::(&q);
+	int* p = data.v;
+	return *(p + 1);
 }
 TESTCASES
-5 1 3
-1 5 4
-0 1 1
+4
 OUTPUT
 /* --test_04.txt */
 .data
 HEAP_START: .word 0
     
 .text
-    b main
-getDiff_P0:                   /* Function: getDiff, Provisos: BOOL, INT */
-    push { r3, r4, r5, r6, r7, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3                /* Evaluate Expression */
-    mov r5, r0
-    mov r6, r0
-    cmp r5, #0
-    bne .L4
-    mov r0, r4                /* Evaluate Expression */
-    b .L5
-.L4: 
-    mov r7, r0                /* Evaluate Expression */
-    mov r1, r3
-    mov r2, #1
-    sub r0, r1, #1
-    push { r0 }
-    mov r0, r4
-    pop { r1 }
-    bl getDiff_P1             /* Call getDiff */
-.L5: 
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
-    bx lr
-    
-getDiff_P1:                   /* Provisos: PROVISO<V, INT>, PROVISO<K, BOOL> */
-    push { r3, r4, r5, r6, r7, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3                /* Evaluate Expression */
-    mov r5, r0
-    mov r6, r0
-    cmp r5, #0
-    bne .L7
-    mov r0, r4                /* Evaluate Expression */
-    b .L8
-.L7: 
-    mov r7, r0                /* Evaluate Expression */
-    mov r1, r3
-    mov r2, #1
-    sub r0, r1, #1
-    push { r0 }
-    mov r0, r4
-    pop { r1 }
-    bl getDiff_P1             /* Call getDiff */
-.L8: 
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
-    bx lr
-    
 main:                         /* Function: main */
-    push { r3, r4, fp, lr }
+    push { r3 }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, #4                /* Evaluate Expression */
+    mov r1, #1
+    push { r1, r0 }
+    sub r0, fp, #8            /* Evaluate Expression */
+    lsr r0, r0, #2
     push { r0 }
-    mov r0, r3
-    pop { r1 }
-    bl getDiff_P0             /* Call getDiff */
+    push { r0 }
+    sub r1, fp, #16           /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r3, r0
+    mov r1, r3                /* Evaluate Expression */
+    mov r2, #1
+    add r0, r1, #1
+    lsl r0, r0, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3 }
     bx lr
     
-.L2_HEAP_START: .word HEAP_START
+.L0_HEAP_START: .word HEAP_START

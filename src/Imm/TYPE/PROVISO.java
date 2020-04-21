@@ -1,5 +1,7 @@
 package Imm.TYPE;
 
+import Exc.SNIPS_EXCEPTION;
+
 public class PROVISO extends TYPE<Void> {
 
 			/* --- FIELDS --- */
@@ -26,7 +28,12 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public TYPE getContext() {
-		return this.context;
+		if (this.context instanceof PROVISO) {
+			PROVISO p = (PROVISO) this.context;
+			if (p.hasContext()) return p.getContext();
+			else return p;
+		}
+		else return this.context;
 	}
 	
 	public boolean hasContext() {
@@ -61,7 +68,7 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public String typeString() {
-		return (this.context != null)? "PROVISO<" + this.placeholderName + ", " + this.context.typeString() + ">" : "PROVISO<" + this.placeholderName + ">";
+		return "PROVISO<" + ((this.context != null)? this.placeholderName + ", " + this.context.typeString() : this.placeholderName) + ">";
 	}
 	
 	public String sourceCodeRepresentation() {
@@ -69,7 +76,10 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public int wordsize() {
-		return (this.context != null)? this.context.wordsize() : 0;
+		if (this.context != null) return this.context.wordsize();
+		else {
+			throw new SNIPS_EXCEPTION("INTERNAL : Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
+		}
 	}
 	
 	public TYPE getCoreType() {

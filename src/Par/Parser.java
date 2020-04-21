@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
@@ -222,13 +223,15 @@ public class Parser {
 		Source source = accept(TokenType.STRUCT).getSource();
 		Token id = accept(TokenType.STRUCTID);
 		
-		StructTypedef def = new StructTypedef(id, new ArrayList(), source);
+		List<TYPE> proviso = this.parseProviso();
+		
+		StructTypedef def = new StructTypedef(id.spelling, proviso, new ArrayList(), source);
 		this.structIds.add(new Pair<Token, StructTypedef>(id, def));
 		
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
-			def.declarations.add(this.parseDeclaration());
+			def.fields.add(this.parseDeclaration());
 		}
 		accept(TokenType.RBRACE);
 		
@@ -551,12 +554,14 @@ public class Parser {
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.XOR_ASSIGN;
 		}
-		else if (current.type == TokenType.LSL) {
+		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) {
+			accept();
 			accept();
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSL_ASSIGN;
 		}
-		else if (current.type == TokenType.LSR) {
+		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT) {
+			accept();
 			accept();
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSR_ASSIGN;
@@ -774,12 +779,15 @@ public class Parser {
 	
 	protected Expression parseShift() throws PARSE_EXCEPTION {
 		Expression left = this.parseAddSub();
-		while (current.type == TokenType.LSL || current.type == TokenType.LSR) {
-			if (current.type == TokenType.LSL) {
+		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
+			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
+			if (current.type == TokenType.CMPLT) {
+				accept();
 				accept();
 				left = new Lsl(left, this.parseAddSub(), current.source);
 			}
 			else {
+				accept();
 				accept();
 				left = new Lsr(left, this.parseAddSub(), current.source);
 			}
@@ -1045,10 +1053,32 @@ public class Parser {
 		StructTypedef def = this.getStructTypedef(token);
 		
 		if (def != null) {
-			type = def.struct;
+			type = def.struct.clone();
+			
+			List<TYPE> proviso = this.parseProviso();
+			
+			if (type instanceof STRUCT) {
+				STRUCT s = (STRUCT) type;
+				s.proviso = proviso;
+			}
+			else {
+				if (!proviso.isEmpty()) {
+					/* Throw a 'Parser Context Exception', since we know that this would be an error in CTX anyway */
+					try {
+						throw new CTX_EXCEPTION(token.getSource(), "Cannot apply proviso to a non struct type");
+					} catch (Exception e) {}
+					throw new PARSE_EXCEPTION(current.source, TokenType.CMPLT, TokenType.MUL, TokenType.LBRACKET);
+				}
+			}
 		}
-		else type = TYPE.fromToken(token);
-
+		else {
+			type = TYPE.fromToken(token);
+			
+			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) {
+				this.activeProvisos.add(token.spelling);
+			}
+		}
+		
 		while (true) {
 			Token c0 = current;
 			while (current.type == TokenType.MUL) {
@@ -1078,6 +1108,19 @@ public class Parser {
 		List<TYPE> pro = new ArrayList();
 		
 		if (current.type == TokenType.CMPLT) {
+			
+			/* Set type of all identifiers to proviso until a CMPGT */
+			for (int i = 0; i < this.tokenStream.size(); i++) {
+				if (this.tokenStream.get(i).type == TokenType.CMPGT || 
+						(this.tokenStream.get(i).type != TokenType.COMMA &&
+						this.tokenStream.get(i).type != TokenType.IDENTIFIER &&
+						this.tokenStream.get(i).type != TokenType.CMPGT)) break;
+				
+				if (this.tokenStream.get(i).type == TokenType.IDENTIFIER) {
+					this.tokenStream.get(i).type = TokenType.PROVISO;
+				}
+			}
+			
 			accept();
 			
 			while (current.type != TokenType.CMPGT) {

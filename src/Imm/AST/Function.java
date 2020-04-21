@@ -68,28 +68,20 @@ public class Function extends CompoundStatement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
 		/* Apply context to existing proviso types */
 		this.manager.setContext(context);
 		
 		/* Apply to parameters */
-		for (Declaration d : this.parameters) {
+		for (Declaration d : this.parameters) 
 			d.setContext(this.manager.provisosTypes);
-		}
 		
 		/* Apply to return type */
-		if (this.returnType instanceof PROVISO) {
-			PROVISO ret = (PROVISO) this.returnType;
-			for (int i = 0; i < this.manager.provisosTypes.size(); i++) {
-				TYPE pro = this.manager.provisosTypes.get(i);
-				
-				if (pro.isEqual(ret)) {
-					//System.out.println("Applied " + context.get(i).typeString() + " to return proviso " + ret.typeString());
-					ret.setContext(context.get(i));
-					//System.out.println("New return proviso: " + ret.typeString());
-				}
-			}
+		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType);
+		
+		/* Add to mapping pool */
+		if (!this.manager.containsMapping(context)) {
+			/* Save this context mapping, save copy of return type */
+			this.manager.addProvisoMapping(this.getReturnType().clone(), context);
 		}
 		
 		/* Apply to body */
@@ -97,10 +89,6 @@ public class Function extends CompoundStatement {
 			s.setContext(this.manager.provisosTypes);
 		}
 		
-		if (!this.manager.containsMapping(context)) {
-			/* Save this context mapping, save copy of return type */
-			this.manager.addProvisoMapping(this.getReturnType().clone(), context);
-		}
 	}
 
 	public void releaseContext() {

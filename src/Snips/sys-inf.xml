@@ -1,7 +1,8 @@
 <Inf>
-	<Version>v.1.7.6</Version>
+	<Version>v.1.7.11</Version>
 	<Library>
 		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
+		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
 	</Library>
 </Inf>

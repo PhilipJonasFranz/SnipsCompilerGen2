@@ -5,8 +5,13 @@ import java.util.List;
 
 import CGen.LabelGen;
 import Exc.CTX_EXCEPTION;
+import Exc.SNIPS_EXCEPTION;
+import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Pair;
 import Util.Source;
 
@@ -48,9 +53,7 @@ public class ProvisoManager {
 			}
 			
 			PROVISO pro0 = (PROVISO) pro;
-			//System.out.println("Applied " + context.get(i).typeString() + " to proviso " + pro0.typeString());
 			pro0.setContext(context.get(i));
-			//System.out.println("New proviso: " + pro0.typeString());
 		}
 	}
 	
@@ -108,8 +111,7 @@ public class ProvisoManager {
 			if (isEqual) return this.provisosCalls.get(i).second.first;
 		}
 		
-		System.out.println("No mapping!");
-		return null;
+		throw new SNIPS_EXCEPTION("No mapping!");
 	}
 	
 	public void addProvisoMapping(TYPE type, List<TYPE> context) {
@@ -120,6 +122,77 @@ public class ProvisoManager {
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
 			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(postfix, new Pair<TYPE, List<TYPE>>(type, context)));
 		}
+	}
+	
+	public static void setContext(List<TYPE> context, TYPE type) throws CTX_EXCEPTION {
+		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			for (TYPE t : context) {
+				if (p.isEqual(t)) {
+					p.setContext(t.clone());
+					break;
+				}
+			}
+		}
+		else if (type instanceof ARRAY) {
+			ARRAY arr = (ARRAY) type;
+			setContext(context, arr.elementType);
+		}
+		else if (type instanceof POINTER) {
+			POINTER p = (POINTER) type;
+			setContext(context, p.targetType);
+		}
+		else if (type instanceof STRUCT) {
+			STRUCT s = (STRUCT) type;
+			
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : context) clone.add(t.clone());
+			mapContextTo(s.proviso, clone);
+			
+			for (Declaration d : s.typedef.fields) {
+				/* Prevent Recursion */
+				if (!(d.getType() instanceof POINTER)) {
+					setContext(clone, d.getType());
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Maps the proviso types of the second argument to the first.
+	 */
+	public static void mapContextTo(List<TYPE> target, List<TYPE> source) {
+		for (int i = 0; i < target.size(); i++) {
+			for (int a = 0; a < source.size(); a++) {
+				if (target.get(i) instanceof PROVISO && target.get(i).isEqual(source.get(a))) {
+					PROVISO p = (PROVISO) target.get(i);
+					p.setContext(source.get(a).clone());
+				}
+			}
+		}
+	}
+	
+	public static TYPE setHiddenContext(TYPE type) throws CTX_EXCEPTION {
+		if (type instanceof PROVISO) {
+			return type;
+		}
+		else if (type instanceof ARRAY) {
+			ARRAY arr = (ARRAY) type;
+			arr.elementType = setHiddenContext(arr.elementType);
+			return arr;
+		}
+		else if (type instanceof POINTER) {
+			POINTER p = (POINTER) type;
+			p.targetType = setHiddenContext(p.targetType);
+			return p;
+		}
+		else if (type instanceof STRUCT) {
+			STRUCT s = (STRUCT) type;
+			STRUCT clone = s.clone();
+			clone = clone.typedef.constructStructType(clone.proviso);
+			return clone;
+		}
+		else return type;
 	}
 	
 }

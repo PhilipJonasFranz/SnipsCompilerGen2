@@ -1,0 +1,45 @@
+/*
+ * A tree node that has a left and right child and holds a value.
+ */
+struct TreeNode<T> {
+	TreeNode<T>* left;
+	TreeNode<T>* right;
+	T value;
+}
+
+/*
+ * Create a new Tree, initialize both childs to 0, set root value
+ * to given value. Return a pointer to the root.
+ */
+TreeNode<T>* create<T>(T value) {
+	TreeNode<T>* tree = (TreeNode<T>*) resv(sizeof(TreeNode<T>));
+	*tree = TreeNode<T>::((TreeNode<T>*) 0, (TreeNode<T>*) 0, value);
+	return tree;
+}
+
+TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
+	TreeNode<T>* new = (TreeNode<T>*) resv(sizeof(TreeNode<T>));
+	*new = TreeNode<T>::((TreeNode<T>*) 0, (TreeNode<T>*) 0, value);
+
+	TreeNode<T>* head = root;
+	while ((int) head != 0) {
+		if (head->value > value) {
+			/* Left leaf is 0, insert here */
+			if ((int) head->left == 0) {
+				head->left = new;
+				return new;
+			}
+			else head = head->left;
+		}
+		else {
+			/* Right leaf is 0, insert here */
+			if ((int) head->right == 0) {
+				head->right = new;
+				return new;
+			}
+			else head = head->right;
+		}
+	}
+	
+	return (TreeNode<T>*) -1;
+}

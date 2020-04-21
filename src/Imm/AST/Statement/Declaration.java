@@ -3,11 +3,11 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.POINTER;
 import Par.Token;
 import Util.Source;
 
@@ -18,7 +18,7 @@ public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
 	public String fieldName;
-		
+	
 	private TYPE type;
 	
 	public Expression value;
@@ -42,6 +42,12 @@ public class Declaration extends Statement {
 		this.value = value;
 	}
 	
+	private Declaration(String id, TYPE type, Source source) {
+		super(source);
+		this.fieldName = id;
+		this.type = type;
+	}
+	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
@@ -56,23 +62,8 @@ public class Declaration extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
 		/* Apply to declaration type */
-		TYPE type0 = this.type;
-		if (type0 instanceof POINTER) {
-			type0 = ((POINTER) type0).targetType;
-		}
-		
-		if (type0 instanceof PROVISO) {
-			PROVISO p = (PROVISO) type0;
-			for (int i = 0; i < context.size(); i++) {
-				TYPE pro = context.get(i);
-				if (pro.isEqual(p)) {
-					p.setContext(context.get(i));
-				}
-			}
-		}
+		ProvisoManager.setContext(context, this.type);
 		
 		/* Apply to value */
 		if (this.value != null) this.value.setContext(context);
@@ -100,6 +91,11 @@ public class Declaration extends Statement {
 	
 	public void setType(TYPE type) {
 		this.type = type;
+	}
+	
+	public Declaration clone() {
+		Declaration clone = new Declaration(this.fieldName, this.type.clone(), this.getSource());
+		return clone;
 	}
 	
 }

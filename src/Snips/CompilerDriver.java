@@ -59,6 +59,10 @@ public class CompilerDriver {
 		disableOptimizer = false,
 		disableWarnings = false;
 			
+	/* Debug */
+	public static boolean
+		printProvisoTypes = false;
+	
 	public static String outputPath;
 	
 	public static boolean printErrors = false;

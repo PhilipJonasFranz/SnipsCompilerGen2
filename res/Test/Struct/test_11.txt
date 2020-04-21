@@ -1,22 +1,29 @@
 SOURCE
-#include<linked_list.sn>
+struct Capsule<T> {
+	T cap;
+}
 
-int main(int x, int y) {
-	int[2] v0 = {10, 20};
+struct Data<T> {
+	T value;
+	Capsule<T> c;
+}
 
-	List<int*>* l = create<int*>();
-	
-	return 0;
+Data<T>* create<T>() {
+	Data<T>* pointer = (Data<T>*) resv(sizeof(Data<T>));
+	return pointer;
+}
+
+int main(int x) {
+	Data<int[2]>* data = create<int[2]>();
+	*data = Data<int[2]>::({x, x * 2}, Capsule<int[2]>::({3, 4}));
+	return data->value [1] + data->c.cap [1];
 }
 TESTCASES
-0 0 0
-0 1 0
-1 0 0
-1 1 0
-2 0 0
-2 1 0
+0 4
+1 6
+2 8
 OUTPUT
-/* --test_09.txt */
+/* --test_11.txt */
 .data
 HEAP_START: .word 0
     
@@ -140,95 +147,52 @@ resv:                         /* Function: resv */
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
     
-/* Frees the memory block the given pointer points to. The pointer object will keep */
-/* the memory address, but the memory block will not be registered to be used anymore and */
-/* thus can be overwritten. */
-free:                         /* Function: free */
-    push { r3, r4, r5, r6, r7, r8, r9 }
-    mov r3, r0
-/* Jump to block head */
-    sub r3, r3, #1
-/* Load Block Size */
-    lsl r0, r3, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
-    mov r4, r0
-/* Store negated block size */
-    mov r5, r0                /* Evaluate Expression */
-    rsb r0, r4, #0
-    lsl r1, r3, #2
-    str r0, [r1]
-    mov r6, r0                /* Evaluate Expression */
-    add r7, r3, r4
-.L22:                         /* Evaluate condition */
-    lsl r0, r7, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
-    cmp r0, #0
-    bge .L23
-    lsl r0, r7, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
-    mov r8, r0
-/* Add size to freed block */
-    mov r9, r0                /* Evaluate Expression */
-    lsl r0, r3, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
-    mov r1, r0
-    add r0, r1, r8
-    lsl r1, r3, #2
-    str r0, [r1]
-/* Shift pointer to next block */
-    sub r7, r7, r8
-    b .L22
-.L23: 
-    pop { r3, r4, r5, r6, r7, r8, r9 }
-    bx lr
-    
-/* A single list entry, contains a pointer to the next node */
-/* and a value. */
-/* Wraps the list head and tail. */
-/* Creates a new List Object and initializes the head an tail to 0. */
-create_P0:                    /* Function: create, Provisos: INT* */
+create_P0:                    /* Function: create, Provisos: INT[2] */
     push { r3, fp, lr }
     mov fp, sp
-    mov r0, #2                /* Evaluate Expression */
+    mov r0, #4                /* Evaluate Expression */
     bl resv                   /* Call resv */
     mov r3, r0
-/* Initialize list, set pointers to 0 */
-    mov r0, #0                /* Evaluate Expression */
-    push { r0 }
-    mov r0, #0
-    lsl r1, r3, #2
-    str r0, [r1, #0]
-    pop { r0 }
-    str r0, [r1, #4]
-    mov r0, r3                /* Evaluate Expression */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr
-    
-/* Free the list by freeing all contained list nodes, and the list itself. */
-    
-/* Creates a new list node for given value x and adds the node at the */
-/* end of the list. */
-    
-/* Creates a new list node for given value x and adds the node at the */
-/* end of the list. */
-    
-/* Check if given list contains given value. */
-    
-/* Finds the first node in the list that has given value. */
-/* Returns a pointer to this list node. */
     
 main:                         /* Function: main */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r4, r1
-    mov r0, #20               /* Evaluate Expression */
-    mov r1, #10
-    push { r1, r0 }
     bl create_P0              /* Evaluate Expression */
-    mov r5, r0
-    mov r0, #0                /* Evaluate Expression */
+    mov r4, r0
+    mov r0, #4                /* Evaluate Expression */
+    mov r1, #3
+    push { r1, r0 }
+    mov r1, r3
+    mov r2, #2
+    mul r0, r1, r2
+    push { r0 }
+    mov r0, r3
+    lsl r1, r4, #2
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r5, r0                /* Evaluate Expression */
+    lsl r1, r4, #2            /* Convert to bytes */
+    mov r1, r1
+    add r1, r1, #4
+    ldr r0, [r1]              /* Load field from struct */
+    push { r0 }
+    lsl r1, r4, #2            /* Convert to bytes */
+    add r1, r1, #8
+    mov r1, r1
+    add r1, r1, #4
+    ldr r0, [r1]              /* Load field from struct */
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr

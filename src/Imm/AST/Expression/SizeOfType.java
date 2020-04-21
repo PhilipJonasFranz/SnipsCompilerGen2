@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Source;
 
 /**
@@ -47,6 +48,10 @@ public class SizeOfType extends Expression {
 					break;
 				}
 			}
+		}
+		else if (this.sizeType instanceof STRUCT) {
+			STRUCT s = (STRUCT) this.sizeType;
+			s.typedef.setContext(context);
 		}
 	}
 

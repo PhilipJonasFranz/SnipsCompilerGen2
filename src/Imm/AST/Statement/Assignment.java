@@ -57,13 +57,13 @@ public class Assignment extends Statement {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		this.lhsId.setContext(context);
 		this.value.setContext(context);
+		this.lhsId.setContext(context);
 	}
 
 	public void releaseContext() {
-		this.lhsId.releaseContext();
 		this.value.releaseContext();
+		this.lhsId.releaseContext();
 	}
 	
 }

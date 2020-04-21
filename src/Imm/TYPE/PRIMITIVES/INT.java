@@ -2,6 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.POINTER;
 
 public class INT extends PRIMITIVE<Integer> {
 
@@ -23,6 +24,10 @@ public class INT extends PRIMITIVE<Integer> {
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
+		}
+		else if (type instanceof POINTER) {
+			POINTER p = (POINTER) type;
+			return p.getCoreType() instanceof INT;
 		}
 		else return type instanceof INT;
 	}

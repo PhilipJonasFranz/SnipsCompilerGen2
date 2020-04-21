@@ -35,7 +35,7 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, null, fc.provisosTypes, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, null, fc.proviso, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
