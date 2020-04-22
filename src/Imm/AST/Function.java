@@ -52,10 +52,10 @@ public class Function extends CompoundStatement {
 		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.functionName + "(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			System.out.print("<" + dec.getType().typeString() + "> " + dec.fieldName);
+			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.fieldName);
 			if (i < this.parameters.size() - 1) System.out.print(", ");
 		}
-		System.out.println(")");
+		System.out.println(") " + this.toString().split("@") [1]);
 		if (rec) {
 			for (Statement s : body) {
 				s.print(d + this.printDepthStep, rec);
@@ -71,12 +71,13 @@ public class Function extends CompoundStatement {
 		/* Apply context to existing proviso types */
 		this.manager.setContext(context);
 		
-		/* Apply to parameters */
-		for (Declaration d : this.parameters) 
-			d.setContext(this.manager.provisosTypes);
-		
 		/* Apply to return type */
 		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType);
+		
+		/* Apply to parameters */
+		for (Declaration d : this.parameters) {
+			d.setContext(this.manager.provisosTypes);
+		}
 		
 		/* Add to mapping pool */
 		if (!this.manager.containsMapping(context)) {

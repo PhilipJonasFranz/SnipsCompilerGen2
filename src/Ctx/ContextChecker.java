@@ -59,6 +59,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
+import Util.Pair;
 import Util.Logging.Message;
 
 public class ContextChecker {
@@ -128,6 +129,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
+		/* Proviso Types are already set at this point */
 		
 		if (f.getReturnType().wordsize() > 1) {
 			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
@@ -163,7 +165,7 @@ public class ContextChecker {
 		
 		this.currentFunction.pop();
 		scopes.pop();
-		return f.getReturnType();
+		return f.getReturnType().clone();
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
@@ -173,12 +175,7 @@ public class ContextChecker {
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
 		
-		for (int i = 0; i < e.structType.typedef.proviso.size(); i++) {
-			PROVISO p = (PROVISO) e.structType.typedef.proviso.get(i);
-			p.setContext(e.structType.proviso.get(i));
-		}
-		
-		ProvisoManager.setContext(e.structType.typedef.proviso, e.structType);
+		ProvisoManager.setHiddenContext(e.structType);
 		
 		if (e.elements.size() != e.structType.typedef.fields.size()) {
 			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
@@ -200,7 +197,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructSelect(StructSelect e) throws CTX_EXCEPTION {
-		
 		/* This method links origins and types manually. This is partially due to the fact
 		 * that for example, a field in a struct does not count as a field identifier in the
 		 * current scope when referencing it. If it was to the check() method, it would report
@@ -241,7 +237,20 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(e.getSource(), "Can only select from struct type, actual " + type.typeString());
 		}
 		
+		STRUCT s0 = (STRUCT) type;
+		for (int i = 0; i < s0.typedef.proviso.size(); i++) {
+			PROVISO p = (PROVISO) s0.typedef.proviso.get(i);
+			p.setContext(s0.proviso.get(i));
+			type = s0;
+		}
+		
+		ProvisoManager.setContext(s0.typedef.proviso, s0);
+		
 		Expression selection = e.selection;
+		
+		/* STRUCT, STRUCT PROVISOS */
+		Stack<Pair<STRUCT, List<TYPE>>> selectStack = new Stack();
+		selectStack.push(new Pair<STRUCT, List<TYPE>>(s0, s0.proviso));
 		
 		while (true) {
 			if (type instanceof STRUCT) {
@@ -254,7 +263,6 @@ public class ContextChecker {
 						IDRef ref = (IDRef) sel0.selector;
 						
 						type = findField(struct, ref);
-						type = ProvisoManager.setHiddenContext(type);
 						
 						if (sel0.deref) {
 							if (!(type instanceof POINTER)) {
@@ -265,6 +273,18 @@ public class ContextChecker {
 								POINTER p0 = (POINTER) type;
 								type = p0.targetType;
 							}
+						}
+						
+						if (type instanceof STRUCT) {
+							STRUCT s1 = (STRUCT) type;
+							for (int i = selectStack.size() - 1; i >= 0; i--) {
+								if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+									type = selectStack.get(i).first;
+									while (selectStack.size() != i) selectStack.pop();
+								}
+							}
+							
+							type = ProvisoManager.setHiddenContext(type);
 						}
 					}
 					else if (sel0.selector instanceof ArraySelect) {
@@ -293,6 +313,26 @@ public class ContextChecker {
 					/* Last selection */
 					type = findField(struct, ref);
 					
+					TYPE type0 = type;
+					if (type0 instanceof POINTER) {
+						type0 = ((POINTER) type0).targetType;
+					}
+					
+					if (type0 instanceof STRUCT) {
+						STRUCT s1 = (STRUCT) type0;
+						for (int i = selectStack.size() - 1; i >= 0; i--) {
+							if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+								type0 = selectStack.get(i).first;
+								while (selectStack.size() != i) selectStack.pop();
+							}
+						}
+						
+						type0 = ProvisoManager.setHiddenContext(type0);
+						
+						if (type instanceof POINTER) type = new POINTER(type0);
+						else type = type0;
+					}
+					
 					break;
 				}
 				else if (selection instanceof ArraySelect) {
@@ -313,6 +353,8 @@ public class ContextChecker {
 				else {
 					throw new CTX_EXCEPTION(selection.getSource(), selection.getClass().getName() + " cannot be a selector");
 				}
+				
+				selectStack.push(new Pair<STRUCT, List<TYPE>>(struct, struct.proviso));
 			}
 			else {
 				throw new CTX_EXCEPTION(e.getSource(), "Cannot select from non struct, actual " + type.typeString());
@@ -320,7 +362,7 @@ public class ContextChecker {
 			
 		}
 		
-		e.setType(type);
+		e.setType(type.clone());
 		return e.getType();
 	}
 	
@@ -431,7 +473,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
-		d.setType(ProvisoManager.setHiddenContext(d.getType()));
+		d.setType(ProvisoManager.setHiddenContext(d.getRawType()));
 		
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
@@ -755,11 +797,13 @@ public class ContextChecker {
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (f.manager.containsMapping(i.proviso)) {
 				/* Mapping already exists, just return return type of this specific mapping */
+				f.setContext(i.proviso);
 				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 			else {
 				/* Create a new context, check function for this specific context */
 				f.setContext(i.proviso);
+				
 				this.scopes.push(new Scope(this.scopes.get(0)));
 				f.check(this);
 				this.scopes.pop();
@@ -780,23 +824,11 @@ public class ContextChecker {
 			
 			TYPE functionParamType = f.parameters.get(a).getType();
 			
-			/* Switch out function parameter dynamically with inline call proviso type */
-			if (f.parameters.get(a).getRawType() instanceof PROVISO) {
-				PROVISO p = (PROVISO) f.parameters.get(a).getRawType();
-				for (int k = 0; k < f.manager.provisosTypes.size(); k++) {
-					PROVISO p0 = (PROVISO) f.manager.provisosTypes.get(k);
-					if (p0.placeholderName.equals(p.placeholderName)) {
-						functionParamType = i.proviso.get(k);
-						break;
-					}
-				}
-			}
-			
 			if (!paramType.isEqual(functionParamType)) {
-				if (paramType instanceof POINTER || i.parameters.get(a).getType() instanceof POINTER) {
+				if (paramType instanceof POINTER || functionParamType instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
 				}
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
 			}
 		}
 		
@@ -829,13 +861,15 @@ public class ContextChecker {
 
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (!f.manager.containsMapping(i.proviso)) {
-				/* Create a new context, check function for this specific context */
-				f.setContext(i.proviso);
-				
 				/* Create new scope that points to the global scope */
+				f.setContext(i.proviso);
 				this.scopes.push(new Scope(this.scopes.get(0)));
+				
 				f.check(this);
 				this.scopes.pop();
+			}
+			else {
+				f.setContext(i.proviso);
 			}
 		}
 		
@@ -849,7 +883,7 @@ public class ContextChecker {
 				if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
 				}
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
 		}
 		

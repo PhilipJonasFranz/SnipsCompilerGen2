@@ -62,7 +62,8 @@ public class CompilerDriver {
 	/* Debug */
 	public static boolean
 		printProvisoTypes = false,
-		includeProvisoInTypeString = false;
+		includeProvisoInTypeString = false,
+		printObjectIDs = false;
 	
 	public static String outputPath;
 	

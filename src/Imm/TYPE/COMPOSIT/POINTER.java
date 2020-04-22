@@ -71,11 +71,16 @@ public class POINTER extends COMPOSIT {
 	public String typeString() {
 		if (this.targetType instanceof STRUCT) {
 			STRUCT s = (STRUCT) this.targetType;
-			String t = ((s.typedef != null)? s.typedef.structName : "?") + "*";
+			String t = ((s.typedef != null)? s.typeString() : "?") + "*";
 			if (CompilerDriver.printProvisoTypes) t += s.getProvisoString();
+			if (CompilerDriver.printObjectIDs) t += " " + this.toString().split("@") [1];
 			return t;
 		}
-		else return this.targetType.typeString() + "*";
+		else {
+			String s = this.targetType.typeString() + "*";
+			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
+			return s;
+		}
 	}
 
 	public void setValue(String value) {

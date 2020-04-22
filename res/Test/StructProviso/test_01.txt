@@ -1,0 +1,17 @@
+SOURCE
+struct TreeNode<T> {
+	TreeNode<T>* left;
+	TreeNode<T>* right;
+	T value;
+}
+
+int main() {
+	TreeNode<int>* root = (TreeNode<int>*) resv(sizeof(TreeNode<int>));
+	*root = TreeNode<int>::((TreeNode<int>*) 0, (TreeNode<int>*) 0, 10);
+	
+	TreeNode<bool> root2 = TreeNode<bool>::((TreeNode<bool>*) 0, (TreeNode<bool>*) 0, true);
+	
+	return root->value;
+}
+TESTCASES
+10

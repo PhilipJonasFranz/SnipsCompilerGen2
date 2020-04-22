@@ -79,13 +79,25 @@ public class STRUCT extends COMPOSIT {
 		if (this.typedef.fields.size() > 0) {
 			s += "<";
 			for (Declaration t : this.typedef.fields) {
-				s += t.getType().typeString() + ",";
+				/* Field is recursive type, cast to struct and print only name and proviso */
+				if (t.getType().getCoreType().isEqual(this)) {
+					STRUCT s0 = (STRUCT) t.getType().getCoreType();
+					
+					s += this.typedef.structName;
+					
+					if (CompilerDriver.printProvisoTypes) s += s0.getProvisoString();
+					if (CompilerDriver.printObjectIDs) s += " " + s0.toString().split("@") [1];
+					s += ",";
+				}
+				else s += t.getType().typeString() + ",";
 			}
 			s = s.substring(0, s.length() - 1);
 			s += ">";
 		}
 		
 		if (CompilerDriver.printProvisoTypes) s += this.getProvisoString();
+		
+		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 		
 		return s;
 	}
@@ -127,11 +139,7 @@ public class STRUCT extends COMPOSIT {
 		for (TYPE t : this.proviso) prov0.add(t.clone());
 		STRUCT s = new STRUCT(prov0);
 		
-		/* Create a copy of the typedef */
-		s.typedef = this.typedef.clone();
-		s.typedef.struct = s;
-		
-		assert(this.typedef.fields.size() == s.typedef.fields.size());
+		s.typedef = this.typedef;
 		
 		return s;
 	}

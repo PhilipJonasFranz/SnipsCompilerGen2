@@ -129,7 +129,7 @@ public class ProvisoManager {
 			PROVISO p = (PROVISO) type;
 			for (TYPE t : context) {
 				if (p.isEqual(t)) {
-					p.setContext(t.clone());
+					p.setContext(t);
 					break;
 				}
 			}
@@ -145,18 +145,58 @@ public class ProvisoManager {
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
-			List<TYPE> clone = new ArrayList();
-			for (TYPE t : context) clone.add(t.clone());
-			mapContextTo(s.proviso, clone);
+			/* Initialize capsuled proviso types */
+			for (int i = 0; i < s.typedef.proviso.size(); i++) {
+				s.typedef.proviso.set(i, setHiddenContext(s.typedef.proviso.get(i)));
+			}
 			
+			/* Iterate over every field in the struct and apply the proviso */
 			for (Declaration d : s.typedef.fields) {
 				/* Prevent Recursion */
-				if (!(d.getType() instanceof POINTER)) {
-					setContext(clone, d.getType());
+				if (!(d.getRawType() instanceof POINTER)) {
 					
-					if (d.getType() instanceof STRUCT) {
-						STRUCT s0 = (STRUCT) d.getType();
+					if (d.getRawType() instanceof STRUCT) {
+						STRUCT s0 = (STRUCT) d.getRawType();
+						
+						/* Map recieved context on the proviso types of the struct */
+						for (int i = 0; i < s0.proviso.size(); i++) {
+							for (int a = 0; a < context.size(); a++) {
+								if (s0.proviso.get(i).isEqual(context.get(a))) {
+									PROVISO p0 = (PROVISO) s0.proviso.get(i);
+									p0.setContext(context.get(a));
+								}
+							}
+						}
+						
+						/* Apply the previously initialized struct proviso to the fields */
 						s0 = (STRUCT) setHiddenContext(s0);
+					}
+					
+					setContext(s.typedef.proviso, d.getRawType());
+				}
+				else {
+					POINTER p = (POINTER) d.getRawType();
+					if (p.getCoreType() instanceof STRUCT) {
+						STRUCT s1 = (STRUCT) p.getCoreType();
+						
+						/* Map recieved context on the proviso types of the struct */
+						for (int i = 0; i < s1.proviso.size(); i++) {
+							for (int a = 0; a < context.size(); a++) {
+								if (s1.proviso.get(i).isEqual(context.get(a))) {
+									PROVISO p0 = (PROVISO) s1.proviso.get(i);
+									p0.setContext(context.get(a));
+								}
+							}
+						}
+						
+						if (s1.typedef.structName.equals(s.typedef.structName)) {
+							/* Set pointer to point on itself, but set provisos */
+							//for (TYPE t : s1.proviso) setContext(context, t);
+							p.coreType = s1;
+						}
+						else {
+							setContext(s1.proviso, s1);
+						}
 					}
 				}
 			}
@@ -179,6 +219,12 @@ public class ProvisoManager {
 	
 	public static TYPE setHiddenContext(TYPE type) throws CTX_EXCEPTION {
 		if (type instanceof PROVISO) {
+			PROVISO p = (PROVISO) type;
+			
+			/* Initialize Capsuled Proviso type */
+			if (p.hasContext()) 
+				p.setContext(setHiddenContext(p.getContext()));
+			
 			return type;
 		}
 		else if (type instanceof ARRAY) {

@@ -3,6 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -45,7 +46,10 @@ public class StructureInit extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		this.structType.typedef.setContext(context);
+		ProvisoManager.setContext(context, this.structType);
+		for (Expression e : this.elements) {
+			e.setContext(context);
+		}
 	}
 
 	public void releaseContext() {
