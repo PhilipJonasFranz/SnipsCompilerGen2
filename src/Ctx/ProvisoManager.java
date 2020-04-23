@@ -145,6 +145,8 @@ public class ProvisoManager {
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
+			ProvisoManager.mapContextTo(s.proviso, context);
+			
 			/* Initialize capsuled proviso types */
 			for (int i = 0; i < s.typedef.proviso.size(); i++) {
 				s.typedef.proviso.set(i, setHiddenContext(s.typedef.proviso.get(i)));
