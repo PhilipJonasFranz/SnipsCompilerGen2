@@ -45,7 +45,7 @@ public class InlineCall extends Expression {
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "Inline Call: " + this.functionName);
 		for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
-		System.out.println();
+		System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}

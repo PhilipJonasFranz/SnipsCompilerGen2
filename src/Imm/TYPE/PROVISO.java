@@ -71,9 +71,16 @@ public class PROVISO extends TYPE<Void> {
 			s += this.placeholderName;
 			if (this.context != null) s += ", " + this.context.typeString();
 			s += ">";
+			
+			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
+			
 			return s;
 		}
-		else return this.context.typeString();
+		else {
+			s = this.context.typeString();
+			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
+			return s;
+		}
 	}
 	
 	public String sourceCodeRepresentation() {

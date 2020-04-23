@@ -1,0 +1,20 @@
+SOURCE
+struct Foo<V> {
+	V value;
+}
+
+struct Nib<T> {
+	Foo<T> val;
+}
+
+struct Data<T> {
+	Nib<T> n0;
+	Nib<T> n1;
+}
+
+int main() {
+	Data<int> data = Data<int>::(Nib<int>::(Foo<int>::(5)), Nib<int>::(Foo<int>::(10)));
+	return data.n0.val.value + data.n1.val.value;
+}
+TESTCASES
+15

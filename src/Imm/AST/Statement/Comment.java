@@ -26,7 +26,7 @@ public class Comment extends Statement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Comment: " + this.comment);
+		return;
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
