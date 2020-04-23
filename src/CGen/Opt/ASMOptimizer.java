@@ -130,6 +130,8 @@ public class ASMOptimizer {
 	}
 	
 	protected void removeUnnessesaryPushPop(AsNBody body) {
+		
+		
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
@@ -139,10 +141,12 @@ public class ASMOptimizer {
 				if (push.operands.size() == 1) {
 					REGISTER reg = ((RegOperand) push.operands.get(0)).reg;
 					for (int a = i; a < body.instructions.size(); a++) {
-						if (body.instructions.get(a) instanceof ASMPopStack) {
-							ASMPopStack pop = (ASMPopStack) body.instructions.get(a);
+						ASMInstruction ins = body.instructions.get(a);
+						
+						if (ins instanceof ASMPopStack) {
+							ASMPopStack pop = (ASMPopStack) ins;
 							
-							if (pop.operands.size() == 1) {
+							if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 								RegOperand op0 = (RegOperand) pop.operands.get(0);
 								if (op0.reg == reg) {
 									body.instructions.remove(a);
@@ -152,7 +156,7 @@ public class ASMOptimizer {
 							}
 						}
 						
-						if (this.overwritesReg(body.instructions.get(a), reg) || body.instructions.get(a) instanceof ASMBranch) {
+						if (this.overwritesReg(ins, reg) || ins instanceof ASMBranch || ins instanceof ASMLabel) {
 							break;
 						}
 					}
@@ -251,7 +255,7 @@ public class ASMOptimizer {
 						if (target.reg == REGISTER.R0 || target.reg == REGISTER.R1 || target.reg == REGISTER.R2) break;
 						
 						/* Writeback flag is set, cannot substitute, since mov copies operand */
-						if (body.instructions.get(i).optFlags.containsKey(OPT_FLAG.WRITEBACK)) {
+						if (body.instructions.get(i).optFlags.contains(OPT_FLAG.WRITEBACK)) {
 							break;
 						}
 						

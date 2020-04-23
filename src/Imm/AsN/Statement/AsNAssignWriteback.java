@@ -57,7 +57,7 @@ public class AsNAssignWriteback extends AsNStatement {
 				ins = new ASMSub(new RegOperand(reg), new RegOperand(REGISTER.R0), new ImmOperand(1));
 			
 			/* Set flag for optimizer */
-			ins.optFlags.put(OPT_FLAG.WRITEBACK, true);
+			ins.optFlags.add(OPT_FLAG.WRITEBACK);
 			node.instructions.add(ins);
 		}
 		else {
@@ -69,7 +69,7 @@ public class AsNAssignWriteback extends AsNStatement {
 				ins = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0), new ImmOperand(1));
 			
 			/* Set flag for optimizer */
-			ins.optFlags.put(OPT_FLAG.WRITEBACK, true);
+			ins.optFlags.add(OPT_FLAG.WRITEBACK);
 			node.instructions.add(ins);	
 			
 			if (map.declarationLoaded(ref.origin)) {

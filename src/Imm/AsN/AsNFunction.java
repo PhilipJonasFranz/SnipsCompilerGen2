@@ -10,6 +10,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Exc.CTX_EXCEPTION;
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMMemOp;
@@ -191,6 +192,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					}
 				}
 				
+				pop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
 				func.instructions.add(pop);
 			}
 			

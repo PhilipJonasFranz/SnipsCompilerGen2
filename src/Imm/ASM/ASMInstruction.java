@@ -1,6 +1,7 @@
 package Imm.ASM;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
@@ -25,11 +26,13 @@ public abstract class ASMInstruction {
 		 *  into<br>
 		 *  add r1, rx, #1<br>
 		 */
-		WRITEBACK;
+		WRITEBACK,
+		
+		FUNC_CLEAN;
 	}
 	
 	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */
-	public HashMap<OPT_FLAG, Boolean> optFlags = new HashMap();
+	public List<OPT_FLAG> optFlags = new ArrayList();
 	
 	/**
 	 * The condition operand of this instruction for conditional instruction execution. 

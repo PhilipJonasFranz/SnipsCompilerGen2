@@ -95,7 +95,7 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public TYPE getCoreType() {
-		return (this.context != null)? this.context.getCoreType() : this;
+		return (this.hasContext())? this.context.getCoreType() : this;
 	}
 
 	public TYPE clone() {

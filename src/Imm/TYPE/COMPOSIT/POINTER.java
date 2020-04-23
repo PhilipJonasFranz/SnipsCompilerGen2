@@ -5,14 +5,12 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
-import lombok.Getter;
 
 public class POINTER extends COMPOSIT {
 
 	/** The type that this pointer capsules. */
 	public TYPE targetType;
 
-	@Getter
 	public TYPE coreType;
 	
 	public POINTER(TYPE targetType) {
@@ -111,6 +109,19 @@ public class POINTER extends COMPOSIT {
 			
 			return p;
 		}
+	}
+
+	public TYPE getCoreType() {
+		if (targetType instanceof PRIMITIVE) {
+			this.coreType = targetType;
+		}
+		else if (targetType instanceof COMPOSIT) {
+			this.coreType = ((COMPOSIT) targetType).getCoreType();
+		}
+		else if (this.targetType instanceof PROVISO) {
+			this.coreType = this.targetType.getCoreType();
+		}
+		return this.coreType;
 	}
 
 }

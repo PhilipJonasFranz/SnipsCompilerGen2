@@ -178,6 +178,8 @@ public class ProvisoManager {
 				}
 				else {
 					POINTER p = (POINTER) d.getRawType();
+					
+					/* Only Struct and Proviso needs proviso initialization */
 					if (p.getCoreType() instanceof STRUCT) {
 						STRUCT s1 = (STRUCT) p.getCoreType();
 						
@@ -200,6 +202,10 @@ public class ProvisoManager {
 							setContext(s1.proviso, s1);
 						}
 					}
+					else {
+						/* Set the context of the target type, proviso can be capsuled inside of pointer */
+						setContext(context, p.targetType);
+					}
 				}
 			}
 		}
@@ -213,7 +219,7 @@ public class ProvisoManager {
 			for (int a = 0; a < source.size(); a++) {
 				if (target.get(i) instanceof PROVISO && target.get(i).isEqual(source.get(a))) {
 					PROVISO p = (PROVISO) target.get(i);
-					p.setContext(source.get(a).clone());
+					p.setContext(source.get(a));
 				}
 			}
 		}

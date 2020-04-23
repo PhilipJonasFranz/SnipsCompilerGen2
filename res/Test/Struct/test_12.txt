@@ -34,14 +34,14 @@ resv:                         /* Function: resv */
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, .L5_HEAP_START    /* Evaluate Expression */
+    ldr r0, .L4_HEAP_START    /* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
-.L7:                          /* Evaluate condition */
+.L6:                          /* Evaluate condition */
     lsl r0, r4, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     cmp r0, #0
-    beq .L8
+    beq .L7
 /* Memory Section is allocated or free */
 /* Load block size from memory */
     lsl r0, r4, #2            /* Convert to bytes */
@@ -49,50 +49,50 @@ resv:                         /* Function: resv */
     mov r5, r0
     mov r6, r0
     cmp r5, #0
-    bge .L10
+    bge .L9
 /* Defragment Heap */
-.L12:                         /* Evaluate condition */
+.L11:                         /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
-    bne .L13
+    bne .L12
     sub r0, r4, r5
     lsl r0, r0, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     mov r7, r0
     cmp r7, #0
-    ble .L15
-    b .L13
-.L15: 
+    ble .L14
+    b .L12
+.L14: 
     cmp r7, #0
-    bne .L17
+    bne .L16
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
-    b .L13
-.L17: 
+    b .L12
+.L16: 
     add r5, r5, r7
 /* Add to current size */
-    b .L12
-.L13: 
+    b .L11
+.L12: 
     mov r0, r5                /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
     mov r7, r0
     cmp r5, #0
-    bne .L18
+    bne .L17
     mov r0, #0                /* Evaluate Expression */
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-.L18: 
+.L17: 
 /* Memory location is free, check size */
     rsb r0, r5, #0
     mov r5, r0
     cmp r0, r3
-    bne .L21
+    bne .L20
 /* Fits */
     mov r0, r3                /* Evaluate Expression */
     lsl r1, r4, #2
@@ -101,10 +101,10 @@ resv:                         /* Function: resv */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
-    b .L24
-.L21: 
+    b .L23
+.L20: 
     cmp r5, r3
-    ble .L23
+    ble .L22
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     mov r0, r3                /* Evaluate Expression */
@@ -120,16 +120,16 @@ resv:                         /* Function: resv */
     mov r1, r4                /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
-    b .L24
-.L23: 
+    b .L23
+.L22: 
     sub r4, r4, r5
-    b .L9
-.L10: 
+    b .L8
+.L9: 
 /* Memory section is allocated, skip */
     add r4, r4, r5
-.L9: 
-    b .L7
 .L8: 
+    b .L6
+.L7: 
 /* End reached, create new block */
     mov r0, r3                /* Evaluate Expression */
     lsl r1, r4, #2
@@ -138,7 +138,7 @@ resv:                         /* Function: resv */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
-.L24: 
+.L23: 
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
     
@@ -161,11 +161,11 @@ free:                         /* Function: free */
     str r0, [r1]
     mov r6, r0                /* Evaluate Expression */
     add r7, r3, r4
-.L26:                         /* Evaluate condition */
+.L25:                         /* Evaluate condition */
     lsl r0, r7, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     cmp r0, #0
-    bge .L27
+    bge .L26
     lsl r0, r7, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     mov r8, r0
@@ -179,8 +179,8 @@ free:                         /* Function: free */
     str r0, [r1]
 /* Shift pointer to next block */
     sub r7, r7, r8
-    b .L26
-.L27: 
+    b .L25
+.L26: 
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
     
@@ -208,23 +208,23 @@ create_P0:                    /* Function: create, Provisos: INT */
     bx lr
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
-destroy_P4:                   /* Function: destroy, Provisos: INT */
+destroy_P3:                   /* Function: destroy, Provisos: INT */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
     lsl r1, r3, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     mov r4, r0
-.L31:                         /* Evaluate condition */
+.L30:                         /* Evaluate condition */
     cmp r4, #0
-    beq .L32
+    beq .L31
     mov r0, r4                /* Load parameters */
     bl free                   /* Call free */
     lsl r1, r4, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     mov r4, r0
-    b .L31
-.L32: 
+    b .L30
+.L31: 
     mov r0, r3                /* Load parameters */
     bl free                   /* Call free */
     mov sp, fp
@@ -254,7 +254,7 @@ add_P1:                       /* Function: add, Provisos: INT */
     lsl r1, r3, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     cmp r0, #0
-    bne .L35
+    bne .L34
     mov r0, r5                /* Evaluate Expression */
     lsl r1, r3, #2            /* Convert to bytes */
     str r0, [r1]              /* Store value to struct field */
@@ -263,55 +263,8 @@ add_P1:                       /* Function: add, Provisos: INT */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]              /* Store value to struct field */
-    b .L34
-.L35: 
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    ldr r1, [r1]
-    lsl r1, r1, #2
-    str r0, [r1]              /* Store value to struct field */
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]              /* Store value to struct field */
+    b .L33
 .L34: 
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
-    bx lr
-    
-add_P2:                       /* Provisos: BOOL */
-    push { r3, r4, r5, r6, r7, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, #2                /* Evaluate Expression */
-    bl resv                   /* Call resv */
-    mov r5, r0
-/* Initialize the new List Node, set the next pointer to null */
-    mov r0, r4                /* Evaluate Expression */
-    push { r0 }
-    mov r6, r0
-    mov r0, #0
-    lsl r1, r5, #2
-    str r0, [r1, #0]
-    pop { r0 }
-    str r0, [r1, #4]
-    mov r7, r0
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, #0
-    bne .L38
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    str r0, [r1]              /* Store value to struct field */
-/* Dereference through pointer */
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]              /* Store value to struct field */
-    b .L37
-.L38: 
     mov r0, r5                /* Evaluate Expression */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #4
@@ -322,42 +275,42 @@ add_P2:                       /* Provisos: BOOL */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]              /* Store value to struct field */
-.L37: 
+.L33: 
     mov sp, fp
     pop { r3, r4, r5, r6, r7, fp, lr }
     bx lr
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-get_P3:                       /* Function: get, Provisos: INT */
+get_P2:                       /* Function: get, Provisos: INT */
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
     lsl r1, r3, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     mov r5, r0
-.L41:                         /* Evaluate condition */
+.L37:                         /* Evaluate condition */
     cmp r4, #0
-    beq .L42
+    beq .L38
     lsl r1, r5, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     cmp r0, #0
-    bne .L43
+    bne .L39
     mov r0, #0                /* Evaluate Expression */
-    b .L45
-.L43: 
+    b .L41
+.L39: 
 /* Jump to next */
     lsl r1, r5, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     mov r5, r0
     mov r0, r4
     sub r4, r0, #1
-    b .L41
-.L42: 
+    b .L37
+.L38: 
     lsl r1, r5, #2            /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]              /* Load field from struct */
-.L45: 
+.L41: 
     pop { r3, r4, r5 }
     bx lr
     
@@ -382,23 +335,22 @@ main:                         /* Function: main */
     mov r0, r4
     pop { r1 }
     bl add_P1                 /* Call add */
-/* TODO: Should throw error, possibly because pointers dont check proviso types */
     mov r0, #12               /* Load parameters */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl add_P2                 /* Call add */
+    bl add_P1                 /* Call add */
     mov r0, r3                /* Evaluate Expression */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl get_P3                 /* Call get */
+    bl get_P2                 /* Call get */
     mov r5, r0
     mov r0, r4                /* Load parameters */
-    bl destroy_P4             /* Call destroy */
+    bl destroy_P3             /* Call destroy */
     mov r0, r5                /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
     
-.L5_HEAP_START: .word HEAP_START
+.L4_HEAP_START: .word HEAP_START
