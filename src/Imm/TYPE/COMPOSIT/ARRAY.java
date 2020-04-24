@@ -29,7 +29,6 @@ public class ARRAY extends COMPOSIT {
 			this.coreType = elementType.getCoreType();
 		}
 		this.length0 = length;
-		this.wordSize = elementType.wordsize();
 	}
 	
 	public ARRAY(TYPE elementType, int length) {
@@ -101,8 +100,11 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public TYPE clone() {
-		ARRAY arr = new ARRAY(this.elementType.clone(), this.getLength());
-		return arr;
+		if (this.length0 != null) {
+			ARRAY arr = new ARRAY(this.elementType.clone(), this.length0);
+			return arr;
+		}
+		else return new ARRAY(this.elementType.clone(), this.length);
 	}
 
 }

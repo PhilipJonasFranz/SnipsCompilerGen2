@@ -136,6 +136,13 @@ public class ProvisoManager {
 		}
 		else if (type instanceof ARRAY) {
 			ARRAY arr = (ARRAY) type;
+			
+			if (arr.elementType instanceof STRUCT) {
+				STRUCT s = (STRUCT) arr.elementType;
+				
+				setContext(context, s);
+			}
+			
 			setContext(context, arr.elementType);
 		}
 		else if (type instanceof POINTER) {
@@ -146,6 +153,12 @@ public class ProvisoManager {
 			STRUCT s = (STRUCT) type;
 			
 			ProvisoManager.mapContextTo(s.proviso, context);
+			
+			/* Map initialized proviso types to typedef provisos */
+			for (int i = 0; i < s.typedef.proviso.size(); i++) {
+				PROVISO p = (PROVISO) s.typedef.proviso.get(i);
+				p.setContext(s.proviso.get(i));
+			}
 			
 			/* Initialize capsuled proviso types */
 			for (int i = 0; i < s.typedef.proviso.size(); i++) {
@@ -195,7 +208,6 @@ public class ProvisoManager {
 						
 						if (s1.typedef.structName.equals(s.typedef.structName)) {
 							/* Set pointer to point on itself, but set provisos */
-							//for (TYPE t : s1.proviso) setContext(context, t);
 							p.coreType = s1;
 						}
 						else {

@@ -494,7 +494,7 @@ public class ContextChecker {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
 				}
-				throw new CTX_EXCEPTION(d.getSource(), ((t instanceof STRUCT)? "Struct" : "Variable") + " type does not match expression type: " + d.getType().typeString() + " vs. " + t.typeString());
+				throw new CTX_EXCEPTION(d.getSource(), "Expression type does not match the declaration type: " + t.typeString() + " vs " + d.getType().typeString());
 			}
 		}
 		
