@@ -11,9 +11,12 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMAnd;
+import Imm.ASM.Processing.Arith.ASMEor;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Processing.Arith.ASMMult;
+import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -108,6 +111,27 @@ public class AsNLhsId extends AsNStatement {
 				inj.add(new ASMLsr(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 			}
 			else inj.add(new ASMLsr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+		}
+		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
+			if (!directInjection) {
+				if (otherOp == 0) save = true;
+				inj.add(new ASMOrr(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+			}
+			else inj.add(new ASMOrr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+		}
+		else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
+			if (!directInjection) {
+				if (otherOp == 0) save = true;
+				inj.add(new ASMAnd(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+			}
+			else inj.add(new ASMAnd(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+		}
+		else if (a.assignArith == ASSIGN_ARITH.XOR_ASSIGN) {
+			if (!directInjection) {
+				if (otherOp == 0) save = true;
+				inj.add(new ASMEor(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+			}
+			else inj.add(new ASMEor(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
 		
 		/* Pop Last Operand Register if Operand Register was used */

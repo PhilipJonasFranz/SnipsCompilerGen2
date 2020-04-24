@@ -288,12 +288,18 @@ public class ContextChecker {
 						}
 					}
 					else if (sel0.selector instanceof ArraySelect) {
-						/* Push disjunct scope */
-						this.scopes.push(new Scope(null));
+						/* Push new scope to house the struct fields */
+						this.scopes.push(new Scope(this.scopes.peek()));
 						
 						/* Add declarations for struct */
 						for (Declaration dec : struct.typedef.fields) 
-							this.scopes.peek().addDeclaration(dec);
+							/* 
+							 * Add the struct fields to the current scope, so that the select expresssion
+							 * from the array select can be checked and finds the field its selecting from.
+							 * The fields are added without checking for duplicates. This is not a big problem,
+							 * since the same scope is instantly popped afterwards.
+							 */
+							this.scopes.peek().addDeclaration(dec, false);
 						
 						ArraySelect arr = (ArraySelect) sel0.selector;
 						type = arr.check(this);
@@ -336,12 +342,18 @@ public class ContextChecker {
 					break;
 				}
 				else if (selection instanceof ArraySelect) {
-					/* Push disjunct scope */
-					this.scopes.push(new Scope(null));
+					/* Push new scope to house the struct fields */
+					this.scopes.push(new Scope(this.scopes.peek()));
 					
 					/* Add declarations for struct */
 					for (Declaration dec : struct.typedef.fields) 
-						this.scopes.peek().addDeclaration(dec);
+						/* 
+						 * Add the struct fields to the current scope, so that the select expresssion
+						 * from the array select can be checked and finds the field its selecting from.
+						 * The fields are added without checking for duplicates. This is not a big problem,
+						 * since the same scope is instantly popped afterwards.
+						 */
+						this.scopes.peek().addDeclaration(dec, false);
 					
 					ArraySelect arr = (ArraySelect) selection;
 					type = arr.check(this);
@@ -934,9 +946,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkSizeOfExpression(SizeOfExpression soe) throws CTX_EXCEPTION {
-		TYPE t = soe.expression.check(this);
-		soe.sizeType = t;
-		
+		soe.sizeType = soe.expression.check(this);
 		soe.setType(new INT());
 		return soe.getType();
 	}

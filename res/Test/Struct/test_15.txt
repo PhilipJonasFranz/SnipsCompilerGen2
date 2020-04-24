@@ -1,0 +1,14 @@
+SOURCE
+struct Data {
+	int [3] arr;
+}
+
+int main(int x) {
+	Data data = Data::({1, 2, 3});
+	data.arr [1] = 5;
+	return data.arr [x];
+}
+TESTCASES
+0 1
+1 5
+2 3

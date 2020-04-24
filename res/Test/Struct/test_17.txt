@@ -1,0 +1,17 @@
+SOURCE
+struct Data {
+	int [3] arr;
+}
+
+int main(int x, int y) {
+	Data [2] data = {Data::({1, 2, 3}), Data::({4, 5, 6})};
+	data [0].arr [1] = 5;
+	return data [y].arr [x];
+}
+TESTCASES
+0 0 1
+1 0 5
+2 0 3
+0 1 4
+1 1 5
+2 1 6

@@ -35,17 +35,18 @@ import Util.Logging.Message;
 
 public class CompilerDriver {
 
+			/* --- STATIC FIELDS --- */
 	/* The Input File */
 	public static File file;
 	
 	public static String [] logo = {
-		"	 _______  __    _  ___  _______  _______",
-		"	|       ||  \\  | ||   ||       ||       |",
-		"	|  _____||   \\_| ||   ||    _  ||  _____|",
-		"	| |_____ |       ||   ||   |_| || |_____",
-		"	|_____  ||  _    ||   ||    ___||_____  |",
-		"	 _____| || | \\   ||   ||   |     _____| |",
-		"	|_______||_|  \\__||___||___|    |_______|"};
+		"	  _______  __    _  ___  _______  _______",
+		"	 |       ||  \\  | ||   ||       ||       |",
+		"	 |  _____||   \\_| ||   ||    _  ||  _____|",
+		"	 | |_____ |       ||   ||   |_| || |_____",
+		"	 |_____  ||  _    ||   ||    ___||_____  |",
+		"	  _____| || | \\   ||   ||   |     _____| |",
+		"	 |_______||_|  \\__||___||___|    |_______|"};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -80,6 +81,18 @@ public class CompilerDriver {
 	
 	public static XMLNode sys_config;
 	
+	/* Reserved Declarations */
+	public static Source nullSource = new Source("Default", 0, 0);
+	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
+	public static boolean heap_referenced = false;
+	public static Declaration HEAP_START = new Declaration(
+													new Token(TokenType.IDENTIFIER, nullSource, "HEAP_START"), 
+													new INT(), 
+													zero_atom, 
+													nullSource);
+	
+	
+			/* --- MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
@@ -114,19 +127,12 @@ public class CompilerDriver {
 		scd.compile(file, code);
 	}
 	
-	/* Reserved Declarations */
-	public static Source nullSource = new Source("Default", 0, 0);
-	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
-	public static boolean heap_referenced = false;
-	public static Declaration HEAP_START = new Declaration(
-													new Token(TokenType.IDENTIFIER, nullSource, "HEAP_START"), 
-													new INT(), 
-													zero_atom, 
-													nullSource);
 	
-	
+			/* --- FIELDS --- */
 	public List<String> referencedLibaries = new ArrayList();
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public CompilerDriver(String [] args) {
 		this.readConfig();
 		this.readArgs(args);
@@ -136,16 +142,14 @@ public class CompilerDriver {
 		this.readConfig();
 	}
 	
+	
+			/* --- METHODS --- */
 	public void readConfig() {
 		/* Read Configuration */
 		List<String> conf = Util.readFile(new File("src\\Snips\\sys-inf.xml"));
 		if (conf == null) conf = readFromJar("sys-inf.xml");
 		
 		sys_config  = new XMLNode(conf);
-	}
-	
-	public String getVersionString() {
-		return sys_config.getValue("Version");
 	}
 	
 	public List<String> readFromJar(String path) {
@@ -448,7 +452,7 @@ public class CompilerDriver {
 		
 		for (String s : logo)System.out.println(s);
 		
-		String ver = "Gen.2 " + getVersionString();
+		String ver = "Gen.2 " + sys_config.getValue("Version");
 		int l = ver.length();
 		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
 		ver = "\t" + ver;
@@ -506,7 +510,7 @@ public class CompilerDriver {
 	
 	public void printInfo() {
 		silenced = false;
-		new Message("Version: Snips Compiler Gen.2 " + getVersionString(), Message.Type.INFO);
+		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
 	}
 	
 	public void setBurstMode(boolean value, boolean imm) {

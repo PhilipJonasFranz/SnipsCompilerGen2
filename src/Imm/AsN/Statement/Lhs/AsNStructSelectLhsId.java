@@ -9,6 +9,7 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -33,6 +34,11 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		AsNStructSelectLhsId id = new AsNStructSelectLhsId();
 		lhs.castedNode = id;
 		
+		if (lhs.select.getType().wordsize() == 1) {
+			id.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+		}
+		
+		/* Inject the address loader, loads address into R1 */
 		AsNStructSelect.injectAddressLoader(id, lhs.select, r, map, st);
 		
 		if (lhs.select.getType().wordsize() > 1) {
@@ -44,6 +50,7 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		}
 		else {
 			/* Load */
+			id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
 			ASMStr store = new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
 			store.comment = new ASMComment("Store value to struct field");
 			id.instructions.add(store);
@@ -52,8 +59,11 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		return id;
 	}
 	
+	/**
+	 * Pop size words of the stack and store it at the location specified in R1.
+	 * Pops the words of the stack set.
+	 */
 	public static void copyFromStack(AsNNode node, int size, StackSet st) throws CGEN_EXCEPTION {
-		
 		/* Do it sequentially for 8 or less words to copy */
 		if (size <= 8) {
 			int offset = 0;

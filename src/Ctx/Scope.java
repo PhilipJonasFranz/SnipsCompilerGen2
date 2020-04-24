@@ -34,6 +34,12 @@ public class Scope {
 		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
 	
+	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
+	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXCEPTION {
+		if (checkDups) this.checkDuplicate(dec);
+		this.declarations.put(dec.fieldName, dec);
+	}
+	
 	/** Add a new declaration to this scope. Checks for duplicates. */
 	public void addDeclaration(Declaration dec) throws CTX_EXCEPTION {
 		this.checkDuplicate(dec);

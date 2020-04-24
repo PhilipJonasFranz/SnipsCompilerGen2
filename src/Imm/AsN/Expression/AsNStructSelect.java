@@ -91,8 +91,70 @@ public class AsNStructSelect extends AsNExpression {
 				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
 			}
 		}
+		else if (select.selector instanceof ArraySelect) {
+			ArraySelect arr = (ArraySelect) select.selector;
+			
+			/*
+			 * This case can only happen if the object that is selected from is a heaped array.
+			 * In this case we can just load the pointer from a register.
+			 */
+			if (r.declarationLoaded(arr.idRef.origin)) {
+				int loc = r.declarationRegLocation(arr.idRef.origin);
+				
+				/* Just move in R1 */
+				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
+			}
+			/* In Local Stack */
+			else if (st.getDeclarationInStackByteOffset(arr.idRef.origin) != -1) {
+				int offset = st.getDeclarationInStackByteOffset(arr.idRef.origin);
+				offset += (arr.idRef.origin.getType().wordsize() - 1) * 4;
+				
+				/* Load offset of array in memory */
+				node.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+			}
+			/* In Parameter Stack */
+			else if (st.getParameterByteOffset(arr.idRef.origin) != -1) {
+				int offset = st.getParameterByteOffset(arr.idRef.origin);
+				
+				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+				start.comment = new ASMComment("Start of structure in stack");
+				node.instructions.add(start);
+			}
+			/* In Global Memory */
+			else if (map.declarationLoaded(arr.idRef.origin)) {
+				ASMDataLabel label = map.resolve(arr.idRef.origin);
+				
+				/* Load data label */
+				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
+			}
+			
+			/* Already convert to bytes here, since loadSumR2 loads the offset in bytes */
+			if (select.deref) {
+				ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2));
+				lsl.comment = new ASMComment("Convert to bytes");
+				node.instructions.add(lsl);
+			}
+			
+			/* Push current */
+			node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1)));
+			
+			/* Load the struture offset in R2 */
+			if (arr.getType().wordsize() > 1)
+				AsNArraySelect.loadSumR2(node, arr, r, map, st, true);
+			else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
+			
+			/* Pop Current */
+			node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			
+			/* Add sum to current */
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		}
 		
-		if (select.deref) {
+		/* 
+		 * Only convert to bytes if select does deref and selector is not a array select since array select will
+		 * deref by itself. 
+		 */
+		if (select.deref && !(select.selector instanceof ArraySelect)) {
 			ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2));
 			lsl.comment = new ASMComment("Convert to bytes");
 			node.instructions.add(lsl);

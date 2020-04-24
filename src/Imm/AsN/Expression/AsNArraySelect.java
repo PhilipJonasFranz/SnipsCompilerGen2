@@ -33,7 +33,6 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNArraySelect extends AsNExpression {
 
@@ -91,6 +90,9 @@ public class AsNArraySelect extends AsNExpression {
 		return select;
 	}
 	
+	/**
+	 * Load the byte offset to the selected sub structure and place it in R2.
+	 */
 	public static void loadSumR2(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, boolean block) throws CGEN_EXCEPTION {
 		/* Sum */
 		if (s.selection.size() > 1 || block) {
@@ -109,7 +111,7 @@ public class AsNArraySelect extends AsNExpression {
 			for (int i = 0; i < s.selection.size(); i++) {
 				node.instructions.addAll(AsNExpression.cast(s.selection.get(i), r, map, st).getInstructions());
 				
-				if (superType.elementType instanceof PRIMITIVE) {
+				if (superType.elementType.wordsize() == 1) {
 					node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 				}
 				else {
@@ -131,6 +133,15 @@ public class AsNArraySelect extends AsNExpression {
 			/* Load Index and multiply with 4 to convert index to byte offset */
 			node.instructions.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
 			node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+		
+			/* Multiply with type wordsize */
+			int wordSize = s.getType().getCoreType().wordsize();
+			if (wordSize > 1) {
+				/* Move wordsize in R0 */
+				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(wordSize)));
+				/* Multiply with word Size */
+				node.instructions.add(new ASMMult(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+			}
 		}
 		
 	}
