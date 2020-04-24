@@ -1,11 +1,15 @@
 SOURCE
 struct Data {
-	int [3] arr;
+	int [3]* arr;
 }
 
 int main(int x) {
+	int[3]* arr = (int[3]*) resv(sizeof(int[3]));
+	*arr = {1, 2, 3};
+	
 	Data* data = (Data*) resv(sizeof(Data));
-	*data = Data::({1, 2, 3});
+	*data = Data::(arr);
+	
 	data->arr [1] = 5;
 	return data->arr [x];
 }
@@ -14,7 +18,7 @@ TESTCASES
 1 5
 2 3
 OUTPUT
-/* --test_16.txt */
+/* --test_19.txt */
 .data
 HEAP_START: .word 0
     
@@ -139,7 +143,7 @@ resv:                         /* Function: resv */
     bx lr
     
 main:                         /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, r6, r7, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #3                /* Evaluate Expression */
@@ -157,17 +161,25 @@ main:                         /* Function: main */
     pop { r0 }
     str r0, [r1, #8]
     mov r5, r0                /* Evaluate Expression */
+    mov r0, #1
+    bl resv                   /* Call resv */
+    mov r6, r0
+    mov r0, r4                /* Evaluate Expression */
+    push { r0 }
+    lsl r1, r6, #2
+    str r0, [r1, #0]
+    mov r7, r0                /* Evaluate Expression */
     mov r0, #5
-    lsl r1, r4, #2            /* Convert to bytes */
+    lsl r1, r6, #2            /* Convert to bytes */
     mov r1, r1
     add r1, r1, #4
     str r0, [r1]              /* Store value to struct field */
-    lsl r1, r4, #2            /* Convert to bytes */
+    lsl r1, r6, #2            /* Convert to bytes */
     lsl r2, r3, #2
     add r1, r1, r2
     ldr r0, [r1]              /* Load field from struct */
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, r6, r7, fp, lr }
     bx lr
     
 .L0_HEAP_START: .word HEAP_START

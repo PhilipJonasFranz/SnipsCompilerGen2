@@ -30,7 +30,7 @@ main:                         /* Function: main */
     mov r1, #3
     push { r1, r0 }
     mov r0, #9                /* Evaluate Expression */
-    sub r1, fp, #12           /* Load field location */
+    sub r1, fp, #12
     str r0, [r1]              /* Store value to struct field */
     sub r1, fp, #12           /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */

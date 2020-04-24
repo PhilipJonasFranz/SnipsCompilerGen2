@@ -12,3 +12,31 @@ TESTCASES
 0 1
 1 5
 2 3
+OUTPUT
+/* --test_15.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3 }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #3                /* Evaluate Expression */
+    mov r1, #2
+    mov r2, #1
+    push { r2, r1, r0 }
+    mov r0, #5                /* Evaluate Expression */
+    sub r1, fp, #12
+    mov r1, r1
+    add r1, r1, #4
+    str r0, [r1]              /* Store value to struct field */
+    sub r1, fp, #12           /* Evaluate Expression */
+    lsl r2, r3, #2
+    add r1, r1, r2
+    ldr r0, [r1]              /* Load field from struct */
+    mov sp, fp
+    pop { r3 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START
