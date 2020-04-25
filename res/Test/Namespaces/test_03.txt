@@ -1,0 +1,15 @@
+SOURCE
+namespace Foo {
+	int x = 10;
+}
+
+namespace Foo {
+	int y = 15;
+}
+
+int main() {
+	return x@Foo + y@Foo;
+}
+
+TESTCASES
+25

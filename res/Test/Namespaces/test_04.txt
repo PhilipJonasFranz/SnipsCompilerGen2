@@ -1,0 +1,19 @@
+SOURCE
+namespace Foo {
+	namespace Baz {
+		int x = 10;
+	}
+	
+	struct Bar {
+		int k;
+	}
+	
+}
+
+int main() {
+	Bar@Foo bar = Bar@Foo::(5);
+	return bar.k + x@Baz@Foo;
+}
+
+TESTCASES
+15

@@ -1,0 +1,11 @@
+SOURCE
+namespace Test {
+	int x = 10;
+}
+
+int main() {
+	return x@Test;
+}
+
+TESTCASES
+10

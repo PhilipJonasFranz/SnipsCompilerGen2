@@ -206,7 +206,7 @@ public class ProvisoManager {
 							}
 						}
 						
-						if (s1.typedef.structName.equals(s.typedef.structName)) {
+						if (s1.typedef.path.build().equals(s.typedef.path.build())) {
 							/* Set pointer to point on itself, but set provisos */
 							p.coreType = s1;
 						}

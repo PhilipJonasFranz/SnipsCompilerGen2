@@ -6,7 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
-import Par.Token;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -15,8 +15,7 @@ import Util.Source;
 public class IDRef extends Expression {
 
 			/* --- FIELDS --- */
-	/* The name of the referenced variable */
-	public String id;
+	public NamespacePath path;
 	
 	/* Set during context checking */
 	public Declaration origin;
@@ -27,15 +26,15 @@ public class IDRef extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public IDRef(Token id, Source source) {
+	public IDRef(NamespacePath path, Source source) {
 		super(source);
-		this.id = id.spelling;
+		this.path = path;
 	}
 
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "IDRef: " + this.id + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		System.out.println(this.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

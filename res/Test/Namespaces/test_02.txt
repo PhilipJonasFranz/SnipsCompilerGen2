@@ -1,0 +1,16 @@
+SOURCE
+namespace Foo {
+	int x = 10;
+	
+	namespace Bar {
+		int x = 15;
+	}
+	
+}
+
+int main() {
+	return x@Foo + x@Bar@Foo;
+}
+
+TESTCASES
+25

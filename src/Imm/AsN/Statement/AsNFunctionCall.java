@@ -96,12 +96,12 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		/* Branch to function */
-		String target = f.functionName + f.manager.getPostfix(provisos);
+		String target = f.path.build() + f.manager.getPostfix(provisos);
 		
 		ASMLabel functionLabel = new ASMLabel(target);
 		
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
-		branch.comment = new ASMComment("Call " + f.functionName);
+		branch.comment = new ASMComment("Call " + f.path.build());
 		call.instructions.add(branch);
 		
 		/* Shrink Stack if parameters were passed through it */

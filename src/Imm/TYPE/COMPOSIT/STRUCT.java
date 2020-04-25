@@ -8,6 +8,7 @@ import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
+import Util.NamespacePath;
 
 public class STRUCT extends COMPOSIT {
 
@@ -44,19 +45,19 @@ public class STRUCT extends COMPOSIT {
 		return false;
 	}
 	
-	public Declaration getField(String name) {
+	public Declaration getField(NamespacePath path) {
 		for (Declaration dec : this.typedef.fields) {
-			if (dec.fieldName.equals(name)) {
+			if (dec.path.build().equals(path.build())) {
 				return dec;
 			}
 		}
 		return null;
 	}
 	
-	public int getFieldByteOffset(String name) {
+	public int getFieldByteOffset(NamespacePath path) {
 		int offset = 0;
 		for (Declaration dec : this.typedef.fields) {
-			if (dec.fieldName.equals(name)) {
+			if (dec.path.build().equals(path.build())) {
 				return offset * 4;
 			}
 			else offset += dec.getType().wordsize();
@@ -64,9 +65,9 @@ public class STRUCT extends COMPOSIT {
 		return -1;
 	}
 	
-	public boolean hasField(String name) {
+	public boolean hasField(NamespacePath path) {
 		for (Declaration dec : this.typedef.fields) {
-			if (dec.fieldName.equals(name)) {
+			if (dec.path.build().equals(path.build())) {
 				return true;
 			}
 		}
@@ -74,7 +75,7 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public String typeString() {
-		String s = this.typedef.structName;
+		String s = this.typedef.path.build();
 		
 		if (this.typedef.fields.size() > 0) {
 			s += "<";
@@ -83,7 +84,7 @@ public class STRUCT extends COMPOSIT {
 				if (t.getType().getCoreType().isEqual(this)) {
 					STRUCT s0 = (STRUCT) t.getType().getCoreType();
 					
-					s += this.typedef.structName;
+					s += this.typedef.path.build();
 					
 					if (CompilerDriver.printProvisoTypes) s += s0.getProvisoString();
 					if (CompilerDriver.printObjectIDs) s += " " + s0.toString().split("@") [1];

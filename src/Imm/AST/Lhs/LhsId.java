@@ -6,6 +6,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -37,6 +38,6 @@ public abstract class LhsId extends SyntaxElement {
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXCEPTION;
 	
-	public abstract String getFieldName();
+	public abstract NamespacePath getFieldName();
 	
 }

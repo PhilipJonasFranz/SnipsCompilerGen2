@@ -240,7 +240,7 @@ public class AsNStructSelect extends AsNExpression {
 	}
 	
 	private static void injectIDRef(AsNNode node, STRUCT struct, IDRef ref) {
-		int offset = struct.getFieldByteOffset(ref.id);
+		int offset = struct.getFieldByteOffset(ref.path);
 		if (offset != 0) node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
 	}
 	
