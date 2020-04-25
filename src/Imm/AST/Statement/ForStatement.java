@@ -14,12 +14,14 @@ import Util.Source;
  */
 public class ForStatement extends ConditionalCompoundStatement {
 
+			/* --- FIELDS --- */
 	public Declaration iterator;
 	
-	public Assignment increment;
+	public Statement increment;
+	
 	
 			/* --- CONSTRUCTORS --- */
-	public ForStatement(Declaration iterator, Expression condition, Assignment increment, List<Statement> body, Source source) {
+	public ForStatement(Declaration iterator, Expression condition, Statement increment, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.iterator = iterator;
 		this.increment = increment;

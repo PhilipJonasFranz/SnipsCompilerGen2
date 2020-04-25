@@ -65,7 +65,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.add(whileEnd);
 		}
 		
-		w.instructions.get(0).comment = new ASMComment("Evaluate condition");
+		if (!w.instructions.isEmpty()) w.instructions.get(0).comment = new ASMComment("Evaluate condition");
 		
 		return w;
 	}

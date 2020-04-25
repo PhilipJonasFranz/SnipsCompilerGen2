@@ -5,3 +5,24 @@ int main(int a) {
 TESTCASES
 4 1
 0 5
+OUTPUT
+/* --test_06.txt */
+main:                         /* Function: main */
+    push { r3 }
+    mov r3, r0
+    mov r1, r3                /* Evaluate Expression */
+    mov r2, #2
+    mul r0, r1, r2
+    mov r1, r0
+    add r0, r1, #5
+    push { r0 }
+    mov r1, r3
+    mov r2, r3
+    mul r0, r1, r2
+    mov r2, r0
+    sub r2, r3, r2
+    pop { r1 }
+    add r0, r1, r2
+    pop { r3 }
+    bx lr
+    

@@ -11,3 +11,74 @@ int main(int b, int c, int d) {
 TESTCASES
 0 0 13
 4 0 17
+OUTPUT
+/* --test_07.txt */
+    b main
+foo:                          /* Function: foo */
+    push { fp, lr }
+    mov fp, sp
+    mov r2, #8
+    add r0, fp, #8
+    add r0, r0, #8
+    ldr r0, [r0]
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    
+main:                         /* Function: main */
+    push { r3, r4, r5, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    mov r0, #4                /* Evaluate Expression */
+    mov r1, #3
+    push { r1, r0 }
+    mov r0, #2
+    mov r1, #1
+    push { r1, r0 }
+    mov r0, #9                /* Evaluate Expression */
+    mov r1, #8
+    mov r2, #7
+    push { r2, r1, r0 }
+    mov r0, #6
+    mov r1, #5
+    mov r2, #4
+    push { r2, r1, r0 }
+    mov r0, #3
+    mov r1, #2
+    mov r2, #1
+    push { r2, r1, r0 }
+    mov r2, #0                /* Evaluate Expression */
+    mov r0, #1
+    mov r1, #8
+    mul r0, r0, r1
+    add r2, r2, r0
+    add r2, r2, #4
+    sub r0, fp, #16
+    add r0, r0, r2
+    ldr r0, [r0]
+    mov r1, r0
+    add r0, r1, r3
+    push { r0 }
+    mov r2, #0                /* Load parameters */
+    mov r0, #2
+    mov r1, #12
+    mul r0, r0, r1
+    add r2, r2, r0
+    sub r1, fp, #52           /* Start of structure in stack */
+    add r1, r1, r2            /* Start of sub structure in stack */
+    ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
+    push { r2, r0 }
+    ldr r0, [r1, #0]
+    push { r0 }
+    bl foo                    /* Call foo */
+    add sp, sp, #12
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
+    mov sp, fp
+    pop { r3, r4, r5, fp, lr }
+    bx lr
+    

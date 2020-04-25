@@ -1,9 +1,11 @@
 package Imm.AST.Lhs;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
@@ -32,7 +34,7 @@ public class PointerLhsId extends LhsId {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "PointerLhsId");
-		this.deref.print(d + this.printDepthStep, rec);
+		if (this.deref != null) this.deref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
@@ -41,18 +43,26 @@ public class PointerLhsId extends LhsId {
 		}
 		else this.deref = (Deref) this.shadowDeref;
 		
-		TYPE t = ctx.checkExpression(deref.expression);
-		return t;
+		this.expressionType = deref.check(ctx);
+		return this.expressionType;
 	}
 
 	public String getFieldName() {
 		if (deref.expression instanceof IDRef) {
 			return ((IDRef) deref.expression).origin.fieldName;
 		}
-		else if (deref.expression instanceof ElementSelect) {
-			return ((ElementSelect) deref.expression).idRef.origin.fieldName;
+		else if (deref.expression instanceof ArraySelect) {
+			return ((ArraySelect) deref.expression).idRef.origin.fieldName;
 		}
 		else return null;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.shadowDeref.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.shadowDeref.releaseContext();
 	}
 	
 }

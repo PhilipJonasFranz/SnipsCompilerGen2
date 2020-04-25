@@ -32,13 +32,13 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.continueJump = continueJump;
 		
 		/* Open new scope for iterator */
-		st.openScope();
+		st.openScope(a);
 		
 		/* Initialize iterator */
 		f.instructions.addAll(AsNDeclaration.cast(a.iterator, r, map, st).getInstructions());
 		
 		/* Open scope for condition, body and increment statement */
-		st.openScope();
+		st.openScope(a);
 		
 		/* Marks the start of the loop */
 		ASMLabel forStart = new ASMLabel(LabelGen.getLabel());
@@ -92,7 +92,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */
-		f.popDeclarationScope(a, r, st);
+		popDeclarationScope(f, a, r, st, true);
 		
 		
 		/* Branch to loop start */
@@ -107,7 +107,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			r.getReg(loc).free();
 		}
 		else {
-			int add = st.closeScope();
+			int add = st.closeScope(a, true);
 			if (add != 0) {
 				f.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
 			}

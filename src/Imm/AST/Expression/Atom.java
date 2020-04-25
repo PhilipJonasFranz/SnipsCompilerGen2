@@ -1,5 +1,7 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
@@ -11,10 +13,10 @@ import Util.Source;
  */
 public class Atom extends Expression {
 
+			/* --- FIELDS --- */
 	/* Type information and potential value */
-	public TYPE type;
-	
 	public String spelling;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -23,16 +25,27 @@ public class Atom extends Expression {
 	 */
 	public Atom(TYPE type, Token id, Source source) {
 		super(source);
-		this.type = type;
+		this.setType(type);
 		this.spelling = id.spelling;
 	}
 
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "<" + this.type.typeString() + ">");
+		System.out.println(this.pad(d) + "<" + this.getType().typeString() + ">");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkAtom(this);
+	}
+
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		//System.out.println("Applied Context: " + this.getClass().getName());
+		return;
+	}
+
+	public void releaseContext() {
+		return;
 	}
 	
 }

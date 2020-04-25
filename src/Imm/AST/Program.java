@@ -7,7 +7,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Directive.Directive;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Source;
 
 /**
@@ -22,7 +21,6 @@ public class Program extends SyntaxElement {
 	
 	public List<Function> functions = new ArrayList();
 	
-	public List<STRUCT> structs = new ArrayList();
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -45,6 +43,14 @@ public class Program extends SyntaxElement {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.check();
+	}
+
+	public void setContext(List<TYPE> setContext) {
+		return;
+	}
+
+	public void releaseContext() {
+		return;
 	}
 	
 }

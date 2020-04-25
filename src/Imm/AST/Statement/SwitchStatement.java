@@ -20,6 +20,7 @@ public class SwitchStatement extends Statement {
 	
 	public DefaultStatement defaultStatement;
 	
+	
 			/* --- CONSTRUCTORS --- */
 	public SwitchStatement(Expression condition, List<CaseStatement> cases, DefaultStatement defaultStatement, Source source) {
 		super(source);
@@ -45,6 +46,18 @@ public class SwitchStatement extends Statement {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkSwitchStatement(this);
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.condition.setContext(context);
+		for (CaseStatement c : this.cases) c.setContext(context);
+		this.defaultStatement.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.condition.releaseContext();
+		for (CaseStatement c : this.cases) c.releaseContext();
+		this.defaultStatement.releaseContext();
 	}
 	
 }

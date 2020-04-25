@@ -12,7 +12,7 @@ import Util.Source;
  */
 public abstract class BoolUnaryExpression extends UnaryExpression {
 
-		/* --- CONSTRUCTORS --- */
+			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -21,6 +21,8 @@ public abstract class BoolUnaryExpression extends UnaryExpression {
 		super(operand, operator, source);
 	}
 
+	
+			/* --- METHODS --- */
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkBoolUnaryExpression(this);
 	}

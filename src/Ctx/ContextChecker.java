@@ -9,14 +9,20 @@ import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.UnaryMinus;
@@ -24,7 +30,10 @@ import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.PointerLhsId;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.CompoundStatement;
@@ -37,16 +46,20 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
+import Util.Pair;
 import Util.Logging.Message;
 
 public class ContextChecker {
@@ -55,7 +68,7 @@ public class ContextChecker {
 	
 	List<Function> functions = new ArrayList();
 	
-	Function currentFunction;
+	Stack<Function> currentFunction = new Stack();
 	
 	SyntaxElement AST;
 	
@@ -63,8 +76,11 @@ public class ContextChecker {
 	
 	Stack<Scope> scopes = new Stack();
 	
+	public static ContextChecker checker;
+	
 	public ContextChecker(SyntaxElement AST) {
 		this.AST = AST;
+		checker = this;
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {
@@ -74,9 +90,35 @@ public class ContextChecker {
 	
 	public TYPE checkProgram(Program p) throws CTX_EXCEPTION {
 		scopes.push(new Scope(null));
+		
+		/* Add global reserved declarations */
+		scopes.peek().addDeclaration(CompilerDriver.HEAP_START);
+		
 		this.head = p;
 		for (SyntaxElement s : p.programElements) {
-			s.check(this);
+			if (s instanceof Function) {
+				Function f = (Function) s;
+				/* Check main function as entrypoint, if a function is called, context is provided
+				 * and then checked */
+				if (f.functionName.equals("main") && !f.manager.provisosTypes.isEmpty()) {
+					throw new CTX_EXCEPTION(f.getSource(), "Function main cannot hold proviso types");
+				}
+				
+				/* Check for duplicate function name */
+				for (Function f0 : head.functions) {
+					if (f0.functionName.equals(f.functionName)) {
+						throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.functionName);
+					}
+				}
+				
+				this.functions.add(f);
+				
+				/* Check only functions with no provisos, proviso functions will be hot checked. */
+				if (f.manager.provisosTypes.isEmpty()) {
+					f.check(this);
+				}
+			}
+			else s.check(this);
 		}
 		
 		return null;
@@ -87,20 +129,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
-		if (f.returnType.wordsize() > 1) {
-			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.returnType.typeString());
-		}
+		/* Proviso Types are already set at this point */
 		
-		this.functions.add(f);
+		if (f.getReturnType().wordsize() > 1) {
+			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
+		}
 		
 		scopes.push(new Scope(scopes.peek()));
-		
-		/* Check for duplicate function name */
-		for (Function f0 : head.functions) {
-			if (f0.functionName.equals(f.functionName)) {
-				throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.functionName);
-			}
-		}
 		
 		/* Check for duplicate function parameters */
 		if (f.parameters.size() > 1) {
@@ -113,18 +148,249 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Declaration d : f.parameters) d.check(this);
+		for (Declaration d : f.parameters) {
+			d.check(this);
+			if (d.getType().getCoreType() instanceof VOID) {
+				new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN);
+			}
+		}
 		
 		head.functions.add(f);
-		this.currentFunction = f;
+		this.currentFunction.push(f);
 		
 		/* Check body */
 		for (Statement s : f.body) {
 			s.check(this);
 		}
 		
+		this.currentFunction.pop();
 		scopes.pop();
-		return null;
+		return f.getReturnType().clone();
+	}
+	
+	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
+		/* Set the declarations in the struct type */
+		return e.struct;
+	}
+	
+	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
+		
+		ProvisoManager.setHiddenContext(e.structType);
+		
+		if (e.elements.size() != e.structType.typedef.fields.size()) {
+			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
+		}
+		
+		for (int i = 0; i < e.elements.size(); i++) {
+			TYPE t = e.elements.get(i).check(this);
+			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
+				if (t instanceof POINTER || e.structType.typedef.fields.get(i).getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
+				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
+			}
+		}
+		
+		e.setType(e.structType);
+		
+		return e.getType();
+	}
+	
+	public TYPE checkStructSelect(StructSelect e) throws CTX_EXCEPTION {
+		/* This method links origins and types manually. This is partially due to the fact
+		 * that for example, a field in a struct does not count as a field identifier in the
+		 * current scope when referencing it. If it was to the check() method, it would report
+		 * an duplicate identifier. */
+		
+		TYPE type = null;
+		
+		/* Get Base Type */
+		if (e.selector instanceof IDRef) {
+			IDRef sel = (IDRef) e.selector;
+			/* Link automatically, identifier is local */
+			type = sel.check(this);
+		}
+		else if (e.selector instanceof ArraySelect) {
+			ArraySelect arr = (ArraySelect) e.selector;
+			type = arr.check(this);
+		}
+		else {
+			throw new CTX_EXCEPTION(e.getSource(), "Base must be variable reference");
+		}
+		
+		if (type == null) {
+			throw new CTX_EXCEPTION(e.getSource(), "Cannot determine type");
+		}
+		
+		/* First selections does deref, this means that the base must be a pointer */
+		if (e.deref) {
+			if (type instanceof POINTER) {
+				POINTER p0 = (POINTER) type;
+				type = p0.targetType;
+			}
+			else {
+				throw new CTX_EXCEPTION(e.selector.getSource(), "Cannot deref non pointer, actual " + type.typeString());
+			}
+		}
+		
+		if (!(type instanceof STRUCT)) {
+			throw new CTX_EXCEPTION(e.getSource(), "Can only select from struct type, actual " + type.typeString());
+		}
+		
+		STRUCT s0 = (STRUCT) type;
+		for (int i = 0; i < s0.typedef.proviso.size(); i++) {
+			PROVISO p = (PROVISO) s0.typedef.proviso.get(i);
+			p.setContext(s0.proviso.get(i));
+			type = s0;
+		}
+		
+		ProvisoManager.setContext(s0.typedef.proviso, s0);
+		
+		Expression selection = e.selection;
+		
+		/* STRUCT, STRUCT PROVISOS */
+		Stack<Pair<STRUCT, List<TYPE>>> selectStack = new Stack();
+		selectStack.push(new Pair<STRUCT, List<TYPE>>(s0, s0.proviso));
+		
+		while (true) {
+			if (type instanceof STRUCT) {
+				STRUCT struct = (STRUCT) type;
+				
+				if (selection instanceof StructSelect) {
+					StructSelect sel0 = (StructSelect) selection;
+					
+					if (sel0.selector instanceof IDRef) {
+						IDRef ref = (IDRef) sel0.selector;
+						
+						type = findField(struct, ref);
+						
+						if (sel0.deref) {
+							if (!(type instanceof POINTER)) {
+								throw new CTX_EXCEPTION(selection.getSource(), "Cannot deref non pointer, actual " + type.typeString());
+							}
+							else {
+								/* Unwrap pointer, selection does dereference */
+								POINTER p0 = (POINTER) type;
+								type = p0.targetType;
+							}
+						}
+						
+						if (type instanceof STRUCT) {
+							STRUCT s1 = (STRUCT) type;
+							for (int i = selectStack.size() - 1; i >= 0; i--) {
+								if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+									type = selectStack.get(i).first;
+									while (selectStack.size() != i) selectStack.pop();
+								}
+							}
+							
+							type = ProvisoManager.setHiddenContext(type);
+						}
+					}
+					else if (sel0.selector instanceof ArraySelect) {
+						/* Push new scope to house the struct fields */
+						this.scopes.push(new Scope(this.scopes.peek()));
+						
+						/* Add declarations for struct */
+						for (Declaration dec : struct.typedef.fields) 
+							/* 
+							 * Add the struct fields to the current scope, so that the select expresssion
+							 * from the array select can be checked and finds the field its selecting from.
+							 * The fields are added without checking for duplicates. This is not a big problem,
+							 * since the same scope is instantly popped afterwards.
+							 */
+							this.scopes.peek().addDeclaration(dec, false);
+						
+						ArraySelect arr = (ArraySelect) sel0.selector;
+						type = arr.check(this);
+						
+						this.scopes.pop();
+					}
+					else {
+						throw new CTX_EXCEPTION(selection.getSource(), sel0.selector.getClass().getName() + " cannot be a selector");
+					}
+					
+					/* Next selection in chain */
+					selection = sel0.selection;
+				}
+				else if (selection instanceof IDRef) {
+					IDRef ref = (IDRef) selection;
+					
+					/* Last selection */
+					type = findField(struct, ref);
+					
+					TYPE type0 = type;
+					if (type0 instanceof POINTER) {
+						type0 = ((POINTER) type0).targetType;
+					}
+					
+					if (type0 instanceof STRUCT) {
+						STRUCT s1 = (STRUCT) type0;
+						for (int i = selectStack.size() - 1; i >= 0; i--) {
+							if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+								type0 = selectStack.get(i).first;
+								while (selectStack.size() != i) selectStack.pop();
+							}
+						}
+						
+						type0 = ProvisoManager.setHiddenContext(type0);
+						
+						if (type instanceof POINTER) type = new POINTER(type0);
+						else type = type0;
+					}
+					
+					break;
+				}
+				else if (selection instanceof ArraySelect) {
+					/* Push new scope to house the struct fields */
+					this.scopes.push(new Scope(this.scopes.peek()));
+					
+					/* Add declarations for struct */
+					for (Declaration dec : struct.typedef.fields) 
+						/* 
+						 * Add the struct fields to the current scope, so that the select expresssion
+						 * from the array select can be checked and finds the field its selecting from.
+						 * The fields are added without checking for duplicates. This is not a big problem,
+						 * since the same scope is instantly popped afterwards.
+						 */
+						this.scopes.peek().addDeclaration(dec, false);
+					
+					ArraySelect arr = (ArraySelect) selection;
+					type = arr.check(this);
+					
+					this.scopes.pop();
+					
+					break;
+				}
+				else {
+					throw new CTX_EXCEPTION(selection.getSource(), selection.getClass().getName() + " cannot be a selector");
+				}
+				
+				selectStack.push(new Pair<STRUCT, List<TYPE>>(struct, struct.proviso));
+			}
+			else {
+				throw new CTX_EXCEPTION(e.getSource(), "Cannot select from non struct, actual " + type.typeString());
+			}
+			
+		}
+		
+		e.setType(type.clone());
+		return e.getType();
+	}
+	
+	private TYPE findField(STRUCT struct, IDRef ref0) throws CTX_EXCEPTION {
+		/* The ID the current selection targets */
+		if (struct.hasField(ref0.id)) {
+			/* Link manually, identifier is not part of current scope */
+			ref0.origin = struct.getField(ref0.id);
+			ref0.setType(ref0.origin.getType());
+			
+			/* Next type in chain */
+			return ref0.getType();
+		}
+		else {
+			throw new CTX_EXCEPTION(ref0.getSource(), "The selected field " + ref0.id + " in the structure " + struct.typeString() + " does not exist");
+		}
 	}
 	
 	public TYPE checkWhileStatement(WhileStatement w) throws CTX_EXCEPTION {
@@ -219,19 +485,16 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
+		d.setType(ProvisoManager.setHiddenContext(d.getRawType()));
+		
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
-			if (d.type instanceof POINTER) {
-				POINTER p = (POINTER) d.type;
-				if (!t.getCoreType().isEqual(p.getCoreType())) {
-					throw new CTX_EXCEPTION(d.getSource(), "Pointer type does not match declaration type: " + t.typeString() + " vs. " + p.getCoreType().typeString());
+			if (!d.getType().isEqual(t)) {
+				if (t instanceof POINTER || d.getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
 				}
-			}
-			else {
-				if (!t.isEqual(d.type)) {
-					throw new CTX_EXCEPTION(d.getSource(), "Variable type does not match expression type: " + d.type.typeString() + " vs. " + t.typeString());
-				}
+				throw new CTX_EXCEPTION(d.getSource(), "Expression type does not match the declaration type: " + t.typeString() + " vs " + d.getType().typeString());
 			}
 		}
 		
@@ -244,6 +507,8 @@ public class ContextChecker {
 	public TYPE checkAssignment(Assignment a) throws CTX_EXCEPTION {
 		TYPE targetType = a.lhsId.check(this);
 		
+		if (a.lhsId instanceof PointerLhsId) targetType = new POINTER(targetType);
+		
 		String fieldName = a.lhsId.getFieldName();
 		
 		Declaration dec = scopes.peek().getField(fieldName);
@@ -251,21 +516,34 @@ public class ContextChecker {
 		
 		TYPE t = a.value.check(this);
 		
+		TYPE ctype = t;
+		
 		/* If target type is a pointer, only the core types have to match */
-		if (targetType instanceof POINTER) {
-			POINTER p = (POINTER) targetType;
-			
-			if (!p.getCoreType().isEqual(t.getCoreType())) {
-				throw new CTX_EXCEPTION(a.getSource(), "Pointer type does not match expression type: " + p.getCoreType().typeString() + " vs. " + t.getCoreType().typeString());
+		if (!targetType.isEqual(t)) {
+			if (targetType instanceof POINTER || t instanceof POINTER) {
+				CompilerDriver.printProvisoTypes = true;
 			}
+			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
-		/* If not, the types have to be equal */
-		else if (!t.isEqual(targetType)) {
-			throw new CTX_EXCEPTION(a.getSource(), "Variable type does not match expression type: " + dec.type.typeString() + " vs. " + t.typeString());
+		
+		if (a.assignArith != ASSIGN_ARITH.NONE) {
+			if (!(t instanceof PRIMITIVE)) {
+				throw new CTX_EXCEPTION(a.getSource(), "Assign arith operation is only applicable for primitive types");
+			}
+			
+			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.XOR_ASSIGN) {
+				if (!(ctype instanceof BOOL)) {
+					throw new CTX_EXCEPTION(a.getSource(), "Expression type " + t.typeString() + " is not applicable for boolean assign operator");
+				}
+			}
+			else if (a.assignArith != ASSIGN_ARITH.NONE) {
+				if (!(ctype instanceof INT)) {
+					throw new CTX_EXCEPTION(a.getSource(), "Expression type " + t.typeString() + " is not applicable for assign operator");
+				}
+			}
 		}
 		
 		a.lhsId.expressionType = t;
-				
 		return null;
 	}
 	
@@ -313,8 +591,8 @@ public class ContextChecker {
 	public TYPE checkCaseStatement(CaseStatement c) throws CTX_EXCEPTION {
 		TYPE type = c.condition.check(this);
 		
-		if (!type.isEqual(c.superStatement.condition.type)) {
-			throw new CTX_EXCEPTION(c.condition.getSource(), "Condition type " + type.typeString() + " does not switch condition type " + c.superStatement.condition.type.typeString());
+		if (!type.isEqual(c.superStatement.condition.getType())) {
+			throw new CTX_EXCEPTION(c.condition.getSource(), "Condition type " + type.typeString() + " does not switch condition type " + c.superStatement.condition.getType().typeString());
 		}
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
@@ -343,21 +621,17 @@ public class ContextChecker {
 	public TYPE checkReturn(ReturnStatement r) throws CTX_EXCEPTION {
 		if (r.value != null) {
 			TYPE t = r.value.check(this);
-			
-			if (!t.isEqual(currentFunction.returnType)) {
-				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + t.typeString() + " vs " + currentFunction.returnType.typeString());
-			}
-			
-			if (t.isEqual(this.currentFunction.returnType)) {
+
+			if (t.isEqual(this.currentFunction.peek().getReturnType())) {
 				return t;
 			}
 			else {
-				throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.returnType.typeString());
+				throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.peek().getReturnType().typeString());
 			}
 		}
 		else {
-			if (!(currentFunction.returnType instanceof VOID)) {
-				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.returnType.typeString());
+			if (!(currentFunction.peek().getReturnType() instanceof VOID)) {
+				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.peek().getReturnType().typeString());
 			}
 			
 			return new VOID();
@@ -370,18 +644,18 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Ternary condition has to be of type BOOL, actual " + type.typeString());
 		}
 		
-		if (t.condition instanceof StructureInit) {
+		if (t.condition instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		TYPE t0 = t.leftOperand.check(this);
 		TYPE t1 = t.rightOperand.check(this);
 		
-		if (t.leftOperand instanceof StructureInit) {
+		if (t.leftOperand instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (t.rightOperand instanceof StructureInit) {
+		if (t.rightOperand instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(t.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
@@ -389,52 +663,52 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(t.condition.getSource(), "Both results of ternary operation have to be of the same type, " + t0.typeString() + " vs " + t1.typeString());
 		}
 		
-		t.type = t0;
-		return t.type;
+		t.setType(t0);
+		return t.getType();
 	}
 	
 	public TYPE checkBinaryExpression(BinaryExpression b) throws CTX_EXCEPTION {
-		TYPE left = b.left().check(this);
-		TYPE right = b.right().check(this);
+		TYPE left = b.getLeft().check(this);
+		TYPE right = b.getRight().check(this);
 		
-		if (b.leftOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (b.left instanceof ArrayInit) {
+			throw new CTX_EXCEPTION(b.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (b.rightOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (b.right instanceof ArrayInit) {
+			throw new CTX_EXCEPTION(b.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (left.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
 		}
 		
 		if (right.wordsize() > 1) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Can only apply to primitive or pointer, actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Can only apply to primitive or pointer, actual " + right.typeString());
 		}
 		
 		if (left instanceof POINTER) {
-			if (!(right instanceof INT)) {
+			if (!(right.getCoreType() instanceof INT)) {
 				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.typeString());
 			}
 			
-			b.type = left;
+			b.setType(left);
 		}
 		else if (right instanceof POINTER) {
-			if (!(left instanceof INT)) {
+			if (!(left.getCoreType() instanceof INT)) {
 				throw new CTX_EXCEPTION(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + left.typeString());
 			}
 			
-			b.type = left;
+			b.setType(left);
 		}
 		else if (left.isEqual(right)) {
-			b.type = left;
+			b.setType(left);
 		}
 		else {
 			throw new CTX_EXCEPTION(b.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
 		}
 	
-		return b.type;
+		return b.getType();
 	}
 	
 	/**
@@ -443,19 +717,19 @@ public class ContextChecker {
 	 * - Both operand types have to be of type BOOL<br>
 	 */
 	public TYPE checkBoolBinaryExpression(BoolBinaryExpression b) throws CTX_EXCEPTION {
-		TYPE left = b.left().check(this);
-		TYPE right = b.right().check(this);
+		TYPE left = b.getLeft().check(this);
+		TYPE right = b.getRight().check(this);
 		
 		if (!(left instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.leftOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.typeString());
+			throw new CTX_EXCEPTION(b.left.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.typeString());
 		}
 		
 		if (!(right instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.rightOperand.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.typeString());
+			throw new CTX_EXCEPTION(b.right.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.typeString());
 		}
 		
-		b.type = left;
-		return b.type;
+		b.setType(left);
+		return b.getType();
 	}
 	
 	/**
@@ -464,30 +738,30 @@ public class ContextChecker {
 	 * - Operand type has to be of type BOOL<br>
 	 */
 	public TYPE checkBoolUnaryExpression(BoolUnaryExpression b) throws CTX_EXCEPTION {
-		TYPE t = b.operand().check(this);
+		TYPE t = b.getOperand().check(this);
 		
 		if (!(t instanceof BOOL)) {
-			throw new CTX_EXCEPTION(b.operand.getSource(), "Expected bool, actual " + t.typeString());
+			throw new CTX_EXCEPTION(b.getOperand().getSource(), "Expected bool, actual " + t.typeString());
 		}
 		
-		b.type = t;
-		return b.type;
+		b.setType(t);
+		return b.getType();
 	}
 	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
-		TYPE op = u.operand().check(this);
+		TYPE op = u.getOperand().check(this);
 		
-		if (u.operand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(u.operand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (u.getOperand() instanceof ArrayInit) {
+			throw new CTX_EXCEPTION(u.getOperand().getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (u instanceof BitNot && op instanceof PRIMITIVE) {
-			u.type = op;
-			return u.type;
+			u.setType(op);
+			return u.getType();
 		}
 		else if (u instanceof UnaryMinus && op instanceof PRIMITIVE) {
-			u.type = op;
-			return u.type;
+			u.setType(op);
+			return u.getType();
 		}
 		else {
 			throw new CTX_EXCEPTION(u.getSource(), "Unknown Expression: " + u.getClass().getName());
@@ -495,20 +769,20 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkCompare(Compare c) throws CTX_EXCEPTION {
-		TYPE left = c.left().check(this);
-		TYPE right = c.right().check(this);
+		TYPE left = c.getLeft().check(this);
+		TYPE right = c.getRight().check(this);
 		
-		if (c.leftOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(c.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (c.left instanceof ArrayInit) {
+			throw new CTX_EXCEPTION(c.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
-		if (c.rightOperand instanceof StructureInit) {
-			throw new CTX_EXCEPTION(c.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+		if (c.right instanceof ArrayInit) {
+			throw new CTX_EXCEPTION(c.right.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
 		
 		if (left.isEqual(right)) {
-			c.type = new BOOL();
-			return c.type;
+			c.setType(new BOOL());
+			return c.getType();
 		}
 		else {
 			throw new CTX_EXCEPTION(c.getSource(), "Operand types do not match: " + left.typeString() + " vs. " + right.typeString());
@@ -516,6 +790,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		/* Find the called function */
 		Function f = null;
 		for (Function f0 : this.functions) {
 			if (f0.functionName.equals(i.functionName)) {
@@ -531,24 +806,53 @@ public class ContextChecker {
 			i.calledFunction = f;
 		}
 		
+		if (!f.manager.provisosTypes.isEmpty()) {
+			if (f.manager.containsMapping(i.proviso)) {
+				/* Mapping already exists, just return return type of this specific mapping */
+				f.setContext(i.proviso);
+				i.setType(f.manager.getMappingReturnType(i.proviso));
+			}
+			else {
+				/* Create a new context, check function for this specific context */
+				f.setContext(i.proviso);
+				
+				this.scopes.push(new Scope(this.scopes.get(0)));
+				f.check(this);
+				this.scopes.pop();
+				i.setType(f.manager.getMappingReturnType(i.proviso));
+			}
+		}
+		
 		if (i.parameters.size() != f.parameters.size()) {
 			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
-			if (i.parameters.get(a) instanceof StructureInit) {
+			if (i.parameters.get(a) instanceof ArrayInit) {
 				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
 			}
 			
 			TYPE paramType = i.parameters.get(a).check(this);
 			
-			if (!paramType.isEqual(f.parameters.get(a).type)) {
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
+			TYPE functionParamType = f.parameters.get(a).getType();
+			
+			if (!paramType.isEqual(functionParamType)) {
+				if (paramType instanceof POINTER || functionParamType instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
 			}
 		}
 		
-		i.type = f.returnType;
-		return i.type;
+		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) {
+			i.setType(f.getReturnType().clone());
+		}
+		
+		if (i.getType() instanceof VOID) {
+			throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
+		}
+		
+		return i.getType();
 	}
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
@@ -566,6 +870,20 @@ public class ContextChecker {
 		else {
 			i.calledFunction = f;
 		}
+
+		if (!f.manager.provisosTypes.isEmpty()) {
+			if (!f.manager.containsMapping(i.proviso)) {
+				/* Create new scope that points to the global scope */
+				f.setContext(i.proviso);
+				this.scopes.push(new Scope(this.scopes.get(0)));
+				
+				f.check(this);
+				this.scopes.pop();
+			}
+			else {
+				f.setContext(i.proviso);
+			}
+		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
 			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
@@ -573,9 +891,11 @@ public class ContextChecker {
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
 			TYPE paramType = i.parameters.get(a).check(this);
-			
-			if (!paramType.isEqual(f.parameters.get(a).type)) {
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Missmatching argument type: " + paramType.typeString() + " vs " + f.parameters.get(a).type.typeString());
+			if (!paramType.isEqual(f.parameters.get(a).getType())) {
+				if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
+					CompilerDriver.printProvisoTypes = true;
+				}
+				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 			}
 		}
 		
@@ -589,17 +909,18 @@ public class ContextChecker {
 	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
 		Declaration d = this.scopes.peek().getField(i.id);
+		
 		if (d != null) {
 			i.origin = d;
-			i.type = d.type;
-			return i.type;
+			i.setType(d.getType());
+			return i.getType();
 		}
 		else {
 			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.id);
 		}
 	}
 	
-	public TYPE checkStructureInit(StructureInit init) throws CTX_EXCEPTION {
+	public TYPE checkArrayInit(ArrayInit init) throws CTX_EXCEPTION {
 		if (init.elements.isEmpty()) {
 			throw new CTX_EXCEPTION(init.getSource(), "Structure init must have at least one element");
 		}
@@ -614,20 +935,32 @@ public class ContextChecker {
 			}
 		}
 		
-		init.type = new ARRAY(type0, init.elements.size());
-		return init.type;
+		init.setType(new ARRAY(type0, init.elements.size()));
+		return init.getType();
+	}
+	
+	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXCEPTION {
+		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType);
+		sot.setType(new INT());
+		return sot.getType();
+	}
+	
+	public TYPE checkSizeOfExpression(SizeOfExpression soe) throws CTX_EXCEPTION {
+		soe.sizeType = soe.expression.check(this);
+		soe.setType(new INT());
+		return soe.getType();
 	}
 	
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ElementSelect)) {
+		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ArraySelect)) {
 			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or element select.");
 		}
 		
-		aof.type = new POINTER(t.getCoreType());
+		aof.setType(new POINTER(t.getCoreType()));
 		
-		return aof.type;
+		return aof.getType();
 	}
 	
 	/**
@@ -640,11 +973,11 @@ public class ContextChecker {
 		/* Dereference pointer or primitive type */
 		if (t instanceof PRIMITIVE) {
 			/* Set to core type */
-			deref.type = t.getCoreType();
+			deref.setType(t.getCoreType());
 		}
 		else if (t instanceof POINTER) {
 			POINTER p = (POINTER) t;
-			deref.type = p.targetType;
+			deref.setType(p.targetType);
 		}
 		else {
 			throw new CTX_EXCEPTION(deref.expression.getSource(), "Cannot dereference type " + t.typeString());
@@ -655,7 +988,53 @@ public class ContextChecker {
 			if (!CompilerDriver.disableWarnings) new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN);
 		}
 		
-		return deref.type;
+		return deref.getType();
+	}
+	
+	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXCEPTION {
+		tc.castType = ProvisoManager.setHiddenContext(tc.castType);
+		
+		TYPE t = tc.expression.check(this);
+		
+		if (t.wordsize() != tc.castType.wordsize()) {
+			throw new CTX_EXCEPTION(tc.getSource(), "Cannot cast " + t.typeString() + " to " + tc.castType.typeString());
+		}
+		
+		tc.setType(tc.castType);
+		return tc.castType;
+	}
+	
+	public TYPE checkIDRefWriteback(IDRefWriteback i) throws CTX_EXCEPTION {
+		if (i.getShadowRef() instanceof IDRef) {
+			IDRef ref = (IDRef) i.getShadowRef();
+			i.idRef = ref;
+			
+			TYPE t = ref.check(this);
+			
+			if (!(t instanceof PRIMITIVE)) {
+				throw new CTX_EXCEPTION(i.idRef.getSource(), "Can only be applied to primitive types");
+			}
+			
+			i.setType(t);
+		}
+		else {
+			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
+		}
+		
+		return i.getType();
+	}
+	
+	public TYPE checkAssignWriteback(AssignWriteback i) throws CTX_EXCEPTION {
+		if (i.getShadowRef() instanceof IDRefWriteback) {
+			IDRefWriteback wb = (IDRefWriteback) i.getShadowRef();
+			wb.check(this);
+			i.idWb = wb;
+		}
+		else {
+			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -665,7 +1044,7 @@ public class ContextChecker {
 	 * - Checks that the types of the selection are of type int<br>
 	 * - Amount of selections does not exceed structure dimension<br>
 	 */
-	public TYPE checkElementSelect(ElementSelect select) throws CTX_EXCEPTION {
+	public TYPE checkArraySelect(ArraySelect select) throws CTX_EXCEPTION {
 		if (select.selection.isEmpty()) {
 			throw new CTX_EXCEPTION(select.getSource(), "Element select must have at least one element (how did we even get here?)");
 		}
@@ -694,7 +1073,7 @@ public class ContextChecker {
 						
 						if (select.selection.get(i) instanceof Atom) {
 							Atom a = (Atom) select.selection.get(i);
-							int value = (int) a.type.getValue();
+							int value = (int) a.getType().getValue();
 							if (value < 0 || value >= arr.getLength()) {
 								throw new CTX_EXCEPTION(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + chain.typeString());
 							}
@@ -707,8 +1086,8 @@ public class ContextChecker {
 			
 			if (type0 instanceof POINTER) chain = new POINTER(chain);
 			
-			select.type = chain;
-			return select.type;
+			select.setType(chain);
+			return select.getType();
 		}
 		else {
 			throw new CTX_EXCEPTION(select.getShadowRef().getSource(), "Can only select from variable reference");
@@ -716,7 +1095,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkAtom(Atom a) throws CTX_EXCEPTION {
-		return a.type;
+		return a.getType();
 	}
 	
 }

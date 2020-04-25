@@ -10,3 +10,26 @@ TESTCASES
 3 5 5
 1 2 3
 0 0 0
+OUTPUT
+/* --test_01.txt */
+main:                         /* Function: main */
+    push { r3, r4, r5, r6 }
+    mov r3, r0
+    mov r4, r1
+    cmp r3, #2
+    bne .L1
+    mov r0, r3                /* Evaluate Expression */
+    b .L4
+.L1: 
+    mov r5, r0
+    cmp r4, #5
+    bne .L3
+    mov r0, r4                /* Evaluate Expression */
+    b .L4
+.L3: 
+    mov r6, r0                /* Evaluate Expression */
+    add r0, r3, r4
+.L4: 
+    pop { r3, r4, r5, r6 }
+    bx lr
+    

@@ -14,16 +14,23 @@ import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.ElementSelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
@@ -36,6 +43,7 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
+import Imm.AsN.AsNNode;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -58,28 +66,31 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * @param s The CapsuledStatement containing the Statements.
 	 * @param r The current RegSet
 	 */
-	protected void popDeclarationScope(CompoundStatement s, RegSet r, StackSet st) {
-		List<Declaration> declarations = new ArrayList(); 
-		
-		/* Collect declarations from statements, ignore sub-compounds, they will do the same */
-		for (Statement s0 : s.body) {
-			if (s0 instanceof Declaration) {
-				declarations.add((Declaration) s0);
+	public static void popDeclarationScope(AsNNode node, CompoundStatement s, RegSet r, StackSet st, boolean close) {
+		if (close) {
+			List<Declaration> declarations = new ArrayList(); 
+			
+			/* Collect declarations from statements, ignore sub-compounds, they will do the same */
+			for (Statement s0 : s.body) {
+				if (s0 instanceof Declaration) {
+					declarations.add((Declaration) s0);
+				}
 			}
-		}
-		
-		/* Delete declaration out of the registers */
-		for (Declaration d : declarations) {
-			if (r.declarationLoaded(d)) {
-				int loc = r.declarationRegLocation(d);
-				r.getReg(loc).free();
+			
+			/* Delete declaration out of the registers */
+			for (Declaration d : declarations) {
+				if (r.declarationLoaded(d)) {
+					int loc = r.declarationRegLocation(d);
+					r.getReg(loc).free();
+				}
 			}
 		}
 		
 		/* Set the stack pointer to the new stack size */
-		int add = st.closeScope();
+		int add = st.closeScope(s, close);
+		
 		if (add != 0) {
-			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
+			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
 		}
 	}
 	
@@ -88,7 +99,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 */
 	protected void addBody(CompoundStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Open a new Scope in the stack */
-		st.openScope();
+		st.openScope(a);
 		
 		/* Body */
 		for (int i = 0; i < a.body.size(); i++) {
@@ -97,7 +108,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		
 		/* Free all declarations in scope */
-		this.popDeclarationScope(a, r, st);
+		popDeclarationScope(this, a, r, st, true);
 	}
 	
 	public void loadStatement(CompoundStatement a, Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
@@ -164,6 +175,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			hasRef |= this.hasAddressReference(sw.defaultStatement, dec);
 			return hasRef;
 		}
+		else if (s instanceof AssignWriteback) {
+			AssignWriteback awb = (AssignWriteback) s;
+			return this.hasAddressReference(awb.getShadowRef(), dec);
+		}
 		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
 			return false;
 		}
@@ -173,11 +188,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXCEPTION {
 		if (e instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) e;
-			return this.hasAddressReference(b.leftOperand, dec) || this.hasAddressReference(b.rightOperand, dec);
+			return this.hasAddressReference(b.left, dec) || this.hasAddressReference(b.right, dec);
 		}
 		else if (e instanceof UnaryExpression) {
 			UnaryExpression u = (UnaryExpression) e;
-			return this.hasAddressReference(u.operand, dec);
+			return this.hasAddressReference(u.getOperand(), dec);
 		}
 		else if (e instanceof InlineCall) {
 			boolean hasRef = false;
@@ -190,17 +205,17 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (e instanceof Deref) {
 			return this.hasAddressReference(((Deref) e).expression, dec);
 		}
-		else if (e instanceof StructureInit) {
+		else if (e instanceof ArrayInit) {
 			boolean hasRef = false;
-			StructureInit init = (StructureInit) e;
+			ArrayInit init = (ArrayInit) e;
 			for (Expression e0 : init.elements) {
 				hasRef |= this.hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
-		else if (e instanceof ElementSelect) {
+		else if (e instanceof ArraySelect) {
 			boolean hasRef = false;
-			ElementSelect sel = (ElementSelect) e;
+			ArraySelect sel = (ArraySelect) e;
 			for (Expression e0 : sel.selection) {
 				hasRef |= this.hasAddressReference(e0, dec);
 			}
@@ -216,10 +231,35 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (e instanceof AddressOf) {
 			AddressOf aof = (AddressOf) e;
-			if (((IDRef) aof.expression).origin.equals(dec)) return true;
-			else return false;
+			if (aof.expression instanceof IDRef) {
+				if (((IDRef) aof.expression).origin.equals(dec)) return true;
+			}
+			else {
+				if (((ArraySelect) aof.expression).idRef.origin.equals(dec)) return true;
+			}
+			return false;
 		}
-		else if (e instanceof IDRef || e instanceof Atom) {
+		else if (e instanceof IDRefWriteback) {
+			IDRefWriteback id = (IDRefWriteback) e;
+			return this.hasAddressReference(id.getShadowRef(), dec);
+		}
+		else if (e instanceof SizeOfExpression) {
+			SizeOfExpression soe = (SizeOfExpression) e;
+			return this.hasAddressReference(soe.expression, dec);
+		}
+		else if (e instanceof TypeCast) {
+			TypeCast tc = (TypeCast) e;
+			return this.hasAddressReference(tc.expression, dec);
+		}
+		else if (e instanceof StructureInit) {
+			StructureInit s = (StructureInit) e;
+			boolean ref = false;
+			for (Expression e0 : s.elements) {
+				ref |= this.hasAddressReference(e0, dec);
+			}
+			return ref;
+		}
+		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());

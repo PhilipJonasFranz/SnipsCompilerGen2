@@ -15,3 +15,43 @@ int main(int a, int b, int c, int d) {
 TESTCASES
 0 0 0 0 0 28
 1 2 3 4 48
+OUTPUT
+/* --test_07.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    add r6, r3, #0
+    add r7, r3, #1
+    add r8, r4, #2
+    add r9, r4, #3
+    add r10, r5, #4
+    add r0, r5, #5
+    push { r0 }
+    ldr r1, [fp, #40]         /* Evaluate Expression */
+    add r0, r1, #6
+    push { r0 }
+    ldr r1, [fp, #40]         /* Evaluate Expression */
+    add r0, r1, #7
+    push { r0 }
+    add r1, r6, r7
+    add r1, r1, r8
+    add r1, r1, r9
+    add r1, r1, r10
+    ldr r2, [fp, #-4]
+    add r1, r1, r2
+    ldr r2, [fp, #-8]
+    add r1, r1, r2
+    ldr r2, [fp, #-12]
+    add r0, r1, r2
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

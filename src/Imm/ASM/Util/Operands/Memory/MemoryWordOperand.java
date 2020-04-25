@@ -2,7 +2,7 @@ package Imm.ASM.Util.Operands.Memory;
 
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Snips.CompilerDriver;
 
@@ -24,21 +24,21 @@ public class MemoryWordOperand extends MemoryOperand {
 		String s = "";
 		if (val instanceof Atom) {
 			Atom atom = (Atom) val;
-			s += ".word " + atom.type.sourceCodeRepresentation();
+			s += ".word " + atom.getType().sourceCodeRepresentation();
 		}
 		else {
-			StructureInit init = (StructureInit) val;
+			ArrayInit init = (ArrayInit) val;
 			for (int i = 0; i < init.elements.size(); i++) {
-				if (init.elements.get(i) instanceof StructureInit) {
-					s += toString((StructureInit) init.elements.get(i));
+				if (init.elements.get(i) instanceof ArrayInit) {
+					s += toString((ArrayInit) init.elements.get(i));
 				}
 				else {
 					String v = null;
 					if (init.elements.get(i) instanceof UnaryMinus) {
 						UnaryMinus minus = (UnaryMinus) init.elements.get(i);
-						v = "-" + ((Atom) minus.operand).type.sourceCodeRepresentation();
+						v = "-" + ((Atom) minus.getOperand()).getType().sourceCodeRepresentation();
 					}
-					else v = ((Atom) init.elements.get(i)).type.sourceCodeRepresentation();
+					else v = ((Atom) init.elements.get(i)).getType().sourceCodeRepresentation();
 					s += CompilerDriver.printDepth + CompilerDriver.printDepth + ".word " + v + "\n";
 				}
 			}

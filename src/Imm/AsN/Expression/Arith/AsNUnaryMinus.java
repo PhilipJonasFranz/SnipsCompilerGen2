@@ -22,7 +22,7 @@ public class AsNUnaryMinus extends AsNUnaryExpression {
 		minus.clearReg(r, st, 0);
 		
 		/* Load Operand */
-		minus.instructions.addAll(AsNExpression.cast(m.operand(), r, map, st).getInstructions());
+		minus.instructions.addAll(AsNExpression.cast(m.getOperand(), r, map, st).getInstructions());
 	
 		/* 0 - Operand */
 		minus.instructions.add(new ASMRsb(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(0)));

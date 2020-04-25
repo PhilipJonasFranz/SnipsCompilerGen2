@@ -44,9 +44,9 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
-		INCLUDE("include"),
 		BACKSL("\\"),
 		USCORE("_"),
+		STRUCT("struct"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),
@@ -57,8 +57,9 @@ public class Token {
 		RBRACKET("]"),
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
+		UNION_ACCESS("->"),
 		
-		/* Statements */
+		/* Keywords */
 		IF("if"),
 		ELSE("else"),
 		WHILE("while"),
@@ -69,8 +70,8 @@ public class Token {
 		SWITCH("switch"),
 		CASE("case"),
 		DEFAULT("default"),
-		
-		/* Functions */
+		INCLUDE("include"),
+		SIZEOF("sizeof"),
 		RETURN("return"),
 		
 		DOT("."),
@@ -86,6 +87,8 @@ public class Token {
 		MUL("*"),
 		DIV("/"),
 		MOD("%"),
+		INCR("++"),
+		DECR("--"),
 		
 		/* Logic Operators */
 		OR("||"),
@@ -104,14 +107,12 @@ public class Token {
 		CMPGE(">=", 				TokenGroup.COMPARE),
 		CMPGT(">", 					TokenGroup.COMPARE),
 		
-		/* Shift Operators */
-		LSL("<<"),
-		LSR(">>"),
-		
 		/* Types */
 		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
+		PROVISO("",					TokenGroup.TYPE), 
+		STRUCTID("", 				TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
 		/* Primitive Literals */
@@ -128,7 +129,7 @@ public class Token {
 		
 		final String spelling;
 		
-		final TokenGroup group;
+		TokenGroup group;
 		
 		private TokenType(String spelling, TokenGroup tokenGroup) {
 			this.spelling = spelling;

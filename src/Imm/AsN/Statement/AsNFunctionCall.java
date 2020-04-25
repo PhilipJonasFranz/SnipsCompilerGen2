@@ -6,6 +6,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -24,6 +25,7 @@ import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.TYPE;
 import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
@@ -33,18 +35,24 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, null, fc.proviso, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, Function caller, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		call.clearReg(r, st, 0, 1, 2);
 		
-		/* Load Mapping */
+		try {
+			f.setContext(provisos);
+		} catch (CTX_EXCEPTION e) {
+			e.printStackTrace();
+		}
+		
+		/* Reload mapping for context */
 		List<Pair<Declaration, Integer>> mapping = 
-			((AsNFunction) f.castedNode).parameterMapping;
+			((AsNFunction) f.castedNode).getParameterMapping();
 
 		int stackMapping = 0;
 		
@@ -54,7 +62,7 @@ public class AsNFunctionCall extends AsNStatement {
 			if (p.getSecond() == -1) {
 				stackMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
-				if (parameters.get(i).type.wordsize() == 1) {
+				if (parameters.get(i).getType().wordsize() == 1) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
 				r.getReg(0).free();
@@ -88,7 +96,10 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		/* Branch to function */
-		ASMLabel functionLabel = (ASMLabel) f.castedNode.instructions.get(0);
+		String target = f.functionName + f.manager.getPostfix(provisos);
+		
+		ASMLabel functionLabel = new ASMLabel(target);
+		
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
 		branch.comment = new ASMComment("Call " + f.functionName);
 		call.instructions.add(branch);
@@ -98,7 +109,7 @@ public class AsNFunctionCall extends AsNStatement {
 			int size = 0;
 			for (Pair<Declaration, Integer> p  : mapping) {
 				if (p.getSecond() == -1) {
-					size += p.getFirst().type.wordsize();
+					size += p.getFirst().getType().wordsize();
 				}
 			}
 			

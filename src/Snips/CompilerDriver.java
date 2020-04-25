@@ -1,9 +1,11 @@
 package Snips;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,27 +18,35 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Directive.Directive;
 import Imm.AST.Directive.IncludeDirective;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
+import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
+import Par.Token;
+import Par.Token.TokenType;
+import PreP.PreProcessor;
+import PreP.PreProcessor.LineObject;
+import Util.Source;
+import Util.Util;
+import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class CompilerDriver {
 
+			/* --- STATIC FIELDS --- */
 	/* The Input File */
 	public static File file;
 	
 	public static String [] logo = {
-			"	 _______  __    _  ___  _______  _______   ",
-			"	|       ||  \\  | ||   ||       ||       | ",
-			"	|  _____||   \\_| ||   ||    _  ||  _____| ",
-			"	| |_____ |       ||   ||   |_| || |_____   ",
-			"	|_____  ||  _    ||   ||    ___||_____  |  ",
-			"	 _____| || | \\   ||   ||   |     _____| | ",
-			"	|_______||_|  \\__||___||___|    |_______| ",
-			"    		                            Gen.2  "};
+		"	  _______  __    _  ___  _______  _______",
+		"	 |       ||  \\  | ||   ||       ||       |",
+		"	 |  _____||   \\_| ||   ||    _  ||  _____|",
+		"	 | |_____ |       ||   ||   |_| || |_____",
+		"	 |_____  ||  _    ||   ||    ___||_____  |",
+		"	  _____| || | \\   ||   ||   |     _____| |",
+		"	 |_______||_|  \\__||___||___|    |_______|"};
 	
 	public static List<Message> log = new ArrayList();
 	
@@ -47,14 +57,21 @@ public class CompilerDriver {
 		silenced = true,
 		imm = false,
 		enableComments = true,
+		disableOptimizer = false,
 		disableWarnings = false;
 			
+	/* Debug */
+	public static boolean
+		printProvisoTypes = false,
+		includeProvisoInTypeString = false,
+		printObjectIDs = false;
+	
 	public static String outputPath;
 	
 	public static boolean printErrors = false;
 	
 	public static String printDepth = "    ";
-	public static int commentDistance = 25;
+	public static int commentDistance = 30;
 	
 	public static List<Double> compressions = new ArrayList();
 	
@@ -62,6 +79,20 @@ public class CompilerDriver {
 	
 	public static CompilerDriver driver;
 	
+	public static XMLNode sys_config;
+	
+	/* Reserved Declarations */
+	public static Source nullSource = new Source("Default", 0, 0);
+	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
+	public static boolean heap_referenced = false;
+	public static Declaration HEAP_START = new Declaration(
+													new Token(TokenType.IDENTIFIER, nullSource, "HEAP_START"), 
+													new INT(), 
+													zero_atom, 
+													nullSource);
+	
+	
+			/* --- MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
@@ -90,17 +121,54 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
-		List<String> code = Util.Util.readFile(file);
+		List<String> code = Util.readFile(file);
 		
 		/* Perform compilation */
 		scd.compile(file, code);
 	}
 	
 	
+			/* --- FIELDS --- */
 	public List<String> referencedLibaries = new ArrayList();
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public CompilerDriver(String [] args) {
+		this.readConfig();
 		this.readArgs(args);
+	}
+	
+	public CompilerDriver() {
+		this.readConfig();
+	}
+	
+	
+			/* --- METHODS --- */
+	public void readConfig() {
+		/* Read Configuration */
+		List<String> conf = Util.readFile(new File("src\\Snips\\sys-inf.xml"));
+		if (conf == null) conf = readFromJar("sys-inf.xml");
+		
+		sys_config  = new XMLNode(conf);
+	}
+	
+	public List<String> readFromJar(String path) {
+		List<String> lines = new ArrayList();
+	    
+		try {
+			InputStream is = CompilerDriver.class.getResourceAsStream(path);
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		    String line;
+		    while ((line = br.readLine()) != null)  {
+		    	lines.add(line);
+		    }
+		    br.close();
+		    is.close();
+		} catch (Exception e) {
+			return null;
+		}
+	    
+	    return lines;
 	}
 	
 	public List<String> compile(File file, List<String> code) {
@@ -125,11 +193,15 @@ public class CompilerDriver {
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
+					/* --- PRE-PROCESSING --- */
+			PreProcessor preProcess = new PreProcessor(code, file.getName());
+			List<LineObject> preCode = preProcess.getProcessed();
+			
 			
 					/* --- SCANNING --- */
 			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
-			Scanner scanner = new Scanner(code);
-			Deque deque = scanner.scan();
+			Scanner scanner = new Scanner(preCode);
+			List<Token> deque = scanner.scan();
 			
 			
 					/* --- PARSING --- */
@@ -142,7 +214,7 @@ public class CompilerDriver {
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
 			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
-				List<SyntaxElement> dependencies = this.addDependencies(p);
+				List<SyntaxElement> dependencies = this.addDependencies(p.directives, p.fileName);
 				
 				/* An error occured during importing, probably loop in dependencies */
 				if (dependencies == null) {
@@ -184,14 +256,17 @@ public class CompilerDriver {
 		
 			
 					/* --- OPTIMIZING --- */
-			double before = body.getInstructions().size();
-			log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
-			ASMOptimizer opt = new ASMOptimizer();
-			opt.optimize(body);
+			if (!disableOptimizer) {
+				double before = body.getInstructions().size();
+				log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
+				
+				ASMOptimizer opt = new ASMOptimizer();
+				opt.optimize(body);
 			
-			double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-			CompilerDriver.compressions.add(rate);
-			log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
+				CompilerDriver.compressions.add(rate);
+				log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+			}
 			
 			
 					/* --- OUTPUT BUILDING --- */
@@ -225,7 +300,7 @@ public class CompilerDriver {
 		log.clear();
 		
 		if (outputPath != null && output != null) {
-			Util.Util.writeInFile(output, outputPath);
+			Util.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, Message.Type.INFO));
 		}
 		
@@ -236,24 +311,43 @@ public class CompilerDriver {
 	 * Used to hot compile referenced libaries.
 	 * @param files The libary files to compile
 	 * @return A list of ASTs containing the contents of the files as AST.
+	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> hotCompile(List<String> files) {
+	public List<SyntaxElement> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
+			for (XMLNode c : sys_config.getNode("Library").children) {
+				String [] v = c.value.split(":");
+				if (v [0].equals(filePath)) {
+					filePath = v [1];
+				}
+			}
+			
 			File file = new File(filePath);
-			List<String> code = Util.Util.readFile(file);
+			
+			/* Read from file */
+			List<String> code = Util.readFile(file);
+			
+			/* Read from jar */
+			if (code == null) {
+				code = readFromJar(filePath);
+			}
+			
+			/* Libary was not found */
+			if (code == null) {
+				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
+			}
 			
 			SyntaxElement AST = null;
 			
 			try {
-				if (code == null) 
-					throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
+				PreProcessor preProcess = new PreProcessor(code, file.getName());
+				List<LineObject> lines = preProcess.getProcessed();
 				
-				
-						/* --- SCANNING --- */
-				Scanner scanner = new Scanner(code);
-				Deque deque = scanner.scan();
+					/* --- SCANNING --- */
+				Scanner scanner = new Scanner(lines);
+				List<Token> deque = scanner.scan();
 				
 				
 						/* --- PARSING --- */
@@ -263,7 +357,7 @@ public class CompilerDriver {
 				
 				
 						/* --- PROCESS IMPORTS --- */
-				List<SyntaxElement> dependencies = this.addDependencies((Program) AST);
+				List<SyntaxElement> dependencies = this.addDependencies(((Program) AST).directives, ((Program) AST).fileName);
 				
 				if (dependencies == null) return null;
 				else {
@@ -286,9 +380,9 @@ public class CompilerDriver {
 	/**
 	 * Import depencendies listed by include directives
 	 * @param importer The program that lists the include directives
+	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> addDependencies(Program importer) {
-		List<Directive> imports = importer.directives;
+	public List<SyntaxElement> addDependencies(List<Directive> imports, String fileName) throws SNIPS_EXCEPTION {
 		List<SyntaxElement> ASTs = new ArrayList();
 		
 		for (String s : this.referencedLibaries) {
@@ -304,7 +398,7 @@ public class CompilerDriver {
 				if (dir instanceof IncludeDirective) {
 					IncludeDirective inc = (IncludeDirective) dir;
 					
-					if (inc.file.equals(importer.fileName)) continue;
+					if (inc.file.equals(fileName)) continue;
 					for (int i = 0; i < ASTs.size(); i++) {
 						if (((Program) ASTs.get(i)).fileName.equals(inc.file)) {
 							continue;
@@ -351,18 +445,28 @@ public class CompilerDriver {
 		return (int) log.stream().filter(x -> x.messageType == type).count();
 	}
 	
-	public static void printLogo() {
+	public void printLogo() {
 		/* Print out all lines of the SNIPS logo */
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
 		for (String s : logo)System.out.println(s);
+		
+		String ver = "Gen.2 " + sys_config.getValue("Version");
+		int l = ver.length();
+		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
+		ver = "\t" + ver;
+		System.out.println(ver);
 		System.out.println();
 	}
 	
 	public void readArgs(String [] args) {
 		if (args [0].equals("-help")) {
 			printHelp();
+			System.exit(0);
+		}
+		else if (args [0].equals("-info")) {
+			printInfo();
 			System.exit(0);
 		}
 		
@@ -373,6 +477,7 @@ public class CompilerDriver {
 				if (args [i].equals("-viz"))useTerminalColors = false;
 				else if (args [i].equals("-imm"))imm = true;
 				else if (args [i].equals("-warn"))disableWarnings = true;
+				else if (args [i].equals("-opt"))disableOptimizer = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
@@ -392,13 +497,20 @@ public class CompilerDriver {
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
+		System.out.println(CompilerDriver.printDepth + "-info     : Print Version Compiler Version and information");
 		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
 		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
 		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
+		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
+	}
+	
+	public void printInfo() {
+		silenced = false;
+		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
 	}
 	
 	public void setBurstMode(boolean value, boolean imm) {
@@ -410,7 +522,8 @@ public class CompilerDriver {
 	public static void printAverageCompression() {
 		double [] rate = {0};
 		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
-		double r0 = Math.round(rate [0] * 100) / 100;
+		double r0 = rate [0];
+		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
 		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
 	}

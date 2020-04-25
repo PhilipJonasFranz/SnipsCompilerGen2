@@ -13,7 +13,9 @@ import Util.Source;
  */
 public class CaseStatement extends ConditionalCompoundStatement {
 
+			/* --- FIELDS --- */
 	public SwitchStatement superStatement;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public CaseStatement(Expression condition, List<Statement> body, Source source) {

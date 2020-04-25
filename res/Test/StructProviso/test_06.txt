@@ -1,0 +1,40 @@
+SOURCE
+struct Nib<T> {
+	T value;
+}
+
+struct Data<T> {
+	Nib<T> n0;
+	Nib<T> n1;
+}
+
+int main() {
+	Data<int> data = Data<int>::(Nib<int>::(5), Nib<int>::(10));
+	return data.n0.value + data.n1.value;
+}
+TESTCASES
+15
+OUTPUT
+/* --test_06.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    mov fp, sp
+    mov r0, #10               /* Evaluate Expression */
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    sub r1, fp, #8            /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    push { r0 }
+    sub r1, fp, #8            /* Load field location */
+    add r1, r1, #4
+    ldr r0, [r1]              /* Load field from struct */
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

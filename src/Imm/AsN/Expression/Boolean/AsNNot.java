@@ -24,7 +24,7 @@ public class AsNNot extends AsNUnaryExpression {
 		/* Clear only R0 */
 		not.clearReg(r, st, 0);
 		
-		not.instructions.addAll(AsNExpression.cast(n.operand(), r, map, st).getInstructions());
+		not.instructions.addAll(AsNExpression.cast(n.getOperand(), r, map, st).getInstructions());
 		not.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 	
 		/* Move #1 into R0 when condition is false */

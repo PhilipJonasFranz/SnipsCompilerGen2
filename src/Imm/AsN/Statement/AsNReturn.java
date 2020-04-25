@@ -19,7 +19,7 @@ public class AsNReturn extends AsNStatement {
 		
 		if (s.value != null) {
 			ret.instructions.addAll(AsNExpression.cast(s.value, r, map, st).getInstructions());
-			ret.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+			if (!ret.instructions.isEmpty()) ret.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		}
 		
 		ret.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));

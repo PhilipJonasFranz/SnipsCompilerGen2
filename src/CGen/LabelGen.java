@@ -18,6 +18,10 @@ public class LabelGen {
 		return ".L" + c++;
 	}
 	
+	public static String getProvisoPostfix() {
+		return "_P" + c++;
+	}
+	
 	/**
 	 * Resets the label generator. Note that all labels created after resetting are not
 	 * guaranteed to be unique.
@@ -31,6 +35,12 @@ public class LabelGen {
 	 */
 	public static String mapToAddressName(String name) {
 		return getLabel() + "_" + name;
+	}
+	
+	private static int i = 0;
+	
+	public static String importLabelPrefix(String base) {
+		return ".I" + i++ + "_" + base;
 	}
 	
 }

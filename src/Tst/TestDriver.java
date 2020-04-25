@@ -16,9 +16,9 @@ import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
 import Util.XMLParser;
+import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
-import Util.XMLParser.XMLNode;
 
 public class TestDriver {
 
@@ -51,7 +51,7 @@ public class TestDriver {
 	
 			/* --- FIELDS --- */
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
-	public long ttl = 200;
+	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
 	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
@@ -62,14 +62,21 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	public boolean writebackResults = false;
+	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
+	
+	public int progress = 0, amount;
+	
+	public long start, firstStart;
 	
 
 			/* --- CONSTRUCTORS --- */
 	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
-		CompilerDriver.printLogo();
+		CompilerDriver comp = new CompilerDriver();
+		comp.printLogo();
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		
@@ -86,6 +93,8 @@ public class TestDriver {
 			}
 		}
 		
+		amount = paths.size();
+		
 		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
 			new Message("Could not find any tests, make sure the path starts from the res/ folder.", Message.Type.WARN);
@@ -98,10 +107,13 @@ public class TestDriver {
 		TestNode head = new TestNode(paths);
 		new Message("Successfully built package tree.", Message.Type.INFO);
 		
-		long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
+		firstStart = start;
 		
 		/* Base Layer */
 		resCnt.push(new ResultCnt());
+		
+		start = System.currentTimeMillis();
 		
 		/* Test the main package */
 		testPackage(head);
@@ -109,7 +121,7 @@ public class TestDriver {
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? " successfully in " + 
-				(System.currentTimeMillis() - start) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
+				(System.currentTimeMillis() - firstStart) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
 				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
 				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
 				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
@@ -155,6 +167,7 @@ public class TestDriver {
 			
 			/* Run test and save test feedback in pair */
 			test.getSecond().addAll(runTest(node.getPackagePath() + test.getFirst()));
+			progress++;
 			
 			/* Get result */
 			ResultCnt res = resCnt.pop();
@@ -176,6 +189,11 @@ public class TestDriver {
 			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
 		}
 		
+		if (System.currentTimeMillis() - start > progressIndicatorSpeed) {
+			new Message("Progress: " + progress + "/" + amount + " test(s), total time: " + (System.currentTimeMillis() - firstStart) + " ms", Message.Type.INFO);
+			start = System.currentTimeMillis();
+		}
+		
 		/* Add package results to super package results */
 		resCnt.peek().add(res);
 	}
@@ -191,6 +209,7 @@ public class TestDriver {
 			/* Extract contents */
 			List<String> code = new ArrayList();
 			List<String> testcases = new ArrayList();
+			List<String> writeback = new ArrayList();
 			
 			/* Extract contents out of the file */
 			int i = 0;
@@ -210,15 +229,22 @@ public class TestDriver {
 				code.add(content.get(i));
 				i++;
 			}
-			while (i < content.size()) {
+			while (i < content.size() && !content.get(i).equals("OUTPUT")) {
 				testcases.add(content.get(i));
 				i++;
+			}
+			
+			for (int a = 0; a < content.size(); a++) {
+				if (content.get(a).equals("OUTPUT")) {
+					break;
+				}
+				else writeback.add(content.get(a));
 			}
 		
 			buffer.add(new Message("Testing file " + file, Message.Type.INFO, buffered));
 			
 			/* Run test */
-			Result res = this.test(file, code, testcases, buffer);
+			Result res = this.test(file, code, testcases, buffer, writeback);
 			
 			/* Evaluate result */
 			if (res.fail > 0) resCnt.peek().failed++;
@@ -237,7 +263,7 @@ public class TestDriver {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer) throws InterruptedException {
+	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer, List<String> content) throws InterruptedException {
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
 		
@@ -253,6 +279,14 @@ public class TestDriver {
 			if (this.printResult) buffer.add(new Message("-> Tested code:", Message.Type.FAIL, true));
 			cd.compile(file, code);
 			return new Result(RET_TYPE.CRASH, 0, 0);
+		}
+		else {
+			/* Write output */
+			if (writebackResults) {
+				content.add("OUTPUT");
+				content.addAll(compile);
+				Util.writeInFile(content, path);
+			}
 		}
 		
 		boolean printedOutput = this.printResult;

@@ -8,7 +8,9 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMMemOp;
@@ -18,6 +20,7 @@ import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -28,6 +31,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Statement.AsNCompoundStatement;
+import Imm.TYPE.TYPE;
 import Util.Pair;
 
 public class AsNFunction extends AsNCompoundStatement {
@@ -47,119 +51,165 @@ public class AsNFunction extends AsNCompoundStatement {
 		f.castedNode = func;
 		func.source = f;
 		
+		List<ASMInstruction> all = new ArrayList();
 		
-		/* Setup Parameter Mapping */
-		func.parameterMapping = func.getParameterMapping();
-		
-		/* Set Params in Registers */
-		for (Pair<Declaration, Integer> p : func.parameterMapping) {
-			if (p.getSecond() == -1) 
-				/* Paramter is in stack, push in stackSet */
-				st.push(p.getFirst());
-			else 
-				/* Load Declaration into register */
-				r.getReg(p.getSecond()).setDeclaration(p.getFirst());
-		}
-		
-		
-		/* Function Header and Entry Label */
-		func.instructions.add(new ASMLabel(func.source.functionName, true));
-		
-		/* Save FP and lr by default */
-		ASMPushStack push = new ASMPushStack(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR));
-		func.instructions.add(push);
-		st.push(REGISTER.LR, REGISTER.FP);
-		
-		/* Save Stackpointer from caller perspective */
-		ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
-		func.instructions.add(fpMov);
-		
-		/* Save parameters in register */
-		func.clearReg(r, st, 0, 1, 2);
-		
-		for (int i = 0; i < f.parameters.size(); i++) {
-			Declaration dec = f.parameters.get(i);
-			if (r.declarationLoaded(dec)) {
-				if (func.hasAddressReference(f, dec)) {
-					int location = r.declarationRegLocation(dec);
+		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {
+			/* Reset regs and stack */
+			r = new RegSet();
+			st = new StackSet();
+			
+			if (!f.manager.provisosCalls.get(k).first.equals("")) {
+				/* Set the current proviso call scheme */
+				try {
+					//System.out.print("Setting translation context for " + f.functionName + ": ");
+					//for (TYPE t : f.manager.provisosCalls.get(k).second.second) System.out.print(t.typeString() + ", ");
+					//System.out.println();
+					f.setContext(f.manager.provisosCalls.get(k).second.second);
+				} catch (CTX_EXCEPTION e) {
 					
-					ASMPushStack push0 = new ASMPushStack(new RegOperand(location));
-					push0.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
-					func.instructions.add(push0);
-					
-					st.push(dec);
-					r.free(location);
 				}
 			}
-		}
-		
-		/* Cast all statements and add all instructions */
-		for (int i = 0; i < f.body.size(); i++) { 
-			func.loadStatement(f, f.body.get(i), r, map, st);
-			//func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
-		}
-		
-		
-		/* Check if other function is called within this function */
-		boolean hasCall = func.instructions.stream().filter(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL).count() > 0;
-		
-		/* Jumplabel to centralized function return */
-		ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());
-		
-		List<REGISTER> used = func.getUsed();
-		
-		
-		if (!hasCall && !func.hasParamsInStack()) {
-			if (used.isEmpty()) 
-				func.instructions.remove(push);
+			
+			/* Setup Parameter Mapping */
+			func.parameterMapping = func.getParameterMapping();
+			
+			/* Set Params in Registers */
+			for (Pair<Declaration, Integer> p : func.parameterMapping) {
+				if (p.getSecond() == -1) 
+					/* Paramter is in stack, push in stackSet */
+					st.push(p.getFirst());
+				else 
+					/* Load Declaration into register */
+					r.getReg(p.getSecond()).setDeclaration(p.getFirst());
+			}
+			
+			/* Function Header and Entry Label, add proviso specific postfix */
+			ASMLabel label = new ASMLabel(func.source.functionName + f.manager.provisosCalls.get(k).first, true);
+			
+			/* Generate comment with function name and potential proviso types */
+			String com = "";
+			if (f.manager.provisosCalls.get(k).first.equals("")) {
+				com = "Function: " + f.functionName;
+			}
+			else {
+				com = ((k == 0)? "Function: " + f.functionName + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
+				List<TYPE> types = f.manager.provisosCalls.get(k).second.second;
+				for (int x = 0; x < types.size(); x++) {
+					com += types.get(x).typeString() + ", ";
+				}
+				com = com.trim().substring(0, com.trim().length() - 1);
+			}
+			label.comment = new ASMComment(com);
+			
+			func.instructions.add(label);
+			
+			/* Save FP and lr by default */
+			ASMPushStack push = new ASMPushStack(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR));
+			func.instructions.add(push);
+			st.push(REGISTER.LR, REGISTER.FP);
+			
+			/* Save Stackpointer from caller perspective */
+			ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
+			func.instructions.add(fpMov);
+			
+			/* Save parameters in register */
+			func.clearReg(r, st, 0, 1, 2);
+			
+			for (int i = 0; i < f.parameters.size(); i++) {
+				Declaration dec = f.parameters.get(i);
+				if (r.declarationLoaded(dec)) {
+					if (func.hasAddressReference(f, dec)) {
+						int location = r.declarationRegLocation(dec);
+						
+						ASMPushStack push0 = new ASMPushStack(new RegOperand(location));
+						push0.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+						func.instructions.add(push0);
+						
+						st.push(dec);
+						r.free(location);
+					}
+				}
+			}
+			
+			/* Cast all statements and add all instructions */
+			for (int i = 0; i < f.body.size(); i++) { 
+				func.loadStatement(f, f.body.get(i), r, map, st);
+				//func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+			}
+			
+			
+			/* Check if other function is called within this function */
+			boolean hasCall = func.instructions.stream().filter(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL).count() > 0;
+			
+			/* Jumplabel to centralized function return */
+			ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());
+			
+			List<REGISTER> used = func.getUsed();
+			
+			
+			if (!hasCall && !func.hasParamsInStack()) {
+				if (used.isEmpty()) 
+					func.instructions.remove(push);
+				else {
+					/* Patch used registers into push instruction at the start */
+					push.operands.clear();
+					used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
+					
+					func.patchBxToB(funcReturn);
+				}
+				
+				if (!st.newDecsOnStack) func.instructions.remove(fpMov);
+			}
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();
 				used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
+				push.operands.add(new RegOperand(REGISTER.FP));
+				push.operands.add(new RegOperand(REGISTER.LR));
 				
 				func.patchBxToB(funcReturn);
 			}
 			
-			if (!st.newDecsOnStack) func.instructions.remove(fpMov);
-		}
-		else {
-			/* Patch used registers into push instruction at the start */
-			push.operands.clear();
-			used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
-			push.operands.add(new RegOperand(REGISTER.FP));
-			push.operands.add(new RegOperand(REGISTER.LR));
 			
-			func.patchBxToB(funcReturn);
-		}
-		
-		
-		/* Patch offset based on amount of pushed registers excluding LR and FP */
-		func.patchFramePointerAddressing(push.operands.size() * 4);
-		
-		
-		if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack) {
-			/* Add centralized stack reset and register restoring */
-			func.instructions.add(funcReturn);
+			/* Patch offset based on amount of pushed registers excluding LR and FP */
+			func.patchFramePointerAddressing(push.operands.size() * 4);
 			
-			ASMPopStack pop = new ASMPopStack();
-			used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
 			
-			if (hasCall || func.hasParamsInStack() || st.newDecsOnStack) {
-				func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
-			
-				if (hasCall || func.hasParamsInStack()) {
-					/* Need to restore registers */
-					pop.operands.add(new RegOperand(REGISTER.FP));
-					pop.operands.add(new RegOperand(REGISTER.LR));
+			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack) {
+				/* Add centralized stack reset and register restoring */
+				func.instructions.add(funcReturn);
+				
+				ASMPopStack pop = new ASMPopStack();
+				used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
+				
+				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack) {
+					func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
+				
+					if (hasCall || func.hasParamsInStack()) {
+						/* Need to restore registers */
+						pop.operands.add(new RegOperand(REGISTER.FP));
+						pop.operands.add(new RegOperand(REGISTER.LR));
+					}
 				}
+				
+				pop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+				func.instructions.add(pop);
 			}
 			
-			func.instructions.add(pop);
+			/* Branch back */
+			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
+			
+			if (f.manager.provisosCalls.size() > 1 && k < f.manager.provisosCalls.size() - 1) {
+				func.instructions.add(new ASMSeperator());
+			}
+			
+			if (!f.manager.provisosTypes.isEmpty()) {
+				all.addAll(func.instructions);
+				func.instructions.clear();
+			}
 		}
 		
-		
-		/* Branch back */
-		func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
+		if (!f.manager.provisosTypes.isEmpty()) func.instructions.addAll(all);
 	
 		return func;
 	}
@@ -272,12 +322,13 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Create a parameter mapping that assigns each parameter either a register or the stack
 	 * as a location.
 	 */
-	private List<Pair<Declaration, Integer>> getParameterMapping() {
+	public List<Pair<Declaration, Integer>> getParameterMapping() {
 		int r = 0;
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
-			int wordSize = dec.type.wordsize();
+			//dec.print(0, true);
+			int wordSize = dec.getType().wordsize();
 			if (wordSize == 1 && r < 3) {
 				/* Load in register */
 				mapping.add(new Pair(dec, r));

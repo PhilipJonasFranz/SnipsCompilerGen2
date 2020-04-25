@@ -1,0 +1,110 @@
+/*
+ * A single list entry, contains a pointer to the next node
+ * and a value.
+ */
+struct ListNode<T> {
+	ListNode<T>* next;
+	T value;
+}
+
+/*
+ * Wraps the list head and tail.
+ */
+struct List<T> {
+	ListNode<T>* head;
+	ListNode<T>* tail;
+}
+
+/*
+ * Creates a new List Object and initializes the head an tail to 0.
+ */
+List<T>* create<T>() {
+	List<T>* lp = (List<T>*) resv(sizeof(List<T>));
+
+	/* Initialize list, set pointers to 0 */
+	*lp = List<T>::((ListNode<T>*) 0, (ListNode<T>*) 0);
+
+	return lp;
+}
+
+/*
+ * Free the list by freeing all contained list nodes, and the list itself.
+ */
+void destroy<T>(List<T>* l) {
+	ListNode<T>* n = l->head;
+	while ((int) n != 0) {
+		free(n);
+		n = n->next;
+	}
+	free(l);
+}
+
+/*
+ * Creates a new list node for given value x and adds the node at the
+ * end of the list.
+ */
+void add<T>(List<T>* lp, T x) {
+	ListNode<T>* n = (ListNode<T>*) resv(sizeof(ListNode<T>));
+
+	/* Initialize the new List Node, set the next pointer to null */
+	*n = ListNode<T>::((ListNode<T>*) 0, x);
+
+	if ((int) lp->head == 0) {
+		lp->head = n; // Dereference through pointer
+		lp->tail = n;
+	}
+	else {
+		lp->tail->next = n;
+		lp->tail = n;
+	}	
+}
+
+/*
+ * Creates a new list node for given value x and adds the node at the
+ * end of the list.
+ */
+T get<T>(List<T>* lp, int i) {
+	ListNode<T>* n = lp->head;
+	while (i != 0) {
+		if ((int) n->next == 0) return (T) 0;
+		
+		/* Jump to next */
+		n = n->next;
+		i--;
+	}
+	
+	return n->value;	
+}
+
+/*
+ * Check if given list contains given value.
+ */
+bool contains<T>(List<T>* lp, T x) {
+	ListNode<T>* n = lp->head;
+	while (true) {
+		if ((int) n == 0) return false;
+		if (n->value == x) {
+			/* Value found */
+			return true;
+		}
+		/* Jump to next */
+		n = n->next;
+	}
+}
+
+/*
+ * Finds the first node in the list that has given value.
+ * Returns a pointer to this list node.
+ */
+ListNode<T>* find<T>(List<T>* lp, int x) {
+	ListNode<T>* n = lp->head;
+	while ((int) n->next != 0) {
+		if (n->value == x) {
+			return n;
+		}
+		/* Jump to next */
+		n = n->next;
+	}
+	/* Not found */
+	return (ListNode<T>*) 0;
+}

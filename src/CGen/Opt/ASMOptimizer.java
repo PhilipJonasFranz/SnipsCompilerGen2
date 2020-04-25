@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
@@ -51,21 +52,61 @@ public class ASMOptimizer {
 		while (OPT_DONE) {
 			OPT_DONE = false;
 			
+			/**
+			 * add r0, r1, r2<br>
+			 * mov r4, r0<br>
+			 * Replace with:<br>
+			 * add r4, r1, r2
+			 */
 			this.removeExpressionIndirectTargeting(body);
 			
+			/**
+			 * mov r0, rx<br>
+			 * cmp rx, r1<br>
+			 * Replace with:<br>
+			 * cmp rx, r1
+			 */
 			this.removeOperandIndirectTargeting(body);
 			
 			this.constantOperandPropagation(body);
 			
+			/**
+			 * b .L1<br>
+			 * ... <- Remove these Lines until Label or newline
+			 */
 			this.clearInstructionsAfterBranch(body);
 			
+			/**
+			 * Removes non-referenced Labels
+			 */
 			this.clearUnusedLabels(body);
 			
+			/**
+			 * mov r1, r0<br>
+			 * mov r0, r1 <-- Delete this line
+			 */
 			this.removeDoubleCrossing(body);
 			
+			/**
+			 * push { r0 }<br>
+			 * pop { r1 }<br>
+			 * Replace with:<br>
+			 * mov r1, r0
+			 */
 			this.removeImplicitStackAssignment(body);
 			
+			/**
+			 * b .Lx <-- Remove this line<br>
+			 * .Lx: 
+			 */
 			this.removeBranchesBeforeLabelToLabel(body);
+			
+			/**
+			 * push { r0 }<br>
+			 * ... <- Does not reassign r0<br>
+			 * pop { r0 }
+			 */
+			this.removeUnnessesaryPushPop(body);
 		}
 	}
 	
@@ -75,7 +116,7 @@ public class ASMOptimizer {
 	protected boolean overwritesReg(ASMInstruction ins, REGISTER reg) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
-			return data.target.reg == reg && data.cond == null;
+			return data.target.reg == reg;
 		}
 		else if (ins instanceof ASMMemOp) {
 			ASMMemOp memOp = (ASMMemOp) ins;
@@ -88,12 +129,47 @@ public class ASMOptimizer {
 		else return false;
 	}
 	
-	/**
-	 * add r0, r1, r2<br>
-	 * mov r4, r0<br>
-	 * Replace with:<br>
-	 * add r4, r1, r2
-	 */
+	protected void removeUnnessesaryPushPop(AsNBody body) {
+		
+		
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				boolean remove = false;
+				
+				if (push.operands.size() == 1) {
+					REGISTER reg = ((RegOperand) push.operands.get(0)).reg;
+					for (int a = i; a < body.instructions.size(); a++) {
+						ASMInstruction ins = body.instructions.get(a);
+						
+						if (ins instanceof ASMPopStack) {
+							ASMPopStack pop = (ASMPopStack) ins;
+							
+							if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+								RegOperand op0 = (RegOperand) pop.operands.get(0);
+								if (op0.reg == reg) {
+									body.instructions.remove(a);
+									remove = true;
+									break;
+								}
+							}
+						}
+						
+						if (this.overwritesReg(ins, reg) || ins instanceof ASMBranch || ins instanceof ASMLabel) {
+							break;
+						}
+					}
+				}
+				
+				if (remove) {
+					body.instructions.remove(i);
+					i--;
+				}
+			}
+		}
+	}
+	
 	protected void removeExpressionIndirectTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMov) {
@@ -140,12 +216,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * mov r0, rx<br>
-	 * cmp rx, r1<br>
-	 * Replace with:<br>
-	 * cmp rx, r1
-	 */
 	protected void removeOperandIndirectTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
@@ -184,21 +254,29 @@ public class ASMOptimizer {
 						RegOperand target = (RegOperand) mov.op1;
 						if (target.reg == REGISTER.R0 || target.reg == REGISTER.R1 || target.reg == REGISTER.R2) break;
 						
+						/* Writeback flag is set, cannot substitute, since mov copies operand */
+						if (body.instructions.get(i).optFlags.contains(OPT_FLAG.WRITEBACK)) {
+							break;
+						}
+						
 						if (body.instructions.get(i) instanceof ASMBinaryData && !(body.instructions.get(i) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) body.instructions.get(i);
+							boolean remove = false;
 							if (data.op0 != null && data.op0.reg == RegOperand.toReg(a)) {
 								/* Replace */
 								data.op0 = target;
 								OPT_DONE = true;
-								
-								body.instructions.remove(i - 1);
-								i--;
+								remove = true;
 							}
-							else if (data.op1 != null && data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == RegOperand.toReg(a)) {
+							
+							if (data.op1 != null && data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == RegOperand.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
 								OPT_DONE = true;
-								
+								remove = true;
+							}
+							
+							if (remove) {
 								body.instructions.remove(i - 1);
 								i--;
 							}
@@ -209,10 +287,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * b .Lx <-- Remove this line<br>
-	 * .Lx: 
-	 */
 	protected void removeBranchesBeforeLabelToLabel(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMBranch && body.instructions.get(i) instanceof ASMLabel) {
@@ -230,12 +304,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * push { r0 }<br>
-	 * pop { r1 }<br>
-	 * Replace with:<br>
-	 * mov r1, r0
-	 */
 	protected void removeImplicitStackAssignment(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMPushStack && body.instructions.get(i) instanceof ASMPopStack) {
@@ -251,10 +319,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * mov r1, r0<br>
-	 * mov r0, r1 <-- Delete this line
-	 */
 	protected void removeDoubleCrossing(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov && body.instructions.get(i) instanceof ASMMov) {
@@ -395,11 +459,15 @@ public class ASMOptimizer {
 						}
 						else if (body.instructions.get(a) instanceof ASMPopStack) {
 							ASMPopStack p = (ASMPopStack) body.instructions.get(a);
+							boolean end = false;
 							for (RegOperand r : p.operands) {
 								if (r.reg == target) {
+									end = true;
 									break;
 								}
 							}
+							
+							if (end) break;
 						}
 						else if (body.instructions.get(a) instanceof ASMLdrStack) {
 							ASMLdrStack p = (ASMLdrStack) body.instructions.get(a);
@@ -484,9 +552,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * Removes non-referenced Labels
-	 */
 	protected void clearUnusedLabels(AsNBody body) {
 		List<ASMLabel> usedLabels = new ArrayList();
 		
@@ -518,10 +583,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	/**
-	 * b .L1<br>
-	 * ... <- Remove these Lines until Label or newline
-	 */
 	protected void clearInstructionsAfterBranch(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMBranch) {

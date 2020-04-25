@@ -1,0 +1,42 @@
+SOURCE
+struct TreeNode<T> {
+	TreeNode<T>* left;
+	TreeNode<T>* right;
+	T value;
+}
+
+int main() {
+	TreeNode<int> root = TreeNode<int>::((TreeNode<int>*) 0, (TreeNode<int>*) 0, 10);
+	
+	TreeNode<bool> root2 = TreeNode<bool>::((TreeNode<bool>*) 0, (TreeNode<bool>*) 0, true);
+	
+	return root.value;
+}
+TESTCASES
+10
+OUTPUT
+/* --test_00.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    mov fp, sp
+    mov r0, #10               /* Evaluate Expression */
+    push { r0 }
+    mov r0, #0
+    push { r0 }
+    mov r0, #0
+    push { r0 }
+    mov r0, #1                /* Evaluate Expression */
+    push { r0 }
+    mov r0, #0
+    push { r0 }
+    mov r0, #0
+    push { r0 }
+    sub r1, fp, #12           /* Evaluate Expression */
+    add r1, r1, #8
+    ldr r0, [r1]              /* Load field from struct */
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

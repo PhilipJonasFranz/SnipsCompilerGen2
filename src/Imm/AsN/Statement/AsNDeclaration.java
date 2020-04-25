@@ -4,16 +4,15 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
-import Imm.ASM.Memory.Stack.ASMStrStack;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNDeclaration extends AsNStatement {
 
@@ -22,22 +21,24 @@ public class AsNDeclaration extends AsNStatement {
 		
 		/* Load value, either in R0 or on the stack */
 		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
-		dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
-		if (free != -1 && d.type.wordsize() == 1) {
+		if (free != -1 && (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER)) {
 			/* Free Register exists and declaration fits into a register */
 			dec.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(0)));
 			r.getReg(free).setDeclaration(d);
 		}
 		else {
-			if (d.type.wordsize() == 1) {
+			if (d.getType().wordsize() == 1) {
 				/* Push declaration on the stack */
-				dec.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.SP), new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+				dec.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			}
 			else {
-				/* Pop Elements only, elements are already on the stack */
-				st.popXWords(d.type.wordsize());
+				/* Pop R0 placeholders pushed by structure init from stack set, but dont add the assembly code 
+				 * to do so, this is so that below the correct declaration can be pushed and lines up with 
+				 * the values on the stack */
+				st.popXWords(d.getType().wordsize());
 			}
 			
 			/* Push the declaration that covers the popped area */

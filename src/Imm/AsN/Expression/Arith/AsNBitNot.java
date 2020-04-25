@@ -21,7 +21,7 @@ public class AsNBitNot extends AsNUnaryExpression {
 		not.clearReg(r, st, 0);
 		
 		/* Load Operand */
-		not.instructions.addAll(AsNExpression.cast(b.operand(), r, map, st).getInstructions());
+		not.instructions.addAll(AsNExpression.cast(b.getOperand(), r, map, st).getInstructions());
 	
 		not.instructions.add(new ASMMvn(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0)));
 		

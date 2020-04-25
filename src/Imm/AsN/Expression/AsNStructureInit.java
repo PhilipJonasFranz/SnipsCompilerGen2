@@ -1,5 +1,7 @@
 package Imm.AsN.Expression;
 
+import java.util.List;
+
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -8,9 +10,11 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNStructureInit extends AsNExpression {
 
@@ -21,20 +25,30 @@ public class AsNStructureInit extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
+		structureInit(init, s.elements, r, map, st);
+		
+		return init;
+	}
+	
+	/*
+	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
+	 * of the stack.
+	 */
+	public static void structureInit(AsNNode node, List<Expression> elements, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
-		for (int i = s.elements.size() - 1; i >= 0; i--) {
+		for (int i = elements.size() - 1; i >= 0; i--) {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
-			if (s.elements.get(i) instanceof Atom) {
-				Atom atom = (Atom) s.elements.get(i);
+			if (elements.get(i) instanceof Atom) {
+				Atom atom = (Atom) elements.get(i);
 				
 				/* Load atom directley in destination */
-				init.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
+				node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
 				regs++;
 				
 				/* If group size is 3, push them on the stack */
 				if (regs == 3) {
-					flush(regs, init);
+					flush(regs, node);
 					regs = 0;
 				}
 				
@@ -42,23 +56,21 @@ public class AsNStructureInit extends AsNExpression {
 			}
 			else {
 				/* Flush all atoms to clear regs */
-				flush(regs, init);
+				flush(regs, node);
 				regs = 0;
 				
-				init.instructions.addAll(AsNExpression.cast(s.elements.get(i), r, map, st).getInstructions());
+				node.instructions.addAll(AsNExpression.cast(elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-				if (!(s.elements.get(i).type instanceof ARRAY)) {
-					init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
+					node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 					st.push(REGISTER.R0);
 				}
 			}
 		}
 		
 		/* Flush remaining atoms */
-		flush(regs, init);
-		
-		return init;
+		flush(regs, node);
 	}
 	
 	/**

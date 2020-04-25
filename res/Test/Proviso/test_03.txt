@@ -1,0 +1,62 @@
+SOURCE
+int getDiff<K, V>(K k, V v) {
+	int f = (int) k;
+	if (f == 0) return (int) v;
+	else return getDiff<V, K>((K) v, (V) (k - 1));
+}
+
+int main(int x, int y) {
+	return getDiff<int, int>(x, y);
+}
+TESTCASES
+5 1 3
+1 5 4
+0 1 1
+OUTPUT
+/* --test_03.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+getDiff_P0:                   /* Function: getDiff, Provisos: INT, INT */
+    push { r3, r4, r5, r6, r7, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3                /* Evaluate Expression */
+    mov r5, r0
+    mov r6, r0
+    cmp r5, #0
+    bne .L3
+    mov r0, r4                /* Evaluate Expression */
+    b .L4
+.L3: 
+    mov r7, r0                /* Evaluate Expression */
+    mov r1, r3
+    mov r2, #1
+    sub r0, r1, #1
+    push { r0 }
+    mov r0, r4
+    pop { r1 }
+    bl getDiff_P0             /* Call getDiff */
+.L4: 
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, fp, lr }
+    bx lr
+    
+main:                         /* Function: main */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, r4                /* Evaluate Expression */
+    push { r0 }
+    mov r0, r3
+    pop { r1 }
+    bl getDiff_P0             /* Call getDiff */
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    
+.L1_HEAP_START: .word HEAP_START

@@ -4,7 +4,9 @@ import java.util.Stack;
 
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Util.Pair;
 import lombok.Getter;
 
 public class StackSet {
@@ -54,7 +56,7 @@ public class StackSet {
 	private Stack<StackCell> stack = new Stack();
 	
 	/** The stack that contains the scope sizes. See {@link #closeScope()} for more information. */
-	private Stack<Integer> scopes = new Stack();
+	private Stack<Pair<Integer, CompoundStatement>> scopes = new Stack();
 
 	/**
 	* Wether new declarations have been pushed on the stack. Only used by AsNFunction to determine
@@ -102,7 +104,7 @@ public class StackSet {
 				words++;
 			}
 			else {
-				words += this.stack.peek().declaration.type.wordsize();
+				words += this.stack.peek().declaration.getType().wordsize();
 			}
 			this.stack.pop();
 		}
@@ -143,7 +145,7 @@ public class StackSet {
 				foundHook = true;
 			}
 			else {
-				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.type.wordsize() * 4;
+				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.getType().wordsize() * 4;
 				else off += 4;
 			}
 		}
@@ -161,7 +163,7 @@ public class StackSet {
 				else off += 4;
 			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
 				if (stack.get(i).declaration.equals(dec)) break;
-				off += (stack.get(i).declaration.type.wordsize() * 4);
+				off += (stack.get(i).declaration.getType().wordsize() * 4);
 			}
 		}
 		
@@ -173,8 +175,8 @@ public class StackSet {
 	 * on the scopes stack, so that when popping this scope, the amount of words to be added to the 
 	 * sp can be determined.
 	 */
-	public void openScope() {
-		this.scopes.push(this.stack.size());
+	public void openScope(CompoundStatement cs) {
+		this.scopes.push(new Pair<Integer, CompoundStatement>(this.stack.size(), cs));
 	}
 	
 	/**
@@ -182,12 +184,36 @@ public class StackSet {
 	 * a compound statement. Returns the amount of bytes the stack was reset. This amount
 	 * has to be added onto the stack pointer to reset the stack to the correct size.
 	 */
-	public int closeScope() {
-		int target = this.scopes.pop();
+	public int closeScope(CompoundStatement cs, boolean close) {
+		int target = 0;
+		
+		if (close) {
+			target = this.scopes.pop().getFirst();
+		}
+		else {
+			for (int i = this.scopes.size() - 1; i >= 0; i--) {
+				target = this.scopes.get(i).getFirst();
+				if (this.scopes.get(i).getSecond().equals(cs)) break;
+			}
+		}
+		
 		int add = 0;
-		while (this.stack.size() != target) {
-			this.stack.pop();
-			add++;
+		if (close) {
+			while (this.stack.size() != target) {
+				this.stack.pop();
+				add++;
+			}
+		}
+		else {
+			Stack<StackCell> st0 = new Stack();
+			while (this.stack.size() != target) {
+				st0.push(this.stack.pop());
+				add++;
+			}
+			
+			while (!st0.isEmpty()) {
+				this.stack.push(st0.pop());
+			}
 		}
 		
 		return add * 4;

@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.Comment;
@@ -42,6 +43,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof Assignment) {
 			node = AsNAssignment.cast((Assignment) s, r, map, st); 
+		}
+		else if (s instanceof AssignWriteback) {
+			node = AsNAssignWriteback.cast((AssignWriteback) s, r, map, st); 
 		}
 		else if (s instanceof SwitchStatement) {
 			node = AsNSwitchStatement.cast((SwitchStatement) s, r, map, st); 

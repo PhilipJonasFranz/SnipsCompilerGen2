@@ -67,6 +67,23 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
+		if (CompilerDriver.heap_referenced) {
+			globals = true;
+			
+			Declaration heap = CompilerDriver.HEAP_START;
+			
+			/* Create instruction for .data Section */
+			ASMDataLabel dataEntry = new ASMDataLabel(heap.fieldName, new MemoryWordOperand(heap.value));
+			body.instructions.add(dataEntry);
+			
+			/* Create address reference instruction for .text section */
+			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.fieldName), new MemoryWordRefOperand(dataEntry));
+			globalVarReferences.add(reference);
+			
+			/* Add declaration to global memory */
+			map.add(heap, reference);
+		}
+		
 		/* No globals, remove .data annotation */
 		if (!globals) body.instructions.remove(data);
 		

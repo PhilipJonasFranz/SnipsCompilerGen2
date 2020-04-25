@@ -12,7 +12,9 @@ import Util.Source;
  */
 public class DefaultStatement extends CompoundStatement {
 
+			/* --- FIELDS --- */
 	public SwitchStatement superStatement;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public DefaultStatement(List<Statement> body, Source source) {

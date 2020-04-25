@@ -14,3 +14,45 @@ TESTCASES
 -1 3
 0 9
 1 1
+OUTPUT
+/* --test_15.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+get:                          /* Function: get */
+    push { r3, r4 }
+    mov r3, r0
+    mov r4, r1
+    add r3, r3, r4
+    lsl r0, r3, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    pop { r3, r4 }
+    bx lr
+    
+main:                         /* Function: main */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #1                /* Evaluate Expression */
+    mov r1, #9
+    push { r1, r0 }
+    mov r0, #3
+    mov r1, #5
+    push { r1, r0 }
+    sub r0, fp, #16           /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r1, r0
+    mov r2, #2
+    add r4, r1, #2
+    mov r0, r3                /* Evaluate Expression */
+    push { r0 }
+    mov r0, r4
+    pop { r1 }
+    bl get                    /* Call get */
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

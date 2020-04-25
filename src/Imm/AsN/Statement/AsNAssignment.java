@@ -33,7 +33,7 @@ public class AsNAssignment extends AsNStatement {
 		
 		/* Compute value */
 		assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
-		assign.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+		if (!assign.instructions.isEmpty()) assign.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		/* Store value at location specified by lhs */
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());
@@ -42,10 +42,12 @@ public class AsNAssignment extends AsNStatement {
 	}
 	
 	/**
-	 * Assumes that the base address of the array or the start address of the sub array is located in R1.
-	 * @param arr The array to copy.
+	 * Assumes that the base address of the array or the start address of the memory section is located in R1.
+	 * Pops the word it copies of the stack.
+	 * @param size The amound of words to copy.
+	 * @throws CGEN_EXCEPTION 
 	 */
-	public static void copyArray(int size, AsNNode node) {
+	public static void copyStackSection(int size, AsNNode node, StackSet st) throws CGEN_EXCEPTION {
 		/* Do it sequentially for 8 or less words to copy */
 		if (size <= 8) {
 			int offset = 0;
@@ -57,6 +59,8 @@ public class AsNAssignment extends AsNStatement {
 				
 				offset += 4;
 			}
+			
+			st.popXWords(size);
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
@@ -79,6 +83,8 @@ public class AsNAssignment extends AsNStatement {
 			
 			/* Pop value from stack and store it at location */
 			node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+			st.popXWords(1);
+			
 			node.instructions.add(new ASMStrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
 			
 			/* Branch to loop start */

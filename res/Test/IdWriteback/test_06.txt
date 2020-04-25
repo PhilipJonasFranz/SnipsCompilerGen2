@@ -1,0 +1,51 @@
+SOURCE
+int main(int a) {
+	int s = 0;
+	int* p = &s; // Force s on the stack
+	for (int i = 0; i < a; i++) {
+		s += i + 1;
+	}
+	return s;
+}
+TESTCASES
+0 0
+1 1
+2 3
+3 6
+4 10
+OUTPUT
+/* --test_06.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4, r5 }
+    mov fp, sp
+    mov r3, r0
+    mov r4, #0
+    push { r4 }               /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #4            /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r4, r0
+/* Force s on the stack */
+    mov r0, #0                /* Evaluate Expression */
+    mov r5, #0
+.L2: 
+    cmp r5, r3
+    bge .L3
+    add r0, r5, #1
+    ldr r2, [fp, #-4]
+    add r0, r2, r0
+    str r0, [fp, #-4]
+    mov r0, r5
+    add r5, r0, #1
+    b .L2
+.L3: 
+    mov r5, r0                /* Evaluate Expression */
+    ldr r0, [fp, #-4]
+    mov sp, fp
+    pop { r3, r4, r5 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

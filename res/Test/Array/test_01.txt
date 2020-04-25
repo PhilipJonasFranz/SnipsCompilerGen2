@@ -12,3 +12,44 @@ TESTCASES
 3 2 6
 3 3 6
 3 4 8
+OUTPUT
+/* --test_01.txt */
+main:                         /* Function: main */
+    push { r3, r4 }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    add r0, r3, #4
+    push { r0 }
+    add r0, r3, #3
+    push { r0 }
+    add r0, r3, #2
+    push { r0 }
+    add r0, r3, #1
+    push { r0 }
+    mov r0, r3
+    push { r0 }
+    mov r0, #0                /* Evaluate Expression */
+    mov r1, #1
+    mov r2, #0
+    push { r2, r1, r0 }
+    mov r0, #1
+    mov r1, #0
+    mov r2, #1
+    push { r2, r1, r0 }
+    lsl r2, r4, #2
+    sub r0, fp, #20
+    add r0, r0, r2
+    ldr r0, [r0]
+    push { r0 }
+    lsl r2, r4, #2
+    sub r0, fp, #44
+    add r0, r0, r2
+    ldr r0, [r0]
+    mov r2, r0
+    pop { r1 }
+    add r0, r1, r2
+    mov sp, fp
+    pop { r3, r4 }
+    bx lr
+    

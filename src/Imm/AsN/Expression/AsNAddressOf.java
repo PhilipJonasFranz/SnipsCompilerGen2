@@ -17,7 +17,7 @@ import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ElementSelect;
+import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -55,19 +55,19 @@ public class AsNAddressOf extends AsNExpression {
 			else {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(ref.origin);
-				offset += (ref.origin.type.wordsize() - 1) * 4;
+				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOperand(target), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
 			}
 		}
-		else if (a.expression instanceof ElementSelect) {
-			ElementSelect select = (ElementSelect) a.expression;
+		else if (a.expression instanceof ArraySelect) {
+			ArraySelect select = (ArraySelect) a.expression;
 			
-			if (select.type instanceof ARRAY)
-				AsNElementSelect.loadSumR2(aof, select, r, map, st, true);
+			if (select.getType() instanceof ARRAY)
+				AsNArraySelect.loadSumR2(aof, select, r, map, st, true);
 			else 
-				AsNElementSelect.loadSumR2(aof, select, r, map, st, false);
+				AsNArraySelect.loadSumR2(aof, select, r, map, st, false);
 			
 			Declaration origin = select.idRef.origin;
 			if (map.declarationLoaded(origin)) {
@@ -88,7 +88,7 @@ public class AsNAddressOf extends AsNExpression {
 			else {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(origin);
-				offset += (origin.type.wordsize() - 1) * 4;
+				offset += (origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));

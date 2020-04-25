@@ -15,6 +15,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitOr;
@@ -38,6 +39,7 @@ import Imm.AsN.Expression.Boolean.AsNAnd;
 import Imm.AsN.Expression.Boolean.AsNCmp;
 import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
@@ -97,39 +99,57 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 		/* --- OPERAND LOADING --- */
 	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXCEPTION {
+		
+		/* Some assertions for debug purposes */
+		if (b.getLeft() instanceof TypeCast) {
+			assert(b.getLeft().getType() instanceof PRIMITIVE);
+		}
+		
+		if (b.getRight() instanceof TypeCast) {
+			assert(b.getRight().getType() instanceof PRIMITIVE);
+		}
+		
+		/* If operands are TypeCasts, unrwrap expression from type cast */
+		Expression left = (b.getLeft() instanceof TypeCast)? ((TypeCast) b.getLeft()).expression : b.getLeft();
+		Expression right = (b.getRight() instanceof TypeCast)? ((TypeCast) b.getRight()).expression : b.getRight();
+		
 		/* Load both operands directley */
-		if (b.left() instanceof IDRef && b.right() instanceof IDRef) {
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, map, st, target0).getInstructions());
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.right(), r, map, st, target1).getInstructions());
+		if (left instanceof IDRef && right instanceof IDRef) {
+			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		/* Load the right operand, then the left directley */
-		else if (b.left() instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(b.right(), r, map, st).getInstructions());
+		else if (left instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
 			if (target1 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
 				r.copy(0, target1);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.left(), r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
 		}
 		/* Load the left operand, then the right directley */
-		else if (b.right() instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(b.left(), r, map, st).getInstructions());
+		else if (right instanceof IDRef) {
+			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			if (target0 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(0)));
 				r.copy(0, target0);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) b.right(), r, map, st, target1).getInstructions());
+			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		else {
+			r.free(0, 1, 2);
+			
 			/* Compute left operand and push the result on the stack */
-			m.instructions.addAll(AsNExpression.cast(b.left(), r, map, st).getInstructions());
+			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			r.free(0);
 			
 			/* Compute the right operand and move it to target location */
-			m.instructions.addAll(AsNExpression.cast(b.right(), r, map, st).getInstructions());
+			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
+			
+			/* Check if instructions were added, if not, this means that the operand is already loaded in the correct location */
 			if (target1 != 0) {
 				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
 				r.copy(0, target1);
@@ -142,21 +162,21 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
 		/* Total Atomic Loading */
-		if (b.left() instanceof Atom && b.right() instanceof Atom) {
+		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
 			m.atomicPrecalc(b, solver);
 		}
 		else {
 			this.clearReg(r, st, 0, 1, 2);
 			
 			/* Partial Atomic Loading Left */
-			if (b.left() instanceof Atom) {
-				this.loadOperand(b.right(), 2, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.left()).type).value)));
+			if (b.getLeft() instanceof Atom) {
+				this.loadOperand(b.getRight(), 2, r, map, st);
+				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.getLeft()).getType()).value)));
 			}
 			/* Partial Atomic Loading Right */
-			else if (b.right() instanceof Atom) {
-				this.loadOperand(b.left(), 1, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.right()).type).value)));
+			else if (b.getRight() instanceof Atom) {
+				this.loadOperand(b.getLeft(), 1, r, map, st);
+				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.getRight()).getType()).value)));
 			}
 			else m.generatePrimitiveLoaderCode(m, b, r, map, st, 1, 2);
 			
@@ -187,10 +207,10 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	 * Precalculate this expression since both operands are immediates.
 	 */
 	protected void atomicPrecalc(BinaryExpression b, BinarySolver s) {
-		if (b.left() instanceof Atom && b.right() instanceof Atom) {
-			Atom l0 = (Atom) b.left(), r0 = (Atom) b.right();
-			if (l0.type instanceof INT && r0.type instanceof INT) {
-				INT i0 = (INT) l0.type, i1 = (INT) r0.type;
+		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
+			Atom l0 = (Atom) b.getLeft(), r0 = (Atom) b.getRight();
+			if (l0.getType() instanceof INT && r0.getType() instanceof INT) {
+				INT i0 = (INT) l0.getType(), i1 = (INT) r0.getType();
 				this.instructions.add(new ASMMov(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
 			}
 		}

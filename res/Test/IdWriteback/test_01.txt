@@ -1,0 +1,33 @@
+SOURCE
+int main(int a) {
+	int x = 5 + a++ + a++;
+	return a;
+}
+TESTCASES
+0 2
+-1 1
+2 4
+OUTPUT
+/* --test_01.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4 }
+    mov r3, r0
+    add r3, r0, #1
+    mov r2, r0
+    mov r1, #5
+    add r0, r1, r2
+    push { r0 }
+    mov r0, r3
+    add r3, r0, #1
+    mov r2, r0
+    pop { r1 }
+    add r4, r1, r2
+    mov r0, r3                /* Evaluate Expression */
+    pop { r3, r4 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

@@ -1,5 +1,7 @@
 package Imm.AST.Expression.Boolean;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
@@ -8,12 +10,15 @@ import Util.Source;
 
 public class Ternary extends Expression {
 	
+			/* --- FIELDS --- */
 	public Expression condition;
 	
 	public Expression leftOperand;
 	
 	public Expression rightOperand;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public Ternary(Expression condition, Expression left, Expression right, Source source) {
 		super(source);
 		this.condition = condition;
@@ -21,6 +26,8 @@ public class Ternary extends Expression {
 		this.rightOperand = right;
 	}
 	
+	
+			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Ternary");
 		this.condition.print(d + this.printDepthStep, rec);
@@ -30,6 +37,18 @@ public class Ternary extends Expression {
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
 		return ctx.checkTernary(this);
+	}
+	
+	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+		this.condition.setContext(context);
+		this.leftOperand.setContext(context);
+		this.rightOperand.setContext(context);
+	}
+
+	public void releaseContext() {
+		this.condition.releaseContext();
+		this.leftOperand.releaseContext();
+		this.rightOperand.releaseContext();
 	}
 	
 }

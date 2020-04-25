@@ -1,0 +1,30 @@
+SOURCE
+bool main(int a, int b) {
+	return ((bool) a) && ((bool) b);
+}
+TESTCASES
+0 0 0
+10 0 0
+0 10 0
+10 5 1
+5 10 1
+OUTPUT
+/* --test_01.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3, r4 }
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3                /* Evaluate Expression */
+    adds r1, r4, #0
+    movne r1, #1
+    cmp r0, #0
+    movne r0, r1
+    moveq r0, #0
+    pop { r3, r4 }
+    bx lr
+    
+.L0_HEAP_START: .word HEAP_START

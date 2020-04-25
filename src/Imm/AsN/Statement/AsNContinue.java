@@ -18,6 +18,12 @@ public class AsNContinue extends AsNStatement {
 		/* Retrieve the jump label target from the super loop */
 		ASMLabel target = ((AsNConditionalCompoundStatement) c.superLoop.castedNode).continueJump;
 		
+		/* Resets the stack. When declarations are made and a continue statement is called, 
+		 * the normal loop reset is skipped, which will cause declarations to pile on the stack.
+		 * By passing the parameter false the stack set and reg set is not changed, but the
+		 * correct offsets are determined. */
+		AsNCompoundStatement.popDeclarationScope(con, c.superLoop, r, st, false);
+		
 		/* Jump to the label */
 		con.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(target)));
 		

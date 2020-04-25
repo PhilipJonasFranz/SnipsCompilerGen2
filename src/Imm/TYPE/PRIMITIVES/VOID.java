@@ -18,7 +18,8 @@ public class VOID extends PRIMITIVE<Void> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		return type instanceof VOID;
+		/* Acts as dont care */
+		return true;
 	}
 	
 	public String typeString() {
@@ -27,6 +28,12 @@ public class VOID extends PRIMITIVE<Void> {
 
 	public String sourceCodeRepresentation() {
 		return null;
+	}
+	
+	public TYPE clone() {
+		VOID b = new VOID();
+		if (this.value != null) b.setValue(this.value + "");
+		return b;
 	}
 	
 }
