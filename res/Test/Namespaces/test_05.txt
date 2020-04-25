@@ -14,3 +14,27 @@ int main() {
 
 TESTCASES
 46
+OUTPUT
+/* --test_05.txt */
+.data
+Foo.k: .word 10
+Foo.x: .word 20
+Foo.Bar.x: .word 16
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    ldr r1, .L0_Foo.k         /* Evaluate Expression */
+    ldr r1, [r1]
+    ldr r2, .L2_Foo.Bar.x     /* Load from .data section */
+    ldr r2, [r2]
+    add r1, r1, r2
+    ldr r2, .L1_Foo.x         /* Load from .data section */
+    ldr r2, [r2]
+    add r0, r1, r2
+    bx lr
+    
+.L0_Foo.k: .word Foo.k
+.L1_Foo.x: .word Foo.x
+.L2_Foo.Bar.x: .word Foo.Bar.x
+.L3_HEAP_START: .word HEAP_START

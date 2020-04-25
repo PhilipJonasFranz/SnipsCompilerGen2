@@ -1139,7 +1139,7 @@ public class Parser {
 		TYPE type = null;
 		Token token = null;
 		
-		if (current.type == TokenType.IDENTIFIER) token = current;
+		if (current.type == TokenType.IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		StructTypedef def = null;

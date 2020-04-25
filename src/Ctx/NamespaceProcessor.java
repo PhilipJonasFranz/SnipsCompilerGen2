@@ -2,6 +2,7 @@ package Ctx;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Namespace;
@@ -28,14 +29,19 @@ public class NamespaceProcessor {
 		/* Merge and integrate namespaces */
 		merge(namespaces);
 		
+		List<String> names, containedNames = new ArrayList();
+		names = namespaces.stream().map(x -> x.path.build()).collect(Collectors.toList());
+		
 		/* Remove duplicates */
 		for (int i = 0; i < p.programElements.size(); i++) {
 			if (p.programElements.get(i) instanceof Namespace) {
 				Namespace n = (Namespace) p.programElements.get(i);
-				if (namespaces.stream().filter(x -> n.path.build().equals(x.path.build())).count() == 0) {
+				/* Check if namespace is still in list, or already added */
+				if (!names.contains(n.path.build()) || containedNames.contains(n.path.build())) {
 					p.programElements.remove(i);
 					i--;
 				}
+				else containedNames.add(n.path.build());
 			}
 		}
 		
@@ -50,9 +56,6 @@ public class NamespaceProcessor {
 				i--;
 			}
 		}
-		
-		System.out.println("Processor: ");
-		p.print(0, true);
 	}
 	
 	protected void flatten(List<SyntaxElement> target, Namespace name) {
@@ -91,14 +94,14 @@ public class NamespaceProcessor {
 					/* Namespace pops into this namespace, add all elements */
 					if (namespaces.get(a).path.path.size() == 1) {
 						namespaces.get(i).programElements.addAll(namespaces.get(a).programElements);
-						namespaces.remove(a);
 					}
 					/* Namespace will capsule in this namespace, cut from path and add namespace */
 					else {
 						namespaces.get(a).path.path.remove(0);
 						namespaces.get(i).programElements.add(namespaces.get(a));
-						namespaces.remove(a);
 					}
+					
+					namespaces.remove(a);
 				}
 			}
 		}
