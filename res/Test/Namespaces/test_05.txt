@@ -4,12 +4,12 @@ namespace Foo {
 	int x = 20;
 }
 
-namespace Bar@Foo {
+namespace Foo::Bar {
 	int x = 16;
 }
 
 int main() {
-	return k@Foo + x@Bar@Foo + x@Foo;
+	return Foo::k + Foo::Bar::x + Foo::x;
 }
 
 TESTCASES

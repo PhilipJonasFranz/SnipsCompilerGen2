@@ -9,7 +9,7 @@ namespace Foo {
 }
 
 int main() {
-	return x@Foo + x@Bar@Foo;
+	return Foo::x + Foo::Bar::x;
 }
 
 TESTCASES

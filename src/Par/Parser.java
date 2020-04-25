@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
@@ -376,7 +377,7 @@ public class Parser {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
-		else if (current.type.group == TokenGroup.TYPE) {
+		else if (current.type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.COLON) {
 			return this.parseDeclaration();
 		}
 		else if (current.type == TokenType.RETURN) {
@@ -720,10 +721,31 @@ public class Parser {
 	}
 	
 	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
-		if (current.type == TokenType.STRUCTID) {
+		boolean structInitCheck = current.type == TokenType.IDENTIFIER;
+		for (int i = 0; i < this.tokenStream.size(); i += 3) {
+			structInitCheck &= tokenStream.get(i).type == TokenType.COLON;
+			structInitCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
+			if (tokenStream.get(i + 2).type == TokenType.LPAREN) {
+				break;
+			}
+			else {
+				Token t = tokenStream.get(i + 2);
+				if (t.type != TokenType.IDENTIFIER && t.type != TokenType.STRUCTID) {
+					structInitCheck = false;
+					break;
+				}
+			}
+		}
+		
+		if (current.type == TokenType.STRUCTID || structInitCheck) {
 			Source source = current.getSource();
 			
 			TYPE type = this.parseType();
+			
+			if (!(type instanceof STRUCT)) {
+				/* Something is definetly wrong at this point */
+				throw new SNIPS_EXCEPTION(new CTX_EXCEPTION(source, "Expected STRUCT type, got " + type.typeString()).getMessage());
+			}
 			
 			accept(TokenType.COLON);
 			accept(TokenType.COLON);
@@ -1145,7 +1167,10 @@ public class Parser {
 		StructTypedef def = null;
 		NamespacePath path = null;
 		
-		if (this.containsStructTypedef(token)) {
+		if (this.containsStructTypedef(token) || 
+				(current.type == TokenType.COLON && 
+				tokenStream.get(0).type == TokenType.COLON && 
+				tokenStream.get(1).type != TokenType.LPAREN)) {
 			path = this.parseNamespacePath(token);
 			def = this.getStructTypedef(path);
 		}
@@ -1242,12 +1267,15 @@ public class Parser {
 			ids.add(accept(TokenType.STRUCTID).spelling);
 		else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		
-		while (current.type == TokenType.AT) {
+		while (current.type == TokenType.COLON && 
+				tokenStream.get(0).type == TokenType.COLON && 
+				tokenStream.get(1).type != TokenType.LPAREN) {
 			accept();
+			accept(TokenType.COLON);
 			
 			if (current.type == TokenType.STRUCTID)
-				ids.add(0, accept(TokenType.STRUCTID).spelling);
-			else ids.add(0, accept(TokenType.IDENTIFIER).spelling);
+				ids.add(accept(TokenType.STRUCTID).spelling);
+			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
 		
 		return new NamespacePath(ids);
@@ -1257,12 +1285,15 @@ public class Parser {
 		List<String> ids = new ArrayList();
 		ids.add(first.spelling);
 		
-		while (current.type == TokenType.AT) {
+		while (current.type == TokenType.COLON && 
+				tokenStream.get(0).type == TokenType.COLON && 
+				tokenStream.get(1).type != TokenType.LPAREN) {
 			accept();
+			accept(TokenType.COLON);
 			
 			if (current.type == TokenType.STRUCTID)
-				ids.add(0, accept(TokenType.STRUCTID).spelling);
-			else ids.add(0, accept(TokenType.IDENTIFIER).spelling);
+				ids.add(accept(TokenType.STRUCTID).spelling);
+			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
 		
 		return new NamespacePath(ids);
