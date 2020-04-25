@@ -730,7 +730,12 @@ public class Parser {
 			}
 			else {
 				Token t = tokenStream.get(i + 2);
-				if (t.type != TokenType.IDENTIFIER && t.type != TokenType.STRUCTID) {
+				
+				if (t.type == TokenType.STRUCTID) {
+					/* Found Struct ID, Must be a structure init */
+					break;
+				}
+				else if (t.type != TokenType.IDENTIFIER && t.type != TokenType.STRUCTID) {
 					structInitCheck = false;
 					break;
 				}
@@ -1136,8 +1141,33 @@ public class Parser {
 			Token token = accept();
 			return new Atom(new BOOL(token.spelling), token, token.source);
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
+		else {
+			/* 
+			 * Set current to anchor curr0.
+			 * If the anchor is null, the parser has not been at this location in the 
+			 * previous iteration. If the anchor is not null and equals the current token,
+			 * the parser has been at this location with the current token, meaning its stuck.
+			 * In this case throw a exception. In the last case, set the anchor to the current
+			 * and try again.
+			 */
+			if (curr0 == null) {
+				curr0 = current;
+				return this.parseExpression();
+			}
+			else {
+				if (curr0.equals(current)) {
+					throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
+				}
+				else {
+					curr0 = current;
+					return this.parseExpression();
+				}
+			}
+		}
 	}
+	
+	/* Anchor used for expression parsing. */
+	private Token curr0 = null;
 	
 	public StructTypedef getStructTypedef(NamespacePath path) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
