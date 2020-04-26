@@ -1,11 +1,14 @@
 package Ctx;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
 import Util.NamespacePath;
+import Util.Source;
 
 /**
  * A scope capsules a reference to its parent scope and a 
@@ -65,16 +68,40 @@ public class Scope {
 	/** 
 	 * Returns the declaration with given field name from this scope or any of the parent scopes. 
 	 * Returns null if the field is not found.
+	 * @throws CTX_EXCEPTION 
 	 */
-	public Declaration getField(NamespacePath path) {
+	public Declaration getField(NamespacePath path, Source source) throws CTX_EXCEPTION {
 		if (this.declarations.containsKey(path)) {
 			return this.declarations.get(path);
 		}
 		else {
 			if (this.parentScope != null) {
-				return this.parentScope.getField(path);
+				return this.parentScope.getField(path, source);
 			}
-			else return null;
+			else {
+				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				if (path == null) return null;
+				
+				if (path.path.size() == 1) {
+					List<Declaration> decs = new ArrayList();
+					
+					for (Entry<NamespacePath, Declaration> entry : this.declarations.entrySet()) {
+						if (entry.getKey().getLast().equals(path.getLast())) {
+							decs.add(entry.getValue());
+						}
+					}
+					
+					/* Return if there is only one result */
+					if (decs.size() == 1) return decs.get(0);
+					/* Multiple results, cannot determine correct one, return null */
+					else {
+						throw new CTX_EXCEPTION(source, "Found multiple matches for field " + path.build() + ". Make sure that the namespace path is explicit");
+					}
+				}
+				else {
+					throw new CTX_EXCEPTION(source, "Unknown variable: " + path.build());
+				}
+			}
 		}
 	}
 	

@@ -35,12 +35,12 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, null, fc.proviso, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, fc.proviso, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, Function caller, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		call.clearReg(r, st, 0, 1, 2);
 		

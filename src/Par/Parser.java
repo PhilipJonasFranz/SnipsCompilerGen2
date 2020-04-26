@@ -314,6 +314,14 @@ public class Parser {
 		return path;
 	}
 	
+	public NamespacePath buildPath() {
+		NamespacePath path = new NamespacePath(new ArrayList());
+		for (int i = 0; i < this.namespaces.size(); i++) {
+			path.path.addAll(this.namespaces.get(i).path);
+		}
+		return path;
+	}
+	
 	public Directive parseDirective() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.DIRECTIVE).getSource();
 		if (current.type == TokenType.INCLUDE) {
@@ -1175,6 +1183,18 @@ public class Parser {
 				return p.getSecond();
 			}
 		}
+		
+		List<StructTypedef> defs = new ArrayList();
+		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
+			if (p.getFirst().getLast().equals(path.getLast())) {
+				defs.add(p.getSecond());
+			}
+		}
+		
+		if (defs.size() == 1 && path.path.size() == 1) {
+			return defs.get(0);
+		}
+		
 		return null;
 	}
 	
@@ -1196,13 +1216,22 @@ public class Parser {
 		
 		StructTypedef def = null;
 		NamespacePath path = null;
-		
+		 
 		if (this.containsStructTypedef(token) || 
 				(current.type == TokenType.COLON && 
 				tokenStream.get(0).type == TokenType.COLON && 
 				tokenStream.get(1).type != TokenType.LPAREN)) {
+			
 			path = this.parseNamespacePath(token);
+			
+			/* Search with relative path */
 			def = this.getStructTypedef(path);
+			
+			/* Nothing found, attempt to convert to current absolut path and try again */
+			if (def == null) {
+				path.path.addAll(0, this.buildPath().path);
+				def = this.getStructTypedef(path);
+			}
 		}
 		
 		if (def != null) {
@@ -1308,6 +1337,8 @@ public class Parser {
 			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
 		
+		assert(!ids.isEmpty());
+		
 		return new NamespacePath(ids);
 	}
 	
@@ -1325,6 +1356,8 @@ public class Parser {
 				ids.add(accept(TokenType.STRUCTID).spelling);
 			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
+		
+		assert(!ids.isEmpty());
 		
 		return new NamespacePath(ids);
 	}

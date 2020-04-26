@@ -18,8 +18,6 @@ public class InlineCall extends Expression {
 	/** Reference to the AST node of the called function */
 	public Function calledFunction;
 	
-	public Function caller;
-	
 	/** List of the provisos types this function is templated with */
 	public List<TYPE> proviso;
 	

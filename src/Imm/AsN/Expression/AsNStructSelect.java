@@ -38,26 +38,29 @@ public class AsNStructSelect extends AsNExpression {
 		s.castedNode = sel;
 		
 		/* Create a address loader that points to the first word of the target */
-		injectAddressLoader(sel, s, r, map, st);
+		boolean directLoad = injectAddressLoader(sel, s, r, map, st);
 		
-		if (s.getType().wordsize() > 1 || s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
-			/* Copy memory section */
-			AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
-			
-			/* Create dummy stack entries for newly copied struct on stack */
-			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REGISTER.R0);
-		}
-		else {
-			/* Load */
-			ASMLdr load = new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
-			load.comment = new ASMComment("Load field from struct");
-			sel.instructions.add(load);
+		if (!directLoad) {
+			/* Copy result on the stack, push dummy values on stack set */
+			if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
+				/* Copy memory section */
+				AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
+				
+				/* Create dummy stack entries for newly copied struct on stack */
+				for (int i = 0; i < s.getType().wordsize(); i++) st.push(REGISTER.R0);
+			}
+			else {
+				/* Load in register */
+				ASMLdr load = new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
+				load.comment = new ASMComment("Load field from struct");
+				sel.instructions.add(load);
+			}
 		}
 		
 		return sel;
 	}
 	
-	public static void injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Load base address */
 		if (select.selector instanceof IDRef) {
 			IDRef ref = (IDRef) select.selector;
@@ -65,8 +68,15 @@ public class AsNStructSelect extends AsNExpression {
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
 				
-				/* Just move in R1 */
-				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
+				/* Struct is one word large and stored in register, this means that the only value requested
+				 * can be the one in the location. So just move the value into R0 and return true that the
+				 * value was directley loaded. */
+				if (ref.getType() instanceof STRUCT) {
+					node.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(loc)));
+					return true;
+				}
+				/* IDRef must point to a pointer, so move the pointer value into R1 */
+				else node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
 			}
 			else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 				/* In Local Stack */
@@ -223,6 +233,8 @@ public class AsNStructSelect extends AsNExpression {
 			/* Base Case reached */
 			else break;
 		}
+		
+		return false;
 	}
 	
 	private static void injectArraySelect(AsNNode node, ArraySelect arr, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {

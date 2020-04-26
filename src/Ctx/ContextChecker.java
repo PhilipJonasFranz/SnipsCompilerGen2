@@ -62,6 +62,7 @@ import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
+import Util.Source;
 import Util.Logging.Message;
 
 public class ContextChecker {
@@ -529,7 +530,8 @@ public class ContextChecker {
 		
 		NamespacePath path = a.lhsId.getFieldName();
 		
-		Declaration dec = scopes.peek().getField(path);
+		Declaration dec = null;
+		if (path != null) scopes.peek().getField(path, a.getSource());
 		a.origin = dec;
 		
 		TYPE t = a.value.check(this);
@@ -807,22 +809,41 @@ public class ContextChecker {
 		}
 	}
 	
-	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
-		/* Find the called function */
+	public Function findFunction(NamespacePath path, Source source) throws CTX_EXCEPTION {
 		Function f = null;
 		for (Function f0 : this.functions) {
-			if (f0.path.build().equals(i.path.build())) {
+			if (f0.path.build().equals(path.build())) {
 				f = f0;
 				break;
 			}
 		}
 		
-		if (f == null) {
-			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.path.build());
+		if (f != null) return f;
+		else if (path.path.size() == 1) {
+			List<Function> funcs = new ArrayList();
+			
+			for (Function f0 : this.functions) {
+				if (f0.path.getLast().equals(path.getLast())) {
+					funcs.add(f0);
+				}
+			}
+			
+			/* Return if there is only one result */
+			if (funcs.size() == 1) return funcs.get(0);
+			/* Multiple results, cannot determine correct one, return null */
+			else {
+				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "'. Make sure that the namespace path is explicit");
+			}
 		}
 		else {
-			i.calledFunction = f;
+			throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
 		}
+	}
+	
+	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		/* Find the called function */
+		Function f = this.findFunction(i.path, i.getSource());
+		i.calledFunction = f;
 		
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (f.manager.containsMapping(i.proviso)) {
@@ -874,20 +895,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
-		Function f = null;
-		for (Function f0 : this.functions) {
-			if (f0.path.build().equals(i.path.build())) {
-				f = f0;
-				break;
-			}
-		}
-		
-		if (f == null) {
-			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.path.build());
-		}
-		else {
-			i.calledFunction = f;
-		}
+		Function f = this.findFunction(i.path, i.getSource());
+		i.calledFunction = f;
 
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (!f.manager.containsMapping(i.proviso)) {
@@ -926,7 +935,7 @@ public class ContextChecker {
 	 * - Sets the type of the reference
 	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
-		Declaration d = this.scopes.peek().getField(i.path);
+		Declaration d = this.scopes.peek().getField(i.path, i.getSource());
 		
 		if (d != null) {
 			i.origin = d;

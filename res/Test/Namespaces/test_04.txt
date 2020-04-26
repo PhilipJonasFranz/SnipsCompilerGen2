@@ -8,11 +8,15 @@ namespace Foo {
 		int k;
 	}
 	
+	int get(Bar bar) {
+		return bar.k;
+	}
+	
 }
 
 int main() {
-	Foo::Bar bar = Foo::Bar::(5);
-	return bar.k + Foo::Baz::x;
+	Bar bar = Bar::(5);
+	return get(bar) + x;
 }
 
 TESTCASES
