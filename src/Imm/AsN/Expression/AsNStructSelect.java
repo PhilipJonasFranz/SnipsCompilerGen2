@@ -26,6 +26,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 
@@ -39,7 +40,7 @@ public class AsNStructSelect extends AsNExpression {
 		/* Create a address loader that points to the first word of the target */
 		injectAddressLoader(sel, s, r, map, st);
 		
-		if (s.getType().wordsize() > 1) {
+		if (s.getType().wordsize() > 1 || s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
 			/* Copy memory section */
 			AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
 			

@@ -1,0 +1,13 @@
+SOURCE
+#include<res\Test\Namespaces\namespace_list.sn>
+
+int main() {
+	LL:List<int>* list = LL:create<int>();
+	
+	LL:add<int>(list, 10);
+	
+	return LL:get<int>(list, 0);
+}
+
+TESTCASES
+10
