@@ -51,15 +51,13 @@ All instructions do support the condition field. See https://iitd-plos.github.io
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
  - Implement Namespaces for imports
- 
-### v.3.0.0-RELEASE: Complex type system, advanced operations
  - Implement Sizeof for Heap Objects
  
-### v.4.0.0-RELEASE: Templating, Struct extending
+### v.3.0.0-RELEASE: Templating, Struct extending
  - Implement Struct Extending
 - Implement Direct ASM injection
  
-### v.5.0.0-RELEASE: Optimization, extended compilation control
+### v.4.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer
  - Implement Optimizer Annotations
 
