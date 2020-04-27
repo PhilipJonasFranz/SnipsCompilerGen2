@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -36,8 +37,8 @@ public class SimpleLhsId extends LhsId {
 		return t;
 	}
 
-	public String getFieldName() {
-		return ref.id;
+	public NamespacePath getFieldName() {
+		return ref.path;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {

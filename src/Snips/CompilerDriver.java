@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
+import Ctx.NamespaceProcessor;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -28,6 +29,7 @@ import Par.Token;
 import Par.Token.TokenType;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
+import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
@@ -86,7 +88,7 @@ public class CompilerDriver {
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(
-													new Token(TokenType.IDENTIFIER, nullSource, "HEAP_START"), 
+													new NamespacePath("HEAP_START"), 
 													new INT(), 
 													zero_atom, 
 													nullSource);
@@ -239,6 +241,11 @@ public class CompilerDriver {
 				/* Clear program directives */
 				p.directives.clear();
 			}
+			
+			
+					/* --- NAMESPACE MANAGER --- */
+			NamespaceProcessor nameProc = new NamespaceProcessor();
+			nameProc.process((Program) AST);
 			
 			
 					/* --- CONTEXT CHECKING --- */

@@ -14,7 +14,7 @@ public class AsNInlineCall extends AsNExpression {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
 		
-		AsNFunctionCall.call(ic.calledFunction, ic.caller, ic.proviso, ic.parameters, call, r, map, st);
+		AsNFunctionCall.call(ic.calledFunction, ic.proviso, ic.parameters, call, r, map, st);
 		
 		return call;
 	}

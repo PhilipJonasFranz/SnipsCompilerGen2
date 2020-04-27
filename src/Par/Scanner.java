@@ -114,6 +114,10 @@ public class Scanner {
 				tokens.add(new Token(TokenType.RPAREN, new Source(fileName, i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("@")) {
+				tokens.add(new Token(TokenType.AT, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("{")) {
 				tokens.add(new Token(TokenType.LBRACE, new Source(fileName, i, a)));
 				this.state = ACC_STATE.NONE;
@@ -211,6 +215,10 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("#")) {
 				tokens.add(new Token(TokenType.DIRECTIVE, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("namespace")) {
+				tokens.add(new Token(TokenType.NAMESPACE, new Source(fileName, i, a)));
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("include")) {

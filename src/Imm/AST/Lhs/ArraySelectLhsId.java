@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.ArraySelect;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -36,8 +37,8 @@ public class ArraySelectLhsId extends LhsId {
 		return t;
 	}
 
-	public String getFieldName() {
-		return selection.idRef.id;
+	public NamespacePath getFieldName() {
+		return selection.idRef.path;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {

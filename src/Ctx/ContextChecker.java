@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
+import Imm.AST.Namespace;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.AddressOf;
@@ -59,7 +60,9 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
+import Util.NamespacePath;
 import Util.Pair;
+import Util.Source;
 import Util.Logging.Message;
 
 public class ContextChecker {
@@ -100,14 +103,14 @@ public class ContextChecker {
 				Function f = (Function) s;
 				/* Check main function as entrypoint, if a function is called, context is provided
 				 * and then checked */
-				if (f.functionName.equals("main") && !f.manager.provisosTypes.isEmpty()) {
+				if (f.path.build().equals("main") && !f.manager.provisosTypes.isEmpty()) {
 					throw new CTX_EXCEPTION(f.getSource(), "Function main cannot hold proviso types");
 				}
 				
 				/* Check for duplicate function name */
 				for (Function f0 : head.functions) {
-					if (f0.functionName.equals(f.functionName)) {
-						throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.functionName);
+					if (f0.path.build().equals(f.path.build())) {
+						throw new CTX_EXCEPTION(f.getSource(), "Duplicate function name: " + f.path.build());
 					}
 				}
 				
@@ -118,6 +121,10 @@ public class ContextChecker {
 					f.check(this);
 				}
 			}
+			else if (s instanceof Namespace) {
+				p.namespaces.add((Namespace) s);
+				s.check(this);
+			}
 			else s.check(this);
 		}
 		
@@ -126,6 +133,18 @@ public class ContextChecker {
 	
 	public TYPE checkExpression(Expression e) throws CTX_EXCEPTION {
 		return e.check(this);
+	}
+	
+	public TYPE checkNamespace(Namespace n) throws CTX_EXCEPTION {
+		for (SyntaxElement s : n.programElements) {
+			if (s instanceof Namespace) {
+				n.namespaces.add((Namespace) s);
+			}
+			
+			s.check(this);
+		}
+		
+		return new VOID();
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
@@ -141,8 +160,8 @@ public class ContextChecker {
 		if (f.parameters.size() > 1) {
 			for (int i = 0; i < f.parameters.size(); i++) {
 				for (int a = i + 1; a < f.parameters.size(); a++) {
-					if (f.parameters.get(i).fieldName.equals(f.parameters.get(a).fieldName)) {
-						throw new CTX_EXCEPTION(f.getSource(), "Duplicate parameter name: " + f.parameters.get(i).fieldName + " in function: " + f.functionName);
+					if (f.parameters.get(i).path.build().equals(f.parameters.get(a).path.build())) {
+						throw new CTX_EXCEPTION(f.getSource(), "Duplicate parameter name: " + f.parameters.get(i).path.build() + " in function: " + f.path.build());
 					}
 				}
 			}
@@ -278,7 +297,7 @@ public class ContextChecker {
 						if (type instanceof STRUCT) {
 							STRUCT s1 = (STRUCT) type;
 							for (int i = selectStack.size() - 1; i >= 0; i--) {
-								if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+								if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
 									type = selectStack.get(i).first;
 									while (selectStack.size() != i) selectStack.pop();
 								}
@@ -327,7 +346,7 @@ public class ContextChecker {
 					if (type0 instanceof STRUCT) {
 						STRUCT s1 = (STRUCT) type0;
 						for (int i = selectStack.size() - 1; i >= 0; i--) {
-							if (selectStack.get(i).first.typedef.structName.equals(s1.typedef.structName)) {
+							if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
 								type0 = selectStack.get(i).first;
 								while (selectStack.size() != i) selectStack.pop();
 							}
@@ -380,16 +399,16 @@ public class ContextChecker {
 	
 	private TYPE findField(STRUCT struct, IDRef ref0) throws CTX_EXCEPTION {
 		/* The ID the current selection targets */
-		if (struct.hasField(ref0.id)) {
+		if (struct.hasField(ref0.path)) {
 			/* Link manually, identifier is not part of current scope */
-			ref0.origin = struct.getField(ref0.id);
+			ref0.origin = struct.getField(ref0.path);
 			ref0.setType(ref0.origin.getType());
 			
 			/* Next type in chain */
 			return ref0.getType();
 		}
 		else {
-			throw new CTX_EXCEPTION(ref0.getSource(), "The selected field " + ref0.id + " in the structure " + struct.typeString() + " does not exist");
+			throw new CTX_EXCEPTION(ref0.getSource(), "The selected field " + ref0.path.build() + " in the structure " + struct.typeString() + " does not exist");
 		}
 	}
 	
@@ -509,9 +528,10 @@ public class ContextChecker {
 		
 		if (a.lhsId instanceof PointerLhsId) targetType = new POINTER(targetType);
 		
-		String fieldName = a.lhsId.getFieldName();
+		NamespacePath path = a.lhsId.getFieldName();
 		
-		Declaration dec = scopes.peek().getField(fieldName);
+		Declaration dec = null;
+		if (path != null) scopes.peek().getField(path, a.getSource());
 		a.origin = dec;
 		
 		TYPE t = a.value.check(this);
@@ -789,22 +809,44 @@ public class ContextChecker {
 		}
 	}
 	
-	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
-		/* Find the called function */
+	public Function findFunction(NamespacePath path, Source source) throws CTX_EXCEPTION {
 		Function f = null;
 		for (Function f0 : this.functions) {
-			if (f0.functionName.equals(i.functionName)) {
+			if (f0.path.build().equals(path.build())) {
 				f = f0;
 				break;
 			}
 		}
 		
-		if (f == null) {
-			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.functionName);
+		if (f != null) return f;
+		else if (path.path.size() == 1) {
+			List<Function> funcs = new ArrayList();
+			
+			for (Function f0 : this.functions) {
+				if (f0.path.getLast().equals(path.getLast())) {
+					funcs.add(f0);
+				}
+			}
+			
+			/* Return if there is only one result */
+			if (funcs.size() == 1) return funcs.get(0);
+			/* Multiple results, cannot determine correct one, return null */
+			else {
+				String s = "";
+				for (Function f0 : funcs) s += f0.path.build() + ", ";
+				s = s.substring(0, s.length() - 2);
+				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
+			}
 		}
 		else {
-			i.calledFunction = f;
+			throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
 		}
+	}
+	
+	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		/* Find the called function */
+		Function f = this.findFunction(i.path, i.getSource());
+		i.calledFunction = f;
 		
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (f.manager.containsMapping(i.proviso)) {
@@ -824,7 +866,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -856,20 +898,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
-		Function f = null;
-		for (Function f0 : this.functions) {
-			if (f0.functionName.equals(i.functionName)) {
-				f = f0;
-				break;
-			}
-		}
-		
-		if (f == null) {
-			throw new CTX_EXCEPTION(i.getSource(), "Undefined Function: " + i.functionName);
-		}
-		else {
-			i.calledFunction = f;
-		}
+		Function f = this.findFunction(i.path, i.getSource());
+		i.calledFunction = f;
 
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (!f.manager.containsMapping(i.proviso)) {
@@ -886,7 +916,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.functionName);
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -908,7 +938,7 @@ public class ContextChecker {
 	 * - Sets the type of the reference
 	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
-		Declaration d = this.scopes.peek().getField(i.id);
+		Declaration d = this.scopes.peek().getField(i.path, i.getSource());
 		
 		if (d != null) {
 			i.origin = d;
@@ -916,7 +946,7 @@ public class ContextChecker {
 			return i.getType();
 		}
 		else {
-			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.id);
+			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.path.build());
 		}
 	}
 	

@@ -8,6 +8,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -45,14 +46,14 @@ public class StructSelectLhsId extends LhsId {
 		return t;
 	}
 
-	public String getFieldName() {
+	public NamespacePath getFieldName() {
 		if (this.select.selector instanceof IDRef) {
 			IDRef ref = (IDRef) this.select.selector;
-			return ref.id;
+			return ref.path;
 		}
 		else if (this.select.selector instanceof ArraySelect) {
 			ArraySelect sel = (ArraySelect) this.select.selector;
-			return sel.idRef.id;
+			return sel.idRef.path;
 		}
 		else return null;
 	}

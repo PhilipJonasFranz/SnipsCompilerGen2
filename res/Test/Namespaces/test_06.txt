@@ -1,0 +1,40 @@
+SOURCE
+namespace Baz {
+	int x = 16;
+}
+
+namespace Foo {
+	int get() {
+		return Baz::x;
+	}
+}
+
+int main() {
+	return Foo::get();
+}
+
+TESTCASES
+16
+OUTPUT
+/* --test_06.txt */
+.data
+Baz.x: .word 16
+HEAP_START: .word 0
+    
+.text
+    b main
+Foo.get:                      /* Function: Foo.get */
+    ldr r0, .L0_Baz.x         /* Evaluate Expression */
+    ldr r0, [r0]
+    bx lr
+    
+main:                         /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl Foo.get                /* Evaluate Expression */
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    
+.L0_Baz.x: .word Baz.x
+.L1_HEAP_START: .word HEAP_START

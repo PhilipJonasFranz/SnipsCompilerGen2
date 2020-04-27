@@ -1,0 +1,48 @@
+SOURCE
+namespace Foo {
+	namespace Baz {
+		int x = 10;
+	}
+	
+	struct Bar<T> {
+		T k;
+	}
+	
+}
+
+int main() {
+	Foo::Bar<bool> bar = Foo::Bar<bool>::(true);
+	
+	bar.k = (bool) (Foo::Baz::x + (sizeof(bar) << 2));
+	
+	return (int) bar.k + Foo::Baz::x;
+}
+
+TESTCASES
+24
+OUTPUT
+/* --test_07.txt */
+.data
+Foo.Baz.x: .word 10
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    mov fp, sp
+    mov r0, #1                /* Evaluate Expression */
+    push { r0 }
+    ldr r1, .L0_Foo.Baz.x     /* Load from .data section */
+    ldr r1, [r1]
+    add r0, r1, #4
+    sub r1, fp, #4
+    str r0, [r1]              /* Store value to struct field */
+    sub r1, fp, #4            /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r1, r0
+    ldr r2, .L0_Foo.Baz.x     /* Load from .data section */
+    ldr r2, [r2]
+    add r0, r1, r2
+    bx lr
+    
+.L0_Foo.Baz.x: .word Foo.Baz.x
+.L1_HEAP_START: .word HEAP_START

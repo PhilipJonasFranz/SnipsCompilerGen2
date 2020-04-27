@@ -30,8 +30,9 @@ public class AsNDeclaration extends AsNStatement {
 			r.getReg(free).setDeclaration(d);
 		}
 		else {
-			if (d.getType().wordsize() == 1) {
-				/* Push declaration on the stack */
+			/* Push only if primitive or pointer, in every other case the expression 
+			 * is already on the stack */
+			if (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER) {
 				dec.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			}
 			else {

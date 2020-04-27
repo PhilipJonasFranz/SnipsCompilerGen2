@@ -1,10 +1,14 @@
 package Ctx;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
+import Util.NamespacePath;
+import Util.Source;
 
 /**
  * A scope capsules a reference to its parent scope and a 
@@ -16,7 +20,7 @@ public class Scope {
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
-	HashMap<String, Declaration> declarations = new HashMap();
+	HashMap<NamespacePath, Declaration> declarations = new HashMap();
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -28,7 +32,7 @@ public class Scope {
 	public void print(int d) {
 		if (d != 0) System.out.println("--- SCOPE ---");
 		else System.out.println("--- TOP SCOPE ---");
-		for (Entry<String, Declaration> dec : this.declarations.entrySet()) {
+		for (Entry<NamespacePath, Declaration> dec : this.declarations.entrySet()) {
 			dec.getValue().print(d, true);
 		}
 		if (this.parentScope != null) this.parentScope.print(d + 4);
@@ -37,13 +41,13 @@ public class Scope {
 	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
 	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXCEPTION {
 		if (checkDups) this.checkDuplicate(dec);
-		this.declarations.put(dec.fieldName, dec);
+		this.declarations.put(dec.path, dec);
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
 	public void addDeclaration(Declaration dec) throws CTX_EXCEPTION {
 		this.checkDuplicate(dec);
-		this.declarations.put(dec.fieldName, dec);
+		this.declarations.put(dec.path, dec);
 	}
 	
 	/** 
@@ -51,8 +55,8 @@ public class Scope {
 	 * of the given declaration. Throws a CTX_EXCEPTION if this is the case.
 	 */
 	public void checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
-		if (this.declarations.containsKey(dec.fieldName)) {
-			throw new CTX_EXCEPTION(dec.getSource(), "Duplicate field name: " + dec.fieldName);
+		if (this.declarations.containsKey(dec.path)) {
+			throw new CTX_EXCEPTION(dec.getSource(), "Duplicate field name: " + dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
@@ -64,16 +68,43 @@ public class Scope {
 	/** 
 	 * Returns the declaration with given field name from this scope or any of the parent scopes. 
 	 * Returns null if the field is not found.
+	 * @throws CTX_EXCEPTION 
 	 */
-	public Declaration getField(String name) {
-		if (this.declarations.containsKey(name)) {
-			return this.declarations.get(name);
+	public Declaration getField(NamespacePath path, Source source) throws CTX_EXCEPTION {
+		if (this.declarations.containsKey(path)) {
+			return this.declarations.get(path);
 		}
 		else {
 			if (this.parentScope != null) {
-				return this.parentScope.getField(name);
+				return this.parentScope.getField(path, source);
 			}
-			else return null;
+			else {
+				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				if (path == null) return null;
+				
+				if (path.path.size() == 1) {
+					List<Declaration> decs = new ArrayList();
+					
+					for (Entry<NamespacePath, Declaration> entry : this.declarations.entrySet()) {
+						if (entry.getKey().getLast().equals(path.getLast())) {
+							decs.add(entry.getValue());
+						}
+					}
+					
+					/* Return if there is only one result */
+					if (decs.size() == 1) return decs.get(0);
+					/* Multiple results, cannot determine correct one, return null */
+					else {
+						String s = "";
+						for (Declaration d0 : decs) s += d0.path.build() + ", ";
+						s = s.substring(0, s.length() - 2);
+						throw new CTX_EXCEPTION(source, "Found multiple matches for field '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
+					}
+				}
+				else {
+					throw new CTX_EXCEPTION(source, "Unknown variable: " + path.build());
+				}
+			}
 		}
 	}
 	

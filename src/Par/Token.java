@@ -44,9 +44,11 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
+		AT("@"),
 		BACKSL("\\"),
 		USCORE("_"),
 		STRUCT("struct"),
+		NAMESPACE("namespace"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),

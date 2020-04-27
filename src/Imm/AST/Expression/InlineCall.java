@@ -7,19 +7,16 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Par.Token;
+import Util.NamespacePath;
 import Util.Source;
 
 public class InlineCall extends Expression {
 
 			/* --- FIELDS --- */
-	/** The name of the called function */
-	public String functionName;
+	public NamespacePath path;
 	
 	/** Reference to the AST node of the called function */
 	public Function calledFunction;
-	
-	public Function caller;
 	
 	/** List of the provisos types this function is templated with */
 	public List<TYPE> proviso;
@@ -33,9 +30,9 @@ public class InlineCall extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public InlineCall(Token functionName, List<TYPE> proviso, List<Expression> parameters, Source source) {
+	public InlineCall(NamespacePath path, List<TYPE> proviso, List<Expression> parameters, Source source) {
 		super(source);
-		this.functionName = functionName.spelling;
+		this.path = path;
 		this.proviso = proviso;
 		this.parameters = parameters;
 	}
@@ -43,7 +40,7 @@ public class InlineCall extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "Inline Call: " + this.functionName);
+		System.out.print(this.pad(d) + "Inline Call: " + this.path.build());
 		for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
 		System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		for (Expression e : this.parameters) {

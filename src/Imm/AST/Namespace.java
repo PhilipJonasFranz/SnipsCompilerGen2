@@ -7,19 +7,18 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Directive.Directive;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
  * This class represents a superclass for all AST-Nodes.
  */
-public class Program extends SyntaxElement {
+public class Namespace extends SyntaxElement {
 
 			/* --- FIELDS --- */
-	public String fileName;
+	public NamespacePath path;
 	
 	public List<SyntaxElement> programElements;
-	
-	public List<Function> functions = new ArrayList();
 	
 	public List<Namespace> namespaces = new ArrayList();
 	
@@ -29,22 +28,24 @@ public class Program extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Program(List<SyntaxElement> programElements, Source source) {
+	public Namespace(NamespacePath path, List<SyntaxElement> programElements, Source source) {
 		super(source);
+		this.path = path;
 		this.programElements = programElements;
 	}
 	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		for (Directive dir : this.directives) dir.print(d, rec);
+		System.out.println(this.pad(d) + "Namespace: " + this.path.build());
+		for (Directive dir : this.directives) dir.print(d + this.printDepthStep, rec);
 		for (SyntaxElement e : this.programElements) {
-			e.print(d, rec);
+			e.print(d + this.printDepthStep, rec);
 		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		return ctx.check();
+		return ctx.checkNamespace(this);
 	}
 
 	public void setContext(List<TYPE> setContext) {
