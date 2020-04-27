@@ -2,7 +2,7 @@ SOURCE
 #include<linked_list.sn>
 
 int main(int x) {
-	List<int>* l = create<int>();
+	LinkedList<int>* l = create<int>();
 	add<int>(l, 10);
 	add<int>(l, 5);
 	add<int>(l, 12);
@@ -188,7 +188,7 @@ free:                         /* Function: free */
 /* and a value. */
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to 0. */
-create_P0:                    /* Function: create, Provisos: INT */
+List.create_P0:               /* Function: List.create, Provisos: INT */
     push { r3, fp, lr }
     mov fp, sp
     mov r0, #2                /* Evaluate Expression */
@@ -208,7 +208,7 @@ create_P0:                    /* Function: create, Provisos: INT */
     bx lr
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
-destroy_P3:                   /* Function: destroy, Provisos: INT */
+List.destroy_P3:              /* Function: List.destroy, Provisos: INT */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
@@ -233,7 +233,7 @@ destroy_P3:                   /* Function: destroy, Provisos: INT */
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-add_P1:                       /* Function: add, Provisos: INT */
+List.add_P1:                  /* Function: List.add, Provisos: INT */
     push { r3, r4, r5, r6, r7, fp, lr }
     mov fp, sp
     mov r3, r0
@@ -282,7 +282,7 @@ add_P1:                       /* Function: add, Provisos: INT */
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-get_P2:                       /* Function: get, Provisos: INT */
+List.get_P2:                  /* Function: List.get, Provisos: INT */
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
@@ -323,31 +323,31 @@ main:                         /* Function: main */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
-    bl create_P0              /* Evaluate Expression */
+    bl List.create_P0         /* Evaluate Expression */
     mov r4, r0
     mov r0, #10               /* Load parameters */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl add_P1                 /* Call add */
+    bl List.add_P1            /* Call List.add */
     mov r0, #5                /* Load parameters */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl add_P1                 /* Call add */
+    bl List.add_P1            /* Call List.add */
     mov r0, #12               /* Load parameters */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl add_P1                 /* Call add */
+    bl List.add_P1            /* Call List.add */
     mov r0, r3                /* Evaluate Expression */
     push { r0 }
     mov r0, r4
     pop { r1 }
-    bl get_P2                 /* Call get */
+    bl List.get_P2            /* Call List.get */
     mov r5, r0
     mov r0, r4                /* Load parameters */
-    bl destroy_P3             /* Call destroy */
+    bl List.destroy_P3        /* Call List.destroy */
     mov r0, r5                /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }

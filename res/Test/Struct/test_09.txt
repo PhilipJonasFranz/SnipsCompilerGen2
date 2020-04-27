@@ -4,7 +4,7 @@ SOURCE
 int main(int x, int y) {
 	int[2] v0 = {10, 20};
 
-	List<int*>* l = create<int*>();
+	LinkedList<int*>* l = create<int*>();
 	
 	return 0;
 }
@@ -186,7 +186,7 @@ free:                         /* Function: free */
 /* and a value. */
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to 0. */
-create_P0:                    /* Function: create, Provisos: INT* */
+List.create_P0:               /* Function: List.create, Provisos: INT* */
     push { r3, fp, lr }
     mov fp, sp
     mov r0, #2                /* Evaluate Expression */
@@ -226,7 +226,7 @@ main:                         /* Function: main */
     mov r0, #20               /* Evaluate Expression */
     mov r1, #10
     push { r1, r0 }
-    bl create_P0              /* Evaluate Expression */
+    bl List.create_P0         /* Evaluate Expression */
     mov r5, r0
     mov r0, #0                /* Evaluate Expression */
     mov sp, fp

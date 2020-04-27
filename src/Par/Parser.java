@@ -382,8 +382,31 @@ public class Parser {
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
+		boolean functionCheck = current.type == TokenType.IDENTIFIER;
+		for (int i = 0; i < this.tokenStream.size(); i += 3) {
+			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
+				break;
+			}
+			functionCheck &= tokenStream.get(i).type == TokenType.COLON;
+			functionCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
+			
+			Token t = tokenStream.get(i + 2);
+			if (t.type == TokenType.STRUCTID) {
+				/* Found Struct ID, Must be a structure init */
+				functionCheck = false;
+				break;
+			}
+			else if (t.type != TokenType.IDENTIFIER) {
+				functionCheck = false;
+				break;
+			}
+		}
+		
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
+		}
+		else if (functionCheck) {
+			return this.parseFunctionCall();
 		}
 		else if (current.type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.COLON) {
 			return this.parseDeclaration();
@@ -408,10 +431,6 @@ public class Parser {
 		}
 		else if (current.type == TokenType.SWITCH) {
 			return this.parseSwitch();
-		}
-		else if (current.type == TokenType.IDENTIFIER && 
-				(this.tokenStream.get(0).type == TokenType.LPAREN || this.tokenStream.get(0).type == TokenType.CMPLT)) {
-			return this.parseFunctionCall();
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL) {
 			return this.parseAssignment(true);
@@ -1198,9 +1217,9 @@ public class Parser {
 		return null;
 	}
 	
-	public boolean containsStructTypedef(Token token) {
+	public boolean containsStructTypedef(String token) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
-			if (p.getFirst().getLast().equals(token.spelling)) {
+			if (p.getFirst().getLast().equals(token)) {
 				return true;
 			}
 		}
@@ -1217,7 +1236,7 @@ public class Parser {
 		StructTypedef def = null;
 		NamespacePath path = null;
 		 
-		if (this.containsStructTypedef(token) || 
+		if (this.containsStructTypedef(token.spelling) || 
 				(current.type == TokenType.COLON && 
 				tokenStream.get(0).type == TokenType.COLON && 
 				tokenStream.get(1).type != TokenType.LPAREN)) {

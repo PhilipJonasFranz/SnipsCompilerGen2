@@ -1,13 +1,319 @@
 SOURCE
-#include<res\Test\Namespaces\namespace_list.sn>
+#include<linked_list.sn>
+#include<binary_tree.sn>
 
 int main() {
-	LL:List<int>* list = LL:create<int>();
+	LinkedList<int>* list = List::create<int>();
 	
-	LL:add<int>(list, 10);
+	add<int>(list, 10);
 	
-	return LL:get<int>(list, 0);
+	return get<int>(list, 0);
 }
 
 TESTCASES
 10
+OUTPUT
+/* --test_09.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                         /* Function: resv */
+    push { r3, r4, r5, r6, r7, r8, r9 }
+    mov r3, r0
+/* Add block header to size */
+    add r3, r3, #1
+/* Get reference to heap start */
+    ldr r0, .L3_HEAP_START    /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r4, r0
+.L5:                          /* Evaluate condition */
+    lsl r0, r4, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    cmp r0, #0
+    beq .L6
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    lsl r0, r4, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r5, r0
+    mov r6, r0
+    cmp r5, #0
+    bge .L8
+/* Defragment Heap */
+.L10:                         /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne .L11
+    sub r0, r4, r5
+    lsl r0, r0, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r7, r0
+    cmp r7, #0
+    ble .L13
+    b .L11
+.L13: 
+    cmp r7, #0
+    bne .L15
+    mov r0, #0                /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b .L11
+.L15: 
+    add r5, r5, r7
+/* Add to current size */
+    b .L10
+.L11: 
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+/* Write defragmented size to heap */
+    mov r7, r0
+    cmp r5, #0
+    bne .L16
+    mov r0, #0                /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+.L16: 
+/* Memory location is free, check size */
+    rsb r0, r5, #0
+    mov r5, r0
+    cmp r0, r3
+    bne .L19
+/* Fits */
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r8, r0                /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+    b .L22
+.L19: 
+    cmp r5, r3
+    ble .L21
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r9, r0                /* Evaluate Expression */
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r1, r4                /* Evaluate Expression */
+    mov r2, #1
+    add r0, r1, #1
+    b .L22
+.L21: 
+    sub r4, r4, r5
+    b .L7
+.L8: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+.L7: 
+    b .L5
+.L6: 
+/* End reached, create new block */
+    mov r0, r3                /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r5, r0                /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+.L22: 
+    pop { r3, r4, r5, r6, r7, r8, r9 }
+    bx lr
+    
+/* Frees the memory block the given pointer points to. The pointer object will keep */
+/* the memory address, but the memory block will not be registered to be used anymore and */
+/* thus can be overwritten. */
+free:                         /* Function: free */
+    push { r3, r4, r5, r6, r7, r8, r9 }
+    mov r3, r0
+/* Jump to block head */
+    sub r3, r3, #1
+/* Load Block Size */
+    lsl r0, r3, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r4, r0
+/* Store negated block size */
+    mov r5, r0                /* Evaluate Expression */
+    rsb r0, r4, #0
+    lsl r1, r3, #2
+    str r0, [r1]
+    mov r6, r0                /* Evaluate Expression */
+    add r7, r3, r4
+.L24:                         /* Evaluate condition */
+    lsl r0, r7, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    cmp r0, #0
+    bge .L25
+    lsl r0, r7, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r8, r0
+/* Add size to freed block */
+    mov r9, r0                /* Evaluate Expression */
+    lsl r0, r3, #2            /* Convert to bytes */
+    ldr r0, [r0]              /* Load from address */
+    mov r1, r0
+    add r0, r1, r8
+    lsl r1, r3, #2
+    str r0, [r1]
+/* Shift pointer to next block */
+    sub r7, r7, r8
+    b .L24
+.L25: 
+    pop { r3, r4, r5, r6, r7, r8, r9 }
+    bx lr
+    
+/* A single list entry, contains a pointer to the next node */
+/* and a value. */
+/* Wraps the list head and tail. */
+/* Creates a new List Object and initializes the head an tail to 0. */
+List.create_P0:               /* Function: List.create, Provisos: INT */
+    push { r3, fp, lr }
+    mov fp, sp
+    mov r0, #2                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r3, r0
+/* Initialize list, set pointers to 0 */
+    mov r0, #0                /* Evaluate Expression */
+    push { r0 }
+    mov r0, #0
+    lsl r1, r3, #2
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    mov r0, r3                /* Evaluate Expression */
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    
+/* Free the list by freeing all contained list nodes, and the list itself. */
+    
+/* Creates a new list node for given value x and adds the node at the */
+/* end of the list. */
+List.add_P1:                  /* Function: List.add, Provisos: INT */
+    push { r3, r4, r5, r6, r7, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, #2                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r5, r0
+/* Initialize the new List Node, set the next pointer to null */
+    mov r0, r4                /* Evaluate Expression */
+    push { r0 }
+    mov r6, r0
+    mov r0, #0
+    lsl r1, r5, #2
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    mov r7, r0
+    lsl r1, r3, #2            /* Convert to bytes */
+    ldr r0, [r1]              /* Load field from struct */
+    cmp r0, #0
+    bne .L29
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r3, #2            /* Convert to bytes */
+    str r0, [r1]              /* Store value to struct field */
+/* Dereference through pointer */
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r3, #2            /* Convert to bytes */
+    add r1, r1, #4
+    str r0, [r1]              /* Store value to struct field */
+    b .L28
+.L29: 
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r3, #2            /* Convert to bytes */
+    add r1, r1, #4
+    ldr r1, [r1]
+    lsl r1, r1, #2
+    str r0, [r1]              /* Store value to struct field */
+    mov r0, r5                /* Evaluate Expression */
+    lsl r1, r3, #2            /* Convert to bytes */
+    add r1, r1, #4
+    str r0, [r1]              /* Store value to struct field */
+.L28: 
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, fp, lr }
+    bx lr
+    
+/* Creates a new list node for given value x and adds the node at the */
+/* end of the list. */
+List.get_P2:                  /* Function: List.get, Provisos: INT */
+    push { r3, r4, r5 }
+    mov r3, r0
+    mov r4, r1
+    lsl r1, r3, #2            /* Convert to bytes */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r5, r0
+.L32:                         /* Evaluate condition */
+    cmp r4, #0
+    beq .L33
+    lsl r1, r5, #2            /* Convert to bytes */
+    ldr r0, [r1]              /* Load field from struct */
+    cmp r0, #0
+    bne .L34
+    mov r0, #0                /* Evaluate Expression */
+    b .L36
+.L34: 
+/* Jump to next */
+    lsl r1, r5, #2            /* Convert to bytes */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r5, r0
+    mov r0, r4
+    sub r4, r0, #1
+    b .L32
+.L33: 
+    lsl r1, r5, #2            /* Convert to bytes */
+    add r1, r1, #4
+    ldr r0, [r1]              /* Load field from struct */
+.L36: 
+    pop { r3, r4, r5 }
+    bx lr
+    
+/* Check if given list contains given value. */
+    
+/* Finds the first node in the list that has given value. */
+/* Returns a pointer to this list node. */
+    
+/* A tree node that has a left and right child and holds a value. */
+/* Create a new Tree, initialize both childs to 0, set root value */
+/* to given value. Return a pointer to the root. */
+    
+    
+main:                         /* Function: main */
+    push { r3, fp, lr }
+    mov fp, sp
+    bl List.create_P0         /* Evaluate Expression */
+    mov r3, r0
+    mov r0, #10               /* Load parameters */
+    push { r0 }
+    mov r0, r3
+    pop { r1 }
+    bl List.add_P1            /* Call List.add */
+    mov r0, #0                /* Evaluate Expression */
+    push { r0 }
+    mov r0, r3
+    pop { r1 }
+    bl List.get_P2            /* Call List.get */
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    
+.L3_HEAP_START: .word HEAP_START

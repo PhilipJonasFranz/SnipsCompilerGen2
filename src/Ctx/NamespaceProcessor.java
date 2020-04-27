@@ -9,6 +9,7 @@ import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
 import lombok.NoArgsConstructor;
@@ -83,6 +84,9 @@ public class NamespaceProcessor {
 					Function f = (Function) s;
 					
 					f.path.path.addAll(0, name.path.path);
+				}
+				else if (s instanceof Comment) {
+					/* Dont do anything */
 				}
 				else throw new SNIPS_EXCEPTION("Cannot flatten " + s.getClass().getName());
 				

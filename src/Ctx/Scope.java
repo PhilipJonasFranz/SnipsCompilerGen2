@@ -95,7 +95,10 @@ public class Scope {
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
 					else {
-						throw new CTX_EXCEPTION(source, "Found multiple matches for field " + path.build() + ". Make sure that the namespace path is explicit");
+						String s = "";
+						for (Declaration d0 : decs) s += d0.path.build() + ", ";
+						s = s.substring(0, s.length() - 2);
+						throw new CTX_EXCEPTION(source, "Found multiple matches for field '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
 					}
 				}
 				else {
