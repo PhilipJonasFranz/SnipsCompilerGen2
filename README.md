@@ -50,12 +50,11 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
 ### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Implement Namespaces for imports
  - Implement Sizeof for Heap Objects
  
 ### v.3.0.0-RELEASE: Templating, Struct extending
  - Implement Struct Extending
-- Implement Direct ASM injection
+ - Implement Direct ASM injection
  
 ### v.4.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer
