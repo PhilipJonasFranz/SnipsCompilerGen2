@@ -54,11 +54,11 @@ public class AsNBody extends AsNNode {
 				Declaration dec = (Declaration) s;
 				
 				/* Create instruction for .data Section */
-				ASMDataLabel dataEntry = new ASMDataLabel(dec.fieldName, new MemoryWordOperand(dec.value));
+				ASMDataLabel dataEntry = new ASMDataLabel(dec.path.build(), new MemoryWordOperand(dec.value));
 				body.instructions.add(dataEntry);
 				
 				/* Create address reference instruction for .text section */
-				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.fieldName), new MemoryWordRefOperand(dataEntry));
+				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.path.build()), new MemoryWordRefOperand(dataEntry));
 				globalVarReferences.add(reference);
 				
 				/* Add declaration to global memory */
@@ -73,11 +73,11 @@ public class AsNBody extends AsNNode {
 			Declaration heap = CompilerDriver.HEAP_START;
 			
 			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(heap.fieldName, new MemoryWordOperand(heap.value));
+			ASMDataLabel dataEntry = new ASMDataLabel(heap.path.build(), new MemoryWordOperand(heap.value));
 			body.instructions.add(dataEntry);
 			
 			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.fieldName), new MemoryWordRefOperand(dataEntry));
+			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.path.build()), new MemoryWordRefOperand(dataEntry));
 			globalVarReferences.add(reference);
 			
 			/* Add declaration to global memory */
@@ -97,7 +97,7 @@ public class AsNBody extends AsNNode {
 		
 		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand());
-		if (!(p.programElements.get(0) instanceof Function && ((Function) p.programElements.get(0)).functionName.equals("main"))) {
+		if (!(p.programElements.get(0) instanceof Function && ((Function) p.programElements.get(0)).path.build().equals("main"))) {
 			body.instructions.add(branch);
 		}
 		
@@ -108,7 +108,7 @@ public class AsNBody extends AsNNode {
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, new StackSet()).getInstructions();
 				
 				/* Patch Branch to Main Function */
-				if (((Function) s).functionName.equals("main")) 
+				if (((Function) s).path.build().equals("main")) 
 					((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
 				
 				body.instructions.addAll(ins);

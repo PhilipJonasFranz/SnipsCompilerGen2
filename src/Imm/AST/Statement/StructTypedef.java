@@ -10,6 +10,7 @@ import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -18,7 +19,7 @@ import Util.Source;
 public class StructTypedef extends SyntaxElement {
 
 			/* --- FIELDS --- */
-	public String structName;
+	public NamespacePath path;
 	
 	public STRUCT struct;
 	
@@ -31,9 +32,9 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(String id, List<TYPE> proviso, List<Declaration> declarations, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, Source source) {
 		super(source);
-		this.structName = id;
+		this.path = path;
 		this.proviso = proviso;
 		this.fields = declarations;
 		
@@ -44,7 +45,7 @@ public class StructTypedef extends SyntaxElement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Struct Typedef <" + this.structName + ">");
+		System.out.println(this.pad(d) + "Struct Typedef <" + this.path.build() + ">");
 		if (rec) {
 			for (Declaration dec : this.fields) {
 				dec.print(d + this.printDepthStep, rec);
@@ -90,7 +91,7 @@ public class StructTypedef extends SyntaxElement {
 			dec0.add(dec.clone());
 		}
 		
-		StructTypedef clone = new StructTypedef(this.structName, prov0, dec0, this.getSource());
+		StructTypedef clone = new StructTypedef(this.path, prov0, dec0, this.getSource());
 		
 		assert(clone.fields.size() == this.fields.size());
 		

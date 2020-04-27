@@ -8,13 +8,13 @@ import Imm.AST.Function;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Par.Token;
+import Util.NamespacePath;
 import Util.Source;
 
 public class FunctionCall extends Statement {
 
 			/* --- FIELDS --- */
-	public String functionName;
+	public NamespacePath path;
 	
 	public Function calledFunction;
 	
@@ -29,9 +29,9 @@ public class FunctionCall extends Statement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public FunctionCall(Token functionName, List<TYPE> proviso, List<Expression> parameters, Source source) {
+	public FunctionCall(NamespacePath path, List<TYPE> proviso, List<Expression> parameters, Source source) {
 		super(source);
-		this.functionName = functionName.spelling;
+		this.path = path;
 		this.proviso = proviso;
 		this.parameters = parameters;
 	}
@@ -39,7 +39,7 @@ public class FunctionCall extends Statement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "Function Call: " + this.functionName);
+		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
 		if (!this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";

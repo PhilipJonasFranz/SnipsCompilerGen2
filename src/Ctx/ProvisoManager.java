@@ -12,6 +12,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
 
@@ -206,7 +207,7 @@ public class ProvisoManager {
 							}
 						}
 						
-						if (s1.typedef.structName.equals(s.typedef.structName)) {
+						if (s1.typedef.path.build().equals(s.typedef.path.build())) {
 							/* Set pointer to point on itself, but set provisos */
 							p.coreType = s1;
 						}
@@ -259,6 +260,10 @@ public class ProvisoManager {
 		}
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
+			
+			if (s.proviso.size() != s.typedef.proviso.size()) {
+				throw new CTX_EXCEPTION(CompilerDriver.nullSource, "Expected " + s.typedef.proviso.size() + " provisos but got " + s.proviso.size());
+			}
 			
 			/* Map initialization proviso types to proviso head listing */
 			for (int i = 0; i < s.typedef.proviso.size(); i++) {

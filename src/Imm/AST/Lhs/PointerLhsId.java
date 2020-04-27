@@ -4,11 +4,12 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.ArraySelect;
+import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Util.NamespacePath;
 import Util.Source;
 import lombok.Getter;
 
@@ -47,12 +48,12 @@ public class PointerLhsId extends LhsId {
 		return this.expressionType;
 	}
 
-	public String getFieldName() {
+	public NamespacePath getFieldName() {
 		if (deref.expression instanceof IDRef) {
-			return ((IDRef) deref.expression).origin.fieldName;
+			return ((IDRef) deref.expression).origin.path;
 		}
 		else if (deref.expression instanceof ArraySelect) {
-			return ((ArraySelect) deref.expression).idRef.origin.fieldName;
+			return ((ArraySelect) deref.expression).idRef.origin.path;
 		}
 		else return null;
 	}

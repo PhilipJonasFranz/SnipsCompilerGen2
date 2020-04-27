@@ -8,7 +8,7 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Par.Token;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -17,7 +17,7 @@ import Util.Source;
 public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
-	public String fieldName;
+	public NamespacePath path;
 	
 	private TYPE type;
 	
@@ -29,29 +29,23 @@ public class Declaration extends Statement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Declaration(Token id, TYPE type, Source source) {
+	public Declaration(NamespacePath path, TYPE type, Source source) {
 		super(source);
-		this.fieldName = id.spelling;
+		this.path = path;
 		this.type = type;
 	}
 	
-	public Declaration(Token id, TYPE type, Expression value, Source source) {
+	public Declaration(NamespacePath path, TYPE type, Expression value, Source source) {
 		super(source);
-		this.fieldName = id.spelling;
+		this.path = path;
 		this.type = type;
 		this.value = value;
-	}
-	
-	private Declaration(String id, TYPE type, Source source) {
-		super(source);
-		this.fieldName = id;
-		this.type = type;
 	}
 	
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.fieldName);
+		System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
 		if (rec && this.value != null) {
 			this.value.print(d + this.printDepthStep, rec);
 		}
@@ -94,7 +88,7 @@ public class Declaration extends Statement {
 	}
 	
 	public Declaration clone() {
-		Declaration clone = new Declaration(this.fieldName, this.type.clone(), this.getSource());
+		Declaration clone = new Declaration(this.path, this.type.clone(), this.getSource());
 		return clone;
 	}
 	

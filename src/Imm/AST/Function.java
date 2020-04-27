@@ -12,7 +12,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Par.Token;
+import Util.NamespacePath;
 import Util.Source;
 
 /**
@@ -25,16 +25,16 @@ public class Function extends CompoundStatement {
 	
 	private TYPE returnType;
 	
-	public String functionName;
+	public NamespacePath path;
 	
 	public List<Declaration> parameters;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public Function(TYPE returnType, Token functionId, List<TYPE> proviso, List<Declaration> parameters, List<Statement> statements, Source source) {
+	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, List<Statement> statements, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
-		this.functionName = functionId.spelling;
+		this.path = path;
 		this.parameters = parameters;
 		
 		this.manager = new ProvisoManager(this.getSource(), proviso);
@@ -49,10 +49,10 @@ public class Function extends CompoundStatement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		for (Directive dir : this.directives) dir.print(d, rec);
-		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.functionName + "(");
+		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build() + "(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.fieldName);
+			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
 			if (i < this.parameters.size() - 1) System.out.print(", ");
 		}
 		System.out.println(") " + this.toString().split("@") [1]);

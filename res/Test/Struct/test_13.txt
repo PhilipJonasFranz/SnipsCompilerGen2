@@ -160,7 +160,7 @@ resv:                         /* Function: resv */
 /* A tree node that has a left and right child and holds a value. */
 /* Create a new Tree, initialize both childs to 0, set root value */
 /* to given value. Return a pointer to the root. */
-create_P0:                    /* Function: create, Provisos: INT */
+Tree.create_P0:               /* Function: Tree.create, Provisos: INT */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
@@ -184,7 +184,7 @@ create_P0:                    /* Function: create, Provisos: INT */
     pop { r3, r4, r5, fp, lr }
     bx lr
     
-insert_P1:                    /* Function: insert, Provisos: INT */
+Tree.insert_P1:               /* Function: Tree.insert, Provisos: INT */
     push { r3, r4, r5, r6, r7, r8, fp, lr }
     mov fp, sp
     mov r3, r0
@@ -264,38 +264,38 @@ main:                         /* Function: main */
     mov r4, r1
     mov r5, r2
     mov r0, #10               /* Evaluate Expression */
-    bl create_P0              /* Call create */
+    bl Tree.create_P0         /* Call Tree.create */
     mov r6, r0
     mov r0, #5                /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     mov r0, #12               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     mov r0, #11               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     mov r0, #15               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     mov r0, #7                /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     mov r0, #2                /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl insert_P1              /* Call insert */
+    bl Tree.insert_P1         /* Call Tree.insert */
     cmp r3, #1
     bne .L34
     lsl r1, r6, #2            /* Convert to bytes */

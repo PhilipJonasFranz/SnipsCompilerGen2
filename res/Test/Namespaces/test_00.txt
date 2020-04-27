@@ -1,0 +1,25 @@
+SOURCE
+namespace Test {
+	int x = 10;
+}
+
+int main() {
+	return Test::x;
+}
+
+TESTCASES
+10
+OUTPUT
+/* --test_00.txt */
+.data
+Test.x: .word 10
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    ldr r0, .L0_Test.x        /* Evaluate Expression */
+    ldr r0, [r0]
+    bx lr
+    
+.L0_Test.x: .word Test.x
+.L1_HEAP_START: .word HEAP_START

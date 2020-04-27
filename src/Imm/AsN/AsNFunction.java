@@ -84,15 +84,15 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
-			ASMLabel label = new ASMLabel(func.source.functionName + f.manager.provisosCalls.get(k).first, true);
+			ASMLabel label = new ASMLabel(func.source.path.build() + f.manager.provisosCalls.get(k).first, true);
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
 			if (f.manager.provisosCalls.get(k).first.equals("")) {
-				com = "Function: " + f.functionName;
+				com = "Function: " + f.path.build();
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.functionName + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
 				List<TYPE> types = f.manager.provisosCalls.get(k).second.second;
 				for (int x = 0; x < types.size(); x++) {
 					com += types.get(x).typeString() + ", ";
