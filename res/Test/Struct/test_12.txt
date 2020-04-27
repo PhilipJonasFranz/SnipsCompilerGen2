@@ -9,7 +9,7 @@ int main(int x) {
 	
 	int r = get<int>(l, x);
 	
-	destroy<int>(l);
+	destroy(l);
 	
 	return r;
 }
