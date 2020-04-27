@@ -109,4 +109,17 @@ namespace List {
 		/* Not found */
 		return (ListNode<T>*) 0;
 	}
+	
+	/*
+	 * Returns the amount of elements stored in the list.
+	 */
+	int size(LinkedList<void>* lp) {
+		ListNode<void>* n = lp->head;
+		int size = 0;
+		while ((int) n != 0) {
+			n = n->next;
+			size++;
+		}
+		return size;
+	}
 }
