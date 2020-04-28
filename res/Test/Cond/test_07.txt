@@ -29,7 +29,7 @@ main:                         /* Function: main */
     mov r4, r1
     mov r5, r2
     cmp r3, #3
-    bne .L0
+    bne main.L0
     add r6, r3, r4
     add r1, r6, r3
     add r1, r1, r5
@@ -46,7 +46,7 @@ main:                         /* Function: main */
     push { r0 }
     add r3, r3, r7
     add sp, sp, #12
-.L0: 
+main.L0: 
     mov r0, r3                /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }

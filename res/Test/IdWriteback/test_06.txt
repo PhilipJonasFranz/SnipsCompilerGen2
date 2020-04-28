@@ -31,21 +31,21 @@ main:                         /* Function: main */
 /* Force s on the stack */
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
-.L2: 
+main.L1: 
     cmp r5, r3
-    bge .L3
+    bge main.L2
     add r0, r5, #1
     ldr r2, [fp, #-4]
     add r0, r2, r0
     str r0, [fp, #-4]
     mov r0, r5
     add r5, r0, #1
-    b .L2
-.L3: 
+    b main.L1
+main.L2: 
     mov r5, r0                /* Evaluate Expression */
     ldr r0, [fp, #-4]
     mov sp, fp
     pop { r3, r4, r5 }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START
+main.L0_HEAP_START: .word HEAP_START

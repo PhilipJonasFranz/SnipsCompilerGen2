@@ -14,4 +14,4 @@ main:                         /* Function: main */
     mov r0, #3                /* Evaluate Expression */
     bx lr
     
-.L0_HEAP_START: .word HEAP_START
+main.L0_HEAP_START: .word HEAP_START

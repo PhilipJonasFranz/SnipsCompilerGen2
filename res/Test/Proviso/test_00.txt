@@ -33,15 +33,15 @@ main:                         /* Function: main */
     bl get_P1                 /* Evaluate Expression */
     mov r4, r0
     cmp r4, #0
-    beq .L5
+    beq main.L0
     mov r0, r3
-    b .L6
-.L5: 
+    b main.L1
+main.L0: 
     mov r5, r0
     mov r0, #2
-.L6: 
+main.L1: 
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
     
-.L2_HEAP_START: .word HEAP_START
+main.L2_HEAP_START: .word HEAP_START

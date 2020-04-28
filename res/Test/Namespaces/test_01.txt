@@ -22,13 +22,13 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    ldr r1, .L0_Foo.x         /* Evaluate Expression */
+    ldr r1, main.L0_Foo.x     /* Evaluate Expression */
     ldr r1, [r1]
-    ldr r2, .L1_Bar.x         /* Load from .data section */
+    ldr r2, main.L1_Bar.x     /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
     
-.L0_Foo.x: .word Foo.x
-.L1_Bar.x: .word Bar.x
-.L2_HEAP_START: .word HEAP_START
+main.L0_Foo.x: .word Foo.x
+main.L1_Bar.x: .word Bar.x
+main.L2_HEAP_START: .word HEAP_START

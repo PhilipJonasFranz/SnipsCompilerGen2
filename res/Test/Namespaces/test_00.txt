@@ -17,9 +17,9 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    ldr r0, .L0_Test.x        /* Evaluate Expression */
+    ldr r0, main.L0_Test.x    /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
     
-.L0_Test.x: .word Test.x
-.L1_HEAP_START: .word HEAP_START
+main.L0_Test.x: .word Test.x
+main.L1_HEAP_START: .word HEAP_START

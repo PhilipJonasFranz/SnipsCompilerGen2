@@ -39,4 +39,4 @@ main:                         /* Function: main */
     ldr r0, [r1]              /* Load field from struct */
     bx lr
     
-.L0_HEAP_START: .word HEAP_START
+main.L0_HEAP_START: .word HEAP_START
