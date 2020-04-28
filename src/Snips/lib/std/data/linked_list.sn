@@ -96,7 +96,7 @@ namespace List {
 	/*
 	 * Finds the first node in the list that has given value.
 	 * Returns a pointer to this list node, or 0 in case the
-	 * value wasnt found.
+	 * value wasnt found. Frees the removed node of the heap.
 	 */
 	ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = lp->head;

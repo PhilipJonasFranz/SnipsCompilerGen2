@@ -9,13 +9,14 @@ public class LabelGen {
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
+	public static String funcPrefix = "";
 	
 			/* --- METHODS --- */
 	/**
 	 * Returns a new unique label. 
 	 */
 	public static String getLabel() {
-		return ".L" + c++;
+		return funcPrefix + ".L" + c++;
 	}
 	
 	public static String getProvisoPostfix() {

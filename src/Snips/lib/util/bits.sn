@@ -1,31 +1,33 @@
-/*
- * Return the bit stored at the index i. Return as a boolean value.
- */
-bool isBitSet(int x, int i) {
-	int mask = 1 << i;
-	return (bool) ((x & mask) >> i);
-}
-
-/*
- * Sets the bit at given index to given boolean. Returns the resulting number.
- */
-int setBit(int target, int i, bool val) {
-	target = target ^ (-((int) val) ^ target) & (1 << i);
-	return target;
-}
-
-/*
- * Toggles the bit at given index.
- */
-int toggleBit(int target, int i) {
-	target = target ^ (1 << i);
-	return target;
-}
-
-/*
- * Toggles the bit at given index.
- */
-int clearBit(int target, int i) {
-	target = target & ~(1 << i);
-	return target;
+namespace Bits {
+	/*
+	 * Return the bit stored at the index i. Return as a boolean value.
+	 */
+	bool isBitSet(int x, int i) {
+		int mask = 1 << i;
+		return (bool) ((x & mask) >> i);
+	}
+	
+	/*
+	 * Sets the bit at given index to given boolean. Returns the resulting number.
+	 */
+	int setBit(int target, int i, bool val) {
+		target = target ^ (-((int) val) ^ target) & (1 << i);
+		return target;
+	}
+	
+	/*
+	 * Toggles the bit at given index.
+	 */
+	int toggleBit(int target, int i) {
+		target = target ^ (1 << i);
+		return target;
+	}
+	
+	/*
+	 * Toggles the bit at given index.
+	 */
+	int clearBit(int target, int i) {
+		target = target & ~(1 << i);
+		return target;
+	}
 }

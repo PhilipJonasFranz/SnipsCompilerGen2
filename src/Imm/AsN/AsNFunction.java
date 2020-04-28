@@ -51,6 +51,9 @@ public class AsNFunction extends AsNCompoundStatement {
 		f.castedNode = func;
 		func.source = f;
 		
+		LabelGen.reset();
+		LabelGen.funcPrefix = f.path.build();
+		
 		List<ASMInstruction> all = new ArrayList();
 		
 		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {

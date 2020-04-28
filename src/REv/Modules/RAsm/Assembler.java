@@ -482,6 +482,8 @@ public class Assembler {
 					
 					String shift = "00000000";
 					
+					String upDown = "1";
+					
 					String wb = "0";
 					String indexing = "1";
 					if (!in.get(i).getInstruction().contains("[")) {
@@ -498,6 +500,7 @@ public class Assembler {
 						else {
 							new Message("Unknown Label: " + sp [2] + " in line " + in.get(i).getLine() + ".", Message.Type.FAIL);
 						}
+						upDown = "1";
 					}
 					else if (in.get(i).getInstruction().contains("!")) {
 						// ldr r0, [r1, #-4]!
@@ -510,7 +513,12 @@ public class Assembler {
 						
 						if (sp [3].contains("#")) {
 							imm = "0";
-							immV = toBinaryStringLength(sp [3].substring(1), 12);
+							int val = Integer.parseInt(sp [3].substring(1));
+							if (val < 0) {
+								upDown = "0";
+								val = -val;
+							}
+							immV = toBinaryStringLength("" + val, 12);
 						}
 						else {
 							if (sp.length > 5)shift = getShiftBin(sp [4] + " " + sp [5]);
@@ -526,10 +534,15 @@ public class Assembler {
 						
 						if (sp [3].contains("#")) {
 							imm = "0";
-							immV = toBinaryStringLength(sp [3].substring(1), 12);
+							int val = Integer.parseInt(sp [3].substring(1));
+							if (val < 0) {
+								upDown = "0";
+								val = -val;
+							}
+							immV = toBinaryStringLength("" + val, 12);
 						}
 						else {
-							if (sp.length > 5)shift = getShiftBin(sp [4] + " " + sp [5].substring(0, sp [5].length() - 1));
+							if (sp.length > 5) shift = getShiftBin(sp [4] + " " + sp [5].substring(0, sp [5].length() - 1));
 							
 							rm = shift + getReg(sp [3]);
 						}
@@ -545,7 +558,12 @@ public class Assembler {
 						
 						if (sp.length > 3 && sp [3].contains("#")) {
 							imm = "0";
-							immV = toBinaryStringLength(sp [3].substring(1), 12);
+							int val = Integer.parseInt(sp [3].substring(1));
+							if (val < 0) {
+								upDown = "0";
+								val = -val;
+							}
+							immV = toBinaryStringLength("" + val, 12);
 						}
 						else if (sp.length > 3) {
 							if (sp.length > 5) {
@@ -565,7 +583,7 @@ public class Assembler {
 					app += "01";
 					app += imm; // Immediate
 					app += indexing; // Indexing
-					app += "1"; // Up/Down
+					app += upDown; // Up/Down
 					app += "0"; // Quantity
 					app += wb; // Writeback
 					app += ls;
