@@ -1235,14 +1235,15 @@ public class Parser {
 			}
 		}
 		
-		if (defs.size() == 1 && path.path.size() == 1) {
+		if (defs.isEmpty()) return null;
+		else if (defs.size() == 1 && path.path.size() == 1) {
 			return defs.get(0);
 		}
 		else {
 			String s = "";
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
-			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit.");
+			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct.");
 		}
 	}
 	
@@ -1279,6 +1280,10 @@ public class Parser {
 			if (def == null) {
 				path.path.addAll(0, this.buildPath().path);
 				def = this.getStructTypedef(path);
+			}
+			
+			if (def == null) {
+				throw new SNIPS_EXCEPTION("Unknown struct type '" + path.build() + "'");
 			}
 		}
 		

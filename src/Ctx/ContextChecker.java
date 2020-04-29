@@ -845,7 +845,7 @@ public class ContextChecker {
 				String s = "";
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
-				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
+				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
 		else {
