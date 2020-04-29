@@ -11,6 +11,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
@@ -119,12 +120,45 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
+		/* Manage and create Literal Pools */
+		List<ASMLdrLabel> buffer = new ArrayList();
+		for (int i = 0; i < body.instructions.size(); i++) {
+			/* Collect ASMLdrLabel instructions in buffer, insert them after next bx instruction */
+			if (body.instructions.get(i) instanceof ASMLdrLabel) {
+				ASMLdrLabel load = (ASMLdrLabel) body.instructions.get(i);
+				buffer.add(load);
+			}
+			else if (body.instructions.get(i) instanceof ASMBranch) {
+				ASMBranch b = (ASMBranch) body.instructions.get(i);
+				if (b.type == BRANCH_TYPE.BX) {
+					/* Flush buffer here */
+					if (!buffer.isEmpty()) {
+						/* Create a new prefix for this literal pool */
+						String prefix = LabelGen.literalPoolPrefix();
+						
+						for (ASMLdrLabel label : buffer) {
+							/* Apply prefix to load label */
+							label.prefix = prefix;
+							
+							/* Get label referenced by load instruction and clone it */
+							ASMDataLabel l0 = map.resolve(label.dec).clone();
+							
+							/* Apply prefix to label name */
+							l0.name = prefix + l0.name.substring(1);
+							
+							/* Inject label clone at target position */
+							body.instructions.add(i + 1, l0);
+						}
+						
+						buffer.clear();
+					}
+				}
+			}
+		}
 		
 		/* Main function not present */
 		if (((LabelOperand) branch.target).label == null) 
 			body.instructions.remove(branch);
-		
-		body.instructions.addAll(globalVarReferences);
 		
 		return body;
 	}

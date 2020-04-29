@@ -265,7 +265,7 @@ public class AsNArraySelect extends AsNExpression {
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 			
-			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label));
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label), s.idRef.origin);
 			load.comment = new ASMComment("Load data section address");
 			node.instructions.add(load);
 			
@@ -277,7 +277,7 @@ public class AsNArraySelect extends AsNExpression {
 			
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 		
-			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label));
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), s.idRef.origin);
 			load.comment = new ASMComment("Load data section address");
 			node.instructions.add(load);
 			

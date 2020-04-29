@@ -65,7 +65,7 @@ public class AsNIdRef extends AsNExpression {
 				ASMDataLabel label = map.resolve(i.origin);
 				
 				/* Load memory address */
-				ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label));
+				ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label), i.origin);
 				ins.comment = new ASMComment("Load from .data section");
 				ref.instructions.add(ins);
 				
@@ -141,7 +141,7 @@ public class AsNIdRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ASMDataLabel label = map.resolve(i.origin);
 			
-			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R2), new LabelOperand(label));
+			ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R2), new LabelOperand(label), i.origin);
 			load.comment = new ASMComment("Load data section address");
 			this.instructions.add(load);
 			

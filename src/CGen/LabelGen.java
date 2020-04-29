@@ -44,4 +44,10 @@ public class LabelGen {
 		return ".I" + i++ + "_" + base;
 	}
 	
+	private static int p = 0;
+	
+	public static String literalPoolPrefix() {
+		return ".POOL" + p++ + "_";
+	}
+	
 }

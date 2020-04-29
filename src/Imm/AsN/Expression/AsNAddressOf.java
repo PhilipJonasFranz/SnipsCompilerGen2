@@ -41,7 +41,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(ref.origin);
 				
-				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label));
+				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label), ref.origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
 			}
@@ -74,7 +74,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(origin);
 				
-				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label));
+				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label), origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
 			}

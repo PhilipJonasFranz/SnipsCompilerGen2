@@ -14,5 +14,9 @@ public class MemorySkipOperand extends MemoryOperand {
 		/* Use the type to string conversion to display type as number */
 		return ".skip" + init.getType().wordsize() * 4;
 	}
+
+	public MemoryOperand clone() {
+		return new MemorySkipOperand(this.init);
+	}
 	
 }
