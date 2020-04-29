@@ -19,10 +19,10 @@ main:                         /* Function: main */
     push { r3 }
     mov r3, r0
     mov r1, r3                /* Evaluate Expression */
-    ldr r2, main.L0_x         /* Load from .data section */
+    ldr r2, .POOL0_main.L0_x  /* Load from .data section */
     ldr r2, [r2]
     mul r0, r1, r2
     pop { r3 }
     bx lr
+.POOL0_main.L0_x: .word x
     
-main.L0_x: .word x

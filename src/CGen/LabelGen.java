@@ -29,6 +29,8 @@ public class LabelGen {
 	 */
 	public static void reset() {
 		c = 0;
+		i = 0;
+		p = 0;
 	}
 	
 	/**

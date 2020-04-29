@@ -130,11 +130,16 @@ public class AsNBody extends AsNNode {
 			}
 			else if (body.instructions.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) body.instructions.get(i);
+				
+				// TODO: Implement Filter to only flush buffer after 4k of text
+				
 				if (b.type == BRANCH_TYPE.BX) {
 					/* Flush buffer here */
 					if (!buffer.isEmpty()) {
 						/* Create a new prefix for this literal pool */
 						String prefix = LabelGen.literalPoolPrefix();
+						
+						List<String> added = new ArrayList();
 						
 						for (ASMLdrLabel label : buffer) {
 							/* Apply prefix to load label */
@@ -144,7 +149,11 @@ public class AsNBody extends AsNNode {
 							ASMDataLabel l0 = map.resolve(label.dec).clone();
 							
 							/* Apply prefix to label name */
-							l0.name = prefix + l0.name.substring(1);
+							if (l0.name.startsWith(".")) l0.name = l0.name.substring(1);
+							l0.name = prefix + l0.name;
+							
+							if (added.contains(l0.name)) continue;
+							else added.add(l0.name);
 							
 							/* Inject label clone at target position */
 							body.instructions.add(i + 1, l0);

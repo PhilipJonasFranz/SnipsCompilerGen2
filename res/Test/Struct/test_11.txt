@@ -39,7 +39,7 @@ resv:                         /* Function: resv */
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, main.L1_HEAP_START/* Evaluate Expression */
+    ldr r0, .POOL0_main.L1_HEAP_START/* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
 resv.L1:                      /* Evaluate condition */
@@ -146,6 +146,7 @@ resv.L2:
 resv.L18: 
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
+.POOL0_main.L1_HEAP_START: .word HEAP_START
     
 create_P0:                    /* Function: create, Provisos: INT[2] */
     push { r3, fp, lr }
@@ -197,4 +198,3 @@ main:                         /* Function: main */
     pop { r3, r4, r5, fp, lr }
     bx lr
     
-main.L1_HEAP_START: .word HEAP_START

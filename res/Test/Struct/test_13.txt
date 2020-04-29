@@ -49,7 +49,7 @@ resv:                         /* Function: resv */
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, main.L2_HEAP_START/* Evaluate Expression */
+    ldr r0, .POOL0_main.L2_HEAP_START/* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
 resv.L1:                      /* Evaluate condition */
@@ -156,6 +156,7 @@ resv.L2:
 resv.L18: 
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
+.POOL0_main.L2_HEAP_START: .word HEAP_START
     
 /* A tree node that has a left and right child and holds a value. */
 /* Create a new Tree, initialize both childs to 0, set root value */
@@ -345,4 +346,3 @@ main.L8:
     pop { r3, r4, r5, r6, r7, r8, fp, lr }
     bx lr
     
-main.L2_HEAP_START: .word HEAP_START

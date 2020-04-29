@@ -24,9 +24,10 @@ HEAP_START: .word 0
 .text
     b main
 Foo.get:                      /* Function: Foo.get */
-    ldr r0, main.L0_Baz.x     /* Evaluate Expression */
+    ldr r0, .POOL0_main.L0_Baz.x/* Evaluate Expression */
     ldr r0, [r0]
     bx lr
+.POOL0_main.L0_Baz.x: .word Baz.x
     
 main:                         /* Function: main */
     push { fp, lr }
@@ -36,5 +37,3 @@ main:                         /* Function: main */
     pop { fp, lr }
     bx lr
     
-main.L0_Baz.x: .word Baz.x
-main.L1_HEAP_START: .word HEAP_START

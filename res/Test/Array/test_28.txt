@@ -64,7 +64,7 @@ main:                         /* Function: main */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    ldr r2, main.L0_vec       /* Evaluate Expression */
+    ldr r2, .POOL0_main.L0_vec/* Evaluate Expression */
     add r2, r2, #12
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
@@ -81,5 +81,5 @@ main:                         /* Function: main */
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr
+.POOL0_main.L0_vec: .word vec
     
-main.L0_vec: .word vec

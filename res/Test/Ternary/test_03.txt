@@ -61,4 +61,3 @@ main.L1:
     pop { r3, r4, r5, r6, r7 }
     bx lr
     
-main.L0_HEAP_START: .word HEAP_START

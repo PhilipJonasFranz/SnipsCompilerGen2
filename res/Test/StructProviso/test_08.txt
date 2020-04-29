@@ -41,4 +41,3 @@ main:                         /* Function: main */
     add r0, r1, r2
     bx lr
     
-main.L0_HEAP_START: .word HEAP_START

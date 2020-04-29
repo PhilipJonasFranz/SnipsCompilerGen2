@@ -39,4 +39,3 @@ main:                         /* Function: main */
     pop { r3 }
     bx lr
     
-main.L0_HEAP_START: .word HEAP_START

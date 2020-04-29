@@ -72,4 +72,3 @@ main:                         /* Function: main */
     pop { r3, r4, fp, lr }
     bx lr
     
-main.L0_HEAP_START: .word HEAP_START

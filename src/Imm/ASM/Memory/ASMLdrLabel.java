@@ -24,7 +24,9 @@ public class ASMLdrLabel extends ASMLdr {
 		String s = CompilerDriver.printDepth + "ldr " + target.toString();
 		s += ", " + this.prefix;
 		if (!this.prefix.equals("")) {
-			s += this.op0.toString().substring(1);
+			String s0 = this.op0.toString();
+			if (s0.startsWith(".")) s0 = s0.substring(1);
+			s += s0;
 		}
 		else this.op0.toString();
 		return s;
