@@ -1238,8 +1238,12 @@ public class Parser {
 		if (defs.size() == 1 && path.path.size() == 1) {
 			return defs.get(0);
 		}
-		
-		return null;
+		else {
+			String s = "";
+			for (StructTypedef def : defs) s += def.path.build() + ", ";
+			s = s.substring(0, s.length() - 2);
+			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit.");
+		}
 	}
 	
 	public boolean containsStructTypedef(String token) {

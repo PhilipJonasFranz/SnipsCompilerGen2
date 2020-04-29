@@ -196,7 +196,7 @@ public class ContextChecker {
 		ProvisoManager.setHiddenContext(e.structType);
 		
 		if (e.elements.size() != e.structType.typedef.fields.size()) {
-			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
+			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count: Expected " + e.structType.typedef.fields.size() + " but got " + e.elements.size());
 		}
 		
 		for (int i = 0; i < e.elements.size(); i++) {
@@ -876,7 +876,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -926,7 +926,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
