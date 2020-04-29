@@ -37,10 +37,14 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			if0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
 			
 			ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
-			/* Condition was false, jump to else */
-			if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
 			
 			ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
+			
+			/* Condition was false, jump to else */
+			if (a.elseStatement == null) {
+				if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(endTarget)));
+			}
+			else if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
 			
 			/* Add Body */
 			if0.addBody(a, r, map, st);
