@@ -1221,7 +1221,7 @@ public class Parser {
 	/* Anchor used for expression parsing. */
 	private Token curr0 = null;
 	
-	public StructTypedef getStructTypedef(NamespacePath path) {
+	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
 			if (p.getFirst().build().equals(path.build())) {
 				return p.getSecond();
@@ -1243,7 +1243,7 @@ public class Parser {
 			String s = "";
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
-			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct.");
+			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
 		}
 	}
 	
@@ -1274,16 +1274,16 @@ public class Parser {
 			path = this.parseNamespacePath(token);
 			
 			/* Search with relative path */
-			def = this.getStructTypedef(path);
+			def = this.getStructTypedef(path, token.getSource());
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
 			if (def == null) {
 				path.path.addAll(0, this.buildPath().path);
-				def = this.getStructTypedef(path);
+				def = this.getStructTypedef(path, token.getSource());
 			}
 			
 			if (def == null) {
-				throw new SNIPS_EXCEPTION("Unknown struct type '" + path.build() + "'");
+				throw new SNIPS_EXCEPTION("Unknown struct type '" + path.build() + "', " + token.getSource().getSourceMarker());
 			}
 		}
 		
