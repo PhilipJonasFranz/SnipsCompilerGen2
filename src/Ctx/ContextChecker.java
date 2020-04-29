@@ -50,7 +50,6 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
-import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -257,13 +256,7 @@ public class ContextChecker {
 		}
 		
 		STRUCT s0 = (STRUCT) type;
-		for (int i = 0; i < s0.typedef.proviso.size(); i++) {
-			PROVISO p = (PROVISO) s0.typedef.proviso.get(i);
-			p.setContext(s0.proviso.get(i));
-			type = s0;
-		}
-		
-		ProvisoManager.setContext(s0.typedef.proviso, s0);
+		s0 = (STRUCT) ProvisoManager.setHiddenContext(s0);
 		
 		Expression selection = e.selection;
 		
@@ -297,9 +290,18 @@ public class ContextChecker {
 						if (type instanceof STRUCT) {
 							STRUCT s1 = (STRUCT) type;
 							for (int i = selectStack.size() - 1; i >= 0; i--) {
+								/* Same Struct */
 								if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-									type = selectStack.get(i).first;
-									while (selectStack.size() != i) selectStack.pop();
+									/* Check for Proviso Equality */
+									boolean equal = true;
+									for (int z = 0; z < s1.proviso.size(); z++) {
+										equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
+									}
+									
+									if (equal) {
+										type = selectStack.get(i).first;
+										while (selectStack.size() != i) selectStack.pop();
+									}
 								}
 							}
 							
@@ -347,8 +349,16 @@ public class ContextChecker {
 						STRUCT s1 = (STRUCT) type0;
 						for (int i = selectStack.size() - 1; i >= 0; i--) {
 							if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-								type0 = selectStack.get(i).first;
-								while (selectStack.size() != i) selectStack.pop();
+								/* Check for Proviso Equality */
+								boolean equal = true;
+								for (int z = 0; z < s1.proviso.size(); z++) {
+									equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
+								}
+								
+								if (equal) {
+									type0 = selectStack.get(i).first;
+									while (selectStack.size() != i) selectStack.pop();
+								}
 							}
 						}
 						
