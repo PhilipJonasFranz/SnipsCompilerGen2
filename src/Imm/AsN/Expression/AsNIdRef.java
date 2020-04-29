@@ -20,7 +20,7 @@ import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.IDRef;
-import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNIdRef extends AsNExpression {
 
@@ -59,7 +59,7 @@ public class AsNIdRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			if (i.origin.getType().wordsize() == 1) {
+			if (i.origin.getType() instanceof PRIMITIVE) {
 				/* Load value from memory */
 				
 				ASMDataLabel label = map.resolve(i.origin);
@@ -73,18 +73,14 @@ public class AsNIdRef extends AsNExpression {
 			}
 			else {
 				/* Copy on stack */
-				if (i.origin.getType() instanceof ARRAY) {
-					ref.loadArray(i, r, map, st);
-				}
+				ref.loadMemorySection(i, r, map, st);
 			}
 		}
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
-			if (i.origin.getType().wordsize() > 1) {
-				if (i.origin.getType() instanceof ARRAY) {
-					ref.loadArray(i, r, map, st);
-				}
+			if (!(i.origin.getType() instanceof PRIMITIVE)) {
+				ref.loadMemorySection(i, r, map, st);
 			}
 			/* Load in register */
 			else {
@@ -110,19 +106,19 @@ public class AsNIdRef extends AsNExpression {
 		return ref;
 	}
 	
-	protected void loadArray(IDRef i, RegSet r, MemoryMap map, StackSet st) {
-		ARRAY arr = (ARRAY) i.origin.getType();
+	protected void loadMemorySection(IDRef i, RegSet r, MemoryMap map, StackSet st) {
+		int wordSize = i.getType().wordsize();
 		
 		r.free(0);
 		
 		/* Origin is in parameter stack */
 		if (st.getParameterByteOffset(i.origin) != -1) {
 			int offset = st.getParameterByteOffset(i.origin);
-			offset += (arr.wordsize() - 1) * 4;
+			offset += (wordSize - 1) * 4;
 			
 			/* Copy memory location with the size of the array */
 			int regs = 0;
-			for (int a = 0; a < arr.wordsize(); a++) {
+			for (int a = 0; a < wordSize; a++) {
 				if (regs < 3) {
 					this.instructions.add(new ASMLdr(new RegOperand(regs), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
 					regs++;
@@ -145,11 +141,11 @@ public class AsNIdRef extends AsNExpression {
 			load.comment = new ASMComment("Load data section address");
 			this.instructions.add(load);
 			
-			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new ImmOperand((arr.wordsize() - 1) * 4)));
+			this.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new ImmOperand((wordSize - 1) * 4)));
 			
 			/* Copy memory location with the size of the array */
 			int regs = 0;
-			for (int a = 0; a < arr.wordsize(); a++) {
+			for (int a = 0; a < wordSize; a++) {
 				if (regs < 2) {
 					this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOperand(regs), new RegOperand(REGISTER.R2), new ImmOperand(-4)));
 					regs++;
@@ -167,7 +163,7 @@ public class AsNIdRef extends AsNExpression {
 			
 			/* Copy memory location with the size of the array */
 			int regs = 0;
-			for (int a = 0; a < arr.wordsize(); a++) {
+			for (int a = 0; a < wordSize; a++) {
 				if (regs < 3) {
 					this.instructions.add(new ASMLdr(new RegOperand(regs), new RegOperand(REGISTER.FP), new ImmOperand(-offset)));
 					regs++;
