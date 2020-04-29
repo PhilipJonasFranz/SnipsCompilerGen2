@@ -32,7 +32,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		Deref dref = lhs.deref;
 		
 		/* Store single cell */
-		if (lhs.expressionType.wordsize() == 1) {
+		if (lhs.expressionType instanceof PRIMITIVE) {
 			id.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			r.free(0);
 		}
