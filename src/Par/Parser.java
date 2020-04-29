@@ -29,6 +29,7 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
@@ -601,17 +602,41 @@ public class Parser {
 	}
 	
 	protected Statement parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
-		// TODO
-		if (tokenStream.get(0).type == TokenType.INCR || tokenStream.get(0).type == TokenType.DECR) {
+		/* Check if tokens ahead are a struct select */
+		boolean structSelectCheck = current.type == TokenType.IDENTIFIER;
+		for (int i = 1; i < this.tokenStream.size(); i += 2) {
+			if (tokenStream.get(i).type == TokenType.INCR || tokenStream.get(i).type == TokenType.DECR) break;
+			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i).type == TokenType.UNION_ACCESS) {
+				structSelectCheck &= tokenStream.get(i).type == TokenType.IDENTIFIER;
+			}
+			else {
+				structSelectCheck = false;
+				break;
+			}
+		}
+		
+		if (tokenStream.get(0).type == TokenType.INCR || tokenStream.get(0).type == TokenType.DECR || structSelectCheck) {
 			Source source = current.getSource();
-			NamespacePath path = this.parseNamespacePath();
 			
-			ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+			if (structSelectCheck) {
+				Expression select = this.parseStructSelect();
+				
+				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
 			
-			accept();
-			if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			
-			return new AssignWriteback(new IDRefWriteback(idWb, new IDRef(path, source), source), source);
+				return new AssignWriteback(new StructSelectWriteback(idWb, select, source), source);
+			}
+			else {
+				NamespacePath path = this.parseNamespacePath();
+				
+				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
+				
+				return new AssignWriteback(new IDRefWriteback(idWb, new IDRef(path, source), source), source);
+			}
 		}
 		else {
 			LhsId target = this.parseLhsIdentifer();

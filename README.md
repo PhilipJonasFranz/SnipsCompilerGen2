@@ -64,7 +64,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  - Implement missing assignment arith injectors
 
 ### Known issues
- - Increment, Decrement and Arith Assign not working for Struct Select Assign
+ - Increment and Decrement not working for Struct Select Assign
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  
