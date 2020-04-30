@@ -839,7 +839,10 @@ public class ContextChecker {
 			}
 			
 			/* Return if there is only one result */
-			if (funcs.size() == 1) return funcs.get(0);
+			if (funcs.isEmpty()) {
+				throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
+			}
+			else if (funcs.size() == 1) return funcs.get(0);
 			/* Multiple results, cannot determine correct one, return null */
 			else {
 				String s = "";

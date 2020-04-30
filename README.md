@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.1.8.5-RELEASE
+# Snips Compiler Gen.2 v.2.0.0-RELEASE
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
@@ -49,9 +49,6 @@ All instructions do support the condition field. See https://iitd-plos.github.io
 ### Utility
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
-### v.2.0.0-RELEASE: Extended type system, extended functionality
- - Implement Sizeof for Heap Objects
- 
 ### v.3.0.0-RELEASE: Templating, Struct extending
  - Implement Struct Extending
  - Implement Direct ASM injection
@@ -64,7 +61,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  - Implement missing assignment arith injectors
 
 ### Known issues
- - Increment and Decrement not working for Struct Select Assign
+ - Increment and Decrement not working for Struct Select Assign, Array Select Assign and Pointer Assign
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  

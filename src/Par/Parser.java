@@ -1178,6 +1178,10 @@ public class Parser {
 					CompilerDriver.heap_referenced = true;
 					CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 				}
+				else if (path.getPath().get(0).equals("hsize")) {
+					CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+				}
+				
 				return new InlineCall(path, proviso, parameters, source);
 			}
 			else {
@@ -1308,9 +1312,8 @@ public class Parser {
 		else {
 			type = TYPE.fromToken(token);
 			
-			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) {
+			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
-			}
 		}
 		
 		while (true) {
@@ -1328,9 +1331,8 @@ public class Parser {
 				dimensions.push(length);
 			}
 			
-			while (!dimensions.isEmpty()) {
+			while (!dimensions.isEmpty()) 
 				type = new ARRAY(type, dimensions.pop());
-			}
 			
 			if (current.equals(c0)) break;
 		}
@@ -1342,7 +1344,6 @@ public class Parser {
 		List<TYPE> pro = new ArrayList();
 		
 		if (current.type == TokenType.CMPLT) {
-			
 			/* Set type of all identifiers to proviso until a CMPGT */
 			for (int i = 0; i < this.tokenStream.size(); i++) {
 				if (this.tokenStream.get(i).type == TokenType.CMPGT || 
@@ -1360,9 +1361,8 @@ public class Parser {
 			while (current.type != TokenType.CMPGT) {
 				TYPE type = this.parseType();
 				pro.add(type);
-				if (current.type == TokenType.COMMA) {
+				if (current.type == TokenType.COMMA) 
 					accept();
-				}
 				else break;
 			}
 			
@@ -1373,26 +1373,12 @@ public class Parser {
 	}
 	
 	protected NamespacePath parseNamespacePath() throws PARSE_EXCEPTION {
-		List<String> ids = new ArrayList();
+		Token token;
 		
-		if (current.type == TokenType.STRUCTID)
-			ids.add(accept(TokenType.STRUCTID).spelling);
-		else ids.add(accept(TokenType.IDENTIFIER).spelling);
+		if (current.type == TokenType.STRUCTID) token = accept();
+		else token = accept(TokenType.IDENTIFIER);
 		
-		while (current.type == TokenType.COLON && 
-				tokenStream.get(0).type == TokenType.COLON && 
-				tokenStream.get(1).type != TokenType.LPAREN) {
-			accept();
-			accept(TokenType.COLON);
-			
-			if (current.type == TokenType.STRUCTID)
-				ids.add(accept(TokenType.STRUCTID).spelling);
-			else ids.add(accept(TokenType.IDENTIFIER).spelling);
-		}
-		
-		assert(!ids.isEmpty());
-		
-		return new NamespacePath(ids);
+		return this.parseNamespacePath(token);
 	}
 	
 	protected NamespacePath parseNamespacePath(Token first) throws PARSE_EXCEPTION {
@@ -1405,8 +1391,7 @@ public class Parser {
 			accept();
 			accept(TokenType.COLON);
 			
-			if (current.type == TokenType.STRUCTID)
-				ids.add(accept(TokenType.STRUCTID).spelling);
+			if (current.type == TokenType.STRUCTID) ids.add(accept().spelling);
 			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
 		
@@ -1421,15 +1406,12 @@ public class Parser {
 		/* Compound Statement with braces */
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
-			while (current.type != TokenType.RBRACE) {
+			while (current.type != TokenType.RBRACE) 
 				body.add(this.parseStatement());
-			}
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
-		else {
-			body.add(this.parseStatement());
-		}
+		else body.add(this.parseStatement());
 		
 		return body;
 	}
