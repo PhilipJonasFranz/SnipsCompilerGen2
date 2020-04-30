@@ -45,20 +45,20 @@ mult:                         /* Function: mult */
     push { r1, r0 }
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
-.L2: 
+mult.L1: 
     cmp r5, #2
-    bge .L3
+    bge mult.L2
     mov r0, #0                /* Evaluate Expression */
     mov r6, #0
-.L5: 
+mult.L4: 
     cmp r6, #2
-    bge .L6
+    bge mult.L5
     mov r7, #0
     mov r0, #0                /* Evaluate Expression */
     mov r8, #0
-.L8: 
+mult.L7: 
     cmp r8, #2
-    bge .L9
+    bge mult.L8
     mov r2, #0                /* Evaluate Expression */
     mov r0, r5
     mov r1, #8
@@ -89,8 +89,8 @@ mult:                         /* Function: mult */
     mov r2, #1
     add r0, r1, #1
     mov r8, r0
-    b .L8
-.L9: 
+    b mult.L7
+mult.L8: 
     mov r0, r7                /* Evaluate Expression */
     push { r0 }
     mov r2, #0                /* Calculate offset of sub structure */
@@ -109,14 +109,14 @@ mult:                         /* Function: mult */
     mov r2, #1
     add r0, r1, #1
     mov r6, r0
-    b .L5
-.L6: 
+    b mult.L4
+mult.L5: 
     mov r1, r5                /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r5, r0
-    b .L2
-.L3: 
+    b mult.L1
+mult.L2: 
     mov r2, #0                /* Evaluate Expression */
     mov r0, r3
     mov r1, #8
@@ -170,4 +170,3 @@ main:                         /* Function: main */
     pop { r3, r4, fp, lr }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

@@ -44,7 +44,7 @@ main:                         /* Function: main */
     sub r1, fp, #8            /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
     cmp r0, #0
-    beq .L1
+    beq main.L0
     sub r1, fp, #20           /* Load field location */
     mov r1, r1
     add r1, r1, #4
@@ -56,13 +56,12 @@ main:                         /* Function: main */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
-    b .L2
-.L1: 
+    b main.L1
+main.L0: 
     sub r1, fp, #4            /* Load field location */
     ldr r0, [r1]              /* Load field from struct */
-.L2: 
+main.L1: 
     mov sp, fp
     pop { r3 }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

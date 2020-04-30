@@ -9,13 +9,14 @@ public class LabelGen {
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
+	public static String funcPrefix = "";
 	
 			/* --- METHODS --- */
 	/**
 	 * Returns a new unique label. 
 	 */
 	public static String getLabel() {
-		return ".L" + c++;
+		return funcPrefix + ".L" + c++;
 	}
 	
 	public static String getProvisoPostfix() {
@@ -28,6 +29,8 @@ public class LabelGen {
 	 */
 	public static void reset() {
 		c = 0;
+		i = 0;
+		p = 0;
 	}
 	
 	/**
@@ -41,6 +44,12 @@ public class LabelGen {
 	
 	public static String importLabelPrefix(String base) {
 		return ".I" + i++ + "_" + base;
+	}
+	
+	private static int p = 0;
+	
+	public static String literalPoolPrefix() {
+		return ".POOL" + p++ + "_";
 	}
 	
 }

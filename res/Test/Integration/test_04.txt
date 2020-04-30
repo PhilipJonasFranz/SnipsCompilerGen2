@@ -182,4 +182,3 @@ main:                         /* Function: main */
     pop { fp, lr }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

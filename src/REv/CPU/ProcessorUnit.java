@@ -293,8 +293,7 @@ public class ProcessorUnit {
 			
 			if (immSrc == 1) {
 				aluSrc = 1;
-				int e = instr [11];
-				imm = new int [] {e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, instr [10], instr [9], instr [8], instr [7], instr [6], instr [5], instr [4], instr [3], instr [2], instr [1], instr [0]};
+				imm = new int [] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, instr [11], instr [10], instr [9], instr [8], instr [7], instr [6], instr [5], instr [4], instr [3], instr [2], instr [1], instr [0]};
 			}
 			else shift = 1;
 		}

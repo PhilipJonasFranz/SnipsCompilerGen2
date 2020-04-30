@@ -29,6 +29,7 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
@@ -601,17 +602,41 @@ public class Parser {
 	}
 	
 	protected Statement parseAssignment(boolean acceptSemicolon) throws PARSE_EXCEPTION {
-		// TODO
-		if (tokenStream.get(0).type == TokenType.INCR || tokenStream.get(0).type == TokenType.DECR) {
+		/* Check if tokens ahead are a struct select */
+		boolean structSelectCheck = current.type == TokenType.IDENTIFIER;
+		for (int i = 1; i < this.tokenStream.size(); i += 2) {
+			if (tokenStream.get(i).type == TokenType.INCR || tokenStream.get(i).type == TokenType.DECR) break;
+			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i).type == TokenType.UNION_ACCESS) {
+				structSelectCheck &= tokenStream.get(i).type == TokenType.IDENTIFIER;
+			}
+			else {
+				structSelectCheck = false;
+				break;
+			}
+		}
+		
+		if (tokenStream.get(0).type == TokenType.INCR || tokenStream.get(0).type == TokenType.DECR || structSelectCheck) {
 			Source source = current.getSource();
-			NamespacePath path = this.parseNamespacePath();
 			
-			ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+			if (structSelectCheck) {
+				Expression select = this.parseStructSelect();
+				
+				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
 			
-			accept();
-			if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			
-			return new AssignWriteback(new IDRefWriteback(idWb, new IDRef(path, source), source), source);
+				return new AssignWriteback(new StructSelectWriteback(idWb, select, source), source);
+			}
+			else {
+				NamespacePath path = this.parseNamespacePath();
+				
+				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
+				
+				return new AssignWriteback(new IDRefWriteback(idWb, new IDRef(path, source), source), source);
+			}
 		}
 		else {
 			LhsId target = this.parseLhsIdentifer();
@@ -1153,6 +1178,10 @@ public class Parser {
 					CompilerDriver.heap_referenced = true;
 					CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 				}
+				else if (path.getPath().get(0).equals("hsize")) {
+					CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+				}
+				
 				return new InlineCall(path, proviso, parameters, source);
 			}
 			else {
@@ -1196,7 +1225,7 @@ public class Parser {
 	/* Anchor used for expression parsing. */
 	private Token curr0 = null;
 	
-	public StructTypedef getStructTypedef(NamespacePath path) {
+	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
 			if (p.getFirst().build().equals(path.build())) {
 				return p.getSecond();
@@ -1210,11 +1239,16 @@ public class Parser {
 			}
 		}
 		
-		if (defs.size() == 1 && path.path.size() == 1) {
+		if (defs.isEmpty()) return null;
+		else if (defs.size() == 1 && path.path.size() == 1) {
 			return defs.get(0);
 		}
-		
-		return null;
+		else {
+			String s = "";
+			for (StructTypedef def : defs) s += def.path.build() + ", ";
+			s = s.substring(0, s.length() - 2);
+			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+		}
 	}
 	
 	public boolean containsStructTypedef(String token) {
@@ -1244,12 +1278,16 @@ public class Parser {
 			path = this.parseNamespacePath(token);
 			
 			/* Search with relative path */
-			def = this.getStructTypedef(path);
+			def = this.getStructTypedef(path, token.getSource());
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
 			if (def == null) {
 				path.path.addAll(0, this.buildPath().path);
-				def = this.getStructTypedef(path);
+				def = this.getStructTypedef(path, token.getSource());
+			}
+			
+			if (def == null) {
+				throw new SNIPS_EXCEPTION("Unknown struct type '" + path.build() + "', " + token.getSource().getSourceMarker());
 			}
 		}
 		
@@ -1274,9 +1312,8 @@ public class Parser {
 		else {
 			type = TYPE.fromToken(token);
 			
-			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) {
+			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
-			}
 		}
 		
 		while (true) {
@@ -1294,9 +1331,8 @@ public class Parser {
 				dimensions.push(length);
 			}
 			
-			while (!dimensions.isEmpty()) {
+			while (!dimensions.isEmpty()) 
 				type = new ARRAY(type, dimensions.pop());
-			}
 			
 			if (current.equals(c0)) break;
 		}
@@ -1308,7 +1344,6 @@ public class Parser {
 		List<TYPE> pro = new ArrayList();
 		
 		if (current.type == TokenType.CMPLT) {
-			
 			/* Set type of all identifiers to proviso until a CMPGT */
 			for (int i = 0; i < this.tokenStream.size(); i++) {
 				if (this.tokenStream.get(i).type == TokenType.CMPGT || 
@@ -1326,9 +1361,8 @@ public class Parser {
 			while (current.type != TokenType.CMPGT) {
 				TYPE type = this.parseType();
 				pro.add(type);
-				if (current.type == TokenType.COMMA) {
+				if (current.type == TokenType.COMMA) 
 					accept();
-				}
 				else break;
 			}
 			
@@ -1339,26 +1373,12 @@ public class Parser {
 	}
 	
 	protected NamespacePath parseNamespacePath() throws PARSE_EXCEPTION {
-		List<String> ids = new ArrayList();
+		Token token;
 		
-		if (current.type == TokenType.STRUCTID)
-			ids.add(accept(TokenType.STRUCTID).spelling);
-		else ids.add(accept(TokenType.IDENTIFIER).spelling);
+		if (current.type == TokenType.STRUCTID) token = accept();
+		else token = accept(TokenType.IDENTIFIER);
 		
-		while (current.type == TokenType.COLON && 
-				tokenStream.get(0).type == TokenType.COLON && 
-				tokenStream.get(1).type != TokenType.LPAREN) {
-			accept();
-			accept(TokenType.COLON);
-			
-			if (current.type == TokenType.STRUCTID)
-				ids.add(accept(TokenType.STRUCTID).spelling);
-			else ids.add(accept(TokenType.IDENTIFIER).spelling);
-		}
-		
-		assert(!ids.isEmpty());
-		
-		return new NamespacePath(ids);
+		return this.parseNamespacePath(token);
 	}
 	
 	protected NamespacePath parseNamespacePath(Token first) throws PARSE_EXCEPTION {
@@ -1371,8 +1391,7 @@ public class Parser {
 			accept();
 			accept(TokenType.COLON);
 			
-			if (current.type == TokenType.STRUCTID)
-				ids.add(accept(TokenType.STRUCTID).spelling);
+			if (current.type == TokenType.STRUCTID) ids.add(accept().spelling);
 			else ids.add(accept(TokenType.IDENTIFIER).spelling);
 		}
 		
@@ -1387,15 +1406,12 @@ public class Parser {
 		/* Compound Statement with braces */
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
-			while (current.type != TokenType.RBRACE) {
+			while (current.type != TokenType.RBRACE) 
 				body.add(this.parseStatement());
-			}
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
-		else {
-			body.add(this.parseStatement());
-		}
+		else body.add(this.parseStatement());
 		
 		return body;
 	}

@@ -1,12 +1,16 @@
 package Imm.AsN.Statement.Lhs;
 
+import java.util.List;
+
 import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -24,6 +28,7 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Lhs.StructSelectLhsId;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNStructSelect;
 
@@ -49,8 +54,19 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 			for (int i = 0; i < lhs.select.getType().wordsize(); i++) st.push(REGISTER.R0);
 		}
 		else {
-			/* Load */
+			/* Load value from stack */
 			id.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+			
+			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
+				/* Load current value in R2 */
+				id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+				
+				/* Create injector, new result is in R0 */
+				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
+				id.instructions.addAll(inj);
+			}
+			
+			/* Store value to location */
 			ASMStr store = new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
 			store.comment = new ASMComment("Store value to struct field");
 			id.instructions.add(store);

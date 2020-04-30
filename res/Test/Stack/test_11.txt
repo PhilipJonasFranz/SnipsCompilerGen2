@@ -62,10 +62,10 @@ fooRec:                       /* Function: fooRec */
     mov r3, r0
     mov r4, r1
     cmp r4, #0
-    bne .L3
+    bne fooRec.L1
     mov r0, r3                /* Evaluate Expression */
-    b .L4
-.L3: 
+    b fooRec.L2
+fooRec.L1: 
     mov r5, r0                /* Evaluate Expression */
     mov r1, r4                /* Load parameters */
     mov r2, #1
@@ -77,7 +77,7 @@ fooRec:                       /* Function: fooRec */
     mov r1, r0
     mov r2, #1
     add r0, r1, #1
-.L4: 
+fooRec.L2: 
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
@@ -177,4 +177,3 @@ main:                         /* Function: main */
     pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

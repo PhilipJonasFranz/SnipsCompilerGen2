@@ -1,0 +1,11 @@
+/*
+ * Loads the size of the memory block that given pointer points to.
+ * The pointer must point on a heap object for the method to work.
+ */
+int hsize(void* p) {
+	/* Jump to block head */
+	p -= 1;
+
+	/* Load Block Size and return */
+	return *p - 1;
+}

@@ -1,0 +1,18 @@
+/*
+ * Multiplicate the given matricies. Both matricies have to have the given
+ * dimension. Returns a pointer to the resulting matrix.
+ */
+int* mat_mult(int* m, int* n, int dimX, int dimY) {
+	int* r = (int*) resv(dimX * dimY);
+	for (int i = 0; i < dimX; i++) {
+		for (int j = 0; j < dimY; j++) {
+			int sum = 0;
+			for (int k = 0; k < dimY; k++) {
+				sum += *(m + (i * dimY) + k) * *(n + (k * dimY) + j);
+			}
+			*(r + (i * dimY) + j) = sum;
+		}
+	}
+
+	return r;
+}

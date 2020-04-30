@@ -10,4 +10,6 @@ public abstract class MemoryOperand extends Operand {
 	
 	public abstract String toString();
 	
+	public abstract MemoryOperand clone();
+	
 }

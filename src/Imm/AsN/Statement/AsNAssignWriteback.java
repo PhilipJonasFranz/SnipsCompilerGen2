@@ -78,7 +78,7 @@ public class AsNAssignWriteback extends AsNStatement {
 				ASMDataLabel label = map.resolve(ref.origin);
 				
 				/* Load memory address */
-				ins = new ASMLdrLabel(new RegOperand(REGISTER.R2), new LabelOperand(label));
+				ins = new ASMLdrLabel(new RegOperand(REGISTER.R2), new LabelOperand(label), ref.origin);
 				ins.comment = new ASMComment("Load from .data section");
 				node.instructions.add(ins);
 				

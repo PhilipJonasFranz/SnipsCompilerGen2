@@ -588,8 +588,9 @@ public class ASMOptimizer {
 			if (body.instructions.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) body.instructions.get(i);
 				if (b.cond == null && b.type != BRANCH_TYPE.BL) {
-					while (i < body.instructions.size() - 1 && !(body.instructions.get(i + 1) instanceof ASMLabel) && !(body.instructions.get(i + 1) instanceof ASMSeperator)) {
-						if (body.instructions.get(i + 1) instanceof ASMComment) {
+					while (i < body.instructions.size() - 1 && !(body.instructions.get(i + 1) instanceof ASMSeperator)) {
+						if (body.instructions.get(i + 1) instanceof ASMLabel && !(body.instructions.get(i + 1) instanceof ASMDataLabel)) break;
+						if (body.instructions.get(i + 1) instanceof ASMComment || body.instructions.get(i + 1) instanceof ASMDataLabel) {
 							i++;
 							continue;
 						}

@@ -94,11 +94,14 @@ public class Scope {
 					/* Return if there is only one result */
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
+					else if (decs.isEmpty()) {
+						throw new CTX_EXCEPTION(source, "Unknown variable: " + path.build());
+					}
 					else {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXCEPTION(source, "Found multiple matches for field '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
+						throw new CTX_EXCEPTION(source, "Found multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 					}
 				}
 				else {

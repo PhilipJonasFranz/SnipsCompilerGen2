@@ -45,5 +45,9 @@ public class MemoryWordOperand extends MemoryOperand {
 		}
 		return s;
 	}
+
+	public MemoryOperand clone() {
+		return new MemoryWordOperand(this.value);
+	}
 	
 }

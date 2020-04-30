@@ -99,7 +99,7 @@ public class AsNStructSelect extends AsNExpression {
 				ASMDataLabel label = map.resolve(ref.origin);
 				
 				/* Load data label */
-				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
+				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin));
 			}
 		}
 		else if (select.selector instanceof ArraySelect) {
@@ -136,7 +136,7 @@ public class AsNStructSelect extends AsNExpression {
 				ASMDataLabel label = map.resolve(arr.idRef.origin);
 				
 				/* Load data label */
-				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
+				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), arr.idRef.origin));
 			}
 			
 			/* Already convert to bytes here, since loadSumR2 loads the offset in bytes */

@@ -81,7 +81,7 @@ public class STRUCT extends COMPOSIT {
 			s += "<";
 			for (Declaration t : this.typedef.fields) {
 				/* Field is recursive type, cast to struct and print only name and proviso */
-				if (t.getType().getCoreType().isEqual(this)) {
+				if (t.getType().getCoreType().isEqual(this) && !(t.getType().getCoreType() instanceof VOID)) {
 					STRUCT s0 = (STRUCT) t.getType().getCoreType();
 					
 					s += this.typedef.path.build();

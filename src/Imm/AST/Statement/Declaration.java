@@ -45,7 +45,11 @@ public class Declaration extends Statement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+		try {
+			System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+		} catch (Exception e) {
+			System.out.println(this.pad(d) + "Declaration <?> " + this.path.build());
+		}
 		if (rec && this.value != null) {
 			this.value.print(d + this.printDepthStep, rec);
 		}

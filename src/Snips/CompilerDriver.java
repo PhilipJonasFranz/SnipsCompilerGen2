@@ -289,7 +289,7 @@ public class CompilerDriver {
 			
 			CompilerDriver.instructionsGenerated += output.size();
 		} catch (Exception e) {
-			if (printErrors) e.printStackTrace();
+			if (printErrors || e instanceof IndexOutOfBoundsException || e instanceof NullPointerException) e.printStackTrace();
 		}
 		
 		/* Report Status */

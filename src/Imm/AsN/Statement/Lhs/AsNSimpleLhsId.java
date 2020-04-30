@@ -56,7 +56,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			ASMDataLabel label = map.resolve(ref.origin);
 			
 			/* Load memory address */
-			id.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label)));
+			id.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin));
 				
 			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
 				id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
@@ -102,7 +102,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				else if (map.resolve(ref.origin) != null) {
 					ASMDataLabel label = map.resolve(ref.origin);
 					
-					ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label));
+					ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin);
 					load.comment = new ASMComment("Load data section address");
 					id.instructions.add(load);
 				}

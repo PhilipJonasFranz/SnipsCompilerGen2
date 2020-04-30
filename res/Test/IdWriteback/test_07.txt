@@ -27,23 +27,22 @@ main:                         /* Function: main */
     mov r3, r0
     mov r0, #0                /* Evaluate Expression */
     mov r4, #0
-.L3: 
+main.L1: 
     cmp r4, r3
-    bge .L4
+    bge main.L2
     add r0, r4, #1
-    ldr r1, .L0_s
+    ldr r1, .POOL0_main.L0_s
     ldr r2, [r1]
     add r0, r2, r0
     str r0, [r1]
     mov r0, r4
     add r4, r0, #1
-    b .L3
-.L4: 
+    b main.L1
+main.L2: 
     mov r4, r0                /* Evaluate Expression */
-    ldr r0, .L0_s             /* Load from .data section */
+    ldr r0, .POOL0_main.L0_s  /* Load from .data section */
     ldr r0, [r0]
     pop { r3, r4 }
     bx lr
+.POOL0_main.L0_s: .word s
     
-.L0_s: .word s
-.L1_HEAP_START: .word HEAP_START

@@ -1,0 +1,64 @@
+#include<linked_list.sn>
+
+namespace GameObject {
+	namespace Items {
+		struct Inventory {
+			int* start;
+		}
+		
+		void set(Inventory* inv, int i, int val) {
+			int* start = inv->start;
+			*(start + i) = val;
+		}
+		
+		int get(Inventory* inv, int i) {
+			int* start = inv->start;
+			return *(start + i);
+		}
+	}
+	
+	struct Player {
+		int posX;
+		int posY;
+		Inventory* inv;
+	}
+}
+
+struct Tuple2<K, V> {
+	K k;
+	V v;
+}
+
+struct Container<T> {
+	T value;
+}
+
+/* Inital Player data */
+int [2] arr = {5, 8};
+
+int main() {
+	/* Initialize Inventory with size 10 */
+	Inventory* inv = (Inventory*) resv(sizeof(Inventory));
+	*inv = Inventory::((int*) resv(10));
+	
+	/* Initialize Player Object */
+	Player* player = (Player*) resv(sizeof(Player));
+	*player = Player::(arr [0], arr [1], inv);	
+
+	Tuple2<int, int> point = Tuple2<int, int>::(player->posX, player->posY);
+	
+	Container<int> con = Container<int>::(5);
+	Tuple2<Player*, Container<int>> sc = Tuple2<Player*, Container<int>>::(player, con);
+
+	/* Set item at index 1 to 5 */
+	set(player->inv, 1, con.value);
+
+	LinkedList<int>* list = create<int>();
+	
+	add<int>(list, point.k);
+	add<int>(list, point.v);
+
+	remove(list, 0);
+	
+	return GameObject::Items::get(sc.k->inv, 1) + List::get<int>(list, 0) + sc.v.value;
+}

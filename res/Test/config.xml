@@ -1,5 +1,5 @@
 <Config>
 	<Devices>
-		<Device>RAM, static, 512, 1, 1</Device>
+		<Device>RAM, static, 1024, 1, 1</Device>
 	</Devices>
 </Config>

@@ -18,4 +18,8 @@ public class ASMDataLabel extends ASMLabel {
 		return super.build() + this.memoryOperand.toString();
 	}
 	
+	public ASMDataLabel clone() {
+		return new ASMDataLabel(this.name, this.memoryOperand.clone());
+	}
+	
 }

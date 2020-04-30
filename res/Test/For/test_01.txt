@@ -26,29 +26,29 @@ main:                         /* Function: main */
     mov r4, #0
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
-.L1: 
+main.L1: 
     cmp r5, r3
-    bge .L2
+    bge main.L2
     add r1, r4, r5
     add r4, r1, #1
     mov r1, r5                /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r5, r0
-    b .L1
-.L2: 
+    b main.L1
+main.L2: 
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
-.L4: 
+main.L4: 
     cmp r5, r3
-    bge .L5
+    bge main.L5
     add r4, r4, #1
     mov r1, r5                /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r5, r0
-    b .L4
-.L5: 
+    b main.L4
+main.L5: 
     mov r0, r4                /* Evaluate Expression */
     pop { r3, r4, r5 }
     bx lr

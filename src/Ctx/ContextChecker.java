@@ -50,7 +50,6 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.WhileStatement;
-import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -197,7 +196,7 @@ public class ContextChecker {
 		ProvisoManager.setHiddenContext(e.structType);
 		
 		if (e.elements.size() != e.structType.typedef.fields.size()) {
-			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count");
+			throw new CTX_EXCEPTION(e.getSource(), "Missmatching argument count: Expected " + e.structType.typedef.fields.size() + " but got " + e.elements.size());
 		}
 		
 		for (int i = 0; i < e.elements.size(); i++) {
@@ -257,13 +256,7 @@ public class ContextChecker {
 		}
 		
 		STRUCT s0 = (STRUCT) type;
-		for (int i = 0; i < s0.typedef.proviso.size(); i++) {
-			PROVISO p = (PROVISO) s0.typedef.proviso.get(i);
-			p.setContext(s0.proviso.get(i));
-			type = s0;
-		}
-		
-		ProvisoManager.setContext(s0.typedef.proviso, s0);
+		s0 = (STRUCT) ProvisoManager.setHiddenContext(s0);
 		
 		Expression selection = e.selection;
 		
@@ -297,9 +290,18 @@ public class ContextChecker {
 						if (type instanceof STRUCT) {
 							STRUCT s1 = (STRUCT) type;
 							for (int i = selectStack.size() - 1; i >= 0; i--) {
+								/* Same Struct */
 								if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-									type = selectStack.get(i).first;
-									while (selectStack.size() != i) selectStack.pop();
+									/* Check for Proviso Equality */
+									boolean equal = true;
+									for (int z = 0; z < s1.proviso.size(); z++) {
+										equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
+									}
+									
+									if (equal) {
+										type = selectStack.get(i).first;
+										while (selectStack.size() != i) selectStack.pop();
+									}
 								}
 							}
 							
@@ -347,8 +349,16 @@ public class ContextChecker {
 						STRUCT s1 = (STRUCT) type0;
 						for (int i = selectStack.size() - 1; i >= 0; i--) {
 							if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-								type0 = selectStack.get(i).first;
-								while (selectStack.size() != i) selectStack.pop();
+								/* Check for Proviso Equality */
+								boolean equal = true;
+								for (int z = 0; z < s1.proviso.size(); z++) {
+									equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
+								}
+								
+								if (equal) {
+									type0 = selectStack.get(i).first;
+									while (selectStack.size() != i) selectStack.pop();
+								}
 							}
 						}
 						
@@ -829,13 +839,16 @@ public class ContextChecker {
 			}
 			
 			/* Return if there is only one result */
-			if (funcs.size() == 1) return funcs.get(0);
+			if (funcs.isEmpty()) {
+				throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
+			}
+			else if (funcs.size() == 1) return funcs.get(0);
 			/* Multiple results, cannot determine correct one, return null */
 			else {
 				String s = "";
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
-				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Make sure that the namespace path is explicit");
+				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
 		else {
@@ -866,7 +879,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -916,7 +929,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {

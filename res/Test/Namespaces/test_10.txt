@@ -1,0 +1,39 @@
+SOURCE
+namespace Name0 {
+	struct A {
+		int x;
+	}
+}
+
+namespace Name1 {
+	struct B {
+		int x0;
+	}
+}
+
+namespace Name0 {
+	struct C {
+		B b0;
+	}
+}
+
+int main() {
+	C c = C::(B::(10));
+	return 20 + c.b0.x0;
+}
+
+TESTCASES
+30
+OUTPUT
+/* --test_10.txt */
+main:                         /* Function: main */
+    mov fp, sp
+    mov r0, #10               /* Evaluate Expression */
+    push { r0 }
+    sub r1, fp, #4            /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r2, r0
+    mov r1, #20
+    add r0, r1, r2
+    bx lr
+    

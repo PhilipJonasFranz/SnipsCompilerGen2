@@ -4,6 +4,8 @@ import Imm.ASM.Structural.Label.ASMDataLabel;
 
 public class MemoryWordRefOperand extends MemoryOperand {
 
+	public String prefix = "";
+	
 	public ASMDataLabel dataLabel;
 	
 	public MemoryWordRefOperand(ASMDataLabel dataLabel) {
@@ -11,7 +13,11 @@ public class MemoryWordRefOperand extends MemoryOperand {
 	}
 	
 	public String toString() {
-		return ".word " + this.dataLabel.name;
+		return ".word " + this.prefix + this.dataLabel.name;
+	}
+
+	public MemoryOperand clone() {
+		return new MemoryWordRefOperand(this.dataLabel.clone());
 	}
 	
 }

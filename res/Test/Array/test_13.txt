@@ -118,13 +118,13 @@ main:                         /* Function: main */
     sub r1, fp, #72           /* Start of structure in stack */
     add r1, r1, r2            /* Start of sub structure in stack */
     add r2, r1, #36
-.L1:                          /* Copy memory section with loop */
+main.L0:                      /* Copy memory section with loop */
     cmp r1, r2
-    beq .L2
+    beq main.L1
     ldr r0, [r1] #4
     push { r0 }
-    b .L1
-.L2: 
+    b main.L0
+main.L1: 
     bl add                    /* Call add */
     add sp, sp, #36
     mov sp, fp

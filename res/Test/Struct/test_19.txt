@@ -1,0 +1,41 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int main() {
+	A a = A::(10);
+	a.x += 5;
+	a.x -= 3;
+	a.x *= 4;
+	return a.x;
+}
+TESTCASES
+48
+OUTPUT
+/* --test_19.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    mov fp, sp
+    mov r0, #10               /* Evaluate Expression */
+    push { r0 }
+    sub r1, fp, #4
+    ldr r2, [r1]
+    add r0, r2, #5
+    str r0, [r1]              /* Store value to struct field */
+    sub r1, fp, #4
+    ldr r2, [r1]
+    sub r0, r2, #3
+    str r0, [r1]              /* Store value to struct field */
+    mov r0, #4                /* Evaluate Expression */
+    sub r1, fp, #4
+    ldr r2, [r1]
+    mul r0, r2, r0
+    str r0, [r1]              /* Store value to struct field */
+    sub r1, fp, #4            /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    bx lr
+    

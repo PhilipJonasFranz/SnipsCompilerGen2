@@ -26,14 +26,14 @@ resv:                         /* Function: resv */
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, .L0_HEAP_START    /* Evaluate Expression */
+    ldr r0, .POOL0_main.L0_HEAP_START/* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
-.L2:                          /* Evaluate condition */
+resv.L1:                      /* Evaluate condition */
     lsl r0, r4, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     cmp r0, #0
-    beq .L3
+    beq resv.L2
 /* Memory Section is allocated or free */
 /* Load block size from memory */
     lsl r0, r4, #2            /* Convert to bytes */
@@ -41,50 +41,50 @@ resv:                         /* Function: resv */
     mov r5, r0
     mov r6, r0
     cmp r5, #0
-    bge .L5
+    bge resv.L4
 /* Defragment Heap */
-.L7:                          /* Evaluate condition */
+resv.L6:                      /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
-    bne .L8
+    bne resv.L7
     sub r0, r4, r5
     lsl r0, r0, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     mov r7, r0
     cmp r7, #0
-    ble .L10
-    b .L8
-.L10: 
+    ble resv.L9
+    b resv.L7
+resv.L9: 
     cmp r7, #0
-    bne .L12
+    bne resv.L11
     mov r0, #0                /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
-    b .L8
-.L12: 
+    b resv.L7
+resv.L11: 
     add r5, r5, r7
 /* Add to current size */
-    b .L7
-.L8: 
+    b resv.L6
+resv.L7: 
     mov r0, r5                /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
     mov r7, r0
     cmp r5, #0
-    bne .L13
+    bne resv.L12
     mov r0, #0                /* Evaluate Expression */
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-.L13: 
+resv.L12: 
 /* Memory location is free, check size */
     rsb r0, r5, #0
     mov r5, r0
     cmp r0, r3
-    bne .L16
+    bne resv.L15
 /* Fits */
     mov r0, r3                /* Evaluate Expression */
     lsl r1, r4, #2
@@ -93,10 +93,10 @@ resv:                         /* Function: resv */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
-    b .L19
-.L16: 
+    b resv.L18
+resv.L15: 
     cmp r5, r3
-    ble .L18
+    ble resv.L17
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     mov r0, r3                /* Evaluate Expression */
@@ -112,16 +112,16 @@ resv:                         /* Function: resv */
     mov r1, r4                /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
-    b .L19
-.L18: 
+    b resv.L18
+resv.L17: 
     sub r4, r4, r5
-    b .L4
-.L5: 
+    b resv.L3
+resv.L4: 
 /* Memory section is allocated, skip */
     add r4, r4, r5
-.L4: 
-    b .L2
-.L3: 
+resv.L3: 
+    b resv.L1
+resv.L2: 
 /* End reached, create new block */
     mov r0, r3                /* Evaluate Expression */
     lsl r1, r4, #2
@@ -130,9 +130,10 @@ resv:                         /* Function: resv */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
-.L19: 
+resv.L18: 
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
+.POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                         /* Function: main */
     push { r3, r4, r5, fp, lr }
@@ -166,4 +167,3 @@ main:                         /* Function: main */
     pop { r3, r4, r5, fp, lr }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

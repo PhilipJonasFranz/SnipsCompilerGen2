@@ -19,14 +19,13 @@ main:                         /* Function: main */
     push { r3, r4 }
     mov r3, r0
     cmp r3, #3
-    bne .L1
+    bne main.L0
     mov r0, #5
-    b .L2
-.L1: 
+    b main.L1
+main.L0: 
     mov r0, #10
-.L2: 
+main.L1: 
     mov r4, r0
     pop { r3, r4 }
     bx lr
     
-.L0_HEAP_START: .word HEAP_START

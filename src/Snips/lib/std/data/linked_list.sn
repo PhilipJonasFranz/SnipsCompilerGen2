@@ -31,8 +31,8 @@ namespace List {
 	/*
 	 * Free the list by freeing all contained list nodes, and the list itself.
 	 */
-	void destroy<T>(LinkedList<T>* l) {
-		ListNode<T>* n = l->head;
+	void destroy(LinkedList<void>* l) {
+		ListNode<void>* n = l->head;
 		while ((int) n != 0) {
 			free(n);
 			n = n->next;
@@ -95,9 +95,10 @@ namespace List {
 	
 	/*
 	 * Finds the first node in the list that has given value.
-	 * Returns a pointer to this list node.
+	 * Returns a pointer to this list node, or 0 in case the
+	 * value wasnt found. Frees the removed node of the heap.
 	 */
-	ListNode<T>* find<T>(LinkedList<T>* lp, int x) {
+	ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = lp->head;
 		while ((int) n->next != 0) {
 			if (n->value == x) {
@@ -108,5 +109,76 @@ namespace List {
 		}
 		/* Not found */
 		return (ListNode<T>*) 0;
+	}
+	
+	/*
+	 * Returns the amount of elements stored in the list.
+	 */
+	int size(LinkedList<void>* lp) {
+		ListNode<void>* n = lp->head;
+		int size = 0;
+		while ((int) n != 0) {
+			n = n->next;
+			size++;
+		}
+		return size;
+	}
+	
+	/*
+	 * Removes the index at given index.
+	 * If the index is out of bounds nothing is removed.
+	 */
+	void remove(LinkedList<void>* lp, int i) {
+		/* Out of bounds */
+		if (i < 0) return;
+		
+		if (i == 0) {
+			/* Remove first element */
+			if ((int) lp->head != 0) {
+				ListNode<void>* n = lp->head;
+				lp->head = lp->head->next;
+				
+				/* Only one element in list */
+				if (lp->tail == n) {
+					lp->tail = (ListNode<void>*) 0;
+				}
+				
+				free(n);
+			}
+			
+			return;
+		}
+		else {
+			ListNode<void>* n = lp->head;
+			i--;
+			
+			/* Jump to element before element to remove */
+			while (i > 0) {
+				if ((int) n->next == 0) return;
+				else {
+					n = n->next;
+					i--;
+				}
+			}
+			
+			/* Out of bounds */
+			if ((int) n->next == 0) return;
+			else {
+				if ((int) n->next->next == 0) {
+					/* Element to remove is last element in list */
+					free(n->next);
+					n->next = (ListNode<void>*) 0;
+					lp->tail = n;
+				}
+				else {
+					/* Cut out element and set next pointers */
+					ListNode<void>* next = n->next->next;
+					free(n->next);
+					n->next = next;
+				}
+				return;
+			}
+		}
+		
 	}
 }
