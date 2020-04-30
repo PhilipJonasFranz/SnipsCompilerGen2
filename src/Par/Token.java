@@ -59,6 +59,7 @@ public class Token {
 		RBRACKET("]"),
 		
 		IDENTIFIER("", 				TokenGroup.IDENTIFIER),
+		NAMESPACE_IDENTIFIER("", 	TokenGroup.IDENTIFIER),
 		UNION_ACCESS("->"),
 		
 		/* Keywords */

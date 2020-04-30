@@ -36,11 +36,13 @@ public class Scanner {
 		
 		List<String> structIds = new ArrayList();
 		
+		List<String> namespaces = new ArrayList();
+		
 		/**
 		 * Defines the current accumulation state of the scanner.
 		 */
 		private enum ACC_STATE {
-			NONE, ID, STRUCT_ID, INT, FLOAT, COMMENT
+			NONE, ID, STRUCT_ID, NAMESPACE_ID, INT, FLOAT, COMMENT
 		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
@@ -219,6 +221,7 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("namespace")) {
 				tokens.add(new Token(TokenType.NAMESPACE, new Source(fileName, i, a)));
+				this.state = ACC_STATE.NAMESPACE_ID;
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("include")) {
@@ -409,7 +412,7 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID) {
+					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.NAMESPACE_ID) {
 						this.state = ACC_STATE.ID;
 					}
 				}
@@ -417,8 +420,7 @@ public class Scanner {
 					this.state = ACC_STATE.INT;
 				}
 				
-				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID)) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
 					if (this.buffer.trim().isEmpty()) {
 						return false;
@@ -429,11 +431,17 @@ public class Scanner {
 					if (this.state == ACC_STATE.ID) {
 						if (this.structIds.contains(id))
 							tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+						else if (this.namespaces.contains(id))
+							tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
 					}
-					else {
+					else if (this.state == ACC_STATE.STRUCT_ID) {
 						this.structIds.add(id);
 						tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+					}
+					else if (this.state == ACC_STATE.NAMESPACE_ID) {
+						tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
+						this.namespaces.add(id);
 					}
 					
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);

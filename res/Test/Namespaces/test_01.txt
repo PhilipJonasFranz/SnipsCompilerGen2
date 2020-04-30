@@ -1,6 +1,8 @@
 SOURCE
 namespace Foo {
-	int x = 10;
+	namespace Baz {
+		int x = 10;
+	}
 }
 
 namespace Bar {
@@ -8,11 +10,12 @@ namespace Bar {
 }
 
 int main() {
-	return Foo::x + Bar::x;
+	Foo::Baz::x++;
+	return Foo::Baz::x + Bar::x;
 }
 
 TESTCASES
-25
+26
 OUTPUT
 /* --test_01.txt */
 .data
