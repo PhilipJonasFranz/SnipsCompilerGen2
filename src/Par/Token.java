@@ -123,6 +123,7 @@ public class Token {
 		/* Primitive Literals */
 		INTLIT("intlit",			TokenGroup.LITERAL),
 		CHARLIT("charlit",			TokenGroup.LITERAL),
+		STRINGLIT("",				TokenGroup.LITERAL),
 		BOOLLIT("boollit",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {

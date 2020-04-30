@@ -1236,6 +1236,15 @@ public class Parser {
 			Token token = accept();
 			return new Atom(new CHAR(token.spelling), token, token.source);
 		}
+		else if (current.type == TokenType.STRINGLIT) {
+			Token token = accept();
+			List<Expression> charAtoms = new ArrayList();
+			String [] sp = token.spelling.split("");
+			for (int i = 0; i < sp.length; i++) {
+				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
+			}
+			return new ArrayInit(charAtoms, token.getSource());
+		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
 			return new Atom(new BOOL(token.spelling), token, token.source);
