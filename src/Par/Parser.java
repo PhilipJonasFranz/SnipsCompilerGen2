@@ -77,6 +77,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.CHAR;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
@@ -1230,6 +1231,10 @@ public class Parser {
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
 			return new Atom(new INT(token.spelling), token, token.source);
+		}
+		else if (current.type == TokenType.CHARLIT) {
+			Token token = accept();
+			return new Atom(new CHAR(token.spelling), token, token.source);
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();

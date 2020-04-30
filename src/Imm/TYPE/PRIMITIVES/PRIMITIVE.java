@@ -26,6 +26,9 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		else if (token.type() == TokenType.BOOL) {
 			return new BOOL();
 		}
+		else if (token.type() == TokenType.CHAR) {
+			return new CHAR();
+		}
 		else if (token.type() == TokenType.VOID) {
 			return new VOID();
 		}

@@ -78,6 +78,7 @@ public class Token {
 		RETURN("return"),
 		
 		DOT("."),
+		APOS("'"),
 		SEMICOLON(";"),
 		COLON(":"),
 		COMMA(","),
@@ -113,6 +114,7 @@ public class Token {
 		/* Types */
 		VOID("void", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
+		CHAR("char",				TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
 		PROVISO("",					TokenGroup.TYPE), 
 		STRUCTID("", 				TokenGroup.TYPE),
@@ -120,6 +122,7 @@ public class Token {
 		
 		/* Primitive Literals */
 		INTLIT("intlit",			TokenGroup.LITERAL),
+		CHARLIT("charlit",			TokenGroup.LITERAL),
 		BOOLLIT("boollit",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
