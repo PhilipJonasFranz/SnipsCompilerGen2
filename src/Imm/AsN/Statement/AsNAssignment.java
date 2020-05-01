@@ -59,8 +59,6 @@ public class AsNAssignment extends AsNStatement {
 				
 				offset += 4;
 			}
-			
-			st.popXWords(size);
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
@@ -83,7 +81,6 @@ public class AsNAssignment extends AsNStatement {
 			
 			/* Pop value from stack and store it at location */
 			node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
-			st.popXWords(1);
 			
 			node.instructions.add(new ASMStrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
 			
@@ -92,6 +89,8 @@ public class AsNAssignment extends AsNStatement {
 			
 			node.instructions.add(loopEnd);
 		}
+		
+		st.popXWords(size);
 	}
 	
 }

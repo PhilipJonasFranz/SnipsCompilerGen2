@@ -1,8 +1,0 @@
-SOURCE
-char main() {
-	char* str = (char*) resv(5);
-	*str = "Hallo";
-	return *str;
-}
-TESTCASES
-72
