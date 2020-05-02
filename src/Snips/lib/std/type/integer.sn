@@ -46,9 +46,9 @@ namespace Integer {
 			add<int>(list, 0);
 		}
 		else {
-			/* Append sign */
+			bool neg = false;
 			if (num < 0) {
-				add<int>(list, -3);
+				neg = true;
 				num = -num;
 			}
 			
@@ -57,15 +57,22 @@ namespace Integer {
 				add<int>(list, c);
 				num = num / 10;
 			}
+			
+			/* Add Sign */
+			if (neg) {
+				add<int>(list, -3);
+			}
 		}
 		
 		/* Get size of list */
 		int size = size(list);
 		char* str = (char*) resv(size);
 		
+		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
 			int c = get<int>(list, i) + 48;
-			*(str + i) = (char) c;
+			*(str + c0) = (char) c;
+			c0++;
 		}
 		
 		List::destroy(list);
