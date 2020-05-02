@@ -1,0 +1,124 @@
+#include<linked_list.sn>
+
+/*
+ * To use this library, you need to include the following line
+ * in the SWARM32PC config: <Device>DISPLAY, dynamic, Devices.Display</Device>.
+ * This will add the display adapter to the configuration.
+ * Also, you need to set the displayBase variable to the word offset the
+ * device memory appends to. Also make sure the processor has enough ram,
+ * string operations can quickly fill it, but only temporarily.
+ */
+namespace Display {
+
+	/* This variable should be set to the first word in the memory section of the display */
+	int displayBase = 2048;
+	int cursor = 0;
+
+	/* Reads the char from the display input at base + 1 */
+	char getChar() {
+		int* base = (int*) (displayBase + 1);
+		int c = *base;
+		*base = 0;
+		return (char) c;
+	}
+	
+	/* Puts the char at the current cursor location and increments the cursor */
+	void putChar(char c) {
+		int* base = (int*) (displayBase + 2);
+		base += cursor;
+		*base = (int) c;
+		Display::cursor++;
+	}
+	
+	namespace Print {
+		/* Skips the cursor to a new line */
+		void println() {
+			int rest = 70 - (cursor % 70);
+			cursor += rest;
+		}
+		
+		/* Prints the string the given char pointer points to. */
+		void printString(char* str) {
+			int size = hsize(str);
+			for (int i = 0; i < size; i++) {
+				char c0 = *(str + i);
+				putChar(c0);
+			}
+		}
+		
+		/* Prints out given string and a new line */
+		void printlnString(char* str) {
+			printString(str);
+			println();
+		}
+		
+		/* Prints out the given integer */
+		void printInt(int num) {
+			if (num == 0) {
+				putChar('0');
+			}
+			else {
+				/* Print out sign */
+				if (num < 0) {
+					putChar('-');
+					num = -num;
+				}
+				
+				LinkedList<int>* list = List::create<int>();
+				
+				while (num > 0) {
+					int c = num % 10;
+					add<int>(list, c);
+					num = num / 10;
+				}
+				
+				/* Get size of list */
+				int size = List::size(list);
+				for (int i = size - 1; i >= 0; i--) {
+					int c = List::get<int>(list, i);
+					putChar((char) (48 + c));
+				}
+				
+				List::destroy(list);
+			}
+			
+			return;
+		}
+	}
+
+	namespace Scanf {
+		char* scanf() {
+			/* Create a list where the input is temporarily stored */
+			LinkedList<char>* input = List::create<char>();
+			
+			while (true) {
+				char c = Display::getChar();
+				/* Input is a ., break */
+				if ((int) c == 46) {
+					break;
+				}
+				
+				/* Input is a new character, add to input */
+				if ((int) c != 0) {
+					List::add<char>(input, c);
+					putChar(c);
+				}
+			}
+			
+			println();
+			
+			/* Read all the characters from the list and place them in the output string */
+			int size = List::size(input);
+			char* arr = (char*) resv(size);
+			for (int i = 0; i < size; i++) {
+				*(arr + i) = List::get<char>(input, i);
+			}
+			
+			/* Free the list and return the string pointer */
+			List::destroy(input);
+			return arr;
+		}
+		
+	}
+
+}
