@@ -52,38 +52,6 @@ namespace Display {
 			println();
 		}
 		
-		/* Prints out the given integer */
-		void printInt(int num) {
-			if (num == 0) {
-				putChar('0');
-			}
-			else {
-				/* Print out sign */
-				if (num < 0) {
-					putChar('-');
-					num = -num;
-				}
-				
-				LinkedList<int>* list = List::create<int>();
-				
-				while (num > 0) {
-					int c = num % 10;
-					add<int>(list, c);
-					num = num / 10;
-				}
-				
-				/* Get size of list */
-				int size = List::size(list);
-				for (int i = size - 1; i >= 0; i--) {
-					int c = List::get<int>(list, i);
-					putChar((char) (48 + c));
-				}
-				
-				List::destroy(list);
-			}
-			
-			return;
-		}
 	}
 
 	namespace Scanf {

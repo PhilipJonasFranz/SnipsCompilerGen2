@@ -35,5 +35,42 @@ namespace Integer {
 		
 		return sum;
 	}
+	
+	/*
+	 * Converts given int to a String representation.
+	 */
+	char* toString(int num) {
+		LinkedList<int>* list = create<int>();
+	
+		if (num == 0) {
+			add<int>(list, 0);
+		}
+		else {
+			/* Append sign */
+			if (num < 0) {
+				add<int>(list, -3);
+				num = -num;
+			}
+			
+			while (num > 0) {
+				int c = num % 10;
+				add<int>(list, c);
+				num = num / 10;
+			}
+		}
+		
+		/* Get size of list */
+		int size = size(list);
+		char* str = (char*) resv(size);
+		
+		for (int i = size - 1; i >= 0; i--) {
+			int c = get<int>(list, i) + 48;
+			*(str + i) = (char) c;
+		}
+		
+		List::destroy(list);
+		
+		return str;
+	}
 
 }
