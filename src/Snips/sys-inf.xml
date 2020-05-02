@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.2.1.1</Version>
+	<Version>v.2.1.2</Version>
 	<Library>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
 		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>

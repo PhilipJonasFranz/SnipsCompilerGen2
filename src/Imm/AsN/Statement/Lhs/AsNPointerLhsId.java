@@ -20,6 +20,7 @@ import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Statement.AsNAssignment;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNPointerLhsId extends AsNLhsId {
@@ -31,14 +32,17 @@ public class AsNPointerLhsId extends AsNLhsId {
 
 		Deref dref = lhs.deref;
 		
-		/* Store single cell */
-		if (lhs.expressionType instanceof PRIMITIVE) {
+		/* Store single cell, push value in R0 */
+		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) {
 			id.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			r.free(0);
 		}
+		
+		r.free(0);
 		
 		/* Load target address */
 		id.instructions.addAll(AsNExpression.cast(dref.expression, r, map, st).getInstructions());
+		
+		/* Convert to bytes */
 		id.instructions.add(new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0), new ImmOperand(2)));
 		
 		if (lhs.expressionType instanceof PRIMITIVE) {
