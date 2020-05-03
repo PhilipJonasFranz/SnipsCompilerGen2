@@ -40,37 +40,32 @@ namespace Integer {
 	 * Converts given int to a String representation.
 	 */
 	char* toString(int num) {
-		LinkedList<int>* list = create<int>();
+		LinkedList<int>* list = List::create<int>();
 	
-		if (num == 0) {
-			add<int>(list, 0);
+		bool neg = false;
+		if (num < 0) {
+			neg = true;
+			num = -num;
 		}
-		else {
-			bool neg = false;
-			if (num < 0) {
-				neg = true;
-				num = -num;
-			}
-			
-			while (num > 0) {
-				int c = num % 10;
-				add<int>(list, c);
-				num = num / 10;
-			}
-			
-			/* Add Sign */
-			if (neg) {
-				add<int>(list, -3);
-			}
+		
+		do {
+			int c = num % 10;
+			List::add<int>(list, c);
+			num = num / 10;
+		} while (num > 0);
+		
+		/* Add Sign */
+		if (neg) {
+			List::add<int>(list, -3);
 		}
 		
 		/* Get size of list */
-		int size = size(list);
+		int size = List::size(list);
 		char* str = (char*) resv(size);
 		
 		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
-			int c = get<int>(list, i) + 48;
+			int c = List::get<int>(list, i) + 48;
 			*(str + c0) = (char) c;
 			c0++;
 		}
