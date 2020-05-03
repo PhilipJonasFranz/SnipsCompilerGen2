@@ -1,0 +1,7 @@
+SOURCE
+char main() {
+	char c = '1';
+	return c;
+}
+TESTCASES
+49

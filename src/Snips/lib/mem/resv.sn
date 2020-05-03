@@ -49,7 +49,7 @@ void* resv(int size) {
 				*(mem_loc + size) = -val;
 				return (void*) (mem_loc + 1);	
 			}
-			else mem_loc -= val;
+			else mem_loc += val;
 		}
 		else {
 			/* Memory section is allocated, skip */

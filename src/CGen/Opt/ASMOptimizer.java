@@ -122,6 +122,10 @@ public class ASMOptimizer {
 			ASMMemOp memOp = (ASMMemOp) ins;
 			return memOp.target.reg == reg;
 		}
+		else if (ins instanceof ASMLdrStack) {
+			ASMLdrStack load = (ASMLdrStack) ins;
+			return load.target.reg == reg;
+		}
 		else if (ins instanceof ASMPopStack) {
 			ASMPopStack pop = (ASMPopStack) ins;
 			return pop.operands.stream().filter(x -> x.reg == reg).count() > 0;

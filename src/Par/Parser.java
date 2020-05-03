@@ -77,6 +77,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.CHAR;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
@@ -383,7 +384,7 @@ public class Parser {
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
-		boolean functionCheck = current.type == TokenType.IDENTIFIER;
+		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
 				break;
@@ -392,7 +393,10 @@ public class Parser {
 			functionCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
 			
 			Token t = tokenStream.get(i + 2);
-			if (t.type == TokenType.STRUCTID) {
+			if (t.type == TokenType.NAMESPACE_IDENTIFIER) {
+				continue;
+			}
+			else if (t.type == TokenType.STRUCTID) {
 				/* Found Struct ID, Must be a structure init */
 				functionCheck = false;
 				break;
@@ -403,13 +407,38 @@ public class Parser {
 			}
 		}
 		
+		boolean decCheck = current.type.group == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER;
+		for (int i = 0; i < this.tokenStream.size(); i += 3) {
+			if (tokenStream.get(i).type == TokenType.IDENTIFIER || 
+				tokenStream.get(i).type == TokenType.LBRACKET || 
+				tokenStream.get(i).type == TokenType.MUL ||
+				tokenStream.get(i).type == TokenType.CMPLT) {
+				break;
+			}
+			
+			decCheck &= tokenStream.get(i).type == TokenType.COLON;
+			decCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
+			
+			Token t = tokenStream.get(i + 2);
+			if (t.type == TokenType.NAMESPACE_IDENTIFIER) {
+				continue;
+			}
+			else if (t.type == TokenType.STRUCTID) {
+				break;
+			}
+			else {
+				decCheck = false;
+				break;
+			}
+		}
+		
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
 		else if (functionCheck) {
 			return this.parseFunctionCall();
 		}
-		else if (current.type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.COLON) {
+		else if (decCheck) {
 			return this.parseDeclaration();
 		}
 		else if (current.type == TokenType.RETURN) {
@@ -433,7 +462,7 @@ public class Parser {
 		else if (current.type == TokenType.SWITCH) {
 			return this.parseSwitch();
 		}
-		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL) {
+		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			return this.parseAssignment(true);
 		}
 		else if (current.type == TokenType.IF) {
@@ -615,7 +644,17 @@ public class Parser {
 			}
 		}
 		
-		if (tokenStream.get(0).type == TokenType.INCR || tokenStream.get(0).type == TokenType.DECR || structSelectCheck) {
+		boolean increment = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
+		for (int i = 0; i < this.tokenStream.size() - 3; i += 3) {
+			if (tokenStream.get(i).type == TokenType.INCR || tokenStream.get(i).type == TokenType.DECR) break;
+			
+			increment &= tokenStream.get(i).type == TokenType.COLON;
+			increment &= tokenStream.get(i + 1).type == TokenType.COLON;
+			
+			increment &= tokenStream.get(i + 2).type == TokenType.IDENTIFIER || tokenStream.get(i + 2).type == TokenType.NAMESPACE_IDENTIFIER;
+		}
+		
+		if (increment || structSelectCheck) {
 			Source source = current.getSource();
 			
 			if (structSelectCheck) {
@@ -773,7 +812,7 @@ public class Parser {
 	}
 	
 	protected Expression parseStructureInit() throws PARSE_EXCEPTION {
-		boolean structInitCheck = current.type == TokenType.IDENTIFIER;
+		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			structInitCheck &= tokenStream.get(i).type == TokenType.COLON;
 			structInitCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
@@ -787,7 +826,7 @@ public class Parser {
 					/* Found Struct ID, Must be a structure init */
 					break;
 				}
-				else if (t.type != TokenType.IDENTIFIER && t.type != TokenType.STRUCTID) {
+				else if (t.type != TokenType.IDENTIFIER && t.type != TokenType.NAMESPACE_IDENTIFIER && t.type != TokenType.STRUCTID) {
 					structInitCheck = false;
 					break;
 				}
@@ -1150,7 +1189,7 @@ public class Parser {
 			accept(TokenType.RPAREN);
 			return expression;
 		}
-		else if (current.type == TokenType.IDENTIFIER) {
+		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
 			
 			NamespacePath path = this.parseNamespacePath();
@@ -1192,6 +1231,19 @@ public class Parser {
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
 			return new Atom(new INT(token.spelling), token, token.source);
+		}
+		else if (current.type == TokenType.CHARLIT) {
+			Token token = accept();
+			return new Atom(new CHAR(token.spelling), token, token.source);
+		}
+		else if (current.type == TokenType.STRINGLIT) {
+			Token token = accept();
+			List<Expression> charAtoms = new ArrayList();
+			String [] sp = token.spelling.split("");
+			for (int i = 0; i < sp.length; i++) {
+				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
+			}
+			return new ArrayInit(charAtoms, token.getSource());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
@@ -1264,7 +1316,9 @@ public class Parser {
 		TYPE type = null;
 		Token token = null;
 		
+		
 		if (current.type == TokenType.IDENTIFIER) token = accept();
+		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		StructTypedef def = null;
@@ -1375,8 +1429,13 @@ public class Parser {
 	protected NamespacePath parseNamespacePath() throws PARSE_EXCEPTION {
 		Token token;
 		
-		if (current.type == TokenType.STRUCTID) token = accept();
-		else token = accept(TokenType.IDENTIFIER);
+		if (current.type == TokenType.STRUCTID) {
+			return new NamespacePath(accept().spelling);
+		}
+		else if (current.type == TokenType.IDENTIFIER) {
+			return new NamespacePath(accept().spelling);
+		}
+		else token = accept(TokenType.NAMESPACE_IDENTIFIER);
 		
 		return this.parseNamespacePath(token);
 	}
@@ -1391,8 +1450,17 @@ public class Parser {
 			accept();
 			accept(TokenType.COLON);
 			
-			if (current.type == TokenType.STRUCTID) ids.add(accept().spelling);
-			else ids.add(accept(TokenType.IDENTIFIER).spelling);
+			if (current.type == TokenType.NAMESPACE_IDENTIFIER) {
+				ids.add(accept().spelling);
+			}
+			else {
+				if (current.type == TokenType.STRUCTID) ids.add(accept().spelling);
+				else ids.add(accept(TokenType.IDENTIFIER).spelling);
+				
+				if (current.type != TokenType.COLON) {
+					break;
+				}
+			}
 		}
 		
 		assert(!ids.isEmpty());

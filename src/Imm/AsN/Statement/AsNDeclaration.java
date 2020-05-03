@@ -9,6 +9,7 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -32,7 +33,7 @@ public class AsNDeclaration extends AsNStatement {
 		else {
 			/* Push only if primitive or pointer, in every other case the expression 
 			 * is already on the stack */
-			if (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER) {
+			if ((d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER) && !(d.value instanceof StructureInit)) {
 				dec.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 			}
 			else {
@@ -44,7 +45,6 @@ public class AsNDeclaration extends AsNStatement {
 			
 			/* Push the declaration that covers the popped area */
 			st.push(d);
-			
 			r.getReg(0).free();
 		}
 		

@@ -36,11 +36,13 @@ public class Scanner {
 		
 		List<String> structIds = new ArrayList();
 		
+		List<String> namespaces = new ArrayList();
+		
 		/**
 		 * Defines the current accumulation state of the scanner.
 		 */
 		private enum ACC_STATE {
-			NONE, ID, STRUCT_ID, INT, FLOAT, COMMENT
+			NONE, ID, STRUCT_ID, NAMESPACE_ID, INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
@@ -58,7 +60,8 @@ public class Scanner {
 		public boolean readChar(char c, int i, int a, String fileName) {
 			if (this.buffer.isEmpty() && ("" + c).trim().equals(""))return false;
 			else {
-				if (this.state != ACC_STATE.COMMENT) this.buffer = this.buffer.trim();
+				if (this.state != ACC_STATE.COMMENT && this.state != ACC_STATE.CHARLIT && this.state != ACC_STATE.STRINGLIT) 
+					this.buffer = this.buffer.trim();
 				this.buffer = buffer + c;
 				boolean b = this.checkState(i, a, fileName);
 				this.lastLine = i;
@@ -134,6 +137,14 @@ public class Scanner {
 			else if (this.buffer.equals("]")) {
 				tokens.add(new Token(TokenType.RBRACKET, new Source(fileName, i, a)));
 				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("'")) {
+				this.state = ACC_STATE.CHARLIT;
+				return false;
+			}
+			else if (this.buffer.equals("\"")) {
+				this.state = ACC_STATE.STRINGLIT;
+				return false;
 			}
 			else if (this.buffer.equals(".")) {
 				tokens.add(new Token(TokenType.DOT, new Source(fileName, i, a)));
@@ -219,6 +230,7 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("namespace")) {
 				tokens.add(new Token(TokenType.NAMESPACE, new Source(fileName, i, a)));
+				this.state = ACC_STATE.NAMESPACE_ID;
 				this.emptyBuffer();
 			}
 			else if (this.buffer.equals("include")) {
@@ -261,6 +273,12 @@ public class Scanner {
 			}
 			else if (this.buffer.equals("int")) {
 				tokens.add(new Token(TokenType.INT, new Source(fileName, i, a)));
+				this.emptyBuffer();
+				this.state = ACC_STATE.NONE;
+				return true;
+			}
+			else if (this.buffer.equals("char")) {
+				tokens.add(new Token(TokenType.CHAR, new Source(fileName, i, a)));
 				this.emptyBuffer();
 				this.state = ACC_STATE.NONE;
 				return true;
@@ -409,7 +427,7 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID) {
+					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.NAMESPACE_ID) {
 						this.state = ACC_STATE.ID;
 					}
 				}
@@ -417,8 +435,7 @@ public class Scanner {
 					this.state = ACC_STATE.INT;
 				}
 				
-				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID)) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
 					if (this.buffer.trim().isEmpty()) {
 						return false;
@@ -429,16 +446,44 @@ public class Scanner {
 					if (this.state == ACC_STATE.ID) {
 						if (this.structIds.contains(id))
 							tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+						else if (this.namespaces.contains(id))
+							tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
 					}
-					else {
+					else if (this.state == ACC_STATE.STRUCT_ID) {
 						this.structIds.add(id);
 						tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+					}
+					else if (this.state == ACC_STATE.NAMESPACE_ID) {
+						tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
+						this.namespaces.add(id);
 					}
 					
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
 					this.checkState(i, a, fileName);
+				}
+				else if (this.buffer.matches("\"(.)*\"") && (this.state == ACC_STATE.STRINGLIT)) {
+					String id = this.buffer.substring(1, this.buffer.length() - 1);
+				
+					tokens.add(new Token(TokenType.STRINGLIT, new Source(fileName, i, a), id));
+					
+					this.emptyBuffer();
+					this.state = ACC_STATE.NONE;
+					return true;
+				}
+				else if (this.buffer.matches("'.'") && (this.state == ACC_STATE.CHARLIT)) {
+					String id = this.buffer.substring(1, this.buffer.length() - 1);
+				
+					tokens.add(new Token(TokenType.CHARLIT, new Source(fileName, i, a), id));
+					
+					this.emptyBuffer();
+					this.state = ACC_STATE.NONE;
+					return true;
+				}
+				/* Invalid Char lit */
+				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) {
+					this.state = ACC_STATE.NONE;
 				}
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("[0-9]+")) && this.state == ACC_STATE.INT) {
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), this.buffer.substring(0, this.buffer.length() - 1)));

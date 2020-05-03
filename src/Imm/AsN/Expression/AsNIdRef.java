@@ -20,6 +20,7 @@ import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.IDRef;
+import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNIdRef extends AsNExpression {
@@ -79,7 +80,7 @@ public class AsNIdRef extends AsNExpression {
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
-			if (!(i.origin.getType() instanceof PRIMITIVE)) {
+			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER)) {
 				ref.loadMemorySection(i, r, map, st);
 			}
 			/* Load in register */

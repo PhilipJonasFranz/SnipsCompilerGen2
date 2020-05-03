@@ -1,0 +1,78 @@
+/*
+ * This file contains utility functions for int values.
+ */
+namespace Integer {
+
+	/*
+	 * Parses the given String to an int. The String has to have the form 
+	 * (-)*+([0-9])* or ([0-9])*. If the String does not match the regex, -1 is returned.
+	 */
+	int parseInt(char* c) {
+		int size = hsize(c);
+		int sum = 0;
+		
+		bool neg = false;
+		for (int i = 0; i < size; i++) {
+			int s = ((int) *(c + i));
+			
+			/* Check if character is a - */
+			if (s == 45) {
+				neg = !neg;
+			}
+			else {
+				/* Subtract 48 to convert to number between [0-9]. */
+				s -= 48;
+				if (s < 0 || s > 9) {
+					sum = -1;
+					break;
+				}
+				sum = (sum * 10) + s;
+			}
+		}
+		
+		/* Negate if sign flag is set */
+		if (neg) sum = -sum;
+		
+		return sum;
+	}
+	
+	/*
+	 * Converts given int to a String representation.
+	 */
+	char* toString(int num) {
+		LinkedList<int>* list = List::create<int>();
+	
+		bool neg = false;
+		if (num < 0) {
+			neg = true;
+			num = -num;
+		}
+		
+		do {
+			int c = num % 10;
+			List::add<int>(list, c);
+			num = num / 10;
+		} while (num > 0);
+		
+		/* Add Sign */
+		if (neg) {
+			List::add<int>(list, -3);
+		}
+		
+		/* Get size of list */
+		int size = List::size(list);
+		char* str = (char*) resv(size);
+		
+		int c0 = 0;
+		for (int i = size - 1; i >= 0; i--) {
+			int c = List::get<int>(list, i) + 48;
+			*(str + c0) = (char) c;
+			c0++;
+		}
+		
+		List::destroy(list);
+		
+		return str;
+	}
+
+}
