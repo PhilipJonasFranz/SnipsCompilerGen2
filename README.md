@@ -65,3 +65,7 @@ All instructions do support the condition field. See https://iitd-plos.github.io
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  
+ ## License & Copyright
+ © Philip Jonas Franz
+ 
+ Licensed under [Apache License 2.0](LICENSE).
