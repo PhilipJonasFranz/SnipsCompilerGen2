@@ -1,0 +1,12 @@
+SOURCE
+T foo<T>() {
+	T t0 = (void) 5;
+	return t0;
+}
+
+int main() {
+	int t1 = foo<int>();
+	return t1;
+}
+TESTCASES
+5

@@ -384,6 +384,11 @@ public class Parser {
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
+		/* Convert next token */
+		if (this.activeProvisos.contains(current.spelling)) {
+			current.type = TokenType.PROVISO;
+		}
+		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {

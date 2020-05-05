@@ -7,6 +7,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Exc.CTX_EXCEPTION;
+import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -34,6 +35,14 @@ public class AsNFunctionCall extends AsNStatement {
 	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
+		
+		/* 
+		 * When a function has provisos, the order cannot be checked.
+		 * A indicator the order is incorrect is that the casted node is null at this point.
+		 */
+		if (fc.calledFunction.castedNode == null) {
+			throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
+		}
 		
 		call(fc.calledFunction, fc.proviso, fc.parameters, call, r, map, st);
 		
