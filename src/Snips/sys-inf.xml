@@ -1,11 +1,12 @@
 <Inf>
-	<Version>v.2.1.6</Version>
+	<Version>v.2.1.7</Version>
 	<Library>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
 		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>
 		<Alias>mat_mult.sn:lib/std/math/mat_mult.sn</Alias>
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
+		<Alias>boolean.sn:lib/std/type/boolean.sn</Alias>
 		<Alias>integer.sn:lib/std/type/integer.sn</Alias>
 		<Alias>string.sn:lib/std/type/string.sn</Alias>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>

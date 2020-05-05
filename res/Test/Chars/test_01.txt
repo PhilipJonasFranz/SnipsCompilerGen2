@@ -1,0 +1,11 @@
+SOURCE
+#include<string.sn>
+
+bool main() {
+	char[4] str0 = "ABC";
+	char[6] str1 = "DEABC";
+	char* sub = substring(&str1, 2, 5);
+	return equals(&str0, sub);
+}
+TESTCASES
+1

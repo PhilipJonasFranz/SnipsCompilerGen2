@@ -6,6 +6,25 @@
 namespace String {
 
 	/*
+	 * Compares the two given strings. Checks if all chars are equal and returns the
+     * boolean result.
+     */
+    bool equals(char* str0, char* str1) {
+    	bool equal = true;
+    	int c = 0;
+    	while (true) {
+    		char c0 = *(str0 + c);
+    		char c1 = *(str1 + c);
+    		
+    		equal &= c0 == c1;
+    		if ((int) c0 == 0 || (int) c1 == 0) break;
+    		c++;
+    	}
+    	
+    	return equal;
+    }
+
+	/*
 	 * Collects all chars in the string whiches index is greater or equal to begin and less than end.
 	 * This means that the length of the resulting string will be (end - begin), starting at begin.
 	 * Valid inputs for the ranges can be negative numbers and indexes out of bounds, 
