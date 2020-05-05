@@ -40,7 +40,7 @@ namespace Display {
 		/* Prints the string the given char pointer points to. */
 		void printString(char* str) {
 			int c = 0;
-			while ((int) *(str + c) != 0) {
+			while ((int) (*(str + c)) != 0) {
 				char c0 = *(str + c);
 				putChar(c0);
 				c++;

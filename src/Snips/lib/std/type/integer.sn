@@ -13,8 +13,8 @@ namespace Integer {
 		int c0 = 0;
 		int sum = 0;
 		bool neg = false;
-		while ((int) *(c + c0) != 0) {
-			int s = ((int) *(c + c0));
+		while ((int) (*(c + c0)) != 0) {
+			int s = (int) *(c + c0);
 			
 			/* Check if character is a - */
 			if (s == 45) {
@@ -29,7 +29,7 @@ namespace Integer {
 				}
 				sum = (sum * 10) + s;
 			}
-			c++;
+			c0++;
 		}
 		
 		/* Negate if sign flag is set */

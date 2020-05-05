@@ -150,7 +150,7 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
-		//System.out.println(current.type.toString() + " " + current.spelling);
+		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
 		Token old = current;
 		current = tokenStream.get(0);
 		tokenStream.remove(0);
@@ -1074,9 +1074,17 @@ public class Parser {
 	
 	protected Expression parseDeref() throws PARSE_EXCEPTION {
 		Expression addr = null;
+		
 		if (current.type == TokenType.MUL) {
 			Source source = accept().getSource();
-			addr = new Deref(this.parseDeref(), source);
+			
+			if (current.type == TokenType.LPAREN) {
+				accept();
+				Expression e = this.parseExpression();
+				accept(TokenType.RPAREN);
+				addr = new Deref(e, source);
+			}
+			else addr = new Deref(this.parseDeref(), source);
 		}
 		
 		if (addr == null) addr = this.parseTypeCast();
@@ -1129,8 +1137,26 @@ public class Parser {
 			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
 		
-		if (not == null) not = this.parseStructSelect();
+		if (not == null) not = this.parseIncrDecr();
 		return not;
+	}
+	
+	protected Expression parseIncrDecr() throws PARSE_EXCEPTION {
+		Expression ref = this.parseStructSelect();
+		
+		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+			Source source = current.getSource();
+			if (current.type == TokenType.INCR) {
+				accept();
+				ref = new IDRefWriteback(ID_WRITEBACK.INCR, ref, source);
+			}
+			else {
+				accept();
+				ref = new IDRefWriteback(ID_WRITEBACK.DECR, ref, source);
+			}
+		}
+		
+		return ref;
 	}
 	
 	protected Expression parseStructSelect() throws PARSE_EXCEPTION {
@@ -1149,7 +1175,7 @@ public class Parser {
 	}
 	
 	protected Expression parseArraySelect() throws PARSE_EXCEPTION {
-		Expression ref = this.parseIncrDecr();
+		Expression ref = this.parseAtom();
 		
 		if (current.type == TokenType.LBRACKET) {
 			List<Expression> selection = new ArrayList();
@@ -1162,24 +1188,6 @@ public class Parser {
 			return new ArraySelect(ref, selection, ref.getSource());
 		}
 		else return ref;
-	}
-	
-	protected Expression parseIncrDecr() throws PARSE_EXCEPTION {
-		Expression ref = this.parseAtom();
-		
-		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
-			Source source = current.getSource();
-			if (current.type == TokenType.INCR) {
-				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.INCR, ref, source);
-			}
-			else {
-				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.DECR, ref, source);
-			}
-		}
-		
-		return ref;
 	}
 	
 	protected Expression parseAtom() throws PARSE_EXCEPTION {
@@ -1264,7 +1272,7 @@ public class Parser {
 				return this.parseExpression();
 			}
 			else {
-				if (curr0.equals(current)) {
+				if (curr0 == current) {
 					throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 				}
 				else {
