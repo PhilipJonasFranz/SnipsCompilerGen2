@@ -1243,6 +1243,7 @@ public class Parser {
 			for (int i = 0; i < sp.length; i++) {
 				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
 			}
+			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
 			return new ArrayInit(charAtoms, token.getSource());
 		}
 		else if (current.type == TokenType.BOOLLIT) {

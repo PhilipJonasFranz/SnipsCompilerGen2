@@ -39,10 +39,11 @@ namespace Display {
 		
 		/* Prints the string the given char pointer points to. */
 		void printString(char* str) {
-			int size = hsize(str);
-			for (int i = 0; i < size; i++) {
-				char c0 = *(str + i);
+			int c = 0;
+			while ((int) *(str + c) != 0) {
+				char c0 = *(str + c);
 				putChar(c0);
+				c++;
 			}
 		}
 		
@@ -77,10 +78,13 @@ namespace Display {
 			
 			/* Read all the characters from the list and place them in the output string */
 			int size = List::size(input);
-			char* arr = (char*) resv(size);
+			char* arr = (char*) resv(size + 1);
 			for (int i = 0; i < size; i++) {
 				*(arr + i) = List::get<char>(input, i);
 			}
+
+			/* Insert 0 char termination */
+			*(arr + size) = (char) 0;
 			
 			/* Free the list and return the string pointer */
 			List::destroy(input);
