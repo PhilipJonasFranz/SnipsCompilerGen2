@@ -1,0 +1,83 @@
+#include<linked_list.sn>
+
+namespace Stack {
+	
+	struct StackedList<T> {
+		LinkedList<T>* list;
+	}
+	
+	/*
+	 * Creates and initializes a new stack.
+	 * Returns a pointer to the newly created stack.
+	 */
+	StackedList<T> create<T>() {
+		LinkedList<T>* list = (LinkedList<T>*) List::create<T>();
+		StackedList<T>* stack = (StackedList<T>*) resv(sizeof(StackedList<T>));
+		*stack = StackedList<T>::(list);
+		return stack;
+	}
+	
+	/*
+	 * Destroys the stack and the capsuled list.
+	 */
+	void destroy(StackedList<void>* stack) {
+		List::destroy(stack->list);
+		free(stack);
+	}
+	
+	/*
+	 * Pushes given element on top of the stack.
+	 */
+	void push<T>(StackedList<T>* stack, T value) {
+		List::add<T>(stack->list, value);
+	}
+	
+	/*
+	 * Returns true if no elements are currently in the stack.
+	 */
+	bool isEmpty(StackedList<void>* stack) {
+		return List::size(stack->list) == 0;
+	}
+	
+	/*
+	 * Returns the amount of elements stored in the stack.
+	 */
+	int size(StackedList<void>* stack) {
+		return List::size(stack->list);
+	}
+	
+	/*
+	 * Returns the element on the top of the stack, but doesnt
+	 * remove it. Returns a 1-Word 0 if the stack is empty.
+	 * Be aware that peeking on an empty stack can be fatal.
+	 * Make sure to check for the presence of elements with isEmpty.
+	 */
+	T peek<T>(StackedList<T>* stack) {
+		if (Stack::isEmpty(stack)) {
+			return (void) 0;
+		}
+		else {
+			int size = List::size(stack->list);
+			return List::get<T>(stack->list, size - 1);
+		}
+	}
+	
+	/*
+	 * Returns the element on the top of the stack, and 
+	 * removes it. Returns a 1-Word 0 if the stack is empty.
+	 * Be aware that peeking on an empty stack can be fatal.
+	 * Make sure to check for the presence of elements with isEmpty.
+	 */
+	T pop<T>(StackedList<T>* stack) {
+		if (Stack::isEmpty(stack)) {
+			return (void) 0;
+		}
+		else {
+			int size = List::size(stack->list);
+			T value = List::get<T>(stack->list, size - 1);
+			List::remove(stack->list, size - 1);
+			return value;
+		}
+	}
+	
+}
