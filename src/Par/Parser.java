@@ -290,20 +290,21 @@ public class Parser {
 		Source source = accept(TokenType.STRUCT).getSource();
 		Token id = accept(TokenType.STRUCTID);
 		
+		List<TYPE> proviso = this.parseProviso();
+		NamespacePath path = this.buildPath(id.spelling);
+		
 		/* Extend Struct */
+		StructTypedef ext = null;
 		List<Declaration> extendDecs = new ArrayList();
 		if (current.type == TokenType.COLON) {
 			accept();
 			NamespacePath ext0 = this.parseNamespacePath();
-			StructTypedef ext = this.getStructTypedef(ext0, source);
+			ext = this.getStructTypedef(ext0, source);
 			
 			for (Declaration d : ext.fields) extendDecs.add(d.clone());
 		}
 		
-		List<TYPE> proviso = this.parseProviso();
-		NamespacePath path = this.buildPath(id.spelling);
-		
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), source);
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		def.fields.addAll(extendDecs);

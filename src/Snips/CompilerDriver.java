@@ -87,13 +87,9 @@ public class CompilerDriver {
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	public static boolean heap_referenced = false;
-	public static Declaration HEAP_START = new Declaration(
-													new NamespacePath("HEAP_START"), 
-													new INT(), 
-													zero_atom, 
-													nullSource);
-	
-	
+	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, nullSource);
+													
+													
 			/* --- MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
