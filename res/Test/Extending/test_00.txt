@@ -1,0 +1,17 @@
+SOURCE
+struct Base {
+	int x;
+}
+
+struct Extend : Base {
+	int y;
+}
+
+int main() {
+	Base b = Base::(12);
+	Extend e = Extend::(10, 15);
+	return e.x + e.y + b.x;
+}
+
+TESTCASES
+37
