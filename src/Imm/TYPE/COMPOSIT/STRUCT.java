@@ -138,11 +138,8 @@ public class STRUCT extends COMPOSIT {
 	public STRUCT clone() {
 		List<TYPE> prov0 = new ArrayList();
 		for (TYPE t : this.proviso) prov0.add(t.clone());
-		STRUCT s = new STRUCT(prov0);
 		
-		s.typedef = this.typedef.clone();
-		
-		return s;
+		return new STRUCT(this.typedef.clone(), prov0);
 	}
 	
 }

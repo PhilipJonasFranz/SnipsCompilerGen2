@@ -3,15 +3,35 @@ package Util;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class NamespacePath {
 
+	public enum PATH_TERMINATION {
+		UNKNOWN, STRUCT, ENUM;
+	}
+	
 			/* --- FIELDS --- */
 	public List<String> path;
+	
+	public PATH_TERMINATION termination = PATH_TERMINATION.UNKNOWN;
+	
+	
+	public NamespacePath(List<String> path) {
+		this.path = path;
+	}
+	
+	public NamespacePath(List<String> path, PATH_TERMINATION termination) {
+		this.path = path;
+		this.termination = termination;
+	}
+	
+	public NamespacePath(String path, PATH_TERMINATION termination) {
+		this.path = new ArrayList();
+		this.path.add(path);
+		this.termination = termination;
+	}
 	
 	
 			/* --- CONSTRUCTORS --- */

@@ -1,0 +1,14 @@
+SOURCE
+enum Mode {
+	DEFAULT, EXTENDED, MINIMAL;
+}
+
+int main() {
+	Mode m = Mode.DEFAULT;
+	if (m == Mode.DEFAULT) {
+		return 10;
+	}
+	else return 20;
+}
+TESTCASES
+10

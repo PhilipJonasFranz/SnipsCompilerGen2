@@ -63,6 +63,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DoWhileStatement;
+import Imm.AST.Statement.EnumTypedef;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -83,6 +84,7 @@ import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
+import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
 import Util.Source;
 import Util.Logging.Message;
@@ -96,6 +98,8 @@ public class Parser {
 	HashMap<String, STRUCT> structs = new HashMap();
 	
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
+	
+	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
 	List<String> activeProvisos = new ArrayList();
 	
@@ -182,10 +186,7 @@ public class Parser {
 		
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
-			if (current.type == TokenType.COMMENT) {
-				elements.add(this.parseComment());
-			}
-			else if (current.type == TokenType.DIRECTIVE) {
+			if (current.type == TokenType.DIRECTIVE) {
 				Directive dir = this.parseDirective();
 				
 				if (incEnd) {
@@ -202,31 +203,7 @@ public class Parser {
 			}
 			else {
 				incEnd = true;
-				if (current.type == TokenType.STRUCT) {
-					elements.add(this.parseStructTypedef());
-				}
-				else if (current.type == TokenType.NAMESPACE) {
-					elements.add(this.parseNamespace());
-				}
-				else {
-					TYPE type = this.parseType();
-					
-					Token identifier = accept(TokenType.IDENTIFIER);
-					
-					SyntaxElement element = null;
-					if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-						element = this.parseFunction(type, identifier);
-					}
-					else {
-						element = this.parseGlobalDeclaration(type, identifier);
-					}
-					
-					elements.add(element);
-					if (!directives.isEmpty()) {
-						element.directives.addAll(directives);
-						directives.clear();
-					}
-				}
+				elements.add(this.parseProgramElement());
 			}
 		}
 		
@@ -248,30 +225,7 @@ public class Parser {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		while (current.type != TokenType.RBRACE) {
-			if (current.type == TokenType.COMMENT) {
-				elements.add(this.parseComment());
-			}
-			else if (current.type == TokenType.STRUCT) {
-				elements.add(this.parseStructTypedef());
-			}
-			else if (current.type == TokenType.NAMESPACE) {
-				elements.add(this.parseNamespace());
-			}
-			else {
-				TYPE type = this.parseType();
-				
-				Token identifier = accept(TokenType.IDENTIFIER);
-				
-				SyntaxElement element = null;
-				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-					element = this.parseFunction(type, identifier);
-				}
-				else {
-					element = this.parseGlobalDeclaration(type, identifier);
-				}
-				
-				elements.add(element);
-			}
+			elements.add(this.parseProgramElement());
 		}
 		
 		this.namespaces.pop();
@@ -279,6 +233,36 @@ public class Parser {
 		accept(TokenType.RBRACE);
 		
 		return new Namespace(path, elements, source);
+	}
+	
+	public SyntaxElement parseProgramElement() throws PARSE_EXCEPTION {
+		if (current.type == TokenType.COMMENT) {
+			return this.parseComment();
+		}
+		else if (current.type == TokenType.STRUCT) {
+			return this.parseStructTypedef();
+		}
+		else if (current.type == TokenType.ENUM) {
+			return this.parseEnumTypedef();
+		}
+		else if (current.type == TokenType.NAMESPACE) {
+			return this.parseNamespace();
+		}
+		else {
+			TYPE type = this.parseType();
+			
+			Token identifier = accept(TokenType.IDENTIFIER);
+			
+			SyntaxElement element = null;
+			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
+				element = this.parseFunction(type, identifier);
+			}
+			else {
+				element = this.parseGlobalDeclaration(type, identifier);
+			}
+			
+			return element;
+		}
 	}
 	
 	public Comment parseComment() throws PARSE_EXCEPTION {
@@ -315,6 +299,43 @@ public class Parser {
 			def.fields.add(this.parseDeclaration());
 		}
 		accept(TokenType.RBRACE);
+		
+		return def;
+	}
+	
+	public EnumTypedef parseEnumTypedef() throws PARSE_EXCEPTION {
+		Source source = accept(TokenType.ENUM).getSource();
+		Token id = accept(TokenType.ENUMID);
+		
+		NamespacePath path = this.buildPath(id.spelling);
+		
+		accept(TokenType.LBRACE);
+		
+		List<String> enums = new ArrayList();
+		
+		while (current.type != TokenType.RBRACE) {
+			String e = accept(TokenType.IDENTIFIER).spelling;
+			enums.add(e);
+			
+			if (current.type == TokenType.COMMA) {
+				accept();
+			}
+			else {
+				accept(TokenType.SEMICOLON);
+				break;
+			}
+		}
+		
+		for (int i = 0; i < tokenStream.size(); i++) {
+			if (enums.contains(tokenStream.get(i).spelling)) {
+				tokenStream.get(i).type = TokenType.ENUMLIT;
+			}
+		}
+		
+		accept(TokenType.RBRACE);
+		
+		EnumTypedef def = new EnumTypedef(path, enums, source);
+		enumIds.add(new Pair<NamespacePath, EnumTypedef>(path, def));
 		
 		return def;
 	}
@@ -424,9 +445,10 @@ public class Parser {
 			}
 		}
 		
-		boolean decCheck = current.type.group == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER;
+		boolean decCheck = current.type.group == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.IDENTIFIER || 
+				tokenStream.get(i).type == TokenType.ENUMID || 
 				tokenStream.get(i).type == TokenType.LBRACKET || 
 				tokenStream.get(i).type == TokenType.MUL ||
 				tokenStream.get(i).type == TokenType.CMPLT) {
@@ -441,6 +463,9 @@ public class Parser {
 				continue;
 			}
 			else if (t.type == TokenType.STRUCTID) {
+				break;
+			}
+			else if (t.type == TokenType.ENUMID) {
 				break;
 			}
 			else {
@@ -754,6 +779,9 @@ public class Parser {
 			accept();
 			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSR_ASSIGN;
+		}
+		else if (current.type == TokenType.IDENTIFIER) {
+			throw new SNIPS_EXCEPTION("Got IDENTIFIER, check for misspelled types, " + current.getSource().getSourceMarker());
 		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LET);
 	}
@@ -1214,7 +1242,7 @@ public class Parser {
 			accept(TokenType.RPAREN);
 			return expression;
 		}
-		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER) {
+		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
 			
 			NamespacePath path = this.parseNamespacePath();
@@ -1247,6 +1275,25 @@ public class Parser {
 				}
 				
 				return new InlineCall(path, proviso, parameters, source);
+			}
+			else if (current.type == TokenType.DOT && (tokenStream.get(0).type == TokenType.ENUMLIT || path.termination == PATH_TERMINATION.ENUM)) {
+				accept(TokenType.DOT);
+				
+				if (current.type != TokenType.ENUMLIT) {
+					throw new SNIPS_EXCEPTION("The expression '" + current.spelling + "' is not a known field of the enum " + path.build() + ", " + source.getSourceMarker());
+				}
+				
+				/* Actual enum field value */
+				Token value = accept(TokenType.ENUMLIT);
+				
+				/* Get enum type mapped to this value */
+				EnumTypedef def = this.getEnumTypedef(path, source);
+				
+				if (def == null) {
+					throw new SNIPS_EXCEPTION("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
+				}
+				
+				return new Atom(def.getEnumField(value.spelling, source), value, source);
 			}
 			else {
 				/* Identifier Reference */
@@ -1329,8 +1376,43 @@ public class Parser {
 		}
 	}
 	
+	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
+			if (p.getFirst().build().equals(path.build())) {
+				return p.getSecond();
+			}
+		}
+		
+		List<EnumTypedef> defs = new ArrayList();
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
+			if (p.getFirst().getLast().equals(path.getLast())) {
+				defs.add(p.getSecond());
+			}
+		}
+		
+		if (defs.isEmpty()) return null;
+		else if (defs.size() == 1 && path.path.size() == 1) {
+			return defs.get(0);
+		}
+		else {
+			String s = "";
+			for (EnumTypedef def : defs) s += def.path.build() + ", ";
+			s = s.substring(0, s.length() - 2);
+			throw new SNIPS_EXCEPTION("Found multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+		}
+	}
+	
 	public boolean containsStructTypedef(String token) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
+			if (p.getFirst().getLast().equals(token)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean containsEnumTypedef(String token) {
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
 			if (p.getFirst().getLast().equals(token)) {
 				return true;
 			}
@@ -1342,15 +1424,15 @@ public class Parser {
 		TYPE type = null;
 		Token token = null;
 		
-		
 		if (current.type == TokenType.IDENTIFIER) token = accept();
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		StructTypedef def = null;
+		EnumTypedef enu = null;
 		NamespacePath path = null;
-		 
-		if (this.containsStructTypedef(token.spelling) || 
+		
+		if (this.containsStructTypedef(token.spelling) || this.containsEnumTypedef(token.spelling) || 
 				(current.type == TokenType.COLON && 
 				tokenStream.get(0).type == TokenType.COLON && 
 				tokenStream.get(1).type != TokenType.LPAREN)) {
@@ -1366,8 +1448,18 @@ public class Parser {
 				def = this.getStructTypedef(path, token.getSource());
 			}
 			
-			if (def == null) {
-				throw new SNIPS_EXCEPTION("Unknown struct type '" + path.build() + "', " + token.getSource().getSourceMarker());
+			/* Search with relative path */
+			enu = this.getEnumTypedef(path, token.getSource());
+			
+			/* Nothing found, attempt to convert to current absolut path and try again */
+			if (enu == null) {
+				path.path.addAll(0, this.buildPath().path);
+				enu = this.getEnumTypedef(path, token.getSource());
+			}
+			
+			/* Nothing found, error */
+			if (enu == null && def == null) {
+				throw new SNIPS_EXCEPTION("Unknown struct or enum type '" + path.build() + "', " + token.getSource().getSourceMarker());
 			}
 		}
 		
@@ -1388,6 +1480,10 @@ public class Parser {
 			type = s;
 			
 			this.toClone.add(new Pair<TYPE, List<TYPE>>(type, proviso));
+		}
+		else if (enu != null) {
+			/* Enum def was found, set reference to default enum field */
+			type = enu.enumType;
 		}
 		else {
 			type = TYPE.fromToken(token);
@@ -1456,7 +1552,10 @@ public class Parser {
 		Token token;
 		
 		if (current.type == TokenType.STRUCTID) {
-			return new NamespacePath(accept().spelling);
+			return new NamespacePath(accept().spelling, PATH_TERMINATION.STRUCT);
+		}
+		else if (current.type == TokenType.ENUMID) {
+			return new NamespacePath(accept().spelling, PATH_TERMINATION.ENUM);
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			return new NamespacePath(accept().spelling);
@@ -1470,6 +1569,8 @@ public class Parser {
 		List<String> ids = new ArrayList();
 		ids.add(first.spelling);
 		
+		PATH_TERMINATION term = PATH_TERMINATION.UNKNOWN;
+		
 		while (current.type == TokenType.COLON && 
 				tokenStream.get(0).type == TokenType.COLON && 
 				tokenStream.get(1).type != TokenType.LPAREN) {
@@ -1480,7 +1581,14 @@ public class Parser {
 				ids.add(accept().spelling);
 			}
 			else {
-				if (current.type == TokenType.STRUCTID) ids.add(accept().spelling);
+				if (current.type == TokenType.STRUCTID) {
+					term = PATH_TERMINATION.STRUCT;
+					ids.add(accept().spelling);
+				}
+				else if (current.type == TokenType.ENUMID) {
+					term = PATH_TERMINATION.ENUM;
+					ids.add(accept().spelling);
+				}
 				else ids.add(accept(TokenType.IDENTIFIER).spelling);
 				
 				if (current.type != TokenType.COLON) {
@@ -1491,7 +1599,7 @@ public class Parser {
 		
 		assert(!ids.isEmpty());
 		
-		return new NamespacePath(ids);
+		return new NamespacePath(ids, term);
 	}
 	
 	protected List<Statement> parseCompoundStatement(boolean forceBraces) throws PARSE_EXCEPTION {

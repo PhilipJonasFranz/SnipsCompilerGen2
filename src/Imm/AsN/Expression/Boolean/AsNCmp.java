@@ -16,7 +16,7 @@ import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.TYPE;
 
 public class AsNCmp extends AsNBinaryExpression {
 
@@ -37,7 +37,9 @@ public class AsNCmp extends AsNBinaryExpression {
 		
 		if (c.getRight() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.getLeft(), r, map, st).getInstructions());
-			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(((INT) ((Atom) c.getRight()).getType()).value)));
+			
+			TYPE t = ((Atom) c.getRight()).getType();
+			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(Integer.parseInt(t.getValue().toString()))));
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */

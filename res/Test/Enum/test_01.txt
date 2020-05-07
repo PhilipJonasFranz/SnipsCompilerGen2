@@ -1,0 +1,16 @@
+SOURCE
+namespace EN0 {
+	enum Mode {
+		DEFAULT, EXTENDED, MINIMAL;
+	}
+}
+
+int main() {
+	EN0::Mode m = EN0::Mode.EXTENDED;
+	if (m == EN0::Mode.DEFAULT) {
+		return 10;
+	}
+	else return 20;
+}
+TESTCASES
+20

@@ -64,11 +64,7 @@ public class StructTypedef extends SyntaxElement {
 		/* Apply context to internal proviso */
 		for (int i = 0; i < this.proviso.size(); i++) {
 			PROVISO p0 = (PROVISO) this.proviso.get(i);
-			
-			List<TYPE> con0 = new ArrayList();
-			con0.add(context.get(i));
-			
-			ProvisoManager.setContext(con0, p0);
+			ProvisoManager.setContext(context, p0);
 		}
 		
 		for (int i = 0; i < context.size(); i++) {
