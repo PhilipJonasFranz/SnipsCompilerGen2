@@ -29,13 +29,22 @@ public class ENUM extends PRIMITIVE<String> {
 		}
 		else if (type instanceof POINTER) {
 			POINTER p = (POINTER) type;
-			return p.getCoreType() instanceof ENUM;
+			if (p.getCoreType() instanceof ENUM) {
+				ENUM e0 = (ENUM) p.getCoreType();
+				return e0.def.equals(this.def);
+			}
+			else return false;
 		}
-		return type instanceof ENUM;
+		
+		if (type instanceof ENUM) {
+			ENUM e0 = (ENUM) type;
+			return e0.def.equals(this.def);
+		}
+		else return false;
 	}
 	
 	public String typeString() {
-		return "ENUM" + ((this.value != null)? ": " + this.value : "");
+		return "ENUM<" + this.def.path.build() + ">";
 	}
 
 	public String sourceCodeRepresentation() {
