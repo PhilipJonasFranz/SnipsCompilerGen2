@@ -5,3 +5,11 @@ char main() {
 }
 TESTCASES
 49
+OUTPUT
+/* --test_00.txt */
+main:                         /* Function: main */
+    push { r3 }
+    mov r0, #49               /* Evaluate Expression */
+    pop { r3 }
+    bx lr
+    

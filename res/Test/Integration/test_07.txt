@@ -149,7 +149,7 @@ resv.L15:
     add r0, r1, #1
     b resv.L18
 resv.L17: 
-    sub r4, r4, r5
+    add r4, r4, r5
     b resv.L3
 resv.L4: 
 /* Memory section is allocated, skip */

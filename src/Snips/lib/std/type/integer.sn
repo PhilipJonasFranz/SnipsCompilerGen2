@@ -6,8 +6,8 @@ namespace Integer {
 	/*
 	 * Parses the given String to an int. The String has to have the form 
 	 * (-)*+([0-9])*NULL or ([0-9])*NULL. If the String does not match the regex, -1 is returned.
-     * The String must be terminated with the NULL char, otherwise the function will
-     * run infiniteley.
+	 * The String must be terminated with the NULL char, otherwise the function will
+	 * run infiniteley.
 	 */
 	int parseInt(char* c) {
 		int c0 = 0;
