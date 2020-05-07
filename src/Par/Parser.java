@@ -781,7 +781,7 @@ public class Parser {
 			return ASSIGN_ARITH.LSR_ASSIGN;
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
-			throw new SNIPS_EXCEPTION("Got IDENTIFIER, check for misspelled types, " + current.getSource().getSourceMarker());
+			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types, " + current.getSource().getSourceMarker());
 		}
 		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LET);
 	}
@@ -1246,6 +1246,10 @@ public class Parser {
 			Source source = current.getSource();
 			
 			NamespacePath path = this.parseNamespacePath();
+			
+			if (current.type == TokenType.COLON && tokenStream.get(0).type == TokenType.COLON) {
+				throw new SNIPS_EXCEPTION("Unknown namespace '" + path.build() + "', " + source.getSourceMarker());
+			}
 			
 			/* Convert next token */
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
