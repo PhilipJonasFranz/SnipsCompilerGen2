@@ -23,7 +23,7 @@
 
  The compiler uses a built-in system libary, located at src/Snips/lib. 
  
- The compiler will output ARM Assembly. 
+ The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
  
 ## Usage & Setup
 ### Running the executable
@@ -45,7 +45,7 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  - mul, mla
  - ldr, str
  
-All instructions do support the condition field. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
+All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 ### XML-Parser
  Under src/REv/Modules/Tools/ you can also find a basic implementation of a XML-Parser, that converts a given .xml file to a tree structure. 
 ### Utility
