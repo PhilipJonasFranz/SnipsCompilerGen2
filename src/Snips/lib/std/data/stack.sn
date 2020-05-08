@@ -1,5 +1,10 @@
 #include<linked_list.sn>
 
+/*
+ * This package provides the utility to create and 
+ * use a stack. This package builds on the linked_list
+ * package. 
+ */
 namespace Stack {
 	
 	struct StackedList<T> {

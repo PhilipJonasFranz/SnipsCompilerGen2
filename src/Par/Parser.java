@@ -1139,6 +1139,11 @@ public class Parser {
 			Source source = accept().getSource();
 			accept(TokenType.LPAREN);
 			
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
+			
 			/* Size of Type */
 			if (current.type.group == TokenGroup.TYPE) {
 				TYPE type = this.parseType();

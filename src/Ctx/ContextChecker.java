@@ -896,7 +896,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -946,7 +946,7 @@ public class ContextChecker {
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {

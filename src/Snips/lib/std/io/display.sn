@@ -6,7 +6,8 @@
  * This will add the display adapter to the configuration.
  * Also, you need to set the displayBase variable to the word offset the
  * device memory appends to. Also make sure the processor has enough ram,
- * string operations can quickly fill it, but only temporarily.
+ * string operations can quickly fill it, but only temporarily. This package
+ * uses the linked_list package.
  */
 namespace Display {
 
