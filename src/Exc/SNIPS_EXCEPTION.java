@@ -1,5 +1,6 @@
 package Exc;
 
+import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
 import Util.Logging.Message;
 
@@ -15,6 +16,9 @@ public class SNIPS_EXCEPTION extends RuntimeException {
 	
 	public SNIPS_EXCEPTION(String errorMessage) {
 		this.errorMessage = errorMessage;
+		
+		if (AsNBody.progress != null) AsNBody.progress.abort();
+		
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	

@@ -38,9 +38,12 @@ public class EnumTypedef extends SyntaxElement {
 		this.path = path;
 		this.enums = enums;
 		
-		int mappingNum = 0;
+		int mappingNum = -1;
+		
+		/* Undefined mapping has value -1 */
 		this.enumType = new ENUM(this, path.getLast() + ":UNDEFINED", mappingNum++);
 		
+		/* Initialize Enum Fields with mapping numbers, first is 0 */
 		for (int i = 0; i < this.enums.size(); i++) {
 			this.enumFields.add(new ENUM(this, enums.get(i), mappingNum++));
 		}

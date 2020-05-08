@@ -1,7 +1,6 @@
 package Par;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -88,28 +87,43 @@ import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
 import Util.Source;
 import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class Parser {
 
 	protected List<Token> tokenStream;
 	
-	Token current;
+	protected Token current;
 	
-	HashMap<String, STRUCT> structs = new HashMap();
-	
+	/* Active Struct Ids */
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
+	/* Active Enum Ids */
 	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
+	/* All active Provisos, like T, V */
 	List<String> activeProvisos = new ArrayList();
 	
+	/* All types that need to be cloned after parsing is complete */
 	List<Pair<TYPE, List<TYPE>>> toClone = new ArrayList();
 	
+	/* The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
-	public Parser(List tokens) throws SNIPS_EXCEPTION {
-		if (tokens == null) throw new SNIPS_EXCEPTION("SNIPS_PARSE -> Tokens are null!");
+	protected ProgressMessage progress;
+	
+	public int done = 0, toGo;
+	
+	public Parser(List tokens, ProgressMessage progress) throws SNIPS_EXCEPTION {
+		if (tokens == null) {
+			this.progress.abort();
+			throw new SNIPS_EXCEPTION("SNIPS_PARSE -> Tokens are null!");
+		}
 		tokenStream = tokens;
+		
+		this.progress = progress;
+		
+		this.toGo = tokens.size();
 		
 		current = tokenStream.get(0);
 		tokenStream.remove(0);
@@ -127,7 +141,10 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		if (current.type() == tokenType)return accept();
-		else throw new PARSE_EXCEPTION(current.source, current.type(), tokenType);
+		else {
+			this.progress.abort();
+			throw new PARSE_EXCEPTION(current.source, current.type(), tokenType);
+		}
 	}
 	
 	/**
@@ -142,8 +159,13 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		if (current.type().group == group)return accept();
-		else throw new PARSE_EXCEPTION(current.source, current.type());
+		else {
+			this.progress.abort();
+			throw new PARSE_EXCEPTION(current.source, current.type());
+		}
 	}
+	
+	public int p = 0;
 	
 	/**
 	 * Accept a token without any checks.
@@ -155,9 +177,18 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
+		
+		if (this.progress != null) {
+			done++;
+			this.progress.incProgress((double) done / this.toGo);
+		}
+		
 		Token old = current;
-		current = tokenStream.get(0);
-		tokenStream.remove(0);
+		if (!tokenStream.isEmpty()) {
+			current = tokenStream.get(0);
+			tokenStream.remove(0);
+		}
+		
 		return old;
 	}
 	
@@ -206,6 +237,8 @@ public class Parser {
 				elements.add(this.parseProgramElement());
 			}
 		}
+		
+		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
 		program.directives.addAll(include);
@@ -375,11 +408,17 @@ public class Parser {
 			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
 			else if (s.equals("libary")) dir = COMP_DIR.LIBARY;
 			else if (s.equals("unroll")) dir = COMP_DIR.UNROLL;
-			else throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
+			else {
+				this.progress.abort();
+				throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
+			}
 			
 			return new CompileDirective(dir, source);
 		}
-		else throw new PARSE_EXCEPTION(source, TokenType.INCLUDE, TokenType.IDENTIFIER);
+		else {
+			this.progress.abort();
+			throw new PARSE_EXCEPTION(source, TokenType.INCLUDE, TokenType.IDENTIFIER);
+		}
 	}
 	
 	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {
@@ -510,11 +549,14 @@ public class Parser {
 		else if (current.type == TokenType.IF) {
 			return this.parseIf();
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, 
+		else {
+			this.progress.abort();
+			throw new PARSE_EXCEPTION(current.source, current.type, 
 			TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
 			TokenType.DO, TokenType.FOR, TokenType.BREAK, 
 			TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
 			TokenType.IF);
+		}
 	}
 	
 	protected FunctionCall parseFunctionCall() throws PARSE_EXCEPTION {
@@ -781,9 +823,13 @@ public class Parser {
 			return ASSIGN_ARITH.LSR_ASSIGN;
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
+			this.progress.abort();
 			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types, " + current.getSource().getSourceMarker());
 		}
-		else throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LET);
+		else {
+			this.progress.abort();
+			throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LET);
+		}
 	}
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXCEPTION {
@@ -803,6 +849,7 @@ public class Parser {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
 			else {
+				this.progress.abort();
 				throw new PARSE_EXCEPTION(current.source, current.type, TokenType.IDENTIFIER);
 			}
 		}
@@ -885,6 +932,7 @@ public class Parser {
 			
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
+				this.progress.abort();
 				throw new SNIPS_EXCEPTION(new CTX_EXCEPTION(source, "Expected STRUCT type, got " + type.typeString()).getMessage());
 			}
 			
@@ -1144,7 +1192,7 @@ public class Parser {
 			this.tokenStream.get(0).type = TokenType.PROVISO;
 		}
 		
-		while (current.type == TokenType.LPAREN && this.tokenStream.get(0).type.group == TokenGroup.TYPE) {
+		while (this.castCheck()) {
 			Source source = accept().getSource();
 			TYPE castType = this.parseType();
 			accept(TokenType.RPAREN);
@@ -1156,6 +1204,35 @@ public class Parser {
 		
 		if (cast == null) cast = this.parseNot();
 		return cast;
+	}
+	
+	public boolean castCheck() {
+		boolean castCheck = current.type == TokenType.LPAREN;
+		if (!castCheck) return false;
+		
+		for (int i = 2; i < tokenStream.size(); i += 3) {
+			/* 
+			 * First type token, from here only allowed token are RPAREN and all other type related
+			 * tokens like [, ], *. If a colon is seen, the current structure cannot be a cast.
+			 */
+			if (tokenStream.get(i - 2).type.group == TokenGroup.TYPE) {
+				for (int a = i - 1; a < tokenStream.size(); a++) {
+					if (tokenStream.get(a).type == TokenType.RPAREN) return true;
+					else if (tokenStream.get(a).type == TokenType.COLON) {
+						return false;
+					}
+				}
+				return false;
+			}
+			else {
+				castCheck &= tokenStream.get(i - 2).type == TokenType.NAMESPACE_IDENTIFIER || tokenStream.get(i - 2).type == TokenType.IDENTIFIER; 
+				castCheck &= tokenStream.get(i - 1).type == TokenType.COLON;
+				castCheck &= tokenStream.get(i).type == TokenType.COLON;
+				
+				if (!castCheck) break;
+			}
+		}
+		return castCheck;
 	}
 	
 	protected Expression parseNot() throws PARSE_EXCEPTION {
@@ -1248,6 +1325,7 @@ public class Parser {
 			NamespacePath path = this.parseNamespacePath();
 			
 			if (current.type == TokenType.COLON && tokenStream.get(0).type == TokenType.COLON) {
+				this.progress.abort();
 				throw new SNIPS_EXCEPTION("Unknown namespace '" + path.build() + "', " + source.getSourceMarker());
 			}
 			
@@ -1284,6 +1362,7 @@ public class Parser {
 				accept(TokenType.DOT);
 				
 				if (current.type != TokenType.ENUMLIT) {
+					this.progress.abort();
 					throw new SNIPS_EXCEPTION("The expression '" + current.spelling + "' is not a known field of the enum " + path.build() + ", " + source.getSourceMarker());
 				}
 				
@@ -1294,6 +1373,7 @@ public class Parser {
 				EnumTypedef def = this.getEnumTypedef(path, source);
 				
 				if (def == null) {
+					this.progress.abort();
 					throw new SNIPS_EXCEPTION("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
 				}
 				
@@ -1341,6 +1421,7 @@ public class Parser {
 			}
 			else {
 				if (curr0 == current) {
+					this.progress.abort();
 					throw new PARSE_EXCEPTION(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 				}
 				else {
@@ -1376,6 +1457,7 @@ public class Parser {
 			String s = "";
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
+			this.progress.abort();
 			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
 		}
 	}
@@ -1402,6 +1484,7 @@ public class Parser {
 			String s = "";
 			for (EnumTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
+			this.progress.abort();
 			throw new SNIPS_EXCEPTION("Found multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
 		}
 	}
@@ -1463,6 +1546,7 @@ public class Parser {
 			
 			/* Nothing found, error */
 			if (enu == null && def == null) {
+				this.progress.abort();
 				throw new SNIPS_EXCEPTION("Unknown struct or enum type '" + path.build() + "', " + token.getSource().getSourceMarker());
 			}
 		}

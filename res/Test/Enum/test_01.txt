@@ -22,9 +22,9 @@ HEAP_START: .word 0
 .text
 main:                         /* Function: main */
     push { r3 }
-    mov r0, #2                /* Evaluate Expression */
-    mov r3, #2
-    cmp r3, #1
+    mov r0, #1                /* Evaluate Expression */
+    mov r3, #1
+    cmp r3, #0
     bne main.L1
     mov r0, #10               /* Evaluate Expression */
     b main.L2

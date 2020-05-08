@@ -7,13 +7,17 @@ import java.util.List;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Source;
+import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
 	List<LineObject> input;
 	
-	public Scanner(List<LineObject> input) {
+	public ProgressMessage progress;
+	
+	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
+		this.progress = progress;
 	}
 	
 	public LinkedList<Token> scan() {
@@ -24,7 +28,13 @@ public class Scanner {
 			for (int a = 0; a < input.get(i).line.length(); a++) {
 				sFSM.readChar(input.get(i).line.charAt(a), input.get(i).lineNumber, a, input.get(i).fileName);
 			}
+			
+			if (progress != null) {
+				progress.incProgress((double) i / input.size());
+			}
 		}
+		
+		if (progress != null) progress.incProgress(1);
 		
 		LinkedList<Token> tokens = sFSM.tokens;
 		tokens.add(new Token(TokenType.EOF, new Source(null, 0, 0), null));

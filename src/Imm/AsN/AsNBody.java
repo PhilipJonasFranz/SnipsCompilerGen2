@@ -28,13 +28,17 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Statement.AsNComment;
 import Snips.CompilerDriver;
+import Util.Logging.ProgressMessage;
 
 public class AsNBody extends AsNNode {
 
+	public static ProgressMessage progress;
+	
 			/* --- METHODS --- */
-	public static AsNBody cast(Program p) throws CGEN_EXCEPTION {
+	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION {
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
+		AsNBody.progress = progress;
 		
 		MemoryMap map = new MemoryMap();
 		
@@ -50,7 +54,10 @@ public class AsNBody extends AsNNode {
 		boolean globals = false;
 		List<ASMInstruction> globalVarReferences = new ArrayList();
 		
-		for (SyntaxElement s : p.programElements) {
+		int done = 0;
+		
+		for (int i = 0; i < p.programElements.size(); i++) {
+			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Declaration) {
 				Declaration dec = (Declaration) s;
 				
@@ -65,6 +72,9 @@ public class AsNBody extends AsNNode {
 				/* Add declaration to global memory */
 				map.add(dec, reference);
 				globals = true;
+				
+				done++;
+				progress.incProgress((double) done / p.programElements.size());
 			}
 		}
 		
@@ -114,9 +124,15 @@ public class AsNBody extends AsNNode {
 				
 				body.instructions.addAll(ins);
 				body.instructions.add(new ASMSeperator());
+				
+				done++;
+				progress.incProgress((double) done / p.programElements.size());
 			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
+			
+				done++;
+				progress.incProgress((double) done / p.programElements.size());
 			}
 		}
 		
@@ -168,6 +184,8 @@ public class AsNBody extends AsNNode {
 		/* Main function not present */
 		if (((LabelOperand) branch.target).label == null) 
 			body.instructions.remove(branch);
+		
+		progress.incProgress(1);
 		
 		return body;
 	}

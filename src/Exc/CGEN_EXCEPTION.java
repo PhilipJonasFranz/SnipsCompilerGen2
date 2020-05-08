@@ -1,5 +1,6 @@
 package Exc;
 
+import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Logging.Message;
@@ -20,11 +21,13 @@ public class CGEN_EXCEPTION extends Exception {
 	public CGEN_EXCEPTION(Source source, String message) {
 		this.location = source;
 		this.message = message;
+		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
 	public CGEN_EXCEPTION(String message) {
 		this.message = message;
+		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	

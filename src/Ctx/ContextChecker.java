@@ -63,6 +63,7 @@ import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
 import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class ContextChecker {
 
@@ -80,13 +81,22 @@ public class ContextChecker {
 	
 	public static ContextChecker checker;
 	
-	public ContextChecker(SyntaxElement AST) {
+	public static ProgressMessage progress;
+	
+	List<Message> messages = new ArrayList();
+	
+	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = AST;
+		ContextChecker.progress = progress;
 		checker = this;
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {
 		this.checkProgram((Program) AST);
+		
+		/* Flush warn messages */
+		for (Message m : this.messages) m.flush();
+		
 		return null;
 	}
 	
@@ -97,7 +107,8 @@ public class ContextChecker {
 		scopes.peek().addDeclaration(CompilerDriver.HEAP_START);
 		
 		this.head = p;
-		for (SyntaxElement s : p.programElements) {
+		for (int i = 0; i < p.programElements.size(); i++) {
+			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Function) {
 				Function f = (Function) s;
 				/* Check main function as entrypoint, if a function is called, context is provided
@@ -125,7 +136,13 @@ public class ContextChecker {
 				s.check(this);
 			}
 			else s.check(this);
+			
+			if (progress != null) {
+				progress.incProgress((double) i / p.programElements.size());
+			}
 		}
+		
+		if (progress != null) progress.incProgress(1);
 		
 		return null;
 	}
@@ -169,7 +186,7 @@ public class ContextChecker {
 		for (Declaration d : f.parameters) {
 			d.check(this);
 			if (d.getType().getCoreType() instanceof VOID) {
-				new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN);
+				messages.add(new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		

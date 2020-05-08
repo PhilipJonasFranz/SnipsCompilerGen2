@@ -1,5 +1,6 @@
 package Exc;
 
+import Ctx.ContextChecker;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Logging.Message;
@@ -18,6 +19,7 @@ public class CTX_EXCEPTION extends Exception {
 	public CTX_EXCEPTION(Source source, String message) {
 		this.location = source;
 		this.message = message;
+		ContextChecker.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
