@@ -185,7 +185,7 @@ public class ContextChecker {
 		
 		for (Declaration d : f.parameters) {
 			d.check(this);
-			if (d.getType().getCoreType() instanceof VOID) {
+			if (d.getType().getCoreType() instanceof VOID && !CompilerDriver.disableWarnings) {
 				messages.add(new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
