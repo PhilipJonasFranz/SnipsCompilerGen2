@@ -1,5 +1,8 @@
 #include<string.sn>
 
+/*
+ * This package contains utility functions for bool values.
+ */
 namespace Boolean {
 
 	/*

@@ -1,5 +1,7 @@
 /*
- * This file contains utility functions for int values.
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility functions for int values and int arrays.
  */
 namespace Integer {
 
@@ -79,4 +81,31 @@ namespace Integer {
 		return str;
 	}
 
+	namespace Array {
+		
+		/*
+		 * Sorts a int array with given size. Uses
+		 * the bubble sort algorithm to sort.
+		 */
+		void sort(int* arr, int size) {
+			if (size > 1) {
+				while (true) {
+					bool sorted = true;
+					for (int i = 1; i < size; i++) {
+						int a0 = *(arr + i - 1);
+						int a1 = *(arr + i);
+						if (a0 > a1) {
+							sorted = false;
+							*(arr + i - 1) = a1;
+							*(arr + i) = a0;
+						}
+					}
+				
+					if (sorted) break;
+				}
+			}
+			return;
+		}
+	}
+	
 }

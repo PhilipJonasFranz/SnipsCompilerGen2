@@ -1,7 +1,7 @@
 #include<linked_list.sn>
 
 /*
- * This library contains various utility functions for Strings chars.
+ * This package contains various utility functions for Strings chars.
  */
 namespace String {
 
