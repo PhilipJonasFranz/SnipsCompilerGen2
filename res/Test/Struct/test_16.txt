@@ -140,7 +140,7 @@ resv.L18:
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                         /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #3                /* Evaluate Expression */
@@ -157,8 +157,7 @@ main:                         /* Function: main */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r5, r0                /* Evaluate Expression */
-    mov r0, #5
+    mov r0, #5                /* Evaluate Expression */
     lsl r1, r4, #2            /* Convert to bytes */
     mov r1, r1
     add r1, r1, #4
@@ -168,6 +167,6 @@ main:                         /* Function: main */
     add r1, r1, r2
     ldr r0, [r1]              /* Load field from struct */
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, fp, lr }
     bx lr
     

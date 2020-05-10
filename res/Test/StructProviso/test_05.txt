@@ -159,7 +159,7 @@ insert_P0:                    /* Function: insert, Provisos: INT */
     bx lr
     
 main:                         /* Function: main */
-    push { r3, r4, fp, lr }
+    push { r3, fp, lr }
     mov fp, sp
     mov r0, #3                /* Evaluate Expression */
     bl resv                   /* Call resv */
@@ -175,8 +175,7 @@ main:                         /* Function: main */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r4, r0                /* Load parameters */
-    mov r0, #15
+    mov r0, #15               /* Load parameters */
     push { r0 }
     mov r0, r3
     pop { r1 }
@@ -185,6 +184,6 @@ main:                         /* Function: main */
     add r1, r1, #8
     ldr r0, [r1]              /* Load field from struct */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, fp, lr }
     bx lr
     

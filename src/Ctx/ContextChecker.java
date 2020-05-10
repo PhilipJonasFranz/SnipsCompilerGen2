@@ -894,6 +894,13 @@ public class ContextChecker {
 				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 		}
+		else {
+			/* 
+			 * Add default proviso mapping, so mapping is present,
+			 * function was called and will be compiled.
+			 */
+			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
 			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
@@ -943,6 +950,13 @@ public class ContextChecker {
 			else {
 				f.setContext(i.proviso);
 			}
+		}
+		else {
+			/* 
+			 * Add default proviso mapping, so mapping is present,
+			 * function was called and will be compiled.
+			 */
+			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
 		}
 		
 		if (i.parameters.size() != f.parameters.size()) {

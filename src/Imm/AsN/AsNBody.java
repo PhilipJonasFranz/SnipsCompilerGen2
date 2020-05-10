@@ -118,9 +118,11 @@ public class AsNBody extends AsNNode {
 			if (s instanceof Function) {
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, new StackSet()).getInstructions();
 				
-				/* Patch Branch to Main Function */
-				if (((Function) s).path.build().equals("main")) 
-					((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
+				if (!ins.isEmpty()) {
+					/* Patch Branch to Main Function */
+					if (((Function) s).path.build().equals("main")) 
+						((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
+				}
 				
 				body.instructions.addAll(ins);
 				body.instructions.add(new ASMSeperator());
