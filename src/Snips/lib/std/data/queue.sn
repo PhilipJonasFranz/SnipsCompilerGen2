@@ -48,10 +48,17 @@ namespace Queue {
 		free(queue);
 	}
 	
+	/*
+	 * Returns true if currently no elements are in the queue.
+	 */
 	bool isEmpty(CyclicQueue<void>* queue) {
 		return queue->isEmpty;
 	}
 	
+	/*
+	 * Returns true if the amount of elements in the queue is
+	 * equal to the specified size when the queue was created.
+	 */
 	bool isFull(CyclicQueue<void>* queue) {
 		return queue->head == queue->tail && !queue->isEmpty;
 	}
@@ -105,6 +112,17 @@ namespace Queue {
 			
 			return value;
 		}
+	}
+
+	/*
+	 * Clears all elements in the queue by resetting the
+	 * head and tail indexes, and setting the isEmpty flag to true.
+	 */
+	void clear(CyclicQueue<void>* queue) {
+		queue->head = 0;
+		queue->tail = 0;
+		queue->isEmpty = true;
+		return;
 	}
 	
 }

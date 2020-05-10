@@ -54,7 +54,12 @@ All instructions do support the condition field. If you compile your assembly co
 ### v.3.0.0-RELEASE: Struct extending, Advanced Operations
  - Implement Direct ASM injection
  
-### v.4.0.0-RELEASE: Optimization, extended compilation control
+### v.4.0.0-RELEASE: Function Pointers/Lambdas, Parser/Attachment rework, Struct Type Vendor
+ - Implement Function Pointers, implement func type
+ - Rework Parser to use Vendor System, implement improved comment and directive attatching to syntax elements
+ - Rework Struct Type System to use SSOT Vendor
+ 
+### v.5.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer
  - Implement Optimizer Annotations
 
@@ -66,7 +71,7 @@ All instructions do support the condition field. If you compile your assembly co
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  
- ## License & Copyright
+## License & Copyright
  © Philip Jonas Franz
  
  Licensed under [Apache License 2.0](LICENSE).
