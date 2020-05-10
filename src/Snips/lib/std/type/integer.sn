@@ -70,8 +70,7 @@ namespace Integer {
 		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
 			int c = List::get<int>(list, i) + 48;
-			*(str + c0) = (char) c;
-			c0++;
+			*(str + c0++) = (char) c;
 		}
 
 		*(str + size) = (char) 0;

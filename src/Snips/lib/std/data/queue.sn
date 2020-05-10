@@ -125,4 +125,22 @@ namespace Queue {
 		return;
 	}
 	
+	/*
+	 * Returns how many elements are currently stored
+	 * in the queue.
+	 */
+	int size(CyclicQueue<void>* queue) {
+		int size = queue->head - queue->tail;
+		
+		/* Head is behind tail */
+		if (size < 0) size = queue->size + size;
+		
+		/* Queue is full */
+		if (size == 0 && !queue->isEmpty) {
+			size = queue->size;
+		}
+		
+		return size;
+	}
+	
 }

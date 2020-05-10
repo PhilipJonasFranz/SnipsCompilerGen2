@@ -1463,7 +1463,7 @@ public class Parser {
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXCEPTION("Found multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXCEPTION("Multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
 		}
 	}
 	
@@ -1490,7 +1490,7 @@ public class Parser {
 			for (EnumTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXCEPTION("Found multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXCEPTION("Multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
 		}
 	}
 	
