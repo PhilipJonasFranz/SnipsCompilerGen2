@@ -51,7 +51,7 @@ public class AsNFunctionCall extends AsNStatement {
 	
 	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
-		call.clearReg(r, st, 0, 1, 2);
+		r.free(0, 1, 2);
 		
 		try {
 			f.setContext(provisos);

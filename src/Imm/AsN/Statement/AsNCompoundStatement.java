@@ -65,6 +65,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * the scope is popped.
 	 * @param s The CapsuledStatement containing the Statements.
 	 * @param r The current RegSet
+	 * @param close If set to true, the declarations are removed, if not, only the offsets are calculated and added to the stack.
 	 */
 	public static void popDeclarationScope(AsNNode node, CompoundStatement s, RegSet r, StackSet st, boolean close) {
 		if (close) {
