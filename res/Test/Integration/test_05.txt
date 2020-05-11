@@ -25,7 +25,7 @@ HEAP_START: .word 0
 .text
     b main
 det:                          /* Function: det */
-    push { fp, lr }
+    push { fp }
     mov fp, sp
     mov r2, #0                /* Evaluate Expression */
     mov r0, #0
@@ -33,7 +33,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -43,7 +43,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -56,7 +56,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -69,7 +69,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -79,7 +79,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -92,7 +92,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -108,7 +108,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -118,7 +118,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -131,7 +131,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -147,7 +147,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -157,7 +157,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -170,7 +170,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -186,7 +186,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -196,7 +196,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -209,7 +209,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -225,7 +225,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #8
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -235,7 +235,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -248,7 +248,7 @@ det:                          /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -258,7 +258,7 @@ det:                          /* Function: det */
     pop { r1 }
     sub r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
+    pop { fp }
     bx lr
     
 main:                         /* Function: main */

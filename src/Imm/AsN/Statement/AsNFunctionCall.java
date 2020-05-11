@@ -13,6 +13,7 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -114,16 +115,33 @@ public class AsNFunctionCall extends AsNStatement {
 		call.instructions.add(branch);
 		
 		/* Shrink Stack if parameters were passed through it */
+		int size = 0;
+		
+		if (f.getReturnType().wordsize() > 1) {
+			/* Stack grows by word size of return type */
+			size -= f.getReturnType().wordsize();
+			
+			/* Push dummy regs on the stack for the return type */
+			for (int i = 0; i < f.getReturnType().wordsize(); i++) {
+				st.push(REGISTER.R0);
+			}
+		}
+		
 		if (stackMapping > 0) {
-			int size = 0;
 			for (Pair<Declaration, Integer> p  : mapping) {
 				if (p.getSecond() == -1) {
+					/* Stack shrinks by parameter word size */
 					size += p.getFirst().getType().wordsize();
 				}
 			}
 			
-			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
 		}
+		
+		/* Based on stack shrink/grow delta, add instruction to reset stack */
+		if (size > 0) 
+			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
+		else if (size < 0)
+			call.instructions.add(new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(-size * 4)));
 		
 		if (!f.parameters.isEmpty()) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}

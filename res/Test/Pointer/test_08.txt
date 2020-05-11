@@ -22,7 +22,7 @@ HEAP_START: .word 0
 .text
     b main
 set:                          /* Function: set */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -34,13 +34,13 @@ set:                          /* Function: set */
     mul r0, r1, r2
     mov r2, r0
     add r1, r3, r2
-    ldr r2, [fp, #20]
+    ldr r2, [fp, #16]
     add r0, r1, r2
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, fp }
     bx lr
     
 main:                         /* Function: main */

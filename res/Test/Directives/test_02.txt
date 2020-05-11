@@ -22,7 +22,7 @@ HEAP_START: .word 0
     b main
     
 mult:                         /* Function: mult */
-    push { r3, r4, r5, r6, r7, r8, fp, lr }
+    push { r3, r4, r5, r6, r7, r8, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -55,7 +55,7 @@ mult.L7:
     add r2, r2, r0
     lsl r0, r8, #2
     add r2, r2, r0
-    add r0, fp, #48
+    add r0, fp, #44
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -66,7 +66,7 @@ mult.L7:
     add r2, r2, r0
     lsl r0, r6, #2
     add r2, r2, r0
-    add r0, fp, #32
+    add r0, fp, #28
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -117,7 +117,7 @@ mult.L2:
     add r0, r0, r2
     ldr r0, [r0]
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, fp }
     bx lr
     
 main:                         /* Function: main */

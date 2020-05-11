@@ -20,24 +20,24 @@ HEAP_START: .word 0
 .text
     b main
 vecProd:                      /* Function: vecProd */
-    push { fp, lr }
+    push { fp }
     mov fp, sp
-    add r0, fp, #20
+    add r0, fp, #16
     add r0, r0, #0
     ldr r0, [r0]
     push { r0 }
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, #0
     ldr r0, [r0]
     mov r2, r0
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    add r0, fp, #20
+    add r0, fp, #16
     add r0, r0, #4
     ldr r0, [r0]
     push { r0 }
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, #4
     ldr r0, [r0]
     mov r2, r0
@@ -47,11 +47,11 @@ vecProd:                      /* Function: vecProd */
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    add r0, fp, #20
+    add r0, fp, #16
     add r0, r0, #8
     ldr r0, [r0]
     push { r0 }
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, #8
     ldr r0, [r0]
     mov r2, r0
@@ -61,7 +61,7 @@ vecProd:                      /* Function: vecProd */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
+    pop { fp }
     bx lr
     
 main:                         /* Function: main */

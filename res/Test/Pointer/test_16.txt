@@ -24,10 +24,10 @@ HEAP_START: .word 0
 .text
     b main
 get:                          /* Function: get */
-    push { r3, fp, lr }
+    push { r3, fp }
     mov fp, sp
     mov r3, r0
-    add r0, fp, #12
+    add r0, fp, #8
     add r0, r0, #0
     ldr r0, [r0]
     mov r1, r0
@@ -35,7 +35,7 @@ get:                          /* Function: get */
     lsl r0, r0, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     push { r0 }
-    add r0, fp, #12
+    add r0, fp, #8
     add r0, r0, #4
     ldr r0, [r0]
     mov r1, r0
@@ -46,7 +46,7 @@ get:                          /* Function: get */
     pop { r1 }
     sub r0, r1, r2
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, fp }
     bx lr
     
 main:                         /* Function: main */

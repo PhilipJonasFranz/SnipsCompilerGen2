@@ -166,10 +166,6 @@ public class ContextChecker {
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
 		/* Proviso Types are already set at this point */
 		
-		if (f.getReturnType().wordsize() > 1) {
-			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
-		}
-		
 		scopes.push(new Scope(scopes.peek()));
 		
 		/* Check for duplicate function parameters */

@@ -18,7 +18,7 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -39,7 +39,7 @@ main:                         /* Function: main */
     movne r0, #1
     moveq r0, #0
     push { r0 }
-    ldr r0, [fp, #20]
+    ldr r0, [fp, #16]
     cmp r0, #2
     moveq r0, #1
     movne r0, #0
@@ -51,6 +51,6 @@ main:                         /* Function: main */
     movne r0, r1
     moveq r0, #0
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, fp }
     bx lr
     

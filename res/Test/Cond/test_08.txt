@@ -32,7 +32,7 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    push { r3, r4, r5, r6, r7, r8, r9, r10, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -42,7 +42,7 @@ main:                         /* Function: main */
     add r6, r3, r4
     add r1, r6, r3
     add r1, r1, r5
-    ldr r2, [fp, #40]
+    ldr r2, [fp, #36]
     add r7, r1, r2
     add r8, r6, r3
     add r9, r6, r3
@@ -67,6 +67,6 @@ main.L2:
 main.L0: 
     mov r0, r3                /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp }
     bx lr
     
