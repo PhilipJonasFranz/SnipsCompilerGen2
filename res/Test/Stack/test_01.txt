@@ -16,24 +16,24 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
     mov r1, r3                /* Evaluate Expression */
-    ldr r2, [fp, #20]
+    ldr r2, [fp, #16]
     mul r0, r1, r2
     mov r1, r0
     add r0, r1, r4
     push { r0 }
-    ldr r1, [fp, #24]
+    ldr r1, [fp, #20]
     mov r2, r5
     mul r0, r1, r2
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, fp }
     bx lr
     

@@ -1,3 +1,9 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains the utility to create a binary
+ * search tree.
+ */
 namespace Tree {
 	/*
 	 * A tree node that has a left and right child and holds a value.

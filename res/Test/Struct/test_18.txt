@@ -122,7 +122,7 @@ resv.L15:
     add r0, r1, #1
     b resv.L18
 resv.L17: 
-    sub r4, r4, r5
+    add r4, r4, r5
     b resv.L3
 resv.L4: 
 /* Memory section is allocated, skip */
@@ -144,7 +144,7 @@ resv.L18:
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                         /* Function: main */
-    push { r3, r4, r5, r6, fp, lr }
+    push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -172,8 +172,7 @@ main:                         /* Function: main */
     str r0, [r1, #16]
     pop { r0 }
     str r0, [r1, #20]
-    mov r6, r0                /* Evaluate Expression */
-    mov r0, #5
+    mov r0, #5                /* Evaluate Expression */
     push { r0 }               /* Load field location */
     lsl r1, r5, #2            /* Convert to bytes */
     mov r2, #0
@@ -193,6 +192,6 @@ main:                         /* Function: main */
     add r1, r1, r2
     ldr r0, [r1]              /* Load field from struct */
     mov sp, fp
-    pop { r3, r4, r5, r6, fp, lr }
+    pop { r3, r4, r5, fp, lr }
     bx lr
     

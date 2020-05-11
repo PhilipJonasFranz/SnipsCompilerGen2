@@ -1,0 +1,36 @@
+SOURCE
+namespace EN0 {
+	enum Mode {
+		DEFAULT, EXTENDED, MINIMAL;
+	}
+}
+
+int main() {
+	EN0::Mode m = EN0::Mode.EXTENDED;
+	if (m == EN0::Mode.DEFAULT) {
+		return 10;
+	}
+	else return 20;
+}
+TESTCASES
+20
+OUTPUT
+/* --test_01.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3 }
+    mov r0, #1                /* Evaluate Expression */
+    mov r3, #1
+    cmp r3, #0
+    bne main.L1
+    mov r0, #10               /* Evaluate Expression */
+    b main.L2
+main.L1: 
+    mov r0, #20               /* Evaluate Expression */
+main.L2: 
+    pop { r3 }
+    bx lr
+    

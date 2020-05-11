@@ -63,6 +63,7 @@ import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
 import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class ContextChecker {
 
@@ -80,13 +81,22 @@ public class ContextChecker {
 	
 	public static ContextChecker checker;
 	
-	public ContextChecker(SyntaxElement AST) {
+	public static ProgressMessage progress;
+	
+	List<Message> messages = new ArrayList();
+	
+	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = AST;
+		ContextChecker.progress = progress;
 		checker = this;
 	}
 	
 	public TYPE check() throws CTX_EXCEPTION {
 		this.checkProgram((Program) AST);
+		
+		/* Flush warn messages */
+		for (Message m : this.messages) m.flush();
+		
 		return null;
 	}
 	
@@ -97,7 +107,8 @@ public class ContextChecker {
 		scopes.peek().addDeclaration(CompilerDriver.HEAP_START);
 		
 		this.head = p;
-		for (SyntaxElement s : p.programElements) {
+		for (int i = 0; i < p.programElements.size(); i++) {
+			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Function) {
 				Function f = (Function) s;
 				/* Check main function as entrypoint, if a function is called, context is provided
@@ -125,7 +136,13 @@ public class ContextChecker {
 				s.check(this);
 			}
 			else s.check(this);
+			
+			if (progress != null) {
+				progress.incProgress((double) i / p.programElements.size());
+			}
 		}
+		
+		if (progress != null) progress.incProgress(1);
 		
 		return null;
 	}
@@ -149,10 +166,6 @@ public class ContextChecker {
 	public TYPE checkFunction(Function f) throws CTX_EXCEPTION {
 		/* Proviso Types are already set at this point */
 		
-		if (f.getReturnType().wordsize() > 1) {
-			throw new CTX_EXCEPTION(f.getSource(), "Functions can only return primitive types or pointers, actual : " + f.getReturnType().typeString());
-		}
-		
 		scopes.push(new Scope(scopes.peek()));
 		
 		/* Check for duplicate function parameters */
@@ -168,8 +181,8 @@ public class ContextChecker {
 		
 		for (Declaration d : f.parameters) {
 			d.check(this);
-			if (d.getType().getCoreType() instanceof VOID) {
-				new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN);
+			if (d.getType().getCoreType() instanceof VOID && !CompilerDriver.disableWarnings) {
+				messages.add(new Message("Unchecked type " + new VOID().typeString() + ", " + d.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		
@@ -848,7 +861,7 @@ public class ContextChecker {
 				String s = "";
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
-				throw new CTX_EXCEPTION(source, "Found multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+				throw new CTX_EXCEPTION(source, "Multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
 		else {
@@ -877,9 +890,16 @@ public class ContextChecker {
 				i.setType(f.manager.getMappingReturnType(i.proviso));
 			}
 		}
+		else {
+			/* 
+			 * Add default proviso mapping, so mapping is present,
+			 * function was called and will be compiled.
+			 */
+			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -927,9 +947,16 @@ public class ContextChecker {
 				f.setContext(i.proviso);
 			}
 		}
+		else {
+			/* 
+			 * Add default proviso mapping, so mapping is present,
+			 * function was called and will be compiled.
+			 */
+			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+		}
 		
 		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.path.build());
+			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 		}
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
@@ -1028,7 +1055,9 @@ public class ContextChecker {
 		
 		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
 		if (t instanceof PRIMITIVE) {
-			if (!CompilerDriver.disableWarnings) new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN);
+			if (!CompilerDriver.disableWarnings) {
+				new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN, true);
+			}
 		}
 		
 		return deref.getType();

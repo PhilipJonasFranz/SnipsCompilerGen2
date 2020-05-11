@@ -101,7 +101,7 @@ public class Scope {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXCEPTION(source, "Found multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+						throw new CTX_EXCEPTION(source, "Multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 					}
 				}
 				else {

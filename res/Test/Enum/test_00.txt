@@ -1,0 +1,34 @@
+SOURCE
+enum Mode {
+	DEFAULT, EXTENDED, MINIMAL;
+}
+
+int main() {
+	Mode m = Mode.DEFAULT;
+	if (m == Mode.DEFAULT) {
+		return 10;
+	}
+	else return 20;
+}
+TESTCASES
+10
+OUTPUT
+/* --test_00.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+main:                         /* Function: main */
+    push { r3 }
+    mov r0, #0                /* Evaluate Expression */
+    mov r3, #0
+    cmp r3, #0
+    bne main.L1
+    mov r0, #10               /* Evaluate Expression */
+    b main.L2
+main.L1: 
+    mov r0, #20               /* Evaluate Expression */
+main.L2: 
+    pop { r3 }
+    bx lr
+    

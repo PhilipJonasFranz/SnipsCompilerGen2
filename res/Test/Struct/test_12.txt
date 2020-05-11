@@ -122,7 +122,7 @@ resv.L15:
     add r0, r1, #1
     b resv.L18
 resv.L17: 
-    sub r4, r4, r5
+    add r4, r4, r5
     b resv.L3
 resv.L4: 
 /* Memory section is allocated, skip */
@@ -185,6 +185,11 @@ free.L2:
     pop { r3, r4, r5, r6, r7, r8, r9 }
     bx lr
     
+/* [BASE-PACKAGE] */
+/*  */
+/* This package contains the utility to create a linked-list, */
+/* insert and remove values from it, as well as some functions */
+/* that give information about the state of the list. */
 /* A single list entry, contains a pointer to the next node */
 /* and a value. */
 /* Wraps the list head and tail. */
@@ -235,7 +240,7 @@ List.destroy.L2:
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                  /* Function: List.add, Provisos: INT */
-    push { r3, r4, r5, r6, r7, fp, lr }
+    push { r3, r4, r5, r6, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -245,13 +250,12 @@ List.add_P1:                  /* Function: List.add, Provisos: INT */
 /* Initialize the new List Node, set the next pointer to null */
     mov r0, r4                /* Evaluate Expression */
     push { r0 }
-    mov r6, r0
     mov r0, #0
     lsl r1, r5, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
-    mov r7, r0
+    mov r6, r0
     lsl r1, r3, #2            /* Convert to bytes */
     ldr r0, [r1]              /* Load field from struct */
     cmp r0, #0
@@ -278,7 +282,7 @@ List.add.L1:
     str r0, [r1]              /* Store value to struct field */
 List.add.L0: 
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
+    pop { r3, r4, r5, r6, fp, lr }
     bx lr
     
 /* Creates a new list node for given value x and adds the node at the */
@@ -322,140 +326,9 @@ List.get.L5:
 /* value wasnt found. Frees the removed node of the heap. */
     
 /* Returns the amount of elements stored in the list. */
-List.size:                    /* Function: List.size */
-    push { r3, r4, r5 }
-    mov r3, r0
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    mov r4, r0
-    mov r0, #0                /* Evaluate Expression */
-    mov r5, #0
-List.size.L1:                 /* Evaluate condition */
-    cmp r4, #0
-    beq List.size.L2
-    lsl r1, r4, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    mov r4, r0
-    mov r0, r5
-    add r5, r0, #1
-    b List.size.L1
-List.size.L2: 
-    mov r0, r5                /* Evaluate Expression */
-    pop { r3, r4, r5 }
-    bx lr
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
-List.remove:                  /* Function: List.remove */
-    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-/* Out of bounds */
-    cmp r4, #0
-    bge List.remove.L0
-    b List.remove.L17
-List.remove.L0: 
-    cmp r4, #0
-    bne List.remove.L3
-/* Remove first element */
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, #0
-    beq List.remove.L4
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    mov r5, r0
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r1, [r1]
-    lsl r1, r1, #2
-    ldr r0, [r1]              /* Load field from struct */
-    lsl r1, r3, #2            /* Convert to bytes */
-    str r0, [r1]              /* Store value to struct field */
-/* Only one element in list */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, r5
-    bne List.remove.L6
-    mov r0, #0                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]              /* Store value to struct field */
-List.remove.L6: 
-    mov r0, r5                /* Load parameters */
-    bl free                   /* Call free */
-List.remove.L4: 
-    b List.remove.L17
-List.remove.L3: 
-    lsl r1, r3, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    mov r5, r0
-    mov r0, r4
-    sub r4, r0, #1
-/* Jump to element before element to remove */
-List.remove.L9:               /* Evaluate condition */
-    mov r6, r0
-    cmp r4, #0
-    ble List.remove.L10
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, #0
-    bne List.remove.L12
-    b List.remove.L17
-List.remove.L12: 
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    mov r5, r0
-    mov r0, r4
-    sub r4, r0, #1
-    b List.remove.L9
-List.remove.L10: 
-/* Out of bounds */
-    mov r7, r0
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, #0
-    bne List.remove.L14
-    b List.remove.L17
-List.remove.L14: 
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r1, [r1]
-    lsl r1, r1, #2
-    ldr r0, [r1]              /* Load field from struct */
-    cmp r0, #0
-    bne List.remove.L16
-/* Element to remove is last element in list */
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    bl free                   /* Call free */
-    mov r0, #0                /* Evaluate Expression */
-    lsl r1, r5, #2            /* Convert to bytes */
-    str r0, [r1]              /* Store value to struct field */
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r3, #2            /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]              /* Store value to struct field */
-    b List.remove.L15
-List.remove.L16: 
-/* Cut out element and set next pointers */
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r1, [r1]
-    lsl r1, r1, #2
-    ldr r0, [r1]              /* Load field from struct */
-    mov r8, r0
-    mov r9, r0                /* Load parameters */
-    lsl r1, r5, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
-    bl free                   /* Call free */
-    mov r0, r8                /* Evaluate Expression */
-    lsl r1, r5, #2            /* Convert to bytes */
-    str r0, [r1]              /* Store value to struct field */
-List.remove.L15: 
-List.remove.L17: 
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
-    bx lr
     
 main:                         /* Function: main */
     push { r3, r4, r5, fp, lr }

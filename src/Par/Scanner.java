@@ -7,13 +7,17 @@ import java.util.List;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Source;
+import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
 	List<LineObject> input;
 	
-	public Scanner(List<LineObject> input) {
+	public ProgressMessage progress;
+	
+	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
+		this.progress = progress;
 	}
 	
 	public LinkedList<Token> scan() {
@@ -24,7 +28,13 @@ public class Scanner {
 			for (int a = 0; a < input.get(i).line.length(); a++) {
 				sFSM.readChar(input.get(i).line.charAt(a), input.get(i).lineNumber, a, input.get(i).fileName);
 			}
+			
+			if (progress != null) {
+				progress.incProgress((double) i / input.size());
+			}
 		}
+		
+		if (progress != null) progress.incProgress(1);
 		
 		LinkedList<Token> tokens = sFSM.tokens;
 		tokens.add(new Token(TokenType.EOF, new Source(null, 0, 0), null));
@@ -36,13 +46,15 @@ public class Scanner {
 		
 		List<String> structIds = new ArrayList();
 		
+		List<String> enumIds = new ArrayList();
+		
 		List<String> namespaces = new ArrayList();
 		
 		/**
 		 * Defines the current accumulation state of the scanner.
 		 */
 		private enum ACC_STATE {
-			NONE, ID, STRUCT_ID, NAMESPACE_ID, INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
+			NONE, ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
@@ -349,6 +361,12 @@ public class Scanner {
 				this.state = ACC_STATE.STRUCT_ID;
 				return true;
 			}
+			else if (this.buffer.equals("enum")) {
+				tokens.add(new Token(TokenType.ENUM, new Source(fileName, i, a)));
+				this.emptyBuffer();
+				this.state = ACC_STATE.ENUM_ID;
+				return true;
+			}
 			else if (this.buffer.startsWith("|")) {
 				if (this.buffer.length() == 1)return false;
 				if (this.buffer.equals("||")) {
@@ -427,7 +445,7 @@ public class Scanner {
 			}
 			else {
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.NAMESPACE_ID) {
+					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) {
 						this.state = ACC_STATE.ID;
 					}
 				}
@@ -435,7 +453,7 @@ public class Scanner {
 					this.state = ACC_STATE.INT;
 				}
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
 					if (this.buffer.trim().isEmpty()) {
 						return false;
@@ -446,6 +464,8 @@ public class Scanner {
 					if (this.state == ACC_STATE.ID) {
 						if (this.structIds.contains(id))
 							tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+						else if (this.enumIds.contains(id))
+							tokens.add(new Token(TokenType.ENUMID, new Source(fileName, i, a), id));
 						else if (this.namespaces.contains(id))
 							tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
@@ -453,6 +473,10 @@ public class Scanner {
 					else if (this.state == ACC_STATE.STRUCT_ID) {
 						this.structIds.add(id);
 						tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
+					}
+					else if (this.state == ACC_STATE.ENUM_ID) {
+						this.enumIds.add(id);
+						tokens.add(new Token(TokenType.ENUMID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.NAMESPACE_ID) {
 						tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));

@@ -37,7 +37,7 @@ HEAP_START: .word 0
 .text
     b main
 bar:                          /* Function: bar */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -47,13 +47,13 @@ bar:                          /* Function: bar */
     mul r0, r1, r2
     push { r0 }
     mov r1, r5
-    ldr r2, [fp, #20]
+    ldr r2, [fp, #16]
     mul r0, r1, r2
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, fp }
     bx lr
     
 fooRec:                       /* Function: fooRec */

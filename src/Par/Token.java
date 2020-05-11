@@ -48,6 +48,7 @@ public class Token {
 		BACKSL("\\"),
 		USCORE("_"),
 		STRUCT("struct"),
+		ENUM("enum"),
 		NAMESPACE("namespace"),
 		EOF("<EOF>"),
 		
@@ -118,13 +119,15 @@ public class Token {
 		BOOL("bool", 				TokenGroup.TYPE),
 		PROVISO("",					TokenGroup.TYPE), 
 		STRUCTID("", 				TokenGroup.TYPE),
+		ENUMID("", 					TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
 		
 		/* Primitive Literals */
 		INTLIT("intlit",			TokenGroup.LITERAL),
 		CHARLIT("charlit",			TokenGroup.LITERAL),
 		STRINGLIT("",				TokenGroup.LITERAL),
-		BOOLLIT("boollit",			TokenGroup.LITERAL);
+		BOOLLIT("boollit",			TokenGroup.LITERAL),
+		ENUMLIT("enumlit",			TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,

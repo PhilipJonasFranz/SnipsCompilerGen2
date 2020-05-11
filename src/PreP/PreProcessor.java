@@ -20,7 +20,6 @@ public class PreProcessor {
 		public String line;
 		
 		public String fileName;
-		
 	}
 	
 	List<LineObject> process = new ArrayList();
@@ -50,9 +49,8 @@ public class PreProcessor {
 					
 					this.process.remove(i);
 					
-					new Message("SNIPS_PREP -> Resolved import " + path, Message.Type.INFO);
-					
 					if (!this.imported.contains(path)) {
+						new Message("PREP -> Resolved import " + path, Message.Type.INFO);
 						this.imported.add(path);
 						List<String> lines = getFile(path);
 						for (int a = 0; a < lines.size(); a++) this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
@@ -61,8 +59,8 @@ public class PreProcessor {
 					i--;
 				} 
 				else {
-					new Message("SNIPS_PREP -> Found line: " + line + ", but cannot resolve! Ensure correct syntax.", Message.Type.WARN);
-					new Message("SNIPS_PREP -> Import Manager may be able to resolve import. Verify output .", Message.Type.WARN);
+					new Message("PREP -> Found line: " + line + ", but cannot resolve! Ensure correct syntax.", Message.Type.WARN);
+					new Message("PREP -> Import Manager may be able to resolve import. Verify output.", Message.Type.WARN);
 				}
 			}
 		}

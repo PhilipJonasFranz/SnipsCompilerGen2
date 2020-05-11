@@ -23,12 +23,12 @@ HEAP_START: .word 0
 .text
     b main
 set:                          /* Function: set */
-    push { fp, lr }
+    push { fp }
     mov fp, sp
 /* Set m [0] [1] */
     mov r0, #8                /* Evaluate Expression */
     push { r0 }
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, #0
     ldr r0, [r0]
     mov r1, r0
@@ -40,14 +40,14 @@ set:                          /* Function: set */
     mov r0, #7                /* Evaluate Expression */
     push { r0 }
     mov r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, #4
     ldr r0, [r0]
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
     mov sp, fp
-    pop { fp, lr }
+    pop { fp }
     bx lr
     
 main:                         /* Function: main */

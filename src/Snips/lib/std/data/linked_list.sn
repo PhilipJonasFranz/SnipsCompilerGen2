@@ -1,3 +1,10 @@
+/*
+ * [BASE-PACKAGE]
+ * 
+ * This package contains the utility to create a linked-list,
+ * insert and remove values from it, as well as some functions
+ * that give information about the state of the list.
+ */
 namespace List {
 	/*
 	 * A single list entry, contains a pointer to the next node

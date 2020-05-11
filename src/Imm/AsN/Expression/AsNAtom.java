@@ -17,7 +17,7 @@ public class AsNAtom extends AsNExpression {
 		AsNAtom atom = new AsNAtom();
 		a.castedNode = atom;
 		
-		atom.clearReg(r, st, 0);
+		r.free(0);
 		
 		/* Make sure only primitives can be in an atom */
 		assert(a.getType() instanceof PRIMITIVE);

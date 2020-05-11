@@ -39,7 +39,7 @@ public class Function extends CompoundStatement {
 		
 		this.manager = new ProvisoManager(this.getSource(), proviso);
 		
-		if (proviso.isEmpty()) {
+		if (path.build().equals("main")) {
 			/* Add default mapping */
 			this.manager.addProvisoMapping(null, new ArrayList());
 		}

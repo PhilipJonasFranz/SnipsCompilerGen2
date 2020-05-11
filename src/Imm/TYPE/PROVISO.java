@@ -98,7 +98,7 @@ public class PROVISO extends TYPE<Void> {
 		return (this.hasContext())? this.context.getCoreType() : this;
 	}
 
-	public TYPE clone() {
+	public PROVISO clone() {
 		PROVISO p = new PROVISO(this.placeholderName);
 		if (this.context != null) p.context = this.context.clone();
 		return p;

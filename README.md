@@ -1,10 +1,15 @@
-# Snips Compiler Gen.2 v.2.1.3-RELEASE
+# Snips Compiler Gen.2 v.2.3.5-RELEASE
+## Some words in advance
+ This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not though for any production environment. The project and all its included modules are still under development and are subject to change.
+ 
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
  operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality and namespaces are supported.
- Currently supported data types are Integers and Booleans, as well as multi-dimensional arrays of said 
- types. Also, Structs can be created and initialized with Proviso Types.
+ 
+ Currently supported data types are Integers and Booleans, Chars and Strings, Enums, as well as multi-dimensional arrays of said 
+ types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and recieve proviso types, allowing them to handle various types.
+ 
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue and return.
 ### The compiler
@@ -21,7 +26,7 @@
 
  The compiler uses a built-in system libary, located at src/Snips/lib. 
  
- The compiler will output ARM Assembly. 
+ The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
  
 ## Usage & Setup
 ### Running the executable
@@ -43,29 +48,27 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  - mul, mla
  - ldr, str
  
-All instructions do support the condition field. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
+All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 ### XML-Parser
  Under src/REv/Modules/Tools/ you can also find a basic implementation of a XML-Parser, that converts a given .xml file to a tree structure. 
 ### Utility
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
-### v.3.0.0-RELEASE: Templating, Struct extending
- - Implement Struct Extending
- - Implement Direct ASM injection
+### v.3.0.0-RELEASE: Function Pointers/Lambdas, Parser/Attachment rework, Struct Type Vendor
+ - Implement Function Pointers, implement func type
+ - Rework Parser to use Vendor System, implement improved comment and directive attatching to syntax elements
+ - Rework Struct Type System to use SSOT Vendor
  
 ### v.4.0.0-RELEASE: Optimization, extended compilation control
  - Implement AST Optimizer
  - Implement Optimizer Annotations
 
-### Todo
- - Implement missing assignment arith injectors
-
-### Known issues
+## Known issues
  - Increment and Decrement not working for Struct Select Assign, Array Select Assign and Pointer Assign
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
  
- ## License & Copyright
+## License & Copyright
  © Philip Jonas Franz
  
  Licensed under [Apache License 2.0](LICENSE).

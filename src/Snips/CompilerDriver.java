@@ -34,6 +34,7 @@ import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class CompilerDriver {
 
@@ -87,13 +88,9 @@ public class CompilerDriver {
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	public static boolean heap_referenced = false;
-	public static Declaration HEAP_START = new Declaration(
-													new NamespacePath("HEAP_START"), 
-													new INT(), 
-													zero_atom, 
-													nullSource);
-	
-	
+	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, nullSource);
+													
+													
 			/* --- MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
@@ -201,14 +198,14 @@ public class CompilerDriver {
 			
 			
 					/* --- SCANNING --- */
-			log.add(new Message("SNIPS_SCAN -> Starting...", Message.Type.INFO));
-			Scanner scanner = new Scanner(preCode);
+			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, Message.Type.INFO);
+			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
 			
 			
 					/* --- PARSING --- */
-			log.add(new Message("SNIPS_PARSE -> Starting...", Message.Type.INFO));
-			Parser parser = new Parser(deque);
+			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, Message.Type.INFO);
+			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
 			
 			
@@ -249,30 +246,31 @@ public class CompilerDriver {
 			
 			
 					/* --- CONTEXT CHECKING --- */
-			log.add(new Message("SNIPS_CTX -> Starting...", Message.Type.INFO));
-			ContextChecker ctx = new ContextChecker(AST);
+			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, Message.Type.INFO);
+			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
-			log.add(new Message("SNIPS_CTX -> Nothing to report.", Message.Type.INFO));
 		
 			if (imm) AST.print(4, true);
 			
 			
 					/* --- CODE GENERATION --- */
-			log.add(new Message("SNIPS_CGEN -> Starting...", Message.Type.INFO));
-			AsNBody body = AsNBody.cast((Program) AST);
+			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, Message.Type.INFO);
+			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
 		
 			
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
 				double before = body.getInstructions().size();
-				log.add(new Message("SNIPS_ASMOPT -> Starting...", Message.Type.INFO));
+				ProgressMessage aopt_progress = new ProgressMessage("AOPT -> Starting", 30, Message.Type.INFO);
 				
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
 			
+				aopt_progress.incProgress(1);
+				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 				CompilerDriver.compressions.add(rate);
-				log.add(new Message("SNIPS_ASMOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+				log.add(new Message("AOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
 			
@@ -353,12 +351,12 @@ public class CompilerDriver {
 				List<LineObject> lines = preProcess.getProcessed();
 				
 					/* --- SCANNING --- */
-				Scanner scanner = new Scanner(lines);
+				Scanner scanner = new Scanner(lines, null);
 				List<Token> deque = scanner.scan();
 				
 				
 						/* --- PARSING --- */
-				Parser parser = new Parser(deque);
+				Parser parser = new Parser(deque, null);
 				AST = parser.parse();
 				((Program) AST).fileName = file.getPath();
 				

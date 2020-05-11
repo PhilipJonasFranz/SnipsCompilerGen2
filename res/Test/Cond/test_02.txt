@@ -12,8 +12,12 @@ TESTCASES
 0 0 0
 OUTPUT
 /* --test_02.txt */
+.data
+HEAP_START: .word 0
+    
+.text
 main:                         /* Function: main */
-    push { r3, r4, r5, r6, r7, fp, lr }
+    push { r3, r4, r5, r6, r7, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -33,6 +37,6 @@ main.L3:
     add r0, r3, r4
 main.L4: 
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
+    pop { r3, r4, r5, r6, r7, fp }
     bx lr
     

@@ -16,16 +16,16 @@ HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
     add r1, r3, r4
     add r1, r1, r5
-    ldr r2, [fp, #20]
+    ldr r2, [fp, #16]
     sub r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, fp }
     bx lr
     

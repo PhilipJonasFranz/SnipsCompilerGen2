@@ -7,11 +7,13 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Exc.CTX_EXCEPTION;
+import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -35,14 +37,22 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		call(fc.calledFunction, fc.proviso, fc.parameters, call, r, map, st);
+		/* 
+		 * When a function has provisos, the order cannot be checked.
+		 * A indicator the order is incorrect is that the casted node is null at this point.
+		 */
+		if (fc.calledFunction.castedNode == null) {
+			throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
+		}
+		
+		call(fc.calledFunction, false, fc.proviso, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
-		call.clearReg(r, st, 0, 1, 2);
+		r.free(0, 1, 2);
 		
 		try {
 			f.setContext(provisos);
@@ -105,16 +115,37 @@ public class AsNFunctionCall extends AsNStatement {
 		call.instructions.add(branch);
 		
 		/* Shrink Stack if parameters were passed through it */
+		int size = 0;
+		
+		/* 
+		 * Only grow stack by return type size if its an inline call, 
+		 * meaning the call has a data target.
+		 */
+		if (f.getReturnType().wordsize() > 1 && inlineCall) {
+			/* Stack grows by word size of return type */
+			size -= f.getReturnType().wordsize();
+			
+			/* Push dummy regs on the stack for the return type */
+			for (int i = 0; i < f.getReturnType().wordsize(); i++) {
+				st.push(REGISTER.R0);
+			}
+		}
+		
 		if (stackMapping > 0) {
-			int size = 0;
 			for (Pair<Declaration, Integer> p  : mapping) {
 				if (p.getSecond() == -1) {
+					/* Stack shrinks by parameter word size */
 					size += p.getFirst().getType().wordsize();
 				}
 			}
 			
-			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
 		}
+		
+		/* Based on stack shrink/grow delta, add instruction to reset stack */
+		if (size > 0) 
+			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
+		else if (size < 0)
+			call.instructions.add(new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(-size * 4)));
 		
 		if (!f.parameters.isEmpty()) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}

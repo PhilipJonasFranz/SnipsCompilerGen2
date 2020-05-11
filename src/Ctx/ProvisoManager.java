@@ -153,13 +153,10 @@ public class ProvisoManager {
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
-			ProvisoManager.mapContextTo(s.proviso, context);
+			mapContextTo(s.proviso, context);
 			
 			/* Map initialized proviso types to typedef provisos */
-			for (int i = 0; i < s.typedef.proviso.size(); i++) {
-				PROVISO p = (PROVISO) s.typedef.proviso.get(i);
-				p.setContext(s.proviso.get(i));
-			}
+			mapContextToStatic(s.typedef.proviso, s.proviso);
 			
 			/* Initialize capsuled proviso types */
 			for (int i = 0; i < s.typedef.proviso.size(); i++) {
@@ -175,14 +172,7 @@ public class ProvisoManager {
 						STRUCT s0 = (STRUCT) d.getRawType();
 						
 						/* Map recieved context on the proviso types of the struct */
-						for (int i = 0; i < s0.proviso.size(); i++) {
-							for (int a = 0; a < context.size(); a++) {
-								if (s0.proviso.get(i).isEqual(context.get(a))) {
-									PROVISO p0 = (PROVISO) s0.proviso.get(i);
-									p0.setContext(context.get(a));
-								}
-							}
-						}
+						ProvisoManager.mapContextTo(s0.proviso, context);
 						
 						/* Apply the previously initialized struct proviso to the fields */
 						s0 = (STRUCT) setHiddenContext(s0);
@@ -197,18 +187,15 @@ public class ProvisoManager {
 					if (p.getCoreType() instanceof STRUCT) {
 						STRUCT s1 = (STRUCT) p.getCoreType();
 						
+						// TODO ERROR HERE: PROVISOS OF STRUCT INIT TYPE ARE CHANGED WHEN CHECKING FIELDS
+						
 						/* Map recieved context on the proviso types of the struct */
-						for (int i = 0; i < s1.proviso.size(); i++) {
-							for (int a = 0; a < context.size(); a++) {
-								if (s1.proviso.get(i).isEqual(context.get(a))) {
-									PROVISO p0 = (PROVISO) s1.proviso.get(i);
-									p0.setContext(context.get(a));
-								}
-							}
-						}
+						mapContextTo(s1.proviso, context);
+						
+						//if (ContextChecker.fieldType != null) System.out.println(ContextChecker.fieldType.typeString());
 						
 						if (s1.typedef.path.build().equals(s.typedef.path.build())) {
-							/* Set pointer to point on itself, but set provisos */
+							/* Struct is recursive, set loop reference and return */
 							p.coreType = s1;
 						}
 						else {
@@ -235,6 +222,16 @@ public class ProvisoManager {
 					p.setContext(source.get(a));
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Maps the proviso types of the second argument to the first, 1 to 1
+	 */
+	public static void mapContextToStatic(List<TYPE> target, List<TYPE> source) {
+		for (int i = 0; i < target.size(); i++) {
+			PROVISO p = (PROVISO) target.get(i);
+			p.setContext(source.get(i));
 		}
 	}
 	
@@ -266,13 +263,10 @@ public class ProvisoManager {
 			}
 			
 			/* Map initialization proviso types to proviso head listing */
-			for (int i = 0; i < s.typedef.proviso.size(); i++) {
-				PROVISO p = (PROVISO) s.typedef.proviso.get(i);
-				p.setContext(s.proviso.get(i));
-			}
+			mapContextToStatic(s.typedef.proviso, s.proviso);
 			
 			/* Propagate initialized proviso mapping on the fields */
-			ProvisoManager.setContext(s.typedef.proviso, s);
+			setContext(s.typedef.proviso, s);
 			
 			return s;
 		}

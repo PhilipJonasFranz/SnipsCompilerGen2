@@ -14,11 +14,15 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMMemOp;
+import Imm.ASM.Memory.ASMStr;
+import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
+import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -150,7 +154,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REGISTER> used = func.getUsed();
 			
 			
-			if (!hasCall && !func.hasParamsInStack()) {
+			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
 				else {
@@ -161,14 +165,14 @@ public class AsNFunction extends AsNCompoundStatement {
 					func.patchBxToB(funcReturn);
 				}
 				
-				if (!st.newDecsOnStack) func.instructions.remove(fpMov);
+				if (!st.newDecsOnStack && f.getReturnType().wordsize() == 1) func.instructions.remove(fpMov);
 			}
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();
 				used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
 				push.operands.add(new RegOperand(REGISTER.FP));
-				push.operands.add(new RegOperand(REGISTER.LR));
+				if (hasCall) push.operands.add(new RegOperand(REGISTER.LR));
 				
 				func.patchBxToB(funcReturn);
 			}
@@ -177,26 +181,38 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Patch offset based on amount of pushed registers excluding LR and FP */
 			func.patchFramePointerAddressing(push.operands.size() * 4);
 			
-			
-			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack) {
+			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1) {
 				/* Add centralized stack reset and register restoring */
 				func.instructions.add(funcReturn);
 				
 				ASMPopStack pop = new ASMPopStack();
 				used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
 				
-				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack) {
+				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1) {
+					if (f.getReturnType().wordsize() > 1) {
+						func.instructions.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.SP)));
+					}
+					
 					func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
 				
-					if (hasCall || func.hasParamsInStack()) {
+					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1) {
 						/* Need to restore registers */
 						pop.operands.add(new RegOperand(REGISTER.FP));
-						pop.operands.add(new RegOperand(REGISTER.LR));
+						if (hasCall) pop.operands.add(new RegOperand(REGISTER.LR));
 					}
 				}
 				
 				pop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
 				func.instructions.add(pop);
+			}
+			
+			if (f.getReturnType().wordsize() > 1) {
+				ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4));
+				sub.comment = new ASMComment("Copy return value from stack");
+				func.instructions.add(sub);
+				
+				/* Copy the data from the top of the stack to the return stack location */
+				copyReturnStack(f.getReturnType().wordsize(), func, st);
 			}
 			
 			/* Branch back */
@@ -342,6 +358,22 @@ public class AsNFunction extends AsNCompoundStatement {
 				mapping.add(new Pair(dec, -1));
 		}
 		return mapping;
+	}
+	
+	/**
+	 * Assumes that the base address of the array or the start address of the memory section is located in R1, and the backup SP in R2.
+	 * Pops the word it copies of the stack.
+	 * @param size The amound of words to copy.
+	 * @throws CGEN_EXCEPTION 
+	 */
+	public static void copyReturnStack(int size, AsNNode node, StackSet st) throws CGEN_EXCEPTION {
+		/* Do it sequentially for 8 or less words to copy */
+		int offset = 0;
+		for (int a = 0; a < size; a++) {
+			node.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2), new ImmOperand(offset)));
+			node.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+			offset += 4;
+		}
 	}
 
 }

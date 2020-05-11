@@ -131,7 +131,7 @@ resv.L15:
     add r0, r1, #1
     b resv.L18
 resv.L17: 
-    sub r4, r4, r5
+    add r4, r4, r5
     b resv.L3
 resv.L4: 
 /* Memory section is allocated, skip */
@@ -153,7 +153,7 @@ resv.L18:
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                         /* Function: main */
-    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    push { r3, r4, r5, r6, r7, fp, lr }
     mov fp, sp
     mov r0, #3                /* Evaluate Expression */
     bl resv                   /* Call resv */
@@ -169,11 +169,24 @@ main:                         /* Function: main */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r4, r0                /* Evaluate Expression */
-    mov r0, #3
+    mov r0, #3                /* Evaluate Expression */
+    bl resv                   /* Call resv */
+    mov r4, r0
+    mov r0, #1                /* Evaluate Expression */
+    push { r0 }
+    mov r0, #0
+    push { r0 }
+    mov r0, #0
+    lsl r1, r4, #2
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, #3                /* Evaluate Expression */
     bl resv                   /* Call resv */
     mov r5, r0
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #15               /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
@@ -184,47 +197,31 @@ main:                         /* Function: main */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r6, r0                /* Evaluate Expression */
-    mov r0, #3
-    bl resv                   /* Call resv */
-    mov r7, r0
-    mov r0, #15               /* Evaluate Expression */
-    push { r0 }
-    mov r0, #0
-    push { r0 }
-    mov r0, #0
-    lsl r1, r7, #2
-    str r0, [r1, #0]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    mov r0, r7                /* Evaluate Expression */
+    mov r0, r5                /* Evaluate Expression */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]              /* Store value to struct field */
-    mov r8, r0                /* Evaluate Expression */
-    mov r0, #3
+    mov r0, #3                /* Evaluate Expression */
     bl resv                   /* Call resv */
-    mov r9, r0
+    mov r6, r0
     mov r0, #12               /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
     mov r0, #0
-    lsl r1, r9, #2
+    lsl r1, r6, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, r9                /* Evaluate Expression */
+    mov r0, r6                /* Evaluate Expression */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #4
     ldr r1, [r1]
     lsl r1, r1, #2
     str r0, [r1]              /* Store value to struct field */
-    mov r10, r0               /* Evaluate Expression */
+    mov r7, r0                /* Evaluate Expression */
     lsl r1, r3, #2            /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1]              /* Load field from struct */
@@ -251,6 +248,6 @@ main:                         /* Function: main */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    pop { r3, r4, r5, r6, r7, fp, lr }
     bx lr
     

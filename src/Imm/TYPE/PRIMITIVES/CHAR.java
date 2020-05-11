@@ -16,7 +16,11 @@ public class CHAR extends PRIMITIVE<Character> {
 	}
 	
 	public void setValue(String value) {
-		this.value = value.charAt(0);
+		/* Termination char */
+		if (value == null) {
+			this.value = (char) 0;
+		}
+		else this.value = value.charAt(0);
 	}
 
 	public boolean isEqual(TYPE type) {

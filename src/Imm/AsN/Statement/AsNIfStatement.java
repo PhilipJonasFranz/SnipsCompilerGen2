@@ -62,7 +62,10 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
 					/* False Jump */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
+					if (elseS.elseStatement != null)
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
+					else 
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(endTarget)));
 				}
 				
 				/* Add Body */
@@ -134,7 +137,10 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 					elseTarget = new ASMLabel(LabelGen.getLabel());
 				
 					/* False Jump */
-					this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(elseTarget)));
+					if (elseS.elseStatement != null)
+						this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(elseTarget)));
+					else 
+						this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(endTarget)));
 				}
 			}
 			

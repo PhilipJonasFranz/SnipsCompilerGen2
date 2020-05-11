@@ -15,7 +15,7 @@ OUTPUT
 /* --test_12.txt */
     b main
 add:                          /* Function: add */
-    push { fp, lr }
+    push { fp }
     mov fp, sp
     mov r2, #0                /* Evaluate Expression */
     mov r0, #0
@@ -23,7 +23,7 @@ add:                          /* Function: add */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
@@ -33,7 +33,7 @@ add:                          /* Function: add */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -46,7 +46,7 @@ add:                          /* Function: add */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #0
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
@@ -59,14 +59,14 @@ add:                          /* Function: add */
     mul r0, r0, r1
     add r2, r2, r0
     add r2, r2, #4
-    add r0, fp, #8
+    add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
+    pop { fp }
     bx lr
     
 main:                         /* Function: main */

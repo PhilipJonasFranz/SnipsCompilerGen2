@@ -1,0 +1,146 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains the utility to create and use
+ * a circular queue.
+ */
+namespace Queue {
+	
+	/*
+	 * The cyclic queue capsules a pointer to a storage location for
+	 * the contained values, indexes for the head and tail, as well as the
+	 * maximum size of the queue. Finally the queue has a isEmpty flag, 
+	 * that is used to determine wether the queue is full or empty when
+	 * the head index is the same as the tail index.
+	 */
+	struct CyclicQueue<T> {
+		T* storage;
+		int size;
+		int head;
+		int tail;
+		bool isEmpty;
+	}
+	
+	/*
+	 * Allocates a new queue and initializes it.
+	 * The passed size will be set as the maximum amount of elements
+	 * in the queue.
+	 */
+	CyclicQueue<T>* create<T>(int size) {
+		/* Allocate memory for storage of given size */
+		T* storage = (T*) resv(sizeof(T) * size);
+		
+		/* Allocate memory for queue */
+		CyclicQueue<T>* queue = (CyclicQueue<T>*) resv(sizeof(CyclicQueue<T>));
+		
+		/* Initialize, set start values */
+		*queue = CyclicQueue<T>::(storage, size, 0, 0, true);
+		
+		return queue;
+	}
+	
+	/*
+	 * Frees the allocated storage of the queue,
+	 * as well as the queue itself.
+	 */
+	void destroy(CyclicQueue<void>* queue) {
+		free(queue->storage);
+		free(queue);
+	}
+	
+	/*
+	 * Returns true if currently no elements are in the queue.
+	 */
+	bool isEmpty(CyclicQueue<void>* queue) {
+		return queue->isEmpty;
+	}
+	
+	/*
+	 * Returns true if the amount of elements in the queue is
+	 * equal to the specified size when the queue was created.
+	 */
+	bool isFull(CyclicQueue<void>* queue) {
+		return queue->head == queue->tail && !queue->isEmpty;
+	}
+	
+	/*
+	 * Enqueue a new value. The value is only enqueued if the 
+	 * queue is not full.
+	 */
+	void enqueue<T>(CyclicQueue<T>* queue, T value) {
+		if (queue->head == queue->tail && !queue->isEmpty) {
+			/* Queue is full */
+			return;
+		}
+		else {
+			/* 
+			 * Calculate word offset to the storage location based on the 
+			 * Size of the proviso type and the head index
+			 */
+			int off = queue->head * sizeof(T);
+			
+			/* Write value */
+			*(queue->storage + off) = value;
+			
+			/* Increment head index */
+			queue->head = (queue->head + 1) % queue->size;
+			
+			/* Set is empty flag and return */
+			queue->isEmpty = false;
+			return;
+		}
+	}
+	
+	/*
+	 * Dequeues a value and removes it from the queue. Returns
+	 * 0 if the queue is empty.
+	 */
+	T dequeue<T>(CyclicQueue<T>* queue) {
+		if (queue->isEmpty) {
+			/* Queue is empty */
+			return (T) 0;
+		}
+		else {
+			/* Read value from tail */
+			T value = *(queue->storage + (queue->tail * sizeof(T)));
+			
+			/* Increment tail */
+			queue->tail = (queue->tail + 1) % queue->size;
+			
+			/* If tail now is equal to head the queue must be empty */
+			if (queue->tail == queue->head) queue->isEmpty = true;
+			
+			return value;
+		}
+	}
+
+	/*
+	 * Clears all elements in the queue by resetting the
+	 * head and tail indexes, and setting the isEmpty flag to true.
+	 */
+	void clear(CyclicQueue<void>* queue) {
+		queue->head = 0;
+		queue->tail = 0;
+		queue->isEmpty = true;
+		return;
+	}
+	
+	/*
+	 * Returns the amount of elements that are currently 
+	 * stored in the queue.
+	 */
+	int size(CyclicQueue<void>* queue) {
+		/* Queue is full */
+		if (queue->head == queue->tail && !queue->isEmpty) {
+			return queue->size;
+		}
+		
+		int size = queue->head - queue->tail;
+		
+		/* Head is behind tail */
+		if (size < 0) size = queue->size + size;
+		
+		return size;
+	}
+	
+}

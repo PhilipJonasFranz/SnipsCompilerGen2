@@ -1,19 +1,22 @@
 /*
- * This file contains utility functions for int values.
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility functions for int values and int arrays.
  */
 namespace Integer {
 
 	/*
 	 * Parses the given String to an int. The String has to have the form 
-	 * (-)*+([0-9])* or ([0-9])*. If the String does not match the regex, -1 is returned.
+	 * (-)*+([0-9])*NULL or ([0-9])*NULL. If the String does not match the regex, -1 is returned.
+	 * The String must be terminated with the NULL char, otherwise the function will
+	 * run infiniteley.
 	 */
 	int parseInt(char* c) {
-		int size = hsize(c);
+		int c0 = 0;
 		int sum = 0;
-		
 		bool neg = false;
-		for (int i = 0; i < size; i++) {
-			int s = ((int) *(c + i));
+		while ((int) (*(c + c0)) != 0) {
+			int s = (int) *(c + c0);
 			
 			/* Check if character is a - */
 			if (s == 45) {
@@ -28,6 +31,7 @@ namespace Integer {
 				}
 				sum = (sum * 10) + s;
 			}
+			c0++;
 		}
 		
 		/* Negate if sign flag is set */
@@ -61,18 +65,46 @@ namespace Integer {
 		
 		/* Get size of list */
 		int size = List::size(list);
-		char* str = (char*) resv(size);
+		char* str = (char*) resv(size + 1);
 		
 		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
 			int c = List::get<int>(list, i) + 48;
-			*(str + c0) = (char) c;
-			c0++;
+			*(str + c0++) = (char) c;
 		}
+
+		*(str + size) = (char) 0;
 		
 		List::destroy(list);
 		
 		return str;
 	}
 
+	namespace Array {
+		
+		/*
+		 * Sorts a int array with given size. Uses
+		 * the bubble sort algorithm to sort.
+		 */
+		void sort(int* arr, int size) {
+			if (size > 1) {
+				while (true) {
+					bool sorted = true;
+					for (int i = 1; i < size; i++) {
+						int a0 = *(arr + i - 1);
+						int a1 = *(arr + i);
+						if (a0 > a1) {
+							sorted = false;
+							*(arr + i - 1) = a1;
+							*(arr + i) = a0;
+						}
+					}
+				
+					if (sorted) break;
+				}
+			}
+			return;
+		}
+	}
+	
 }

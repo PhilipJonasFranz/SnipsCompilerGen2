@@ -27,16 +27,19 @@ public class StructTypedef extends SyntaxElement {
 	
 	public List<Declaration> fields;
 	
+	public StructTypedef extension = null;
+	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, Source source) {
 		super(source);
 		this.path = path;
 		this.proviso = proviso;
 		this.fields = declarations;
+		this.extension = extension;
 		
 		/* Call with reference on itself, struct type will be built when context checking */
 		this.struct = new STRUCT(this, proviso);
@@ -61,11 +64,7 @@ public class StructTypedef extends SyntaxElement {
 		/* Apply context to internal proviso */
 		for (int i = 0; i < this.proviso.size(); i++) {
 			PROVISO p0 = (PROVISO) this.proviso.get(i);
-			
-			List<TYPE> con0 = new ArrayList();
-			con0.add(context.get(i));
-			
-			ProvisoManager.setContext(con0, p0);
+			ProvisoManager.setContext(context, p0);
 		}
 		
 		for (int i = 0; i < context.size(); i++) {
@@ -91,7 +90,7 @@ public class StructTypedef extends SyntaxElement {
 			dec0.add(dec.clone());
 		}
 		
-		StructTypedef clone = new StructTypedef(this.path, prov0, dec0, this.getSource());
+		StructTypedef clone = new StructTypedef(this.path, prov0, dec0, this.extension, this.getSource());
 		
 		assert(clone.fields.size() == this.fields.size());
 		
