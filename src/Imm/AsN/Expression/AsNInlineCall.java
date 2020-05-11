@@ -23,7 +23,7 @@ public class AsNInlineCall extends AsNExpression {
 			throw new SNIPS_EXCEPTION("Function " + ic.calledFunction.path.build() + " is undefined at this point, " + ic.getSource().getSourceMarker());
 		}
 		
-		AsNFunctionCall.call(ic.calledFunction, ic.proviso, ic.parameters, call, r, map, st);
+		AsNFunctionCall.call(ic.calledFunction, true, ic.proviso, ic.parameters, call, r, map, st);
 		
 		return call;
 	}

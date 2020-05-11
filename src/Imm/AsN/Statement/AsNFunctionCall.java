@@ -45,12 +45,12 @@ public class AsNFunctionCall extends AsNStatement {
 			throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
 		}
 		
-		call(fc.calledFunction, fc.proviso, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, false, fc.proviso, fc.parameters, call, r, map, st);
 		
 		return call;
 	}
 	
-	public static void call(Function f, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		r.free(0, 1, 2);
 		
@@ -117,7 +117,11 @@ public class AsNFunctionCall extends AsNStatement {
 		/* Shrink Stack if parameters were passed through it */
 		int size = 0;
 		
-		if (f.getReturnType().wordsize() > 1) {
+		/* 
+		 * Only grow stack by return type size if its an inline call, 
+		 * meaning the call has a data target.
+		 */
+		if (f.getReturnType().wordsize() > 1 && inlineCall) {
 			/* Stack grows by word size of return type */
 			size -= f.getReturnType().wordsize();
 			
