@@ -1,4 +1,7 @@
 # Snips Compiler Gen.2 v.2.3.5-RELEASE
+## Some words in advance
+ This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. This means that results procuded by the compiler and included modules may contain errors and are not though for any production environment.
+ 
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
