@@ -83,6 +83,19 @@ namespace List {
 		
 		return n->value;	
 	}
+
+	ListNode<T>* getNode<T>(LinkedList<T>* lp, int i) {
+		ListNode<T>* n = lp->head;
+		while (i != 0) {
+			if ((int) n->next == 0) return (T) 0;
+			
+			/* Jump to next */
+			n = n->next;
+			i--;
+		}
+		
+		return n;	
+	}
 	
 	/*
 	 * Check if given list contains given value.
@@ -103,7 +116,7 @@ namespace List {
 	/*
 	 * Finds the first node in the list that has given value.
 	 * Returns a pointer to this list node, or 0 in case the
-	 * value wasnt found. Frees the removed node of the heap.
+	 * value wasnt found.
 	 */
 	ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = lp->head;

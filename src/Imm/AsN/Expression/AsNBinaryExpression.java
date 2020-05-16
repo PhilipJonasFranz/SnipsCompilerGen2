@@ -171,12 +171,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Partial Atomic Loading Left */
 			if (b.getLeft() instanceof Atom) {
 				this.loadOperand(b.getRight(), 2, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(((INT) ((Atom) b.getLeft()).getType()).value)));
+				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(Integer.parseInt(b.getLeft().getType().sourceCodeRepresentation()))));
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.getRight() instanceof Atom) {
 				this.loadOperand(b.getLeft(), 1, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(((INT) ((Atom) b.getRight()).getType()).value)));
+				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(Integer.parseInt(b.getRight().getType().sourceCodeRepresentation()))));
 			}
 			else m.generatePrimitiveLoaderCode(m, b, r, map, st, 1, 2);
 			

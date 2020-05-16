@@ -1,11 +1,11 @@
 SOURCE
 int main(int a) {
 	int b = a;
-	a = a * 3;
-	return b;
+	a = a * bx11 + hx11;
+	return a;
 }
 TESTCASES
-5 5
+5 32
 OUTPUT
 /* --test_05.txt */
 main:                         /* Function: main */
@@ -16,8 +16,10 @@ main:                         /* Function: main */
     mov r1, r3
     mov r2, #3
     mul r0, r1, r2
-    mov r3, r0
-    mov r0, r4                /* Evaluate Expression */
+    mov r1, r0
+    mov r2, #17
+    add r3, r1, #17
+    mov r0, r3                /* Evaluate Expression */
     pop { r3, r4, r5 }
     bx lr
     
