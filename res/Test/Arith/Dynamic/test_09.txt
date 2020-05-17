@@ -38,11 +38,16 @@ baz:                          /* Function: baz */
     mov r2, sp
     mov sp, fp
     pop { fp }
-    sub r1, sp, #8            /* Copy return value from stack */
-    ldr r0, [r2, #0]
-    str r0, [r1, #0]
-    ldr r0, [r2, #4]
-    str r0, [r1, #4]
+    mov r0, #8
+    add r1, r2, #8
+baz.L2:                       /* Copy stack return with loop */
+    cmp r0, #0
+    beq baz.L3
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b baz.L2
+baz.L3: 
     bx lr
     
 foo:                          /* Function: foo */
@@ -59,11 +64,16 @@ foo:                          /* Function: foo */
     mov r2, sp
     mov sp, fp
     pop { r3, fp }
-    sub r1, sp, #8            /* Copy return value from stack */
-    ldr r0, [r2, #0]
-    str r0, [r1, #0]
-    ldr r0, [r2, #4]
-    str r0, [r1, #4]
+    mov r0, #8
+    add r1, r2, #8
+foo.L2:                       /* Copy stack return with loop */
+    cmp r0, #0
+    beq foo.L3
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b foo.L2
+foo.L3: 
     bx lr
     
 main:                         /* Function: main */
@@ -71,14 +81,11 @@ main:                         /* Function: main */
     mov fp, sp
     mov r3, r0
     bl foo                    /* Call foo */
-    sub sp, sp, #8
     mov r1, r3                /* Evaluate Expression */
     mov r2, #2
     mul r0, r1, r2
     bl foo                    /* Call foo */
-    sub sp, sp, #8
     bl baz                    /* Evaluate Expression */
-    sub sp, sp, #8
     sub r0, fp, #8
     add r0, r0, #0
     ldr r0, [r0]

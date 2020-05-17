@@ -84,6 +84,8 @@ public class ContextChecker {
 	
 	Stack<List<TYPE>> signalStack = new Stack();
 	
+	Stack<SyntaxElement> exceptionEscapeStack = new Stack();
+	
 	public static ContextChecker checker;
 	
 	public static ProgressMessage progress;
@@ -98,8 +100,6 @@ public class ContextChecker {
 	
 	public TYPE check() throws CTX_EXCEPTION {
 		this.checkProgram((Program) AST);
-		
-		AST.print(0, true);
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -176,6 +176,7 @@ public class ContextChecker {
 		scopes.push(new Scope(scopes.peek()));
 		
 		this.signalStack.push(new ArrayList());
+		this.exceptionEscapeStack.push(f);
 		
 		if (f.path.build().equals("main") && f.signals) {
 			throw new CTX_EXCEPTION(f.getSource(), "Entry function 'main' cannot signal exceptions");
@@ -243,6 +244,7 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(f.getSource(), unwatched);
 		}
 		
+		this.exceptionEscapeStack.pop();
 		this.signalStack.pop();
 		scopes.pop();
 		
@@ -256,6 +258,7 @@ public class ContextChecker {
 	
 	public TYPE checkSignal(SignalStatement e) throws CTX_EXCEPTION {
 		TYPE exc = e.exceptionInit.check(this);
+		e.watchpoint = this.exceptionEscapeStack.peek();
 		
 		boolean match = false;
 		for (TYPE signals : this.currentFunction.peek().signalsTypes) {
@@ -277,6 +280,7 @@ public class ContextChecker {
 	
 	public TYPE checkTryStatement(TryStatement e) throws CTX_EXCEPTION {
 		this.signalStack.push(new ArrayList());
+		this.exceptionEscapeStack.push(e);
 		
 		for (Statement s : e.body) {
 			s.check(this);
@@ -289,6 +293,8 @@ public class ContextChecker {
 				}
 			}
 		}
+		
+		this.exceptionEscapeStack.pop();
 		
 		for (WatchStatement w : e.watchpoints) {
 			w.check(this);
@@ -1002,6 +1008,7 @@ public class ContextChecker {
 		/* Find the called function */
 		Function f = this.findFunction(i.path, i.getSource());
 		i.calledFunction = f;
+		i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		/* Add signaled types */
 		if (f.signals) {
@@ -1071,7 +1078,8 @@ public class ContextChecker {
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
 		Function f = this.findFunction(i.path, i.getSource());
 		i.calledFunction = f;
-
+		i.watchpoint = this.exceptionEscapeStack.peek();
+		
 		/* Add signaled types */
 		if (f.signals) {
 			for (TYPE s : f.signalsTypes) {

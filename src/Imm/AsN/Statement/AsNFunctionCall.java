@@ -12,11 +12,8 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
-import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -64,13 +61,10 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Pair<Declaration, Integer>> mapping = 
 			((AsNFunction) f.castedNode).getParameterMapping();
 
-		int stackMapping = 0;
-		
 		/* Load Parameters in the Stack */
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.getSecond() == -1) {
-				stackMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				if (parameters.get(i).getType().wordsize() == 1) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
@@ -114,38 +108,15 @@ public class AsNFunctionCall extends AsNStatement {
 		branch.comment = new ASMComment("Call " + f.path.build());
 		call.instructions.add(branch);
 		
-		/* Shrink Stack if parameters were passed through it */
-		int size = 0;
-		
 		/* 
-		 * Only grow stack by return type size if its an inline call, 
-		 * meaning the call has a data target.
+		 * Push dummy values on the stack for the stack return value, but only if 
+		 * there is a data target.
 		 */
 		if (f.getReturnType().wordsize() > 1 && inlineCall) {
-			/* Stack grows by word size of return type */
-			size -= f.getReturnType().wordsize();
-			
-			/* Push dummy regs on the stack for the return type */
 			for (int i = 0; i < f.getReturnType().wordsize(); i++) {
 				st.push(REGISTER.R0);
 			}
 		}
-		
-		if (stackMapping > 0) {
-			for (Pair<Declaration, Integer> p  : mapping) {
-				if (p.getSecond() == -1) {
-					/* Stack shrinks by parameter word size */
-					size += p.getFirst().getType().wordsize();
-				}
-			}
-			
-		}
-		
-		/* Based on stack shrink/grow delta, add instruction to reset stack */
-		if (size > 0) 
-			call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
-		else if (size < 0)
-			call.instructions.add(new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(-size * 4)));
 		
 		if (!f.parameters.isEmpty()) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import CGen.LabelGen;
 import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
@@ -325,7 +326,7 @@ public class Parser {
 			for (Declaration d : ext.fields) extendDecs.add(d.clone());
 		}
 		
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, source);
+		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		def.fields.addAll(extendDecs);

@@ -47,6 +47,7 @@ get:                          /* Function: get */
     sub r0, r1, r2
     mov sp, fp
     pop { r3, fp }
+    add sp, sp, #8
     bx lr
     
 main:                         /* Function: main */
@@ -76,7 +77,6 @@ main:                         /* Function: main */
     push { r1, r0 }
     mov r0, r3
     bl get                    /* Call get */
-    add sp, sp, #8
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

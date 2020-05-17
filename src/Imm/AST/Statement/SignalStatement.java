@@ -4,6 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.TYPE.TYPE;
@@ -15,6 +16,8 @@ import Util.Source;
 public class SignalStatement extends Statement {
 
 			/* --- FIELDS --- */
+	public SyntaxElement watchpoint;
+	
 	private Expression shadowRef;
 	
 	public StructureInit exceptionInit;

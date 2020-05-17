@@ -38,5 +38,6 @@ main.L3:
 main.L4: 
     mov sp, fp
     pop { r3, r4, r5, r6, r7, fp }
+    add sp, sp, #4
     bx lr
     

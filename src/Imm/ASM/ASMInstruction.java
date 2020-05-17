@@ -28,6 +28,8 @@ public abstract class ASMInstruction {
 		 */
 		WRITEBACK,
 		
+		EXC_EXIT,
+		
 		FUNC_CLEAN;
 	}
 	

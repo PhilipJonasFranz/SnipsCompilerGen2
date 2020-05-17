@@ -250,6 +250,7 @@ __mat_mult.L2:
     mov r0, r6                /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    add sp, sp, #4
     bx lr
     
 allocMatrix:                  /* Function: allocMatrix */
@@ -325,7 +326,6 @@ main:                         /* Function: main */
     mov r0, r4
     pop { r1, r2 }
     bl __mat_mult             /* Call __mat_mult */
-    add sp, sp, #4
     mov r6, r0
     add r0, r6, r3
     lsl r0, r0, #2            /* Convert to bytes */

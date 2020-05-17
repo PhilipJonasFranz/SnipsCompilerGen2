@@ -44,6 +44,7 @@ import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
+import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
@@ -54,6 +55,9 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		
 		if (s instanceof ConditionalCompoundStatement) {
 			node = AsNConditionalCompoundStatement.cast((ConditionalCompoundStatement) s, r, map, st);
+		}
+		else if (s instanceof TryStatement) {
+			node = AsNTryStatement.cast((TryStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 		

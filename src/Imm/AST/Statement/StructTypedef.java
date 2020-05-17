@@ -29,14 +29,19 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public int SID;
+	
+	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, Source source) {
+	public StructTypedef(NamespacePath path, int SID, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, Source source) {
 		super(source);
 		this.path = path;
+		this.SID = SID;
+		
 		this.proviso = proviso;
 		this.fields = declarations;
 		this.extension = extension;
@@ -48,7 +53,7 @@ public class StructTypedef extends SyntaxElement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Struct Typedef <" + this.path.build() + ">");
+		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
 		if (rec) {
 			for (Declaration dec : this.fields) {
 				dec.print(d + this.printDepthStep, rec);
@@ -90,7 +95,7 @@ public class StructTypedef extends SyntaxElement {
 			dec0.add(dec.clone());
 		}
 		
-		StructTypedef clone = new StructTypedef(this.path, prov0, dec0, this.extension, this.getSource());
+		StructTypedef clone = new StructTypedef(this.path, this.SID, prov0, dec0, this.extension, this.getSource());
 		
 		assert(clone.fields.size() == this.fields.size());
 		
