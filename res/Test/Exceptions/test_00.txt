@@ -1,0 +1,37 @@
+SOURCE
+struct ContextException {
+	int code;
+}
+
+struct Exception {
+	int i0;
+	int s0;
+}
+
+int get(int* arr, int i, int s) signals Exception {
+	if (i >= s || i < 0) {
+		signal Exception::(i, s);
+	}
+	else {
+		return *(arr + i);
+	}
+}
+
+int main(int i) {
+	int [3] arr = {5, 3, 8};
+	
+	int r = 0;
+	try {
+		r = get(&arr, i, 3);
+	} watch (Exception e) {
+		r = e.i0 << 1 + e.s0;
+	}
+	
+	return r;
+}
+TESTCASES
+0 5
+1 3
+2 8
+3 12
+4 19

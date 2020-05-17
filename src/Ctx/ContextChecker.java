@@ -46,9 +46,12 @@ import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
+import Imm.AST.Statement.TryStatement;
+import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -79,6 +82,8 @@ public class ContextChecker {
 	
 	Stack<Scope> scopes = new Stack();
 	
+	Stack<List<TYPE>> signalStack = new Stack();
+	
 	public static ContextChecker checker;
 	
 	public static ProgressMessage progress;
@@ -93,6 +98,8 @@ public class ContextChecker {
 	
 	public TYPE check() throws CTX_EXCEPTION {
 		this.checkProgram((Program) AST);
+		
+		AST.print(0, true);
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -168,6 +175,12 @@ public class ContextChecker {
 		
 		scopes.push(new Scope(scopes.peek()));
 		
+		this.signalStack.push(new ArrayList());
+		
+		if (f.path.build().equals("main") && f.signals) {
+			throw new CTX_EXCEPTION(f.getSource(), "Entry function 'main' cannot signal exceptions");
+		}
+		
 		/* Check for duplicate function parameters */
 		if (f.parameters.size() > 1) {
 			for (int i = 0; i < f.parameters.size(); i++) {
@@ -186,6 +199,10 @@ public class ContextChecker {
 			}
 		}
 		
+		if (f.signals && f.signalsTypes.isEmpty()) {
+			throw new CTX_EXCEPTION(f.getSource(), "Function must signal at least one exception type");
+		}
+		
 		head.functions.add(f);
 		this.currentFunction.push(f);
 		
@@ -195,13 +212,118 @@ public class ContextChecker {
 		}
 		
 		this.currentFunction.pop();
+		
+		/* Check for signaled types that are not thrown */
+		for (TYPE t : f.signalsTypes) {
+			boolean contains = false;
+			for (int i = 0; i < this.signalStack.peek().size(); i++) {
+				contains |= this.signalStack.peek().get(i).isEqual(t);
+			}
+			
+			if (!contains) {
+				throw new CTX_EXCEPTION(f.getSource(), "Watched exception " + t.typeString() + " is not thrown in function body");
+			}
+		}
+		
+		/* Remove function signaled exceptions */
+		for (TYPE t : f.signalsTypes) {
+			for (int i = 0; i < this.signalStack.peek().size(); i++) {
+				if (this.signalStack.peek().get(i).isEqual(t)) {
+					this.signalStack.peek().remove(i);
+					break;
+				}
+			}
+		}
+		
+		/* Exception types are not watched or signaled */
+		if (!this.signalStack.peek().isEmpty()) {
+			String unwatched = "Unwatched exceptions for function " + f.path.build() + ": ";
+			for (TYPE t : this.signalStack.peek()) unwatched += t.typeString() + ", ";
+			unwatched = unwatched.substring(0, unwatched.length() - 2);
+			throw new CTX_EXCEPTION(f.getSource(), unwatched);
+		}
+		
+		this.signalStack.pop();
 		scopes.pop();
+		
 		return f.getReturnType().clone();
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXCEPTION {
 		/* Set the declarations in the struct type */
 		return e.struct;
+	}
+	
+	public TYPE checkSignal(SignalStatement e) throws CTX_EXCEPTION {
+		TYPE exc = e.exceptionInit.check(this);
+		
+		boolean match = false;
+		for (TYPE signals : this.currentFunction.peek().signalsTypes) {
+			match |= signals.isEqual(exc);
+		}
+		
+		/* Thrown exception is not in list of signaled types */
+		if (!match) {
+			throw new CTX_EXCEPTION(e.getSource(), "Thrown exception type " + exc.typeString() + " is not signaled by function '" + this.currentFunction.peek().path.build() + "'");
+		}
+		
+		/* Add to signal stack */
+		if (!this.signalStackContains(exc)) {
+			this.signalStack.peek().add(exc);
+		}
+		
+		return new VOID();
+	}
+	
+	public TYPE checkTryStatement(TryStatement e) throws CTX_EXCEPTION {
+		this.signalStack.push(new ArrayList());
+		
+		for (Statement s : e.body) {
+			s.check(this);
+		}
+		
+		for (int i = 0; i < e.watchpoints.size(); i++) {
+			for (int a = i + 1; a < e.watchpoints.size(); a++) {
+				if (e.watchpoints.get(i).watched.getType().isEqual(e.watchpoints.get(a).watched.getType())) {
+					throw new CTX_EXCEPTION(e.getSource(), "Found multiple watchpoints for exception " + e.watchpoints.get(i).watched.getType().typeString());
+				}
+			}
+		}
+		
+		for (WatchStatement w : e.watchpoints) {
+			w.check(this);
+			
+			for (TYPE t : this.signalStack.peek()) {
+				if (t.isEqual(w.watched.getType())) {
+					w.hasTarget = true;
+					this.signalStack.peek().remove(t);
+					break;
+				}
+			}
+			
+			if (!w.hasTarget) {
+				throw new CTX_EXCEPTION(e.getSource(), "Watched exception type " + w.watched.getType().typeString() + " is not thrown in try block");
+			}
+		}
+		
+		/* Add all unwatched to the previous signal level */
+		List<TYPE> unwatched = this.signalStack.pop();
+		for (TYPE t : unwatched) {
+			boolean contains = this.signalStack.peek().stream().filter(x -> x.isEqual(t)).count() > 0;
+			if (!contains) this.signalStack.peek().add(t);
+		}
+		
+		return new VOID();
+	}
+	
+	public TYPE checkWatchStatement(WatchStatement e) throws CTX_EXCEPTION {
+		e.watched.check(this);
+		
+		for (Statement s : e.body) {
+			s.check(this);
+		}
+		
+		return new VOID();
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXCEPTION {
@@ -869,10 +991,26 @@ public class ContextChecker {
 		}
 	}
 	
+	public boolean signalStackContains(TYPE newSignal) {
+		for (TYPE t : this.signalStack.peek()) {
+			if (t.isEqual(newSignal)) return true;
+		}
+		return false;
+	}
+	
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
 		/* Find the called function */
 		Function f = this.findFunction(i.path, i.getSource());
 		i.calledFunction = f;
+		
+		/* Add signaled types */
+		if (f.signals) {
+			for (TYPE s : f.signalsTypes) {
+				if (!this.signalStackContains(s)) {
+					this.signalStack.peek().add(s);
+				}
+			}
+		}
 		
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (f.manager.containsMapping(i.proviso)) {
@@ -934,6 +1072,15 @@ public class ContextChecker {
 		Function f = this.findFunction(i.path, i.getSource());
 		i.calledFunction = f;
 
+		/* Add signaled types */
+		if (f.signals) {
+			for (TYPE s : f.signalsTypes) {
+				if (!this.signalStackContains(s)) {
+					this.signalStack.peek().add(s);
+				}
+			}
+		}
+		
 		if (!f.manager.provisosTypes.isEmpty()) {
 			if (!f.manager.containsMapping(i.proviso)) {
 				/* Create new scope that points to the global scope */

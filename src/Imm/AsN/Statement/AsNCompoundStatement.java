@@ -41,6 +41,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AsN.AsNNode;
@@ -179,6 +180,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (s instanceof AssignWriteback) {
 			AssignWriteback awb = (AssignWriteback) s;
 			return this.hasAddressReference(awb.getShadowRef(), dec);
+		}
+		else if (s instanceof SignalStatement) {
+			SignalStatement s0 = (SignalStatement) s;
+			return this.hasAddressReference(s0.exceptionInit, dec);
 		}
 		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
 			return false;

@@ -67,9 +67,12 @@ import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
+import Imm.AST.Statement.TryStatement;
+import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -176,6 +179,7 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
+		
 		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
 		
 		if (this.progress != null) {
@@ -444,9 +448,22 @@ public class Parser {
 		
 		accept(TokenType.RPAREN);
 		
+		boolean signals = false;
+		List<TYPE> signalsTypes = new ArrayList();
+		if (current.type == TokenType.SIGNALS) {
+			signals = true;
+			accept();
+			while (current.type != TokenType.LBRACE) {
+				signalsTypes.add(this.parseType());
+				if (current.type == TokenType.COMMA) {
+					accept();
+				}
+			}
+		}
+		
 		List<Statement> body = this.parseCompoundStatement(true);
 		
-		return new Function(returnType, new NamespacePath(identifier.spelling), proviso, parameters, body, identifier.source);
+		return new Function(returnType, new NamespacePath(identifier.spelling), proviso, parameters, signals, signalsTypes, body, identifier.source);
 	}
 	
 	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
@@ -548,6 +565,12 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IF) {
 			return this.parseIf();
+		}
+		else if (current.type == TokenType.TRY) {
+			return this.parseTry();
+		}
+		else if (current.type == TokenType.SIGNAL) {
+			return this.parseSignal();
 		}
 		else {
 			this.progress.abort();
@@ -667,6 +690,51 @@ public class Parser {
 		}
 		
 		return if0;
+	}
+	
+	protected TryStatement parseTry() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		accept(TokenType.TRY);
+		
+		List<Statement> body = this.parseCompoundStatement(true);
+		
+		List<WatchStatement> watchpoints = new ArrayList();
+		while (current.type == TokenType.WATCH) {
+			watchpoints.add(this.parseWatch());
+		}
+		
+		return new TryStatement(body, watchpoints, source);
+	}
+	
+	protected WatchStatement parseWatch() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		accept(TokenType.WATCH);
+		
+		accept(TokenType.LPAREN);
+		
+		Declaration watched = this.parseParameterDeclaration();
+		
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = this.parseCompoundStatement(false);
+		
+		return new WatchStatement(body, watched, source);
+	}
+	
+	protected SignalStatement parseSignal() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		
+		accept(TokenType.SIGNAL);
+		
+		Expression ex0 = this.parseExpression();
+		
+		accept(TokenType.SEMICOLON);
+		
+		/* Signal Statement will transform in resv and assign statement */
+		//CompilerDriver.heap_referenced = true;
+		//CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+		
+		return new SignalStatement(ex0, source);
 	}
 	
 	protected ForStatement parseFor() throws PARSE_EXCEPTION {
