@@ -1,4 +1,8 @@
 SOURCE
+struct ContextException {
+	int code;
+}
+
 struct Exception {
 	int i0;
 	int s0;
@@ -13,26 +17,33 @@ int get(int* arr, int i, int s) signals Exception {
 	}
 }
 
+int throw() signals ContextException {
+	signal ContextException::(99);
+}
+
 int main(int i) {
 	int [3] arr = {5, 3, 8};
 	
 	int r = 0;
 	try {
+		throw();
 		r = get(&arr, i, 3);
 	} watch (Exception e) {
 		r = (e.i0 << 1) + e.s0;
+	} watch (ContextException e) {
+		r = e.code;
 	}
 	
 	return r;
 }
 TESTCASES
-0 5
-1 3
-2 8
-3 9
-4 11
+0 99
+1 99
+2 99
+3 99
+4 99
 OUTPUT
-/* --test_00.txt */
+/* --test_01.txt */
 .data
 HEAP_START: .word 0
     
@@ -50,7 +61,7 @@ get:                          /* Function: get */
     push { r0 }
     mov r0, r4
     push { r0 }
-    mov r12, #1               /* Signal thrown exception */
+    mov r12, #2               /* Signal thrown exception */
     mov r0, #8
     b get.L0                  /* Exception thrown, branch to escape target */
 get.L2: 
@@ -78,6 +89,30 @@ get.L6:
 get.L4: 
     bx lr
     
+throw:                        /* Function: throw */
+    push { fp }
+    mov fp, sp
+    mov r0, #99
+    push { r0 }
+    mov r12, #1               /* Signal thrown exception */
+    mov r0, #4
+    cmp r12, #0
+    mov r2, sp
+    mov sp, fp
+    pop { fp }
+    beq throw.L2
+    add r1, r2, r0
+throw.L3:                     /* Copy stack return with loop */
+    cmp r0, #0
+    beq throw.L4
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b throw.L3
+throw.L4: 
+throw.L2: 
+    bx lr
+    
 main:                         /* Function: main */
     push { r3, r4, fp, lr }
     mov fp, sp
@@ -86,8 +121,12 @@ main:                         /* Function: main */
     mov r1, #3
     mov r2, #5
     push { r2, r1, r0 }
+    mov r0, #0                /* Evaluate Expression */
     mov r4, #0
     push { sp }
+    bl throw                  /* Call throw */
+    cmp r12, #0
+    bne main.L0               /* Exception thrown, branch to escape target */
     mov r0, #3                /* Evaluate Expression */
     push { r0 }
     mov r0, r3
@@ -104,7 +143,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-16]        /* Load backed up sp from stack */
     add sp, sp, #4
-    cmp r12, #1
+    cmp r12, #2
     bne main.L2
     add r1, r1, #8
     mov r0, #8
@@ -132,6 +171,25 @@ main.L4:
     mov r12, #0
     b main.L1
 main.L2: 
+    cmp r12, #1
+    bne main.L5
+    add r1, r1, #4
+    mov r0, #4
+main.L6:                      /* Copy stack return with loop */
+    cmp r0, #0
+    beq main.L7
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b main.L6
+main.L7: 
+    sub r1, fp, #24           /* Evaluate Expression */
+    ldr r0, [r1]              /* Load field from struct */
+    mov r4, r0
+    add sp, sp, #4
+    mov r12, #0
+    b main.L1
+main.L5: 
 main.L1: 
     mov r0, r4                /* Evaluate Expression */
     mov sp, fp

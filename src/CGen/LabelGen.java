@@ -37,7 +37,7 @@ public class LabelGen {
 		c = 0;
 		i = 0;
 		p = 0;
-		sid = 0;
+		sid = 1;
 	}
 	
 	/**

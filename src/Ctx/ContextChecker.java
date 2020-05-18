@@ -279,6 +279,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkTryStatement(TryStatement e) throws CTX_EXCEPTION {
+		this.scopes.push(new Scope(this.scopes.peek()));
 		this.signalStack.push(new ArrayList());
 		
 		/* If exception is thrown that is not watched by this statement, relay to this watchpoint */
@@ -299,6 +300,7 @@ public class ContextChecker {
 			}
 		}
 		
+		this.scopes.pop();
 		this.exceptionEscapeStack.pop();
 		
 		for (WatchStatement w : e.watchpoints) {
@@ -328,12 +330,15 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkWatchStatement(WatchStatement e) throws CTX_EXCEPTION {
+		this.scopes.push(new Scope(this.scopes.peek()));
+		
 		e.watched.check(this);
 		
 		for (Statement s : e.body) {
 			s.check(this);
 		}
 		
+		this.scopes.pop();
 		return new VOID();
 	}
 	

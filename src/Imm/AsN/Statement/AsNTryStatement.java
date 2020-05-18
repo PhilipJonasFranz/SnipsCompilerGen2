@@ -98,6 +98,9 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			tr0.instructions.add(skip);
 		}
 		
+		/* Exception was not caught, escape to higher watchpoint */
+		AsNSignalStatement.injectWatchpointBranch(tr0, s.watchpoint, null);
+		
 		tr0.instructions.add(endBranch);
 		
 		return tr0;
