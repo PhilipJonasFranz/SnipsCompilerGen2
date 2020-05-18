@@ -53,10 +53,6 @@ TESTCASES
 4 11
 OUTPUT
 /* --test_02.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 get:                          /* Function: get */
     push { r3, r4, r5, r6, r7, fp }
