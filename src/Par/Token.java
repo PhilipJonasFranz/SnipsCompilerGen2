@@ -50,6 +50,10 @@ public class Token {
 		STRUCT("struct"),
 		ENUM("enum"),
 		NAMESPACE("namespace"),
+		TRY("try"),
+		WATCH("watch"),
+		SIGNAL("signal"),
+		SIGNALS("signals"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),

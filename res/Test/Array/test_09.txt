@@ -27,6 +27,7 @@ foo:                          /* Function: foo */
     ldr r0, [r0]
     mov sp, fp
     pop { fp }
+    add sp, sp, #24
     bx lr
     
 main:                         /* Function: main */
@@ -51,7 +52,6 @@ main:                         /* Function: main */
     ldr r2, [fp, #-24]
     push { r2, r1, r0 }
     bl foo                    /* Call foo */
-    add sp, sp, #24
     mov r1, r0
     add r0, r1, r3
     mov sp, fp

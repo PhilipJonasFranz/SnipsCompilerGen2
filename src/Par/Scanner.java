@@ -258,6 +258,14 @@ public class Scanner {
 				tokens.add(new Token(TokenType.SIZEOF, new Source(fileName, i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("try")) {
+				tokens.add(new Token(TokenType.TRY, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("watch")) {
+				tokens.add(new Token(TokenType.WATCH, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("\\")) {
 				tokens.add(new Token(TokenType.BACKSL, new Source(fileName, i, a)));
 				this.emptyBuffer();
@@ -371,6 +379,18 @@ public class Scanner {
 				this.emptyBuffer();
 				this.state = ACC_STATE.ENUM_ID;
 				return true;
+			}
+			else if (this.buffer.startsWith("signal")) {
+				if (this.buffer.length() == 6)return false;
+				if (this.buffer.equals("signals")) {
+					tokens.add(new Token(TokenType.SIGNALS, new Source(fileName, i, a)));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.SIGNAL, new Source(fileName, i, a - this.buffer.length())));
+					this.buffer = this.buffer.substring(this.buffer.length() - 1);
+					this.checkState(i, a, fileName);
+				}
 			}
 			else if (this.buffer.startsWith("|")) {
 				if (this.buffer.length() == 1)return false;

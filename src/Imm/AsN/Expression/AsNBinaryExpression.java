@@ -144,6 +144,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Compute left operand and push the result on the stack */
 			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			st.push(REGISTER.R0);
 			r.free(0);
 			
 			/* Compute the right operand and move it to target location */
@@ -157,6 +158,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			
 			/* Pop the left operand in the target register */
 			m.instructions.add(new ASMPopStack(new RegOperand(target0)));
+			st.pop();
 		}
 	}
 	

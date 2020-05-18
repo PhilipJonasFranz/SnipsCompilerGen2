@@ -29,13 +29,20 @@ public class Function extends CompoundStatement {
 	
 	public List<Declaration> parameters;
 	
+	public boolean signals;
+	
+	public List<TYPE> signalsTypes;
+	
 	
 			/* --- CONSTRUCTORS --- */
-	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, List<Statement> statements, Source source) {
+	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
 		this.path = path;
 		this.parameters = parameters;
+		
+		this.signals = signals;
+		this.signalsTypes = signalsTypes;
 		
 		this.manager = new ProvisoManager(this.getSource(), proviso);
 		
@@ -55,7 +62,17 @@ public class Function extends CompoundStatement {
 			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
 			if (i < this.parameters.size() - 1) System.out.print(", ");
 		}
-		System.out.println(") " + this.toString().split("@") [1]);
+		System.out.print(")");
+		
+		if (!this.signalsTypes.isEmpty()) {
+			System.out.print(" signals ");
+			for (int i = 0; i < this.signalsTypes.size(); i++) {
+				System.out.print(this.signalsTypes.get(i).typeString());
+				if (i < this.signalsTypes.size() - 1) System.out.print(", ");
+			}
+		}
+		
+		System.out.println(" " + this.toString().split("@") [1]);
 		if (rec) {
 			for (Statement s : body) {
 				s.print(d + this.printDepthStep, rec);

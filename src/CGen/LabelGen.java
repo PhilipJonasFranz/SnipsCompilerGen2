@@ -9,6 +9,8 @@ public class LabelGen {
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
+	private static int sid = 1;
+	
 	public static String funcPrefix = "";
 	
 			/* --- METHODS --- */
@@ -23,6 +25,10 @@ public class LabelGen {
 		return "_P" + c++;
 	}
 	
+	public static int getSID() {
+		return sid++;
+	}
+	
 	/**
 	 * Resets the label generator. Note that all labels created after resetting are not
 	 * guaranteed to be unique.
@@ -31,6 +37,7 @@ public class LabelGen {
 		c = 0;
 		i = 0;
 		p = 0;
+		sid = 1;
 	}
 	
 	/**

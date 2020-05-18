@@ -32,6 +32,7 @@ bar:                          /* Function: bar */
     ldr r0, [r0]
     mov sp, fp
     pop { fp }
+    add sp, sp, #16
     bx lr
     
 foo:                          /* Function: foo */
@@ -48,6 +49,7 @@ foo:                          /* Function: foo */
     ldr r0, [r0]
     mov sp, fp
     pop { fp }
+    add sp, sp, #36
     bx lr
     
 main:                         /* Function: main */
@@ -79,7 +81,6 @@ main:                         /* Function: main */
     ldr r0, [fp, #-16]
     push { r0 }
     bl bar                    /* Call bar */
-    add sp, sp, #16
     mov r1, r0
     add r0, r1, r3
     push { r0 }
@@ -96,7 +97,6 @@ main:                         /* Function: main */
     ldr r2, [fp, #-52]
     push { r2, r1, r0 }
     bl foo                    /* Call foo */
-    add sp, sp, #36
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

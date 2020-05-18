@@ -62,6 +62,7 @@ vecProd:                      /* Function: vecProd */
     add r0, r1, r2
     mov sp, fp
     pop { fp }
+    add sp, sp, #24
     bx lr
     
 main:                         /* Function: main */
@@ -84,7 +85,6 @@ main:                         /* Function: main */
     ldr r2, [fp, #-24]
     push { r2, r1, r0 }
     bl vecProd                /* Call vecProd */
-    add sp, sp, #24
     mov sp, fp
     pop { fp, lr }
     bx lr

@@ -50,6 +50,7 @@ __vec_cross.L2:
     mov r0, r3                /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, fp }
+    add sp, sp, #24
     bx lr
     
 main:                         /* Function: main */
@@ -104,7 +105,6 @@ main:                         /* Function: main */
     ldr r0, [r1, #0]
     push { r0 }
     bl __vec_cross            /* Call __vec_cross */
-    add sp, sp, #24
     mov sp, fp
     pop { fp, lr }
     bx lr

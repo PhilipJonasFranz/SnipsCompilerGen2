@@ -40,6 +40,7 @@ set:                          /* Function: set */
     str r0, [r1, #12]
     mov sp, fp
     pop { r3, fp }
+    add sp, sp, #16
     bx lr
     
 main:                         /* Function: main */
@@ -62,7 +63,6 @@ main:                         /* Function: main */
     sub r0, fp, #16
     lsr r0, r0, #2
     bl set                    /* Call set */
-    add sp, sp, #16
     mov r2, #0                /* Evaluate Expression */
     mov r0, r3
     mov r1, #8
