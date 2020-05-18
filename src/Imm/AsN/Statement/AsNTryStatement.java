@@ -27,6 +27,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNTryStatement extends AsNCompoundStatement {
@@ -43,8 +44,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		/* Save stack pointer for watchpoint */
 		tr0.instructions.add(new ASMPushStack(new RegOperand(REGISTER.SP)));
 		st.push(REGISTER.SP);
-		
-		// TODO: Make statements in the body jump to the watchpoint
+	
 		/* Insert the body */
 		tr0.addBody(s, r, map, st);
 		
@@ -80,8 +80,9 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			tr0.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(watched.wordsize() * 4)));
 			tr0.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(watched.wordsize() * 4)));
 			
-			tr0.copyReturnStack(tr0, st);
+			tr0.copyException(tr0, st);
 			
+			/* Add the declaration of the exception to the stack, is already loaded */
 			st.push(w.watched);
 			
 			/* Add body of watcher */
@@ -89,6 +90,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			
 			/* Add wordsize of exception to stack */
 			tr0.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(watched.wordsize() * 4)));
+			st.pop();
 			
 			/* Clear exception flag */
 			tr0.instructions.add(new ASMMov(new RegOperand(REGISTER.R12), new ImmOperand(0)));
@@ -98,15 +100,29 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			tr0.instructions.add(skip);
 		}
 		
-		/* Exception was not caught, escape to higher watchpoint */
-		AsNSignalStatement.injectWatchpointBranch(tr0, s.watchpoint, null);
+		if (!s.unwatched.isEmpty()) {
+			tr0.instructions.add(new ASMComment("Unwatched Exceptions"));
+			
+			/* For each unwatched type, compare the SID and move the corresponding size in R0 */
+			for (TYPE t : s.unwatched) {
+				STRUCT s0 = (STRUCT) t;
+				tr0.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(s0.typedef.SID)));
+				tr0.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s0.wordsize() * 4), new Cond(COND.EQ)));
+			}
+			
+			/* R1 contains the location of the start of the exception in the stack, move in SP to inject in copy loop */
+			tr0.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.R1)));
+			
+			/* Exception was not caught, escape to higher watchpoint */
+			AsNSignalStatement.injectWatchpointBranch(tr0, s.watchpoint, null);
+		}
 		
 		tr0.instructions.add(endBranch);
 		
 		return tr0;
 	}
 	
-	public void copyReturnStack(AsNNode node, StackSet st) throws CGEN_EXCEPTION {
+	public void copyException(AsNNode node, StackSet st) throws CGEN_EXCEPTION {
 		ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 		loopStart.comment = new ASMComment("Copy stack return with loop");
 		
@@ -123,7 +139,6 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		node.instructions.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
 		
 		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2)));
-		
 		
 		/* Decrement counter */
 		node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(4)));
