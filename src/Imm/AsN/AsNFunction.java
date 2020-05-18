@@ -60,10 +60,10 @@ public class AsNFunction extends AsNCompoundStatement {
 		f.castedNode = func;
 		func.source = f;
 		
-		func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
-		
 		LabelGen.reset();
 		LabelGen.funcPrefix = f.path.build();
+		
+		if (f.signals) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
 		
 		List<ASMInstruction> all = new ArrayList();
 		
@@ -161,7 +161,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REGISTER> used = func.getUsed();
 			
 			
-			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1) {
+			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
 				else {
@@ -361,7 +361,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * @return
 	 */
 	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
+		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
 		List<REGISTER> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {

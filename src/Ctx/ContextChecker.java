@@ -280,6 +280,11 @@ public class ContextChecker {
 	
 	public TYPE checkTryStatement(TryStatement e) throws CTX_EXCEPTION {
 		this.signalStack.push(new ArrayList());
+		
+		/* If exception is thrown that is not watched by this statement, relay to this watchpoint */
+		e.watchpoint = this.exceptionEscapeStack.peek();
+		
+		/* Setup new watchpoint target */
 		this.exceptionEscapeStack.push(e);
 		
 		for (Statement s : e.body) {

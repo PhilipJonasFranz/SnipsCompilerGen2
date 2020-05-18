@@ -4,6 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -13,6 +14,8 @@ import Util.Source;
 public class TryStatement extends CompoundStatement {
 
 			/* --- FIELDS --- */
+	public SyntaxElement watchpoint;
+	
 	public List<WatchStatement> watchpoints;
 	
 	

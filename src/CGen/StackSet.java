@@ -219,4 +219,19 @@ public class StackSet {
 		return add * 4;
 	}
 	
+	public int getHighestSPBackupOffset() {
+		int off = 4;
+		for (int i = 0; i < stack.size(); i++) {
+			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
+				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;
+				else if (stack.get(i).reg == REGISTER.SP) return off;
+				else off += 4;
+			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
+				off += (stack.get(i).declaration.getType().wordsize() * 4);
+			}
+		}
+		
+		return off;
+	}
+	
 }

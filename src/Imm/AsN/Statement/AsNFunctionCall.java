@@ -12,8 +12,12 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
@@ -43,6 +47,12 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		call(fc.calledFunction, false, fc.proviso, fc.parameters, call, r, map, st);
+		
+		if (fc.calledFunction.signals) {
+			/* Check if exception was thrown and jump to watchpoint */
+			call.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
+			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
+		}
 		
 		return call;
 	}
