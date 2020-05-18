@@ -17,7 +17,6 @@ OUTPUT
 /* --test_07.txt */
 .data
 s: .word 0
-HEAP_START: .word 0
     
 .text
     b main

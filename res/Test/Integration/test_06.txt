@@ -27,10 +27,6 @@ TESTCASES
 1 1 25
 OUTPUT
 /* --test_06.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 mult:                         /* Function: mult */
     push { r3, r4, r5, r6, r7, r8, fp }

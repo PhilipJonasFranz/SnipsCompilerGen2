@@ -14,10 +14,6 @@ TESTCASES
 0 1 1
 OUTPUT
 /* --test_03.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 getDiff_P0:                   /* Function: getDiff, Provisos: INT, INT */
     push { r3, r4, r5, r6, fp, lr }

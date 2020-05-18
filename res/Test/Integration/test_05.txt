@@ -19,10 +19,6 @@ TESTCASES
 78
 OUTPUT
 /* --test_05.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 det:                          /* Function: det */
     push { fp }

@@ -16,10 +16,6 @@ TESTCASES
 10
 OUTPUT
 /* --test_00.txt */
-.data
-HEAP_START: .word 0
-    
-.text
 main:                         /* Function: main */
     mov fp, sp
     mov r0, #10               /* Evaluate Expression */

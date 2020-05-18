@@ -17,10 +17,6 @@ TESTCASES
 10
 OUTPUT
 /* --test_19.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 set:                          /* Function: set */
     push { r3 }

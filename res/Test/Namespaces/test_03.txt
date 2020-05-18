@@ -18,7 +18,6 @@ OUTPUT
 .data
 Foo.x: .word 10
 Foo.y: .word 15
-HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */

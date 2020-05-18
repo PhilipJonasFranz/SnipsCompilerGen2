@@ -16,10 +16,6 @@ TESTCASES
 2 2 2 2 2 20
 OUTPUT
 /* --test_04.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 sq:                           /* Function: sq */
     push { r3 }

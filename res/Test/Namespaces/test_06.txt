@@ -19,7 +19,6 @@ OUTPUT
 /* --test_06.txt */
 .data
 Baz.x: .word 16
-HEAP_START: .word 0
     
 .text
     b main

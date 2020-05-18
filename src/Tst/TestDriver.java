@@ -62,7 +62,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -264,6 +264,7 @@ public class TestDriver {
 	
 	@SuppressWarnings("deprecation")
 	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer, List<String> content) throws InterruptedException {
+		CompilerDriver.reset();
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
 		

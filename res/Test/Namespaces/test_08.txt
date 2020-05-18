@@ -10,10 +10,6 @@ TESTCASES
 40
 OUTPUT
 /* --test_08.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 Test.foo:                     /* Function: Test.foo */
     push { r3 }

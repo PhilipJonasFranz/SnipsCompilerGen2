@@ -17,10 +17,6 @@ TESTCASES
 10 55
 OUTPUT
 /* --test_00.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 fib_P0:                       /* Function: fib, Provisos: INT */
     push { r3, fp, lr }

@@ -14,10 +14,6 @@ TESTCASES
 32
 OUTPUT
 /* --test_03.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 vecProd:                      /* Function: vecProd */
     push { fp }

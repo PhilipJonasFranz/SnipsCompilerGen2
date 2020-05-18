@@ -15,10 +15,6 @@ TESTCASES
 1 1 25
 OUTPUT
 /* --test_02.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
     
 mult:                         /* Function: mult */

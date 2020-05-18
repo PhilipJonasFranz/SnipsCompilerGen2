@@ -19,10 +19,6 @@ TESTCASES
 0 0
 OUTPUT
 /* --test_03.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 foo:                          /* Function: foo */
     push { r3 }

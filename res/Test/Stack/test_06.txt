@@ -20,10 +20,6 @@ TESTCASES
 2 65
 OUTPUT
 /* --test_06.txt */
-.data
-HEAP_START: .word 0
-    
-.text
 main:                         /* Function: main */
     push { r3, r4, r5, r6, r7, r8, r9, r10 }
     mov fp, sp

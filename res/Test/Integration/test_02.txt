@@ -20,10 +20,6 @@ TESTCASES
 10 4
 OUTPUT
 /* --test_02.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 log2:                         /* Function: log2 */
     push { r3, fp, lr }

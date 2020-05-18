@@ -16,10 +16,6 @@ TESTCASES
 5 120
 OUTPUT
 /* --test_01.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 fac:                          /* Function: fac */
     push { r3, fp, lr }

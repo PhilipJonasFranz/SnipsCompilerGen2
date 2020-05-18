@@ -32,7 +32,6 @@ OUTPUT
 .data
 Foo.x: .word 15
 Foo.Baz.x: .word 10
-HEAP_START: .word 0
     
 .text
     b main

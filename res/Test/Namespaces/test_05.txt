@@ -20,7 +20,6 @@ OUTPUT
 Foo.k: .word 10
 Foo.x: .word 20
 Foo.Bar.x: .word 16
-HEAP_START: .word 0
     
 .text
 main:                         /* Function: main */

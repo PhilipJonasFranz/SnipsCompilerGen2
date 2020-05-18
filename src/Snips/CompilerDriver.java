@@ -141,6 +141,10 @@ public class CompilerDriver {
 		this.readConfig();
 	}
 	
+	public static void reset() {
+		heap_referenced = false;
+	}
+	
 	
 			/* --- METHODS --- */
 	public void readConfig() {

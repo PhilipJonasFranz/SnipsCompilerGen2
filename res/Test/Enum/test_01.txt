@@ -16,10 +16,6 @@ TESTCASES
 20
 OUTPUT
 /* --test_01.txt */
-.data
-HEAP_START: .word 0
-    
-.text
 main:                         /* Function: main */
     push { r3 }
     mov r0, #1                /* Evaluate Expression */

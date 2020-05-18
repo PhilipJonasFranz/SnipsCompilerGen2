@@ -21,10 +21,6 @@ TESTCASES
 1 2 3 4 48
 OUTPUT
 /* --test_08.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
 foo:                          /* Function: foo */
     push { r3, r4 }
