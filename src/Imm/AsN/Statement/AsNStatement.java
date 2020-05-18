@@ -13,6 +13,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AsN.AsNNode;
@@ -49,6 +50,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof SwitchStatement) {
 			node = AsNSwitchStatement.cast((SwitchStatement) s, r, map, st); 
+		}
+		else if (s instanceof SignalStatement) {
+			node = AsNSignalStatement.cast((SignalStatement) s, r, map, st); 
 		}
 		else if (s instanceof Comment) {
 			node = AsNComment.cast((Comment) s, r, map, st); 

@@ -219,11 +219,12 @@ List.create_P0:               /* Function: List.create, Provisos: INT* */
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
     
+    
 /* Check if given list contains given value. */
     
 /* Finds the first node in the list that has given value. */
 /* Returns a pointer to this list node, or 0 in case the */
-/* value wasnt found. Frees the removed node of the heap. */
+/* value wasnt found. */
     
 /* Returns the amount of elements stored in the list. */
     

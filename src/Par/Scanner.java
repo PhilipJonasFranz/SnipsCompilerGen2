@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import Exc.SNIPS_EXCEPTION;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Source;
@@ -21,7 +22,8 @@ public class Scanner {
 	}
 	
 	public LinkedList<Token> scan() {
-		ScannerFSM sFSM = new ScannerFSM(new LinkedList());
+		
+		ScannerFSM sFSM = new ScannerFSM(new LinkedList(), progress);
 		
 		for (int i = 0; i < input.size(); i++) {
 			input.get(i).line = input.get(i).line.replace("\t", "    ");
@@ -54,7 +56,7 @@ public class Scanner {
 		 * Defines the current accumulation state of the scanner.
 		 */
 		private enum ACC_STATE {
-			NONE, ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
+			NONE, ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
@@ -65,8 +67,11 @@ public class Scanner {
 		
 		private String buffer = "";
 		
-		public ScannerFSM(LinkedList<Token> tokens) {
+		private ProgressMessage progress;
+		
+		public ScannerFSM(LinkedList<Token> tokens, ProgressMessage progress) {
 			this.tokens = tokens;
+			this.progress = progress;
 		}
 		
 		public boolean readChar(char c, int i, int a, String fileName) {
@@ -253,6 +258,14 @@ public class Scanner {
 				tokens.add(new Token(TokenType.SIZEOF, new Source(fileName, i, a)));
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("try")) {
+				tokens.add(new Token(TokenType.TRY, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("watch")) {
+				tokens.add(new Token(TokenType.WATCH, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("\\")) {
 				tokens.add(new Token(TokenType.BACKSL, new Source(fileName, i, a)));
 				this.emptyBuffer();
@@ -367,6 +380,18 @@ public class Scanner {
 				this.state = ACC_STATE.ENUM_ID;
 				return true;
 			}
+			else if (this.buffer.startsWith("signal")) {
+				if (this.buffer.length() == 6)return false;
+				if (this.buffer.equals("signals")) {
+					tokens.add(new Token(TokenType.SIGNALS, new Source(fileName, i, a)));
+					this.emptyBuffer();
+				}
+				else {
+					tokens.add(new Token(TokenType.SIGNAL, new Source(fileName, i, a - this.buffer.length())));
+					this.buffer = this.buffer.substring(this.buffer.length() - 1);
+					this.checkState(i, a, fileName);
+				}
+			}
 			else if (this.buffer.startsWith("|")) {
 				if (this.buffer.length() == 1)return false;
 				if (this.buffer.equals("||")) {
@@ -449,8 +474,17 @@ public class Scanner {
 						this.state = ACC_STATE.ID;
 					}
 				}
-				else if (this.buffer.matches("[0-9]+")) {
+				
+				if (this.buffer.matches(int_match)) {
 					this.state = ACC_STATE.INT;
+				}
+				
+				if (this.buffer.matches(bin_match)) {
+					this.state = ACC_STATE.BIN_INT;
+				}
+				
+				if (this.buffer.matches(hex_match)) {
+					this.state = ACC_STATE.HEX_INT;
 				}
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
@@ -509,8 +543,54 @@ public class Scanner {
 				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) {
 					this.state = ACC_STATE.NONE;
 				}
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("[0-9]+")) && this.state == ACC_STATE.INT) {
-					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), this.buffer.substring(0, this.buffer.length() - 1)));
+				
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches(int_match)) && this.state == ACC_STATE.INT) {
+					String lit = this.buffer.substring(0, this.buffer.length() - 1);
+					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
+					this.buffer = this.buffer.substring(this.buffer.length() - 1);
+					this.state = ACC_STATE.NONE;
+					this.checkState(i, a, fileName);
+				}
+				else if ((this.buffer.endsWith(" ") || !this.buffer.matches(hex_match)) && this.state == ACC_STATE.HEX_INT) {
+					String lit = this.buffer.substring(0, this.buffer.length() - 1);
+					
+					if (lit.length() < 3) {
+						this.progress.abort();
+						throw new SNIPS_EXCEPTION("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
+					}
+					
+					lit = lit.substring(2);
+					String [] sp = lit.split("");
+					int s = 0;
+					for (int k = 0; k < sp.length; k++) {
+						s += Math.pow(16, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 16);
+					}
+				
+					lit = s + "";
+					
+					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
+					this.buffer = this.buffer.substring(this.buffer.length() - 1);
+					this.state = ACC_STATE.NONE;
+					this.checkState(i, a, fileName);
+				}
+				else if ((this.buffer.endsWith(" ") || !this.buffer.matches(bin_match)) && this.state == ACC_STATE.BIN_INT) {
+					String lit = this.buffer.substring(0, this.buffer.length() - 1);
+					
+					if (lit.length() < 3) {
+						this.progress.abort();
+						throw new SNIPS_EXCEPTION("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
+					}
+					
+					lit = lit.substring(2);
+					String [] sp = lit.split("");
+					int s = 0;
+					for (int k = 0; k < sp.length; k++) {
+						s += Math.pow(2, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 2);
+					}
+					
+					lit = s + "";
+					
+					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
 					this.checkState(i, a, fileName);
@@ -525,5 +605,10 @@ public class Scanner {
 		}
 		
 	}
+	
+			/* --- REGEXES --- */
+	public static String int_match = "[0-9]+";
+	public static String hex_match = "hx([0-9]|[a-f]|[A-F])+";
+	public static String bin_match = "bx[0-1]+";
 	
 }

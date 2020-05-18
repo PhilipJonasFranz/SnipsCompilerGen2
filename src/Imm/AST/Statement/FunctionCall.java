@@ -5,6 +5,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -14,6 +15,8 @@ import Util.Source;
 public class FunctionCall extends Statement {
 
 			/* --- FIELDS --- */
+	public SyntaxElement watchpoint;
+	
 	public NamespacePath path;
 	
 	public Function calledFunction;

@@ -35,5 +35,6 @@ main:                         /* Function: main */
     add r0, r1, r2
     mov sp, fp
     pop { r3, r4, r5, fp }
+    add sp, sp, #8
     bx lr
     

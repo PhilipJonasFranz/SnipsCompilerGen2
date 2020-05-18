@@ -14,18 +14,21 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMMemOp;
-import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.ASMBinaryData;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.PatchableImmOperand;
@@ -45,6 +48,8 @@ public class AsNFunction extends AsNCompoundStatement {
 	
 	public Function source;
 	
+	public ASMLabel copyLoopEscape;
+	
 	
 			/* --- METHODS --- */
 	/**
@@ -57,6 +62,8 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		LabelGen.reset();
 		LabelGen.funcPrefix = f.path.build();
+		
+		if (f.signals) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
 		
 		List<ASMInstruction> all = new ArrayList();
 		
@@ -154,7 +161,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REGISTER> used = func.getUsed();
 			
 			
-			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1) {
+			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
 				else {
@@ -181,21 +188,32 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Patch offset based on amount of pushed registers excluding LR and FP */
 			func.patchFramePointerAddressing(push.operands.size() * 4);
 			
-			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1) {
+			/* If function signals exceptions, add escape target for exceptions to jump to */
+			if (f.signals) {
+				func.instructions.add(func.copyLoopEscape);
+			}
+			
+			ASMPopStack pop = null;
+			
+			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
 				/* Add centralized stack reset and register restoring */
 				func.instructions.add(funcReturn);
 				
-				ASMPopStack pop = new ASMPopStack();
-				used.stream().forEach(x -> pop.operands.add(new RegOperand(x)));
+				/* Check if exception was thrown */
+				if (f.signals) func.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
 				
-				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1) {
-					if (f.getReturnType().wordsize() > 1) {
+				pop = new ASMPopStack();
+				for (REGISTER reg : used) pop.operands.add(new RegOperand(reg));
+				
+				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
+					/* Backup SP in R2 */
+					if (f.getReturnType().wordsize() > 1 || f.signals) {
 						func.instructions.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.SP)));
 					}
 					
 					func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
 				
-					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1) {
+					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
 						/* Need to restore registers */
 						pop.operands.add(new RegOperand(REGISTER.FP));
 						if (hasCall) pop.operands.add(new RegOperand(REGISTER.LR));
@@ -206,13 +224,45 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(pop);
 			}
 			
-			if (f.getReturnType().wordsize() > 1) {
-				ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4));
-				sub.comment = new ASMComment("Copy return value from stack");
-				func.instructions.add(sub);
+			int size = 0;
+			for (Pair<Declaration, Integer> p  : func.getParameterMapping()) {
+				if (p.getSecond() == -1) {
+					/* Stack shrinks by parameter word size */
+					size += p.getFirst().getType().wordsize();
+				}
+			}
+			
+			if (size != 0) {
+				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
+			}
+			
+			ASMLabel singleWordSkip = new ASMLabel(LabelGen.getLabel());
+			if (f.getReturnType().wordsize() == 1 && f.signals) {
+				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(singleWordSkip)));
+			}
+			
+			if (f.getReturnType().wordsize() > 1 || f.signals) {
+				if (f.signals && f.getReturnType().wordsize() > 1) {
+					/* 
+					 * No exception, move word size of return type in R0, if execption 
+					 * were thrown, the word size would already be in R0 
+					 */
+					func.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4), new Cond(COND.EQ)));
+				}
+				else if (f.getReturnType().wordsize() > 1) {
+					/* Function does not signal, move word size of return type in R0 */
+					func.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4)));
+				}
+				
+				/* End address of return in stack */
+				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 				
 				/* Copy the data from the top of the stack to the return stack location */
-				copyReturnStack(f.getReturnType().wordsize(), func, st);
+				copyReturnStack(func, st);
+			}
+			
+			if (f.getReturnType().wordsize() == 1 && f.signals) {
+				func.instructions.add(singleWordSkip);
 			}
 			
 			/* Branch back */
@@ -240,7 +290,8 @@ public class AsNFunction extends AsNCompoundStatement {
 		for (int i = 0; i < this.instructions.size(); i++) {
 			if (this.instructions.get(i) instanceof ASMBranch) {
 				ASMBranch branch = (ASMBranch) this.instructions.get(i);
-				if (branch.type == BRANCH_TYPE.BX) {
+				/* Only patch bx and instructions that are not part of exceptional exit */
+				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
 					branch.target = new LabelOperand(funcReturn);
 				}
@@ -310,7 +361,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * @return
 	 */
 	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
+		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
 		List<REGISTER> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {
@@ -361,19 +412,38 @@ public class AsNFunction extends AsNCompoundStatement {
 	}
 	
 	/**
-	 * Assumes that the base address of the array or the start address of the memory section is located in R1, and the backup SP in R2.
+	 * Assumes that the wordsize to copy is located in R0, the end base address of the array or the start 
+	 * address of the memory section in R1.
 	 * Pops the word it copies of the stack.
 	 * @param size The amound of words to copy.
 	 * @throws CGEN_EXCEPTION 
 	 */
-	public static void copyReturnStack(int size, AsNNode node, StackSet st) throws CGEN_EXCEPTION {
-		/* Do it sequentially for 8 or less words to copy */
-		int offset = 0;
-		for (int a = 0; a < size; a++) {
-			node.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2), new ImmOperand(offset)));
-			node.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
-			offset += 4;
-		}
+	public static void copyReturnStack(AsNNode node, StackSet st) throws CGEN_EXCEPTION {
+		ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
+		loopStart.comment = new ASMComment("Copy stack return with loop");
+		
+		node.instructions.add(loopStart);
+		
+		ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
+		
+		/* Check if whole sub array was loaded */
+		node.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+		
+		/* Branch to loop end */
+		node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
+		
+		node.instructions.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
+		
+		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2)));
+		
+		
+		/* Decrement counter */
+		node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(4)));
+		
+		/* Branch to loop start */
+		node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
+		
+		node.instructions.add(loopEnd);
 	}
 
 }

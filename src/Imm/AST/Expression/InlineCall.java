@@ -5,6 +5,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -13,6 +14,8 @@ import Util.Source;
 public class InlineCall extends Expression {
 
 			/* --- FIELDS --- */
+	public SyntaxElement watchpoint;
+	
 	public NamespacePath path;
 	
 	/** Reference to the AST node of the called function */

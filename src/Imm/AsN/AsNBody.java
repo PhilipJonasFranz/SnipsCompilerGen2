@@ -116,7 +116,11 @@ public class AsNBody extends AsNNode {
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
-				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, new StackSet()).getInstructions();
+				StackSet st = new StackSet();
+				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, st).getInstructions();
+				
+				/* Ensure that stack was emptied, so no stack shift at compile time occurred */
+				assert(st.getStack().isEmpty());
 				
 				if (!ins.isEmpty()) {
 					/* Patch Branch to Main Function */

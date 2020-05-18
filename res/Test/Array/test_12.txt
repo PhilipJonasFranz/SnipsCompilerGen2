@@ -67,6 +67,7 @@ add:                          /* Function: add */
     add r0, r1, r2
     mov sp, fp
     pop { fp }
+    add sp, sp, #16
     bx lr
     
 main:                         /* Function: main */
@@ -85,7 +86,6 @@ main:                         /* Function: main */
     ldr r0, [fp, #-16]
     push { r0 }
     bl add                    /* Call add */
-    add sp, sp, #16
     mov sp, fp
     pop { fp, lr }
     bx lr
