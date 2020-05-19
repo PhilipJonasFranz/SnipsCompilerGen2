@@ -52,6 +52,17 @@ HEAP_START: .word 0
     
 .text
     b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
 /* Loads the size of the memory block that given pointer points to. */
 /* The pointer must point on a heap object for the method to work. */
 hsize:                        /* Function: hsize */
@@ -233,14 +244,8 @@ checkThreshold.L8:
     pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     beq checkThreshold.L9
     add r1, r2, r0
-checkThreshold.L10:           /* Copy stack return with loop */
-    cmp r0, #0
-    beq checkThreshold.L11
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b checkThreshold.L10
-checkThreshold.L11: 
+    add r10, pc, #8
+    b _routine_stack_copy_
 checkThreshold.L9: 
     bx lr
     
@@ -288,14 +293,8 @@ main.L0:
     bne main.L2
     add r1, r1, #4
     mov r0, #4
-main.L3:                      /* Copy stack return with loop */
-    cmp r0, #0
-    beq main.L4
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b main.L3
-main.L4: 
+    add r10, pc, #8
+    b _routine_stack_copy_
     sub r1, fp, #4            /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
     mov r5, r0

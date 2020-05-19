@@ -26,6 +26,17 @@ TESTCASES
 OUTPUT
 /* --test_09.txt */
     b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
 baz:                          /* Function: baz */
     push { fp }
     mov fp, sp
@@ -40,14 +51,8 @@ baz:                          /* Function: baz */
     pop { fp }
     mov r0, #8
     add r1, r2, #8
-baz.L2:                       /* Copy stack return with loop */
-    cmp r0, #0
-    beq baz.L3
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b baz.L2
-baz.L3: 
+    add r10, pc, #8
+    b _routine_stack_copy_
     bx lr
     
 foo:                          /* Function: foo */
@@ -66,14 +71,8 @@ foo:                          /* Function: foo */
     pop { r3, fp }
     mov r0, #8
     add r1, r2, #8
-foo.L2:                       /* Copy stack return with loop */
-    cmp r0, #0
-    beq foo.L3
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b foo.L2
-foo.L3: 
+    add r10, pc, #8
+    b _routine_stack_copy_
     bx lr
     
 main:                         /* Function: main */

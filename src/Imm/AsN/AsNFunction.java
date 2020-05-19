@@ -14,15 +14,12 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMMemOp;
-import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
-import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
@@ -258,7 +255,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
 				
 				/* Copy the data from the top of the stack to the return stack location */
-				copyReturnStack(func, st);
+				AsNBody.branchToCopyRoutine(func);
 			}
 			
 			if (f.getReturnType().wordsize() == 1 && f.signals) {
@@ -411,39 +408,4 @@ public class AsNFunction extends AsNCompoundStatement {
 		return mapping;
 	}
 	
-	/**
-	 * Assumes that the wordsize to copy is located in R0, the end base address of the array or the start 
-	 * address of the memory section in R1.
-	 * Pops the word it copies of the stack.
-	 * @param size The amound of words to copy.
-	 * @throws CGEN_EXCEPTION 
-	 */
-	public static void copyReturnStack(AsNNode node, StackSet st) throws CGEN_EXCEPTION {
-		ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
-		loopStart.comment = new ASMComment("Copy stack return with loop");
-		
-		node.instructions.add(loopStart);
-		
-		ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
-		
-		/* Check if whole sub array was loaded */
-		node.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
-		
-		/* Branch to loop end */
-		node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
-		
-		node.instructions.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
-		
-		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2)));
-		
-		
-		/* Decrement counter */
-		node.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(4)));
-		
-		/* Branch to loop start */
-		node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
-		
-		node.instructions.add(loopEnd);
-	}
-
 }

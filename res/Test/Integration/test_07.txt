@@ -173,13 +173,13 @@ resv.L18:
 /* Multiplicate the given matricies. Both matricies have to have the given */
 /* dimension. Returns a pointer to the resulting matrix. */
 __mat_mult:                   /* Function: __mat_mult */
-    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
     mov r1, r5                /* Evaluate Expression */
-    ldr r2, [fp, #40]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     bl resv                   /* Call resv */
     mov r6, r0
@@ -192,28 +192,29 @@ __mat_mult.L1:
     mov r8, #0
 __mat_mult.L4: 
     mov r0, r8
-    ldr r1, [fp, #40]
+    ldr r1, [fp, #36]
     cmp r0, r1
     bge __mat_mult.L5
     mov r9, #0
     mov r0, #0                /* Evaluate Expression */
-    mov r10, #0
+    push { r0 }
 __mat_mult.L7: 
-    mov r0, r10
-    ldr r1, [fp, #40]
+    ldr r0, [fp, #-4]
+    ldr r1, [fp, #36]
     cmp r0, r1
     bge __mat_mult.L8
     mov r1, r7                /* Evaluate Expression */
-    ldr r2, [fp, #40]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r3, r2
-    add r0, r1, r10
+    ldr r2, [fp, #-4]
+    add r0, r1, r2
     lsl r0, r0, #2            /* Convert to bytes */
     ldr r0, [r0]              /* Load from address */
     push { r0 }
-    mov r1, r10
-    ldr r2, [fp, #40]
+    ldr r1, [fp, #-4]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r4, r2
@@ -224,14 +225,16 @@ __mat_mult.L7:
     pop { r1 }
     mul r0, r1, r2
     add r9, r9, r0
-    mov r0, r10
-    add r10, r0, #1
+    ldr r0, [fp, #-4]
+    add r1, r0, #1
+    str r1, [fp, #-4]
     b __mat_mult.L7
 __mat_mult.L8: 
+    add sp, sp, #4
     mov r0, r9                /* Evaluate Expression */
     push { r0 }
     mov r1, r7
-    ldr r2, [fp, #40]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r6, r2
@@ -249,7 +252,7 @@ __mat_mult.L5:
 __mat_mult.L2: 
     mov r0, r6                /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     add sp, sp, #4
     bx lr
     

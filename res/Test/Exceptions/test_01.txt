@@ -45,6 +45,17 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
     b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
 get:                          /* Function: get */
     push { r3, r4, r5, r6, fp }
     mov fp, sp
@@ -74,14 +85,8 @@ get.L3:
     pop { r3, r4, r5, r6, fp }
     beq get.L4
     add r1, r2, r0
-get.L5:                       /* Copy stack return with loop */
-    cmp r0, #0
-    beq get.L6
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b get.L5
-get.L6: 
+    add r10, pc, #8
+    b _routine_stack_copy_
 get.L4: 
     bx lr
     
@@ -98,14 +103,8 @@ throw:                        /* Function: throw */
     pop { fp }
     beq throw.L2
     add r1, r2, r0
-throw.L3:                     /* Copy stack return with loop */
-    cmp r0, #0
-    beq throw.L4
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b throw.L3
-throw.L4: 
+    add r10, pc, #8
+    b _routine_stack_copy_
 throw.L2: 
     bx lr
     
@@ -143,14 +142,8 @@ main.L0:
     bne main.L2
     add r1, r1, #8
     mov r0, #8
-main.L3:                      /* Copy stack return with loop */
-    cmp r0, #0
-    beq main.L4
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b main.L3
-main.L4: 
+    add r10, pc, #8
+    b _routine_stack_copy_
     sub r1, fp, #20           /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
     mov r1, r0
@@ -168,24 +161,18 @@ main.L4:
     b main.L1
 main.L2: 
     cmp r12, #1
-    bne main.L5
+    bne main.L3
     add r1, r1, #4
     mov r0, #4
-main.L6:                      /* Copy stack return with loop */
-    cmp r0, #0
-    beq main.L7
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b main.L6
-main.L7: 
+    add r10, pc, #8
+    b _routine_stack_copy_
     sub r1, fp, #16           /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
     mov r4, r0
     add sp, sp, #4
     mov r12, #0
     b main.L1
-main.L5: 
+main.L3: 
 main.L1: 
     mov r0, r4                /* Evaluate Expression */
     mov sp, fp

@@ -30,6 +30,8 @@ public abstract class ASMInstruction {
 		
 		EXC_EXIT,
 		
+		SYS_JMP,
+		
 		FUNC_CLEAN;
 	}
 	

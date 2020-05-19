@@ -59,8 +59,8 @@ public class PreProcessor {
 					i--;
 				} 
 				else {
-					new Message("PREP -> Found line: " + line + ", but cannot resolve! Ensure correct syntax.", Message.Type.WARN);
-					new Message("PREP -> Import Manager may be able to resolve import. Verify output.", Message.Type.WARN);
+					new Message("PRE0 -> Found line: " + line + ", but cannot resolve! Ensure correct syntax.", Message.Type.WARN);
+					new Message("PRE0 -> Import Manager may be able to resolve import. Verify output.", Message.Type.WARN);
 				}
 			}
 		}

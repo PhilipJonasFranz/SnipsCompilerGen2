@@ -377,7 +377,7 @@ String.equals.L2:
 /* Valid inputs for the ranges can be negative numbers and indexes out of bounds, */
 /* but result may not be as expected. */
 String.substring:             /* Function: String.substring */
-    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -465,24 +465,29 @@ String.substring.L5:
     bl resv                   /* Call resv */
     mov r9, r0
     mov r0, #0                /* Evaluate Expression */
-    mov r10, #0
+    push { r0 }
 String.substring.L8: 
-    cmp r10, r8
+    ldr r0, [fp, #-4]
+    cmp r0, r8
     bge String.substring.L9
-    mov r0, r10               /* Evaluate Expression */
+    ldr r0, [fp, #-4]         /* Evaluate Expression */
     push { r0 }
     mov r0, r6
     pop { r1 }
     bl List.get_P2            /* Call List.get */
     push { r0 }
-    add r0, r9, r10
+    mov r1, r9
+    ldr r2, [fp, #-4]
+    add r0, r1, r2
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r0, r10
-    add r10, r0, #1
+    ldr r0, [fp, #-4]
+    add r1, r0, #1
+    str r1, [fp, #-4]
     b String.substring.L8
 String.substring.L9: 
+    add sp, sp, #4
     mov r0, #0                /* Evaluate Expression */
     push { r0 }
     add r0, r9, r8
@@ -495,7 +500,7 @@ String.substring.L9:
     mov r0, r9                /* Evaluate Expression */
 String.substring.L10: 
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     bx lr
     
 /* Returns the length of the string. The length is determined by the first */
