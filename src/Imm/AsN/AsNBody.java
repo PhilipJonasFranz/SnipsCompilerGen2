@@ -258,7 +258,9 @@ public class AsNBody extends AsNNode {
 		/* Mark routine as used */
 		AsNBody.usedStackCopyRoutine = true;
 		
-		node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R10), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+		ASMAdd add = new ASMAdd(new RegOperand(REGISTER.R10), new RegOperand(REGISTER.PC), new ImmOperand(8));
+		add.comment = new ASMComment("Setup return address for routine");
+		node.instructions.add(add);
 		
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(AsNBody.stackCopyRoutine));
 		
