@@ -51,7 +51,7 @@ baz:                          /* Function: baz */
     pop { fp }
     mov r0, #8
     add r1, r2, #8
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
     bx lr
     
@@ -71,7 +71,7 @@ foo:                          /* Function: foo */
     pop { r3, fp }
     mov r0, #8
     add r1, r2, #8
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
     bx lr
     

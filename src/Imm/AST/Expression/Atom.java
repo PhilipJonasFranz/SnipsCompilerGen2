@@ -32,7 +32,7 @@ public class Atom extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "<" + this.getType().typeString() + ">");
+		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

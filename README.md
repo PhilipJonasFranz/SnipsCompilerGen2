@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.3.0.2-RELEASE
+# Snips Compiler Gen.2 v.3.0.3-RELEASE
 ## Some words in advance
  This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not though for any production environment. The project and all its included modules are still under development and are subject to change.
  
@@ -66,7 +66,6 @@ All instructions do support the condition field. If you compile your assembly co
  - Increment and Decrement not working for Struct Select Assign, Array Select Assign and Pointer Assign
  - Unprecise error messages related to proviso type errors
  - Unprecise error messages related to incorrect struct names while parsing
- - Literals that exceed bit length limit of asm instruction are not handled properly
  
 ## License & Copyright
  © Philip Jonas Franz

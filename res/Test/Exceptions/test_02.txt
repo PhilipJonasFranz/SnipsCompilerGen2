@@ -103,7 +103,7 @@ get.L5:
     pop { r3, r4, r5, r6, r7, fp }
     beq get.L6
     add r1, r2, r0
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
 get.L6: 
     bx lr
@@ -135,7 +135,7 @@ relay.L1:
     bne relay.L3
     add r1, r1, #4
     mov r0, #4
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
     sub r1, fp, #4            /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
@@ -160,7 +160,7 @@ relay.L4:
     pop { r3, r4, r5, r6, fp, lr }
     beq relay.L5
     add r1, r2, r0
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
 relay.L5: 
     bx lr
@@ -195,7 +195,7 @@ main.L0:
     bne main.L2
     add r1, r1, #8
     mov r0, #8
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
     sub r1, fp, #20           /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */

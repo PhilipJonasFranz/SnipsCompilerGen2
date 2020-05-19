@@ -4,10 +4,8 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.RegOperand;
 import Imm.AST.Expression.Atom;
+import Imm.AsN.AsNBody;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNAtom extends AsNExpression {
@@ -22,7 +20,8 @@ public class AsNAtom extends AsNExpression {
 		/* Make sure only primitives can be in an atom */
 		assert(a.getType() instanceof PRIMITIVE);
 		
-		atom.instructions.add(new ASMMov(new RegOperand(target), new ImmOperand(Integer.parseInt(a.getType().sourceCodeRepresentation()))));
+		/* Load value via literal manager, directley or via label */
+		AsNBody.literalManager.loadValue(atom, Integer.parseInt(a.getType().sourceCodeRepresentation()), target);
 		
 		return atom;
 	}

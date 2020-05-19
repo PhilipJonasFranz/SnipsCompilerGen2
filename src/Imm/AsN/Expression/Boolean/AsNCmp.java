@@ -14,6 +14,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
+import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.TYPE;
@@ -39,7 +40,14 @@ public class AsNCmp extends AsNBinaryExpression {
 			cmp.instructions.addAll(AsNExpression.cast(c.getLeft(), r, map, st).getInstructions());
 			
 			TYPE t = ((Atom) c.getRight()).getType();
-			cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(Integer.parseInt(t.sourceCodeRepresentation()))));
+			
+			if (Integer.parseInt(t.sourceCodeRepresentation()) < 255) {
+				cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(Integer.parseInt(t.sourceCodeRepresentation()))));
+			}
+			else {
+				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.sourceCodeRepresentation()), 1);
+				cmp.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+			}
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */

@@ -244,7 +244,7 @@ checkThreshold.L8:
     pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     beq checkThreshold.L9
     add r1, r2, r0
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
 checkThreshold.L9: 
     bx lr
@@ -293,7 +293,7 @@ main.L0:
     bne main.L2
     add r1, r1, #4
     mov r0, #4
-    add r10, pc, #8
+    add r10, pc, #8           /* Setup return address for routine */
     b _routine_stack_copy_
     sub r1, fp, #4            /* Evaluate Expression */
     ldr r0, [r1]              /* Load field from struct */
