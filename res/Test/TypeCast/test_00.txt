@@ -9,7 +9,7 @@ TESTCASES
 -1 -1
 OUTPUT
 /* --test_00.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
     mov r3, r0
     pop { r3 }

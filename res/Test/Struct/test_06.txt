@@ -13,20 +13,20 @@ TESTCASES
 13
 OUTPUT
 /* --test_06.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #5                /* Evaluate Expression */
+    mov r0, #5                               /* Evaluate Expression */
     mov r1, #3
     push { r1, r0 }
-    mov r0, #8                /* Evaluate Expression */
+    mov r0, #8                               /* Evaluate Expression */
     sub r1, fp, #8
-    str r0, [r1]              /* Store value to struct field */
-    sub r1, fp, #8            /* Evaluate Expression */
-    ldr r0, [r1]              /* Load field from struct */
+    str r0, [r1]                             /* Store value to struct field */
+    sub r1, fp, #8                           /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
-    sub r1, fp, #8            /* Load field location */
+    sub r1, fp, #8                           /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

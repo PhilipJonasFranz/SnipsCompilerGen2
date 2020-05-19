@@ -6,7 +6,7 @@ TESTCASES
 3
 OUTPUT
 /* --test_01.txt */
-main:                         /* Function: main */
-    mov r0, #3                /* Evaluate Expression */
+main:                                        /* Function: main */
+    mov r0, #3                               /* Evaluate Expression */
     bx lr
     

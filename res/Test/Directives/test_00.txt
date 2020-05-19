@@ -12,50 +12,50 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-__op_div:                     /* Function: __op_div */
+__op_div:                                    /* Function: __op_div */
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
-__op_div.L1:                  /* Evaluate condition */
+__op_div.L1:                                 /* Evaluate condition */
     cmp r3, r4
     blt __op_div.L2
     sub r3, r3, r4
-    mov r1, r5                /* Evaluate Expression */
+    mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r5, r0
     b __op_div.L1
 __op_div.L2: 
-    mov r0, r5                /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
     pop { r3, r4, r5 }
     bx lr
     
-foo:                          /* Function: foo */
+foo:                                         /* Function: foo */
     push { r3 }
     mov r3, r0
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, #4
     mul r0, r1, r2
     pop { r3 }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
     cmp r3, #2
     bne main.L0
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     mov r3, #3
 main.L0: 
-    mov r0, #2                /* Evaluate Expression */
+    mov r0, #2                               /* Evaluate Expression */
     push { r0 }
-    mov r0, r3                /* Load parameters */
-    bl foo                    /* Call foo */
+    mov r0, r3                               /* Load parameters */
+    bl foo                                   /* Call foo */
     pop { r1 }
-    bl __op_div               /* Call __op_div */
+    bl __op_div                              /* Call __op_div */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

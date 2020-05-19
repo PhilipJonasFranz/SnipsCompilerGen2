@@ -20,10 +20,10 @@ TESTCASES
 OUTPUT
 /* --test_05.txt */
     b main
-det:                          /* Function: det */
+det:                                         /* Function: det */
     push { fp }
     mov fp, sp
-    mov r2, #0                /* Evaluate Expression */
+    mov r2, #0                               /* Evaluate Expression */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -33,7 +33,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -46,7 +46,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -59,7 +59,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -69,7 +69,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -82,7 +82,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -98,7 +98,7 @@ det:                          /* Function: det */
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -108,7 +108,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -121,7 +121,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -137,7 +137,7 @@ det:                          /* Function: det */
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -147,7 +147,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -160,7 +160,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -176,7 +176,7 @@ det:                          /* Function: det */
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -186,7 +186,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -199,7 +199,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -215,7 +215,7 @@ det:                          /* Function: det */
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -225,7 +225,7 @@ det:                          /* Function: det */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #12
     mul r0, r0, r1
@@ -238,7 +238,7 @@ det:                          /* Function: det */
     pop { r1 }
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1
@@ -258,10 +258,10 @@ det:                          /* Function: det */
     add sp, sp, #36
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #4                /* Evaluate Expression */
+    mov r0, #4                               /* Evaluate Expression */
     mov r1, #0
     mov r2, #1
     push { r2, r1, r0 }
@@ -273,7 +273,7 @@ main:                         /* Function: main */
     mov r1, #6
     mov r2, #3
     push { r2, r1, r0 }
-    ldr r0, [fp, #-4]         /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     ldr r2, [fp, #-12]
     push { r2, r1, r0 }
@@ -285,7 +285,7 @@ main:                         /* Function: main */
     ldr r1, [fp, #-32]
     ldr r2, [fp, #-36]
     push { r2, r1, r0 }
-    bl det                    /* Call det */
+    bl det                                   /* Call det */
     mov sp, fp
     pop { fp, lr }
     bx lr

@@ -22,49 +22,49 @@ TESTCASES
 7 10
 OUTPUT
 /* --test_06.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6 }
     mov r3, r0
     mov r4, r1
     mov r5, r2
     cmp r3, #1
     bne main.L0
-    mov r0, #2                /* Evaluate Expression */
+    mov r0, #2                               /* Evaluate Expression */
     b main.L14
 main.L0: 
     cmp r3, #1
     bne main.L2
-    mov r0, #12               /* Evaluate Expression */
+    mov r0, #12                              /* Evaluate Expression */
     b main.L14
 main.L2: 
     cmp r3, #2
     bne main.L4
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #1                               /* Evaluate Expression */
     b main.L14
 main.L4: 
     cmp r3, #3
     bne main.L7
     mov r6, #4
-    mov r0, #4                /* Evaluate Expression */
+    mov r0, #4                               /* Evaluate Expression */
     b main.L14
 main.L7: 
     mov r6, r0
     cmp r3, #4
     bne main.L8
-    mov r0, #8                /* Evaluate Expression */
+    mov r0, #8                               /* Evaluate Expression */
     b main.L14
 main.L8: 
     cmp r3, #5
     bne main.L11
-    mov r0, #7                /* Evaluate Expression */
+    mov r0, #7                               /* Evaluate Expression */
     b main.L14
 main.L11: 
     cmp r3, #6
     bne main.L13
-    mov r0, #9                /* Evaluate Expression */
+    mov r0, #9                               /* Evaluate Expression */
     b main.L14
 main.L13: 
-    mov r0, #10               /* Evaluate Expression */
+    mov r0, #10                              /* Evaluate Expression */
 main.L14: 
     pop { r3, r4, r5, r6 }
     bx lr

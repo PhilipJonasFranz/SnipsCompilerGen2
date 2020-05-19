@@ -17,7 +17,7 @@ TESTCASES
 OUTPUT
 /* --test_10.txt */
     b main
-bar:                          /* Function: bar */
+bar:                                         /* Function: bar */
     push { fp }
     mov fp, sp
     mov r2, #8
@@ -29,32 +29,32 @@ bar:                          /* Function: bar */
     add sp, sp, #12
     bx lr
     
-foo:                          /* Function: foo */
+foo:                                         /* Function: foo */
     push { fp, lr }
     mov fp, sp
-    mov r2, #0                /* Evaluate Expression */
+    mov r2, #0                               /* Evaluate Expression */
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r1, fp, #8            /* Start of structure in stack */
+    add r1, fp, #8                           /* Start of structure in stack */
     add r1, r1, r2
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     push { r2, r0 }
     ldr r0, [r1, #0]
     push { r0 }
-    bl bar                    /* Call bar */
+    bl bar                                   /* Call bar */
     mov sp, fp
     pop { fp, lr }
     add sp, sp, #36
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #9                /* Evaluate Expression */
+    mov r0, #9                               /* Evaluate Expression */
     mov r1, #8
     mov r2, #7
     push { r2, r1, r0 }
@@ -66,7 +66,7 @@ main:                         /* Function: main */
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
-    ldr r0, [fp, #-4]         /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     ldr r2, [fp, #-12]
     push { r2, r1, r0 }
@@ -78,7 +78,7 @@ main:                         /* Function: main */
     ldr r1, [fp, #-32]
     ldr r2, [fp, #-36]
     push { r2, r1, r0 }
-    bl foo                    /* Call foo */
+    bl foo                                   /* Call foo */
     mov r1, r0
     add r0, r1, r3
     mov sp, fp

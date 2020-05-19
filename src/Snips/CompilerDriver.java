@@ -74,7 +74,7 @@ public class CompilerDriver {
 	public static boolean printErrors = false;
 	
 	public static String printDepth = "    ";
-	public static int commentDistance = 30;
+	public static int commentDistance = 45;
 	
 	public static List<Double> compressions = new ArrayList();
 	

@@ -18,11 +18,11 @@ TESTCASES
 OUTPUT
 /* --test_20.txt */
     b main
-set:                          /* Function: set */
+set:                                         /* Function: set */
     push { fp }
     mov fp, sp
 /* Set m [0] [1] */
-    mov r0, #8                /* Evaluate Expression */
+    mov r0, #8                               /* Evaluate Expression */
     push { r0 }
     add r0, fp, #4
     add r0, r0, #0
@@ -33,7 +33,7 @@ set:                          /* Function: set */
     pop { r0 }
     str r0, [r1]
 /* Set m [1] [0] */
-    mov r0, #7                /* Evaluate Expression */
+    mov r0, #7                               /* Evaluate Expression */
     push { r0 }
     mov r2, #4
     add r0, fp, #4
@@ -47,38 +47,38 @@ set:                          /* Function: set */
     add sp, sp, #8
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #2                /* Evaluate Expression */
+    mov r0, #2                               /* Evaluate Expression */
     mov r1, #1
     push { r1, r0 }
     mov r0, #6
     mov r1, #3
     push { r1, r0 }
-    mov r2, #0                /* Evaluate Expression */
+    mov r2, #0                               /* Evaluate Expression */
     mov r0, #1
     mov r1, #8
     mul r0, r0, r1
     add r2, r2, r0
     sub r0, fp, #16
-    add r0, r0, r2            /* Add structure offset */
+    add r0, r0, r2                           /* Add structure offset */
     lsr r0, r0, #2
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     mov r1, #8
     mul r0, r0, r1
     add r2, r2, r0
     sub r0, fp, #16
-    add r0, r0, r2            /* Add structure offset */
+    add r0, r0, r2                           /* Add structure offset */
     lsr r0, r0, #2
     push { r0 }
-    ldr r0, [fp, #-20]        /* Load parameters */
+    ldr r0, [fp, #-20]                       /* Load parameters */
     ldr r1, [fp, #-24]
     push { r1, r0 }
-    bl set                    /* Call set */
-    mov r2, #0                /* Evaluate Expression */
+    bl set                                   /* Call set */
+    mov r2, #0                               /* Evaluate Expression */
     mov r0, #0
     mov r1, #8
     mul r0, r0, r1
@@ -88,7 +88,7 @@ main:                         /* Function: main */
     add r0, r0, r2
     ldr r0, [r0]
     push { r0 }
-    mov r2, #0                /* Calculate offset of sub structure */
+    mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
     mov r1, #8
     mul r0, r0, r1

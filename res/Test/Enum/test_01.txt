@@ -16,16 +16,16 @@ TESTCASES
 20
 OUTPUT
 /* --test_01.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #1                               /* Evaluate Expression */
     mov r3, #1
     cmp r3, #0
     bne main.L1
-    mov r0, #10               /* Evaluate Expression */
+    mov r0, #10                              /* Evaluate Expression */
     b main.L2
 main.L1: 
-    mov r0, #20               /* Evaluate Expression */
+    mov r0, #20                              /* Evaluate Expression */
 main.L2: 
     pop { r3 }
     bx lr

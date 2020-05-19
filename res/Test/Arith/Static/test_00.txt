@@ -6,7 +6,7 @@ TESTCASES
 212
 OUTPUT
 /* --test_00.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     mov r1, #106
     mov r2, #1
     mov r0, #212

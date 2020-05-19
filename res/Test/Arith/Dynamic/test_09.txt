@@ -37,13 +37,13 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-baz:                          /* Function: baz */
+baz:                                         /* Function: baz */
     push { fp }
     mov fp, sp
-    mov r0, #10               /* Evaluate Expression */
+    mov r0, #10                              /* Evaluate Expression */
     mov r1, #3
     push { r1, r0 }
-    ldr r0, [fp, #-4]         /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     push { r1, r0 }
     mov r2, sp
@@ -51,19 +51,19 @@ baz:                          /* Function: baz */
     pop { fp }
     mov r0, #8
     add r1, r2, #8
-    add r10, pc, #8           /* Setup return address for routine */
+    add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     bx lr
     
-foo:                          /* Function: foo */
+foo:                                         /* Function: foo */
     push { r3, fp }
     mov fp, sp
     mov r3, r0
-    mov r0, #5                /* Evaluate Expression */
+    mov r0, #5                               /* Evaluate Expression */
     push { r0 }
     mov r0, r3
     push { r0 }
-    ldr r0, [fp, #-4]         /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     push { r1, r0 }
     mov r2, sp
@@ -71,20 +71,20 @@ foo:                          /* Function: foo */
     pop { r3, fp }
     mov r0, #8
     add r1, r2, #8
-    add r10, pc, #8           /* Setup return address for routine */
+    add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    bl foo                    /* Call foo */
-    mov r1, r3                /* Evaluate Expression */
+    bl foo                                   /* Call foo */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, #2
     mul r0, r1, r2
-    bl foo                    /* Call foo */
-    bl baz                    /* Evaluate Expression */
+    bl foo                                   /* Call foo */
+    bl baz                                   /* Evaluate Expression */
     sub r0, fp, #8
     add r0, r0, #0
     ldr r0, [r0]
@@ -103,9 +103,9 @@ main:                         /* Function: main */
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    sub r1, fp, #24           /* Load field location */
+    sub r1, fp, #24                          /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

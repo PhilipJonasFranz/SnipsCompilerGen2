@@ -18,7 +18,7 @@ TESTCASES
 2 44
 OUTPUT
 /* --test_05.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6, r7, r8, r9 }
     mov fp, sp
     mov r3, r0

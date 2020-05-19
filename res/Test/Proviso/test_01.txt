@@ -14,9 +14,9 @@ OUTPUT
 /* --test_01.txt */
     b main
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4 }
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #1                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr
     

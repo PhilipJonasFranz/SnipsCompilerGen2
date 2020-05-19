@@ -15,13 +15,13 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-foo:                          /* Function: foo */
+foo:                                         /* Function: foo */
     push { r3, r4, r5, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     ldr r2, [fp, #16]
     mul r0, r1, r2
     push { r0 }
@@ -36,13 +36,13 @@ foo:                          /* Function: foo */
     add sp, sp, #4
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    ldr r0, [fp, #20]         /* Evaluate Expression */
+    ldr r0, [fp, #20]                        /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #24]
     push { r0 }
@@ -50,7 +50,7 @@ main:                         /* Function: main */
     push { r0 }
     mov r0, r3
     pop { r1, r2 }
-    bl foo                    /* Call foo */
+    bl foo                                   /* Call foo */
     mov r2, r0
     add r0, r4, r2
     mov sp, fp

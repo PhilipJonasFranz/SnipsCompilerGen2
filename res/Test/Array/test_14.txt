@@ -19,13 +19,13 @@ TESTCASES
 1 1 2 12
 OUTPUT
 /* --test_14.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5 }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, #12               /* Evaluate Expression */
+    mov r0, #12                              /* Evaluate Expression */
     mov r1, #11
     mov r2, #10
     push { r2, r1, r0 }
@@ -41,7 +41,7 @@ main:                         /* Function: main */
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
-    mov r2, #0                /* Evaluate Expression */
+    mov r2, #0                               /* Evaluate Expression */
     mov r0, r3
     mov r1, #24
     mul r0, r0, r1

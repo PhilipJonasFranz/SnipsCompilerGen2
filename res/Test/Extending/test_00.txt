@@ -17,25 +17,25 @@ TESTCASES
 37
 OUTPUT
 /* --test_00.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #12               /* Evaluate Expression */
+    mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #15               /* Evaluate Expression */
+    mov r0, #15                              /* Evaluate Expression */
     mov r1, #10
     push { r1, r0 }
-    sub r1, fp, #12           /* Evaluate Expression */
-    ldr r0, [r1]              /* Load field from struct */
+    sub r1, fp, #12                          /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
-    sub r1, fp, #12           /* Load field location */
+    sub r1, fp, #12                          /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    sub r1, fp, #4            /* Load field location */
-    ldr r0, [r1]              /* Load field from struct */
+    sub r1, fp, #4                           /* Load field location */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

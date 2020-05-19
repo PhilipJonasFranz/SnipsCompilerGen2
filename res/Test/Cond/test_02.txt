@@ -12,7 +12,7 @@ TESTCASES
 0 0 0
 OUTPUT
 /* --test_02.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6, r7, fp }
     mov fp, sp
     mov r3, r0
@@ -20,16 +20,16 @@ main:                         /* Function: main */
     mov r5, r2
     cmp r3, #2
     bne main.L1
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     b main.L4
 main.L1: 
     mov r6, r0
     cmp r4, #5
     bne main.L3
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     b main.L4
 main.L3: 
-    mov r7, r0                /* Evaluate Expression */
+    mov r7, r0                               /* Evaluate Expression */
     add r0, r3, r4
 main.L4: 
     mov sp, fp

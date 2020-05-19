@@ -10,15 +10,15 @@ TESTCASES
 2 3
 OUTPUT
 /* --test_03.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
-    mov r0, #5                /* Evaluate Expression */
+    mov r0, #5                               /* Evaluate Expression */
     push { r0 }
     sub r0, fp, #12
     add r0, r0, #4

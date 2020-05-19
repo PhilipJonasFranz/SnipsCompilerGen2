@@ -8,7 +8,7 @@ TESTCASES
 10 0
 OUTPUT
 /* --test_02.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
     mov r3, r0
     cmp r3, #0

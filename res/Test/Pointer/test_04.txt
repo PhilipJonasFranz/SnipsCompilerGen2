@@ -14,29 +14,29 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-get:                          /* Function: get */
+get:                                         /* Function: get */
     push { r3, r4 }
     mov r3, r0
     mov r4, r1
-    lsl r0, r4, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     pop { r3, r4 }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    push { r3 }               /* Push declaration on stack, referenced by addressof. */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #10
-    push { r3 }               /* Push declaration on stack, referenced by addressof. */
-    sub r0, fp, #4            /* Evaluate Expression */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
     sub r0, fp, #8
     lsr r0, r0, #2
     pop { r1 }
-    bl get                    /* Call get */
+    bl get                                   /* Call get */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr
