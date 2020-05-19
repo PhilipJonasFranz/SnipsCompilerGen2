@@ -114,6 +114,8 @@ public class Parser {
 	/* The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
+	List<Message> buffered = new ArrayList();
+	
 	protected ProgressMessage progress;
 	
 	public int done = 0, toGo;
@@ -226,7 +228,7 @@ public class Parser {
 				Directive dir = this.parseDirective();
 				
 				if (incEnd) {
-					new Message("All include statements should be at the head of the file", Message.Type.WARN);
+					buffered.add(new Message("All include statements should be at the head of the file", Message.Type.WARN, true));
 				}
 				
 				if (dir instanceof IncludeDirective) {
@@ -247,6 +249,8 @@ public class Parser {
 		
 		Program program = new Program(elements, source);
 		program.directives.addAll(include);
+		
+		for (Message m : buffered) m.flush();
 		
 		return program;
 	}
@@ -1648,7 +1652,7 @@ public class Parser {
 			type = enu.enumType;
 		}
 		else {
-			type = TYPE.fromToken(token);
+			type = TYPE.fromToken(token, buffered);
 			
 			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
