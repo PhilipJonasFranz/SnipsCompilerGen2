@@ -45,7 +45,7 @@ public class POINTER extends COMPOSIT {
 					}
 				}
 				
-				return s0.typedef.path.build().equals(s1.typedef.path.build());
+				return s0.typedef.SID == s1.typedef.SID;
 			}
 			else if (pointer.getCoreType() instanceof STRUCT || this.getCoreType() instanceof STRUCT) {
 				/* Only one of both is struct, return false */

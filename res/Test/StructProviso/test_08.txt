@@ -20,22 +20,18 @@ TESTCASES
 15
 OUTPUT
 /* --test_08.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #10               /* Evaluate Expression */
+    mov r0, #10                              /* Evaluate Expression */
     push { r0 }
     mov r0, #5
     push { r0 }
-    sub r1, fp, #8            /* Evaluate Expression */
-    ldr r0, [r1]              /* Load field from struct */
+    sub r1, fp, #8                           /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
-    sub r1, fp, #8            /* Load field location */
+    sub r1, fp, #8                           /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

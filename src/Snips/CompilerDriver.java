@@ -74,7 +74,7 @@ public class CompilerDriver {
 	public static boolean printErrors = false;
 	
 	public static String printDepth = "    ";
-	public static int commentDistance = 30;
+	public static int commentDistance = 45;
 	
 	public static List<Double> compressions = new ArrayList();
 	
@@ -139,6 +139,10 @@ public class CompilerDriver {
 	
 	public CompilerDriver() {
 		this.readConfig();
+	}
+	
+	public static void reset() {
+		heap_referenced = false;
 	}
 	
 	
@@ -222,7 +226,7 @@ public class CompilerDriver {
 				
 				/* Print out imported libaries */
 				for (SyntaxElement s : dependencies) {
-					log.add(new Message("SNIPS -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
+					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
 				}
 				
 				/* Add libaries to AST, duplicates were already filtered */

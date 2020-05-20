@@ -18,33 +18,29 @@ TESTCASES
 30
 OUTPUT
 /* --test_09.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
     mov fp, sp
     mov r3, #19
-    push { r3 }               /* Push declaration on stack, referenced by addressof. */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #11
-    push { r3 }               /* Push declaration on stack, referenced by addressof. */
-    sub r0, fp, #8            /* Evaluate Expression */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
     sub r0, fp, #4
     lsr r0, r0, #2
     push { r0 }
-    sub r1, fp, #16           /* Evaluate Expression */
-    ldr r0, [r1]              /* Load field from struct */
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    sub r1, fp, #16                          /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     push { r0 }
-    sub r1, fp, #16           /* Load field location */
+    sub r1, fp, #16                          /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    ldr r0, [r1]                             /* Load field from struct */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

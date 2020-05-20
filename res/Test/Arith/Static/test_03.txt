@@ -6,7 +6,7 @@ TESTCASES
 1
 OUTPUT
 /* --test_03.txt */
-main:                         /* Function: main */
+main:                                        /* Function: main */
     mov r1, #1
     mov r2, #1
     mul r0, r1, r2

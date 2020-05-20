@@ -8,7 +8,6 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
@@ -27,6 +26,7 @@ import Imm.AST.Expression.Arith.Sub;
 import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Or;
+import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.Arith.AsNAdd;
 import Imm.AsN.Expression.Arith.AsNBitAnd;
 import Imm.AsN.Expression.Arith.AsNBitOr;
@@ -173,12 +173,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			/* Partial Atomic Loading Left */
 			if (b.getLeft() instanceof Atom) {
 				this.loadOperand(b.getRight(), 2, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(1), new ImmOperand(Integer.parseInt(b.getLeft().getType().sourceCodeRepresentation()))));
+				AsNBody.literalManager.loadValue(this, Integer.parseInt(b.getLeft().getType().sourceCodeRepresentation()), 1);
 			}
 			/* Partial Atomic Loading Right */
 			else if (b.getRight() instanceof Atom) {
 				this.loadOperand(b.getLeft(), 1, r, map, st);
-				m.instructions.add(new ASMMov(new RegOperand(2), new ImmOperand(Integer.parseInt(b.getRight().getType().sourceCodeRepresentation()))));
+				AsNBody.literalManager.loadValue(this, Integer.parseInt(b.getRight().getType().sourceCodeRepresentation()), 2);
 			}
 			else m.generatePrimitiveLoaderCode(m, b, r, map, st, 1, 2);
 			
@@ -213,7 +213,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			Atom l0 = (Atom) b.getLeft(), r0 = (Atom) b.getRight();
 			if (l0.getType() instanceof INT && r0.getType() instanceof INT) {
 				INT i0 = (INT) l0.getType(), i1 = (INT) r0.getType();
-				this.instructions.add(new ASMMov(new RegOperand(0), new ImmOperand(s.solve(i0.value, i1.value))));
+				AsNBody.literalManager.loadValue(this, s.solve(i0.value, i1.value), 0);
 			}
 		}
 	}

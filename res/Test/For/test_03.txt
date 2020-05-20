@@ -16,15 +16,11 @@ TESTCASES
 3 4656
 OUTPUT
 /* --test_03.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6 }
     mov r3, r0
     mov r4, #0
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 main.L1: 
     cmp r5, r3
@@ -34,26 +30,26 @@ main.L1:
     add r4, r1, #1
     cmp r5, #5
     bge main.L3
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 main.L6: 
     cmp r6, #4
     bge main.L7
     add r4, r4, r4
-    mov r1, r6                /* Evaluate Expression */
+    mov r1, r6                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r6, r0
     b main.L6
 main.L7: 
 main.L3: 
-    mov r1, r5                /* Evaluate Expression */
+    mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     mov r5, r0
     b main.L1
 main.L2: 
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4, r5, r6 }
     bx lr
     

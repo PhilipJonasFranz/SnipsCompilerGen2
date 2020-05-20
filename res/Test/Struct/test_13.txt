@@ -43,36 +43,36 @@ HEAP_START: .word 0
 /* by one to accomodate the block metadata. The function returns a void pointer to */
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
-resv:                         /* Function: resv */
+resv:                                        /* Function: resv */
     push { r3, r4, r5, r6, r7, r8, r9 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_main.L2_HEAP_START/* Evaluate Expression */
+    ldr r0, .POOL0_main.L2_HEAP_START        /* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
-resv.L1:                      /* Evaluate condition */
-    lsl r0, r4, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+resv.L1:                                     /* Evaluate condition */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     cmp r0, #0
     beq resv.L2
 /* Memory Section is allocated or free */
 /* Load block size from memory */
-    lsl r0, r4, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r5, r0
     mov r6, r0
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
-resv.L6:                      /* Evaluate condition */
+resv.L6:                                     /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
     bne resv.L7
     sub r0, r4, r5
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r7, r0
     cmp r7, #0
     ble resv.L9
@@ -80,7 +80,7 @@ resv.L6:                      /* Evaluate condition */
 resv.L9: 
     cmp r7, #0
     bne resv.L11
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
@@ -89,14 +89,14 @@ resv.L11:
 /* Add to current size */
     b resv.L6
 resv.L7: 
-    mov r0, r5                /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
     mov r7, r0
     cmp r5, #0
     bne resv.L12
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
@@ -109,10 +109,10 @@ resv.L12:
     cmp r0, r3
     bne resv.L15
 /* Fits */
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r8, r0                /* Evaluate Expression */
+    mov r8, r0                               /* Evaluate Expression */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
@@ -122,17 +122,17 @@ resv.L15:
     ble resv.L17
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r9, r0                /* Evaluate Expression */
+    mov r9, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r1, r4                /* Evaluate Expression */
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     b resv.L18
@@ -146,10 +146,10 @@ resv.L3:
     b resv.L1
 resv.L2: 
 /* End reached, create new block */
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r5, r0                /* Evaluate Expression */
+    mov r5, r0                               /* Evaluate Expression */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
@@ -165,14 +165,14 @@ resv.L18:
 /* A tree node that has a left and right child and holds a value. */
 /* Create a new Tree, initialize both childs to 0, set root value */
 /* to given value. Return a pointer to the root. */
-Tree.create_P0:               /* Function: Tree.create, Provisos: INT */
+Tree.create_P0:                              /* Function: Tree.create, Provisos: INT */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                /* Evaluate Expression */
-    bl resv                   /* Call resv */
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
     mov r4, r0
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
@@ -183,20 +183,20 @@ Tree.create_P0:               /* Function: Tree.create, Provisos: INT */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr
     
-Tree.insert_P1:               /* Function: Tree.insert, Provisos: INT */
+Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
     push { r3, r4, r5, r6, r7, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r0, #3                /* Evaluate Expression */
-    bl resv                   /* Call resv */
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
     mov r5, r0
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
@@ -207,49 +207,49 @@ Tree.insert_P1:               /* Function: Tree.insert, Provisos: INT */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     mov r6, r0
-Tree.insert.L1:               /* Evaluate condition */
+Tree.insert.L1:                              /* Evaluate condition */
     mov r7, r0
     cmp r6, #0
     beq Tree.insert.L2
-    lsl r1, r6, #2            /* Convert to bytes */
+    lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #8
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     cmp r0, r4
     ble Tree.insert.L4
 /* Left leaf is 0, insert here */
-    lsl r1, r6, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
+    lsl r1, r6, #2                           /* Convert to bytes */
+    ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     bne Tree.insert.L6
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r6, #2            /* Convert to bytes */
-    str r0, [r1]              /* Store value to struct field */
-    mov r0, r5                /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r6, #2                           /* Convert to bytes */
+    str r0, [r1]                             /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
     b Tree.insert.L9
 Tree.insert.L6: 
-    lsl r1, r6, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
+    lsl r1, r6, #2                           /* Convert to bytes */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r6, r0
     b Tree.insert.L3
 Tree.insert.L4: 
 /* Right leaf is 0, insert here */
-    lsl r1, r6, #2            /* Convert to bytes */
+    lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     bne Tree.insert.L8
-    mov r0, r5                /* Evaluate Expression */
-    lsl r1, r6, #2            /* Convert to bytes */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #4
-    str r0, [r1]              /* Store value to struct field */
-    mov r0, r5                /* Evaluate Expression */
+    str r0, [r1]                             /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
     b Tree.insert.L9
 Tree.insert.L8: 
-    lsl r1, r6, #2            /* Convert to bytes */
+    lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r6, r0
 Tree.insert.L3: 
     b Tree.insert.L1
@@ -260,89 +260,89 @@ Tree.insert.L9:
     pop { r3, r4, r5, r6, r7, fp, lr }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6, r7, r8, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, #10               /* Evaluate Expression */
-    bl Tree.create_P0         /* Call Tree.create */
+    mov r0, #10                              /* Evaluate Expression */
+    bl Tree.create_P0                        /* Call Tree.create */
     mov r6, r0
-    mov r0, #5                /* Load parameters */
+    mov r0, #5                               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
-    mov r0, #12               /* Load parameters */
+    bl Tree.insert_P1                        /* Call Tree.insert */
+    mov r0, #12                              /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
-    mov r0, #11               /* Load parameters */
+    bl Tree.insert_P1                        /* Call Tree.insert */
+    mov r0, #11                              /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
-    mov r0, #15               /* Load parameters */
+    bl Tree.insert_P1                        /* Call Tree.insert */
+    mov r0, #15                              /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
-    mov r0, #7                /* Load parameters */
+    bl Tree.insert_P1                        /* Call Tree.insert */
+    mov r0, #7                               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
-    mov r0, #2                /* Load parameters */
+    bl Tree.insert_P1                        /* Call Tree.insert */
+    mov r0, #2                               /* Load parameters */
     push { r0 }
     mov r0, r6
     pop { r1 }
-    bl Tree.insert_P1         /* Call Tree.insert */
+    bl Tree.insert_P1                        /* Call Tree.insert */
     cmp r3, #1
     bne main.L1
-    lsl r1, r6, #2            /* Convert to bytes */
+    lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #8
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     b main.L8
 main.L1: 
-    mov r0, r6                /* Evaluate Expression */
+    mov r0, r6                               /* Evaluate Expression */
     mov r7, r0
     mov r8, r0
     cmp r4, #1
     bne main.L3
-    lsl r1, r7, #2            /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r7, r0
     b main.L2
 main.L3: 
-    lsl r1, r7, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r7, r0
 main.L2: 
     cmp r5, #2
     bne main.L4
-    lsl r1, r7, #2            /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #8
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     b main.L8
 main.L4: 
     cmp r5, #1
     bne main.L7
-    lsl r1, r7, #2            /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r7, r0
     b main.L6
 main.L7: 
-    lsl r1, r7, #2            /* Convert to bytes */
-    ldr r0, [r1]              /* Load field from struct */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r7, r0
 main.L6: 
-    lsl r1, r7, #2            /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #8
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
 main.L8: 
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, fp, lr }

@@ -10,14 +10,25 @@ public class MemoryWordOperand extends MemoryOperand {
 
 	public Expression value;
 	
+	public int intValue;
+	
 	public MemoryWordOperand(Expression expr) {
 		this.value = expr;
 	}
 	
+	public MemoryWordOperand(int value) {
+		this.intValue = value;
+	}
+	
 	public String toString() {
-		/* Use the type to string conversion to display type as number */
-		String s = this.toString(value);
-		return ((this.value instanceof Atom)? s : "\n" + s.substring(0, s.length() - 1));
+		if (this.value != null) {
+			/* Use the type to string conversion to display type as number */
+			String s = this.toString(value);
+			return ((this.value instanceof Atom)? s : "\n" + s.substring(0, s.length() - 1));
+		}
+		else {
+			return ".word " + this.intValue;
+		}
 	}
 	
 	private String toString(Expression val) {
@@ -47,7 +58,9 @@ public class MemoryWordOperand extends MemoryOperand {
 	}
 
 	public MemoryOperand clone() {
-		return new MemoryWordOperand(this.value);
+		MemoryWordOperand clone = new MemoryWordOperand(this.value);
+		clone.intValue = this.intValue;
+		return clone;
 	}
 	
 }

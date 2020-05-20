@@ -11,29 +11,29 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-__op_mod:                     /* Function: __op_mod */
+__op_mod:                                    /* Function: __op_mod */
     push { r3, r4, r5, r6, r7, r8 }
     mov r3, r0
     mov r4, r1
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     mov r5, r0
-__op_mod.L1:                  /* Evaluate condition */
+__op_mod.L1:                                 /* Evaluate condition */
     mov r6, r0
     cmp r5, r3
     bgt __op_mod.L2
-    mov r1, r5                /* Evaluate Expression */
+    mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
     lsl r0, r1, #1
     mov r5, r0
     b __op_mod.L1
 __op_mod.L2: 
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     mov r7, r0
-__op_mod.L4:                  /* Evaluate condition */
+__op_mod.L4:                                 /* Evaluate condition */
     mov r8, r0
     cmp r7, r4
     blt __op_mod.L5
-    mov r1, r5                /* Evaluate Expression */
+    mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
     lsr r5, r1, #1
     cmp r5, r7
@@ -43,20 +43,20 @@ __op_mod.L4:                  /* Evaluate condition */
 __op_mod.L6: 
     b __op_mod.L4
 __op_mod.L5: 
-    mov r0, r7                /* Evaluate Expression */
+    mov r0, r7                               /* Evaluate Expression */
     pop { r3, r4, r5, r6, r7, r8 }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     push { r0 }
     mov r0, r3
     pop { r1 }
-    bl __op_mod               /* Call __op_mod */
+    bl __op_mod                              /* Call __op_mod */
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr

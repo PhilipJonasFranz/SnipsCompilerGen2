@@ -16,65 +16,61 @@ TESTCASES
 2 2 2 2 2 20
 OUTPUT
 /* --test_04.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
-sq:                           /* Function: sq */
+sq:                                          /* Function: sq */
     push { r3 }
     mov r3, r0
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, r3
     mul r0, r1, r2
     pop { r3 }
     bx lr
     
-sqsum:                        /* Function: sqsum */
+sqsum:                                       /* Function: sqsum */
     push { r3, r4, r5, r6, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, r3                /* Evaluate Expression */
-    bl sq                     /* Call sq */
+    mov r0, r3                               /* Evaluate Expression */
+    bl sq                                    /* Call sq */
     push { r0 }
-    mov r0, r4                /* Load parameters */
-    bl sq                     /* Call sq */
+    mov r0, r4                               /* Load parameters */
+    bl sq                                    /* Call sq */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    mov r0, r5                /* Load parameters */
-    bl sq                     /* Call sq */
+    mov r0, r5                               /* Load parameters */
+    bl sq                                    /* Call sq */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    ldr r0, [fp, #28]         /* Load parameters */
-    bl sq                     /* Call sq */
+    ldr r0, [fp, #28]                        /* Load parameters */
+    bl sq                                    /* Call sq */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    ldr r0, [fp, #24]         /* Load parameters */
-    bl sq                     /* Call sq */
+    ldr r0, [fp, #24]                        /* Load parameters */
+    bl sq                                    /* Call sq */
     mov r2, r0
     pop { r1 }
     add r6, r1, r2
-    mov r0, r6                /* Evaluate Expression */
+    mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, r6, fp, lr }
     add sp, sp, #8
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    ldr r0, [fp, #24]         /* Evaluate Expression */
+    ldr r0, [fp, #24]                        /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #20]
     push { r0 }
@@ -84,7 +80,7 @@ main:                         /* Function: main */
     push { r0 }
     mov r0, r3
     pop { r1, r2 }
-    bl sqsum                  /* Call sqsum */
+    bl sqsum                                 /* Call sqsum */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     add sp, sp, #8

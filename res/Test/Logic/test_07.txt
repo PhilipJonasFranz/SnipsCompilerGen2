@@ -13,16 +13,12 @@ TESTCASES
 1 1 1 1
 OUTPUT
 /* --test_07.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     adds r1, r4, #0
     movne r1, #1
     cmp r0, #0

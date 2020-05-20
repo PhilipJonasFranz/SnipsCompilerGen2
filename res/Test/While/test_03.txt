@@ -19,50 +19,46 @@ TESTCASES
 0 0
 OUTPUT
 /* --test_03.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
-foo:                          /* Function: foo */
+foo:                                         /* Function: foo */
     push { r3 }
     mov r3, r0
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, #2
     add r0, r1, #2
     pop { r3 }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r4, #0
-main.L1:                      /* Evaluate condition */
+main.L1:                                     /* Evaluate condition */
     cmp r3, #0
     ble main.L2
     cmp r3, #5
     ble main.L3
-    mov r0, r4                /* Evaluate Expression */
-    bl foo                    /* Call foo */
+    mov r0, r4                               /* Evaluate Expression */
+    bl foo                                   /* Call foo */
     mov r4, r0
 main.L3: 
     cmp r3, #2
     bge main.L5
-    mov r0, r4                /* Evaluate Expression */
-    bl foo                    /* Call foo */
+    mov r0, r4                               /* Evaluate Expression */
+    bl foo                                   /* Call foo */
     mov r1, r0
     mov r2, #3
     sub r4, r1, #3
 main.L5: 
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, #1
     sub r0, r1, #1
     mov r3, r0
     b main.L1
 main.L2: 
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr

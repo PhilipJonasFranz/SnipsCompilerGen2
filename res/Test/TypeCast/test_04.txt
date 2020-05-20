@@ -16,20 +16,16 @@ TESTCASES
 2 4 6
 OUTPUT
 /* --test_04.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4 }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     push { r0 }
     mov r0, r3
     push { r0 }
-    ldr r0, [fp, #-4]         /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     push { r1, r0 }
     sub r0, fp, #16

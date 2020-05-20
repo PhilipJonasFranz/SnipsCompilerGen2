@@ -321,6 +321,7 @@ public class ContextChecker {
 		
 		/* Add all unwatched to the previous signal level */
 		List<TYPE> unwatched = this.signalStack.pop();
+		e.unwatched = unwatched;
 		for (TYPE t : unwatched) {
 			boolean contains = this.signalStack.peek().stream().filter(x -> x.isEqual(t)).count() > 0;
 			if (!contains) this.signalStack.peek().add(t);

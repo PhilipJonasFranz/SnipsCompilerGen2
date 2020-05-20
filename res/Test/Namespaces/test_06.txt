@@ -19,20 +19,19 @@ OUTPUT
 /* --test_06.txt */
 .data
 Baz.x: .word 16
-HEAP_START: .word 0
     
 .text
     b main
-Foo.get:                      /* Function: Foo.get */
-    ldr r0, .POOL0_main.L0_Baz.x/* Evaluate Expression */
+Foo.get:                                     /* Function: Foo.get */
+    ldr r0, .POOL0_main.L0_Baz.x             /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
 .POOL0_main.L0_Baz.x: .word Baz.x
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    bl Foo.get                /* Evaluate Expression */
+    bl Foo.get                               /* Evaluate Expression */
     mov sp, fp
     pop { fp, lr }
     bx lr

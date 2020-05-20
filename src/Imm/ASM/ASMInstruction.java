@@ -30,6 +30,13 @@ public abstract class ASMInstruction {
 		
 		EXC_EXIT,
 		
+		/**
+		 * This flag is set to signal that a 'b' jump is a controlled jump, and the program
+		 * will return to the jump location by manipulating the pc. This is used to prevent
+		 * the optimizer from deleting instructions after the jump.
+		 */
+		SYS_JMP,
+		
 		FUNC_CLEAN;
 	}
 	

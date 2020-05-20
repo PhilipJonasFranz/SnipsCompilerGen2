@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -17,6 +18,8 @@ public class TryStatement extends CompoundStatement {
 	public SyntaxElement watchpoint;
 	
 	public List<WatchStatement> watchpoints;
+	
+	public List<TYPE> unwatched = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */

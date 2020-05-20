@@ -16,24 +16,20 @@ TESTCASES
 5 120
 OUTPUT
 /* --test_01.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
-fac:                          /* Function: fac */
+fac:                                         /* Function: fac */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
     cmp r3, #0
     bne fac.L1
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #1                               /* Evaluate Expression */
     b fac.L2
 fac.L1: 
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, #1
     sub r0, r1, #1
-    bl fac                    /* Call fac */
+    bl fac                                   /* Call fac */
     mov r1, r0
     mov r2, r3
     mul r0, r1, r2
@@ -42,11 +38,11 @@ fac.L2:
     pop { r3, fp, lr }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    bl fac                    /* Call fac */
+    bl fac                                   /* Call fac */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

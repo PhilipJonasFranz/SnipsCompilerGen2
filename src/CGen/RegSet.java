@@ -61,7 +61,7 @@ public class RegSet {
 	/** Create a new RegSet object, initialize the regs, set regs 11-15 to reserved. */
 	public RegSet() {
 		for (int i = 0; i < regs.length; i++) regs [i] = new Reg();
-		for (int i = 11; i < regs.length; i++) regs [i].status = STATUS.RESERVED;
+		for (int i = 10; i < regs.length; i++) regs [i].status = STATUS.RESERVED;
 	}
 	
 	/** Returns the {@link num} reg. */

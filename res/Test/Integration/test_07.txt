@@ -55,36 +55,36 @@ HEAP_START: .word 0
 /* by one to accomodate the block metadata. The function returns a void pointer to */
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
-resv:                         /* Function: resv */
+resv:                                        /* Function: resv */
     push { r3, r4, r5, r6, r7, r8, r9 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_main.L0_HEAP_START/* Evaluate Expression */
+    ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
-resv.L1:                      /* Evaluate condition */
-    lsl r0, r4, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+resv.L1:                                     /* Evaluate condition */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     cmp r0, #0
     beq resv.L2
 /* Memory Section is allocated or free */
 /* Load block size from memory */
-    lsl r0, r4, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r5, r0
     mov r6, r0
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
-resv.L6:                      /* Evaluate condition */
+resv.L6:                                     /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
     bne resv.L7
     sub r0, r4, r5
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r7, r0
     cmp r7, #0
     ble resv.L9
@@ -92,7 +92,7 @@ resv.L6:                      /* Evaluate condition */
 resv.L9: 
     cmp r7, #0
     bne resv.L11
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
@@ -101,14 +101,14 @@ resv.L11:
 /* Add to current size */
     b resv.L6
 resv.L7: 
-    mov r0, r5                /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
     mov r7, r0
     cmp r5, #0
     bne resv.L12
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
@@ -121,10 +121,10 @@ resv.L12:
     cmp r0, r3
     bne resv.L15
 /* Fits */
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r8, r0                /* Evaluate Expression */
+    mov r8, r0                               /* Evaluate Expression */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
@@ -134,17 +134,17 @@ resv.L15:
     ble resv.L17
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r9, r0                /* Evaluate Expression */
+    mov r9, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r1, r4                /* Evaluate Expression */
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     b resv.L18
@@ -158,10 +158,10 @@ resv.L3:
     b resv.L1
 resv.L2: 
 /* End reached, create new block */
-    mov r0, r3                /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r5, r0                /* Evaluate Expression */
+    mov r5, r0                               /* Evaluate Expression */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
@@ -172,66 +172,69 @@ resv.L18:
     
 /* Multiplicate the given matricies. Both matricies have to have the given */
 /* dimension. Returns a pointer to the resulting matrix. */
-__mat_mult:                   /* Function: __mat_mult */
-    push { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+__mat_mult:                                  /* Function: __mat_mult */
+    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r1, r5                /* Evaluate Expression */
-    ldr r2, [fp, #40]
+    mov r1, r5                               /* Evaluate Expression */
+    ldr r2, [fp, #36]
     mul r0, r1, r2
-    bl resv                   /* Call resv */
+    bl resv                                  /* Call resv */
     mov r6, r0
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
 __mat_mult.L1: 
     cmp r7, r5
     bge __mat_mult.L2
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r8, #0
 __mat_mult.L4: 
     mov r0, r8
-    ldr r1, [fp, #40]
+    ldr r1, [fp, #36]
     cmp r0, r1
     bge __mat_mult.L5
     mov r9, #0
-    mov r0, #0                /* Evaluate Expression */
-    mov r10, #0
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
 __mat_mult.L7: 
-    mov r0, r10
-    ldr r1, [fp, #40]
+    ldr r0, [fp, #-4]
+    ldr r1, [fp, #36]
     cmp r0, r1
     bge __mat_mult.L8
-    mov r1, r7                /* Evaluate Expression */
-    ldr r2, [fp, #40]
+    mov r1, r7                               /* Evaluate Expression */
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r3, r2
-    add r0, r1, r10
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    ldr r2, [fp, #-4]
+    add r0, r1, r2
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     push { r0 }
-    mov r1, r10
-    ldr r2, [fp, #40]
+    ldr r1, [fp, #-4]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r4, r2
     add r0, r1, r8
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov r2, r0
     pop { r1 }
     mul r0, r1, r2
     add r9, r9, r0
-    mov r0, r10
-    add r10, r0, #1
+    ldr r0, [fp, #-4]
+    add r1, r0, #1
+    str r1, [fp, #-4]
     b __mat_mult.L7
 __mat_mult.L8: 
-    mov r0, r9                /* Evaluate Expression */
+    add sp, sp, #4
+    mov r0, r9                               /* Evaluate Expression */
     push { r0 }
     mov r1, r7
-    ldr r2, [fp, #40]
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     mov r2, r0
     add r1, r6, r2
@@ -247,33 +250,33 @@ __mat_mult.L5:
     add r7, r0, #1
     b __mat_mult.L1
 __mat_mult.L2: 
-    mov r0, r6                /* Evaluate Expression */
+    mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, r10, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     add sp, sp, #4
     bx lr
     
-allocMatrix:                  /* Function: allocMatrix */
+allocMatrix:                                 /* Function: allocMatrix */
     push { r3, r4, r5, r6, r7, fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r1, r3                /* Evaluate Expression */
+    mov r1, r3                               /* Evaluate Expression */
     mov r2, r4
     mul r0, r1, r2
-    bl resv                   /* Call resv */
+    bl resv                                  /* Call resv */
     mov r5, r0
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 allocMatrix.L1: 
     cmp r6, r4
     bge allocMatrix.L2
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mov r1, r6                /* Evaluate Expression */
+    mov r1, r6                               /* Evaluate Expression */
     mov r2, r4
     mul r0, r1, r2
     mov r1, r0
@@ -296,28 +299,28 @@ allocMatrix.L5:
     add r6, r0, #1
     b allocMatrix.L1
 allocMatrix.L2: 
-    mov r0, r5                /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, r6, r7, fp, lr }
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5, r6, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     pop { r1 }
-    bl allocMatrix            /* Call allocMatrix */
+    bl allocMatrix                           /* Call allocMatrix */
     mov r4, r0
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     pop { r1 }
-    bl allocMatrix            /* Call allocMatrix */
+    bl allocMatrix                           /* Call allocMatrix */
     mov r5, r0
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     push { r0 }
@@ -325,11 +328,11 @@ main:                         /* Function: main */
     push { r0 }
     mov r0, r4
     pop { r1, r2 }
-    bl __mat_mult             /* Call __mat_mult */
+    bl __mat_mult                            /* Call __mat_mult */
     mov r6, r0
     add r0, r6, r3
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     mov sp, fp
     pop { r3, r4, r5, r6, fp, lr }
     bx lr

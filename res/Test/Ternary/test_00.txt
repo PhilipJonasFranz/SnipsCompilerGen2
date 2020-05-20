@@ -11,11 +11,7 @@ TESTCASES
 5 10
 OUTPUT
 /* --test_00.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4 }
     mov r3, r0
     cmp r3, #3

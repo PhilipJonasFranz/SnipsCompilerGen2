@@ -33,12 +33,19 @@ TESTCASES
 4 11
 OUTPUT
 /* --test_00.txt */
-.data
-HEAP_START: .word 0
-    
-.text
     b main
-get:                          /* Function: get */
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+get:                                         /* Function: get */
     push { r3, r4, r5, r6, fp }
     mov fp, sp
     mov r3, r0
@@ -50,14 +57,14 @@ get:                          /* Function: get */
     push { r0 }
     mov r0, r4
     push { r0 }
-    mov r12, #1               /* Signal thrown exception */
+    mov r12, #1                              /* Signal thrown exception */
     mov r0, #8
-    b get.L0                  /* Exception thrown, branch to escape target */
+    b get.L0                                 /* Exception thrown, branch to escape target */
 get.L2: 
-    mov r6, r0                /* Evaluate Expression */
+    mov r6, r0                               /* Evaluate Expression */
     add r0, r3, r4
-    lsl r0, r0, #2            /* Convert to bytes */
-    ldr r0, [r0]              /* Load from address */
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
     b get.L3
 get.L0: 
 get.L3: 
@@ -67,63 +74,51 @@ get.L3:
     pop { r3, r4, r5, r6, fp }
     beq get.L4
     add r1, r2, r0
-get.L5:                       /* Copy stack return with loop */
-    cmp r0, #0
-    beq get.L6
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b get.L5
-get.L6: 
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
 get.L4: 
     bx lr
     
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #8                /* Evaluate Expression */
+    mov r0, #8                               /* Evaluate Expression */
     mov r1, #3
     mov r2, #5
     push { r2, r1, r0 }
     mov r4, #0
     push { sp }
-    mov r0, #3                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     push { r0 }
     mov r0, r3
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     pop { r1, r2 }
-    bl get                    /* Call get */
+    bl get                                   /* Call get */
     cmp r12, #0
-    bne main.L0               /* Exception thrown, branch to escape target */
+    bne main.L0                              /* Exception thrown, branch to escape target */
     mov r4, r0
     b main.L1
 main.L0: 
     mov r1, sp
-    ldr sp, [fp, #-16]        /* Load backed up sp from stack */
+    ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
     cmp r12, #1
     bne main.L2
     add r1, r1, #8
     mov r0, #8
-main.L3:                      /* Copy stack return with loop */
-    cmp r0, #0
-    beq main.L4
-    ldr r2, [r1, #-4]!
-    push { r2 }
-    sub r0, r0, #4
-    b main.L3
-main.L4: 
-    sub r1, fp, #20           /* Evaluate Expression */
-    ldr r0, [r1]              /* Load field from struct */
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    sub r1, fp, #20                          /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r1, r0
     lsl r0, r1, #1
     push { r0 }
-    sub r1, fp, #20           /* Load field location */
+    sub r1, fp, #20                          /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]              /* Load field from struct */
+    ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
@@ -133,7 +128,7 @@ main.L4:
     b main.L1
 main.L2: 
 main.L1: 
-    mov r0, r4                /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr

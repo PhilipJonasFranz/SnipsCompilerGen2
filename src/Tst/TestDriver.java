@@ -264,6 +264,7 @@ public class TestDriver {
 	
 	@SuppressWarnings("deprecation")
 	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer, List<String> content) throws InterruptedException {
+		CompilerDriver.reset();
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
 		

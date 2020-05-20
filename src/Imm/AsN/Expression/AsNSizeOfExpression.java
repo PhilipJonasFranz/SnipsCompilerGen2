@@ -4,10 +4,8 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.RegOperand;
 import Imm.AST.Expression.SizeOfExpression;
+import Imm.AsN.AsNBody;
 
 public class AsNSizeOfExpression extends AsNExpression {
 
@@ -19,7 +17,7 @@ public class AsNSizeOfExpression extends AsNExpression {
 		s.clearReg(r, st, 0);
 		
 		/* Move word size in target register */
-		s.instructions.add(new ASMMov(new RegOperand(target), new ImmOperand(soe.sizeType.wordsize())));
+		AsNBody.literalManager.loadValue(s, soe.sizeType.wordsize(), target);
 		
 		return s;
 	}

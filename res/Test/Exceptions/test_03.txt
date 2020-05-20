@@ -1,0 +1,310 @@
+SOURCE
+struct Exception {
+	int code;
+}
+
+int checkThreshold(int* arr, int t) signals Exception {
+	int max = 0;
+	int s = hsize(arr);
+	for (int i = 0; i < s; i++) {
+		int v = *(arr + i);
+		if (v >= t) {
+			signal Exception::(v);
+		}
+		else {
+			if (v > max) max = v;
+		}
+	}
+	
+	return max;
+}
+
+int main(int t) {
+	int* arr = (int*) resv(5);
+	*arr = {6, 1, 7, 5, 9};
+	
+	int exit = 0;
+	try {
+		exit = checkThreshold(arr, t);
+	} watch (Exception e) {
+		exit = e.code;
+	}
+	
+	return exit;
+}
+TESTCASES
+0 6
+1 6
+2 6
+3 6
+4 6
+5 6
+6 6
+7 7
+8 9
+9 9
+10 9
+11 9
+OUTPUT
+/* --test_03.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+/* Loads the size of the memory block that given pointer points to. */
+/* The pointer must point on a heap object for the method to work. */
+hsize:                                       /* Function: hsize */
+    push { r3 }
+    mov r3, r0
+/* Jump to block head */
+    sub r3, r3, #1
+/* Load Block Size and return */
+    lsl r0, r3, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    mov r1, r0
+    mov r2, #1
+    sub r0, r1, #1
+    pop { r3 }
+    bx lr
+    
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                                        /* Function: resv */
+    push { r3, r4, r5, r6, r7, r8, r9 }
+    mov r3, r0
+/* Add block header to size */
+    add r3, r3, #1
+/* Get reference to heap start */
+    ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r4, r0
+resv.L1:                                     /* Evaluate condition */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    lsl r0, r4, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    mov r5, r0
+    mov r6, r0
+    cmp r5, #0
+    bge resv.L4
+/* Defragment Heap */
+resv.L6:                                     /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne resv.L7
+    sub r0, r4, r5
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    mov r7, r0
+    cmp r7, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r7, #0
+    bne resv.L11
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b resv.L7
+resv.L11: 
+    add r5, r5, r7
+/* Add to current size */
+    b resv.L6
+resv.L7: 
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+/* Write defragmented size to heap */
+    mov r7, r0
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+/* Memory location is free, check size */
+    rsb r0, r5, #0
+    mov r5, r0
+    cmp r0, r3
+    bne resv.L15
+/* Fits */
+    mov r0, r3                               /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r8, r0                               /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+    b resv.L18
+resv.L15: 
+    cmp r5, r3
+    ble resv.L17
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    mov r0, r3                               /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r9, r0                               /* Evaluate Expression */
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r1, r4                               /* Evaluate Expression */
+    mov r2, #1
+    add r0, r1, #1
+    b resv.L18
+resv.L17: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+/* End reached, create new block */
+    mov r0, r3                               /* Evaluate Expression */
+    lsl r1, r4, #2
+    str r0, [r1]
+    mov r5, r0                               /* Evaluate Expression */
+    mov r1, r4
+    mov r2, #1
+    add r0, r1, #1
+resv.L18: 
+    pop { r3, r4, r5, r6, r7, r8, r9 }
+    bx lr
+.POOL0_main.L0_HEAP_START: .word HEAP_START
+    
+checkThreshold:                              /* Function: checkThreshold */
+    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, #0
+    mov r0, r3                               /* Evaluate Expression */
+    bl hsize                                 /* Call hsize */
+    mov r6, r0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r7, #0
+checkThreshold.L2: 
+    cmp r7, r6
+    bge checkThreshold.L3
+    add r0, r3, r7
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    mov r8, r0
+    cmp r0, r4
+    blt checkThreshold.L5
+    mov r0, r8
+    push { r0 }
+    mov r12, #1                              /* Signal thrown exception */
+    mov r0, #4
+    b checkThreshold.L0                      /* Exception thrown, branch to escape target */
+checkThreshold.L5: 
+    mov r9, r0
+    cmp r8, r5
+    ble checkThreshold.L6
+    mov r0, r8                               /* Evaluate Expression */
+    mov r5, r0
+checkThreshold.L6: 
+    mov r0, r7
+    add r7, r0, #1
+    b checkThreshold.L2
+checkThreshold.L3: 
+    mov r0, r5                               /* Evaluate Expression */
+    b checkThreshold.L8
+checkThreshold.L0: 
+checkThreshold.L8: 
+    cmp r12, #0
+    mov r2, sp
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
+    beq checkThreshold.L9
+    add r1, r2, r0
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+checkThreshold.L9: 
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #5                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r4, r0
+    mov r0, #9                               /* Evaluate Expression */
+    mov r1, #5
+    mov r2, #7
+    push { r2, r1, r0 }
+    mov r0, #1
+    mov r1, #6
+    push { r1, r0 }
+    lsl r1, r4, #2
+    pop { r0 }
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    mov r5, #0
+    push { sp }
+    mov r0, r3                               /* Evaluate Expression */
+    push { r0 }
+    mov r0, r4
+    pop { r1 }
+    bl checkThreshold                        /* Call checkThreshold */
+    cmp r12, #0
+    bne main.L0                              /* Exception thrown, branch to escape target */
+    mov r5, r0
+    b main.L1
+main.L0: 
+    mov r1, sp
+    ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
+    add sp, sp, #4
+    cmp r12, #1
+    bne main.L2
+    add r1, r1, #4
+    mov r0, #4
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    sub r1, fp, #4                           /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
+    mov r5, r0
+    add sp, sp, #4
+    mov r12, #0
+    b main.L1
+main.L2: 
+main.L1: 
+    mov r0, r5                               /* Evaluate Expression */
+    mov sp, fp
+    pop { r3, r4, r5, fp, lr }
+    bx lr
+    

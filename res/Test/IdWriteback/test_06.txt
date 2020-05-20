@@ -15,21 +15,17 @@ TESTCASES
 4 10
 OUTPUT
 /* --test_06.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3, r4, r5 }
     mov fp, sp
     mov r3, r0
     mov r4, #0
-    push { r4 }               /* Push declaration on stack, referenced by addressof. */
-    sub r0, fp, #4            /* Evaluate Expression */
+    push { r4 }                              /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
     mov r4, r0
 /* Force s on the stack */
-    mov r0, #0                /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 main.L1: 
     cmp r5, r3
@@ -42,7 +38,7 @@ main.L1:
     add r5, r0, #1
     b main.L1
 main.L2: 
-    mov r5, r0                /* Evaluate Expression */
+    mov r5, r0                               /* Evaluate Expression */
     ldr r0, [fp, #-4]
     mov sp, fp
     pop { r3, r4, r5 }

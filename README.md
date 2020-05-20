@@ -1,17 +1,16 @@
-# Snips Compiler Gen.2 v.3.0.0-RELEASE
+# Snips Compiler Gen.2 v.3.0.5-RELEASE
 ## Some words in advance
- This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not though for any production environment. The project and all its included modules are still under development and are subject to change.
+ This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
 ## What is Snips?
  Snips is a lightweight C/Java oriented proramming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
- operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality and namespaces are supported.
+ operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces and exception handling are supported.
  
- Currently supported data types are Integers and Booleans, Chars and Strings, Enums, as well as multi-dimensional arrays of said 
- types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and recieve proviso types, allowing them to handle various types.
+ Currently supported data types are Integers and Booleans, Chars and Strings, Enums, as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and recieve proviso types, allowing them to handle various types.
  
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
- continue and return.
+ continue, try/watch, signal and return.
 ### The compiler
  The compiler pipeline consists out of various stages:
  

@@ -6,14 +6,10 @@ TESTCASES
 1
 OUTPUT
 /* --test_02.txt */
-.data
-HEAP_START: .word 0
-    
-.text
-main:                         /* Function: main */
+main:                                        /* Function: main */
     push { r3 }
     mov r3, r0
-    mov r0, #1                /* Evaluate Expression */
+    mov r0, #1                               /* Evaluate Expression */
     pop { r3 }
     bx lr
     

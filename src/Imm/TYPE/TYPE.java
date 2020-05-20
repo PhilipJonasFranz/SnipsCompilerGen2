@@ -1,6 +1,7 @@
 package Imm.TYPE;
 
-import Exc.PARSE_EXCEPTION;
+import java.util.List;
+
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token;
 import Par.Token.TokenType;
@@ -41,7 +42,7 @@ public abstract class TYPE<T> {
 	
 	public abstract TYPE getCoreType();
 	
-	public static TYPE fromToken(Token token) throws PARSE_EXCEPTION {
+	public static TYPE fromToken(Token token, List<Message> buffered) {
 		if (token.type() == TokenType.PROVISO) {
 			return new PROVISO(token.spelling);
 		}
@@ -50,7 +51,7 @@ public abstract class TYPE<T> {
 			
 			if (t == null) {
 				t = new PROVISO(token.spelling);
-				new Message("Unknown Type '" + token.spelling + "', creating Proviso", Message.Type.WARN);
+				buffered.add(new Message("Unknown Type '" + token.spelling + "', creating Proviso", Message.Type.WARN, true));
 			}
 			
 			return t;
