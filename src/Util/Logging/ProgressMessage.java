@@ -39,7 +39,7 @@ public class ProgressMessage {
 		if (!CompilerDriver.silenced && !buffered) System.out.print(this.getMessage());
 	}
 	
-	public double last = 0;
+	public boolean isDone = false;;
 	
 	protected int printed = 0;
 	
@@ -50,8 +50,9 @@ public class ProgressMessage {
 				printed++;
 			}
 			
-			if (progress == 1) {
+			if (progress == 1 && !isDone) {
 				System.out.println("DONE!");
+				isDone = true;
 			}
 		}
 	}

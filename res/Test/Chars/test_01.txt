@@ -505,6 +505,29 @@ String.substring.L10:
     
 /* Returns the length of the string. The length is determined by the first */
 /* occurrence of the 0 termination char. The length does include the 0 char. */
+String.length:                               /* Function: String.length */
+    push { r3, r4 }
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r4, #0
+String.length.L1:                            /* Evaluate condition */
+    add r0, r3, r4
+    lsl r0, r0, #2                           /* Convert to bytes */
+    ldr r0, [r0]                             /* Load from address */
+    cmp r0, #0
+    beq String.length.L2
+    mov r0, r4
+    add r4, r0, #1
+    b String.length.L1
+String.length.L2: 
+    mov r0, r4
+    add r4, r0, #1
+    mov r0, r4                               /* Evaluate Expression */
+    pop { r3, r4 }
+    bx lr
+    
+/* Concatenates the two given strings. Result is one string. Does */
+/* only read the two given strings. */
     
 main:                                        /* Function: main */
     push { r3, fp, lr }

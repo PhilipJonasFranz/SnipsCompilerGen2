@@ -260,16 +260,6 @@ public class ContextChecker {
 		TYPE exc = e.exceptionInit.check(this);
 		e.watchpoint = this.exceptionEscapeStack.peek();
 		
-		boolean match = false;
-		for (TYPE signals : this.currentFunction.peek().signalsTypes) {
-			match |= signals.isEqual(exc);
-		}
-		
-		/* Thrown exception is not in list of signaled types */
-		if (!match) {
-			throw new CTX_EXCEPTION(e.getSource(), "Thrown exception type " + exc.typeString() + " is not signaled by function '" + this.currentFunction.peek().path.build() + "'");
-		}
-		
 		/* Add to signal stack */
 		if (!this.signalStackContains(exc)) {
 			this.signalStack.peek().add(exc);
