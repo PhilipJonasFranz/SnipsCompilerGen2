@@ -20,6 +20,7 @@ public class Scope {
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
+	/** Stores all the declarations made in this scope. */
 	HashMap<NamespacePath, Declaration> declarations = new HashMap();
 	
 	
@@ -29,6 +30,7 @@ public class Scope {
 		this.parentScope = parentScope;
 	}
 	
+	/** Print out the current scope and all parent scopes and the stored declarations */
 	public void print(int d) {
 		if (d != 0) System.out.println("--- SCOPE ---");
 		else System.out.println("--- TOP SCOPE ---");

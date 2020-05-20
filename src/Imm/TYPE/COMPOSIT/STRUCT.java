@@ -38,7 +38,7 @@ public class STRUCT extends COMPOSIT {
 					isEqual &= this.typedef.fields.get(i).getType().isEqual(struct.typedef.fields.get(i).getType());
 				}
 				
-				return isEqual && struct.typedef.path.build().equals(this.typedef.path.build());
+				return isEqual && struct.typedef.SID == this.typedef.SID;
 			}
 			
 		}
