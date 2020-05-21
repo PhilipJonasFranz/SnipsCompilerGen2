@@ -2,7 +2,7 @@
 	<Version>v.3.0.7</Version>
 	<Library>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
-		<Alias>vec_cross.sn:lib/std/math/vec_cross.sn</Alias>
+		<Alias>vector.sn:lib/std/math/vector.sn</Alias>
 		<Alias>matrix.sn:lib/std/math/matrix.sn</Alias>
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
 		<Alias>boolean.sn:lib/std/type/boolean.sn</Alias>
