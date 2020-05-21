@@ -15,7 +15,7 @@ namespace Stack {
 	 * Creates and initializes a new stack.
 	 * Returns a pointer to the newly created stack.
 	 */
-	StackedList<T> create<T>() {
+	StackedList<T>* create<T>() {
 		LinkedList<T>* list = (LinkedList<T>*) List::create<T>();
 		StackedList<T>* stack = (StackedList<T>*) resv(sizeof(StackedList<T>));
 		*stack = StackedList<T>::(list);

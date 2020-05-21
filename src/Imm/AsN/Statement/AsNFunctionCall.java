@@ -12,6 +12,7 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -122,9 +123,15 @@ public class AsNFunctionCall extends AsNStatement {
 		 * Push dummy values on the stack for the stack return value, but only if 
 		 * there is a data target.
 		 */
-		if (f.getReturnType().wordsize() > 1 && inlineCall) {
-			for (int i = 0; i < f.getReturnType().wordsize(); i++) {
-				st.push(REGISTER.R0);
+		if (f.getReturnType().wordsize() > 1) {
+			if (inlineCall) {
+				for (int i = 0; i < f.getReturnType().wordsize(); i++) {
+					st.push(REGISTER.R0);
+				}
+			}
+			else {
+				/* No data target, reset stack */
+				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4)));
 			}
 		}
 		
