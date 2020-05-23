@@ -12,7 +12,7 @@
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue, try/watch, signal and return.
  
- You can find more information on the language and the libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf) at doc/Snips Documentation.pdf.
+ You can find more information on the language and the libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 ### The compiler
  The compiler pipeline consists out of various stages:
  
