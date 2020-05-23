@@ -11,6 +11,8 @@
  
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue, try/watch, signal and return.
+ 
+ You can find more information on the language and the libraries at the [Official Documentation](Snips Documentation.pdf)
 ### The compiler
  The compiler pipeline consists out of various stages:
  
