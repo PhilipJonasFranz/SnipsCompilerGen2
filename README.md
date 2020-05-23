@@ -12,7 +12,7 @@
  Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
  continue, try/watch, signal and return.
  
- You can find more information on the language and the libraries at the [Official Documentation](Snips Documentation.pdf)
+ You can find more information on the language and the libraries at the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf)
 ### The compiler
  The compiler pipeline consists out of various stages:
  
@@ -31,7 +31,7 @@
  
 ## Usage & Setup
 ### Running the executable
- If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips [Full Path to file to compile]". With "snips -help" you can get more information on the arguments.
+ If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips (Full Path to file to compile)". With "snips -help" you can get more information on the arguments.
 
 ### Running the code
 The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
