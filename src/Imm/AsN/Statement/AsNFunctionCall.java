@@ -76,10 +76,21 @@ public class AsNFunctionCall extends AsNStatement {
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.getSecond() == -1) {
+				/*
+				 * At this point, special stack set handling is needed. The casted parameter can push dummies
+				 * on the stack. Since these are function parameters, the called function will take care of
+				 * them. We reset the stack set for the compile time here already.
+				 */
+				int s = st.getStack().size();
+				
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
+				
+				/* Push Parameter in R0 on the stack */
 				if (parameters.get(i).getType().wordsize() == 1) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
+				
+				while (st.getStack().size() != s) st.pop();
 				r.getReg(0).free();
 			}
 		}
