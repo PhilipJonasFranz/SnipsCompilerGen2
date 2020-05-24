@@ -1,0 +1,34 @@
+SOURCE
+int get(int x) {
+	int y = 10;
+	return #r3 + 5;
+}
+
+int main(int k) {
+	return get(k);
+}
+TESTCASES
+5 10
+0 5
+-5 0
+OUTPUT
+/* --test_00.txt */
+    b main
+get:                                         /* Function: get */
+    push { r3, r4 }
+    mov r3, r0
+    mov r1, r0
+    mov r2, #5
+    add r0, r1, #5
+    pop { r3, r4 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    bl get                                   /* Call get */
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    

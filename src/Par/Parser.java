@@ -26,6 +26,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
@@ -1461,6 +1462,12 @@ public class Parser {
 				/* Identifier Reference */
 				return new IDRef(path, source);
 			}
+		}
+		else if (current.type == TokenType.DIRECTIVE) {
+			/* Direct Reg Targeting */
+			Source source = accept().getSource();
+			Token reg = accept(TokenType.IDENTIFIER);
+			return new RegisterAtom(reg, source);
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();

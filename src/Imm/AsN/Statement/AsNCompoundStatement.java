@@ -23,6 +23,7 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
@@ -269,7 +270,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			}
 			return ref;
 		}
-		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType || e instanceof StructSelect) {
+		else if (e instanceof IDRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());

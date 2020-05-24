@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Stack;
 
 import Exc.CTX_EXCEPTION;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
@@ -19,6 +21,7 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
@@ -1324,6 +1327,37 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkAtom(Atom a) throws CTX_EXCEPTION {
+		return a.getType();
+	}
+	
+	public TYPE checkRegisterAtom(RegisterAtom a) throws CTX_EXCEPTION {
+		String reg = a.spelling.toLowerCase();
+		
+		if (reg.equals("sp")) a.reg = REGISTER.SP;
+		else if (reg.equals("lr")) a.reg = REGISTER.LR;
+		else if (reg.equals("fp")) a.reg = REGISTER.FP;
+		else if (reg.equals("pc")) a.reg = REGISTER.PC;
+		else if (reg.equals("er")) a.reg = REGISTER.R12;
+		else {
+			if (reg.length() < 2) {
+				throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
+			}
+			else {
+				String r0 = reg.substring(1);
+				try {
+					int regNum = Integer.parseInt(r0);
+					
+					if (regNum < 0 || regNum > 15) {
+						throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
+					}
+					
+					a.reg = RegOperand.toReg(regNum);
+				} catch (NumberFormatException e) {
+					throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
+				}
+			}
+		}
+		
 		return a.getType();
 	}
 	
