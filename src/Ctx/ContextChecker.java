@@ -222,7 +222,7 @@ public class ContextChecker {
 			}
 			
 			if (!contains) {
-				throw new CTX_EXCEPTION(f.getSource(), "Watched exception " + t.typeString() + " is not thrown in function body");
+				messages.add(new Message("Watched exception " + t.typeString() + " is not thrown in function '" + f.path.build() + "', " + f.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		
@@ -305,7 +305,7 @@ public class ContextChecker {
 			}
 			
 			if (!w.hasTarget) {
-				throw new CTX_EXCEPTION(e.getSource(), "Watched exception type " + w.watched.getType().typeString() + " is not thrown in try block");
+				messages.add(new Message("Watched exception type " + w.watched.getType().typeString() + " is not thrown in try block, " + e.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		
@@ -1224,7 +1224,8 @@ public class ContextChecker {
 		
 		TYPE t = tc.expression.check(this);
 		
-		if (t.wordsize() != tc.castType.wordsize()) {
+		/* Allow only casting to equal word sizes or from or to void types */
+		if (t.wordsize() != tc.castType.wordsize() && !(tc.castType.getCoreType() instanceof VOID || t instanceof VOID)) {
 			throw new CTX_EXCEPTION(tc.getSource(), "Cannot cast " + t.typeString() + " to " + tc.castType.typeString());
 		}
 		

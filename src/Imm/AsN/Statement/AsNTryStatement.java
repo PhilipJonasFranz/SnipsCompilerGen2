@@ -26,6 +26,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AsN.AsNBody;
+import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 
@@ -47,6 +48,10 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		/* Insert the body */
 		tr0.addBody(s, r, map, st);
 		
+		/* Load SP before the try section was entered, no exception was thrown, 
+		 * dont pop from stack yet since offset is needed below */
+		tr0.loadSPBackup(tr0, st);
+		
 		/* Branch to end, no exception occured */
 		ASMLabel endBranch = new ASMLabel(LabelGen.getLabel());
 		tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(endBranch)));
@@ -57,14 +62,8 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		/* Backup SP, currently points to top address of thrown exception */
 		tr0.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.SP)));
 		
-		/* Load SP before the try section was entered */
-		int off = st.getHighestSPBackupOffset();
-		ASMLdrStack reset = new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.DOWN, -off));
-		reset.comment = new ASMComment("Load backed up sp from stack");
-		tr0.instructions.add(reset);
-		
-		/* Pop SP Backup */
-		tr0.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(4)));
+		/* Load SP before the try section was entered, exception was thrown */
+		tr0.loadSPBackup(tr0, st);
 		st.popXWords(1);
 		
 		for (WatchStatement w : s.watchpoints) {
@@ -119,6 +118,16 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		tr0.instructions.add(endBranch);
 		
 		return tr0;
+	}
+	
+	public void loadSPBackup(AsNNode node, StackSet st) {
+		int off = st.getHighestSPBackupOffset();
+		ASMLdrStack reset = new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.DOWN, -off));
+		reset.comment = new ASMComment("Load backed up sp from stack");
+		node.instructions.add(reset);
+		
+		/* Pop SP Backup */
+		node.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(4)));
 	}
 	
 }
