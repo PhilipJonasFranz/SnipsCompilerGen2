@@ -22,6 +22,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
@@ -83,6 +84,7 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.CHAR;
+import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
@@ -99,6 +101,9 @@ public class Parser {
 	protected List<Token> tokenStream;
 	
 	protected Token current;
+	
+	/* Active Struct Ids */
+	List<Pair<NamespacePath, Function>> functions = new ArrayList();
 	
 	/* Active Struct Ids */
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
@@ -469,13 +474,59 @@ public class Parser {
 		
 		List<Statement> body = this.parseCompoundStatement(true);
 		
-		return new Function(returnType, new NamespacePath(identifier.spelling), proviso, parameters, signals, signalsTypes, body, identifier.source);
+		NamespacePath path = new NamespacePath(identifier.spelling);
+		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, identifier.source);
+		this.functions.add(new Pair<NamespacePath, Function>(path, f));
+		return f;
 	}
 	
 	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
-		TYPE type = this.parseType();
-		Token id = accept(TokenType.IDENTIFIER);
-		return new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+		if (current.type == TokenType.FUNC) {
+			Source source = accept().getSource();
+			
+			List<Declaration> decs = new ArrayList();
+			
+			if (current.type == TokenType.LPAREN) {
+				/* Params in braces */
+				accept(TokenType.LPAREN);
+				
+				while (current.type != TokenType.RPAREN) {
+					decs.add(this.parseParameterDeclaration());
+					
+					if (current.type == TokenType.COMMA) {
+						accept();
+					}
+					else {
+						break;
+					}
+				}
+				
+				accept(TokenType.RPAREN);
+			}
+			else if (current.type != TokenType.UNION_ACCESS ){
+				/* Only one param, no braces */
+				decs.add(this.parseParameterDeclaration());
+			}
+			
+			accept(TokenType.UNION_ACCESS);
+			
+			TYPE ret = this.parseType();
+			
+			Token id = accept(TokenType.IDENTIFIER);
+			List<String> path = new ArrayList();
+			path.add(id.spelling);
+			
+			/* Wrap parsed function head in function object, wrap created head in declaration */
+			Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
+			lambda.isLambdaHead = true;
+			
+			return new Declaration(new NamespacePath(id.spelling), new FUNC(lambda), null, source);
+		}
+		else {
+			TYPE type = this.parseType();
+			Token id = accept(TokenType.IDENTIFIER);
+			return new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+		}
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
@@ -1414,28 +1465,35 @@ public class Parser {
 			}
 			
 			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
-				/* Inline Call */
 				List<TYPE> proviso = this.parseProviso();
 				
-				accept(TokenType.LPAREN);
-				
-				List<Expression> parameters = new ArrayList();
-				while (current.type != TokenType.RPAREN) {
-					parameters.add(this.parseExpression());
-					if (current.type != TokenType.COMMA) break;
-					accept(TokenType.COMMA);
+				/* Predicate with proviso */
+				if (current.type != TokenType.LPAREN) {
+					/* Predicate without proviso */
+					return new FunctionRef(proviso, path, source);
 				}
-				accept(TokenType.RPAREN);
-				
-				if (path.getPath().get(0).equals("resv")) {
-					CompilerDriver.heap_referenced = true;
-					CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+				else {
+					/* Inline Call */
+					accept(TokenType.LPAREN);
+					
+					List<Expression> parameters = new ArrayList();
+					while (current.type != TokenType.RPAREN) {
+						parameters.add(this.parseExpression());
+						if (current.type != TokenType.COMMA) break;
+						accept(TokenType.COMMA);
+					}
+					accept(TokenType.RPAREN);
+					
+					if (path.getPath().get(0).equals("resv")) {
+						CompilerDriver.heap_referenced = true;
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+					}
+					else if (path.getPath().get(0).equals("hsize")) {
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+					}
+					
+					return new InlineCall(path, proviso, parameters, source);
 				}
-				else if (path.getPath().get(0).equals("hsize")) {
-					CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
-				}
-				
-				return new InlineCall(path, proviso, parameters, source);
 			}
 			else if (current.type == TokenType.DOT && (tokenStream.get(0).type == TokenType.ENUMLIT || path.termination == PATH_TERMINATION.ENUM)) {
 				accept(TokenType.DOT);
@@ -1459,8 +1517,16 @@ public class Parser {
 				return new Atom(def.getEnumField(value.spelling, source), value, source);
 			}
 			else {
-				/* Identifier Reference */
-				return new IDRef(path, source);
+				Function lambda = this.findFunction(path);
+				
+				if (lambda != null) {
+					/* Predicate without proviso */
+					return new FunctionRef(new ArrayList(), path, source);
+				}
+				else {
+					/* Identifier Reference */
+					return new IDRef(path, source);
+				}
 			}
 		}
 		else if (current.type == TokenType.DIRECTIVE) {
@@ -1515,6 +1581,33 @@ public class Parser {
 				}
 			}
 		}
+	}
+	
+	public Function findFunction(NamespacePath path) {
+		Function lambda = null;
+		
+		for (Pair<NamespacePath, Function> p : this.functions) {
+			if (p.first.build().equals(path.build())) {
+				return p.second;
+			}
+		}
+		
+		if (lambda == null) {
+			if (path.path.size() == 1) {
+				List<Function> f0 = new ArrayList();
+				
+				for (Pair<NamespacePath, Function> p : this.functions) {
+					if (p.first.getLast().equals(path.getLast())) {
+						f0.add(p.second);
+					}
+				}
+				
+				/* Return if there is only one result */
+				if (f0.size() == 1) return f0.get(0);
+			}
+		}
+		
+		return null;
 	}
 	
 	/* Anchor used for expression parsing. */
@@ -1596,7 +1689,8 @@ public class Parser {
 		TYPE type = null;
 		Token token = null;
 		
-		if (current.type == TokenType.IDENTIFIER) token = accept();
+		if (current.type == TokenType.FUNC) token = accept();
+		else if (current.type == TokenType.IDENTIFIER) token = accept();
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
@@ -1663,6 +1757,11 @@ public class Parser {
 			
 			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
+			
+			/* FUNC types are not allowed as pointers or arrays */
+			if (type instanceof FUNC) {
+				return type;
+			}
 		}
 		
 		while (true) {

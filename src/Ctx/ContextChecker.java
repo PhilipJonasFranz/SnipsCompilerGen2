@@ -18,6 +18,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
@@ -61,6 +62,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
@@ -664,6 +666,10 @@ public class ContextChecker {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
+			if (t instanceof FUNC) {
+				d.setType(t);
+			}
+			
 			if (!d.getType().isEqual(t)) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
@@ -983,6 +989,16 @@ public class ContextChecker {
 				}
 			}
 			
+			for (Declaration d : this.currentFunction.peek().parameters) {
+				if (d.getType() instanceof FUNC) {
+					FUNC f0 = (FUNC) d.getType();
+					f0.funcHead.lambdaDeclaration = d;
+					if (f0.funcHead.path.getLast().equals(path.getLast())) {
+						funcs.add(f0.funcHead);
+					}
+				}
+			}
+			
 			/* Return if there is only one result */
 			if (funcs.isEmpty()) {
 				throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
@@ -1120,6 +1136,12 @@ public class ContextChecker {
 		
 		for (int a = 0; a < f.parameters.size(); a++) {
 			TYPE paramType = i.parameters.get(a).check(this);
+			
+			if (paramType instanceof FUNC) {
+				FUNC f0 = (FUNC) paramType;
+				f0.funcHead.isLambdaHead = true;
+			}
+			
 			if (!paramType.isEqual(f.parameters.get(a).getType())) {
 				if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
@@ -1147,6 +1169,54 @@ public class ContextChecker {
 		else {
 			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.path.build());
 		}
+	}
+	
+	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXCEPTION {
+		Function lambda = null;
+		
+		for (Function f : this.functions) {
+			if (f.path.build().equals(r.path.build())) {
+				lambda = f;
+				break;
+			}
+		}
+		
+		if (lambda == null) {
+			if (r.path.path.size() == 1) {
+				List<Function> f0 = new ArrayList();
+				
+				for (Function f : this.functions) {
+					if (f.path.getLast().equals(f.path.getLast())) {
+						f0.add(f);
+					}
+				}
+				
+				/* Return if there is only one result */
+				if (f0.size() == 1) lambda = f0.get(0);
+				/* Multiple results, cannot determine correct one, return null */
+				else if (f0.isEmpty()) {
+					throw new CTX_EXCEPTION(r.getSource(), "Unknown predicate: " + r.path.build());
+				}
+				else {
+					String s = "";
+					for (Function f : f0) s += f.path.build() + ", ";
+					s = s.substring(0, s.length() - 2);
+					throw new CTX_EXCEPTION(r.getSource(), "Multiple matches for predicate '" + r.path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+				}
+			}
+			else {
+				throw new CTX_EXCEPTION(r.getSource(), "Unknown predicate: " + r.path.build());
+			}
+		}
+		
+		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		r.origin = lambda;
+		
+		/* Set flag that this function was targeted as a lambda */
+		lambda.isLambdaTarget = true;
+		
+		r.setType(new FUNC(lambda));
+		return r.getType();
 	}
 	
 	public TYPE checkArrayInit(ArrayInit init) throws CTX_EXCEPTION {

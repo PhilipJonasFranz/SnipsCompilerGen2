@@ -33,6 +33,13 @@ public class Function extends CompoundStatement {
 	
 	public List<TYPE> signalsTypes;
 	
+	/* Flags for lambda targeting */
+	public Declaration lambdaDeclaration;
+	
+	public boolean isLambdaTarget = false;
+	
+	public boolean isLambdaHead = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, Source source) {

@@ -36,6 +36,7 @@ import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.FUNC;
 import Util.Pair;
 
 public class AsNFunction extends AsNCompoundStatement {
@@ -46,6 +47,8 @@ public class AsNFunction extends AsNCompoundStatement {
 	public Function source;
 	
 	public ASMLabel copyLoopEscape;
+	
+	public ASMLabel lambdaTarget;
 	
 	
 			/* --- METHODS --- */
@@ -63,6 +66,20 @@ public class AsNFunction extends AsNCompoundStatement {
 		if (f.signals) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
 		
 		List<ASMInstruction> all = new ArrayList();
+		
+		for (Declaration d : f.parameters) {
+			if (d.getType() instanceof FUNC) {
+				FUNC f0 = (FUNC) d.getType();
+				
+				/* 
+				 * Predicate function heads are not casted, set a casted node here to prevent confusion later.
+				 * The isLambdaHead flag will indicate that this function is a predicate.
+				 */
+				AsNFunction casted = new AsNFunction();
+				casted.source = f0.funcHead;
+				f0.funcHead.castedNode = casted;
+			}
+		}
 		
 		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {
 			/* Reset regs and stack */
@@ -92,6 +109,20 @@ public class AsNFunction extends AsNCompoundStatement {
 				else 
 					/* Load Declaration into register */
 					r.getReg(p.getSecond()).setDeclaration(p.getFirst());
+			}
+			
+			/* Function address getter for lambda */
+			if (f.isLambdaTarget) {
+				ASMLabel l = new ASMLabel("lambda_" + LabelGen.getLabel());
+				l.comment = new ASMComment("Function address getter for predication");
+				func.lambdaTarget = l;
+				
+				func.instructions.add(l);
+				
+				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+				
+				/* Branch back via sys jump */
+				func.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(REGISTER.R10)));
 			}
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
@@ -150,7 +181,10 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			
 			/* Check if other function is called within this function */
-			boolean hasCall = func.instructions.stream().filter(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL).count() > 0;
+			boolean hasCall = func.instructions.stream().filter(x -> {
+				return x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
+					   x instanceof ASMAdd && ((ASMAdd) x).target.reg == REGISTER.LR;
+			}).count() > 0;
 			
 			/* Jumplabel to centralized function return */
 			ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());

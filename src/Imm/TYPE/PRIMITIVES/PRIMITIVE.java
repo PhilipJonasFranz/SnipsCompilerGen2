@@ -32,6 +32,9 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		else if (token.type() == TokenType.VOID) {
 			return new VOID();
 		}
+		else if (token.type() == TokenType.FUNC) {
+			return new FUNC();
+		}
 		else return null;
 	}
 	

@@ -26,7 +26,7 @@ public class AsNInlineCall extends AsNExpression {
 		 * When a function has provisos, the order cannot be checked.
 		 * A indicator the order is incorrect is that the casted node is null at this point.
 		 */
-		if (ic.calledFunction.castedNode == null) {
+		if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead) {
 			throw new SNIPS_EXCEPTION("Function " + ic.calledFunction.path.build() + " is undefined at this point, " + ic.getSource().getSourceMarker());
 		}
 		

@@ -296,6 +296,12 @@ public class Scanner {
 				this.state = ACC_STATE.NONE;
 				return true;
 			}
+			else if (this.buffer.equals("func")) {
+				tokens.add(new Token(TokenType.FUNC, new Source(fileName, i, a)));
+				this.emptyBuffer();
+				this.state = ACC_STATE.NONE;
+				return true;
+			}
 			else if (this.buffer.equals("int")) {
 				tokens.add(new Token(TokenType.INT, new Source(fileName, i, a)));
 				this.emptyBuffer();
