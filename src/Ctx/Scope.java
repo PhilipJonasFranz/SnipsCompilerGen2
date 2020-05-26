@@ -113,4 +113,38 @@ public class Scope {
 		}
 	}
 	
+	/**
+	 * Same as {@link #getField(NamespacePath, Source)}, but returns null instead of
+	 * throwing exception.
+	 */
+	public Declaration getFieldNull(NamespacePath path, Source source) {
+		if (this.declarations.containsKey(path)) {
+			return this.declarations.get(path);
+		}
+		else {
+			if (this.parentScope != null) {
+				return this.parentScope.getFieldNull(path, source);
+			}
+			else {
+				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				if (path == null) return null;
+				
+				if (path.path.size() == 1) {
+					List<Declaration> decs = new ArrayList();
+					
+					for (Entry<NamespacePath, Declaration> entry : this.declarations.entrySet()) {
+						if (entry.getKey().getLast().equals(path.getLast())) {
+							decs.add(entry.getValue());
+						}
+					}
+					
+					/* Return if there is only one result */
+					if (decs.size() == 1) return decs.get(0);
+				}
+			}
+		}
+		
+		return null;
+	}
+	
 }

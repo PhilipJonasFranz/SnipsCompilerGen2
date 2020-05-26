@@ -1,0 +1,84 @@
+SOURCE
+int add5(int a) {
+	return a + 5;
+}
+
+int add10(int a) {
+	return a + 10;
+}
+
+int foo(int v, func int a -> int pr0) {
+	return pr0(v);
+}
+
+int main(int x, bool add10Or5) {
+	func pred = (add10Or5)? add10 : add5;
+	return foo(x, pred);
+}
+TESTCASES
+0 0 5
+1 0 6
+0 1 10
+1 1 11
+OUTPUT
+/* --test_00.txt */
+    b main
+lambda_add5:                                 /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add5:                                        /* Function: add5 */
+    push { r3 }
+    mov r3, r0
+    mov r1, r3                               /* Evaluate Expression */
+    mov r2, #5
+    add r0, r1, #5
+    pop { r3 }
+    bx lr
+    
+lambda_add10:                                /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add10:                                       /* Function: add10 */
+    push { r3 }
+    mov r3, r0
+    mov r1, r3                               /* Evaluate Expression */
+    mov r2, #10
+    add r0, r1, #10
+    pop { r3 }
+    bx lr
+    
+foo:                                         /* Function: foo */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3                               /* Evaluate Expression */
+    add lr, pc, #8
+    mov pc, r4
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    cmp r4, #0
+    beq main.L0
+    add r10, pc, #8
+    b lambda_add10
+    b main.L1
+main.L0: 
+    add r10, pc, #8
+    b lambda_add5
+main.L1: 
+    mov r5, r0
+    push { r0 }
+    mov r0, r3
+    pop { r1 }
+    bl foo                                   /* Call foo */
+    mov sp, fp
+    pop { r3, r4, r5, fp, lr }
+    bx lr
+    

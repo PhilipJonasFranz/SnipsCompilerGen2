@@ -13,6 +13,7 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -121,14 +122,27 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 		}
 		
-		/* Branch to function */
-		String target = f.path.build() + f.manager.getPostfix(provisos);
-		
-		ASMLabel functionLabel = new ASMLabel(target);
-		
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
-		branch.comment = new ASMComment("Call " + f.path.build());
-		call.instructions.add(branch);
+		if (f.isLambdaHead) {
+			if (r.declarationLoaded(f.lambdaDeclaration)) {
+				int loc = r.declarationRegLocation(f.lambdaDeclaration);
+				
+				/* Manual linking */
+				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+				
+				/* Move address of function into pc */
+				call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+			}
+		}
+		else {
+			/* Branch to function */
+			String target = f.path.build() + f.manager.getPostfix(provisos);
+			
+			ASMLabel functionLabel = new ASMLabel(target);
+			
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
+			branch.comment = new ASMComment("Call " + f.path.build());
+			call.instructions.add(branch);
+		}
 		
 		/* 
 		 * Push dummy values on the stack for the stack return value, but only if 

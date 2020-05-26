@@ -1,0 +1,62 @@
+SOURCE
+T add5<T>(T a) {
+	return (T) ((int) a + 5);
+}
+
+int main(int x) {
+	func pred = add5<int>;
+	func pred0 = add5<bool>;
+	
+	bool b0 = pred0(false);
+	
+	return pred(x);
+}
+TESTCASES
+0 5
+1 6
+OUTPUT
+/* --test_03.txt */
+    b main
+lambda_add5_P0:                              /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add5_P0:                                     /* Function: add5, Provisos: BOOL */
+    push { r3 }
+    mov r3, r0
+    mov r1, r0
+    mov r2, #5
+    add r0, r1, #5
+    pop { r3 }
+    bx lr
+    
+lambda_add5_P1:                              /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add5_P1:                                     /* Provisos: INT */
+    push { r3 }
+    mov r3, r0
+    mov r1, r0
+    mov r2, #5
+    add r0, r1, #5
+    pop { r3 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, r6, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_add5_P1
+    mov r4, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_add5_P0
+    mov r5, r0
+    mov r0, #0                               /* Evaluate Expression */
+    bl add5_P0                               /* Call add5 */
+    mov r6, r0
+    mov r0, r3                               /* Evaluate Expression */
+    bl add5_P1                               /* Call add5 */
+    mov sp, fp
+    pop { r3, r4, r5, r6, fp, lr }
+    bx lr
+    
