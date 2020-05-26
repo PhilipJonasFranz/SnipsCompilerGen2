@@ -120,6 +120,8 @@ public class Parser {
 	/* The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
+	Stack<List<Declaration>> scopes = new Stack();
+	
 	List<Message> buffered = new ArrayList();
 	
 	protected ProgressMessage progress;
@@ -221,6 +223,7 @@ public class Parser {
 	}
 	
 	protected Program parseProgram() throws PARSE_EXCEPTION {
+		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
@@ -258,6 +261,7 @@ public class Parser {
 		
 		for (Message m : buffered) m.flush();
 		
+		this.scopes.pop();
 		return program;
 	}
 	
@@ -306,7 +310,9 @@ public class Parser {
 				element = this.parseFunction(type, identifier);
 			}
 			else {
-				element = this.parseGlobalDeclaration(type, identifier);
+				Declaration d = this.parseGlobalDeclaration(type, identifier);
+				this.scopes.peek().add(d);
+				element = d;
 			}
 			
 			return element;
@@ -437,6 +443,8 @@ public class Parser {
 	}
 	
 	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {
+		this.scopes.push(new ArrayList());
+		
 		List<TYPE> proviso = this.parseProviso();
 		
 		for (TYPE t : proviso) {
@@ -477,6 +485,8 @@ public class Parser {
 		NamespacePath path = new NamespacePath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, identifier.source);
 		this.functions.add(new Pair<NamespacePath, Function>(path, f));
+		
+		this.scopes.pop();
 		return f;
 	}
 	
@@ -484,9 +494,14 @@ public class Parser {
 		if (current.type == TokenType.FUNC) {
 			Source source = accept().getSource();
 			
+			List<TYPE> proviso = new ArrayList();
 			List<Declaration> decs = new ArrayList();
 			
-			if (current.type == TokenType.LPAREN) {
+			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
+				if (current.type == TokenType.CMPLT) {
+					proviso = this.parseProviso();
+				}
+				
 				/* Params in braces */
 				accept(TokenType.LPAREN);
 				
@@ -520,12 +535,16 @@ public class Parser {
 			Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
 			lambda.isLambdaHead = true;
 			
-			return new Declaration(new NamespacePath(id.spelling), new FUNC(lambda), null, source);
+			Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
+			this.scopes.peek().add(d);
+			return d;
 		}
 		else {
 			TYPE type = this.parseType();
 			Token id = accept(TokenType.IDENTIFIER);
-			return new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+			Declaration d = new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+			this.scopes.peek().add(d);
+			return d;
 		}
 	}
 	
@@ -764,17 +783,21 @@ public class Parser {
 	}
 	
 	protected WatchStatement parseWatch() throws PARSE_EXCEPTION {
+		this.scopes.push(new ArrayList());
+		
 		Source source = current.getSource();
 		accept(TokenType.WATCH);
 		
 		accept(TokenType.LPAREN);
 		
 		Declaration watched = this.parseParameterDeclaration();
+		this.scopes.peek().add(watched);
 		
 		accept(TokenType.RPAREN);
 		
 		List<Statement> body = this.parseCompoundStatement(false);
 		
+		this.scopes.pop();
 		return new WatchStatement(body, watched, source);
 	}
 	
@@ -795,11 +818,14 @@ public class Parser {
 	}
 	
 	protected ForStatement parseFor() throws PARSE_EXCEPTION {
+		this.scopes.push(new ArrayList());
+		
 		Source source = accept(TokenType.FOR).getSource();
 		accept(TokenType.LPAREN);
 		
 		/* Accepts semicolon */
 		Declaration iterator = this.parseDeclaration();
+		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
 		accept(TokenType.SEMICOLON);
@@ -811,6 +837,7 @@ public class Parser {
 		
 		List<Statement> body = this.parseCompoundStatement(false);
 		
+		this.scopes.pop();
 		return new ForStatement(iterator, condition, increment, body, source);
 	}
 	
@@ -989,7 +1016,9 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		return new Declaration(new NamespacePath(identifier.spelling), type, value, identifier.source);
+		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, identifier.source);
+		this.scopes.peek().add(d);
+		return d;
 	}
 	
 	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
@@ -1005,7 +1034,9 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		return new Declaration(new NamespacePath(id.spelling), type, value, source);
+		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, source);
+		this.scopes.peek().add(d);
+		return d;
 	}
 	
 	protected ReturnStatement parseReturn() throws PARSE_EXCEPTION {
@@ -1517,7 +1548,22 @@ public class Parser {
 				return new Atom(def.getEnumField(value.spelling, source), value, source);
 			}
 			else {
+				/* Find the function that may match this path and act as a predicate */
 				Function lambda = this.findFunction(path);
+				
+				/* 
+				 * Check if a variable exists that matches the path, if yes, this variable
+				 * reference is treated with a higher priority.
+				 */
+				for (int i = this.scopes.size() - 1; i >= 0; i--) {
+					List<Declaration> scope = this.scopes.get(i);
+					for (int a = 0; a < scope.size(); a++) {
+						if (scope.get(a).path.build().equals(path.build())) {
+							/* Path referres to a variable, set lambda to null */
+							lambda = null;
+						}
+					}
+				}
 				
 				if (lambda != null) {
 					/* Predicate without proviso */
@@ -1875,6 +1921,8 @@ public class Parser {
 	}
 	
 	protected List<Statement> parseCompoundStatement(boolean forceBraces) throws PARSE_EXCEPTION {
+		this.scopes.push(new ArrayList());
+		
 		List<Statement> body = new ArrayList();
 		
 		/* Compound Statement with braces */
@@ -1887,6 +1935,7 @@ public class Parser {
 		/* Without braces, one statement only */
 		else body.add(this.parseStatement());
 		
+		this.scopes.pop();
 		return body;
 	}
 	

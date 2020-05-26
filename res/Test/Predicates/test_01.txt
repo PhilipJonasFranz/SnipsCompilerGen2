@@ -39,7 +39,7 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
     b main
-lambda_sortPred.L0:                          /* Function address getter for predication */
+lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
 sortPred:                                    /* Function: sortPred */
@@ -131,7 +131,7 @@ main:                                        /* Function: main */
     mov r1, #6
     push { r1, r0 }
     add r10, pc, #8                          /* Load parameters */
-    b lambda_sortPred.L0
+    b lambda_sortPred
     push { r0 }
     mov r0, #5
     push { r0 }

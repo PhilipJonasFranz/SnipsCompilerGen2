@@ -1000,9 +1000,7 @@ public class ContextChecker {
 			}
 			
 			/* Return if there is only one result */
-			if (funcs.isEmpty()) {
-				throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
-			}
+			if (funcs.isEmpty()) return  null;
 			else if (funcs.size() == 1) return funcs.get(0);
 			/* Multiple results, cannot determine correct one, return null */
 			else {
@@ -1012,9 +1010,7 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(source, "Multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
-		else {
-			throw new CTX_EXCEPTION(source, "Undefined Function: " + path.build());
-		}
+		else return null;
 	}
 	
 	public boolean signalStackContains(TYPE newSignal) {
@@ -1027,6 +1023,37 @@ public class ContextChecker {
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
 		/* Find the called function */
 		Function f = this.findFunction(i.path, i.getSource());
+		
+		/* Proviso may come from lambda */
+		Declaration d = this.scopes.peek().getFieldNull(i.path, i.getSource());
+		
+		if (d != null) {
+			if (d.getType() instanceof FUNC) {
+				FUNC f0 = (FUNC) d.getType();
+				
+				if (i.proviso.size() != 0) {
+					throw new CTX_EXCEPTION(i.getSource(), "Proviso for inline call are provided by predicate '" + d.path.build() + "', cannot provide proviso at this location");
+				}
+				
+				/* Proviso types provided through lambda */
+				i.proviso = f0.proviso;
+			}
+		}
+		
+		/* Function not found, may be a lambda call */
+		if (f == null) {
+			d = this.scopes.peek().getField(i.path, i.getSource());
+			
+			if (d.getType() instanceof FUNC) {
+				f = ((FUNC) d.getType()).funcHead;
+			}
+		}
+		
+		/* Still not found, undefined */
+		if (f == null) {
+			throw new CTX_EXCEPTION(i.getSource(), "Undefined function or predicate '" + i.path.build() + "'");
+		}
+		
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
@@ -1186,7 +1213,7 @@ public class ContextChecker {
 				List<Function> f0 = new ArrayList();
 				
 				for (Function f : this.functions) {
-					if (f.path.getLast().equals(f.path.getLast())) {
+					if (f.path.getLast().equals(r.path.getLast())) {
 						f0.add(f);
 					}
 				}
@@ -1209,13 +1236,21 @@ public class ContextChecker {
 			}
 		}
 		
-		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		if (lambda.manager.provisosTypes.size() != r.proviso.size()) {
+			throw new CTX_EXCEPTION(r.getSource(), "Missmatching number of provided provisos for predicate, expected " + lambda.manager.provisosTypes.size() + ", got " + r.proviso.size());
+		}
+		
+		/* Add default mapping, function may not be casted otherwise */
+		if (r.proviso.size() == 0) {
+			lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		}
+		
 		r.origin = lambda;
 		
 		/* Set flag that this function was targeted as a lambda */
 		lambda.isLambdaTarget = true;
 		
-		r.setType(new FUNC(lambda));
+		r.setType(new FUNC(lambda, r.proviso));
 		return r.getType();
 	}
 	

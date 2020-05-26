@@ -8,12 +8,12 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.FunctionRef;
-import Imm.AsN.AsNFunction;
 
 public class AsNFunctionRef extends AsNExpression {
 
@@ -24,7 +24,9 @@ public class AsNFunctionRef extends AsNExpression {
 		
 		ref.instructions.add(new ASMAdd(new RegOperand(REGISTER.R10), new RegOperand(REGISTER.PC), new ImmOperand(8)));
 		
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(((AsNFunction) i.origin.castedNode).lambdaTarget));
+		String label = "lambda_" + i.origin.path.build() + i.origin.manager.getPostfix(i.proviso);
+		
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(new ASMLabel(label)));
 		branch.optFlags.add(OPT_FLAG.SYS_JMP);
 		ref.instructions.add(branch);
 		

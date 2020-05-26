@@ -48,8 +48,6 @@ public class AsNFunction extends AsNCompoundStatement {
 	
 	public ASMLabel copyLoopEscape;
 	
-	public ASMLabel lambdaTarget;
-	
 	
 			/* --- METHODS --- */
 	/**
@@ -111,11 +109,12 @@ public class AsNFunction extends AsNCompoundStatement {
 					r.getReg(p.getSecond()).setDeclaration(p.getFirst());
 			}
 			
+			String funcLabel = func.source.path.build() + f.manager.provisosCalls.get(k).first;
+			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {
-				ASMLabel l = new ASMLabel("lambda_" + LabelGen.getLabel());
+				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
 				l.comment = new ASMComment("Function address getter for predication");
-				func.lambdaTarget = l;
 				
 				func.instructions.add(l);
 				
@@ -126,7 +125,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
-			ASMLabel label = new ASMLabel(func.source.path.build() + f.manager.provisosCalls.get(k).first, true);
+			ASMLabel label = new ASMLabel(funcLabel, true);
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";

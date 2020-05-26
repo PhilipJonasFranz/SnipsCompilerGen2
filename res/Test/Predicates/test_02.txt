@@ -1,0 +1,40 @@
+SOURCE
+int add5(int a) {
+	return a + 5;
+}
+
+int main(int x) {
+	func pred = add5;
+	return pred(x);
+}
+TESTCASES
+0 5
+1 6
+OUTPUT
+/* --test_02.txt */
+    b main
+lambda_add5:                                 /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add5:                                        /* Function: add5 */
+    push { r3 }
+    mov r3, r0
+    mov r1, r3                               /* Evaluate Expression */
+    mov r2, #5
+    add r0, r1, #5
+    pop { r3 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_add5
+    mov r4, r0
+    mov r0, r3                               /* Evaluate Expression */
+    bl add5                                  /* Call add5 */
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    

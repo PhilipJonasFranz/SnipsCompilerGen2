@@ -1,5 +1,7 @@
 package Imm.TYPE.PRIMITIVES;
 
+import java.util.List;
+
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
@@ -11,12 +13,15 @@ public class FUNC extends PRIMITIVE<Function> {
 
 	public Function funcHead;
 	
+	public List<TYPE> proviso;
+	
 	public FUNC() {
 
 	}
 	
-	public FUNC(Function funcHead) {
+	public FUNC(Function funcHead, List<TYPE> proviso) {
 		this.funcHead = funcHead;
+		this.proviso = proviso;
 	}
 
 	public boolean isEqual(TYPE type) {
@@ -51,7 +56,10 @@ public class FUNC extends PRIMITIVE<Function> {
 		
 		s += "> ";
 		
-		if (this.funcHead != null) s += this.funcHead.toString().split("@") [1];
+		if (this.funcHead != null) {
+			s += this.funcHead.toString().split("@") [1];
+		}
+		else s = s.trim();
 		
 		return s;
 	}
@@ -61,7 +69,7 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public TYPE clone() {
-		FUNC b = new FUNC(this.value);
+		FUNC b = new FUNC(this.value, this.proviso);
 		b.funcHead = this.funcHead;
 		return b;
 	}
