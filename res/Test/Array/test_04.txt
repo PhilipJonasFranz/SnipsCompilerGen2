@@ -22,7 +22,7 @@ OUTPUT
 bar:                                         /* Function: bar */
     push { fp }
     mov fp, sp
-    add r0, fp, #4
+    add r0, sp, #4
     add r0, r0, #0
     ldr r0, [r0]
     push { r0 }
@@ -48,7 +48,7 @@ foo:                                         /* Function: foo */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    lsl r2, r3, #2
+    lsl r2, r0, #2
     add r0, fp, #24
     add r0, r0, r2
     ldr r0, [r0]

@@ -82,9 +82,7 @@ public class NamespaceProcessor {
 					/* Full path is already present */
 				}
 				else if (s instanceof Function) {
-					Function f = (Function) s;
-					
-					f.path.path.addAll(0, name.path.path);
+					/* Already done during parsing */
 				}
 				else if (s instanceof Comment) {
 					/* Dont do anything */

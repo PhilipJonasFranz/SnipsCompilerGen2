@@ -482,7 +482,7 @@ public class Parser {
 		
 		List<Statement> body = this.parseCompoundStatement(true);
 		
-		NamespacePath path = new NamespacePath(identifier.spelling);
+		NamespacePath path = this.buildPath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, identifier.source);
 		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		

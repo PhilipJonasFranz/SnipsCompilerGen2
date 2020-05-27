@@ -277,11 +277,15 @@ public class AsNFunction extends AsNCompoundStatement {
 					 * No exception, move word size of return type in R0, if execption 
 					 * were thrown, the word size would already be in R0 
 					 */
-					func.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4), new Cond(COND.EQ)));
+					ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4), new Cond(COND.EQ));
+					mov.optFlags.add(OPT_FLAG.WRITEBACK);
+					func.instructions.add(mov);
 				}
 				else if (f.getReturnType().wordsize() > 1) {
 					/* Function does not signal, move word size of return type in R0 */
-					func.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4)));
+					ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4));
+					mov.optFlags.add(OPT_FLAG.WRITEBACK);
+					func.instructions.add(mov);
 				}
 				
 				/* End address of return in stack */

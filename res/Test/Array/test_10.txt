@@ -20,8 +20,7 @@ OUTPUT
 bar:                                         /* Function: bar */
     push { fp }
     mov fp, sp
-    mov r2, #8
-    add r0, fp, #4
+    add r0, sp, #4
     add r0, r0, #8
     ldr r0, [r0]
     mov sp, fp
@@ -79,8 +78,7 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-36]
     push { r2, r1, r0 }
     bl foo                                   /* Call foo */
-    mov r1, r0
-    add r0, r1, r3
+    add r0, r0, r3
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

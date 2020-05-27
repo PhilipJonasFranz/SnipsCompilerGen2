@@ -20,12 +20,10 @@ main:                                        /* Function: main */
     mov r1, r3                               /* Evaluate Expression */
     ldr r2, [fp, #16]
     mul r0, r1, r2
-    mov r1, r0
-    add r0, r1, r4
+    add r0, r0, r4
     push { r0 }
     ldr r1, [fp, #20]
-    mov r2, r5
-    mul r0, r1, r2
+    mul r0, r1, r5
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

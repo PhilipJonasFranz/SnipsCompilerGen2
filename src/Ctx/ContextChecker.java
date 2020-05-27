@@ -682,7 +682,7 @@ public class ContextChecker {
 		if (d.getType() instanceof FUNC) {
 			for (Function f0 : this.functions) {
 				if (f0.path.getLast().equals(d.path.getLast()) && f0.path.path.size() == 1) {
-					throw new CTX_EXCEPTION(d.getSource(), "Predicate name shadows function name '" + d.path.build());
+					throw new CTX_EXCEPTION(d.getSource(), "Predicate name shadows function name '" + d.path.build() + "'");
 				}
 			}
 		}

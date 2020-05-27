@@ -11,7 +11,7 @@ OUTPUT
 main:                                        /* Function: main */
     push { r3 }
     mov r3, r0
-    rsb r2, r3, #0
+    rsb r2, r0, #0
     mov r1, #2
     mul r0, r1, r2
     rsb r2, r0, #0

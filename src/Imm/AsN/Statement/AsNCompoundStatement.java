@@ -112,6 +112,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		/* Body */
 		for (int i = 0; i < a.body.size(); i++) {
 			Statement s = a.body.get(i);
+			
+			/* Free operand regs */
+			r.free(0, 1, 2);
+			
 			this.loadStatement(a, s, r, map, st);
 		}
 		

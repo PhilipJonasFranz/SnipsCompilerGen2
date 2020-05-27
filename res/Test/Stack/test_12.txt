@@ -30,7 +30,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    add r5, r3, r4
+    add r5, r3, r1
     add r1, r3, r4
     add r6, r1, #1
     add r1, r3, r4

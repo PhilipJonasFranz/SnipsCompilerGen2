@@ -40,8 +40,7 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     add r0, r0, r2
     ldr r0, [r0]
-    mov r1, r0
-    add r0, r1, r3
+    add r0, r0, r3
     push { r0 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #2

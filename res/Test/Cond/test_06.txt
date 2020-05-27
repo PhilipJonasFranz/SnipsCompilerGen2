@@ -48,7 +48,6 @@ main.L4:
     mov r0, #4                               /* Evaluate Expression */
     b main.L14
 main.L7: 
-    mov r6, r0
     cmp r3, #4
     bne main.L8
     mov r0, #8                               /* Evaluate Expression */

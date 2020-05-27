@@ -38,8 +38,7 @@ main.L1:
     add r4, r0, #1
     b main.L1
 main.L2: 
-    mov r4, r0                               /* Evaluate Expression */
-    ldr r0, .POOL0_main.L0_s                 /* Load from .data section */
+    ldr r0, .POOL0_main.L0_s                 /* Evaluate Expression */
     ldr r0, [r0]
     pop { r3, r4 }
     bx lr

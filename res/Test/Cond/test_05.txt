@@ -25,7 +25,7 @@ main:                                        /* Function: main */
     mov r2, #2
     mul r0, r1, r2
     mov r5, r0
-    add r4, r4, r5
+    add r4, r4, r0
 main.L0: 
     add r4, r4, #10
     mov r0, r4                               /* Evaluate Expression */

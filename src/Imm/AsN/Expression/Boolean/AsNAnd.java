@@ -25,7 +25,7 @@ public class AsNAnd extends AsNBinaryExpression {
 		AsNAnd and = new AsNAnd();
 		
 		/* Clear only R0, R1 since R2 is not needed */
-		and.clearReg(r, st, 0, 1);
+		r.free(0, 1);
 		
 		if (a.getLeft() instanceof Atom && a.getRight() instanceof Atom) {
 			int value0 = ((INT) ((Atom) a.getLeft()).getType()).value;

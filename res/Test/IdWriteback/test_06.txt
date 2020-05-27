@@ -38,8 +38,7 @@ main.L1:
     add r5, r0, #1
     b main.L1
 main.L2: 
-    mov r5, r0                               /* Evaluate Expression */
-    ldr r0, [fp, #-4]
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5 }
     bx lr

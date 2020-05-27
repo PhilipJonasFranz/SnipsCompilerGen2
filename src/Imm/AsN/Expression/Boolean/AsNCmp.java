@@ -34,7 +34,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		AsNCmp cmp = new AsNCmp();
 		
 		/* Clear only R0, R1 since R2 is not needed */
-		cmp.clearReg(r, st, 0, 1);
+		r.free(0, 1);
 		
 		if (c.getRight() instanceof Atom) {
 			cmp.instructions.addAll(AsNExpression.cast(c.getLeft(), r, map, st).getInstructions());
