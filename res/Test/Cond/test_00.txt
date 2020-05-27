@@ -28,9 +28,7 @@ main.L1:
     mov r0, #16                              /* Evaluate Expression */
     b main.L6
 main.L3: 
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #10
-    add r3, r1, #10
+    add r3, r3, #10
     cmp r3, #13
     bne main.L5
     mov r0, #99                              /* Evaluate Expression */

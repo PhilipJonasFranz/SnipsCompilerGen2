@@ -378,6 +378,8 @@ public class ASMOptimizer {
 					/* Set to false if reg is read */
 					boolean clear = true;
 					
+					boolean hardClear = false;
+					
 					/* Break is reg is overwritten */
 					
 					for (int a = i + 1; a < body.instructions.size(); a++) {
@@ -422,6 +424,8 @@ public class ASMOptimizer {
 							if (dataP.op1 instanceof RegOperand && ((RegOperand) dataP.op1).reg == target) {
 								dataP.op1 = new ImmOperand(val);
 								OPT_DONE = true;
+								
+								if (!move.optFlags.contains(OPT_FLAG.WRITEBACK)) hardClear = true;
 							}
 							
 							if (dataP.op0 instanceof RegOperand && ((RegOperand) dataP.op0).reg == target) {
@@ -567,7 +571,7 @@ public class ASMOptimizer {
 						
 					}
 					
-					if (clear) {
+					if (clear || hardClear) {
 						body.instructions.remove(i);
 						i--;
 						OPT_DONE = true;

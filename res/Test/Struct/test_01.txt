@@ -96,9 +96,7 @@ resv.L12:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L15: 
     cmp r5, r3
@@ -114,9 +112,7 @@ resv.L15:
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L17: 
     add r4, r4, r5
@@ -131,9 +127,7 @@ resv.L2:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
 resv.L18: 
     pop { r3, r4, r5, r6 }
     bx lr
@@ -154,9 +148,7 @@ main:                                        /* Function: main */
     mov r2, #3
     mul r0, r1, r2
     push { r0 }
-    mov r1, r3
-    mov r2, #2
-    add r0, r1, #2
+    add r0, r3, #2
     lsl r1, r4, #2
     str r0, [r1, #0]
     pop { r0 }

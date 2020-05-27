@@ -24,9 +24,7 @@ OUTPUT
 bar:                                         /* Function: bar */
     push { r3, r4 }
     mov r3, r0
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #2
-    add r4, r1, #2
+    add r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr
@@ -47,9 +45,7 @@ main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #4
-    add r0, r1, #4
+    add r0, r0, #4
     bl foo                                   /* Call foo */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */

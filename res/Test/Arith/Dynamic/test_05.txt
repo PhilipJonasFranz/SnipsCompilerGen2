@@ -15,9 +15,7 @@ main:                                        /* Function: main */
     mov r1, r3                               /* Evaluate Expression */
     mov r2, #3
     mul r0, r1, r2
-    mov r1, r0
-    mov r2, #17
-    add r3, r1, #17
+    add r3, r0, #17
     mov r0, r3                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr

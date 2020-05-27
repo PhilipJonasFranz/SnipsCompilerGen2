@@ -87,9 +87,7 @@ resv.L12:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L15: 
     cmp r5, r3
@@ -105,9 +103,7 @@ resv.L15:
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L17: 
     add r4, r4, r5
@@ -122,9 +118,7 @@ resv.L2:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
 resv.L18: 
     pop { r3, r4, r5, r6 }
     bx lr
@@ -450,9 +444,7 @@ String.substring.L2:
     b String.substring.L10
 String.substring.L5: 
 /* Collect chars in list in string and insert 0 char */
-    mov r1, r8                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r8, #1
     bl resv                                  /* Call resv */
     mov r9, r0
     mov r0, #0                               /* Evaluate Expression */

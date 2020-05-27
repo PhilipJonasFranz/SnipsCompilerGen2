@@ -26,9 +26,7 @@ fac:                                         /* Function: fac */
     mov r0, #1                               /* Evaluate Expression */
     b fac.L2
 fac.L1: 
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #1
-    sub r0, r1, #1
+    sub r0, r3, #1
     bl fac                                   /* Call fac */
     mul r0, r0, r3
 fac.L2: 

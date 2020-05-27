@@ -48,9 +48,7 @@ main.L3:
     ldr r2, [fp, #-4]
     add r1, r1, r2
     add r4, r1, r6
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #1
-    sub r3, r1, #1
+    sub r3, r3, #1
     add sp, sp, #4
     b main.L1
 main.L2: 

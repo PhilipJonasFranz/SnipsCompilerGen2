@@ -29,9 +29,7 @@ lambda_add5:                                 /* Function address getter for pred
 add5:                                        /* Function: add5 */
     push { r3 }
     mov r3, r0
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #5
-    add r0, r1, #5
+    add r0, r0, #5
     pop { r3 }
     bx lr
     
@@ -41,9 +39,7 @@ lambda_add10:                                /* Function address getter for pred
 add10:                                       /* Function: add10 */
     push { r3 }
     mov r3, r0
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #10
-    add r0, r1, #10
+    add r0, r0, #10
     pop { r3 }
     bx lr
     

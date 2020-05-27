@@ -29,7 +29,6 @@ main:                                        /* Function: main */
     ldr r0, [r1, #4]
     ldr r2, [r1, #0]
     push { r2, r0 }
-    mov r2, #0
     sub r0, fp, #8
     add r0, r0, #0
     ldr r0, [r0]

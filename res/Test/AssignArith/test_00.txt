@@ -18,7 +18,6 @@ main.L1:
     cmp r4, #10
     bge main.L2
     add r3, r3, #1
-    mov r0, #1                               /* Evaluate Expression */
     add r4, r4, #1
     b main.L1
 main.L2: 
