@@ -12,39 +12,35 @@ OUTPUT
 /* --test_00.txt */
     b main
 __op_mod:                                    /* Function: __op_mod */
-    push { r3, r4, r5, r6, r7, r8 }
+    push { r3, r4, r5, r6 }
     mov r3, r0
     mov r4, r1
     mov r0, r4                               /* Evaluate Expression */
     mov r5, r0
 __op_mod.L1:                                 /* Evaluate condition */
-    mov r6, r0
     cmp r5, r3
     bgt __op_mod.L2
     mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
-    lsl r0, r1, #1
-    mov r5, r0
+    lsl r5, r1, #1
     b __op_mod.L1
 __op_mod.L2: 
     mov r0, r3                               /* Evaluate Expression */
-    mov r7, r0
+    mov r6, r0
 __op_mod.L4:                                 /* Evaluate condition */
-    mov r8, r0
-    cmp r7, r4
+    cmp r6, r4
     blt __op_mod.L5
     mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
     lsr r5, r1, #1
-    cmp r5, r7
+    cmp r5, r6
     bgt __op_mod.L6
-    sub r0, r7, r5
-    mov r7, r0
+    sub r6, r6, r5
 __op_mod.L6: 
     b __op_mod.L4
 __op_mod.L5: 
-    mov r0, r7                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6, r7, r8 }
+    mov r0, r6                               /* Evaluate Expression */
+    pop { r3, r4, r5, r6 }
     bx lr
     
 main:                                        /* Function: main */

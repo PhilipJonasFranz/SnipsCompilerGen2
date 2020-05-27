@@ -40,14 +40,12 @@ main.L4:
     add r4, r4, #1
     mov r1, r6                               /* Evaluate Expression */
     mov r2, #1
-    add r0, r1, #1
-    mov r6, r0
+    add r6, r1, #1
     b main.L4
 main.L5: 
     mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
-    add r0, r1, #1
-    mov r5, r0
+    add r5, r1, #1
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */

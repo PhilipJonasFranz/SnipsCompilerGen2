@@ -148,16 +148,14 @@ main.L0:
     b _routine_stack_copy_
     sub r1, fp, #20                          /* Evaluate Expression */
     ldr r0, [r1]                             /* Load field from struct */
-    mov r1, r0
-    lsl r0, r1, #1
+    lsl r0, r0, #1
     push { r0 }
     sub r1, fp, #20                          /* Load field location */
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0
     pop { r1 }
-    add r0, r1, r2
-    mov r4, r0
+    add r4, r1, r2
     add sp, sp, #8
     mov r12, #0
     b main.L1

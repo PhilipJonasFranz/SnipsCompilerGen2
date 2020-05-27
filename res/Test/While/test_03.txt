@@ -54,8 +54,7 @@ main.L3:
 main.L5: 
     mov r1, r3                               /* Evaluate Expression */
     mov r2, #1
-    sub r0, r1, #1
-    mov r3, r0
+    sub r3, r1, #1
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */

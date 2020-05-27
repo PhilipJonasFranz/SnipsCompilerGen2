@@ -32,8 +32,7 @@ foo:                                         /* Function: foo */
     mov fp, sp
     mov r3, r0
     bl bar                                   /* Call bar */
-    mov r2, r0
-    add r0, r3, r2
+    add r0, r3, r0
     mov sp, fp
     pop { r3, fp, lr }
     bx lr
@@ -46,8 +45,7 @@ main:                                        /* Function: main */
     mov r2, #4
     add r0, r1, #4
     bl foo                                   /* Call foo */
-    mov r2, r0
-    add r3, r3, r2
+    add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, fp, lr }

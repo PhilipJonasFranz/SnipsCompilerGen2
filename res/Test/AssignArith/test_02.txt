@@ -17,7 +17,7 @@ main:                                        /* Function: main */
     sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
     mov r3, r0
-    lsl r1, r3, #2
+    lsl r1, r0, #2
     ldr r2, [r1]
     add r0, r2, #5
     str r0, [r1]

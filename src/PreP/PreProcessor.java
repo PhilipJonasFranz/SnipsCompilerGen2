@@ -50,7 +50,7 @@ public class PreProcessor {
 					this.process.remove(i);
 					
 					if (!this.imported.contains(path)) {
-						new Message("PREP -> Resolved import " + path, Message.Type.INFO);
+						new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
 						this.imported.add(path);
 						List<String> lines = getFile(path);
 						for (int a = 0; a < lines.size(); a++) this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));

@@ -34,7 +34,7 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6, r7, r8, r9 }
+    push { r3, r4, r5, r6, r7 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
@@ -52,7 +52,6 @@ resv.L1:                                     /* Evaluate condition */
     lsl r0, r4, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     mov r5, r0
-    mov r6, r0
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
@@ -63,19 +62,19 @@ resv.L6:                                     /* Evaluate condition */
     sub r0, r4, r5
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
-    mov r7, r0
-    cmp r7, #0
+    mov r6, r0
+    cmp r6, #0
     ble resv.L9
     b resv.L7
 resv.L9: 
-    cmp r7, #0
+    cmp r6, #0
     bne resv.L11
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
 resv.L11: 
-    add r5, r5, r7
+    add r5, r5, r6
 /* Add to current size */
     b resv.L6
 resv.L7: 
@@ -83,7 +82,6 @@ resv.L7:
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
-    mov r7, r0
     cmp r5, #0
     bne resv.L12
     mov r0, #0                               /* Evaluate Expression */
@@ -94,15 +92,14 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r0, r5, #0
-    mov r5, r0
+    rsb r5, r5, #0
     cmp r0, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r8, r0                               /* Evaluate Expression */
+    mov r6, r0                               /* Evaluate Expression */
     mov r1, r4
     mov r2, #1
     add r0, r1, #1
@@ -115,7 +112,7 @@ resv.L15:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r9, r0                               /* Evaluate Expression */
+    mov r7, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
@@ -144,7 +141,7 @@ resv.L2:
     mov r2, #1
     add r0, r1, #1
 resv.L18: 
-    pop { r3, r4, r5, r6, r7, r8, r9 }
+    pop { r3, r4, r5, r6, r7 }
     bx lr
 .POOL0_main.L1_HEAP_START: .word HEAP_START
     
@@ -182,13 +179,11 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     mov r5, r0                               /* Evaluate Expression */
     lsl r1, r4, #2                           /* Convert to bytes */
-    mov r1, r1
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
     lsl r1, r4, #2                           /* Convert to bytes */
     add r1, r1, #8
-    mov r1, r1
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     mov r2, r0

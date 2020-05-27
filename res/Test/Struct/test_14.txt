@@ -42,7 +42,6 @@ main:                                        /* Function: main */
     cmp r0, #0
     beq main.L0
     sub r1, fp, #20                          /* Load field location */
-    mov r1, r1
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }

@@ -51,8 +51,7 @@ main:                                        /* Function: main */
     mov r0, r3
     pop { r1, r2 }
     bl foo                                   /* Call foo */
-    mov r2, r0
-    add r0, r4, r2
+    add r0, r4, r0
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     add sp, sp, #8

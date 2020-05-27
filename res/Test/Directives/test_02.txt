@@ -68,12 +68,10 @@ mult.L7:
     mov r2, r0
     pop { r1 }
     mul r0, r1, r2
-    mov r2, r0
-    add r7, r7, r2
+    add r7, r7, r0
     mov r1, r8                               /* Evaluate Expression */
     mov r2, #1
-    add r0, r1, #1
-    mov r8, r0
+    add r8, r1, #1
     b mult.L7
 mult.L8: 
     mov r0, r7                               /* Evaluate Expression */
@@ -92,14 +90,12 @@ mult.L8:
     mov r8, r0                               /* Evaluate Expression */
     mov r1, r6
     mov r2, #1
-    add r0, r1, #1
-    mov r6, r0
+    add r6, r1, #1
     b mult.L4
 mult.L5: 
     mov r1, r5                               /* Evaluate Expression */
     mov r2, #1
-    add r0, r1, #1
-    mov r5, r0
+    add r5, r1, #1
     b mult.L1
 mult.L2: 
     mov r2, #0                               /* Evaluate Expression */

@@ -81,8 +81,7 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-16]
     push { r0 }
     bl bar                                   /* Call bar */
-    mov r1, r0
-    add r0, r1, r3
+    add r0, r0, r3
     push { r0 }
     ldr r0, [fp, #-20]                       /* Load parameters */
     ldr r1, [fp, #-24]

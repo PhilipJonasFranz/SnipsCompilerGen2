@@ -41,7 +41,6 @@ main:                                        /* Function: main */
     add r2, r2, r0
     pop { r1 }
     add r1, r1, r2
-    mov r1, r1
     add r1, r1, #4
     pop { r0 }
     str r0, [r1]                             /* Store value to struct field */
