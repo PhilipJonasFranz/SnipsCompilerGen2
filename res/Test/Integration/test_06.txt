@@ -98,8 +98,7 @@ mult.L8:
     add r0, r0, r2
     pop { r1 }
     str r1, [r0]
-    mov r8, r0                               /* Evaluate Expression */
-    mov r1, r6
+    mov r1, r6                               /* Evaluate Expression */
     mov r2, #1
     add r6, r1, #1
     b mult.L4

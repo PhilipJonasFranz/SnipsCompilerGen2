@@ -25,9 +25,7 @@ foo:                                         /* Function: foo */
     ldr r2, [fp, #16]
     mul r0, r1, r2
     push { r0 }
-    mov r1, r5
-    mov r2, r4
-    mul r0, r1, r2
+    mul r0, r5, r4
     mov r2, r0
     pop { r1 }
     add r0, r1, r2

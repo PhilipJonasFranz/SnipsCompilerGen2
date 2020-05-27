@@ -33,7 +33,7 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6, r7 }
+    push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
@@ -91,15 +91,15 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r5, r5, #0
+    rsb r0, r5, #0
+    mov r5, r0
     cmp r0, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r6, r0                               /* Evaluate Expression */
-    mov r1, r4
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     b resv.L18
@@ -111,7 +111,6 @@ resv.L15:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r7, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
@@ -135,17 +134,16 @@ resv.L2:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
-    mov r1, r4
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
 resv.L18: 
-    pop { r3, r4, r5, r6, r7 }
+    pop { r3, r4, r5, r6 }
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6, fp, lr }
+    push { r3, r4, r5, fp, lr }
     mov fp, sp
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -193,7 +191,6 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
-    mov r6, r0                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
@@ -208,6 +205,6 @@ main:                                        /* Function: main */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, r6, fp, lr }
+    pop { r3, r4, r5, fp, lr }
     bx lr
     

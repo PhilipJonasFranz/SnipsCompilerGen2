@@ -191,6 +191,11 @@ public class ASMOptimizer {
 									replace = false;
 								}
 								
+								if (body.instructions.get(i + 1) instanceof ASMCmp) {
+									ASMCmp cmp = (ASMCmp) body.instructions.get(i + 1);
+									if (cmp.op0.reg == reg) replace = false;
+								}
+								
 								if (replace) {
 									/* Replace */
 									data.target = mov.target;
@@ -218,6 +223,7 @@ public class ASMOptimizer {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+				/* For all operand regs */
 				for (int a = 0; a < 2; a++) {
 					if (mov.target.reg == RegOperand.toReg(a) && mov.op1 instanceof RegOperand) {
 						if (body.instructions.get(i) instanceof ASMCmp) {
@@ -269,6 +275,28 @@ public class ASMOptimizer {
 							if (data.op1 != null && data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == RegOperand.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
+								OPT_DONE = true;
+								remove = true;
+							}
+							
+							if (remove && a < 3) {
+								body.instructions.remove(i - 1);
+								i--;
+							}
+						}
+						else if (body.instructions.get(i) instanceof ASMMult) {
+							ASMMult mul = (ASMMult) body.instructions.get(i);
+							boolean remove = false;
+							if (mul.op0 != null && mul.op0.reg == RegOperand.toReg(a)) {
+								/* Replace */
+								mul.op0 = target;
+								OPT_DONE = true;
+								remove = true;
+							}
+							
+							if (mul.op1 != null && mul.op1 instanceof RegOperand && ((RegOperand) mul.op1).reg == RegOperand.toReg(a)) {
+								/* Replace */
+								mul.op1 = target;
 								OPT_DONE = true;
 								remove = true;
 							}

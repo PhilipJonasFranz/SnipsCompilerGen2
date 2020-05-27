@@ -30,9 +30,7 @@ fac.L1:
     mov r2, #1
     sub r0, r1, #1
     bl fac                                   /* Call fac */
-    mov r1, r0
-    mov r2, r3
-    mul r0, r1, r2
+    mul r0, r0, r3
 fac.L2: 
     mov sp, fp
     pop { r3, fp, lr }

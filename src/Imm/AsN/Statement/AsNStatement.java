@@ -24,6 +24,9 @@ public abstract class AsNStatement extends AsNNode {
 		/* Relay to statement type cast */
 		AsNStatement node = null;
 		
+		/* Free operand registers */
+		r.free(0, 1, 2);
+		
 		if (s instanceof CompoundStatement) {
 			node = AsNCompoundStatement.cast((CompoundStatement) s, r, map, st);
 		}

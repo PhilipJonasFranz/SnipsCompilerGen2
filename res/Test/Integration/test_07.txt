@@ -56,7 +56,7 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6, r7 }
+    push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
@@ -114,15 +114,15 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r5, r5, #0
+    rsb r0, r5, #0
+    mov r5, r0
     cmp r0, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r6, r0                               /* Evaluate Expression */
-    mov r1, r4
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
     b resv.L18
@@ -134,7 +134,6 @@ resv.L15:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r7, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
@@ -158,12 +157,11 @@ resv.L2:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
-    mov r1, r4
+    mov r1, r4                               /* Evaluate Expression */
     mov r2, #1
     add r0, r1, #1
 resv.L18: 
-    pop { r3, r4, r5, r6, r7 }
+    pop { r3, r4, r5, r6 }
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
@@ -255,9 +253,7 @@ allocMatrix:                                 /* Function: allocMatrix */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, r4
-    mul r0, r1, r2
+    mul r0, r3, r1
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
@@ -270,14 +266,10 @@ allocMatrix.L1:
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mov r1, r6                               /* Evaluate Expression */
-    mov r2, r4
-    mul r0, r1, r2
+    mul r0, r6, r4
     add r0, r0, r7
     push { r0 }
-    mov r1, r6
-    mov r2, r4
-    mul r0, r1, r2
+    mul r0, r6, r4
     add r1, r5, r0
     add r0, r1, r7
     lsl r1, r0, #2
