@@ -19,7 +19,10 @@ public class Assignment extends Statement {
 		NONE,
 		ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN,
 		LSL_ASSIGN, LSR_ASSIGN,
-		ORR_ASSIGN, AND_ASSIGN, XOR_ASSIGN
+		/* Boolean Operation */
+		ORR_ASSIGN, AND_ASSIGN,
+		/* Bitwise Operation */
+		BIT_ORR_ASSIGN, BIT_AND_ASSIGN, BIT_XOR_ASSIGN
 	}
 	
 	

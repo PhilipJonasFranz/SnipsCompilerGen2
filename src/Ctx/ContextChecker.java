@@ -721,7 +721,7 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(a.getSource(), "Assign arith operation is only applicable for primitive types");
 			}
 			
-			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.XOR_ASSIGN) {
+			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
 				if (!(ctype instanceof BOOL)) {
 					throw new CTX_EXCEPTION(a.getSource(), "Expression type " + t.typeString() + " is not applicable for boolean assign operator");
 				}
@@ -1019,7 +1019,7 @@ public class ContextChecker {
 				throw new CTX_EXCEPTION(source, "Multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
-		else return null;
+		else throw new CTX_EXCEPTION(source, "Undefined function '" + path.build() + "'");
 	}
 	
 	public boolean signalStackContains(TYPE newSignal) {

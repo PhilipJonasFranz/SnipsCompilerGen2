@@ -923,10 +923,12 @@ public class Parser {
 	}
 	
 	protected ASSIGN_ARITH parseAssignOperator() throws PARSE_EXCEPTION {
+		/* None */
 		if (current.type == TokenType.LET) {
 			accept();
 			return ASSIGN_ARITH.NONE;
 		}
+		/* Arithmetic Operation */
 		else if (current.type == TokenType.ADD) {
 			accept();
 			accept(TokenType.LET);
@@ -945,23 +947,43 @@ public class Parser {
 		else if (current.type == TokenType.DIV) {
 			accept();
 			accept(TokenType.LET);
+			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
 			return ASSIGN_ARITH.DIV_ASSIGN;
 		}
+		else if (current.type == TokenType.MOD) {
+			accept();
+			accept(TokenType.LET);
+			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+			return ASSIGN_ARITH.MOD_ASSIGN;
+		}
+		/* Bitwise Operation */
 		else if (current.type == TokenType.ADDROF) {
 			accept();
 			accept(TokenType.LET);
-			return ASSIGN_ARITH.AND_ASSIGN;
+			return ASSIGN_ARITH.BIT_AND_ASSIGN;
 		}
 		else if (current.type == TokenType.BITOR) {
 			accept();
 			accept(TokenType.LET);
-			return ASSIGN_ARITH.ORR_ASSIGN;
+			return ASSIGN_ARITH.BIT_ORR_ASSIGN;
 		}
 		else if (current.type == TokenType.XOR) {
 			accept();
 			accept(TokenType.LET);
-			return ASSIGN_ARITH.XOR_ASSIGN;
+			return ASSIGN_ARITH.BIT_XOR_ASSIGN;
 		}
+		/* Boolean logic */
+		else if (current.type == TokenType.AND) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.AND_ASSIGN;
+		}
+		else if (current.type == TokenType.OR) {
+			accept();
+			accept(TokenType.LET);
+			return ASSIGN_ARITH.ORR_ASSIGN;
+		}
+		/* Shifts */
 		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) {
 			accept();
 			accept();

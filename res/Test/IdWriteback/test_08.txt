@@ -1,0 +1,25 @@
+SOURCE
+bool main(bool a, bool b) {
+	a &&= b;
+	return a;
+}
+TESTCASES
+0 0 0
+0 1 0
+1 0 0
+1 1 1
+OUTPUT
+/* --test_08.txt */
+main:                                        /* Function: main */
+    push { r3, r4 }
+    mov r3, r0
+    mov r4, r1
+    adds r0, r1, #0
+    movne r0, #1
+    cmp r3, #0
+    movne r3, r0
+    moveq r3, #0
+    mov r0, r3                               /* Evaluate Expression */
+    pop { r3, r4 }
+    bx lr
+    

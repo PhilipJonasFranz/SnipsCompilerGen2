@@ -37,6 +37,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
+import Imm.TYPE.PRIMITIVES.INT;
 import Util.Pair;
 
 public class AsNFunction extends AsNCompoundStatement {
@@ -52,11 +53,22 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* --- METHODS --- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
+	 * @throws CTX_EXCEPTION 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION, CTX_EXCEPTION {
 		AsNFunction func = new AsNFunction();
 		f.castedNode = func;
 		func.source = f;
+		
+		/* 
+		 * Add default mappings for library operators. These can be called by assign arith, 
+		 * and therefore maybe have no registered mapping.
+		 */
+		if (f.path.build().equals("__op_div") || f.path.build().equals("__op_mod")) {
+			if (!f.manager.containsMapping(new ArrayList())) {
+				f.manager.addProvisoMapping(new INT(), new ArrayList());
+			}
+		}
 		
 		LabelGen.reset();
 		LabelGen.funcPrefix = f.path.build();
@@ -79,27 +91,57 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
+		/*
+		 * Change names of proviso mappings if the types are word-size equal.
+		 * The translation will result in the same assembly, so we dont have to do it again.
+		 * The name is set to the first occurrence of the similar mappings. Down below
+		 * the name is checked if its already in a list of translated mappings.
+		 */
+		for (int i = 0; i < f.manager.provisosCalls.size(); i++) {
+			Pair<String, Pair<TYPE, List<TYPE>>> call0 = f.manager.provisosCalls.get(i);
+			for (int a = i + 1; a < f.manager.provisosCalls.size(); a++) {
+				Pair<String, Pair<TYPE, List<TYPE>>> call1 = f.manager.provisosCalls.get(a);
+				
+				if (!call0.first.equals(call1.first)) {
+					boolean equal = true;
+					equal &= call0.second.first.wordsize() == call1.second.first.wordsize();
+					for (int k = 0; k < call0.second.second.size(); k++) {
+						equal &= call0.second.second.get(k).wordsize() == call1.second.second.get(k).wordsize();
+					}
+					
+					/* Mappings are of equal types, let one point to the other */
+					if (equal) {
+						call1.first = call0.first;
+					}
+				}
+			}
+		}
+		
+		/* 
+		 * List that contains all the names of the proviso calls that were already translated.
+		 * This is used to check wether to translate the current proviso mapping again. The name
+		 * would be the same since it was changed up below.
+		 */
+		List<String> translated = new ArrayList();
+		
 		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
+			/* Check if mapping was already translated, if yes, skip */
+			if (translated.contains(f.manager.provisosCalls.get(k).first)) continue;
+			else translated.add(f.manager.provisosCalls.get(k).first);
+			
+			/* Set the current proviso call scheme if its not the default scheme */
 			if (!f.manager.provisosCalls.get(k).first.equals("")) {
-				/* Set the current proviso call scheme */
-				try {
-					//System.out.print("Setting translation context for " + f.functionName + ": ");
-					//for (TYPE t : f.manager.provisosCalls.get(k).second.second) System.out.print(t.typeString() + ", ");
-					//System.out.println();
-					f.setContext(f.manager.provisosCalls.get(k).second.second);
-				} catch (CTX_EXCEPTION e) {
-					
-				}
+				f.setContext(f.manager.provisosCalls.get(k).second.second);
 			}
 			
 			/* Setup Parameter Mapping */
 			func.parameterMapping = func.getParameterMapping();
 			
-			/* Set Params in Registers */
+			/* Apply parameters to RegSet and StackSet */
 			for (Pair<Declaration, Integer> p : func.parameterMapping) {
 				if (p.getSecond() == -1) 
 					/* Paramter is in stack, push in stackSet */
@@ -109,13 +151,13 @@ public class AsNFunction extends AsNCompoundStatement {
 					r.getReg(p.getSecond()).setDeclaration(p.getFirst());
 			}
 			
+			/* Create the function head label */
 			String funcLabel = func.source.path.build() + f.manager.provisosCalls.get(k).first;
 			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {
 				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
 				l.comment = new ASMComment("Function address getter for predication");
-				
 				func.instructions.add(l);
 				
 				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.PC), new ImmOperand(8)));
@@ -134,11 +176,19 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			else {
 				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
-				List<TYPE> types = f.manager.provisosCalls.get(k).second.second;
-				for (int x = 0; x < types.size(); x++) {
-					com += types.get(x).typeString() + ", ";
+				
+				/* Create a String that lists all proviso mappings that this version of the function represents */
+				for (int z = k; z < f.manager.provisosCalls.size(); z++) {
+					if (f.manager.provisosCalls.get(z).first.equals(f.manager.provisosCalls.get(k).first)) {
+						List<TYPE> types = f.manager.provisosCalls.get(z).second.second;
+						for (int x = 0; x < types.size(); x++) {
+							com += types.get(x).typeString() + ", ";
+						}
+						com = com.trim().substring(0, com.trim().length() - 1);
+						
+						if (z < f.manager.provisosCalls.size() - 1) com += " | ";
+					}
 				}
-				com = com.trim().substring(0, com.trim().length() - 1);
 			}
 			label.comment = new ASMComment(com);
 			

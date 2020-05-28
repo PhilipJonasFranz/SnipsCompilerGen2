@@ -9,6 +9,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -58,7 +59,7 @@ public class AsNBody extends AsNNode {
 	public static LiteralManager literalManager;
 	
 			/* --- METHODS --- */
-	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION {
+	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION, CTX_EXCEPTION {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralManager();
 		
