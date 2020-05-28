@@ -339,7 +339,6 @@ List.get.L5:
     pop { r3, r4, r5 }
     bx lr
     
-    
 /* Check if given list contains given value. */
     
 /* Finds the first node in the list that has given value. */

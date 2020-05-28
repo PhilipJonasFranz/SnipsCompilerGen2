@@ -172,7 +172,6 @@ public class AsNLhsId extends AsNStatement {
 			else inj.add(new ASMEor(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
 		else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
-			/* Perform and */
 			ASMAdd and0 = new ASMAdd(new RegOperand(combineOperand), new RegOperand(combineOperand), new ImmOperand(0));
 			and0.updateConditionField = true;
 			inj.add(and0);
@@ -191,7 +190,6 @@ public class AsNLhsId extends AsNStatement {
 			}
 		}
 		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
-			/* Perform and */
 			ASMOrr orr = new ASMOrr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand));
 			orr.updateConditionField = true;
 			inj.add(orr);

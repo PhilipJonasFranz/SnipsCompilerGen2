@@ -108,6 +108,16 @@ public class ASMOptimizer {
 			 */
 			this.removeUnnessesaryPushPop(body);
 		}
+		
+		/* Filter duplicate empty lines */
+		if (body.instructions.size() > 1) {
+			for (int i = 1; i < body.instructions.size(); i++) {
+				if (body.instructions.get(i - 1) instanceof ASMSeperator && body.instructions.get(i) instanceof ASMSeperator) {
+					body.instructions.remove(i);
+					i--;
+				}
+			}
+		}
 	}
 	
 	/**

@@ -277,7 +277,6 @@ List.get.L5:
     pop { r3, r4, r5 }
     bx lr
     
-    
 /* Check if given list contains given value. */
     
 /* Finds the first node in the list that has given value. */
@@ -296,7 +295,6 @@ List.get.L5:
 /* A tree node that has a left and right child and holds a value. */
 /* Create a new Tree, initialize both childs to 0, set root value */
 /* to given value. Return a pointer to the root. */
-    
     
 main:                                        /* Function: main */
     push { r3, fp, lr }

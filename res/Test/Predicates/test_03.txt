@@ -27,7 +27,6 @@ add5_P0:                                     /* Function: add5, Provisos: BOOL |
     pop { r3 }
     bx lr
     
-    
 main:                                        /* Function: main */
     push { r3, r4, r5, r6, fp, lr }
     mov fp, sp

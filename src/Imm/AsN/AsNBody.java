@@ -139,7 +139,7 @@ public class AsNBody extends AsNNode {
 				
 		
 		/* --- Inject Stack Copy Routine --- */
-		List<ASMInstruction> routine = body.buildRoutine();
+		List<ASMInstruction> routine = body.buildStackCopyRoutine();
 		body.instructions.addAll(routine);
 	
 		
@@ -261,7 +261,7 @@ public class AsNBody extends AsNNode {
 		node.instructions.add(branch);
 	}
 	
-	public List<ASMInstruction> buildRoutine() {
+	public List<ASMInstruction> buildStackCopyRoutine() {
 		List<ASMInstruction> routine = new ArrayList();
 		routine.add(new ASMComment("System Routine, used to copy memory on the stack"));
 		

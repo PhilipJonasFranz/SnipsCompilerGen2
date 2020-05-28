@@ -205,7 +205,6 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
     
-    
 /* Check if given list contains given value. */
     
 /* Finds the first node in the list that has given value. */

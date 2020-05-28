@@ -35,7 +35,6 @@ add5.L1:
     pop { r3 }
     bx lr
     
-    
 main:                                        /* Function: main */
     push { r3, r4, r5, r6, fp, lr }
     mov fp, sp
