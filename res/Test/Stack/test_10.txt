@@ -35,10 +35,9 @@ bar:                                         /* Function: bar */
     mov r5, r2
     mov r1, r5                               /* Evaluate Expression */
     ldr r2, [fp, #16]
-    mul r0, r1, r2
-    mov r1, r0
-    mul r0, r3, r4
-    add r0, r1, r0
+    mul r1, r1, r2
+    mul r2, r3, r4
+    add r0, r1, r2
     mov sp, fp
     pop { r3, r4, r5, fp }
     add sp, sp, #4

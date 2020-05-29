@@ -66,8 +66,8 @@ mult.L7:
     add r0, r0, r2
     ldr r2, [r0]
     pop { r1 }
-    mul r0, r1, r2
-    add r7, r7, r0
+    mul r2, r1, r2
+    add r7, r7, r2
     add r8, r8, #1
     b mult.L7
 mult.L8: 

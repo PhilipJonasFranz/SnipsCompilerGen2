@@ -192,8 +192,8 @@ __mat_mult.L7:
     bge __mat_mult.L8
     mov r1, r7                               /* Evaluate Expression */
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    add r1, r3, r0
+    mul r2, r1, r2
+    add r1, r3, r2
     ldr r2, [fp, #-4]
     add r0, r1, r2
     lsl r0, r0, #2                           /* Convert to bytes */
@@ -201,8 +201,8 @@ __mat_mult.L7:
     push { r0 }
     ldr r1, [fp, #-4]
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    add r1, r4, r0
+    mul r2, r1, r2
+    add r1, r4, r2
     add r0, r1, r8
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r2, [r0]                             /* Load from address */
@@ -219,8 +219,8 @@ __mat_mult.L8:
     push { r0 }
     mov r1, r7
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    add r1, r6, r0
+    mul r2, r1, r2
+    add r1, r6, r2
     add r0, r1, r8
     lsl r1, r0, #2
     pop { r0 }
@@ -257,11 +257,11 @@ allocMatrix.L1:
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mul r0, r6, r4
-    add r0, r0, r7
+    mul r1, r6, r4
+    add r0, r1, r7
     push { r0 }
-    mul r0, r6, r4
-    add r1, r5, r0
+    mul r2, r6, r4
+    add r1, r5, r2
     add r0, r1, r7
     lsl r1, r0, #2
     pop { r0 }

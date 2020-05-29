@@ -23,9 +23,8 @@ main:                                        /* Function: main */
     bne main.L0
     mov r1, r3                               /* Evaluate Expression */
     mov r2, #2
-    mul r0, r1, r2
-    mov r5, r0
-    add r4, r4, r0
+    mul r5, r1, r2
+    add r4, r4, r5
 main.L0: 
     add r4, r4, #10
     mov r0, r4                               /* Evaluate Expression */

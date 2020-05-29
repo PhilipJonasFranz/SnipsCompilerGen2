@@ -35,8 +35,8 @@ __vec_cross.L1:
     add r0, fp, #12
     add r0, r0, r2
     ldr r2, [r0]
-    mul r0, r1, r2
-    add r3, r3, r0
+    mul r2, r1, r2
+    add r3, r3, r2
     add r4, r4, #1
     b __vec_cross.L1
 __vec_cross.L2: 

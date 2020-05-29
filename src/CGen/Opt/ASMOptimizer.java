@@ -285,35 +285,45 @@ public class ASMOptimizer {
 				if (mov.op1 instanceof RegOperand) {
 					REGISTER reg = ((RegOperand) mov.op1).reg;
 					if (reg == REGISTER.R0 || reg == REGISTER.R1 || reg == REGISTER.R2) {
+						
+						boolean replace = true;
+						
+						if (this.overwritesReg(body.instructions.get(i - 2), reg)) {
+							replace = false;
+						}
+						
+						if (body.instructions.get(i + 1) instanceof ASMCmp) {
+							ASMCmp cmp = (ASMCmp) body.instructions.get(i + 1);
+							if (cmp.op0.reg == reg) replace = false;
+						}
+						
+						boolean patchUp = false;
 						if (body.instructions.get(i - 1) instanceof ASMBinaryData && !(body.instructions.get(i - 1) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) body.instructions.get(i - 1);
-							if (data.target.reg == reg) {
-								boolean replace = true;
-								
-								if (this.overwritesReg(body.instructions.get(i - 2), reg)) {
-									replace = false;
-								}
-								
-								if (body.instructions.get(i + 1) instanceof ASMCmp) {
-									ASMCmp cmp = (ASMCmp) body.instructions.get(i + 1);
-									if (cmp.op0.reg == reg) replace = false;
-								}
-								
-								if (replace) {
-									/* Replace */
-									data.target = mov.target;
-									OPT_DONE = true;
-									
-									if (!this.overwritesReg(body.instructions.get(i - 2), reg)) {
-										body.instructions.remove(i);
-										i--;
-									}
-									else {
-										ASMInstruction rem = body.instructions.remove(i);
-										body.instructions.add(i - 1, rem);
-										i--;
-									}
-								}
+							if (data.target.reg == reg && replace) {
+								data.target = mov.target;
+								OPT_DONE = true;
+								patchUp = true;
+							}
+						}
+						else if (body.instructions.get(i - 1) instanceof ASMMult) {
+							ASMMult mul = (ASMMult) body.instructions.get(i - 1);
+							if (mul.target.reg == reg && replace) {
+								mul.target = mov.target;
+								OPT_DONE = true;
+								patchUp = true;
+							}
+						}
+						
+						if (patchUp) {
+							if (!this.overwritesReg(body.instructions.get(i - 2), reg)) {
+								body.instructions.remove(i);
+								i--;
+							}
+							else {
+								ASMInstruction rem = body.instructions.remove(i);
+								body.instructions.add(i - 1, rem);
+								i--;
 							}
 						}
 					}

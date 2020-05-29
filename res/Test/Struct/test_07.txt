@@ -41,8 +41,7 @@ main:                                        /* Function: main */
     add r1, r1, #8
     ldr r1, [r1]                             /* Load field from struct */
     mov r2, #2
-    mul r0, r1, r2
-    mov r2, r0
+    mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     bx lr
