@@ -163,6 +163,11 @@ public class ASMOptimizer {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == reg);
 		}
+		else if (ins instanceof ASMStrStack) {
+			ASMLdrStack load = (ASMLdrStack) ins;
+			return load.target.reg == reg || load.op0.reg == reg || (load.op1 != null && load.op1 instanceof RegOperand && ((RegOperand) load.op1).reg == reg);
+		}
+		// TODO: Implement missing instructions
 		else return false;
 	}
 	
@@ -228,21 +233,23 @@ public class ASMOptimizer {
 								found = true;
 								pop = pop0;
 								end = a - 1;
+								break;
 							}
 						}
 					}
 					
 					if (found) {
-						
 						boolean replace = true;
 						REGISTER newReg = pop.operands.get(0).reg;
 						
 						/* Check if register if newReg is overwritten in the span between the push pop */
 						for (int a = i + 1; a < end; a++) {
+							/* New register is overwritten, value from mov would be shadowed */
 							if (this.overwritesReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;
 							}
+							/* New register is read after new mov, would read wrong value */
 							else if (this.readsReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;

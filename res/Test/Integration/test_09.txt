@@ -383,9 +383,8 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #12
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
+    mov r1, r0
     mov r2, #2
-    pop { r1 }
     mul r0, r1, r2
     mov r2, r0
     pop { r1 }
