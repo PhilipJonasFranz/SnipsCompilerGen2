@@ -13,11 +13,9 @@ main:                                        /* Function: main */
     mov r1, r3                               /* Evaluate Expression */
     mov r2, #2
     mul r0, r1, r2
-    add r0, r0, #5
-    push { r0 }
+    add r1, r0, #5
     mul r0, r3, r3
     sub r2, r3, r0
-    pop { r1 }
     add r0, r1, r2
     pop { r3 }
     bx lr

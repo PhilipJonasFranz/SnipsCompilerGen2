@@ -196,6 +196,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Save FP and lr by default */
 			ASMPushStack push = new ASMPushStack(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR));
+			push.optFlags.add(OPT_FLAG.FUNC_CLEAN);
 			func.instructions.add(push);
 			st.push(REGISTER.LR, REGISTER.FP);
 			

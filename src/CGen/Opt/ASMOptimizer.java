@@ -107,6 +107,18 @@ public class ASMOptimizer {
 			 * pop { r0 }
 			 */
 			this.removeUnnessesaryPushPop(body);
+			
+			/**
+			 * push { r0 }<br>
+			 * ... <- Does not reassign r1<br>
+			 * pop { r1 }
+			 * 
+			 * Transform to
+			 * mov r1, r0<br>
+			 * ... <- Does not reassign r1<br>
+			 * ---
+			 */
+			this.removeIndirectPushPopAssign(body);
 		}
 		
 		/* Filter duplicate empty lines */
@@ -143,9 +155,18 @@ public class ASMOptimizer {
 		else return false;
 	}
 	
+	/**
+	 * Check if given register is read by given instruction.
+	 */
+	protected boolean readsReg(ASMInstruction ins, REGISTER reg) {
+		if (ins instanceof ASMBinaryData) {
+			ASMBinaryData data = (ASMBinaryData) ins;
+			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == reg);
+		}
+		else return false;
+	}
+	
 	protected void removeUnnessesaryPushPop(AsNBody body) {
-		
-		
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
@@ -179,6 +200,63 @@ public class ASMOptimizer {
 				if (remove) {
 					body.instructions.remove(i);
 					i--;
+				}
+			}
+		}
+	}
+	
+	protected void removeIndirectPushPopAssign(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				if (push.operands.size() == 1) {
+					REGISTER pushReg = push.operands.get(0).reg;
+					
+					/* Search for pop Counterpart */
+					boolean found = false;
+					ASMPopStack pop = null;
+					int end = 0;
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						ASMInstruction ins = body.instructions.get(a);
+						
+						if (ins instanceof ASMBranch || ins instanceof ASMLabel || ins instanceof ASMPushStack) {
+							break;
+						}
+						else if (ins instanceof ASMPopStack) {
+							ASMPopStack pop0 = (ASMPopStack) ins;
+							if (pop0.operands.size() == 1 && !pop0.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+								found = true;
+								pop = pop0;
+								end = a - 1;
+							}
+						}
+					}
+					
+					if (found) {
+						
+						boolean replace = true;
+						REGISTER newReg = pop.operands.get(0).reg;
+						
+						/* Check if register if newReg is overwritten in the span between the push pop */
+						for (int a = i + 1; a < end; a++) {
+							if (this.overwritesReg(body.instructions.get(a), newReg)) {
+								replace = false;
+								break;
+							}
+							else if (this.readsReg(body.instructions.get(a), newReg)) {
+								replace = false;
+								break;
+							}
+						}
+						
+						if (replace) {
+							body.instructions.set(i, new ASMMov(new RegOperand(newReg), new RegOperand(pushReg)));
+							body.instructions.remove(pop);
+							
+							OPT_DONE = true;
+							i--;
+						}
+					}
 				}
 			}
 		}

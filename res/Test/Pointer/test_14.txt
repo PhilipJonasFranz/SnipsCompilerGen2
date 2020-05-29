@@ -51,10 +51,9 @@ main:                                        /* Function: main */
     mov r1, #5
     push { r1, r0 }
     mov r0, r3                               /* Evaluate Expression */
-    push { r0 }
+    mov r1, r0
     sub r0, fp, #16
     lsr r0, r0, #2
-    pop { r1 }
     bl shift                                 /* Call shift */
     mov sp, fp
     pop { r3, fp, lr }

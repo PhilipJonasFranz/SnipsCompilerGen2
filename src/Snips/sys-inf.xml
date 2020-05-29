@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.3.1.4</Version>
+	<Version>v.3.1.5</Version>
 	<Library>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
 		<Alias>vector.sn:lib/std/math/vector.sn</Alias>

@@ -22,31 +22,25 @@ sarrus:                                      /* Function: sarrus */
     add r0, sp, #4
     add r0, r0, #0
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #16
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
+    mul r0, r1, r0
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #32
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #4
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #20
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #24
@@ -61,13 +55,11 @@ sarrus:                                      /* Function: sarrus */
     add r0, fp, #4
     add r0, r0, #8
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #12
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #28
@@ -82,13 +74,11 @@ sarrus:                                      /* Function: sarrus */
     add r0, fp, #4
     add r0, r0, #24
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #16
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #8
@@ -103,13 +93,11 @@ sarrus:                                      /* Function: sarrus */
     add r0, fp, #4
     add r0, r0, #28
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #20
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #0
@@ -124,13 +112,11 @@ sarrus:                                      /* Function: sarrus */
     add r0, fp, #4
     add r0, r0, #32
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     add r0, fp, #4
     add r0, r0, #12
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     push { r0 }
     add r0, fp, #4
     add r0, r0, #4

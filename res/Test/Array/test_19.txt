@@ -31,14 +31,12 @@ __vec_cross.L1:
     add r0, fp, #24
     add r0, r0, r2
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     lsl r2, r4, #2
     add r0, fp, #12
     add r0, r0, r2
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    mul r0, r1, r2
+    mul r0, r1, r0
     add r3, r3, r0
     add r4, r4, #1
     b __vec_cross.L1

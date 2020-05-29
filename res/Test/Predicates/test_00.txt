@@ -70,9 +70,8 @@ main.L0:
     b lambda_add5
 main.L1: 
     mov r5, r0
-    push { r0 }
+    mov r1, r0
     mov r0, r3
-    pop { r1 }
     bl foo                                   /* Call foo */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }

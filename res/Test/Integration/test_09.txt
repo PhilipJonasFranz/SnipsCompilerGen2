@@ -320,9 +320,8 @@ Queue.enqueue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
+    mov r1, r0
     mov r2, #2
-    pop { r1 }
     mul r0, r1, r2
     mov r4, r0
 /* Write value */
@@ -472,13 +471,11 @@ main:                                        /* Function: main */
     sub r0, fp, #8
     add r0, r0, #0
     ldr r0, [r0]
-    push { r0 }
+    mov r1, r0
     sub r0, fp, #8
     add r0, r0, #4
     ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    add r0, r1, r2
+    add r0, r1, r0
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

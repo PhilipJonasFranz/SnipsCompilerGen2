@@ -24,11 +24,9 @@ foo:                                         /* Function: foo */
     mov r1, r3                               /* Evaluate Expression */
     ldr r2, [fp, #16]
     mul r0, r1, r2
-    push { r0 }
+    mov r1, r0
     mul r0, r5, r4
-    mov r2, r0
-    pop { r1 }
-    add r0, r1, r2
+    add r0, r1, r0
     mov sp, fp
     pop { r3, r4, r5, fp }
     add sp, sp, #4

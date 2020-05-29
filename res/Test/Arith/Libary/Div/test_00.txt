@@ -32,9 +32,8 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
     mov r0, r4                               /* Evaluate Expression */
-    push { r0 }
+    mov r1, r0
     mov r0, r3
-    pop { r1 }
     bl __op_div                              /* Call __op_div */
     mov sp, fp
     pop { r3, r4, fp, lr }

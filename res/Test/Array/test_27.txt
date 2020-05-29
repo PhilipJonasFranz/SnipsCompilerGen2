@@ -69,9 +69,8 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-16]
     push { r0 }
     mov r0, r4
-    push { r0 }
+    mov r1, r0
     mov r0, r3
-    pop { r1 }
     bl foo                                   /* Call foo */
     mov sp, fp
     pop { r3, r4, fp, lr }

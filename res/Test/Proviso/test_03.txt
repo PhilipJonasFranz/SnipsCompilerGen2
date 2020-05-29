@@ -27,10 +27,8 @@ getDiff_P0:                                  /* Function: getDiff, Provisos: INT
     mov r0, r4                               /* Evaluate Expression */
     b getDiff.L2
 getDiff.L1: 
-    sub r0, r3, #1
-    push { r0 }
+    sub r1, r3, #1
     mov r0, r4
-    pop { r1 }
     bl getDiff_P0                            /* Call getDiff */
 getDiff.L2: 
     mov sp, fp
@@ -43,9 +41,8 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
     mov r0, r4                               /* Evaluate Expression */
-    push { r0 }
+    mov r1, r0
     mov r0, r3
-    pop { r1 }
     bl getDiff_P0                            /* Call getDiff */
     mov sp, fp
     pop { r3, r4, fp, lr }
