@@ -60,8 +60,7 @@ resv.L1:                                     /* Evaluate condition */
 /* Memory Section is allocated or free */
 /* Load block size from memory */
     lsl r0, r4, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r5, r0
+    ldr r5, [r0]                             /* Load from address */
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
@@ -71,8 +70,7 @@ resv.L6:                                     /* Evaluate condition */
     bne resv.L7
     sub r0, r4, r5
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r6, r0
+    ldr r6, [r0]                             /* Load from address */
     cmp r6, #0
     ble resv.L9
     b resv.L7
@@ -218,8 +216,7 @@ Tree.insert.L1:                              /* Evaluate condition */
     b Tree.insert.L9
 Tree.insert.L6: 
     lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r6, r0
+    ldr r6, [r1]                             /* Load field from struct */
     b Tree.insert.L3
 Tree.insert.L4: 
 /* Right leaf is 0, insert here */
@@ -237,8 +234,7 @@ Tree.insert.L4:
 Tree.insert.L8: 
     lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r6, r0
+    ldr r6, [r1]                             /* Load field from struct */
 Tree.insert.L3: 
     b Tree.insert.L1
 Tree.insert.L2: 
@@ -288,13 +284,11 @@ main.L1:
     bne main.L3
     lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r7, r0
+    ldr r7, [r1]                             /* Load field from struct */
     b main.L2
 main.L3: 
     lsl r1, r7, #2                           /* Convert to bytes */
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r7, r0
+    ldr r7, [r1]                             /* Load field from struct */
 main.L2: 
     cmp r5, #2
     bne main.L4
@@ -307,13 +301,11 @@ main.L4:
     bne main.L7
     lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r7, r0
+    ldr r7, [r1]                             /* Load field from struct */
     b main.L6
 main.L7: 
     lsl r1, r7, #2                           /* Convert to bytes */
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r7, r0
+    ldr r7, [r1]                             /* Load field from struct */
 main.L6: 
     lsl r1, r7, #2                           /* Convert to bytes */
     add r1, r1, #8

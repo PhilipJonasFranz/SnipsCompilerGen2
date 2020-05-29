@@ -16,8 +16,8 @@ get:                                         /* Function: get */
     push { r3 }
     mov r3, r0
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    add r0, r0, #1
+    ldr r1, [r0]                             /* Load from address */
+    add r0, r1, #1
     pop { r3 }
     bx lr
     

@@ -53,17 +53,25 @@ public class ASMOptimizer {
 			OPT_DONE = false;
 			
 			/**
-			 * add r0, r1, r2<br>
-			 * mov r4, r0<br>
-			 * Replace with:<br>
+			 * add r0, r1, r2
+			 * mov r4, r0
+			 * Replace with:
 			 * add r4, r1, r2
 			 */
 			this.removeExpressionIndirectTargeting(body);
 			
 			/**
-			 * mov r0, rx<br>
-			 * cmp rx, r1<br>
-			 * Replace with:<br>
+			 * ldr r0, [r1]
+			 * mov r4, r0
+			 * Replace with:
+			 * add r4, [r1]
+			 */
+			this.removeLoadIndirectTargeting(body);
+			
+			/**
+			 * mov r0, rx
+			 * cmp rx, r1
+			 * Replace with:
 			 * cmp rx, r1
 			 */
 			this.removeOperandIndirectTargeting(body);
@@ -71,7 +79,7 @@ public class ASMOptimizer {
 			this.constantOperandPropagation(body);
 			
 			/**
-			 * b .L1<br>
+			 * b .L1
 			 * ... <- Remove these Lines until Label or newline
 			 */
 			this.clearInstructionsAfterBranch(body);
@@ -82,40 +90,40 @@ public class ASMOptimizer {
 			this.clearUnusedLabels(body);
 			
 			/**
-			 * mov r1, r0<br>
+			 * mov r1, r0
 			 * mov r0, r1 <-- Delete this line
 			 */
 			this.removeDoubleCrossing(body);
 			
 			/**
-			 * push { r0 }<br>
-			 * pop { r1 }<br>
-			 * Replace with:<br>
+			 * push { r0 }
+			 * pop { r1 }
+			 * Replace with:
 			 * mov r1, r0
 			 */
 			this.removeImplicitStackAssignment(body);
 			
 			/**
-			 * b .Lx <-- Remove this line<br>
+			 * b .Lx <-- Remove this line
 			 * .Lx: 
 			 */
 			this.removeBranchesBeforeLabelToLabel(body);
 			
 			/**
-			 * push { r0 }<br>
-			 * ... <- Does not reassign r0<br>
+			 * push { r0 }
+			 * ... <- Does not reassign r0
 			 * pop { r0 }
 			 */
 			this.removeUnnessesaryPushPop(body);
 			
 			/**
-			 * push { r0 }<br>
-			 * ... <- Does not reassign r1<br>
+			 * push { r0 }
+			 * ... <- Does not reassign r1
 			 * pop { r1 }
 			 * 
 			 * Transform to
-			 * mov r1, r0<br>
-			 * ... <- Does not reassign r1<br>
+			 * mov r1, r0
+			 * ... <- Does not reassign r1
 			 * ---
 			 */
 			this.removeIndirectPushPopAssign(body);
@@ -307,6 +315,42 @@ public class ASMOptimizer {
 									}
 								}
 							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	protected void removeLoadIndirectTargeting(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i);
+				
+				if (mov.op1 instanceof RegOperand) {
+					REGISTER reg = ((RegOperand) mov.op1).reg;
+					
+					/* Only perform action if target is a operand register. */
+					if (!(reg == REGISTER.R0 || reg == REGISTER.R1 || reg == REGISTER.R2)) continue;
+					
+					if (body.instructions.get(i - 1) instanceof ASMLdrStack) {
+						ASMLdrStack ldr = (ASMLdrStack) body.instructions.get(i - 1);
+						
+						if (ldr.target.reg == reg) {
+							ldr.target.reg = mov.target.reg;
+							OPT_DONE = true;
+							body.instructions.remove(i);
+							i--;
+						}
+					}
+					else if (body.instructions.get(i - 1) instanceof ASMLdr) {
+						ASMLdr ldr = (ASMLdr) body.instructions.get(i - 1);
+						
+						if (ldr.target.reg == reg) {
+							ldr.target.reg = mov.target.reg;
+							OPT_DONE = true;
+							body.instructions.remove(i);
+							i--;
 						}
 					}
 				}

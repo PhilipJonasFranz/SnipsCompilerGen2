@@ -24,8 +24,7 @@ get:                                         /* Function: get */
     add r1, r3, #2
     add r0, r1, r4
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r2, r0
+    ldr r2, [r0]                             /* Load from address */
     pop { r1 }
     mul r0, r1, r2
     pop { r3, r4 }
