@@ -350,7 +350,7 @@ List.remove:                                 /* Function: List.remove */
 /* Out of bounds */
     cmp r4, #0
     bge List.remove.L0
-    b List.remove.L17
+    b List.remove.L15
 List.remove.L0: 
     cmp r4, #0
     bne List.remove.L3
@@ -381,7 +381,7 @@ List.remove.L6:
     mov r0, r5                               /* Load parameters */
     bl free                                  /* Call free */
 List.remove.L4: 
-    b List.remove.L17
+    b List.remove.L15
 List.remove.L3: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1]                             /* Load field from struct */
@@ -395,7 +395,7 @@ List.remove.L9:                              /* Evaluate condition */
     ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     bne List.remove.L12
-    b List.remove.L17
+    b List.remove.L15
 List.remove.L12: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1]                             /* Load field from struct */
@@ -408,7 +408,7 @@ List.remove.L10:
     ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     bne List.remove.L14
-    b List.remove.L17
+    b List.remove.L15
 List.remove.L14: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1]
@@ -441,7 +441,6 @@ List.remove.L16:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1]                             /* Store value to struct field */
 List.remove.L15: 
-List.remove.L17: 
     mov sp, fp
     pop { r3, r4, r5, r6, fp, lr }
     bx lr

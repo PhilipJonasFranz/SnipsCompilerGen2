@@ -28,7 +28,7 @@ main.L1:
     add r1, r4, r5
     add r4, r1, #1
     cmp r5, #5
-    bge main.L3
+    bge main.L7
     mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 main.L6: 
@@ -38,7 +38,6 @@ main.L6:
     add r6, r6, #1
     b main.L6
 main.L7: 
-main.L3: 
     add r5, r5, #1
     b main.L1
 main.L2: 

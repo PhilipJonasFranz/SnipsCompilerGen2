@@ -59,7 +59,7 @@ sort:                                        /* Function: sort */
     mov r4, r1
     mov r5, r2
     cmp r4, #1
-    ble sort.L0
+    ble sort.L4
 sort.L3:                                     /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
@@ -106,7 +106,6 @@ sort.L7:
 sort.L11: 
     b sort.L3
 sort.L4: 
-sort.L0: 
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
     bx lr

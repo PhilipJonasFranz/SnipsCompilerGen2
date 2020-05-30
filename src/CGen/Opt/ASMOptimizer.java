@@ -105,6 +105,14 @@ public class ASMOptimizer {
 			this.removeImplicitStackAssignment(body);
 			
 			/**
+			 * .L0:
+			 * .L1:
+			 * Replace with:
+			 * .L1   <- Rename all .L0 occurrenced to this label
+			 */
+			this.removeDoubleLabels(body);
+			
+			/**
 			 * b .Lx <-- Remove this line
 			 * .Lx: 
 			 */
@@ -525,9 +533,11 @@ public class ASMOptimizer {
 			if (body.instructions.get(i - 1) instanceof ASMBranch && body.instructions.get(i) instanceof ASMLabel) {
 				ASMBranch branch = (ASMBranch) body.instructions.get(i - 1);
 				ASMLabel label = (ASMLabel) body.instructions.get(i);
+				
 				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand) {
 					LabelOperand op = (LabelOperand) branch.target;
-					if (op.label.equals(label)) {
+					
+					if (op.label.name.equals(label.name)) {
 						body.instructions.remove(i - 1);
 						i--;
 						OPT_DONE = true;
@@ -834,6 +844,23 @@ public class ASMOptimizer {
 						body.instructions.remove(i + 1);
 						OPT_DONE = true;
 					}
+				}
+			}
+		}
+	}
+	
+	protected void removeDoubleLabels(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMLabel && !(body.instructions.get(i) instanceof ASMDataLabel)) {
+				ASMLabel l1 = (ASMLabel) body.instructions.get(i);
+				
+				if (body.instructions.get(i - 1) instanceof ASMLabel && !(body.instructions.get(i - 1) instanceof ASMDataLabel)) {
+					ASMLabel l0 = (ASMLabel) body.instructions.get(i - 1);
+					
+					l1.name = l0.name;
+					body.instructions.remove(i);
+					i--;
+					OPT_DONE = true;
 				}
 			}
 		}
