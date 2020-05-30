@@ -13,8 +13,7 @@ main:                                        /* Function: main */
     mov r3, r0
     add r0, r0, #2
     push { r0 }
-    mov r0, r3
-    push { r0 }
+    push { r3 }
     mov r0, #2                               /* Evaluate Expression */
     mov sp, fp
     pop { r3 }

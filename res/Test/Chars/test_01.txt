@@ -200,8 +200,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     bl resv                                  /* Call resv */
     mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
-    mov r0, r4                               /* Evaluate Expression */
-    push { r0 }
+    push { r4 }
     mov r0, #0
     lsl r1, r5, #2
     str r0, [r1, #0]

@@ -117,6 +117,14 @@ public class ASMOptimizer {
 			this.removeUnnessesaryPushPop(body);
 			
 			/**
+			 * mov r0, rx
+			 * push { r0 }
+			 * Replace with:
+			 * push { rx }
+			 */
+			this.removeImplicitPushPopTargeting(body);
+			
+			/**
 			 * push { r0 }
 			 * ... <- Does not reassign r1
 			 * pop { r1 }
@@ -454,6 +462,27 @@ public class ASMOptimizer {
 								body.instructions.remove(i - 1);
 								i--;
 							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	protected void removeImplicitPushPopTargeting(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i - 1) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+				
+				if (mov.target.reg == REGISTER.R0 && mov.op1 instanceof RegOperand) {
+					if (body.instructions.get(i) instanceof ASMPushStack) {
+						ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+						
+						if (push.operands.size() == 1 && push.operands.get(0).reg == mov.target.reg) {
+							push.operands.get(0).reg = ((RegOperand) mov.op1).reg;
+							body.instructions.remove(i - 1);
+							i--;
+							OPT_DONE = true;
 						}
 					}
 				}

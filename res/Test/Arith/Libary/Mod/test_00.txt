@@ -44,8 +44,6 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r0, r4                               /* Evaluate Expression */
-    mov r1, r0
     mov r0, r3
     bl __op_mod                              /* Call __op_mod */
     mov sp, fp

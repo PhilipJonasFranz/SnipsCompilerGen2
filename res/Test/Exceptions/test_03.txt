@@ -202,8 +202,7 @@ checkThreshold.L2:
     ldr r8, [r0]                             /* Load from address */
     cmp r8, r4
     blt checkThreshold.L5
-    mov r0, r8
-    push { r0 }
+    push { r8 }
     mov r12, #1                              /* Signal thrown exception */
     mov r0, #4
     b checkThreshold.L0                      /* Exception thrown, branch to escape target */
@@ -259,8 +258,7 @@ main:                                        /* Function: main */
     str r0, [r1, #16]
     mov r5, #0
     push { sp }
-    mov r0, r3                               /* Evaluate Expression */
-    mov r1, r0
+    mov r1, r3
     mov r0, r4
     bl checkThreshold                        /* Call checkThreshold */
     cmp r12, #0

@@ -215,8 +215,7 @@ __mat_mult.L7:
     b __mat_mult.L7
 __mat_mult.L8: 
     add sp, sp, #4
-    mov r0, r9                               /* Evaluate Expression */
-    push { r0 }
+    push { r9 }
     mov r1, r7
     ldr r2, [fp, #36]
     mul r2, r1, r2
@@ -295,8 +294,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     push { r0 }
-    mov r0, r5
-    push { r0 }
+    push { r5 }
     mov r0, r4
     pop { r1, r2 }
     bl __mat_mult                            /* Call __mat_mult */

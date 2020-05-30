@@ -265,8 +265,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     bl resv                                  /* Call resv */
     mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
-    mov r0, r4                               /* Evaluate Expression */
-    push { r0 }
+    push { r4 }
     mov r0, #0
     lsl r1, r5, #2
     str r0, [r1, #0]
@@ -454,8 +453,7 @@ GameObject.Items.set:                        /* Function: GameObject.Items.set *
     mov r5, r2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r6, [r1]                             /* Load field from struct */
-    mov r0, r5                               /* Evaluate Expression */
-    push { r0 }
+    push { r5 }
     add r0, r6, r4
     lsl r1, r0, #2
     pop { r0 }
@@ -493,8 +491,7 @@ main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r4, r0
-    mov r0, r3                               /* Evaluate Expression */
-    push { r0 }
+    push { r3 }
     ldr r0, .POOL1_main.L3_arr               /* Load data section address */
     add r0, r0, #4
     ldr r0, [r0]
@@ -537,8 +534,7 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #-24]                       /* Evaluate Expression */
     push { r0 }
-    mov r0, r4
-    push { r0 }
+    push { r4 }
 /* Set item at index 1 to 5 */
     sub r1, fp, #24                          /* Load parameters */
     ldr r0, [r1]                             /* Load field from struct */

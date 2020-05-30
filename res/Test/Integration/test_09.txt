@@ -236,8 +236,7 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
     mov r1, #0
     mov r2, #0
     push { r2, r1, r0 }
-    mov r0, r3
-    push { r0 }
+    push { r3 }
     mov r0, r4
     lsl r1, r5, #2
     str r0, [r1, #0]
