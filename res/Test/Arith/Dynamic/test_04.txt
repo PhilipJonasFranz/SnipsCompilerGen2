@@ -27,9 +27,8 @@ foo:                                         /* Function: foo */
     mov fp, sp
     mov r0, #4                               /* Evaluate Expression */
     bl baz                                   /* Call baz */
-    mov r2, r0
     mov r1, #8
-    mul r0, r1, r2
+    mul r0, r1, r0
     mov sp, fp
     pop { fp, lr }
     bx lr

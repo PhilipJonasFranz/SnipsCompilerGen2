@@ -13,6 +13,7 @@ import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMMov;
@@ -461,6 +462,35 @@ public class ASMOptimizer {
 							if (remove && a < 3) {
 								body.instructions.remove(i - 1);
 								i--;
+							}
+						}
+						else if (i + 1 < body.instructions.size() && body.instructions.get(i + 1) instanceof ASMMult) {
+							
+							ASMInstruction ins0 = body.instructions.get(i);
+							if (!(ins0 instanceof ASMBranch || ins0 instanceof ASMLabel || 
+								 ins0 instanceof ASMMemOp || ins0 instanceof ASMStackOp || 
+								 ins0 instanceof ASMPushStack || ins0 instanceof ASMPopStack)) {
+								
+								ASMMult mul = (ASMMult) body.instructions.get(i + 1);
+								boolean remove = false;
+								if (mul.op0 != null && mul.op0.reg == RegOperand.toReg(a)) {
+									/* Replace */
+									mul.op0 = target;
+									OPT_DONE = true;
+									remove = true;
+								}
+								
+								if (mul.op1 != null && mul.op1 instanceof RegOperand && ((RegOperand) mul.op1).reg == RegOperand.toReg(a)) {
+									/* Replace */
+									mul.op1 = target;
+									OPT_DONE = true;
+									remove = true;
+								}
+								
+								if (remove && a < 3) {
+									body.instructions.remove(i - 1);
+									i--;
+								}
 							}
 						}
 					}

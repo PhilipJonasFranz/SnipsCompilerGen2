@@ -24,9 +24,8 @@ set:                                         /* Function: set */
     mov r4, r1
     mov r5, r2
     push { r4 }
-    mov r2, r5
     mov r1, #2
-    mul r2, r1, r2
+    mul r2, r1, r5
     add r1, r3, r2
     ldr r2, [fp, #16]
     add r0, r1, r2

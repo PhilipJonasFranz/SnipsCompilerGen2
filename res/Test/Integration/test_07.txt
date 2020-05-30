@@ -243,7 +243,7 @@ allocMatrix:                                 /* Function: allocMatrix */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mul r0, r3, r1
+    mul r0, r0, r1
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */

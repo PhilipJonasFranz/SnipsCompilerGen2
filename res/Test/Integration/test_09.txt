@@ -223,8 +223,8 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
     mov fp, sp
     mov r3, r0
 /* Allocate memory for storage of given size */
-    mov r1, #2
-    mul r0, r1, r3
+    mov r0, #2                               /* Evaluate Expression */
+    mul r0, r0, r3
     bl resv                                  /* Call resv */
     mov r4, r0
 /* Allocate memory for queue */
