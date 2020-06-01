@@ -1029,39 +1029,66 @@ public class ContextChecker {
 		return false;
 	}
 	
-	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+	public Function linkFunction(NamespacePath path, SyntaxElement i, Source source) throws CTX_EXCEPTION {
+		List<TYPE> proviso = null;
+		
+		if (i instanceof InlineCall) {
+			InlineCall i0 = (InlineCall) i;
+			proviso = i0.proviso;
+		}
+		else {
+			FunctionCall i0 = (FunctionCall) i;
+			proviso = i0.proviso;
+		}
+		
 		/* Find the called function */
-		Function f = this.findFunction(i.path, i.getSource());
+		Function f = this.findFunction(path, source);
 		
 		/* Proviso may come from lambda */
-		Declaration d = this.scopes.peek().getFieldNull(i.path, i.getSource());
+		Declaration d = this.scopes.peek().getFieldNull(path, source);
 		
 		if (d != null) {
 			if (d.getType() instanceof FUNC) {
 				FUNC f0 = (FUNC) d.getType();
 				
-				if (i.proviso.size() != 0) {
-					throw new CTX_EXCEPTION(i.getSource(), "Proviso for inline call are provided by predicate '" + d.path.build() + "', cannot provide proviso at this location");
+				if (proviso.size() != 0) {
+					throw new CTX_EXCEPTION(source, "Proviso for inline call are provided by predicate '" + d.path.build() + "', cannot provide proviso at this location");
 				}
 				
 				/* Proviso types provided through lambda */
-				i.proviso = f0.proviso;
+				proviso = f0.proviso;
 			}
 		}
 		
 		/* Function not found, may be a lambda call */
 		if (f == null) {
-			d = this.scopes.peek().getField(i.path, i.getSource());
+			d = this.scopes.peek().getFieldNull(path, source);
 			
-			if (d.getType() instanceof FUNC) {
+			if (d != null && d.getType() instanceof FUNC) {
 				f = ((FUNC) d.getType()).funcHead;
 			}
 		}
 		
 		/* Still not found, undefined */
 		if (f == null) {
-			throw new CTX_EXCEPTION(i.getSource(), "Undefined function or predicate '" + i.path.build() + "'");
+			throw new CTX_EXCEPTION(source, "Undefined function or predicate '" + path.build() + "'");
 		}
+		
+		if (i instanceof InlineCall) {
+			InlineCall i0 = (InlineCall) i;
+			i0.proviso = proviso;
+		}
+		else {
+			FunctionCall i0 = (FunctionCall) i;
+			i0.proviso = proviso;
+		}
+		
+		return f;
+	}
+	
+	public TYPE checkInlineCall(InlineCall i) throws CTX_EXCEPTION {
+		/* Find the called function */
+		Function f = this.linkFunction(i.path, i, i.getSource());
 		
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
@@ -1132,7 +1159,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
-		Function f = this.findFunction(i.path, i.getSource());
+		Function f = this.linkFunction(i.path, i, i.getSource());
+		
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
