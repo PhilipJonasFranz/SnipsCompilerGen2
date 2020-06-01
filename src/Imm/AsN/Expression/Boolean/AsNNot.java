@@ -22,7 +22,7 @@ public class AsNNot extends AsNUnaryExpression {
 		AsNNot not = new AsNNot();
 		
 		/* Clear only R0 */
-		not.clearReg(r, st, 0);
+		r.free(0);
 		
 		not.instructions.addAll(AsNExpression.cast(n.getOperand(), r, map, st).getInstructions());
 		not.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));

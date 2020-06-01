@@ -97,8 +97,8 @@ namespace Queue {
 	 */
 	T dequeue<T>(CyclicQueue<T>* queue) {
 		if (queue->isEmpty) {
-			/* Queue is empty */
-			return (T) 0;
+			/* Queue is empty, cast void 0. */
+			return (void) 0;
 		}
 		else {
 			/* Read value from tail */

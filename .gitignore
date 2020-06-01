@@ -23,6 +23,7 @@ target/
 
 # BlueJ files
 *.ctxt
+*.tmp
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -39,3 +40,5 @@ target/
 hs_err_pid*
 /bin/
 /target/
+
+doc/~$ips Documentation.docx

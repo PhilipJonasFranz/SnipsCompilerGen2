@@ -12,6 +12,8 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -75,10 +77,21 @@ public class AsNFunctionCall extends AsNStatement {
 		for (int i = 0; i < mapping.size(); i++) {
 			Pair<Declaration, Integer> p = mapping.get(i);
 			if (p.getSecond() == -1) {
+				/*
+				 * At this point, special stack set handling is needed. The casted parameter can push dummies
+				 * on the stack. Since these are function parameters, the called function will take care of
+				 * them. We reset the stack set for the compile time here already.
+				 */
+				int s = st.getStack().size();
+				
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
+				
+				/* Push Parameter in R0 on the stack */
 				if (parameters.get(i).getType().wordsize() == 1) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
+				
+				while (st.getStack().size() != s) st.pop();
 				r.getReg(0).free();
 			}
 		}
@@ -109,22 +122,41 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 		}
 		
-		/* Branch to function */
-		String target = f.path.build() + f.manager.getPostfix(provisos);
-		
-		ASMLabel functionLabel = new ASMLabel(target);
-		
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
-		branch.comment = new ASMComment("Call " + f.path.build());
-		call.instructions.add(branch);
+		if (f.isLambdaHead) {
+			if (r.declarationLoaded(f.lambdaDeclaration)) {
+				int loc = r.declarationRegLocation(f.lambdaDeclaration);
+				
+				/* Manual linking */
+				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+				
+				/* Move address of function into pc */
+				call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+			}
+		}
+		else {
+			/* Branch to function */
+			String target = f.path.build() + f.manager.getPostfix(provisos);
+			
+			ASMLabel functionLabel = new ASMLabel(target);
+			
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
+			branch.comment = new ASMComment("Call " + f.path.build());
+			call.instructions.add(branch);
+		}
 		
 		/* 
 		 * Push dummy values on the stack for the stack return value, but only if 
 		 * there is a data target.
 		 */
-		if (f.getReturnType().wordsize() > 1 && inlineCall) {
-			for (int i = 0; i < f.getReturnType().wordsize(); i++) {
-				st.push(REGISTER.R0);
+		if (f.getReturnType().wordsize() > 1) {
+			if (inlineCall) {
+				for (int i = 0; i < f.getReturnType().wordsize(); i++) {
+					st.push(REGISTER.R0);
+				}
+			}
+			else {
+				/* No data target, reset stack */
+				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4)));
 			}
 		}
 		

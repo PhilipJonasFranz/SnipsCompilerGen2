@@ -16,7 +16,7 @@ namespace String {
     		char c0 = *(str0 + c);
     		char c1 = *(str1 + c);
     		
-    		equal &= c0 == c1;
+    		equal &&= c0 == c1;
     		if ((int) c0 == 0 || (int) c1 == 0) break;
     		c++;
     	}

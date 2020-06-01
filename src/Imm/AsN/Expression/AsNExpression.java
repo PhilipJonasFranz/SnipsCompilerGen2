@@ -11,9 +11,11 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
@@ -58,11 +60,17 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof IDRef) {
 			node = AsNIdRef.cast((IDRef) e, r, map, st, 0);
 		}
+		else if (e instanceof FunctionRef) {
+			node = AsNFunctionRef.cast((FunctionRef) e, r, map, st, 0);
+		}
 		else if (e instanceof IDRefWriteback) {
 			node = AsNIDRefWriteback.cast((IDRefWriteback) e, r, map, st);
 		}
 		else if (e instanceof Atom) {
 			node = AsNAtom.cast((Atom) e, r, map, st, 0); 
+		}
+		else if (e instanceof RegisterAtom) {
+			node = AsNRegisterAtom.cast((RegisterAtom) e, r, map, st, 0); 
 		}
 		else if (e instanceof SizeOfType) {
 			node = AsNSizeOfType.cast((SizeOfType) e, r, map, st, 0);

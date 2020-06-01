@@ -25,7 +25,7 @@ public class AsNOr extends AsNBinaryExpression {
 		AsNOr or = new AsNOr();
 		
 		/* Clear only R0, R1 since R2 is not needed */
-		or.clearReg(r, st, 0, 1);
+		r.free(0, 1);
 		
 		if (o.getLeft() instanceof Atom && o.getRight() instanceof Atom) {
 			int value0 = ((INT) ((Atom) o.getLeft()).getType()).value;

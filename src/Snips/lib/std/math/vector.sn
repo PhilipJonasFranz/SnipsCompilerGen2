@@ -1,0 +1,21 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility for vectors and various vector operations.
+ */
+namespace Vector {
+
+	/*
+	 * Calculates the scalar product of the two given vectors.
+	 * Both vectors have to have the same length. The length
+	 * Is passed by the l parameter.
+	 */
+	int scalarProd(int* v, int* w, int l) {
+		int sum = 0;
+		for (int i = 0; i < l; i++) {
+			sum += *(v + i) * *(w + i);
+		}
+		return sum;
+	}
+	
+}

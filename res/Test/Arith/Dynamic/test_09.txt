@@ -61,8 +61,7 @@ foo:                                         /* Function: foo */
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    mov r0, r3
-    push { r0 }
+    push { r3 }
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     push { r1, r0 }
@@ -80,33 +79,25 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     bl foo                                   /* Call foo */
-    mov r1, r3                               /* Evaluate Expression */
     mov r2, #2
-    mul r0, r1, r2
+    mul r0, r3, r2
     bl foo                                   /* Call foo */
     bl baz                                   /* Evaluate Expression */
     sub r0, fp, #8
     add r0, r0, #0
-    ldr r0, [r0]
-    push { r0 }
+    ldr r1, [r0]
     sub r0, fp, #16
     add r0, r0, #0
-    ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
-    add r0, r1, r2
-    push { r0 }
+    ldr r2, [r0]
+    add r1, r1, r2
     sub r0, fp, #16
     add r0, r0, #4
-    ldr r0, [r0]
-    mov r2, r0
-    pop { r1 }
+    ldr r2, [r0]
     add r0, r1, r2
     push { r0 }
     sub r1, fp, #24                          /* Load field location */
     add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
-    mov r2, r0
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

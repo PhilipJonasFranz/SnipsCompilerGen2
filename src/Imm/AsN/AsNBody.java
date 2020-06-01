@@ -9,6 +9,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -58,7 +59,7 @@ public class AsNBody extends AsNNode {
 	public static LiteralManager literalManager;
 	
 			/* --- METHODS --- */
-	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION {
+	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION, CTX_EXCEPTION {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralManager();
 		
@@ -138,7 +139,7 @@ public class AsNBody extends AsNNode {
 				
 		
 		/* --- Inject Stack Copy Routine --- */
-		List<ASMInstruction> routine = body.buildRoutine();
+		List<ASMInstruction> routine = body.buildStackCopyRoutine();
 		body.instructions.addAll(routine);
 	
 		
@@ -260,7 +261,7 @@ public class AsNBody extends AsNNode {
 		node.instructions.add(branch);
 	}
 	
-	public List<ASMInstruction> buildRoutine() {
+	public List<ASMInstruction> buildStackCopyRoutine() {
 		List<ASMInstruction> routine = new ArrayList();
 		routine.add(new ASMComment("System Routine, used to copy memory on the stack"));
 		

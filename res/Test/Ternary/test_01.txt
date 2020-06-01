@@ -18,7 +18,7 @@ main:                                        /* Function: main */
     cmp r3, #3
     bne main.L0
     mov r0, #5
-    b main.L1
+    b main.L3
 main.L0: 
     cmp r3, #4
     bne main.L2
@@ -27,7 +27,6 @@ main.L0:
 main.L2: 
     mov r0, #10
 main.L3: 
-main.L1: 
     mov r4, r0
     pop { r3, r4 }
     bx lr

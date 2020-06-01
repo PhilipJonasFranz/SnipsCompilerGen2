@@ -73,6 +73,8 @@ public class ProvisoManager {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
 			
+			if (map0.size() != map.size()) throw new SNIPS_EXCEPTION("Recieved proviso mapping length is not equal to expected length, expected " + map0.size() + ", but got " + map.size());
+			
 			if (this.mappingIsEqual(map0, map)) {
 				return true;
 			}

@@ -38,10 +38,8 @@ main.L1:
     mov r0, #1
     cmp r0, r3
     bne main.L2
-    mov r1, r3                               /* Evaluate Expression */
     mov r2, #3
-    mul r0, r1, r2
-    mov r4, r0
+    mul r4, r3, r2
     b main.L0
 main.L2: 
     mov r0, #2

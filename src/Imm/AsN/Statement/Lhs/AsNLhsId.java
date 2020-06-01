@@ -8,6 +8,8 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.Branch.ASMBranch;
+import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -15,9 +17,16 @@ import Imm.ASM.Processing.Arith.ASMAnd;
 import Imm.ASM.Processing.Arith.ASMEor;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMLsr;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.Operands.ImmOperand;
+import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Lhs.ArraySelectLhsId;
@@ -92,11 +101,40 @@ public class AsNLhsId extends AsNStatement {
 			}
 			else inj.add(new ASMMult(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
-		else if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) {
-			// TODO
-		}
-		else if (a.assignArith == ASSIGN_ARITH.MOD_ASSIGN) {
-			// TODO
+		else if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN || a.assignArith == ASSIGN_ARITH.MOD_ASSIGN) {
+			/* Move operands, so sourceOperand = 0 and combineOperand = 1 */
+			if (sourceOperand != 0) {
+				if (combineOperand == 0) {
+					if (sourceOperand != 1) {
+						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand)));
+					}
+					else {
+						/* Swap */
+						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+					}
+				}
+				else {
+					inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand)));
+					inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(combineOperand)));
+				}
+			}
+			else if (combineOperand != 1) {
+				inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(combineOperand)));
+			}
+			
+			if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) {
+				inj.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(new ASMLabel("__op_div"))));
+			}
+			else {
+				inj.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(new ASMLabel("__op_mod"))));
+			}
+			
+			if (directInjection) {
+				inj.add(new ASMMov(new RegOperand(sourceOperand), new RegOperand(REGISTER.R0)));
+			}
 		}
 		else if (a.assignArith == ASSIGN_ARITH.LSL_ASSIGN) {
 			if (!directInjection) {
@@ -112,26 +150,58 @@ public class AsNLhsId extends AsNStatement {
 			}
 			else inj.add(new ASMLsr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
-		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
+		else if (a.assignArith == ASSIGN_ARITH.BIT_ORR_ASSIGN) {
 			if (!directInjection) {
 				if (otherOp == 0) save = true;
 				inj.add(new ASMOrr(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 			}
 			else inj.add(new ASMOrr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
-		else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
+		else if (a.assignArith == ASSIGN_ARITH.BIT_AND_ASSIGN) {
 			if (!directInjection) {
 				if (otherOp == 0) save = true;
 				inj.add(new ASMAnd(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 			}
 			else inj.add(new ASMAnd(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 		}
-		else if (a.assignArith == ASSIGN_ARITH.XOR_ASSIGN) {
+		else if (a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
 			if (!directInjection) {
 				if (otherOp == 0) save = true;
 				inj.add(new ASMEor(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
 			}
 			else inj.add(new ASMEor(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand)));
+		}
+		else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
+			ASMAdd and0 = new ASMAdd(new RegOperand(combineOperand), new RegOperand(combineOperand), new ImmOperand(0));
+			and0.updateConditionField = true;
+			inj.add(and0);
+			
+			inj.add(new ASMMov(new RegOperand(combineOperand), new ImmOperand(1), new Cond(COND.NE)));
+			
+			inj.add(new ASMCmp(new RegOperand(sourceOperand), new ImmOperand(0)));
+			
+			if (!directInjection) {
+				inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(combineOperand), new Cond(COND.NE)));
+				inj.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(COND.EQ)));
+			}
+			else {
+				inj.add(new ASMMov(new RegOperand(sourceOperand), new RegOperand(combineOperand), new Cond(COND.NE)));
+				inj.add(new ASMMov(new RegOperand(sourceOperand), new ImmOperand(0), new Cond(COND.EQ)));
+			}
+		}
+		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
+			ASMOrr orr = new ASMOrr(new RegOperand(sourceOperand), new RegOperand(sourceOperand), new RegOperand(combineOperand));
+			orr.updateConditionField = true;
+			inj.add(orr);
+			
+			if (!directInjection) {
+				inj.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(1), new Cond(COND.NE)));
+				inj.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(0), new Cond(COND.EQ)));
+			}
+			else {
+				inj.add(new ASMMov(new RegOperand(sourceOperand), new ImmOperand(1), new Cond(COND.NE)));
+				inj.add(new ASMMov(new RegOperand(sourceOperand), new ImmOperand(0), new Cond(COND.EQ)));
+			}
 		}
 		
 		/* Pop Last Operand Register if Operand Register was used */

@@ -248,6 +248,8 @@ public class CompilerDriver {
 			NamespaceProcessor nameProc = new NamespaceProcessor();
 			nameProc.process((Program) AST);
 			
+			if (imm) AST.print(4, true);
+			
 			
 					/* --- CONTEXT CHECKING --- */
 			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, Message.Type.INFO);

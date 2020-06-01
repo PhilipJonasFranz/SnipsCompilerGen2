@@ -5,6 +5,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMMov;
@@ -40,7 +41,9 @@ public class AsNSignalStatement extends AsNStatement {
 		sig.instructions.add(signal);
 		
 		/* Move word size of thrown exception into r0 to be used in the copy loop */
-		sig.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.exceptionInit.getType().wordsize() * 4)));
+		ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.exceptionInit.getType().wordsize() * 4));
+		mov.optFlags.add(OPT_FLAG.WRITEBACK);
+		sig.instructions.add(mov);
 		
 		/* Add the branch to the watchpoint */
 		injectWatchpointBranch(sig, s.watchpoint, null);

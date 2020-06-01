@@ -118,6 +118,7 @@ public class Token {
 		
 		/* Types */
 		VOID("void", 				TokenGroup.TYPE),
+		FUNC("func", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
 		CHAR("char",				TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),

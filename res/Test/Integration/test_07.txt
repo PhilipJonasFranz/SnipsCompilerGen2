@@ -56,7 +56,7 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6, r7, r8, r9 }
+    push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
     add r3, r3, #1
@@ -72,9 +72,7 @@ resv.L1:                                     /* Evaluate condition */
 /* Memory Section is allocated or free */
 /* Load block size from memory */
     lsl r0, r4, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r5, r0
-    mov r6, r0
+    ldr r5, [r0]                             /* Load from address */
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
@@ -84,20 +82,19 @@ resv.L6:                                     /* Evaluate condition */
     bne resv.L7
     sub r0, r4, r5
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r7, r0
-    cmp r7, #0
+    ldr r6, [r0]                             /* Load from address */
+    cmp r6, #0
     ble resv.L9
     b resv.L7
 resv.L9: 
-    cmp r7, #0
+    cmp r6, #0
     bne resv.L11
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
 resv.L11: 
-    add r5, r5, r7
+    add r5, r5, r6
 /* Add to current size */
     b resv.L6
 resv.L7: 
@@ -105,7 +102,6 @@ resv.L7:
     lsl r1, r4, #2
     str r0, [r1]
 /* Write defragmented size to heap */
-    mov r7, r0
     cmp r5, #0
     bne resv.L12
     mov r0, #0                               /* Evaluate Expression */
@@ -124,10 +120,7 @@ resv.L12:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r8, r0                               /* Evaluate Expression */
-    mov r1, r4
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L15: 
     cmp r5, r3
@@ -137,16 +130,13 @@ resv.L15:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r9, r0                               /* Evaluate Expression */
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov r1, r4                               /* Evaluate Expression */
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
     b resv.L18
 resv.L17: 
     add r4, r4, r5
@@ -161,12 +151,9 @@ resv.L2:
     mov r0, r3                               /* Evaluate Expression */
     lsl r1, r4, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
-    mov r1, r4
-    mov r2, #1
-    add r0, r1, #1
+    add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6, r7, r8, r9 }
+    pop { r3, r4, r5, r6 }
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
@@ -205,8 +192,7 @@ __mat_mult.L7:
     bge __mat_mult.L8
     mov r1, r7                               /* Evaluate Expression */
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    mov r2, r0
+    mul r2, r1, r2
     add r1, r3, r2
     ldr r2, [fp, #-4]
     add r0, r1, r2
@@ -215,13 +201,11 @@ __mat_mult.L7:
     push { r0 }
     ldr r1, [fp, #-4]
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    mov r2, r0
+    mul r2, r1, r2
     add r1, r4, r2
     add r0, r1, r8
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    mov r2, r0
+    ldr r2, [r0]                             /* Load from address */
     pop { r1 }
     mul r0, r1, r2
     add r9, r9, r0
@@ -231,12 +215,10 @@ __mat_mult.L7:
     b __mat_mult.L7
 __mat_mult.L8: 
     add sp, sp, #4
-    mov r0, r9                               /* Evaluate Expression */
-    push { r0 }
+    push { r9 }
     mov r1, r7
     ldr r2, [fp, #36]
-    mul r0, r1, r2
-    mov r2, r0
+    mul r2, r1, r2
     add r1, r6, r2
     add r0, r1, r8
     lsl r1, r0, #2
@@ -261,9 +243,7 @@ allocMatrix:                                 /* Function: allocMatrix */
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, r4
-    mul r0, r1, r2
+    mul r0, r0, r1
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
@@ -276,16 +256,10 @@ allocMatrix.L1:
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mov r1, r6                               /* Evaluate Expression */
-    mov r2, r4
-    mul r0, r1, r2
-    mov r1, r0
+    mul r1, r6, r4
     add r0, r1, r7
     push { r0 }
-    mov r1, r6
-    mov r2, r4
-    mul r0, r1, r2
-    mov r2, r0
+    mul r2, r6, r4
     add r1, r5, r2
     add r0, r1, r7
     lsl r1, r0, #2
@@ -308,29 +282,24 @@ main:                                        /* Function: main */
     push { r3, r4, r5, r6, fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                               /* Evaluate Expression */
-    push { r0 }
+    mov r1, #3
     mov r0, #3
-    pop { r1 }
     bl allocMatrix                           /* Call allocMatrix */
     mov r4, r0
-    mov r0, #3                               /* Evaluate Expression */
-    push { r0 }
+    mov r1, #3
     mov r0, #3
-    pop { r1 }
     bl allocMatrix                           /* Call allocMatrix */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     push { r0 }
-    mov r0, r5
-    push { r0 }
+    push { r5 }
     mov r0, r4
     pop { r1, r2 }
     bl __mat_mult                            /* Call __mat_mult */
     mov r6, r0
-    add r0, r6, r3
+    add r0, r0, r3
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     mov sp, fp

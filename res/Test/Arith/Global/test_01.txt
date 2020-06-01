@@ -23,8 +23,7 @@ main:                                        /* Function: main */
     mov r1, r3                               /* Evaluate Expression */
     ldr r2, .POOL0_main.L0_x                 /* Load from .data section */
     ldr r2, [r2]
-    mul r0, r1, r2
-    mov r1, r0
+    mul r1, r1, r2
     ldr r2, .POOL0_main.L1_y                 /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2

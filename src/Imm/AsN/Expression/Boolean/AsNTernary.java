@@ -24,7 +24,7 @@ public class AsNTernary extends AsNExpression {
 	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		AsNTernary tern = new AsNTernary();
 		
-		tern.clearReg(r, st, 0, 1, 2);
+		r.free(0, 1, 2);
 		
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(t.condition, r, map, st);

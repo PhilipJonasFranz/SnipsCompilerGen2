@@ -2,6 +2,7 @@ SOURCE
 int main(int b) {
 	int* p = &b;
 	*p += 5;
+	return b;
 }
 TESTCASES
 0 5
@@ -17,10 +18,11 @@ main:                                        /* Function: main */
     sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
     mov r3, r0
-    lsl r1, r3, #2
+    lsl r1, r0, #2
     ldr r2, [r1]
     add r0, r2, #5
     str r0, [r1]
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
     mov sp, fp
     pop { r3 }
     bx lr

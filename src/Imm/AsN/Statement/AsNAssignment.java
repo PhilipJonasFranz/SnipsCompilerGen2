@@ -62,8 +62,6 @@ public class AsNAssignment extends AsNStatement {
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
-			// TODO: Test this implementation
-			
 			/* Move counter in R2 */
 			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
 			

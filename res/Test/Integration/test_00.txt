@@ -1,11 +1,11 @@
 SOURCE
-T fib<T>(T n) {
+int fib(int n) {
 	if (n < 3) return 1;
-	else return fib<T>(n - 1) + fib<T>(n - 2);
+	else return fib(n - 1) + fib(n - 2);
 }
 
 int main(int a) {
-	return fib<int>(a);
+	return fib(a);
 }
 TESTCASES
 1 1
@@ -18,7 +18,7 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-fib_P0:                                      /* Function: fib, Provisos: INT */
+fib:                                         /* Function: fib */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
@@ -27,15 +27,11 @@ fib_P0:                                      /* Function: fib, Provisos: INT */
     mov r0, #1                               /* Evaluate Expression */
     b fib.L2
 fib.L1: 
-    mov r1, r3                               /* Evaluate Expression */
-    mov r2, #1
-    sub r0, r1, #1
-    bl fib_P0                                /* Call fib */
+    sub r0, r3, #1
+    bl fib                                   /* Call fib */
     push { r0 }
-    mov r1, r3                               /* Load parameters */
-    mov r2, #2
-    sub r0, r1, #2
-    bl fib_P0                                /* Call fib */
+    sub r0, r3, #2
+    bl fib                                   /* Call fib */
     mov r2, r0
     pop { r1 }
     add r0, r1, r2
@@ -48,7 +44,7 @@ main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
     mov r3, r0
-    bl fib_P0                                /* Call fib */
+    bl fib                                   /* Call fib */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr

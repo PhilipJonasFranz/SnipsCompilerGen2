@@ -20,9 +20,11 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
@@ -110,6 +112,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		/* Body */
 		for (int i = 0; i < a.body.size(); i++) {
 			Statement s = a.body.get(i);
+			
+			/* Free operand regs */
+			r.free(0, 1, 2);
+			
 			this.loadStatement(a, s, r, map, st);
 		}
 		
@@ -269,7 +275,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			}
 			return ref;
 		}
-		else if (e instanceof IDRef || e instanceof Atom || e instanceof SizeOfType || e instanceof StructSelect) {
+		else if (e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
 		}
 		else throw new CGEN_EXCEPTION(e.getSource(), "Cannot check references for " + e.getClass().getName());

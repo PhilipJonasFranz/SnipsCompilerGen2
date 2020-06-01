@@ -13,20 +13,13 @@ main:                                        /* Function: main */
     push { r3, r4 }
     mov r3, r0
     add r3, r0, #1
-    mov r1, r0
-    add r0, r1, #10
-    push { r0 }
+    add r1, r0, #10
     mov r0, r3
     sub r3, r0, #1
-    mov r2, r0
-    pop { r1 }
-    sub r0, r1, r2
-    push { r0 }
+    sub r1, r1, r0
     mov r0, r3
     add r3, r0, #1
-    mov r2, r0
-    pop { r1 }
-    add r4, r1, r2
+    add r4, r1, r0
     mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr
