@@ -621,9 +621,15 @@ public class Assembler {
 					if (sp.length == 1)new Message("Expected identifier or numeric: " + in.get(i).getInstruction(), Message.Type.FAIL);
 					if (mode == MODE.TEXT) {
 						// .word [label] -> label address
-						if (!locations.containsKey(sp [1]))new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], Message.Type.FAIL);
-						int [] num = Util.toBinary(locations.get(sp [1]));
-						for (int a : num)app = a + app;
+						try {
+							int imm = Integer.parseInt(sp [1]);
+							int [] num = Util.toBinary(imm);
+							for (int a : num)app = a + app;
+						} catch (NumberFormatException e) {
+							if (!locations.containsKey(sp [1])) new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], Message.Type.FAIL);
+							int [] num = Util.toBinary(locations.get(sp [1]));
+							for (int a : num)app = a + app;
+						}
 					}
 					else {
 						// Either write word by .word [value] or default to 0, .word [value] -> [value]

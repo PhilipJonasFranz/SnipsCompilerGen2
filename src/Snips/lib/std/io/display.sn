@@ -17,7 +17,7 @@ namespace Display {
 
 	/* Reads the char from the display input at base + 1 */
 	char getChar() {
-		int* base = (int*) (displayBase + 1);
+		int* base = (int*) (Display::displayBase + 1);
 		int c = *base;
 		*base = 0;
 		return (char) c;
@@ -25,7 +25,7 @@ namespace Display {
 	
 	/* Puts the char at the current cursor location and increments the cursor */
 	void putChar(char c) {
-		int* base = (int*) (displayBase + 2);
+		int* base = (int*) (Display::displayBase + 2);
 		base += cursor;
 		*base = (int) c;
 		Display::cursor++;
