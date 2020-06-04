@@ -31,7 +31,8 @@ main:                                        /* Function: main */
     b lambda_add5
     mov r4, r0
     mov r0, r3                               /* Evaluate Expression */
-    bl add5                                  /* Call add5 */
+    add lr, pc, #8
+    mov pc, r4
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr

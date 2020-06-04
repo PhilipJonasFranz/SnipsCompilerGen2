@@ -1001,8 +1001,10 @@ public class ContextChecker {
 			for (Declaration d : this.currentFunction.peek().parameters) {
 				if (d.getType() instanceof FUNC) {
 					FUNC f0 = (FUNC) d.getType();
-					f0.funcHead.lambdaDeclaration = d;
-					if (f0.funcHead.path.getLast().equals(path.getLast())) {
+					
+					if (f0.funcHead != null) f0.funcHead.lambdaDeclaration = d;
+					
+					if (d.path.getLast().equals(path.getLast())) {
 						funcs.add(f0.funcHead);
 					}
 				}
@@ -1044,42 +1046,41 @@ public class ContextChecker {
 		/* Find the called function */
 		Function f = this.findFunction(path, source);
 		
-		/* Proviso may come from lambda */
-		Declaration d = this.scopes.peek().getFieldNull(path, source);
+		Declaration anonTarget = null;
 		
-		if (d != null) {
-			if (d.getType() instanceof FUNC) {
-				FUNC f0 = (FUNC) d.getType();
+		/* Function not found, may be a lambda call */
+		if (f == null) {
+			anonTarget = this.scopes.peek().getFieldNull(path, source);
+			
+			if (anonTarget != null && anonTarget.getType() instanceof FUNC) {
+				FUNC f0 = (FUNC) anonTarget.getType();
 				
 				if (proviso.size() != 0) {
-					throw new CTX_EXCEPTION(source, "Proviso for inline call are provided by predicate '" + d.path.build() + "', cannot provide proviso at this location");
+					throw new CTX_EXCEPTION(source, "Proviso for inline call are provided by predicate '" + anonTarget.path.build() + "', cannot provide proviso at this location");
 				}
 				
 				/* Proviso types provided through lambda */
 				proviso = f0.proviso;
+				
+				f = f0.funcHead;
+				
+				if (f == null) {
+					if (!CompilerDriver.disableWarnings) {
+						this.messages.add(new Message("Unsafe operation, target of predicate '" + path.build() + "' is unknown, " + source.getSourceMarker(), Message.Type.WARN, true));
+					}
+				}
 			}
 		}
 		
-		/* Function not found, may be a lambda call */
-		if (f == null) {
-			d = this.scopes.peek().getFieldNull(path, source);
-			
-			if (d != null && d.getType() instanceof FUNC) {
-				f = ((FUNC) d.getType()).funcHead;
-			}
-		}
-		
-		/* Still not found, undefined */
-		if (f == null) {
-			throw new CTX_EXCEPTION(source, "Undefined function or predicate '" + path.build() + "'");
-		}
 		
 		if (i instanceof InlineCall) {
 			InlineCall i0 = (InlineCall) i;
+			i0.anonTarget = anonTarget;
 			i0.proviso = proviso;
 		}
 		else {
 			FunctionCall i0 = (FunctionCall) i;
+			i0.anonTarget = anonTarget;
 			i0.proviso = proviso;
 		}
 		
@@ -1093,66 +1094,80 @@ public class ContextChecker {
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
-		/* Add signaled types */
-		if (f.signals) {
-			for (TYPE s : f.signalsTypes) {
-				if (!this.signalStackContains(s)) {
-					this.signalStack.peek().add(s);
+		if (f != null) {
+			/* Add signaled types */
+			if (f.signals) {
+				for (TYPE s : f.signalsTypes) {
+					if (!this.signalStackContains(s)) {
+						this.signalStack.peek().add(s);
+					}
 				}
 			}
-		}
-		
-		if (!f.manager.provisosTypes.isEmpty()) {
-			if (f.manager.containsMapping(i.proviso)) {
-				/* Mapping already exists, just return return type of this specific mapping */
-				f.setContext(i.proviso);
-				i.setType(f.manager.getMappingReturnType(i.proviso));
+			
+			if (!f.manager.provisosTypes.isEmpty()) {
+				if (f.manager.containsMapping(i.proviso)) {
+					/* Mapping already exists, just return return type of this specific mapping */
+					f.setContext(i.proviso);
+					i.setType(f.manager.getMappingReturnType(i.proviso));
+				}
+				else {
+					/* Create a new context, check function for this specific context */
+					f.setContext(i.proviso);
+					
+					this.scopes.push(new Scope(this.scopes.get(0)));
+					f.check(this);
+					this.scopes.pop();
+					i.setType(f.manager.getMappingReturnType(i.proviso));
+				}
 			}
 			else {
-				/* Create a new context, check function for this specific context */
-				f.setContext(i.proviso);
+				/* 
+				 * Add default proviso mapping, so mapping is present,
+				 * function was called and will be compiled.
+				 */
+				f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+			}
+			
+			if (i.parameters.size() != f.parameters.size()) {
+				throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
+			}
+			
+			for (int a = 0; a < f.parameters.size(); a++) {
+				if (i.parameters.get(a) instanceof ArrayInit) {
+					throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
+				}
 				
-				this.scopes.push(new Scope(this.scopes.get(0)));
-				f.check(this);
-				this.scopes.pop();
-				i.setType(f.manager.getMappingReturnType(i.proviso));
+				TYPE paramType = i.parameters.get(a).check(this);
+				
+				TYPE functionParamType = f.parameters.get(a).getType();
+				
+				if (!paramType.isEqual(functionParamType)) {
+					if (paramType instanceof POINTER || functionParamType instanceof POINTER) {
+						CompilerDriver.printProvisoTypes = true;
+					}
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+				}
+			}
+			
+			if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) {
+				i.setType(f.getReturnType().clone());
+			}
+			
+			if (i.getType() instanceof VOID) {
+				throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
 			}
 		}
 		else {
-			/* 
-			 * Add default proviso mapping, so mapping is present,
-			 * function was called and will be compiled.
-			 */
-			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
-		}
-		
-		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
-		}
-		
-		for (int a = 0; a < f.parameters.size(); a++) {
-			if (i.parameters.get(a) instanceof ArrayInit) {
-				throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
-			}
+			/* Set void as return type */
+			i.setType(new VOID());
 			
-			TYPE paramType = i.parameters.get(a).check(this);
-			
-			TYPE functionParamType = f.parameters.get(a).getType();
-			
-			if (!paramType.isEqual(functionParamType)) {
-				if (paramType instanceof POINTER || functionParamType instanceof POINTER) {
-					CompilerDriver.printProvisoTypes = true;
+			for (int a = 0; a < i.parameters.size(); a++) {
+				if (i.parameters.get(a) instanceof ArrayInit) {
+					throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
 				}
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+				
+				i.parameters.get(a).check(this);
 			}
-		}
-		
-		if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) {
-			i.setType(f.getReturnType().clone());
-		}
-		
-		if (i.getType() instanceof VOID) {
-			throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
 		}
 		
 		return i.getType();
@@ -1164,53 +1179,64 @@ public class ContextChecker {
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
-		/* Add signaled types */
-		if (f.signals) {
-			for (TYPE s : f.signalsTypes) {
-				if (!this.signalStackContains(s)) {
-					this.signalStack.peek().add(s);
+		if (f != null) {
+			/* Add signaled types */
+			if (f.signals) {
+				for (TYPE s : f.signalsTypes) {
+					if (!this.signalStackContains(s)) {
+						this.signalStack.peek().add(s);
+					}
 				}
 			}
-		}
-		
-		if (!f.manager.provisosTypes.isEmpty()) {
-			if (!f.manager.containsMapping(i.proviso)) {
-				/* Create new scope that points to the global scope */
-				f.setContext(i.proviso);
-				this.scopes.push(new Scope(this.scopes.get(0)));
-				
-				f.check(this);
-				this.scopes.pop();
+			
+			if (!f.manager.provisosTypes.isEmpty()) {
+				if (!f.manager.containsMapping(i.proviso)) {
+					/* Create new scope that points to the global scope */
+					f.setContext(i.proviso);
+					this.scopes.push(new Scope(this.scopes.get(0)));
+					
+					f.check(this);
+					this.scopes.pop();
+				}
+				else {
+					f.setContext(i.proviso);
+				}
 			}
 			else {
-				f.setContext(i.proviso);
+				/* 
+				 * Add default proviso mapping, so mapping is present,
+				 * function was called and will be compiled.
+				 */
+				f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+			}
+			
+			if (i.parameters.size() != f.parameters.size()) {
+				throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
+			}
+			
+			for (int a = 0; a < f.parameters.size(); a++) {
+				TYPE paramType = i.parameters.get(a).check(this);
+				
+				if (paramType instanceof FUNC) {
+					FUNC f0 = (FUNC) paramType;
+					f0.funcHead.isLambdaHead = true;
+				}
+				
+				if (!paramType.isEqual(f.parameters.get(a).getType())) {
+					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
+						CompilerDriver.printProvisoTypes = true;
+					}
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+				}
 			}
 		}
 		else {
-			/* 
-			 * Add default proviso mapping, so mapping is present,
-			 * function was called and will be compiled.
-			 */
-			f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
-		}
-		
-		if (i.parameters.size() != f.parameters.size()) {
-			throw new CTX_EXCEPTION(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
-		}
-		
-		for (int a = 0; a < f.parameters.size(); a++) {
-			TYPE paramType = i.parameters.get(a).check(this);
-			
-			if (paramType instanceof FUNC) {
-				FUNC f0 = (FUNC) paramType;
-				f0.funcHead.isLambdaHead = true;
-			}
-			
-			if (!paramType.isEqual(f.parameters.get(a).getType())) {
-				if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) {
-					CompilerDriver.printProvisoTypes = true;
+			for (int a = 0; a < i.parameters.size(); a++) {
+				if (i.parameters.get(a) instanceof ArrayInit) {
+					throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
 				}
-				throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+				
+				i.parameters.get(a).check(this);
 			}
 		}
 		
@@ -1357,7 +1383,7 @@ public class ContextChecker {
 		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
 		if (t instanceof PRIMITIVE) {
 			if (!CompilerDriver.disableWarnings) {
-				new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN, true);
+				this.messages.add(new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		
@@ -1370,7 +1396,7 @@ public class ContextChecker {
 		TYPE t = tc.expression.check(this);
 		
 		/* Allow only casting to equal word sizes or from or to void types */
-		if (t.wordsize() != tc.castType.wordsize() && !(tc.castType.getCoreType() instanceof VOID || t instanceof VOID)) {
+		if ((t != null && t.wordsize() != tc.castType.wordsize()) && !(tc.castType.getCoreType() instanceof VOID || t instanceof VOID)) {
 			throw new CTX_EXCEPTION(tc.getSource(), "Cannot cast " + t.typeString() + " to " + tc.castType.typeString());
 		}
 		
