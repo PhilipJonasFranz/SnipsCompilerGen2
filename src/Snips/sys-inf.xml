@@ -1,8 +1,10 @@
 <Inf>
-	<Version>v.3.1.8</Version>
+	<Version>v.3.1.9</Version>
 	<Library>
 		<Alias>bits.sn:lib/util/bits.sn</Alias>
+		<Alias>color.sn:lib/util/color.sn</Alias>
 		<Alias>vector.sn:lib/std/math/vector.sn</Alias>
+		<Alias>math.sn:lib/std/math/math.sn</Alias>
 		<Alias>matrix.sn:lib/std/math/matrix.sn</Alias>
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
 		<Alias>boolean.sn:lib/std/type/boolean.sn</Alias>
