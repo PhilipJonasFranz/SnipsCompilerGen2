@@ -1072,6 +1072,10 @@ public class ContextChecker {
 			}
 		}
 		
+		/* Neither regular function or predicate was found, undefined */
+		if (f == null && anonTarget == null) {
+			throw new CTX_EXCEPTION(source, "Undefined function or predicate '" + path.build() + "'");
+		}
 		
 		if (i instanceof InlineCall) {
 			InlineCall i0 = (InlineCall) i;
