@@ -602,7 +602,8 @@ public class ASMOptimizer {
 					
 					for (int a = i + 1; a < body.instructions.size(); a++) {
 						if (body.instructions.get(a) instanceof ASMBranch ||
-							body.instructions.get(a) instanceof ASMLabel) {
+							body.instructions.get(a) instanceof ASMLabel ||
+							body.instructions.get(a) instanceof ASMMov && ((ASMMov) body.instructions.get(a)).target.reg == REGISTER.PC) {
 							clear = false;
 							break;
 						}

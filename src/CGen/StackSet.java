@@ -202,15 +202,18 @@ public class StackSet {
 		int add = 0;
 		if (close) {
 			while (this.stack.size() != target) {
-				this.stack.pop();
-				add++;
+				StackCell c = this.stack.pop();
+				if (c.type == CONTENT_TYPE.REGISTER) add++;
+				else add += c.declaration.getType().wordsize();
 			}
 		}
 		else {
 			Stack<StackCell> st0 = new Stack();
 			while (this.stack.size() != target) {
-				st0.push(this.stack.pop());
-				add++;
+				StackCell c = this.stack.pop();
+				if (c.type == CONTENT_TYPE.REGISTER) add++;
+				else add += c.declaration.getType().wordsize();
+				st0.push(c);
 			}
 			
 			while (!st0.isEmpty()) {

@@ -47,14 +47,15 @@ public class InlineCall extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + ((this.anonTarget == null)? "Inline" : "Anonymous") + " Call: " + this.path.build());
+		System.out.print(this.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
 		if (this.calledFunction != null) {
 			for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
 			System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		}
 		else {
 			System.out.println();
-			anonTarget.print(d + this.printDepthStep, rec);
+			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
+			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
 		}
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);

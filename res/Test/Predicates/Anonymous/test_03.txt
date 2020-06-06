@@ -1,0 +1,21 @@
+SOURCE
+int [2] f(int x) {
+	return {x, 0};
+}
+
+int main() {
+	func pred = f;
+	int p = (int) pred;
+	func pred0 = (func) p;
+
+	int s = 0;
+	for (int i = 0; i < 10; i++) {
+		int [2] r0 = (int [2]) pred0(i + 1);
+		int r = r0 [0];
+		s += r;
+	}
+		
+	return s;
+}
+TESTCASES
+55
