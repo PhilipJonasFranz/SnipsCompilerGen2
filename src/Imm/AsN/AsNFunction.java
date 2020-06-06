@@ -87,7 +87,9 @@ public class AsNFunction extends AsNCompoundStatement {
 				 */
 				AsNFunction casted = new AsNFunction();
 				casted.source = f0.funcHead;
-				f0.funcHead.castedNode = casted;
+				
+				/* May be null due to anonymous call */
+				if (f0.funcHead != null) f0.funcHead.castedNode = casted;
 			}
 		}
 		

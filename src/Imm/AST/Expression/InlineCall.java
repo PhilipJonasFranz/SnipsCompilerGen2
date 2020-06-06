@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -27,6 +28,9 @@ public class InlineCall extends Expression {
 	/** The Expressions used as parameters */
 	public List<Expression> parameters;
 	
+	/** Anonymous target. Recieves value during ctx if call is calling a predicate that could not be linked. */
+	public Declaration anonTarget;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -43,9 +47,16 @@ public class InlineCall extends Expression {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "Inline Call: " + this.path.build());
-		for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
-		System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
+		System.out.print(this.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		if (this.calledFunction != null) {
+			for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
+			System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
+		}
+		else {
+			System.out.println();
+			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
+			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
+		}
 		for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}
@@ -56,22 +67,22 @@ public class InlineCall extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
-		for (int i = 0; i < this.proviso.size(); i++) {
-			TYPE pro = this.proviso.get(i);
-			
-			if (pro instanceof PROVISO) {
-				PROVISO pro0 = (PROVISO) pro;
-				for (int a = 0; a < context.size(); a++) {
-					/* Found proviso in function head, set context */
-					if (context.get(a).isEqual(pro0)) {
-						if (context.get(a) instanceof PROVISO) {
-							PROVISO pro1 = (PROVISO) context.get(a);
-							pro0.setContext(pro1.getContext());
+		if (this.anonTarget == null) {
+			for (int i = 0; i < this.proviso.size(); i++) {
+				TYPE pro = this.proviso.get(i);
+				
+				if (pro instanceof PROVISO) {
+					PROVISO pro0 = (PROVISO) pro;
+					for (int a = 0; a < context.size(); a++) {
+						/* Found proviso in function head, set context */
+						if (context.get(a).isEqual(pro0)) {
+							if (context.get(a) instanceof PROVISO) {
+								PROVISO pro1 = (PROVISO) context.get(a);
+								pro0.setContext(pro1.getContext());
+							}
+							else pro0.setContext(context.get(a));
+							break;
 						}
-						else pro0.setContext(context.get(a));
-						break;
 					}
 				}
 			}

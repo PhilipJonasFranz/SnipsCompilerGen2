@@ -1,0 +1,85 @@
+SOURCE
+int [2] f(int x) {
+	return {x, 0};
+}
+
+int main() {
+	func pred = f;
+	int p = (int) pred;
+	func pred0 = (func) p;
+
+	int s = 0;
+	for (int i = 0; i < 10; i++) {
+		int [2] r0 = (int [2]) pred0(i + 1);
+		int r = r0 [0];
+		s += r;
+	}
+		
+	return s;
+}
+TESTCASES
+55
+OUTPUT
+/* --test_03.txt */
+    b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+lambda_f:                                    /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+f:                                           /* Function: f */
+    push { r3, fp }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    push { r3 }
+    mov r2, sp
+    mov sp, fp
+    pop { r3, fp }
+    mov r0, #8
+    add r1, r2, #8
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, r6, r7, r8, fp, lr }
+    mov fp, sp
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_f
+    mov r3, r0
+    mov r4, r0
+    mov r5, r0
+    mov r6, #0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r7, #0
+main.L1: 
+    cmp r7, #10
+    bge main.L2
+    add r0, r7, #1
+    add lr, pc, #8
+    mov pc, r5
+    sub r0, fp, #8
+    add r0, r0, #0
+    ldr r8, [r0]
+    add r6, r6, r8
+    mov r0, r7
+    add r7, r0, #1
+    add sp, sp, #8
+    b main.L1
+main.L2: 
+    mov r0, r6                               /* Evaluate Expression */
+    mov sp, fp
+    pop { r3, r4, r5, r6, r7, r8, fp, lr }
+    bx lr
+    

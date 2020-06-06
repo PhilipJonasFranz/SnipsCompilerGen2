@@ -22,17 +22,20 @@ public class AsNInlineCall extends AsNExpression {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;
 		
-		/* 
-		 * When a function has provisos, the order cannot be checked.
-		 * A indicator the order is incorrect is that the casted node is null at this point.
-		 */
-		if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead) {
-			throw new SNIPS_EXCEPTION("Function " + ic.calledFunction.path.build() + " is undefined at this point, " + ic.getSource().getSourceMarker());
+		/* Function may be null when its an anonymous call */
+		if (ic.anonTarget == null) {
+			/* 
+			 * When a function has provisos, the order cannot be checked.
+			 * A indicator the order is incorrect is that the casted node is null at this point.
+			 */
+			if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead) {
+				throw new SNIPS_EXCEPTION("Function " + ic.calledFunction.path.build() + " is undefined at this point, " + ic.getSource().getSourceMarker());
+			}
 		}
 		
-		AsNFunctionCall.call(ic.calledFunction, true, ic.proviso, ic.parameters, call, r, map, st);
+		AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, true, ic.proviso, ic.parameters, ic, call, r, map, st);
 		
-		if (ic.calledFunction.signals) {
+		if (ic.anonTarget == null && ic.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
 			AsNSignalStatement.injectWatchpointBranch(call, ic.watchpoint, new Cond(COND.NE));
