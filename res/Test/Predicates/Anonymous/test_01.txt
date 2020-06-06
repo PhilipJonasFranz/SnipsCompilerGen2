@@ -1,12 +1,12 @@
 SOURCE
-int [2] get() {
-	return {5, 3};
+int [2] id(int[2] arr) {
+	return arr;
 }
 
 int main(int x) {
-	func [1] pred = {get};
+	func [1] pred = {id};
 	func pred0 = pred [0];
-	int [2] arr = (int [2]) pred0();
+	int [2] arr = (int[2]) pred0({5, 3});
 	return arr [x];
 }
 TESTCASES

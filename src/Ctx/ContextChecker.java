@@ -36,6 +36,7 @@ import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Lhs.PointerLhsId;
+import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
@@ -670,7 +671,7 @@ public class ContextChecker {
 				d.setType(t);
 			}
 			
-			if (!d.getType().isEqual(t)) {
+			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) {
 					CompilerDriver.printProvisoTypes = true;
 				}
@@ -709,7 +710,7 @@ public class ContextChecker {
 		TYPE ctype = t;
 		
 		/* If target type is a pointer, only the core types have to match */
-		if (!targetType.isEqual(t)) {
+		if (!targetType.isEqual(t) || (targetType.wordsize() != t.wordsize() && a.lhsId instanceof SimpleLhsId)) {
 			if (targetType instanceof POINTER || t instanceof POINTER) {
 				CompilerDriver.printProvisoTypes = true;
 			}
@@ -1137,10 +1138,6 @@ public class ContextChecker {
 			}
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
-				if (i.parameters.get(a) instanceof ArrayInit) {
-					throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
-				}
-				
 				TYPE paramType = i.parameters.get(a).check(this);
 				
 				TYPE functionParamType = f.parameters.get(a).getType();
@@ -1166,10 +1163,6 @@ public class ContextChecker {
 			i.setType(new VOID());
 			
 			for (int a = 0; a < i.parameters.size(); a++) {
-				if (i.parameters.get(a) instanceof ArrayInit) {
-					throw new CTX_EXCEPTION(i.getSource(), "Structure Init can only be a sub expression of structure init");
-				}
-				
 				i.parameters.get(a).check(this);
 			}
 		}
