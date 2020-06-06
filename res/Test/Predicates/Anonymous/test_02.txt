@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-/* --test_07.txt */
+/* --test_02.txt */
     b main
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

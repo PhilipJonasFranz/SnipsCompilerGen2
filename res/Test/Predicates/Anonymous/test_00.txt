@@ -15,7 +15,7 @@ TESTCASES
 0 5
 1 6
 OUTPUT
-/* --test_05.txt */
+/* --test_00.txt */
     b main
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
