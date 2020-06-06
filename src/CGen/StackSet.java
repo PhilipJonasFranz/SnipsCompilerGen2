@@ -202,15 +202,18 @@ public class StackSet {
 		int add = 0;
 		if (close) {
 			while (this.stack.size() != target) {
-				this.stack.pop();
-				add++;
+				StackCell c = this.stack.pop();
+				if (c.type == CONTENT_TYPE.REGISTER) add++;
+				else add += c.declaration.getType().wordsize();
 			}
 		}
 		else {
 			Stack<StackCell> st0 = new Stack();
 			while (this.stack.size() != target) {
-				st0.push(this.stack.pop());
-				add++;
+				StackCell c = this.stack.pop();
+				if (c.type == CONTENT_TYPE.REGISTER) add++;
+				else add += c.declaration.getType().wordsize();
+				st0.push(c);
 			}
 			
 			while (!st0.isEmpty()) {
@@ -235,6 +238,24 @@ public class StackSet {
 		}
 		
 		return occurences.get(occurences.size() - 1);
+	}
+	
+	/**
+	 * Returns the total amount of words on the stack starting after the FP/LR backup.
+	 */
+	public int getFrameSize() {
+		int off = 0;
+		for (StackCell c : this.stack) {
+			if (c.getType() == CONTENT_TYPE.REGISTER) {
+				if (c.getReg() == REGISTER.LR || c.getReg() == REGISTER.FP) {
+					off = 0;
+				}
+				else off += 4;
+			}
+			else off += c.getDeclaration().getType().wordsize();
+		}
+		
+		return off;
 	}
 	
 }

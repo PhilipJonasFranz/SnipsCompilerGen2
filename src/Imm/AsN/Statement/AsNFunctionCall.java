@@ -1,5 +1,6 @@
 package Imm.AsN.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import CGen.MemoryMap;
@@ -14,6 +15,7 @@ import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -24,7 +26,9 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
@@ -40,17 +44,19 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		/* 
-		 * When a function has provisos, the order cannot be checked.
-		 * A indicator the order is incorrect is that the casted node is null at this point.
-		 */
-		if (fc.calledFunction.castedNode == null) {
-			throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
+		if (fc.anonTarget == null) {
+			/* 
+			 * When a function has provisos, the order cannot be checked.
+			 * A indicator the order is incorrect is that the casted node is null at this point.
+			 */
+			if (fc.calledFunction.castedNode == null) {
+				throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
+			}
 		}
 		
-		call(fc.calledFunction, false, fc.proviso, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, fc.anonTarget, false, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
-		if (fc.calledFunction.signals) {
+		if (fc.anonTarget == null && fc.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
 			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
@@ -59,24 +65,56 @@ public class AsNFunctionCall extends AsNStatement {
 		return call;
 	}
 	
-	public static void call(Function f, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static List<Pair<Expression, Integer>> getDefaultMapping(List<Expression> params) {
+		int r = 0;
+		List<Pair<Expression, Integer>> mapping = new ArrayList();
+		
+		for (Expression e : params) {
+			//dec.print(0, true);
+			int wordSize = e.getType().wordsize();
+			if (wordSize == 1 && r < 3) {
+				/* Load in register */
+				mapping.add(new Pair(e, r));
+				r++;
+			}
+			else 
+				/* Load in stack */
+				mapping.add(new Pair(e, -1));
+		}
+		return mapping;
+	}
+	
+	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		r.free(0, 1, 2);
 		
-		try {
-			f.setContext(provisos);
-		} catch (CTX_EXCEPTION e) {
-			e.printStackTrace();
+		if (f != null) {
+			try {
+				f.setContext(provisos);
+			} catch (CTX_EXCEPTION e) {
+				e.printStackTrace();
+			}
 		}
 		
-		/* Reload mapping for context */
-		List<Pair<Declaration, Integer>> mapping = 
-			((AsNFunction) f.castedNode).getParameterMapping();
-
+		int regMapping = 0;
+		
+		List<Integer> sMap = new ArrayList();
+		
+		/* Extract mapping locations from different mappings */
+		if (f == null) {
+			/* Load default mapping */
+			List<Pair<Expression, Integer>> mapping = getDefaultMapping(parameters);
+			mapping.stream().forEach(x -> sMap.add(x.second));
+		}
+		else {
+			/* Reload mapping for context */
+			List<Pair<Declaration, Integer>> mapping = ((AsNFunction) f.castedNode).getParameterMapping();
+			mapping.stream().forEach(x -> sMap.add(x.second));
+		}
+		
 		/* Load Parameters in the Stack */
-		for (int i = 0; i < mapping.size(); i++) {
-			Pair<Declaration, Integer> p = mapping.get(i);
-			if (p.getSecond() == -1) {
+		for (int i = 0; i < sMap.size(); i++) {
+			if (sMap.get(i) == -1) {
 				/*
 				 * At this point, special stack set handling is needed. The casted parameter can push dummies
 				 * on the stack. Since these are function parameters, the called function will take care of
@@ -96,17 +134,14 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		
-		int regMapping = 0;
-		
 		/* Load Parameters in the registers */
-		for (int i = mapping.size() - 1; i >= 0; i--) {
-			Pair<Declaration, Integer> p = mapping.get(i);
-			if (p.getSecond() != -1) {
+		for (int i = sMap.size() - 1; i >= 0; i--) {
+			if (sMap.get(i) != -1) {
 				regMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
 				/* Leave First Parameter directley in R0 */
-				if (p.getSecond() > 0) {
+				if (sMap.get(i) > 0) {
 					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
 				}
 				r.getReg(0).free();
@@ -122,15 +157,28 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
 		}
 		
-		if (f.isLambdaHead) {
-			if (r.declarationLoaded(f.lambdaDeclaration)) {
-				int loc = r.declarationRegLocation(f.lambdaDeclaration);
-				
-				/* Manual linking */
-				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
-				
-				/* Move address of function into pc */
-				call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+		if ((f != null && f.isLambdaHead) || anonCall != null) {
+			if (anonCall != null) {
+				if (r.declarationLoaded(anonCall)) {
+					int loc = r.declarationRegLocation(anonCall);
+					
+					/* Manual linking */
+					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+					
+					/* Move address of function into pc */
+					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+				}
+			}
+			else {
+				if (r.declarationLoaded(f.lambdaDeclaration)) {
+					int loc = r.declarationRegLocation(f.lambdaDeclaration);
+					
+					/* Manual linking */
+					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+					
+					/* Move address of function into pc */
+					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+				}
 			}
 		}
 		else {
@@ -144,23 +192,46 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(branch);
 		}
 		
-		/* 
-		 * Push dummy values on the stack for the stack return value, but only if 
-		 * there is a data target.
-		 */
-		if (f.getReturnType().wordsize() > 1) {
-			if (inlineCall) {
-				for (int i = 0; i < f.getReturnType().wordsize(); i++) {
-					st.push(REGISTER.R0);
+		if (f != null) {
+			/* 
+			 * Push dummy values on the stack for the stack return value, but only if 
+			 * there is a data target.
+			 */
+			if (f.getReturnType().wordsize() > 1) {
+				if (inlineCall) {
+					for (int i = 0; i < f.getReturnType().wordsize(); i++) {
+						st.push(REGISTER.R0);
+					}
+				}
+				else {
+					/* No data target, reset stack */
+					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4)));
+				}
+			}
+		}
+		else {
+			if (callee instanceof InlineCall) {
+				InlineCall ic = (InlineCall) callee;
+				
+				/* 
+				 * Anonymous inline call uses implicit type, push dummy values for this type.
+				 */
+				if (ic.getType().wordsize() > 1) {
+					for (int i = 0; i < ic.getType().wordsize(); i++) {
+						st.push(REGISTER.R0);
+					}
 				}
 			}
 			else {
-				/* No data target, reset stack */
-				call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4)));
+				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
+				ASMSub sub = new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP), new ImmOperand(st.getFrameSize() * 4));
+				sub.comment = new ASMComment("Reset the stack after anonymous call");
+				
+				call.instructions.add(sub);
 			}
 		}
 		
-		if (!f.parameters.isEmpty()) call.instructions.get(0).comment = new ASMComment("Load parameters");
+		if (parameters.size() > 0) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}
 	
 }

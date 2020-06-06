@@ -26,6 +26,9 @@ public class FunctionCall extends Statement {
 	
 	public List<Expression> parameters;
 	
+	/** Anonymous target. Recieves value during ctx if call is calling a predicate that could not be linked. */
+	public Declaration anonTarget;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -61,18 +64,18 @@ public class FunctionCall extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		
-		for (int i = 0; i < this.proviso.size(); i++) {
-			TYPE pro = this.proviso.get(i);
-			
-			if (pro instanceof PROVISO) {
-				PROVISO pro0 = (PROVISO) pro;
-				for (int a = 0; a < context.size(); a++) {
-					/* Found proviso in function head, set context */
-					if (context.get(a).isEqual(pro0)) {
-						pro0.setContext(context.get(a));
-						break;
+		if (this.anonTarget == null) {
+			for (int i = 0; i < this.proviso.size(); i++) {
+				TYPE pro = this.proviso.get(i);
+				
+				if (pro instanceof PROVISO) {
+					PROVISO pro0 = (PROVISO) pro;
+					for (int a = 0; a < context.size(); a++) {
+						/* Found proviso in function head, set context */
+						if (context.get(a).isEqual(pro0)) {
+							pro0.setContext(context.get(a));
+							break;
+						}
 					}
 				}
 			}

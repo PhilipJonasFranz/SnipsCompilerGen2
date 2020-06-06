@@ -497,47 +497,65 @@ public class Parser {
 			List<TYPE> proviso = new ArrayList();
 			List<Declaration> decs = new ArrayList();
 			
-			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				if (current.type == TokenType.CMPLT) {
-					proviso = this.parseProviso();
-				}
-				
-				/* Params in braces */
-				accept(TokenType.LPAREN);
-				
-				while (current.type != TokenType.RPAREN) {
-					decs.add(this.parseParameterDeclaration());
+			TYPE ret = null;
+			
+			boolean anonymous = false;
+			
+			/* Non-anonymous */
+			if (current.type != TokenType.IDENTIFIER) {
+				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
+					if (current.type == TokenType.CMPLT) {
+						proviso = this.parseProviso();
+					}
 					
-					if (current.type == TokenType.COMMA) {
-						accept();
+					/* Params in braces */
+					accept(TokenType.LPAREN);
+					
+					while (current.type != TokenType.RPAREN) {
+						decs.add(this.parseParameterDeclaration());
+						
+						if (current.type == TokenType.COMMA) {
+							accept();
+						}
+						else {
+							break;
+						}
 					}
-					else {
-						break;
-					}
+					
+					accept(TokenType.RPAREN);
+				}
+				else if (current.type != TokenType.UNION_ACCESS) {
+					/* Only one param, no braces */
+					decs.add(this.parseParameterDeclaration());
 				}
 				
-				accept(TokenType.RPAREN);
+				accept(TokenType.UNION_ACCESS);
+				
+				ret = this.parseType();
 			}
-			else if (current.type != TokenType.UNION_ACCESS ){
-				/* Only one param, no braces */
-				decs.add(this.parseParameterDeclaration());
+			else {
+				anonymous = true;
 			}
-			
-			accept(TokenType.UNION_ACCESS);
-			
-			TYPE ret = this.parseType();
 			
 			Token id = accept(TokenType.IDENTIFIER);
 			List<String> path = new ArrayList();
 			path.add(id.spelling);
 			
-			/* Wrap parsed function head in function object, wrap created head in declaration */
-			Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
-			lambda.isLambdaHead = true;
-			
-			Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
-			this.scopes.peek().add(d);
-			return d;
+			if (anonymous) {
+				/* Anonymous call, pass null function */
+				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(null, proviso), null, source);
+				this.scopes.peek().add(d);
+				return d;
+			}
+			else {
+				/* Wrap parsed function head in function object, wrap created head in declaration */
+				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
+				lambda.isLambdaHead = true;
+				
+				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
+				this.scopes.peek().add(d);
+				return d;
+			}
 		}
 		else {
 			TYPE type = this.parseType();
@@ -1825,11 +1843,6 @@ public class Parser {
 			
 			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
-			
-			/* FUNC types are not allowed as pointers or arrays */
-			if (type instanceof FUNC) {
-				return type;
-			}
 		}
 		
 		while (true) {

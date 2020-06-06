@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exc.SNIPS_EXCEPTION;
 import Snips.CompilerDriver;
+import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
@@ -50,16 +52,22 @@ public class PreProcessor {
 					this.process.remove(i);
 					
 					if (!this.imported.contains(path)) {
-						new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
-						this.imported.add(path);
-						List<String> lines = getFile(path);
-						for (int a = 0; a < lines.size(); a++) this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
+						try {
+							List<String> lines = getFile(path);
+							for (int a = 0; a < lines.size(); a++) {
+								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
+							}
+							new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
+							this.imported.add(path);
+						} catch (NullPointerException e) {
+							throw new SNIPS_EXCEPTION("PRE0 -> Cannot resolve import " + path + ", " + new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
+						}
 					}
 					
 					i--;
 				} 
 				else {
-					new Message("PRE0 -> Found line: " + line + ", but cannot resolve! Ensure correct syntax.", Message.Type.WARN);
+					new Message("PRE0 -> Found line: " + line + ", but cannot resolve! Ensure correct syntax, " + new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker(), Message.Type.WARN);
 					new Message("PRE0 -> Import Manager may be able to resolve import. Verify output.", Message.Type.WARN);
 				}
 			}
