@@ -15,6 +15,7 @@ import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -25,7 +26,9 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
@@ -51,7 +54,7 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		
-		call(fc.calledFunction, fc.anonTarget, false, fc.proviso, fc.parameters, call, r, map, st);
+		call(fc.calledFunction, fc.anonTarget, false, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
 		if (fc.anonTarget == null && fc.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */
@@ -81,7 +84,7 @@ public class AsNFunctionCall extends AsNStatement {
 		return mapping;
 	}
 	
-	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Clear the operand regs */
 		r.free(0, 1, 2);
 		
@@ -206,10 +209,29 @@ public class AsNFunctionCall extends AsNStatement {
 				}
 			}
 		}
-		
-		if (f != null && !f.parameters.isEmpty()) {
-			call.instructions.get(0).comment = new ASMComment("Load parameters");
+		else {
+			if (callee instanceof InlineCall) {
+				InlineCall ic = (InlineCall) callee;
+				
+				/* 
+				 * Anonymous inline call uses implicit type, push dummy values for this type.
+				 */
+				if (ic.getType().wordsize() > 1) {
+					for (int i = 0; i < ic.getType().wordsize(); i++) {
+						st.push(REGISTER.R0);
+					}
+				}
+			}
+			else {
+				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
+				ASMSub sub = new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP), new ImmOperand(st.getFrameSize() * 4));
+				sub.comment = new ASMComment("Reset the stack after anonymous call");
+				
+				call.instructions.add(sub);
+			}
 		}
+		
+		if (parameters.size() > 0) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}
 	
 }

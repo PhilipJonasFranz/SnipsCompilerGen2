@@ -1066,7 +1066,7 @@ public class ContextChecker {
 				
 				if (f == null) {
 					if (!CompilerDriver.disableWarnings) {
-						this.messages.add(new Message("Unsafe operation, target of predicate '" + path.build() + "' is unknown, " + source.getSourceMarker(), Message.Type.WARN, true));
+						this.messages.add(new Message("Unsafe operation, predicate '" + path.build() + "' is anonymous, " + source.getSourceMarker(), Message.Type.WARN, true));
 					}
 				}
 			}
@@ -1398,6 +1398,19 @@ public class ContextChecker {
 		tc.castType = ProvisoManager.setHiddenContext(tc.castType);
 		
 		TYPE t = tc.expression.check(this);
+		
+		if (tc.expression instanceof InlineCall) {
+			InlineCall ic = (InlineCall) tc.expression;
+			/* Anonymous inline call */
+			if (ic.calledFunction == null) {
+				ic.setType(tc.castType);
+				t = tc.castType;
+				
+				if (!CompilerDriver.disableWarnings) {
+					messages.add(new Message("Using implicit anonymous type " + tc.castType.typeString() + ", " + tc.getSource().getSourceMarker(), Message.Type.WARN, true));
+				}
+			}
+		}
 		
 		/* Allow only casting to equal word sizes or from or to void types */
 		if ((t != null && t.wordsize() != tc.castType.wordsize()) && !(tc.castType.getCoreType() instanceof VOID || t instanceof VOID)) {
