@@ -17,6 +17,6 @@ int __op_mod(int a, int b) {
         }
     }
     
-    if (neg) r = b - r;
+    if (r != 0 && neg) r = b - r;
     return r;
 }
