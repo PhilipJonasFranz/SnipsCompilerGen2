@@ -285,6 +285,13 @@ public class CompilerDriver {
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
+			/* Remove double empty lines */
+			for (int i = 1; i < output.size(); i++) {
+				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) {
+					output.remove(i - 1);
+					i--;
+				}
+			}
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
