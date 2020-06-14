@@ -15,6 +15,7 @@ namespace Queue {
 	 */
 	struct CyclicQueue<T> {
 		T* storage;
+		T defValue;
 		int size;
 		int head;
 		int tail;
@@ -26,7 +27,7 @@ namespace Queue {
 	 * The passed size will be set as the maximum amount of elements
 	 * in the queue.
 	 */
-	CyclicQueue<T>* create<T>(int size) {
+	CyclicQueue<T>* create<T>(int size, T defValue) {
 		/* Allocate memory for storage of given size */
 		T* storage = (T*) resv(sizeof(T) * size);
 		
@@ -34,7 +35,7 @@ namespace Queue {
 		CyclicQueue<T>* queue = (CyclicQueue<T>*) resv(sizeof(CyclicQueue<T>));
 		
 		/* Initialize, set start values */
-		*queue = CyclicQueue<T>::(storage, size, 0, 0, true);
+		*queue = CyclicQueue<T>::(storage, defValue, size, 0, 0, true);
 		
 		return queue;
 	}
@@ -93,12 +94,12 @@ namespace Queue {
 	
 	/*
 	 * Dequeues a value and removes it from the queue. Returns
-	 * 0 if the queue is empty.
+	 * the default value if the queue is empty.
 	 */
 	T dequeue<T>(CyclicQueue<T>* queue) {
 		if (queue->isEmpty) {
-			/* Queue is empty, cast void 0. */
-			return (void) 0;
+			/* Queue is empty, return a default value. */
+			return queue->defValue;
 		}
 		else {
 			/* Read value from tail */

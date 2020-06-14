@@ -77,6 +77,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -1524,6 +1525,11 @@ public class Parser {
 			Expression expression = this.parseExpression();
 			accept(TokenType.RPAREN);
 			return expression;
+		}
+		else if (current.type == TokenType.NULL) {
+			Token id = accept();
+			CompilerDriver.null_referenced = true;
+			return new Atom(new NULL(), id, id.getSource());
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();

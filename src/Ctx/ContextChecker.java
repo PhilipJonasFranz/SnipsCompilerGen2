@@ -58,6 +58,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.TYPE.NULL;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -862,6 +863,14 @@ public class ContextChecker {
 		TYPE left = b.getLeft().check(this);
 		TYPE right = b.getRight().check(this);
 		
+		if (left instanceof NULL) {
+			throw new CTX_EXCEPTION(b.left.getSource(), "Cannot perform arithmetic on null");
+		}
+		
+		if (right instanceof NULL) {
+			throw new CTX_EXCEPTION(b.right.getSource(), "Cannot perform arithmetic on null");
+		}
+		
 		if (b.left instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(b.left.getSource(), "Structure Init can only be a sub expression of structure init");
 		}
@@ -941,6 +950,10 @@ public class ContextChecker {
 	
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXCEPTION {
 		TYPE op = u.getOperand().check(this);
+		
+		if (op instanceof NULL) {
+			throw new CTX_EXCEPTION(u.getOperand().getSource(), "Cannot perform arithmetic on null");
+		}
 		
 		if (u.getOperand() instanceof ArrayInit) {
 			throw new CTX_EXCEPTION(u.getOperand().getSource(), "Structure Init can only be a sub expression of structure init");

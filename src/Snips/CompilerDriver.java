@@ -87,6 +87,10 @@ public class CompilerDriver {
 	/* Reserved Declarations */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
+	
+	public static boolean null_referenced = false;
+	public static Declaration NULL_PTR = new Declaration(new NamespacePath("NULL"), new INT(), zero_atom, nullSource);
+	
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, nullSource);
 													
@@ -143,6 +147,7 @@ public class CompilerDriver {
 	
 	public static void reset() {
 		heap_referenced = false;
+		null_referenced = false;
 	}
 	
 	

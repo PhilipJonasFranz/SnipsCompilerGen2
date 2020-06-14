@@ -250,6 +250,10 @@ public class Scanner {
 				this.state = ACC_STATE.NAMESPACE_ID;
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("null")) {
+				tokens.add(new Token(TokenType.NULL, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("include")) {
 				tokens.add(new Token(TokenType.INCLUDE, new Source(fileName, i, a)));
 				this.emptyBuffer();

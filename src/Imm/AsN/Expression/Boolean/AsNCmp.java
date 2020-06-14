@@ -17,6 +17,7 @@ import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.NULL;
 import Imm.TYPE.TYPE;
 
 public class AsNCmp extends AsNBinaryExpression {
@@ -36,7 +37,7 @@ public class AsNCmp extends AsNBinaryExpression {
 		/* Clear only R0, R1 since R2 is not needed */
 		r.free(0, 1);
 		
-		if (c.getRight() instanceof Atom) {
+		if (c.getRight() instanceof Atom && !(((Atom) c.getRight()).getType() instanceof NULL)) {
 			cmp.instructions.addAll(AsNExpression.cast(c.getLeft(), r, map, st).getInstructions());
 			
 			TYPE t = ((Atom) c.getRight()).getType();

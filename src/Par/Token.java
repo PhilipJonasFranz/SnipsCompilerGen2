@@ -132,7 +132,8 @@ public class Token {
 		CHARLIT("charlit",			TokenGroup.LITERAL),
 		STRINGLIT("",				TokenGroup.LITERAL),
 		BOOLLIT("boollit",			TokenGroup.LITERAL),
-		ENUMLIT("enumlit",			TokenGroup.LITERAL);
+		ENUMLIT("enumlit",			TokenGroup.LITERAL),
+		NULL("null",				TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,
