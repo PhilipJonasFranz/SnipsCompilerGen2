@@ -96,6 +96,12 @@ import Util.Source;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
 
+/**
+ * Parses an AST out of the token stream. The process is similar to this symbolic representation:
+ * 
+ * 	          --> www.reddit.com/r/ProgrammerHumor/comments/h83mqx/parser_be_like/ <--
+ * 
+ */
 public class Parser {
 
 	protected List<Token> tokenStream;

@@ -209,7 +209,15 @@ __op_mod.L6:                                 /* Evaluate condition */
 __op_mod.L8: 
     b __op_mod.L6
 __op_mod.L7: 
-    cmp r5, #0
+    cmp r7, #0
+    movne r0, #1
+    moveq r0, #0
+    adds r1, r5, #0
+    movne r1, #1
+    cmp r0, #0
+    movne r0, r1
+    moveq r0, #0
+    cmp r0, #0
     beq __op_mod.L11
     sub r7, r4, r7
 __op_mod.L11: 
