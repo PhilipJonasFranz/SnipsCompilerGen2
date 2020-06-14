@@ -172,6 +172,10 @@ public class ASMOptimizer {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return data.target.reg == reg;
 		}
+		else if (ins instanceof ASMMult) {
+			ASMMult mul = (ASMMult) ins;
+			return mul.target.reg == reg;
+		}
 		else if (ins instanceof ASMMemOp) {
 			ASMMemOp memOp = (ASMMemOp) ins;
 			return memOp.target.reg == reg;
