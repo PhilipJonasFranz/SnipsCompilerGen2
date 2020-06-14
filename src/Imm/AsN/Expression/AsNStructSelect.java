@@ -212,10 +212,15 @@ public class AsNStructSelect extends AsNExpression {
 					injectIDRef(node, struct, (IDRef) ref);
 				}
 				else if (selection instanceof ArraySelect) {
-					injectArraySelect(node, (ArraySelect) selection, r, map, st);
+					ArraySelect arrSel = (ArraySelect) selection;
+					
+					int offset = struct.getFieldByteOffset(arrSel.idRef.path);
+					node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					
+					injectArraySelect(node, arrSel, r, map, st);
 				}
 			}
-
+			
 			/* If current selection derefs and its not the last selection in the chain */
 			if (sel0.selection instanceof StructSelect) {
 				StructSelect sel1 = (StructSelect) sel0.selection;
