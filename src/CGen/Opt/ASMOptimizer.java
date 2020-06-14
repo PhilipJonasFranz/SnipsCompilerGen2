@@ -16,9 +16,11 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMMvn;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
@@ -144,6 +146,11 @@ public class ASMOptimizer {
 			 * ---
 			 */
 			this.removeIndirectPushPopAssign(body);
+			
+			/**
+			 * add r0, r0, #0 <- Remove this line
+			 */
+			this.removeZeroInstruction(body);
 		}
 		
 		/* Filter duplicate empty lines */
@@ -194,6 +201,31 @@ public class ASMOptimizer {
 		}
 		// TODO: Implement missing instructions
 		else return false;
+	}
+	
+	protected void removeZeroInstruction(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd) {
+				ASMAdd add = (ASMAdd) body.instructions.get(i);
+				if (add.target.reg == add.op0.reg && add.op1 instanceof ImmOperand && !add.updateConditionField) {
+					ImmOperand imm = (ImmOperand) add.op1;
+					if (imm.value == 0) {
+						body.instructions.remove(i);
+						i--;
+					}
+				}
+			}
+			else if (body.instructions.get(i) instanceof ASMSub) {
+				ASMSub sub = (ASMSub) body.instructions.get(i);
+				if (sub.target.reg == sub.op0.reg && sub.op1 instanceof ImmOperand && !sub.updateConditionField) {
+					ImmOperand imm = (ImmOperand) sub.op1;
+					if (imm.value == 0) {
+						body.instructions.remove(i);
+						i--;
+					}
+				}
+			}
+		}
 	}
 	
 	protected void removeUnnessesaryPushPop(AsNBody body) {

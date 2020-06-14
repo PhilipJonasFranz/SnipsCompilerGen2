@@ -575,6 +575,7 @@ public class Parser {
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
+				if (tokenStream.get(i + 1).type == TokenType.CMPLE) functionCheck = false;
 				break;
 			}
 			functionCheck &= tokenStream.get(i).type == TokenType.COLON;
@@ -1002,16 +1003,14 @@ public class Parser {
 			return ASSIGN_ARITH.ORR_ASSIGN;
 		}
 		/* Shifts */
-		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) {
+		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLE) {
 			accept();
 			accept();
-			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSL_ASSIGN;
 		}
-		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT) {
+		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGE) {
 			accept();
 			accept();
-			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSR_ASSIGN;
 		}
 		else if (current.type == TokenType.IDENTIFIER) {

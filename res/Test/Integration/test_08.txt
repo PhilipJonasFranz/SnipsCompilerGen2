@@ -496,7 +496,6 @@ main:                                        /* Function: main */
     ldr r0, [r0]
     push { r0 }
     ldr r0, .POOL1_main.L3_arr               /* Load data section address */
-    add r0, r0, #0
     ldr r0, [r0]
     lsl r1, r4, #2
     str r0, [r1, #0]

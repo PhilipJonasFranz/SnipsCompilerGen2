@@ -28,7 +28,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
@@ -84,7 +83,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r2, [r0]
@@ -108,7 +106,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r2, [r0]
@@ -134,7 +131,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r0, [r0]
@@ -192,7 +188,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r2, [r0]
@@ -216,7 +211,6 @@ det:                                         /* Function: det */
     mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
-    add r2, r2, #0
     add r0, fp, #4
     add r0, r0, r2
     ldr r2, [r0]

@@ -4,16 +4,16 @@ int __op_div(int a, int b) {
     
     while (a >= b) {
     	while ((b << 1) < a) {
-    		b = b << 1;
-    		m = m << 1;
+    		b <<= 1;
+    		m <<= 1;
     	}
     
        a = a - b;
        r = r + m;
        
        while (b > a && m > 1) {
-       		b = b >> 1;
-       		m = m >> 1;
+       		b >>= 1;
+       		m >>= 1;
        }
     }
     return r;

@@ -53,7 +53,6 @@ main:                                        /* Function: main */
     b lambda_id
     push { r0 }
     sub r0, fp, #4
-    add r0, r0, #0
     ldr r4, [r0]
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
