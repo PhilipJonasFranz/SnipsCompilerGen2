@@ -1,0 +1,51 @@
+SOURCE
+struct Test {
+	int x;
+	int [2] [2] y;
+}
+
+int main(int k, int i) {
+	Test t = Test::(10, {{2, 4}, {6, 8}});
+	return t.y [k] [i] + t.x;
+}
+TESTCASES
+0 0 12
+0 1 14
+1 0 16
+1 1 18
+OUTPUT
+/* --test_21.txt */
+main:                                        /* Function: main */
+    push { r3, r4 }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, #8                               /* Evaluate Expression */
+    mov r1, #6
+    push { r1, r0 }
+    mov r0, #4
+    mov r1, #2
+    push { r1, r0 }
+    mov r0, #10
+    push { r0 }
+    sub r1, fp, #20                          /* Evaluate Expression */
+    add r1, r1, #4
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r1, #8
+    mul r0, r3, r1
+    add r2, r2, r0
+    lsl r0, r4, #2
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    ldr r0, [r1]                             /* Load field from struct */
+    push { r0 }
+    sub r1, fp, #20                          /* Load field location */
+    ldr r2, [r1]                             /* Load field from struct */
+    pop { r1 }
+    add r0, r1, r2
+    mov sp, fp
+    pop { r3, r4 }
+    bx lr
+    

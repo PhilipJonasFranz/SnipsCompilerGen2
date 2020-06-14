@@ -168,6 +168,7 @@ public class AsNFunctionCall extends AsNStatement {
 					/* Move address of function into pc */
 					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
 				}
+				else throw new SNIPS_EXCEPTION("Anon call loader not implemented");
 			}
 			else {
 				if (r.declarationLoaded(f.lambdaDeclaration)) {
@@ -179,6 +180,7 @@ public class AsNFunctionCall extends AsNStatement {
 					/* Move address of function into pc */
 					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
 				}
+				else throw new SNIPS_EXCEPTION("Lambda Declaration loader not implemented");
 			}
 		}
 		else {

@@ -212,6 +212,7 @@ public class ASMOptimizer {
 					if (imm.value == 0) {
 						body.instructions.remove(i);
 						i--;
+						OPT_DONE = true;
 					}
 				}
 			}
@@ -222,6 +223,7 @@ public class ASMOptimizer {
 					if (imm.value == 0) {
 						body.instructions.remove(i);
 						i--;
+						OPT_DONE = true;
 					}
 				}
 			}

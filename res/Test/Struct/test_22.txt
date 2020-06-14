@@ -1,0 +1,30 @@
+SOURCE
+struct Test {
+	int x;
+}
+
+int main(int k) {
+	Test [2] t = {Test::(10), Test::(20)};
+	return t [k].x;
+}
+TESTCASES
+0 10
+1 20
+OUTPUT
+/* --test_22.txt */
+main:                                        /* Function: main */
+    push { r3 }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #20                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #10
+    push { r0 }
+    sub r1, fp, #8                           /* Evaluate Expression */
+    lsl r2, r3, #2
+    add r1, r1, r2
+    ldr r0, [r1]                             /* Load field from struct */
+    mov sp, fp
+    pop { r3 }
+    bx lr
+    
