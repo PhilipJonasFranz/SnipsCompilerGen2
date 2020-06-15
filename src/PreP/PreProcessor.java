@@ -89,6 +89,11 @@ public class PreProcessor {
 		/* Read from file */
 		List<String> code = Util.readFile(file);
 		
+		if (code == null) {
+			file = new File("release\\" + filePath);
+			code = Util.readFile(file);
+		}
+		
 		/* Read from jar */
 		if (code == null) {
 			code = CompilerDriver.driver.readFromJar(filePath);

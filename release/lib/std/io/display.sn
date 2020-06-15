@@ -59,7 +59,7 @@ namespace Display {
 	namespace Scanf {
 		char* scanf() {
 			/* Create a list where the input is temporarily stored */
-			LinkedList<char>* input = List::create<char>();
+			LinkedList<char>* input = List::create<char>((char) 0);
 			
 			while (true) {
 				char c = Display::getChar();
