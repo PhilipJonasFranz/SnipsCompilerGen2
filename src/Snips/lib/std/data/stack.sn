@@ -15,8 +15,8 @@ namespace Stack {
 	 * Creates and initializes a new stack.
 	 * Returns a pointer to the newly created stack.
 	 */
-	StackedList<T>* create<T>() {
-		LinkedList<T>* list = (LinkedList<T>*) List::create<T>();
+	StackedList<T>* create<T>(T defValue) {
+		LinkedList<T>* list = (LinkedList<T>*) List::create<T>(defValue);
 		StackedList<T>* stack = (StackedList<T>*) resv(sizeof(StackedList<T>));
 		*stack = StackedList<T>::(list);
 		return stack;
@@ -53,13 +53,11 @@ namespace Stack {
 	
 	/*
 	 * Returns the element on the top of the stack, but doesnt
-	 * remove it. Returns a 1-Word 0 if the stack is empty.
-	 * Be aware that peeking on an empty stack can be fatal.
-	 * Make sure to check for the presence of elements with isEmpty.
+	 * remove it. Returns the default value if the stack is empty.
 	 */
 	T peek<T>(StackedList<T>* stack) {
 		if (Stack::isEmpty(stack)) {
-			return (void) 0;
+			return stack->list->defValue;
 		}
 		else {
 			int size = List::size(stack->list);
@@ -69,13 +67,11 @@ namespace Stack {
 	
 	/*
 	 * Returns the element on the top of the stack, and 
-	 * removes it. Returns a 1-Word 0 if the stack is empty.
-	 * Be aware that peeking on an empty stack can be fatal.
-	 * Make sure to check for the presence of elements with isEmpty.
+	 * removes it. Returns the default value if the stack is empty.
 	 */
 	T pop<T>(StackedList<T>* stack) {
 		if (Stack::isEmpty(stack)) {
-			return (void) 0;
+			return stack->list->defValue;
 		}
 		else {
 			int size = List::size(stack->list);
