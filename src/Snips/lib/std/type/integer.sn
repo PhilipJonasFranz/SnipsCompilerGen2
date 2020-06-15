@@ -1,6 +1,6 @@
+#include<linked_list.sn>
+
 /*
- * [BASE-PACKAGE]
- *
  * This package contains utility functions for int values and int arrays.
  */
 namespace Integer {
@@ -44,7 +44,7 @@ namespace Integer {
 	 * Converts given int to a String representation.
 	 */
 	char* toString(int num) {
-		LinkedList<int>* list = List::create<int>();
+		LinkedList<int>* list = List::create<int>(0);
 	
 		bool neg = false;
 		if (num < 0) {
