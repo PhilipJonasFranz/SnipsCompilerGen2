@@ -24,7 +24,7 @@
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, local changes while keeping original functionality
 
- The compiler uses a built-in system libary, located at src/Snips/lib. 
+ The compiler uses a built-in system libary, located at release/lib. 
  
  The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
  
