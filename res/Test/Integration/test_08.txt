@@ -60,7 +60,7 @@ int main() {
 	/* Set item at index 1 to 5 */
 	set(player->inv, 1, con.value);
 
-	LinkedList<int>* list = create<int>();
+	LinkedList<int>* list = create<int>(0);
 	
 	add<int>(list, point.k);
 	add<int>(list, point.v);
@@ -78,6 +78,7 @@ arr:
         .word 5
         .word 8
 HEAP_START: .word 0
+NULL: .word 0
     
 .text
     b main
@@ -232,25 +233,31 @@ free.L2:
 /* A single list entry, contains a pointer to the next node */
 /* and a value. */
 /* Wraps the list head and tail. */
-/* Creates a new List Object and initializes the head an tail to 0. */
+/* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT */
-    push { r3, fp, lr }
+    push { r3, r4, fp, lr }
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
     mov r3, r0
-/* Initialize list, set pointers to 0 */
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    mov r0, #0
-    lsl r1, r3, #2
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r4, r0
+/* Initialize list, set pointers to null */
+    push { r3 }
+    ldr r0, .POOL1_main.L5_NULL              /* Load null address */
+    ldr r1, .POOL1_main.L5_NULL              /* Load null address */
+    push { r1, r0 }
+    lsl r1, r4, #2
+    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
-    mov r0, r3                               /* Evaluate Expression */
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, r4, fp, lr }
     bx lr
+.POOL1_main.L5_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
     
@@ -266,14 +273,15 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    mov r0, #0
+    ldr r0, .POOL2_main.L5_NULL              /* Load null address */
     lsl r1, r5, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL2_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     bne List.add.L1
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -299,6 +307,7 @@ List.add.L0:
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
+.POOL2_main.L5_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
@@ -313,9 +322,12 @@ List.get.L1:                                 /* Evaluate condition */
     beq List.get.L2
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL3_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     bne List.get.L3
-    mov r0, #0                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #8
+    ldr r0, [r1]                             /* Load field from struct */
     b List.get.L5
 List.get.L3: 
 /* Jump to next */
@@ -331,6 +343,7 @@ List.get.L2:
 List.get.L5: 
     pop { r3, r4, r5 }
     bx lr
+.POOL3_main.L5_NULL: .word NULL
     
 /* Check if given list contains given value. */
     
@@ -357,7 +370,8 @@ List.remove.L0:
 /* Remove first element */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL4_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     beq List.remove.L4
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1]                             /* Load field from struct */
@@ -373,7 +387,7 @@ List.remove.L0:
     ldr r0, [r1]                             /* Load field from struct */
     cmp r0, r5
     bne List.remove.L6
-    mov r0, #0                               /* Evaluate Expression */
+    ldr r0, .POOL4_main.L5_NULL              /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
@@ -393,7 +407,8 @@ List.remove.L9:                              /* Evaluate condition */
     ble List.remove.L10
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL4_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     bne List.remove.L12
     b List.remove.L15
 List.remove.L12: 
@@ -406,7 +421,8 @@ List.remove.L10:
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL4_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     bne List.remove.L14
     b List.remove.L15
 List.remove.L14: 
@@ -414,13 +430,14 @@ List.remove.L14:
     ldr r1, [r1]
     lsl r1, r1, #2
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL4_main.L5_NULL              /* Load null address */
+    cmp r0, r1
     bne List.remove.L16
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
     bl free                                  /* Call free */
-    mov r0, #0                               /* Evaluate Expression */
+    ldr r0, .POOL4_main.L5_NULL              /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1]                             /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -444,6 +461,7 @@ List.remove.L15:
     mov sp, fp
     pop { r3, r4, r5, r6, fp, lr }
     bx lr
+.POOL4_main.L5_NULL: .word NULL
     
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
     push { r3, r4, r5, r6 }
@@ -491,11 +509,11 @@ main:                                        /* Function: main */
     bl resv                                  /* Call resv */
     mov r4, r0
     push { r3 }
-    ldr r0, .POOL1_main.L3_arr               /* Load data section address */
+    ldr r0, .POOL5_main.L3_arr               /* Load data section address */
     add r0, r0, #4
     ldr r0, [r0]
     push { r0 }
-    ldr r0, .POOL1_main.L3_arr               /* Load data section address */
+    ldr r0, .POOL5_main.L3_arr               /* Load data section address */
     ldr r0, [r0]
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -544,7 +562,8 @@ main:                                        /* Function: main */
     ldr r0, [r1]                             /* Load field from struct */
     pop { r1, r2 }
     bl GameObject.Items.set                  /* Call GameObject.Items.set */
-    bl List.create_P0                        /* Evaluate Expression */
+    mov r0, #0                               /* Evaluate Expression */
+    bl List.create_P0                        /* Call List.create */
     mov r5, r0
     sub r1, fp, #8                           /* Load parameters */
     ldr r1, [r1]                             /* Load field from struct */
@@ -583,5 +602,5 @@ main:                                        /* Function: main */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
-.POOL1_main.L3_arr: .word arr
+.POOL5_main.L3_arr: .word arr
     

@@ -4,7 +4,7 @@ SOURCE
 int main(int x, int y) {
 	int[2] v0 = {10, 20};
 
-	LinkedList<int*>* l = create<int*>();
+	LinkedList<int*>* l = create<int*>(null);
 	
 	return 0;
 }
@@ -19,6 +19,7 @@ OUTPUT
 /* --test_09.txt */
 .data
 HEAP_START: .word 0
+NULL: .word 0
     
 .text
     b main
@@ -173,25 +174,31 @@ free.L2:
 /* A single list entry, contains a pointer to the next node */
 /* and a value. */
 /* Wraps the list head and tail. */
-/* Creates a new List Object and initializes the head an tail to 0. */
+/* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT* */
-    push { r3, fp, lr }
+    push { r3, r4, fp, lr }
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
     mov r3, r0
-/* Initialize list, set pointers to 0 */
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    mov r0, #0
-    lsl r1, r3, #2
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r4, r0
+/* Initialize list, set pointers to null */
+    push { r3 }
+    ldr r0, .POOL1_main.L2_NULL              /* Load null address */
+    ldr r1, .POOL1_main.L2_NULL              /* Load null address */
+    push { r1, r0 }
+    lsl r1, r4, #2
+    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
-    mov r0, r3                               /* Evaluate Expression */
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, r4, fp, lr }
     bx lr
+.POOL1_main.L2_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
     
@@ -220,10 +227,12 @@ main:                                        /* Function: main */
     mov r0, #20                              /* Evaluate Expression */
     mov r1, #10
     push { r1, r0 }
-    bl List.create_P0                        /* Evaluate Expression */
+    ldr r0, .POOL2_main.L2_NULL              /* Evaluate Expression */
+    bl List.create_P0                        /* Call List.create */
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr
+.POOL2_main.L2_NULL: .word NULL
     
