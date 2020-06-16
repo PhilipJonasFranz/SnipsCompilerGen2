@@ -16,9 +16,15 @@ namespace Stack {
 	 * Returns a pointer to the newly created stack.
 	 */
 	StackedList<T>* create<T>(T defValue) {
-		LinkedList<T>* list = (LinkedList<T>*) List::create<T>(defValue);
-		StackedList<T>* stack = (StackedList<T>*) resv(sizeof(StackedList<T>));
+		/* Allocate a new linked list for the stack */
+		LinkedList<T>* list = List::create<T>(defValue);
+		
+		/* Allocate the stack */
+		StackedList<T>* stack = resv(sizeof(StackedList<T>));
+		
+		/* Initialize the stack with the list */
 		*stack = StackedList<T>::(list);
+		
 		return stack;
 	}
 	
@@ -26,7 +32,10 @@ namespace Stack {
 	 * Destroys the stack and the capsuled list.
 	 */
 	void destroy(StackedList<void>* stack) {
+		/* Destroy the capsuled list */
 		List::destroy(stack->list);
+		
+		/* Free the stack itself */
 		free(stack);
 	}
 	

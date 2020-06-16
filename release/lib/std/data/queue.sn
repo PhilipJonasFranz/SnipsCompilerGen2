@@ -29,10 +29,10 @@ namespace Queue {
 	 */
 	CyclicQueue<T>* create<T>(int size, T defValue) {
 		/* Allocate memory for storage of given size */
-		T* storage = (T*) resv(sizeof(T) * size);
+		T* storage = resv(sizeof(T) * size);
 		
 		/* Allocate memory for queue */
-		CyclicQueue<T>* queue = (CyclicQueue<T>*) resv(sizeof(CyclicQueue<T>));
+		CyclicQueue<T>* queue = resv(sizeof(CyclicQueue<T>));
 		
 		/* Initialize, set start values */
 		*queue = CyclicQueue<T>::(storage, defValue, size, 0, 0, true);

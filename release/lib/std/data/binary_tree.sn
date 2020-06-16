@@ -19,20 +19,24 @@ namespace Tree {
 	 * to given value. Return a pointer to the root.
 	 */
 	TreeNode<T>* create<T>(T value) {
-		TreeNode<T>* tree = (TreeNode<T>*) resv(sizeof(TreeNode<T>));
-		*tree = TreeNode<T>::((TreeNode<T>*) 0, (TreeNode<T>*) 0, value);
+		TreeNode<T>* tree = resv(sizeof(TreeNode<T>));
+		
+		/* Initialize the root with null pointers and the given value */
+		*tree = TreeNode<T>::(null, null, value);
 		return tree;
 	}
 	
 	TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
-		TreeNode<T>* new = (TreeNode<T>*) resv(sizeof(TreeNode<T>));
-		*new = TreeNode<T>::((TreeNode<T>*) 0, (TreeNode<T>*) 0, value);
+		TreeNode<T>* new = resv(sizeof(TreeNode<T>));
+		
+		/* Initialize new node with null pointers and given value */
+		*new = TreeNode<T>::(null, null, value);
 	
 		TreeNode<T>* head = root;
-		while ((int) head != 0) {
+		while (head != null) {
 			if (head->value > value) {
 				/* Left leaf is 0, insert here */
-				if ((int) head->left == 0) {
+				if (head->left == null) {
 					head->left = new;
 					return new;
 				}
@@ -40,7 +44,7 @@ namespace Tree {
 			}
 			else {
 				/* Right leaf is 0, insert here */
-				if ((int) head->right == 0) {
+				if (head->right == null) {
 					head->right = new;
 					return new;
 				}
@@ -48,6 +52,6 @@ namespace Tree {
 			}
 		}
 		
-		return (TreeNode<T>*) -1;
+		return null;
 	}
 }

@@ -36,6 +36,7 @@ OUTPUT
 /* --test_13.txt */
 .data
 HEAP_START: .word 0
+NULL: .word 0
     
 .text
     b main
@@ -159,11 +160,13 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r4, r0
+/* Initialize the root with null pointers and the given value */
     push { r3 }
-    mov r0, #0
-    push { r0 }
-    mov r0, #0
+    ldr r0, .POOL1_main.L3_NULL              /* Load null address */
+    ldr r1, .POOL1_main.L3_NULL              /* Load null address */
+    push { r1, r0 }
     lsl r1, r4, #2
+    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -173,6 +176,7 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr
+.POOL1_main.L3_NULL: .word NULL
     
 Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
     push { r3, r4, r5, r6, fp, lr }
@@ -182,11 +186,13 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r5, r0
+/* Initialize new node with null pointers and given value */
     push { r4 }
-    mov r0, #0
-    push { r0 }
-    mov r0, #0
+    ldr r0, .POOL2_main.L3_NULL              /* Load null address */
+    ldr r1, .POOL2_main.L3_NULL              /* Load null address */
+    push { r1, r0 }
     lsl r1, r5, #2
+    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -195,7 +201,8 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     mov r0, r3                               /* Evaluate Expression */
     mov r6, r0
 Tree.insert.L1:                              /* Evaluate condition */
-    cmp r6, #0
+    ldr r1, .POOL2_main.L3_NULL              /* Load null address */
+    cmp r6, r1
     beq Tree.insert.L2
     lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #8
@@ -205,7 +212,8 @@ Tree.insert.L1:                              /* Evaluate condition */
 /* Left leaf is 0, insert here */
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL2_main.L3_NULL              /* Load null address */
+    cmp r0, r1
     bne Tree.insert.L6
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r6, #2                           /* Convert to bytes */
@@ -221,7 +229,8 @@ Tree.insert.L4:
     lsl r1, r6, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
-    cmp r0, #0
+    ldr r1, .POOL2_main.L3_NULL              /* Load null address */
+    cmp r0, r1
     bne Tree.insert.L8
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r6, #2                           /* Convert to bytes */
@@ -236,11 +245,12 @@ Tree.insert.L8:
 Tree.insert.L3: 
     b Tree.insert.L1
 Tree.insert.L2: 
-    mvn r0, #0
+    ldr r0, .POOL2_main.L3_NULL              /* Evaluate Expression */
 Tree.insert.L9: 
     mov sp, fp
     pop { r3, r4, r5, r6, fp, lr }
     bx lr
+.POOL2_main.L3_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { r3, r4, r5, r6, r7, fp, lr }
