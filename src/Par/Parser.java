@@ -502,7 +502,7 @@ public class Parser {
 			Source source = accept().getSource();
 			
 			List<TYPE> proviso = new ArrayList();
-			List<Declaration> decs = new ArrayList();
+			List<TYPE> types = new ArrayList();
 			
 			TYPE ret = null;
 			
@@ -519,7 +519,7 @@ public class Parser {
 					accept(TokenType.LPAREN);
 					
 					while (current.type != TokenType.RPAREN) {
-						decs.add(this.parseParameterDeclaration());
+						types.add(this.parseType());
 						
 						if (current.type == TokenType.COMMA) {
 							accept();
@@ -533,7 +533,7 @@ public class Parser {
 				}
 				else if (current.type != TokenType.UNION_ACCESS) {
 					/* Only one param, no braces */
-					decs.add(this.parseParameterDeclaration());
+					types.add(this.parseType());
 				}
 				
 				accept(TokenType.UNION_ACCESS);
@@ -555,8 +555,14 @@ public class Parser {
 				return d;
 			}
 			else {
+				List<Declaration> params = new ArrayList();
+				int c = 0;
+				for (TYPE t : types) {
+					params.add(new Declaration(new NamespacePath("param" + c++), t, null, source));
+				}
+				
 				/* Wrap parsed function head in function object, wrap created head in declaration */
-				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
+				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), source);
 				lambda.isLambdaHead = true;
 				
 				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);

@@ -86,7 +86,7 @@ namespace Integer {
 		 * Sorts a int array with given size. Uses
 		 * the bubble sort algorithm to sort.
 		 */
-		void sort(int* arr, int size, func (int a, int b) -> bool pred) {
+		void sort(int* arr, int size, func (int, int) -> bool pred) {
 			if (size > 1) {
 				while (true) {
 					bool sorted = true;
