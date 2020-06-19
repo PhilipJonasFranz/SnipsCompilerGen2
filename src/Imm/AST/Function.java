@@ -10,6 +10,7 @@ import Imm.AST.Directive.Directive;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -21,6 +22,8 @@ import Util.Source;
 public class Function extends CompoundStatement {
 
 			/* --- FIELDS --- */
+	public MODIFIER modifier = MODIFIER.SHARED;
+	
 	public ProvisoManager manager;
 	
 	private TYPE returnType;
@@ -42,7 +45,7 @@ public class Function extends CompoundStatement {
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, Source source) {
+	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
 		this.path = path;
@@ -52,6 +55,8 @@ public class Function extends CompoundStatement {
 		this.signalsTypes = signalsTypes;
 		
 		this.manager = new ProvisoManager(this.getSource(), proviso);
+		
+		this.modifier = modifier;
 		
 		if (path.build().equals("main")) {
 			/* Add default mapping */

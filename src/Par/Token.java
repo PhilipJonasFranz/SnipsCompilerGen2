@@ -90,6 +90,11 @@ public class Token {
 		LET("="),
 		TERN("?"),
 		
+		/* Modifiers */
+		SHARED("shared", 			TokenGroup.MODIFIER),
+		RESTRICTED("restricted", 	TokenGroup.MODIFIER),
+		EXCLUSIVE("exclusive", 		TokenGroup.MODIFIER),
+		
 		/* Arithmetic Operators */
 		ADD("+"),
 		SUB("-"),
@@ -140,6 +145,7 @@ public class Token {
 			TYPE,
 			LITERAL,
 			COMPARE,
+			MODIFIER,
 			MISC;
 		}
 		

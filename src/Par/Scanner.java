@@ -250,6 +250,18 @@ public class Scanner {
 				this.state = ACC_STATE.NAMESPACE_ID;
 				this.emptyBuffer();
 			}
+			else if (this.buffer.equals("shared")) {
+				tokens.add(new Token(TokenType.SHARED, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("restricted")) {
+				tokens.add(new Token(TokenType.RESTRICTED, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
+			else if (this.buffer.equals("exclusive")) {
+				tokens.add(new Token(TokenType.EXCLUSIVE, new Source(fileName, i, a)));
+				this.emptyBuffer();
+			}
 			else if (this.buffer.equals("null")) {
 				tokens.add(new Token(TokenType.NULL, new Source(fileName, i, a)));
 				this.emptyBuffer();

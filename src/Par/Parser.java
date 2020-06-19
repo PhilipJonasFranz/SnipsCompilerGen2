@@ -58,6 +58,7 @@ import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.Comment;
@@ -298,26 +299,33 @@ public class Parser {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
-		else if (current.type == TokenType.STRUCT) {
+		else if (current.type == TokenType.STRUCT || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
 		}
-		else if (current.type == TokenType.ENUM) {
+		else if (current.type == TokenType.ENUM || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
 			return this.parseEnumTypedef();
 		}
 		else if (current.type == TokenType.NAMESPACE) {
 			return this.parseNamespace();
 		}
 		else {
+			MODIFIER mod = MODIFIER.SHARED;
+			Token modT = null;
+			if (current.type.group == TokenGroup.MODIFIER) {
+				modT = accept();
+				mod = this.resolve(modT);
+			}
+			
 			TYPE type = this.parseType();
 			
 			Token identifier = accept(TokenType.IDENTIFIER);
 			
 			SyntaxElement element = null;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				element = this.parseFunction(type, identifier);
+				element = this.parseFunction(type, identifier, mod);
 			}
 			else {
-				Declaration d = this.parseGlobalDeclaration(type, identifier);
+				Declaration d = this.parseGlobalDeclaration(type, identifier, mod);
 				this.scopes.peek().add(d);
 				element = d;
 			}
@@ -357,7 +365,7 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
-			def.fields.add(this.parseDeclaration());
+			def.fields.add(this.parseDeclaration(MODIFIER.SHARED));
 		}
 		accept(TokenType.RBRACE);
 		
@@ -449,7 +457,7 @@ public class Parser {
 		}
 	}
 	
-	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {
+	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
 		this.scopes.push(new ArrayList());
 		
 		List<TYPE> proviso = this.parseProviso();
@@ -490,7 +498,7 @@ public class Parser {
 		List<Statement> body = this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
-		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, identifier.source);
+		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
 		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		
 		this.scopes.pop();
@@ -562,7 +570,7 @@ public class Parser {
 				}
 				
 				/* Wrap parsed function head in function object, wrap created head in declaration */
-				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), source);
+				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
 				lambda.isLambdaHead = true;
 				
 				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
@@ -573,7 +581,7 @@ public class Parser {
 		else {
 			TYPE type = this.parseType();
 			Token id = accept(TokenType.IDENTIFIER);
-			Declaration d = new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+			Declaration d = new Declaration(new NamespacePath(id.spelling), type, MODIFIER.SHARED, id.getSource());
 			this.scopes.peek().add(d);
 			return d;
 		}
@@ -583,6 +591,13 @@ public class Parser {
 		/* Convert next token */
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
+		}
+		
+		MODIFIER mod = MODIFIER.SHARED;
+		Token modT = null;
+		if (current.type.group == TokenGroup.MODIFIER) {
+			modT = accept();
+			mod = this.resolve(modT);
 		}
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
@@ -638,55 +653,65 @@ public class Parser {
 			}
 		}
 		
-		if (current.type == TokenType.COMMENT) {
-			return this.parseComment();
-		}
-		else if (functionCheck) {
-			return this.parseFunctionCall();
-		}
-		else if (decCheck) {
-			return this.parseDeclaration();
-		}
-		else if (current.type == TokenType.RETURN) {
-			return this.parseReturn();
-		}
-		else if (current.type == TokenType.WHILE) {
-			return this.parseWhile();
-		}
-		else if (current.type == TokenType.DO) {
-			return this.parseDoWhile();
-		}
-		else if (current.type == TokenType.FOR) {
-			return this.parseFor();
-		}
-		else if (current.type == TokenType.BREAK) {
-			return this.parseBreak();
-		}
-		else if (current.type == TokenType.CONTINUE) {
-			return this.parseContinue();
-		}
-		else if (current.type == TokenType.SWITCH) {
-			return this.parseSwitch();
-		}
-		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
-			return this.parseAssignment(true);
-		}
-		else if (current.type == TokenType.IF) {
-			return this.parseIf();
-		}
-		else if (current.type == TokenType.TRY) {
-			return this.parseTry();
-		}
-		else if (current.type == TokenType.SIGNAL) {
-			return this.parseSignal();
+		if (decCheck) {
+			return this.parseDeclaration(mod);
 		}
 		else {
-			this.progress.abort();
-			throw new PARSE_EXCEPTION(current.source, current.type, 
-			TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
-			TokenType.DO, TokenType.FOR, TokenType.BREAK, 
-			TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
-			TokenType.IF);
+			if (modT != null) {
+				throw new PARSE_EXCEPTION(modT.source, modT.type, 
+						TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+						TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+						TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+						TokenType.IF);
+			}
+			
+			else if (current.type == TokenType.COMMENT) {
+				return this.parseComment();
+			}
+			else if (functionCheck) {
+				return this.parseFunctionCall();
+			}
+			else if (current.type == TokenType.RETURN) {
+				return this.parseReturn();
+			}
+			else if (current.type == TokenType.WHILE) {
+				return this.parseWhile();
+			}
+			else if (current.type == TokenType.DO) {
+				return this.parseDoWhile();
+			}
+			else if (current.type == TokenType.FOR) {
+				return this.parseFor();
+			}
+			else if (current.type == TokenType.BREAK) {
+				return this.parseBreak();
+			}
+			else if (current.type == TokenType.CONTINUE) {
+				return this.parseContinue();
+			}
+			else if (current.type == TokenType.SWITCH) {
+				return this.parseSwitch();
+			}
+			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
+				return this.parseAssignment(true);
+			}
+			else if (current.type == TokenType.IF) {
+				return this.parseIf();
+			}
+			else if (current.type == TokenType.TRY) {
+				return this.parseTry();
+			}
+			else if (current.type == TokenType.SIGNAL) {
+				return this.parseSignal();
+			}
+			else {
+				this.progress.abort();
+				throw new PARSE_EXCEPTION(current.source, current.type, 
+				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+				TokenType.IF);
+			}
 		}
 	}
 	
@@ -856,7 +881,7 @@ public class Parser {
 		accept(TokenType.LPAREN);
 		
 		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration();
+		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED);
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -1059,7 +1084,7 @@ public class Parser {
 		}
 	}
 	
-	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier) throws PARSE_EXCEPTION {
+	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
 		Expression value = null;
 		
 		if (current.type == TokenType.LET) {
@@ -1068,12 +1093,12 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, identifier.source);
+		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, mod, identifier.source);
 		this.scopes.peek().add(d);
 		return d;
 	}
 	
-	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
+	protected Declaration parseDeclaration(MODIFIER mod) throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		TYPE type = this.parseType();
 		
@@ -1086,7 +1111,7 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, source);
+		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, source);
 		this.scopes.peek().add(d);
 		return d;
 	}
@@ -1989,6 +2014,12 @@ public class Parser {
 		
 		this.scopes.pop();
 		return body;
+	}
+	
+	protected MODIFIER resolve(Token t) {
+		if (t.type == TokenType.SHARED) return MODIFIER.SHARED;
+		else if (t.type == TokenType.RESTRICTED) return MODIFIER.RESTRICTED;
+		else return MODIFIER.EXCLUSIVE;
 	}
 	
 }

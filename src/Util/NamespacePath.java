@@ -56,4 +56,13 @@ public class NamespacePath {
 		return s;
 	}
 	
+	public String buildPathOnly() {
+		String s = "";
+		for (int i = 0; i < this.path.size() - 1; i++) {
+			s += this.path.get(i) + ".";
+		}
+		if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
+		return s;
+	}
+	
 }

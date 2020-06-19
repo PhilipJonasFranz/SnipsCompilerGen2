@@ -22,6 +22,7 @@ import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
@@ -60,6 +61,7 @@ public class CompilerDriver {
 		silenced = true,
 		imm = false,
 		enableComments = true,
+		disableModifiers = false,
 		disableOptimizer = false,
 		disableWarnings = false;
 			
@@ -89,10 +91,10 @@ public class CompilerDriver {
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	
 	public static boolean null_referenced = false;
-	public static Declaration NULL_PTR = new Declaration(new NamespacePath("NULL"), new INT(), zero_atom, nullSource);
+	public static Declaration NULL_PTR = new Declaration(new NamespacePath("NULL"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
 	
 	public static boolean heap_referenced = false;
-	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, nullSource);
+	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
 													
 													
 			/* --- MAIN --- */
@@ -507,6 +509,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-warn"))disableWarnings = true;
 				else if (args [i].equals("-opt"))disableOptimizer = true;
 				else if (args [i].equals("-com"))enableComments = false;
+				else if (args [i].equals("-rov"))disableModifiers = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;

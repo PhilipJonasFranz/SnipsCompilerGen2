@@ -58,6 +58,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.NULL;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -1113,6 +1114,9 @@ public class ContextChecker {
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		if (f != null) {
+			
+			checkModifier(f.modifier, f.path, i.getSource());
+			
 			/* Add signaled types */
 			if (f.signals) {
 				for (TYPE s : f.signalsTypes) {
@@ -1191,6 +1195,32 @@ public class ContextChecker {
 		return i.getType();
 	}
 	
+	public void checkModifier(MODIFIER mod, NamespacePath path, Source source) throws CTX_EXCEPTION {
+		String currentPath = this.currentFunction.peek().path.buildPathOnly();
+		
+		if (mod == MODIFIER.SHARED) return;
+		else if (mod == MODIFIER.RESTRICTED) {
+			if (!currentPath.startsWith(path.buildPathOnly())) {
+				if (CompilerDriver.disableModifiers) {
+					if (!CompilerDriver.disableWarnings) {
+						this.messages.add(new Message("Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build() + " at " + source.getSourceMarker(), Message.Type.WARN, true));
+					}
+				}
+				else throw new CTX_EXCEPTION(source, "Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build());
+			}
+		}
+		else if (mod == MODIFIER.EXCLUSIVE) {
+			if (!currentPath.equals(path.buildPathOnly())) {
+				if (CompilerDriver.disableModifiers) {
+					if (!CompilerDriver.disableWarnings) {
+						this.messages.add(new Message("Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build() + " at " + source.getSourceMarker(), Message.Type.WARN, true));
+					}
+				}
+				else throw new CTX_EXCEPTION(source, "Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build());
+			}
+		}
+	}	
+	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXCEPTION {
 		Function f = this.linkFunction(i.path, i, i.getSource());
 		
@@ -1198,6 +1228,9 @@ public class ContextChecker {
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		if (f != null) {
+			
+			checkModifier(f.modifier, f.path, i.getSource());
+			
 			/* Add signaled types */
 			if (f.signals) {
 				for (TYPE s : f.signalsTypes) {
