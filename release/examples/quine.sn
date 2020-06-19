@@ -1,6 +1,6 @@
 #include<display.sn>
 int main(){
-char*s=resv(81);
-*s="#include<display.sn>\nint main(){\nchar*s=resv(81);\n*s=\"%s\";\nprintf(s,&s);\n}";
-printf(s,&s);
+	char*s=resv(88);
+	*s="#include<display.sn>\nint main(){\n\tchar*s=resv(88);\n\t*s=\"%s\";\n\tprintf(s,&s);\n}";
+	printf(s,&s);
 }

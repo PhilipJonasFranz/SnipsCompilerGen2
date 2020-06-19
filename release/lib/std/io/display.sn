@@ -98,6 +98,13 @@ namespace Display {
 						/* Newline */
 						putChar('"');
 					}
+					else if (c0 == 't') {
+						/* Tab */
+						putChar(' ');
+						putChar(' ');
+						putChar(' ');
+						putChar(' ');
+					}
 				}
 				else {
 					/* Simply put the char to the display */
