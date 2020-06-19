@@ -309,41 +309,51 @@ List.add.L0:
     bx lr
 .POOL2_main.L5_NULL: .word NULL
     
-/* Creates a new list node for given value x and adds the node at the */
-/* end of the list. */
+/* Returns the value of the node at the given index. Returns */
+/* the default value if the index is invalid. */
 List.get_P2:                                 /* Function: List.get, Provisos: INT */
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
+    cmp r4, #0
+    bge List.get.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #8
+    ldr r0, [r1]                             /* Load field from struct */
+    b List.get.L7
+List.get.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1]                             /* Load field from struct */
-List.get.L1:                                 /* Evaluate condition */
+List.get.L3:                                 /* Evaluate condition */
     cmp r4, #0
-    beq List.get.L2
+    beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1]                             /* Load field from struct */
     ldr r1, .POOL3_main.L5_NULL              /* Load null address */
     cmp r0, r1
-    bne List.get.L3
+    bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
-    b List.get.L5
-List.get.L3: 
+    b List.get.L7
+List.get.L5: 
 /* Jump to next */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1]                             /* Load field from struct */
     mov r0, r4
     sub r4, r0, #1
-    b List.get.L1
-List.get.L2: 
+    b List.get.L3
+List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
-List.get.L5: 
+List.get.L7: 
     pop { r3, r4, r5 }
     bx lr
 .POOL3_main.L5_NULL: .word NULL
+    
+/* Returns the the node at the given index. Returns */
+/* null if the index is invalid. */
     
 /* Check if given list contains given value. */
     

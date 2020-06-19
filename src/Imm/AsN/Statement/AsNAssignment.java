@@ -22,6 +22,7 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.Assignment;
+import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Statement.Lhs.AsNLhsId;
@@ -62,8 +63,17 @@ public class AsNAssignment extends AsNStatement {
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
-			/* Move counter in R2 */
-			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
+			if (size * 4 < 255) {
+				/* Move counter in R2 */
+				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
+			}
+			else {
+				/* Load value via literal manager */
+				AsNBody.literalManager.loadValue(node, size * 4, 2);
+				
+				/* Move counter in R2 */
+				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+			}
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
 			loopStart.comment = new ASMComment("Copy memory section with loop");

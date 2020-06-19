@@ -543,7 +543,7 @@ public class Scanner {
 					this.state = ACC_STATE.NONE;
 					this.checkState(i, a, fileName);
 				}
-				else if (this.buffer.matches("\"(.)*\"") && (this.state == ACC_STATE.STRINGLIT)) {
+				else if (this.buffer.matches("\"(.)*\"") && (this.state == ACC_STATE.STRINGLIT) && !this.buffer.endsWith("\\\"")) {
 					String id = this.buffer.substring(1, this.buffer.length() - 1);
 				
 					tokens.add(new Token(TokenType.STRINGLIT, new Source(fileName, i, a), id));

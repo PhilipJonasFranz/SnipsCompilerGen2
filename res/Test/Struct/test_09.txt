@@ -205,8 +205,11 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
     
-/* Creates a new list node for given value x and adds the node at the */
-/* end of the list. */
+/* Returns the value of the node at the given index. Returns */
+/* the default value if the index is invalid. */
+    
+/* Returns the the node at the given index. Returns */
+/* null if the index is invalid. */
     
 /* Check if given list contains given value. */
     
