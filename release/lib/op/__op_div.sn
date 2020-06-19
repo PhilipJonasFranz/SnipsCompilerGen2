@@ -1,4 +1,4 @@
-int __op_div(int a, int b) {
+shared int __op_div(int a, int b) {
 	int r = 0;
 	int m = 1;
 	

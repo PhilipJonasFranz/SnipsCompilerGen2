@@ -27,7 +27,7 @@ namespace Queue {
 	 * The passed size will be set as the maximum amount of elements
 	 * in the queue.
 	 */
-	CyclicQueue<T>* create<T>(int size, T defValue) {
+	shared CyclicQueue<T>* create<T>(int size, T defValue) {
 		/* Allocate memory for storage of given size */
 		T* storage = resv(sizeof(T) * size);
 		
@@ -44,7 +44,7 @@ namespace Queue {
 	 * Frees the allocated storage of the queue,
 	 * as well as the queue itself.
 	 */
-	void destroy(CyclicQueue<void>* queue) {
+	shared void destroy(CyclicQueue<void>* queue) {
 		free(queue->storage);
 		free(queue);
 	}
@@ -52,7 +52,7 @@ namespace Queue {
 	/*
 	 * Returns true if currently no elements are in the queue.
 	 */
-	bool isEmpty(CyclicQueue<void>* queue) {
+	shared bool isEmpty(CyclicQueue<void>* queue) {
 		return queue->isEmpty;
 	}
 	
@@ -60,7 +60,7 @@ namespace Queue {
 	 * Returns true if the amount of elements in the queue is
 	 * equal to the specified size when the queue was created.
 	 */
-	bool isFull(CyclicQueue<void>* queue) {
+	shared bool isFull(CyclicQueue<void>* queue) {
 		return queue->head == queue->tail && !queue->isEmpty;
 	}
 	
@@ -68,7 +68,7 @@ namespace Queue {
 	 * Enqueue a new value. The value is only enqueued if the 
 	 * queue is not full.
 	 */
-	void enqueue<T>(CyclicQueue<T>* queue, T value) {
+	shared void enqueue<T>(CyclicQueue<T>* queue, T value) {
 		if (queue->head == queue->tail && !queue->isEmpty) {
 			/* Queue is full */
 			return;
@@ -96,7 +96,7 @@ namespace Queue {
 	 * Dequeues a value and removes it from the queue. Returns
 	 * the default value if the queue is empty.
 	 */
-	T dequeue<T>(CyclicQueue<T>* queue) {
+	shared T dequeue<T>(CyclicQueue<T>* queue) {
 		if (queue->isEmpty) {
 			/* Queue is empty, return a default value. */
 			return queue->defValue;
@@ -119,7 +119,7 @@ namespace Queue {
 	 * Clears all elements in the queue by resetting the
 	 * head and tail indexes, and setting the isEmpty flag to true.
 	 */
-	void clear(CyclicQueue<void>* queue) {
+	shared void clear(CyclicQueue<void>* queue) {
 		queue->head = 0;
 		queue->tail = 0;
 		queue->isEmpty = true;
@@ -130,7 +130,7 @@ namespace Queue {
 	 * Returns the amount of elements that are currently 
 	 * stored in the queue.
 	 */
-	int size(CyclicQueue<void>* queue) {
+	shared int size(CyclicQueue<void>* queue) {
 		/* Queue is full */
 		if (queue->head == queue->tail && !queue->isEmpty) {
 			return queue->size;

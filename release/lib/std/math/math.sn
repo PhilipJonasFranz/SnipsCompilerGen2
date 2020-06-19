@@ -8,7 +8,7 @@ namespace Math {
 	/*
 	 * Returns x to the n-th power.
 	 */
-	int pow(int x, int n) {
+	shared int pow(int x, int n) {
 		int r = 1;
 		while (n > 0) {
 			r = r * x;
@@ -20,14 +20,14 @@ namespace Math {
 	/*
 	 * Returns the absolute value of x.
 	 */
-	int abs(int x) {
+	shared int abs(int x) {
 		return (x < 0)? -x : x;
 	}
 	
 	/*
 	 * Returns the n-th faculty.
 	 */
-	int fac(int n) {
+	shared int fac(int n) {
 		int r = 1;
 		while (n > 0) {
 			r = r * n;

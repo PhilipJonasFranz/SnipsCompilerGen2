@@ -12,7 +12,7 @@ namespace Matrix {
 	 * multiplication is defined on the matrices. 
 	 * Returns a pointer to the resulting matrix.
 	 */
-	int* mult(int* m, int* n, int dim0, int dim1) {
+	shared int* mult(int* m, int* n, int dim0, int dim1) {
 		int* r = (int*) resv(dim0 * dim1);
 		
 		/* For each row of the result */

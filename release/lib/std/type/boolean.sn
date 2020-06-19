@@ -9,7 +9,7 @@ namespace Boolean {
 	 * Parses given string to boolean. Returns true if the String equals
 	 * 'true', false if not.
 	 */
-	bool parseBool(char* str) {
+	shared bool parseBool(char* str) {
 		char[5] str0 = "true";
 		if (equals(str, &str0)) {
 			return true;
@@ -20,7 +20,7 @@ namespace Boolean {
 	/*
 	 * Converts given boolean to a String representation.
 	 */
-	char* toString(bool b) {
+	shared char* toString(bool b) {
 		if (b) {
 			char* r = (char*) resv(5);
 			*r = "true";

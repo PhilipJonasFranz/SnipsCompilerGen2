@@ -17,7 +17,7 @@ namespace Display {
 	int cursor = 0;
 
 	/* Reads the char from the display input at base + 1 */
-	char getChar() {
+	restricted char getChar() {
 		int* base = (int*) (Display::displayBase + 1);
 		int c = *base;
 		*base = 0;
@@ -25,7 +25,7 @@ namespace Display {
 	}
 	
 	/* Puts the char at the current cursor location and increments the cursor */
-	void putChar(char c) {
+	restricted void putChar(char c) {
 		int* base = (int*) (Display::displayBase + 2);
 		base += cursor;
 		*base = (int) c;
@@ -33,14 +33,15 @@ namespace Display {
 	}
 	
 	namespace Print {
+		
 		/* Skips the cursor to a new line */
-		void println() {
+		shared void println() {
 			int rest = 70 - (cursor % 70);
 			cursor += rest;
 		}
 		
 		/* Prints the string the given char pointer points to. */
-		void printString(char* str) {
+		shared void printString(char* str) {
 			int c = 0;
 			while ((int) (*(str + c)) != 0) {
 				char c0 = *(str + c);
@@ -50,12 +51,13 @@ namespace Display {
 		}
 		
 		/* Prints out given string and a new line */
-		void printlnString(char* str) {
+		shared void printlnString(char* str) {
 			printString(str);
 			println();
 		}
 		
-		void printf(char* c, void* f) {
+		/* Prints out given string and formats in given arguments. */
+		shared void printf(char* c, void* f) {
 			int i = 0;
 			int fi = 0;
 			while ((int) (*(c + i)) != 0) {
@@ -118,7 +120,8 @@ namespace Display {
 	}
 
 	namespace Scanf {
-		char* scanf() {
+		
+		shared char* scanf() {
 			/* Create a list where the input is temporarily stored */
 			LinkedList<char>* input = List::create<char>((char) 0);
 			

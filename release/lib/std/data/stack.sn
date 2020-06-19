@@ -15,7 +15,7 @@ namespace Stack {
 	 * Creates and initializes a new stack.
 	 * Returns a pointer to the newly created stack.
 	 */
-	StackedList<T>* create<T>(T defValue) {
+	shared StackedList<T>* create<T>(T defValue) {
 		/* Allocate a new linked list for the stack */
 		LinkedList<T>* list = List::create<T>(defValue);
 		
@@ -31,7 +31,7 @@ namespace Stack {
 	/*
 	 * Destroys the stack and the capsuled list.
 	 */
-	void destroy(StackedList<void>* stack) {
+	shared void destroy(StackedList<void>* stack) {
 		/* Destroy the capsuled list */
 		List::destroy(stack->list);
 		
@@ -42,21 +42,21 @@ namespace Stack {
 	/*
 	 * Pushes given element on top of the stack.
 	 */
-	void push<T>(StackedList<T>* stack, T value) {
+	shared void push<T>(StackedList<T>* stack, T value) {
 		List::add<T>(stack->list, value);
 	}
 	
 	/*
 	 * Returns true if no elements are currently in the stack.
 	 */
-	bool isEmpty(StackedList<void>* stack) {
+	shared bool isEmpty(StackedList<void>* stack) {
 		return List::size(stack->list) == 0;
 	}
 	
 	/*
 	 * Returns the amount of elements stored in the stack.
 	 */
-	int size(StackedList<void>* stack) {
+	shared int size(StackedList<void>* stack) {
 		return List::size(stack->list);
 	}
 	
@@ -64,7 +64,7 @@ namespace Stack {
 	 * Returns the element on the top of the stack, but doesnt
 	 * remove it. Returns the default value if the stack is empty.
 	 */
-	T peek<T>(StackedList<T>* stack) {
+	shared T peek<T>(StackedList<T>* stack) {
 		if (Stack::isEmpty(stack)) {
 			return stack->list->defValue;
 		}
@@ -78,7 +78,7 @@ namespace Stack {
 	 * Returns the element on the top of the stack, and 
 	 * removes it. Returns the default value if the stack is empty.
 	 */
-	T pop<T>(StackedList<T>* stack) {
+	shared T pop<T>(StackedList<T>* stack) {
 		if (Stack::isEmpty(stack)) {
 			return stack->list->defValue;
 		}

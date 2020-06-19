@@ -4,7 +4,7 @@
  * the start of the reserved memory section + 1. This means the pointer points to
  * the start of the memory thats actually supposed to be used.
  */
-void* resv(int size) {
+shared void* resv(int size) {
 	/* Add block header to size */
 	size += 1;
 	

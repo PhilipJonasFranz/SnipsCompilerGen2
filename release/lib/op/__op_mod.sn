@@ -1,4 +1,4 @@
-int __op_mod(int a, int b) {
+shared int __op_mod(int a, int b) {
 	bool neg = false;
 	if (a < 0) {
 		neg = true;

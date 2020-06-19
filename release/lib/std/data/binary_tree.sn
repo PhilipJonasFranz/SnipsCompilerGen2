@@ -18,7 +18,7 @@ namespace Tree {
 	 * Create a new Tree, initialize both childs to 0, set root value
 	 * to given value. Return a pointer to the root.
 	 */
-	TreeNode<T>* create<T>(T value) {
+	shared TreeNode<T>* create<T>(T value) {
 		TreeNode<T>* tree = resv(sizeof(TreeNode<T>));
 		
 		/* Initialize the root with null pointers and the given value */
@@ -26,7 +26,7 @@ namespace Tree {
 		return tree;
 	}
 	
-	TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
+	shared TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
 		TreeNode<T>* new = resv(sizeof(TreeNode<T>));
 		
 		/* Initialize new node with null pointers and given value */
