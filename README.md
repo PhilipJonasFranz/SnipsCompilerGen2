@@ -36,7 +36,7 @@
 The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
- Code examples and testcases can be found under res/Test/.
+ Code examples and testcases can be found under res/Test/ and under release/examples/.
 ## Included Modules
 ### Assembler
  Under src/REv/Modules/RAsm/ you can find an assembler that is used by the test driver to assemble the outputted program and run it on the SWARM32Pc. The Assembler will work with the code that the Compiler outputs, but it does not fully support all instructions and does not follow any compilation conventions. I do not recommend to use it anywhere else than in combination with this project.
