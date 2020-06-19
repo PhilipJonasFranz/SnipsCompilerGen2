@@ -27,7 +27,7 @@ namespace List {
 	/*
 	 * Creates a new List Object and initializes the head an tail to null.
 	 */
-	LinkedList<T>* create<T>(T defValue) {
+	shared LinkedList<T>* create<T>(T defValue) {
 		LinkedList<T>* lp = resv(sizeof(LinkedList<T>));
 	
 		/* Initialize list, set pointers to null */
@@ -39,7 +39,7 @@ namespace List {
 	/*
 	 * Free the list by freeing all contained list nodes, and the list itself.
 	 */
-	void destroy(LinkedList<void>* l) {
+	shared void destroy(LinkedList<void>* l) {
 		ListNode<void>* n = l->head;
 		while (n != null) {
 			free(n);
@@ -52,7 +52,7 @@ namespace List {
 	 * Creates a new list node for given value x and adds the node at the
 	 * end of the list.
 	 */
-	void add<T>(LinkedList<T>* lp, T x) {
+	shared void add<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = resv(sizeof(ListNode<T>));
 	
 		/* Initialize the new List Node, set the next pointer to null */
@@ -69,10 +69,12 @@ namespace List {
 	}
 	
 	/*
-	 * Creates a new list node for given value x and adds the node at the
-	 * end of the list.
+	 * Returns the value of the node at the given index. Returns
+	 * the default value if the index is invalid.
 	 */
-	T get<T>(LinkedList<T>* lp, int i) {
+	shared T get<T>(LinkedList<T>* lp, int i) {
+		if (i < 0) return lp->defValue;
+	
 		ListNode<T>* n = lp->head;
 		while (i != 0) {
 			if (n->next == null) return lp->defValue;
@@ -85,7 +87,13 @@ namespace List {
 		return n->value;	
 	}
 
-	ListNode<T>* getNode<T>(LinkedList<T>* lp, int i) {
+	/*
+	 * Returns the the node at the given index. Returns
+	 * null if the index is invalid.
+	 */
+	shared ListNode<T>* getNode<T>(LinkedList<T>* lp, int i) {
+		if (i < 0) return null;
+	
 		ListNode<T>* n = lp->head;
 		while (i != 0) {
 			if (n->next == null) return null;
@@ -101,7 +109,7 @@ namespace List {
 	/*
 	 * Check if given list contains given value.
 	 */
-	bool contains<T>(LinkedList<T>* lp, T x) {
+	shared bool contains<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = lp->head;
 		while (true) {
 			if (n == null) return false;
@@ -119,7 +127,7 @@ namespace List {
 	 * Returns a pointer to this list node, or 0 in case the
 	 * value wasnt found.
 	 */
-	ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
+	shared ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
 		ListNode<T>* n = lp->head;
 		while (n->next != null) {
 			if (n->value == x) {
@@ -135,7 +143,7 @@ namespace List {
 	/*
 	 * Returns the amount of elements stored in the list.
 	 */
-	int size(LinkedList<void>* lp) {
+	shared int size(LinkedList<void>* lp) {
 		ListNode<void>* n = lp->head;
 		int size = 0;
 		while (n != null) {
@@ -149,7 +157,7 @@ namespace List {
 	 * Removes the index at given index.
 	 * If the index is out of bounds nothing is removed.
 	 */
-	void remove(LinkedList<void>* lp, int i) {
+	shared void remove(LinkedList<void>* lp, int i) {
 		/* Out of bounds */
 		if (i < 0) return;
 		
