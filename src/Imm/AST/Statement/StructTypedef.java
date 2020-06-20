@@ -7,6 +7,7 @@ import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.SyntaxElement;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -19,6 +20,8 @@ import Util.Source;
 public class StructTypedef extends SyntaxElement {
 
 			/* --- FIELDS --- */
+	public MODIFIER modifier;
+	
 	public NamespacePath path;
 	
 	public STRUCT struct;
@@ -37,7 +40,7 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, int SID, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, Source source) {
+	public StructTypedef(NamespacePath path, int SID, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		this.SID = SID;
@@ -45,6 +48,8 @@ public class StructTypedef extends SyntaxElement {
 		this.proviso = proviso;
 		this.fields = declarations;
 		this.extension = extension;
+		
+		this.modifier = modifier;
 		
 		/* Call with reference on itself, struct type will be built when context checking */
 		this.struct = new STRUCT(this, proviso);
@@ -95,7 +100,7 @@ public class StructTypedef extends SyntaxElement {
 			dec0.add(dec.clone());
 		}
 		
-		StructTypedef clone = new StructTypedef(this.path, this.SID, prov0, dec0, this.extension, this.getSource());
+		StructTypedef clone = new StructTypedef(this.path, this.SID, prov0, dec0, this.extension, this.modifier, this.getSource());
 		
 		assert(clone.fields.size() == this.fields.size());
 		

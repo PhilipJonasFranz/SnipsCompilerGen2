@@ -1,0 +1,37 @@
+SOURCE
+namespace Test {
+	
+	exclusive int var = 14;
+	
+	shared int getter() {
+		return var;
+	}
+	
+}
+
+int main() {
+	return Test::getter();
+}
+TESTCASES
+14
+OUTPUT
+/* --test_02.txt */
+.data
+Test.var: .word 14
+    
+.text
+    b main
+Test.getter:                                 /* Function: Test.getter */
+    ldr r0, .POOL0_main.L0_Test.var          /* Evaluate Expression */
+    ldr r0, [r0]
+    bx lr
+.POOL0_main.L0_Test.var: .word Test.var
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl Test.getter                           /* Evaluate Expression */
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    

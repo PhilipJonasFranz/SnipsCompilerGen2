@@ -4,6 +4,7 @@
  * This package contains utility to manipulate single bits on data words.
  */
 namespace Bits {
+
 	/*
 	 * Return the bit stored at the index i. Return as a boolean value.
 	 */
@@ -35,4 +36,5 @@ namespace Bits {
 		target = target & ~(1 << i);
 		return target;
 	}
+
 }

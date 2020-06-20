@@ -361,6 +361,9 @@ public class ContextChecker {
 		
 		e.setType(e.structType);
 		
+		/* Struct may have modifier restrictions */
+		this.checkModifier(e.structType.typedef.modifier, e.structType.typedef.path, e.getSource());
+		
 		return e.getType();
 	}
 	
@@ -1303,16 +1306,22 @@ public class ContextChecker {
 	 * - Sets the type of the reference
 	 */
 	public TYPE checkIDRef(IDRef i) throws CTX_EXCEPTION {
+		/* Search for the declaration in the scopes */
 		Declaration d = this.scopes.peek().getField(i.path, i.getSource());
 		
 		if (d != null) {
+			/* Link origin */
 			i.origin = d;
+			
+			/* Apply type */
 			i.setType(d.getType());
+			
+			/* Check for modifier restrictions */
+			this.checkModifier(i.origin.modifier, i.origin.path, i.getSource());
+			
 			return i.getType();
 		}
-		else {
-			throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.path.build());
-		}
+		else throw new CTX_EXCEPTION(i.getSource(), "Unknown variable: " + i.path.build());
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXCEPTION {

@@ -8,7 +8,7 @@ namespace Colors {
 	/*
 	 * Holds a single integer value that encodes r, g, b, and a channel.
 	 */
-	struct Color {
+	restricted struct Color {
 		int rgba;
 	}
 

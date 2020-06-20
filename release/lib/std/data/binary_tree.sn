@@ -8,7 +8,7 @@ namespace Tree {
 	/*
 	 * A tree node that has a left and right child and holds a value.
 	 */
-	struct TreeNode<T> {
+	restricted struct TreeNode<T> {
 		TreeNode<T>* left;
 		TreeNode<T>* right;
 		T value;

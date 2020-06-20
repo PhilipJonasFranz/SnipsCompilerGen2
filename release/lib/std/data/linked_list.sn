@@ -6,11 +6,12 @@
  * that give information about the state of the list.
  */
 namespace List {
+
 	/*
 	 * A single list entry, contains a pointer to the next node
 	 * and a value.
 	 */
-	struct ListNode<T> {
+	restricted struct ListNode<T> {
 		ListNode<T>* next;
 		T value;
 	}
@@ -18,7 +19,7 @@ namespace List {
 	/*
 	 * Wraps the list head and tail.
 	 */
-	struct LinkedList<T> {
+	restricted struct LinkedList<T> {
 		ListNode<T>* head;
 		ListNode<T>* tail;
 		T defValue;
@@ -208,6 +209,6 @@ namespace List {
 				return;
 			}
 		}
-		
 	}
+	
 }

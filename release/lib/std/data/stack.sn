@@ -7,7 +7,7 @@
  */
 namespace Stack {
 	
-	struct StackedList<T> {
+	restricted struct StackedList<T> {
 		LinkedList<T>* list;
 	}
 	

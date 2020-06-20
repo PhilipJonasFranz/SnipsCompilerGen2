@@ -13,7 +13,7 @@ namespace Queue {
 	 * that is used to determine wether the queue is full or empty when
 	 * the head index is the same as the tail index.
 	 */
-	struct CyclicQueue<T> {
+	restricted struct CyclicQueue<T> {
 		T* storage;
 		T defValue;
 		int size;

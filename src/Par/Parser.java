@@ -309,12 +309,7 @@ public class Parser {
 			return this.parseNamespace();
 		}
 		else {
-			MODIFIER mod = MODIFIER.SHARED;
-			Token modT = null;
-			if (current.type.group == TokenGroup.MODIFIER) {
-				modT = accept();
-				mod = this.resolve(modT);
-			}
+			MODIFIER mod = this.parseModifier();
 			
 			TYPE type = this.parseType();
 			
@@ -340,6 +335,9 @@ public class Parser {
 	}
 	
 	public StructTypedef parseStructTypedef() throws PARSE_EXCEPTION {
+		
+		MODIFIER mod = this.parseModifier();
+		
 		Source source = accept(TokenType.STRUCT).getSource();
 		Token id = accept(TokenType.STRUCTID);
 		
@@ -357,7 +355,7 @@ public class Parser {
 			for (Declaration d : ext.fields) extendDecs.add(d.clone());
 		}
 		
-		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, source);
+		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		def.fields.addAll(extendDecs);
@@ -593,12 +591,8 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		
-		MODIFIER mod = MODIFIER.SHARED;
-		Token modT = null;
-		if (current.type.group == TokenGroup.MODIFIER) {
-			modT = accept();
-			mod = this.resolve(modT);
-		}
+		Token modT = (current.type.group == TokenGroup.MODIFIER)? current : null;
+		MODIFIER mod = this.parseModifier();
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
@@ -2014,6 +2008,17 @@ public class Parser {
 		
 		this.scopes.pop();
 		return body;
+	}
+	
+	protected MODIFIER parseModifier() {
+		MODIFIER mod = MODIFIER.SHARED;
+		
+		if (current.type.group == TokenGroup.MODIFIER) {
+			Token modT = accept();
+			mod = this.resolve(modT);
+		}
+		
+		return mod;
 	}
 	
 	protected MODIFIER resolve(Token t) {

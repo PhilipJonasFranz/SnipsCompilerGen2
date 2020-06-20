@@ -13,8 +13,8 @@
 namespace Display {
 
 	/* This variable should be set to the first word in the memory section of the display */
-	int displayBase = 4096;
-	int cursor = 0;
+	shared int displayBase = 4096;
+	restricted int cursor = 0;
 
 	/* Reads the char from the display input at base + 1 */
 	restricted char getChar() {
