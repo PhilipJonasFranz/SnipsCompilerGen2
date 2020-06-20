@@ -99,14 +99,6 @@ public class ASMOptimizer {
 			this.removeDoubleCrossing(body);
 			
 			/**
-			 * push { r0 }
-			 * pop { r1 }
-			 * Replace with:
-			 * mov r1, r0
-			 */
-			this.removeImplicitStackAssignment(body);
-			
-			/**
 			 * .L0:
 			 * .L1:
 			 * Replace with:
@@ -167,7 +159,7 @@ public class ASMOptimizer {
 	/**
 	 * Check if given register is overwritten by given instruction.
 	 */
-	protected boolean overwritesReg(ASMInstruction ins, REGISTER reg) {
+	private boolean overwritesReg(ASMInstruction ins, REGISTER reg) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return data.target.reg == reg;
@@ -194,7 +186,7 @@ public class ASMOptimizer {
 	/**
 	 * Check if given register is read by given instruction.
 	 */
-	protected boolean readsReg(ASMInstruction ins, REGISTER reg) {
+	private boolean readsReg(ASMInstruction ins, REGISTER reg) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == reg);
@@ -207,7 +199,7 @@ public class ASMOptimizer {
 		else return false;
 	}
 	
-	protected void removeZeroInstruction(AsNBody body) {
+	private void removeZeroInstruction(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMAdd) {
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
@@ -234,7 +226,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeUnnessesaryPushPop(AsNBody body) {
+	private void removeUnnessesaryPushPop(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
@@ -273,7 +265,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeIndirectPushPopAssign(AsNBody body) {
+	private void removeIndirectPushPopAssign(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
@@ -332,7 +324,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeExpressionIndirectTargeting(AsNBody body) {
+	private void removeExpressionIndirectTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
@@ -387,7 +379,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeLoadIndirectTargeting(AsNBody body) {
+	private void removeLoadIndirectTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
@@ -423,7 +415,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeOperandIndirectTargeting(AsNBody body) {
+	private void removeOperandIndirectTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
@@ -545,7 +537,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeImplicitPushPopTargeting(AsNBody body) {
+	private void removeImplicitPushPopTargeting(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
@@ -566,7 +558,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeBranchesBeforeLabelToLabel(AsNBody body) {
+	private void removeBranchesBeforeLabelToLabel(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMBranch && body.instructions.get(i) instanceof ASMLabel) {
 				ASMBranch branch = (ASMBranch) body.instructions.get(i - 1);
@@ -585,22 +577,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeImplicitStackAssignment(AsNBody body) {
-		for (int i = 1; i < body.instructions.size(); i++) {
-			if (body.instructions.get(i - 1) instanceof ASMPushStack && body.instructions.get(i) instanceof ASMPopStack) {
-				ASMPushStack push = (ASMPushStack) body.instructions.get(i - 1);
-				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
-				if (push.operands.size() == 1 && pop.operands.size() == 1) {
-					body.instructions.remove(i - 1);
-					body.instructions.remove(i - 1);
-					body.instructions.add(i - 1, new ASMMov(pop.operands.get(0), push.operands.get(0)));
-					OPT_DONE = true;
-				}
-			}
-		}
-	}
-	
-	protected void removeDoubleCrossing(AsNBody body) {
+	private void removeDoubleCrossing(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov && body.instructions.get(i) instanceof ASMMov) {
 				ASMMov move0 = (ASMMov) body.instructions.get(i - 1);
@@ -620,7 +597,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void constantOperandPropagation(AsNBody body) {
+	private void constantOperandPropagation(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMov) {
 				ASMMov move = (ASMMov) body.instructions.get(i);
@@ -838,7 +815,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void clearUnusedLabels(AsNBody body) {
+	private void clearUnusedLabels(AsNBody body) {
 		List<ASMLabel> usedLabels = new ArrayList();
 		
 		for (int i = 1; i < body.instructions.size(); i++) {
@@ -869,7 +846,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void clearInstructionsAfterBranch(AsNBody body) {
+	private void clearInstructionsAfterBranch(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) body.instructions.get(i);
@@ -888,7 +865,7 @@ public class ASMOptimizer {
 		}
 	}
 	
-	protected void removeDoubleLabels(AsNBody body) {
+	private void removeDoubleLabels(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMLabel && !(body.instructions.get(i) instanceof ASMDataLabel)) {
 				ASMLabel l1 = (ASMLabel) body.instructions.get(i);
