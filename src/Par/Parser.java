@@ -25,7 +25,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
@@ -56,9 +55,9 @@ import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
+import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AsN.AsNNode.MODIFIER;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.Comment;
@@ -78,6 +77,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -921,8 +921,8 @@ public class Parser {
 		/* Check if tokens ahead are a struct select */
 		boolean structSelectCheck = current.type == TokenType.IDENTIFIER;
 		for (int i = 1; i < this.tokenStream.size(); i += 2) {
-			if (tokenStream.get(i).type == TokenType.INCR || tokenStream.get(i).type == TokenType.DECR) break;
-			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i).type == TokenType.UNION_ACCESS) {
+			if ((tokenStream.get(i - 1).type == TokenType.INCR || tokenStream.get(i - 1).type == TokenType.DECR) && i > 1) break;
+			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i - 1).type == TokenType.UNION_ACCESS) {
 				structSelectCheck &= tokenStream.get(i).type == TokenType.IDENTIFIER;
 			}
 			else {
@@ -941,13 +941,14 @@ public class Parser {
 			increment &= tokenStream.get(i + 2).type == TokenType.IDENTIFIER || tokenStream.get(i + 2).type == TokenType.NAMESPACE_IDENTIFIER;
 		}
 		
+		Source source = current.getSource();
+		
 		if (increment || structSelectCheck) {
-			Source source = current.getSource();
 			
 			if (structSelectCheck) {
 				Expression select = this.parseStructSelect();
 				
-				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
 				accept();
 				if (acceptSemicolon) accept(TokenType.SEMICOLON);
 			
@@ -956,7 +957,7 @@ public class Parser {
 			else {
 				NamespacePath path = this.parseNamespacePath();
 				
-				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
 				
 				accept();
 				if (acceptSemicolon) accept(TokenType.SEMICOLON);
@@ -966,6 +967,30 @@ public class Parser {
 		}
 		else {
 			LhsId target = this.parseLhsIdentifer();
+			
+			/*
+			 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
+			 * operation, needs to be handeled like this. This occurs for example in an assignment:
+			 * 
+			 * x [0].value++;
+			 * 
+			 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
+			 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
+			 * with a StructSelectWriteback as payload.
+			 */
+			if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+				StructSelectLhsId lhs = (StructSelectLhsId) target;
+				
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
+			
+				return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
+			}
+			
+			/*
+			 * Normal behaviour.
+			 */
 			ASSIGN_ARITH arith = this.parseAssignOperator();
 			Expression value = this.parseExpression();
 			if (acceptSemicolon) accept(TokenType.SEMICOLON);
@@ -1502,11 +1527,15 @@ public class Parser {
 			Source source = current.getSource();
 			if (current.type == TokenType.INCR) {
 				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.INCR, ref, source);
+				if (ref instanceof IDRef)
+					ref = new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else ref = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
 			}
 			else {
 				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.DECR, ref, source);
+				if (ref instanceof IDRef)
+					ref = new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else ref = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
 			}
 		}
 		

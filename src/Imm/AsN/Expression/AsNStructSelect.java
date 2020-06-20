@@ -60,6 +60,9 @@ public class AsNStructSelect extends AsNExpression {
 		return sel;
 	}
 	
+	/**
+	 * Loads the address of the target of the selection into R1.
+	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
 		/* Load base address */
 		if (select.selector instanceof IDRef) {

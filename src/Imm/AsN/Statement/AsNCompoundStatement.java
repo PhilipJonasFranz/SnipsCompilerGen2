@@ -189,7 +189,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (s instanceof AssignWriteback) {
 			AssignWriteback awb = (AssignWriteback) s;
-			return this.hasAddressReference(awb.getShadowRef(), dec);
+			return this.hasAddressReference(awb.reference, dec);
 		}
 		else if (s instanceof SignalStatement) {
 			SignalStatement s0 = (SignalStatement) s;

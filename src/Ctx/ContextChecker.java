@@ -26,6 +26,7 @@ import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
@@ -1500,11 +1501,34 @@ public class ContextChecker {
 		return i.getType();
 	}
 	
+	public TYPE checkStructSelectWriteback(StructSelectWriteback i) throws CTX_EXCEPTION {
+		if (i.getShadowSelect() instanceof StructSelect) {
+			StructSelect ref = (StructSelect) i.getShadowSelect();
+			i.select = ref;
+			
+			TYPE t = ref.check(this);
+			
+			if (!(t instanceof PRIMITIVE)) {
+				throw new CTX_EXCEPTION(i.select.getSource(), "Can only be applied to primitive types");
+			}
+			
+			i.setType(t);
+		}
+		else {
+			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
+		}
+		
+		return i.getType();
+	}
+	
 	public TYPE checkAssignWriteback(AssignWriteback i) throws CTX_EXCEPTION {
-		if (i.getShadowRef() instanceof IDRefWriteback) {
-			IDRefWriteback wb = (IDRefWriteback) i.getShadowRef();
+		if (i.reference instanceof IDRefWriteback) {
+			IDRefWriteback wb = (IDRefWriteback) i.reference;
 			wb.check(this);
-			i.idWb = wb;
+		}
+		else if (i.reference instanceof StructSelectWriteback) {
+			StructSelectWriteback sel = (StructSelectWriteback) i.reference;
+			sel.check(this);
 		}
 		else {
 			throw new CTX_EXCEPTION(i.getSource(), "Can only apply to id reference");
