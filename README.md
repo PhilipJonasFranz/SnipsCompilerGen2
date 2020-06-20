@@ -62,11 +62,6 @@ All instructions do support the condition field. If you compile your assembly co
  - Implement AST Optimizer
  - Implement Optimizer Annotations
 
-## Known issues
- - Increment and Decrement not working for Struct Select Assign, Array Select Assign and Pointer Assign
- - Unprecise error messages related to proviso type errors
- - Unprecise error messages related to incorrect struct names while parsing
- 
 ## License & Copyright
  © Philip Jonas Franz
  
