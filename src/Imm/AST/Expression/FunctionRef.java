@@ -34,6 +34,13 @@ public class FunctionRef extends Expression {
 		this.proviso = proviso;
 		this.path = path;
 	}
+	
+	public FunctionRef(List<TYPE> proviso, Function origin, Source source) {
+		super(source);
+		this.proviso = proviso;
+		this.origin = origin;
+		this.path = origin.path;
+	}
 
 	
 			/* --- METHODS --- */

@@ -998,7 +998,7 @@ public class ContextChecker {
 		}
 	}
 	
-	public Function findFunction(NamespacePath path, Source source) throws CTX_EXCEPTION {
+	public Function findFunction(NamespacePath path, Source source, boolean isPredicate) throws CTX_EXCEPTION {
 		Function f = null;
 		for (Function f0 : this.functions) {
 			if (f0.path.build().equals(path.build())) {
@@ -1030,17 +1030,17 @@ public class ContextChecker {
 			}
 			
 			/* Return if there is only one result */
-			if (funcs.isEmpty()) return  null;
+			if (funcs.isEmpty()) return null;
 			else if (funcs.size() == 1) return funcs.get(0);
 			/* Multiple results, cannot determine correct one, return null */
 			else {
 				String s = "";
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
-				throw new CTX_EXCEPTION(source, "Multiple matches for function '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+				throw new CTX_EXCEPTION(source, "Multiple matches for " + ((isPredicate)? "predicate" : "function") + " '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 			}
 		}
-		else throw new CTX_EXCEPTION(source, "Undefined function '" + path.build() + "'");
+		else throw new CTX_EXCEPTION(source, "Unknown " + ((isPredicate)? "predicate" : "function") + " '" + path.build() + "'");
 	}
 	
 	public boolean signalStackContains(TYPE newSignal) {
@@ -1063,7 +1063,7 @@ public class ContextChecker {
 		}
 		
 		/* Find the called function */
-		Function f = this.findFunction(path, source);
+		Function f = this.findFunction(path, source, false);
 		
 		Declaration anonTarget = null;
 		
@@ -1326,51 +1326,24 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXCEPTION {
-		Function lambda = null;
 		
-		for (Function f : this.functions) {
-			if (f.path.build().equals(r.path.build())) {
-				lambda = f;
-				break;
-			}
-		}
-		
+		/* If not already linked, find referenced function */
+		Function lambda = (r.origin != null)? r.origin : this.findFunction(r.path, r.getSource(), true);
 		if (lambda == null) {
-			if (r.path.path.size() == 1) {
-				List<Function> f0 = new ArrayList();
-				
-				for (Function f : this.functions) {
-					if (f.path.getLast().equals(r.path.getLast())) {
-						f0.add(f);
-					}
-				}
-				
-				/* Return if there is only one result */
-				if (f0.size() == 1) lambda = f0.get(0);
-				/* Multiple results, cannot determine correct one, return null */
-				else if (f0.isEmpty()) {
-					throw new CTX_EXCEPTION(r.getSource(), "Unknown predicate: " + r.path.build());
-				}
-				else {
-					String s = "";
-					for (Function f : f0) s += f.path.build() + ", ";
-					s = s.substring(0, s.length() - 2);
-					throw new CTX_EXCEPTION(r.getSource(), "Multiple matches for predicate '" + r.path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
-				}
-			}
-			else {
-				throw new CTX_EXCEPTION(r.getSource(), "Unknown predicate: " + r.path.build());
-			}
+			throw new CTX_EXCEPTION(r.getSource(), "Unknown predicate: " + r.path.build());
 		}
 		
-		if (lambda.manager.provisosTypes.size() != r.proviso.size()) {
+		/* Provided number of provisos does not match number of provisos of lambda */
+		if (lambda.manager.provisosTypes.size() != r.proviso.size()) 
 			throw new CTX_EXCEPTION(r.getSource(), "Missmatching number of provided provisos for predicate, expected " + lambda.manager.provisosTypes.size() + ", got " + r.proviso.size());
-		}
+		
+		/* A lambda cannot signal exceptions, since it may become anonymous */
+		if (lambda.signals) 
+			throw new CTX_EXCEPTION(r.getSource(), "Predicates may not signal exceptions");
 		
 		/* Add default mapping, function may not be casted otherwise */
-		if (r.proviso.size() == 0) {
+		if (r.proviso.size() == 0) 
 			lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
-		}
 		
 		r.origin = lambda;
 		
@@ -1382,21 +1355,30 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkArrayInit(ArrayInit init) throws CTX_EXCEPTION {
-		if (init.elements.isEmpty()) {
+		/* Array must at least contain one element */
+		if (init.elements.isEmpty()) 
 			throw new CTX_EXCEPTION(init.getSource(), "Structure init must have at least one element");
-		}
 		
 		TYPE type0 = init.elements.get(0).check(this);
+		
+		int dontCareSize = 0;
+		
 		if (init.elements.size() > 1) {
-			for (int i = 1; i < init.elements.size(); i++) {
+			for (int i = 0; i < init.elements.size(); i++) {
 				TYPE typeX = init.elements.get(i).check(this);
-				if (!typeX.isEqual(type0)) {
-					throw new CTX_EXCEPTION(init.getSource(), "Structure init elements have to have same type: " + type0.typeString() + " vs " + typeX.typeString());
+				
+				if (init.dontCareTypes) {
+					dontCareSize += typeX.wordsize();
+				}
+				else {
+					if (!typeX.isEqual(type0)) {
+						throw new CTX_EXCEPTION(init.getSource(), "Structure init elements have to have same type: " + type0.typeString() + " vs " + typeX.typeString());
+					}
 				}
 			}
 		}
 		
-		init.setType(new ARRAY(type0, init.elements.size()));
+		init.setType(new ARRAY((init.dontCareTypes)? new VOID() : type0, (init.dontCareTypes)? dontCareSize : init.elements.size()));
 		return init.getType();
 	}
 	

@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.3.2.3</Version>
+	<Version>v.3.2.4</Version>
 	<Library>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
 		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>

@@ -1,0 +1,51 @@
+SOURCE
+struct Point {
+	int x;
+	int y;
+}
+
+int add5(int x) {
+	return x + 5;
+}
+
+int main(int b) {
+	void [6] x = [10, true, 'c', add5, Point::(10, 5)];
+	return x [b];
+}
+TESTCASES
+0 10
+1 1
+4 10
+5 5
+OUTPUT
+/* --test_00.txt */
+    b main
+lambda_add5:                                 /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+add5:                                        /* Function: add5 */
+    push { r3 }
+    mov r3, r0
+    add r0, r0, #5
+    pop { r3 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3 }
+    mov fp, sp
+    mov r3, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_add5
+    push { r0 }
+    mov r0, #99
+    mov r1, #1
+    mov r2, #10
+    push { r2, r1, r0 }
+    lsl r2, r3, #2
+    sub r0, fp, #16
+    add r0, r0, r2
+    ldr r0, [r0]
+    mov sp, fp
+    pop { r3 }
+    bx lr
+    

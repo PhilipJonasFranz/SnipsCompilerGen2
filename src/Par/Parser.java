@@ -162,7 +162,8 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
-		if (current.type() == tokenType)return accept();
+		
+		if (current.type() == tokenType) return accept();
 		else {
 			this.progress.abort();
 			throw new PARSE_EXCEPTION(current.source, current.type(), tokenType);
@@ -1210,7 +1211,9 @@ public class Parser {
 	}
 	
 	protected Expression parseArrayInit() throws PARSE_EXCEPTION {
-		if (current.type == TokenType.LBRACE) {
+		if (current.type == TokenType.LBRACE || current.type == TokenType.LBRACKET) {
+			boolean dontCare = current.type == TokenType.LBRACKET;
+			
 			Source source = accept().getSource();
 			List<Expression> elements = new ArrayList();
 			while (current.type != TokenType.RBRACE) {
@@ -1222,8 +1225,10 @@ public class Parser {
 				else break;
 			}
 			
-			accept(TokenType.RBRACE);
-			return new ArrayInit(elements, source);
+			if (dontCare) accept(TokenType.RBRACKET);
+			else accept(TokenType.RBRACE);
+			
+			return new ArrayInit(elements, dontCare, source);
 		}
 		else return this.parseTernary();
 	}
@@ -1672,7 +1677,7 @@ public class Parser {
 				
 				if (lambda != null) {
 					/* Predicate without proviso */
-					return new FunctionRef(new ArrayList(), path, source);
+					return new FunctionRef(new ArrayList(), lambda, source);
 				}
 				else {
 					/* Identifier Reference */
@@ -1702,7 +1707,7 @@ public class Parser {
 				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
 			}
 			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
-			return new ArrayInit(charAtoms, token.getSource());
+			return new ArrayInit(charAtoms, false, token.getSource());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();

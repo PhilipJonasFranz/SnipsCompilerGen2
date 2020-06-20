@@ -15,15 +15,18 @@ public class ArrayInit extends Expression {
 			/* --- FIELDS --- */
 	public List<Expression> elements;
 	
+	public boolean dontCareTypes = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public ArrayInit(List<Expression> elements, Source source) {
+	public ArrayInit(List<Expression> elements, boolean dontCare, Source source) {
 		super(source);
 		this.elements = elements;
+		this.dontCareTypes = dontCare;
 	}
 	
 
