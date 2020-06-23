@@ -128,12 +128,17 @@ namespace List {
 	 * Returns a pointer to this list node, or 0 in case the
 	 * value wasnt found.
 	 */
-	shared ListNode<T>* find<T>(LinkedList<T>* lp, T x) {
+	shared ListNode<T>* find<T>(LinkedList<T>* lp, func (T, T) -> bool pred, T x) {
 		ListNode<T>* n = lp->head;
-		while (n->next != null) {
-			if (n->value == x) {
+		while (n != null) {
+			/* 
+			 * If the predicate matches given value, 
+			 * the searched value was found.
+			 */
+			if (pred(x, n->value)) {
 				return n;
 			}
+			
 			/* Jump to next */
 			n = n->next;
 		}
@@ -152,6 +157,30 @@ namespace List {
 			size++;
 		}
 		return size;
+	}
+	
+	/*
+	 * Returns the index of given node in the list.
+	 */
+	shared int indexOf(LinkedList<void>* lp, ListNode<void>* n) {
+		/* Start iterating at head of list */
+		ListNode<void>* n0 = lp->head;
+		
+		/* Current index */
+		int i = 0;
+		
+		while (n0 != null) {
+			/* Addresses match, node found, return current index */
+			if (n0 == n) return i;
+			else {
+				/* Jump to next node */
+				n0 = n0->next;
+				i++;
+			}
+		}
+		
+		/* Node is not part of the list. */
+		return -1;
 	}
 	
 	/*

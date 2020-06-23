@@ -515,6 +515,11 @@ public class Parser {
 			
 			boolean anonymous = false;
 			
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
+			
 			/* Non-anonymous */
 			if (current.type != TokenType.IDENTIFIER) {
 				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {

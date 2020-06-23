@@ -319,6 +319,8 @@ List.size.L2:
     bx lr
 .POOL4_main.L4_NULL: .word NULL
     
+/* Returns the index of given node in the list. */
+    
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
     

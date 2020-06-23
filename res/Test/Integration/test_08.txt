@@ -363,6 +363,8 @@ List.get.L7:
     
 /* Returns the amount of elements stored in the list. */
     
+/* Returns the index of given node in the list. */
+    
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
 List.remove:                                 /* Function: List.remove */

@@ -12,6 +12,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.FUNC;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
@@ -135,6 +136,15 @@ public class ProvisoManager {
 					p.setContext(t);
 					break;
 				}
+			}
+		}
+		else if (type instanceof FUNC) {
+			FUNC f = (FUNC) type;
+			if (f.funcHead != null) {
+				for (Declaration d : f.funcHead.parameters) {
+					d.setContext(context);
+				}
+				setContext(context, f.funcHead.getReturnType());
 			}
 		}
 		else if (type instanceof ARRAY) {
