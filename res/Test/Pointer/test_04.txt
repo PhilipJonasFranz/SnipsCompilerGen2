@@ -1,11 +1,11 @@
 SOURCE
-int get(int* q, int* p) {
+int forEach(int* q, int* p) {
 	return *p;
 }
 
 int main(int x) {
 	int y = 10;
-	return get(&y, &x);
+	return forEach(&y, &x);
 }
 TESTCASES
 0 0
@@ -14,7 +14,7 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-get:                                         /* Function: get */
+forEach:                                     /* Function: forEach */
     push { r3, r4 }
     mov r3, r0
     mov r4, r1
@@ -35,7 +35,7 @@ main:                                        /* Function: main */
     mov r1, r0
     sub r0, fp, #8
     lsr r0, r0, #2
-    bl get                                   /* Call get */
+    bl forEach                               /* Call forEach */
     mov sp, fp
     pop { r3, fp, lr }
     bx lr
