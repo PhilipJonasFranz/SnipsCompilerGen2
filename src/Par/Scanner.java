@@ -13,7 +13,7 @@ import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
-	/* --- NESTED --- */
+			/* --- NESTED --- */
 	/**
 	 * Defines the current accumulation state of the scanner.
 	 */
@@ -66,6 +66,7 @@ public class Scanner {
 	}
 
 	
+			/* --- FIELDS --- */
 	/**
 	 * All simple scannable tokens, represented in base/reset token format.
 	 */
@@ -150,6 +151,8 @@ public class Scanner {
 	
 	public ProgressMessage progress;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
 		this.progress = progress;
@@ -167,6 +170,8 @@ public class Scanner {
 		
 	}
 	
+	
+			/* --- METHODS --- */
 	public LinkedList<Token> scan() {
 		ScannerFSM sFSM = new ScannerFSM(new LinkedList(), progress);
 		
@@ -175,9 +180,8 @@ public class Scanner {
 			input.get(i).line = input.get(i).line.replace("\t", "    ");
 			
 			/* For every char in every line, let fsm read char and check state */
-			for (int a = 0; a < input.get(i).line.length(); a++) {
+			for (int a = 0; a < input.get(i).line.length(); a++) 
 				sFSM.readChar(input.get(i).line.charAt(a), input.get(i).lineNumber, a, input.get(i).fileName);
-			}
 			
 			/* Increase progress based on read input lines */
 			if (progress != null) progress.incProgress((double) i / input.size());
@@ -193,11 +197,9 @@ public class Scanner {
 	private static class ScannerFSM {
 
 				/* --- REGEXES --- */
-		public static String int_match = "[0-9]+";
-		
-		public static String hex_match = "hx([0-9]|[a-f]|[A-F])+";
-		
-		public static String bin_match = "bx[0-1]+";
+		public static String int_match = "[0-9]+",
+							 hex_match = "hx([0-9]|[a-f]|[A-F])+",
+							 bin_match = "bx[0-1]+";
 
 		
 				/* --- FIELDS --- */
@@ -219,13 +221,18 @@ public class Scanner {
 		private String buffer = "";
 		
 		private ProgressMessage progress;
-
 		
+		public boolean wasAwaiting = false;
+		
+		
+				/* --- CONSTRUCTORS --- */
 		public ScannerFSM(LinkedList<Token> tokens, ProgressMessage progress) {
 			this.tokens = tokens;
 			this.progress = progress;
 		}
 		
+		
+				/* --- METHODS --- */
 		/**
 		 * Read a single char, append it to the buffer and check the state.
 		 */
@@ -234,20 +241,18 @@ public class Scanner {
 			else {
 				if (this.state != ACC_STATE.COMMENT && this.state != ACC_STATE.CHARLIT && this.state != ACC_STATE.STRINGLIT) 
 					this.buffer = this.buffer.trim();
-				this.buffer = buffer + c;
-				boolean b = true;
 				
-				while (b) {
-					b = this.checkState(i, a, fileName);
-				}
+				this.buffer += c;
+				
+				boolean b = true;
+				while (b) b = this.checkState(i, a, fileName);
 				
 				this.lastLine = i;
 			}
 		}
 		
-		public boolean wasAwaiting = false;
-		
 		public boolean checkState(int i, int a, String fileName) {
+			/* --- COMMENT SCANNER --- */
 			if (this.state == ACC_STATE.COMMENT) {
 				if (i != this.lastLine && this.buffer.startsWith("//")) {
 					/* End of single line comment */
@@ -261,7 +266,7 @@ public class Scanner {
 						this.state = ACC_STATE.NONE;
 						this.buffer = this.buffer.trim();
 						tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.substring(2, this.buffer.length() - 2).trim()));
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 					else {
 						if (!buffer.trim().equals("/*"))
@@ -277,21 +282,22 @@ public class Scanner {
 						if (!this.buffer.equals("*/"))
 							tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.substring(2, this.buffer.length() - 2)));
 						
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 					else if (i != this.lastLine) {
 						tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.trim().substring(1).trim()));
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 				}
 				return false;
 			}
 			
+			/* --- REGULAR & SIMPLE TOKEN SCANNER --- */
 			ScannableToken t = scannableMap.get(buffer);
 			
-			if (t == null && this.wasAwaiting) {
+			/* Nothing found, if was awaiting check for match with previous buffer */
+			if (t == null && this.wasAwaiting) 
 				t = scannableMap.get(buffer.substring(0, buffer.length() - 1));
-			}
 			
 			if (t != null && (!t.await || this.wasAwaiting)) {
 				this.wasAwaiting = false;
@@ -314,6 +320,7 @@ public class Scanner {
 				return false;
 			}
 				
+			/* --- LITERAL SCANNER --- */
 			if (this.buffer.equals("'")) {
 				this.state = ACC_STATE.CHARLIT;
 				return false;
@@ -339,6 +346,7 @@ public class Scanner {
 				}
 			}
 			else {
+				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
 					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) {
 						this.state = ACC_STATE.ID;
@@ -392,7 +400,7 @@ public class Scanner {
 					String id = this.buffer.substring(1, this.buffer.length() - 1);
 					tokens.add(new Token(TokenType.STRINGLIT, new Source(fileName, i, a), id));
 					
-					this.emptyBuffer();
+					this.buffer = "";
 					this.state = ACC_STATE.NONE;
 					return true;
 				}
@@ -400,7 +408,7 @@ public class Scanner {
 					String id = this.buffer.substring(1, this.buffer.length() - 1);
 					tokens.add(new Token(TokenType.CHARLIT, new Source(fileName, i, a), id));
 					
-					this.emptyBuffer();
+					this.buffer = "";
 					this.state = ACC_STATE.NONE;
 					return true;
 				}
@@ -445,10 +453,6 @@ public class Scanner {
 			}
 			
 			return false;
-		}
-		
-		public void emptyBuffer() {
-			this.buffer = "";
 		}
 		
 		/**

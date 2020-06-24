@@ -1078,7 +1078,7 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			this.progress.abort();
-			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types, " + current.getSource().getSourceMarker());
+			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types or tokens, " + current.getSource().getSourceMarker());
 		}
 		else {
 			this.progress.abort();
