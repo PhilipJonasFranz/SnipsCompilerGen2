@@ -91,6 +91,14 @@ public class Scanner {
 			INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 		}
 		
+
+				/* --- REGEXES --- */
+		public static String int_match = "[0-9]+";
+		
+		public static String hex_match = "hx([0-9]|[a-f]|[A-F])+";
+		
+		public static String bin_match = "bx[0-1]+";
+
 		
 				/* --- FIELDS --- */
 		/* All struct ids that have been scanned */
@@ -116,52 +124,52 @@ public class Scanner {
 		 * All simple scannable tokens, represented in base/reset token format.
 		 */
 		public ScannableToken [] scannables = {
-				new ScannableToken("(", TokenType.LPAREN, ACC_STATE.NONE, ""),
-				new ScannableToken(")", TokenType.RPAREN, ACC_STATE.NONE, ""),
-				new ScannableToken("@", TokenType.AT, ACC_STATE.NONE, ""),
-				new ScannableToken("{", TokenType.LBRACE, ACC_STATE.NONE, ""),
-				new ScannableToken("}", TokenType.RBRACE, ACC_STATE.NONE, ""),
-				new ScannableToken("[", TokenType.LBRACKET, ACC_STATE.NONE, ""),
-				new ScannableToken("]", TokenType.RBRACKET, ACC_STATE.NONE, ""),
-				new ScannableToken(".", TokenType.DOT, ACC_STATE.NONE, ""),
-				new ScannableToken(";", TokenType.SEMICOLON, ACC_STATE.NONE, ""),
-				new ScannableToken(":", TokenType.COLON, ACC_STATE.NONE, ""),
-				new ScannableToken(",", TokenType.COMMA, ACC_STATE.NONE, ""),
-				new ScannableToken("?", TokenType.TERN, ACC_STATE.NONE, ""),
-				new ScannableToken("*", TokenType.MUL, ACC_STATE.NONE, ""),
-				new ScannableToken("^", TokenType.XOR, ACC_STATE.NONE, ""),
-				new ScannableToken("~", TokenType.NOT, ACC_STATE.NONE, ""),
-				new ScannableToken("#", TokenType.DIRECTIVE, ACC_STATE.NONE, ""),
-				new ScannableToken("namespace", TokenType.NAMESPACE, ACC_STATE.NAMESPACE_ID, " "),
-				new ScannableToken("shared", TokenType.SHARED, ACC_STATE.NONE, " "),
-				new ScannableToken("restricted", TokenType.RESTRICTED, ACC_STATE.NONE, " "),
-				new ScannableToken("exclusive", TokenType.EXCLUSIVE, ACC_STATE.NONE, " "),
-				new ScannableToken("null", TokenType.NULL, ACC_STATE.NONE, ""),
-				new ScannableToken("sizeof", TokenType.SIZEOF, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("try", TokenType.TRY, ACC_STATE.NONE, " ", "{"),
-				new ScannableToken("watch", TokenType.WATCH, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("\\", TokenType.BACKSL, ACC_STATE.NONE, ""),
-				new ScannableToken("if", TokenType.IF, ACC_STATE.NONE, ""),
-				new ScannableToken("true", TokenType.BOOLLIT, ACC_STATE.NONE, true, ""),
-				new ScannableToken("false", TokenType.BOOLLIT, ACC_STATE.NONE, true, ""),
-				new ScannableToken("else", TokenType.ELSE, ACC_STATE.NONE, ""),
-				new ScannableToken("void", TokenType.VOID, ACC_STATE.NONE, ""),
-				new ScannableToken("func", TokenType.FUNC, ACC_STATE.NONE, ""),
-				new ScannableToken("int", TokenType.INT, ACC_STATE.NONE, ""),
-				new ScannableToken("char", TokenType.CHAR, ACC_STATE.NONE, ""),
-				new ScannableToken("bool", TokenType.BOOL, ACC_STATE.NONE, ""),
-				new ScannableToken("return", TokenType.RETURN, ACC_STATE.NONE, " ", ";"),
-				new ScannableToken("break", TokenType.BREAK, ACC_STATE.NONE, " ", ";"),
-				new ScannableToken("continue", TokenType.CONTINUE, ACC_STATE.NONE, " ", ";"),
-				new ScannableToken("while", TokenType.WHILE, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("do", TokenType.DO, ACC_STATE.NONE, " ", "{"),
-				new ScannableToken("for", TokenType.FOR, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("switch", TokenType.SWITCH, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("case", TokenType.CASE, ACC_STATE.NONE, " ", "("),
-				new ScannableToken("default", TokenType.DEFAULT, ACC_STATE.NONE, " ", ":"),
-				new ScannableToken("struct", TokenType.STRUCT, ACC_STATE.STRUCT_ID, " "),
-				new ScannableToken("enum", TokenType.ENUM, ACC_STATE.ENUM_ID, " "),
-				new ScannableToken("%", TokenType.MOD, ACC_STATE.NONE, "")
+				new ScannableToken("(", 		TokenType.LPAREN, 		ACC_STATE.NONE, 		""),
+				new ScannableToken(")", 		TokenType.RPAREN, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("@", 		TokenType.AT, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("{", 		TokenType.LBRACE, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("}", 		TokenType.RBRACE, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("[", 		TokenType.LBRACKET, 	ACC_STATE.NONE, 		""),
+				new ScannableToken("]", 		TokenType.RBRACKET, 	ACC_STATE.NONE, 		""),
+				new ScannableToken(".", 		TokenType.DOT, 			ACC_STATE.NONE, 		""),
+				new ScannableToken(";", 		TokenType.SEMICOLON, 	ACC_STATE.NONE, 		""),
+				new ScannableToken(":", 		TokenType.COLON, 		ACC_STATE.NONE, 		""),
+				new ScannableToken(",", 		TokenType.COMMA, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("?", 		TokenType.TERN, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("*", 		TokenType.MUL, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("^", 		TokenType.XOR, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("~", 		TokenType.NOT, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("#", 		TokenType.DIRECTIVE, 	ACC_STATE.NONE, 		""),
+				new ScannableToken("namespace", TokenType.NAMESPACE, 	ACC_STATE.NAMESPACE_ID, " "),
+				new ScannableToken("shared", 	TokenType.SHARED, 		ACC_STATE.NONE, 		" "),
+				new ScannableToken("restricted",TokenType.RESTRICTED, 	ACC_STATE.NONE, 		" "),
+				new ScannableToken("exclusive", TokenType.EXCLUSIVE,	ACC_STATE.NONE, 		" "),
+				new ScannableToken("null", 		TokenType.NULL, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("sizeof", 	TokenType.SIZEOF, 		ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("try", 		TokenType.TRY, 			ACC_STATE.NONE, 		" ", "{"),
+				new ScannableToken("watch", 	TokenType.WATCH, 		ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("\\", 		TokenType.BACKSL, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("if", 		TokenType.IF, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("true", 		TokenType.BOOLLIT, 		ACC_STATE.NONE,   true, ""),
+				new ScannableToken("false", 	TokenType.BOOLLIT, 		ACC_STATE.NONE,   true, ""),
+				new ScannableToken("else", 		TokenType.ELSE, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("void", 		TokenType.VOID, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("func",		TokenType.FUNC, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("int", 		TokenType.INT, 			ACC_STATE.NONE, 		""),
+				new ScannableToken("char", 		TokenType.CHAR, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("bool", 		TokenType.BOOL, 		ACC_STATE.NONE, 		""),
+				new ScannableToken("return", 	TokenType.RETURN, 		ACC_STATE.NONE, 		" ", ";"),
+				new ScannableToken("break", 	TokenType.BREAK, 		ACC_STATE.NONE, 		" ", ";"),
+				new ScannableToken("continue", 	TokenType.CONTINUE, 	ACC_STATE.NONE, 		" ", ";"),
+				new ScannableToken("while", 	TokenType.WHILE, 		ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("do", 		TokenType.DO, 			ACC_STATE.NONE, 		" ", "{"),
+				new ScannableToken("for", 		TokenType.FOR, 			ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("switch", 	TokenType.SWITCH, 		ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("case", 		TokenType.CASE, 		ACC_STATE.NONE, 		" ", "("),
+				new ScannableToken("default", 	TokenType.DEFAULT, 		ACC_STATE.NONE, 		" ", ":"),
+				new ScannableToken("struct", 	TokenType.STRUCT, 		ACC_STATE.STRUCT_ID, 	" "),
+				new ScannableToken("enum", 		TokenType.ENUM, 		ACC_STATE.ENUM_ID, 		" "),
+				new ScannableToken("%", 		TokenType.MOD, 			ACC_STATE.NONE, 		"")
 		};
 		
 		HashMap<String, ScannableToken> scannableMap = new HashMap();
@@ -477,13 +485,13 @@ public class Scanner {
 						throw new SNIPS_EXCEPTION("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
+					/* Convert to literal in base10 */
 					lit = lit.substring(2);
 					String [] sp = lit.split("");
 					int s = 0;
 					for (int k = 0; k < sp.length; k++) {
 						s += Math.pow(16, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 16);
 					}
-				
 					lit = s + "";
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
@@ -499,13 +507,13 @@ public class Scanner {
 						throw new SNIPS_EXCEPTION("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
+					/* Convert to literal in base10 */
 					lit = lit.substring(2);
 					String [] sp = lit.split("");
 					int s = 0;
 					for (int k = 0; k < sp.length; k++) {
 						s += Math.pow(2, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 2);
 					}
-					
 					lit = s + "";
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
@@ -523,10 +531,5 @@ public class Scanner {
 		}
 		
 	}
-	
-			/* --- REGEXES --- */
-	public static String int_match = "[0-9]+";
-	public static String hex_match = "hx([0-9]|[a-f]|[A-F])+";
-	public static String bin_match = "bx[0-1]+";
 	
 }
