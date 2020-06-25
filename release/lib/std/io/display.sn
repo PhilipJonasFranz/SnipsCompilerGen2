@@ -1,0 +1,161 @@
+#include<linked_list.sn>
+#include<integer.sn>
+
+/*
+ * To use this library, you need to include the following line
+ * in the SWARM32PC config: <Device>DISPLAY, dynamic, Devices.Display</Device>.
+ * This will add the display adapter to the configuration.
+ * Also, you need to set the displayBase variable to the word offset the
+ * device memory appends to. Also make sure the processor has enough ram,
+ * string operations can quickly fill it, but only temporarily. This package
+ * uses the linked_list package.
+ */
+namespace Display {
+
+	/* This variable should be set to the first word in the memory section of the display */
+	shared int displayBase = 4096;
+	restricted int cursor = 0;
+
+	/* Reads the char from the display input at base + 1 */
+	restricted char getChar() {
+		int* base = (int*) (Display::displayBase + 1);
+		int c = *base;
+		*base = 0;
+		return (char) c;
+	}
+	
+	/* Puts the char at the current cursor location and increments the cursor */
+	restricted void putChar(char c) {
+		int* base = (int*) (Display::displayBase + 2);
+		base += cursor;
+		*base = (int) c;
+		Display::cursor++;
+	}
+	
+	namespace Print {
+		
+		/* Skips the cursor to a new line */
+		shared void println() {
+			int rest = 70 - (cursor % 70);
+			cursor += rest;
+		}
+		
+		/* Prints the string the given char pointer points to. */
+		shared void printString(char* str) {
+			int c = 0;
+			while ((int) (*(str + c)) != 0) {
+				char c0 = *(str + c);
+				putChar(c0);
+				c++;
+			}
+		}
+		
+		/* Prints out given string and a new line */
+		shared void printlnString(char* str) {
+			printString(str);
+			println();
+		}
+		
+		/* Prints out given string and formats in given arguments. */
+		shared void printf(char* c, void* f) {
+			int i = 0;
+			int fi = 0;
+			while ((int) (*(c + i)) != 0) {
+				char c0 = *(c + i);
+				
+				if (c0 == '%') {
+					/* Signals Formatting */
+					i++;
+					
+					/* Load formatting char */
+					c0 = *(c + i);
+					
+					if (c0 == 'd') {
+						/* Format int */
+						int toFormat = *(f + fi);
+						char* str = Integer::toString(toFormat);
+						printString(str);
+						free(str);
+					}
+					else if (c0 == 's') {
+						/* Print templated string */
+						char* toFormat = *(f + fi);
+						printString(toFormat);
+					}
+					
+					fi++;
+				}
+				else if (c0 == '\') {
+					/* Signals Escape Character */
+					i++;
+					
+					/* Load escaped char */
+					c0 = *(c + i);
+					
+					if (c0 == 'n') {
+						/* Newline */
+						println();
+					}
+					else if (c0 == '"') {
+						/* Newline */
+						putChar('"');
+					}
+					else if (c0 == 't') {
+						/* Tab */
+						putChar(' ');
+						putChar(' ');
+						putChar(' ');
+						putChar(' ');
+					}
+				}
+				else {
+					/* Simply put the char to the display */
+					putChar(c0);
+				}
+				
+				i++;
+			}
+		}
+		
+	}
+
+	namespace Scanf {
+		
+		shared char* scanf() {
+			/* Create a list where the input is temporarily stored */
+			LinkedList<char>* input = List::create<char>((char) 0);
+			
+			while (true) {
+				char c = Display::getChar();
+				/* Input is a ., break */
+				if ((int) c == 46) {
+					break;
+				}
+				
+				/* Input is a new character, add to input */
+				if ((int) c != 0) {
+					List::add<char>(input, c);
+					putChar(c);
+				}
+			}
+			
+			println();
+			
+			/* Read all the characters from the list and place them in the output string */
+			int size = List::size(input);
+			char* arr = (char*) resv(size + 1);
+			for (int i = 0; i < size; i++) {
+				*(arr + i) = List::get<char>(input, i);
+			}
+
+			/* Insert 0 char termination */
+			*(arr + size) = (char) 0;
+			
+			/* Free the list and return the string pointer */
+			List::destroy(input);
+			return arr;
+		}
+		
+	}
+
+}

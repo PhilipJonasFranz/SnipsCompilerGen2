@@ -24,6 +24,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -189,7 +190,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (s instanceof AssignWriteback) {
 			AssignWriteback awb = (AssignWriteback) s;
-			return this.hasAddressReference(awb.getShadowRef(), dec);
+			return this.hasAddressReference(awb.reference, dec);
 		}
 		else if (s instanceof SignalStatement) {
 			SignalStatement s0 = (SignalStatement) s;
@@ -262,6 +263,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (e instanceof SizeOfExpression) {
 			SizeOfExpression soe = (SizeOfExpression) e;
 			return this.hasAddressReference(soe.expression, dec);
+		}
+		else if (e instanceof InstanceofExpression) {
+			InstanceofExpression iof = (InstanceofExpression) e;
+			return this.hasAddressReference(iof.expression, dec);
 		}
 		else if (e instanceof TypeCast) {
 			TypeCast tc = (TypeCast) e;

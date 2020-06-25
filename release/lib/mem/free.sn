@@ -1,0 +1,28 @@
+/*
+ * Frees the memory block the given pointer points to. The pointer object will keep
+ * the memory address, but the memory block will not be registered to be used anymore and
+ * thus can be overwritten.
+ */
+shared void free(void* p) {
+	/* Jump to block head */
+	p -= 1;
+
+	/* Load Block Size */
+	int size = *p;
+	
+	/* Store negated block size */
+	*p = -size;
+	
+	int* ptr = p + size;
+	while (*ptr < 0) {
+		int size0 = *ptr;
+		
+		/* Add size to freed block */
+		*p = *p + size0;
+		
+		/* Shift pointer to next block */
+		ptr -= size0;
+	}
+	
+	return;
+}

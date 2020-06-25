@@ -1,0 +1,57 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains the utility to create a binary
+ * search tree.
+ */
+namespace Tree {
+	/*
+	 * A tree node that has a left and right child and holds a value.
+	 */
+	restricted struct TreeNode<T> {
+		TreeNode<T>* left;
+		TreeNode<T>* right;
+		T value;
+	}
+	
+	/*
+	 * Create a new Tree, initialize both childs to 0, set root value
+	 * to given value. Return a pointer to the root.
+	 */
+	shared TreeNode<T>* create<T>(T value) {
+		TreeNode<T>* tree = resv(sizeof(TreeNode<T>));
+		
+		/* Initialize the root with null pointers and the given value */
+		*tree = TreeNode<T>::(null, null, value);
+		return tree;
+	}
+	
+	shared TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
+		TreeNode<T>* new = resv(sizeof(TreeNode<T>));
+		
+		/* Initialize new node with null pointers and given value */
+		*new = TreeNode<T>::(null, null, value);
+	
+		TreeNode<T>* head = root;
+		while (head != null) {
+			if (head->value > value) {
+				/* Left leaf is 0, insert here */
+				if (head->left == null) {
+					head->left = new;
+					return new;
+				}
+				else head = head->left;
+			}
+			else {
+				/* Right leaf is 0, insert here */
+				if (head->right == null) {
+					head->right = new;
+					return new;
+				}
+				else head = head->right;
+			}
+		}
+		
+		return null;
+	}
+}

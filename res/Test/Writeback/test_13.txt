@@ -1,0 +1,67 @@
+SOURCE
+struct X {
+	int x;
+	int y;
+}
+
+int main() {
+	X [2] x0 = {X::(10, 5), X::(4, 9)};
+	x0 [0].y++;
+	return x0 [0].y + x0 [1].x;
+}
+TESTCASES
+10
+OUTPUT
+/* --test_13.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #9                               /* Evaluate Expression */
+    mov r1, #4
+    push { r1, r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    mov r1, #10
+    push { r1, r0 }
+    mov r0, #1
+    push { r0 }
+    sub r1, fp, #24                          /* Load field location */
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #0
+    mov r1, #12
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    add r1, r1, #8
+    ldr r0, [r1]
+    add r0, r0, #1
+    str r0, [r1]
+    sub r1, fp, #24                          /* Evaluate Expression */
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #0
+    mov r1, #12
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    add r1, r1, #8
+    ldr r0, [r1]                             /* Load field from struct */
+    push { r0 }
+    sub r1, fp, #24                          /* Load field location */
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #1
+    mov r1, #12
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    add r1, r1, #4
+    ldr r2, [r1]                             /* Load field from struct */
+    pop { r1 }
+    add r0, r1, r2
+    bx lr
+    

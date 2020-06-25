@@ -1,0 +1,59 @@
+SOURCE
+int f(int x) {
+	return x * x;
+}
+
+int map(int x, func int -> int pred) {
+	return pred(x);
+}
+
+int main() {
+	int p = (int) f;
+	func pred0 = (func) p;
+
+	int y = map(10, pred0);
+
+	return y;
+}
+TESTCASES
+100
+OUTPUT
+/* --test_04.txt */
+    b main
+lambda_f:                                    /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+f:                                           /* Function: f */
+    push { r3 }
+    mov r3, r0
+    mul r0, r0, r0
+    pop { r3 }
+    bx lr
+    
+map:                                         /* Function: map */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3                               /* Evaluate Expression */
+    add lr, pc, #8
+    mov pc, r4
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, fp, lr }
+    mov fp, sp
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_f
+    mov r3, r0
+    mov r4, r0
+    mov r1, r0
+    mov r0, #10
+    bl map                                   /* Call map */
+    mov r5, r0
+    mov sp, fp
+    pop { r3, r4, r5, fp, lr }
+    bx lr
+    

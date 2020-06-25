@@ -1,0 +1,41 @@
+SOURCE
+namespace Test {
+	
+	exclusive int calc() {
+		return 5 << 1;
+	}
+	
+	shared int getter() {
+		return calc();
+	}
+	
+}
+
+int main() {
+	return Test::getter();
+}
+TESTCASES
+10
+OUTPUT
+/* --test_00.txt */
+    b main
+Test.calc:                                   /* Function: Test.calc */
+    mov r0, #10                              /* Evaluate Expression */
+    bx lr
+    
+Test.getter:                                 /* Function: Test.getter */
+    push { fp, lr }
+    mov fp, sp
+    bl Test.calc                             /* Evaluate Expression */
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl Test.getter                           /* Evaluate Expression */
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    

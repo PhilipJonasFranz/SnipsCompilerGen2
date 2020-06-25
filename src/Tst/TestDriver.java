@@ -62,7 +62,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -118,6 +118,9 @@ public class TestDriver {
 		/* Test the main package */
 		testPackage(head);
 		
+		/* Print out ASM-OPT stats */
+		CompilerDriver.printAverageCompression();
+		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? " successfully in " + 
@@ -125,8 +128,6 @@ public class TestDriver {
 				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
 				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
 				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
-		
-		CompilerDriver.printAverageCompression();
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {

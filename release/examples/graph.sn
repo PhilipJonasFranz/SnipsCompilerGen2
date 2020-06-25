@@ -1,0 +1,47 @@
+#include<math.sn>
+#include<color.sn>
+#include<C:\Users\pjfra\Desktop\_Snips\lib\graphics.sn>
+#include<C:\Users\pjfra\Desktop\_Snips\lib\pixelDisplay.sn>
+
+/*
+ * Function to be visualized
+ */
+int f(int x) {
+	return Math::pow(x % 10, 2);
+}
+
+/*
+ * Draw axes and plot of f(x)
+ */
+int main() {
+	Graphics2D* g = Graphics::create(null);
+
+	int left = -35;
+	int right = 35;
+	int step = 1;
+
+	/* Draw Axes */
+	Color* c = Colors::create(200, 0, 0, 255);
+	g->color = c;
+	
+	fillRect(g, 0, (displayHeight >> 1), displayWidth, 1);
+	fillRect(g, (displayWidth >> 1), 0, 1, displayHeight);
+	
+	free(c);
+	c = Colors::create(255, 255, 255, 255);
+	g->color = c;
+
+	/* Draw the graph plot */
+	for (int i = left; i <= right; i += step) {
+		int r = f(i) * step;
+		
+		int x = (displayWidth >> 1) + (step * 10 * i);
+		int y = (displayHeight >> 1) - r;
+		
+		if (x >= 0 && x < displayWidth && y >= 0 && y <= displayHeight) {
+			fillRect(g, x, y, 2, 2);
+		}
+	}
+
+	return 0;
+}

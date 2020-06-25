@@ -1,8 +1,0 @@
-int __op_div(int a, int b) {
-    int r = 0;
-    while (a >= b) {
-       a = a - b;
-       r = r + 1;
-    }
-    return r;
-}

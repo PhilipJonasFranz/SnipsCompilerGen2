@@ -1,16 +1,15 @@
-# Snips Compiler Gen.2 v.3.1.11-RELEASE
+# Snips Compiler Gen.2 v.3.3.0-RELEASE
 ## Some words in advance
  This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
 ## What is Snips?
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
- operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces and exception handling are supported.
+ operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling and predicates are supported.
  
- Currently supported data types are Integers and Booleans, Chars and Strings, Enums, as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
+ Currently supported data types are Integers and Booleans, Chars and Strings, Enums, Predicates as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
  
- Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, 
- continue, try/watch, signal and return.
+ Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, continue, try/watch, signal and return.
  
  You can find more information on the language and the libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 ### The compiler
@@ -25,7 +24,7 @@
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, local changes while keeping original functionality
 
- The compiler uses a built-in system libary, located at src/Snips/lib. 
+ The compiler uses a built-in system libary, located at release/lib. 
  
  The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
  
@@ -37,7 +36,7 @@
 The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
- Code examples and testcases can be found under res/Test/.
+ Code examples and testcases can be found under res/Test/ and under release/examples/.
 ## Included Modules
 ### Assembler
  Under src/REv/Modules/RAsm/ you can find an assembler that is used by the test driver to assemble the outputted program and run it on the SWARM32Pc. The Assembler will work with the code that the Compiler outputs, but it does not fully support all instructions and does not follow any compilation conventions. I do not recommend to use it anywhere else than in combination with this project.
@@ -63,11 +62,6 @@ All instructions do support the condition field. If you compile your assembly co
  - Implement AST Optimizer
  - Implement Optimizer Annotations
 
-## Known issues
- - Increment and Decrement not working for Struct Select Assign, Array Select Assign and Pointer Assign
- - Unprecise error messages related to proviso type errors
- - Unprecise error messages related to incorrect struct names while parsing
- 
 ## License & Copyright
  © Philip Jonas Franz
  

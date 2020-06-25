@@ -1,0 +1,20 @@
+shared int __op_div(int a, int b) {
+	int r = 0;
+	int m = 1;
+	
+	while (a >= b) {
+		while ((b << 1) < a) {
+			b <<= 1;
+			m <<= 1;
+		}
+	
+		a = a - b;
+		r = r + m;
+		
+		while (b > a && m > 1) {
+			b >>= 1;
+			m >>= 1;
+		}
+	}
+	return r;
+}

@@ -5,27 +5,28 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.IDRefWriteback;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all AST-Nodes.
  */
 public class AssignWriteback extends Statement {
 
-			/* --- FIELDS --- */
-	@Getter
-	private Expression shadowRef;
+			/* --- NESTED --- */
+	public enum WRITEBACK {
+		INCR, DECR;
+	}
+
 	
-	public IDRefWriteback idWb;
+			/* --- FIELDS --- */
+	public Expression reference;
 	
 	
 			/* --- CONSTRUCTORS --- */
 	public AssignWriteback(Expression value, Source source) {
 		super(source);
-		this.shadowRef = value;
+		this.reference = value;
 	}
 	
 	
@@ -33,7 +34,7 @@ public class AssignWriteback extends Statement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign Writeback");
 		if (rec) {
-			this.getShadowRef().print(d + this.printDepthStep, rec);
+			this.reference.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -42,11 +43,11 @@ public class AssignWriteback extends Statement {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		this.shadowRef.setContext(context);
+		this.reference.setContext(context);
 	}
 
 	public void releaseContext() {
-		this.shadowRef.releaseContext();
+		this.reference.releaseContext();
 	}
 	
 }

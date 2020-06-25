@@ -38,26 +38,59 @@ main:                                        /* Function: main */
     sub r0, fp, #24                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
+    mov r0, #1
+    push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #2
+    push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    sub r1, fp, #32                          /* Load field location */
-    add r1, r1, #0
+    sub r1, fp, #44                          /* Load field location */
+    add r1, r1, #4
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #0
+    mov r1, #8
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    add r1, r1, #4
     ldr r1, [r1]                             /* Load field from struct */
     add r0, r1, #1
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    sub r1, fp, #32                          /* Evaluate Expression */
-    add r1, r1, #0
+    sub r1, fp, #44                          /* Evaluate Expression */
+    add r1, r1, #4
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #0
+    mov r1, #8
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
+    add r1, r1, #4
     ldr r1, [r1]                             /* Load field from struct */
     add r0, r1, r3
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     push { r0 }
-    sub r1, fp, #32                          /* Load field location */
+    sub r1, fp, #44                          /* Load field location */
+    add r1, r1, #4
+    push { r1 }
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r0, #1
+    mov r1, #8
+    mul r0, r0, r1
+    add r2, r2, r0
+    pop { r1 }
+    add r1, r1, r2
     add r1, r1, #4
     ldr r1, [r1]                             /* Load field from struct */
     add r0, r1, r3

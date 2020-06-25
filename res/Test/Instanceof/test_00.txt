@@ -1,0 +1,36 @@
+SOURCE
+struct A {
+	int x;
+}
+
+struct B {
+	int y;
+}
+
+int main() {
+	A a = A::(10);
+	void* p = &a;
+	return (int) (p instanceof A);
+}
+TESTCASES
+1
+OUTPUT
+/* --test_00.txt */
+main:                                        /* Function: main */
+    push { r3 }
+    mov fp, sp
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r3, r0
+    lsl r0, r0, #2
+    ldr r0, [r0]
+    cmp r0, #1
+    movne r0, #0
+    mov sp, fp
+    pop { r3 }
+    bx lr
+    

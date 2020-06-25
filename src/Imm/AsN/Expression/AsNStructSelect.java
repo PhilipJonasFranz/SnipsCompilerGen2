@@ -29,6 +29,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Snips.CompilerDriver;
 
 public class AsNStructSelect extends AsNExpression {
 	
@@ -60,7 +61,11 @@ public class AsNStructSelect extends AsNExpression {
 		return sel;
 	}
 	
+	/**
+	 * Loads the address of the target of the selection into R1.
+	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+		
 		/* Load base address */
 		if (select.selector instanceof IDRef) {
 			IDRef ref = (IDRef) select.selector;
@@ -203,6 +208,11 @@ public class AsNStructSelect extends AsNExpression {
 						injectIDRef(node, struct, (IDRef) sel1.selector);
 					}
 					else if (sel1.selector instanceof ArraySelect) {
+						if (!CompilerDriver.disableStructSIDHeaders) {
+							/* Add offset for header */
+							node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+						}
+						
 						injectArraySelect(node, (ArraySelect) sel1.selector, r, map, st);
 					}
 				}
@@ -212,10 +222,15 @@ public class AsNStructSelect extends AsNExpression {
 					injectIDRef(node, struct, (IDRef) ref);
 				}
 				else if (selection instanceof ArraySelect) {
-					injectArraySelect(node, (ArraySelect) selection, r, map, st);
+					ArraySelect arrSel = (ArraySelect) selection;
+					
+					int offset = struct.getFieldByteOffset(arrSel.idRef.path);
+					node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					
+					injectArraySelect(node, arrSel, r, map, st);
 				}
 			}
-
+			
 			/* If current selection derefs and its not the last selection in the chain */
 			if (sel0.selection instanceof StructSelect) {
 				StructSelect sel1 = (StructSelect) sel0.selection;

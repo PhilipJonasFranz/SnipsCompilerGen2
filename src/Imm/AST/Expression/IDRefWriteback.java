@@ -4,6 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
+import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
 import Util.Source;
 import lombok.Getter;
@@ -12,15 +13,9 @@ import lombok.Getter;
  * This class represents a superclass for all Expressions.
  */
 public class IDRefWriteback extends Expression {
-
-			/* --- NESTED --- */
-	public enum ID_WRITEBACK {
-		INCR, DECR;
-	}
-	
 	
 			/* --- FIELDS --- */
-	public ID_WRITEBACK idWb;
+	public WRITEBACK writeback;
 	
 	@Getter
 	private Expression shadowRef;
@@ -33,9 +28,9 @@ public class IDRefWriteback extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public IDRefWriteback(ID_WRITEBACK idWb, Expression expression, Source source) {
+	public IDRefWriteback(WRITEBACK idWb, Expression expression, Source source) {
 		super(source);
-		this.idWb = idWb;
+		this.writeback = idWb;
 		this.shadowRef = expression;
 	}
 

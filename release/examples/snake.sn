@@ -1,0 +1,283 @@
+#include<linked_list.sn>
+#include<integer.sn>
+#include<display.sn>
+
+/* 0 = Normal, 1 = GameOver */
+int gameState = 0;
+
+/* The direction the snake moves in, 0 = North, 1 = East ... */
+int moveDir = 1;
+
+/* The current length of the snake */
+int size = 1;
+
+int speed = 255;
+
+
+/* Utility and variables related to positions */
+namespace Position {
+
+	/* The position the last part of the snake moved of in this turn */
+	int clearPos = 0;
+
+	/* Wether the snake ate food in this turn */
+	bool removePos = true;
+
+	/* Position of the current food */
+	int foodPos = 0;
+	
+	/* Flatten given x and y to the dimensions of the frame */
+	int flattenXY(int x, int y) {
+		return (y * 70) + x;
+	}
+
+	/* Extract the x component from a flattened position */
+	int getX(int pos) {
+		return pos % 70;
+	}
+
+	/* Extract the y component from a flattened position */
+	int getY(int pos) {
+		return pos / 70;
+	}
+
+	int* toScreeenAddress(int x, int y) {
+		return (int*) ((y + 1) * 70 + x + Display::displayBase + 2);
+	}
+	
+	int* toScreeenAddressByPos(int pos) {
+		return (int*) (pos + Display::displayBase + 72);
+	}
+	
+}
+
+
+/* Utility related to Graphics */
+namespace Graphics {
+
+	void wipeScreen() {
+		/* Start of screen array */
+		int* addr = (int*) (Display::displayBase + 2);
+		for (int i = 0; i < 50; i++) {
+			for (int a = 0; a < 70; a++) {
+				*addr = 0;
+				addr += 1;
+			}
+		}
+		
+		return;
+	}
+
+	void render(LinkedList<int>* p) {
+		/* Clear Screen and reset cursor */
+		Display::cursor = 0;
+
+		/* Print Game Over message */
+		if (gameState == 1) {
+			char [24] go = "Game Over! Your score: ";
+			printString(&go);
+			
+			char* sc = toString(size - 1);
+			printString(sc);
+			free(sc);
+		}
+		else {
+			/* Print score */
+			char [8] rs = "Score: ";
+			printString(&rs);
+			
+			char* sc = toString(size - 1);
+			printlnString(sc);
+			free(sc);
+			
+			/* Print food */
+			int* faddr = toScreeenAddressByPos(foodPos);
+			*faddr = 79;
+			
+			/* Clear last part of snake if no food was eaten */
+			if (removePos) {
+				int* raddr = toScreeenAddressByPos(clearPos);
+				*raddr = 0;
+			}
+			
+			/* Draw first part of snake */
+			int pos = get<int>(p, size - 1);
+			int* addr = toScreeenAddressByPos(pos);
+			*addr = 88;
+		}
+		
+		return;
+	}
+	
+}
+
+
+/* Utility related to game logic and updating */
+namespace GameLogic {
+
+	/* Generate a new pseudo-random location for the food */
+	void generateNewFoodLocation() {
+		int cx = getX(foodPos);
+		int cy = getY(foodPos);
+		
+		cx += 10;
+		cy += 10;
+		
+		cx = cx % 70;
+		cy = cy % 30;
+		
+		foodPos = flattenXY(cx, cy);
+	}
+
+	void movePlayer(LinkedList<int>* p) {
+		/* Get Position of head */
+		int pos = get<int>(p, size - 1);
+		
+		int nx = getX(pos);
+		int ny = getY(pos);
+		
+		/* Compute new Coords based on movement dir and perform bounds check */
+		if (moveDir == 0) {
+			if (ny == 0) {
+				gameState = 1;
+				return;
+			}
+			ny--;
+		}
+		else if (moveDir == 1) {
+			if (nx == 70) {
+				gameState = 1;
+				return;
+			}
+			nx++;
+		}
+		else if (moveDir == 2) {
+			if (ny == 30) {
+				gameState = 1;
+				return;
+			}
+			ny++;
+		}
+		else if (moveDir == 3) {
+			if (nx == 0) {
+				gameState = 1;
+				return;
+			}
+			nx--;
+		}
+		
+		/* Load from display */
+		int val = *toScreeenAddress(nx, ny);
+		removePos = true;
+		
+		/* Player collided with something */
+		if (val != 0) {
+			/* Player found food */
+			if (val == 79) {
+				removePos = false;
+				generateNewFoodLocation();
+				size++;
+			}
+			else {
+				/* Collided with wall or snake */
+				gameState = 1;
+			}
+		}
+		
+		/* Add new position to head of snake */
+		if (gameState == 0) {
+			add<int>(p, flattenXY(nx, ny));
+		}
+		
+		/* Remove tail if nothing was eaten */
+		if (removePos) {
+			clearPos = get<int>(p, 0);
+			remove(p, 0);
+		}
+		
+		return;
+	}
+
+	void processUserInput() {
+		char in = Display::getChar();
+		
+		/* If a valid input was recieved */
+		if ((int) in != 0) {
+			/* W, A, S, D */
+			if (in == 'w') {
+				moveDir = 0;
+			}
+			else if (in == 'a') {
+				moveDir = 3;
+			}
+			else if (in == 's') {
+				moveDir = 2;
+			}
+			else if (in == 'd') {
+				moveDir = 1;
+			}
+		}
+		
+		return;
+	}
+
+	/* Update the game logic and re-render */
+	void update(LinkedList<int>* p) {
+		/* Read user input and update based on input */
+		processUserInput();
+		
+		/* Moves player and handles collision logic */
+		movePlayer(p);
+		
+		/* Render Frame */
+		render(p);
+		
+		return;
+	}
+
+}
+
+
+/* Sleep by creating overhead with empty loop */
+void sleep() {
+	int x = 0;
+	for (int i = 0; i < 255; i++) {
+		for (int a = 0; a < speed; a++) {
+			x++;
+		}
+	}
+	return;
+}
+
+int main() {
+	/* Game Setup */
+	generateNewFoodLocation();
+	
+	/* Let user enter his desired game speed */
+	char [32] sp = "Enter your game speed [0-255]: ";
+	printString(&sp);
+	
+	char* in = scanf();
+	speed = 255 - parseInt(in);
+	free(in);
+	
+	/* Clear first display line */
+	Display::cursor = 0;
+	for (int i = 0; i < 70; i++) putChar((char) 0);
+	
+	/* List storing the positions of the snake */
+	LinkedList<int>* p = List::create<int>(0);
+	add<int>(p, flattenXY(35, 25));
+
+	/* Game loop while game is in normal state */
+	while (gameState == 0) {
+		/* Update game logic and render */
+		update(p);
+		
+		sleep();
+	}
+	
+	free(p);
+
+	return 0;
+}

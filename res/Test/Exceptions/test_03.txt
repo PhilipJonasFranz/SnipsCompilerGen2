@@ -203,8 +203,10 @@ checkThreshold.L2:
     cmp r8, r4
     blt checkThreshold.L5
     push { r8 }
+    mov r0, #1
+    push { r0 }
     mov r12, #1                              /* Signal thrown exception */
-    mov r0, #4
+    mov r0, #8
     b checkThreshold.L0                      /* Exception thrown, branch to escape target */
 checkThreshold.L5: 
     cmp r8, r5
@@ -271,13 +273,14 @@ main.L0:
     add sp, sp, #4
     cmp r12, #1
     bne main.L2
-    add r1, r1, #4
-    mov r0, #4
+    add r1, r1, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
-    sub r1, fp, #4                           /* Evaluate Expression */
+    sub r1, fp, #8                           /* Evaluate Expression */
+    add r1, r1, #4
     ldr r5, [r1]                             /* Load field from struct */
-    add sp, sp, #4
+    add sp, sp, #8
     mov r12, #0
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */

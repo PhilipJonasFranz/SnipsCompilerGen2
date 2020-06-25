@@ -15,7 +15,6 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Directive.CompileDirective;
 import Imm.AST.Directive.CompileDirective.COMP_DIR;
 import Imm.AST.Directive.Directive;
-import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
@@ -25,8 +24,8 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.IDRefWriteback.ID_WRITEBACK;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -56,6 +55,7 @@ import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
+import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
@@ -77,6 +77,8 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -96,6 +98,12 @@ import Util.Source;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
 
+/**
+ * Parses an AST out of the token stream. The process is similar to this symbolic representation:
+ * 
+ * 	          --> www.reddit.com/r/ProgrammerHumor/comments/h83mqx/parser_be_like/ <--
+ * 
+ */
 public class Parser {
 
 	protected List<Token> tokenStream;
@@ -154,7 +162,8 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
 		}
-		if (current.type() == tokenType)return accept();
+		
+		if (current.type() == tokenType) return accept();
 		else {
 			this.progress.abort();
 			throw new PARSE_EXCEPTION(current.source, current.type(), tokenType);
@@ -227,37 +236,14 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
-		boolean incEnd = false;
-		List<Directive> include = new ArrayList();
-		List<Directive> directives = new ArrayList();
-		
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
-			if (current.type == TokenType.DIRECTIVE) {
-				Directive dir = this.parseDirective();
-				
-				if (incEnd) {
-					buffered.add(new Message("All include statements should be at the head of the file", Message.Type.WARN, true));
-				}
-				
-				if (dir instanceof IncludeDirective) {
-					include.add(dir);
-				}
-				else {
-					incEnd = true;
-					directives.add(dir);
-				}
-			}
-			else {
-				incEnd = true;
-				elements.add(this.parseProgramElement());
-			}
+			elements.add(this.parseProgramElement());
 		}
 		
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
-		program.directives.addAll(include);
 		
 		for (Message m : buffered) m.flush();
 		
@@ -291,26 +277,28 @@ public class Parser {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
-		else if (current.type == TokenType.STRUCT) {
+		else if (current.type == TokenType.STRUCT || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
 		}
-		else if (current.type == TokenType.ENUM) {
+		else if (current.type == TokenType.ENUM || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
 			return this.parseEnumTypedef();
 		}
 		else if (current.type == TokenType.NAMESPACE) {
 			return this.parseNamespace();
 		}
 		else {
+			MODIFIER mod = this.parseModifier();
+			
 			TYPE type = this.parseType();
 			
 			Token identifier = accept(TokenType.IDENTIFIER);
 			
 			SyntaxElement element = null;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				element = this.parseFunction(type, identifier);
+				element = this.parseFunction(type, identifier, mod);
 			}
 			else {
-				Declaration d = this.parseGlobalDeclaration(type, identifier);
+				Declaration d = this.parseGlobalDeclaration(type, identifier, mod);
 				this.scopes.peek().add(d);
 				element = d;
 			}
@@ -325,6 +313,9 @@ public class Parser {
 	}
 	
 	public StructTypedef parseStructTypedef() throws PARSE_EXCEPTION {
+		
+		MODIFIER mod = this.parseModifier();
+		
 		Source source = accept(TokenType.STRUCT).getSource();
 		Token id = accept(TokenType.STRUCTID);
 		
@@ -342,7 +333,7 @@ public class Parser {
 			for (Declaration d : ext.fields) extendDecs.add(d.clone());
 		}
 		
-		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, source);
+		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		def.fields.addAll(extendDecs);
@@ -350,7 +341,7 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
-			def.fields.add(this.parseDeclaration());
+			def.fields.add(this.parseDeclaration(MODIFIER.SHARED));
 		}
 		accept(TokenType.RBRACE);
 		
@@ -413,17 +404,7 @@ public class Parser {
 	
 	public Directive parseDirective() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.DIRECTIVE).getSource();
-		if (current.type == TokenType.INCLUDE) {
-			accept();
-			accept(TokenType.CMPLT);
-			String path = "";
-			while (current.type != TokenType.CMPGT) {
-				path += accept().spelling;
-			}
-			accept();
-			return new IncludeDirective(path, source);
-		}
-		else if (current.type == TokenType.IDENTIFIER) {
+		if (current.type == TokenType.IDENTIFIER) {
 			COMP_DIR dir;
 			String s = accept(TokenType.IDENTIFIER).spelling.toLowerCase();
 			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
@@ -438,11 +419,11 @@ public class Parser {
 		}
 		else {
 			this.progress.abort();
-			throw new PARSE_EXCEPTION(source, TokenType.INCLUDE, TokenType.IDENTIFIER);
+			throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
 		}
 	}
 	
-	protected Function parseFunction(TYPE returnType, Token identifier) throws PARSE_EXCEPTION {
+	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
 		this.scopes.push(new ArrayList());
 		
 		List<TYPE> proviso = this.parseProviso();
@@ -483,7 +464,7 @@ public class Parser {
 		List<Statement> body = this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
-		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, identifier.source);
+		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
 		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		
 		this.scopes.pop();
@@ -495,11 +476,16 @@ public class Parser {
 			Source source = accept().getSource();
 			
 			List<TYPE> proviso = new ArrayList();
-			List<Declaration> decs = new ArrayList();
+			List<TYPE> types = new ArrayList();
 			
 			TYPE ret = null;
 			
 			boolean anonymous = false;
+			
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
 			
 			/* Non-anonymous */
 			if (current.type != TokenType.IDENTIFIER) {
@@ -512,7 +498,7 @@ public class Parser {
 					accept(TokenType.LPAREN);
 					
 					while (current.type != TokenType.RPAREN) {
-						decs.add(this.parseParameterDeclaration());
+						types.add(this.parseType());
 						
 						if (current.type == TokenType.COMMA) {
 							accept();
@@ -526,7 +512,7 @@ public class Parser {
 				}
 				else if (current.type != TokenType.UNION_ACCESS) {
 					/* Only one param, no braces */
-					decs.add(this.parseParameterDeclaration());
+					types.add(this.parseType());
 				}
 				
 				accept(TokenType.UNION_ACCESS);
@@ -548,8 +534,14 @@ public class Parser {
 				return d;
 			}
 			else {
+				List<Declaration> params = new ArrayList();
+				int c = 0;
+				for (TYPE t : types) {
+					params.add(new Declaration(new NamespacePath("param" + c++), t, null, source));
+				}
+				
 				/* Wrap parsed function head in function object, wrap created head in declaration */
-				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), decs, false, new ArrayList(), new ArrayList(), source);
+				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
 				lambda.isLambdaHead = true;
 				
 				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
@@ -560,7 +552,7 @@ public class Parser {
 		else {
 			TYPE type = this.parseType();
 			Token id = accept(TokenType.IDENTIFIER);
-			Declaration d = new Declaration(new NamespacePath(id.spelling), type, id.getSource());
+			Declaration d = new Declaration(new NamespacePath(id.spelling), type, MODIFIER.SHARED, id.getSource());
 			this.scopes.peek().add(d);
 			return d;
 		}
@@ -572,9 +564,13 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		
+		Token modT = (current.type.group == TokenGroup.MODIFIER)? current : null;
+		MODIFIER mod = this.parseModifier();
+		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
+				if (tokenStream.get(i + 1).type == TokenType.CMPLE) functionCheck = false;
 				break;
 			}
 			functionCheck &= tokenStream.get(i).type == TokenType.COLON;
@@ -624,55 +620,65 @@ public class Parser {
 			}
 		}
 		
-		if (current.type == TokenType.COMMENT) {
-			return this.parseComment();
-		}
-		else if (functionCheck) {
-			return this.parseFunctionCall();
-		}
-		else if (decCheck) {
-			return this.parseDeclaration();
-		}
-		else if (current.type == TokenType.RETURN) {
-			return this.parseReturn();
-		}
-		else if (current.type == TokenType.WHILE) {
-			return this.parseWhile();
-		}
-		else if (current.type == TokenType.DO) {
-			return this.parseDoWhile();
-		}
-		else if (current.type == TokenType.FOR) {
-			return this.parseFor();
-		}
-		else if (current.type == TokenType.BREAK) {
-			return this.parseBreak();
-		}
-		else if (current.type == TokenType.CONTINUE) {
-			return this.parseContinue();
-		}
-		else if (current.type == TokenType.SWITCH) {
-			return this.parseSwitch();
-		}
-		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
-			return this.parseAssignment(true);
-		}
-		else if (current.type == TokenType.IF) {
-			return this.parseIf();
-		}
-		else if (current.type == TokenType.TRY) {
-			return this.parseTry();
-		}
-		else if (current.type == TokenType.SIGNAL) {
-			return this.parseSignal();
+		if (decCheck) {
+			return this.parseDeclaration(mod);
 		}
 		else {
-			this.progress.abort();
-			throw new PARSE_EXCEPTION(current.source, current.type, 
-			TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
-			TokenType.DO, TokenType.FOR, TokenType.BREAK, 
-			TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
-			TokenType.IF);
+			if (modT != null) {
+				throw new PARSE_EXCEPTION(modT.source, modT.type, 
+						TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+						TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+						TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+						TokenType.IF);
+			}
+			
+			else if (current.type == TokenType.COMMENT) {
+				return this.parseComment();
+			}
+			else if (functionCheck) {
+				return this.parseFunctionCall();
+			}
+			else if (current.type == TokenType.RETURN) {
+				return this.parseReturn();
+			}
+			else if (current.type == TokenType.WHILE) {
+				return this.parseWhile();
+			}
+			else if (current.type == TokenType.DO) {
+				return this.parseDoWhile();
+			}
+			else if (current.type == TokenType.FOR) {
+				return this.parseFor();
+			}
+			else if (current.type == TokenType.BREAK) {
+				return this.parseBreak();
+			}
+			else if (current.type == TokenType.CONTINUE) {
+				return this.parseContinue();
+			}
+			else if (current.type == TokenType.SWITCH) {
+				return this.parseSwitch();
+			}
+			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
+				return this.parseAssignment(true);
+			}
+			else if (current.type == TokenType.IF) {
+				return this.parseIf();
+			}
+			else if (current.type == TokenType.TRY) {
+				return this.parseTry();
+			}
+			else if (current.type == TokenType.SIGNAL) {
+				return this.parseSignal();
+			}
+			else {
+				this.progress.abort();
+				throw new PARSE_EXCEPTION(current.source, current.type, 
+				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+				TokenType.IF);
+			}
 		}
 	}
 	
@@ -828,10 +834,6 @@ public class Parser {
 		
 		accept(TokenType.SEMICOLON);
 		
-		/* Signal Statement will transform in resv and assign statement */
-		//CompilerDriver.heap_referenced = true;
-		//CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-		
 		return new SignalStatement(ex0, source);
 	}
 	
@@ -842,7 +844,7 @@ public class Parser {
 		accept(TokenType.LPAREN);
 		
 		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration();
+		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED);
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -888,8 +890,8 @@ public class Parser {
 		/* Check if tokens ahead are a struct select */
 		boolean structSelectCheck = current.type == TokenType.IDENTIFIER;
 		for (int i = 1; i < this.tokenStream.size(); i += 2) {
-			if (tokenStream.get(i).type == TokenType.INCR || tokenStream.get(i).type == TokenType.DECR) break;
-			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i).type == TokenType.UNION_ACCESS) {
+			if ((tokenStream.get(i - 1).type == TokenType.INCR || tokenStream.get(i - 1).type == TokenType.DECR) && i > 1) break;
+			else if (tokenStream.get(i - 1).type == TokenType.DOT || tokenStream.get(i - 1).type == TokenType.UNION_ACCESS) {
 				structSelectCheck &= tokenStream.get(i).type == TokenType.IDENTIFIER;
 			}
 			else {
@@ -908,13 +910,14 @@ public class Parser {
 			increment &= tokenStream.get(i + 2).type == TokenType.IDENTIFIER || tokenStream.get(i + 2).type == TokenType.NAMESPACE_IDENTIFIER;
 		}
 		
+		Source source = current.getSource();
+		
 		if (increment || structSelectCheck) {
-			Source source = current.getSource();
 			
 			if (structSelectCheck) {
 				Expression select = this.parseStructSelect();
 				
-				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
 				accept();
 				if (acceptSemicolon) accept(TokenType.SEMICOLON);
 			
@@ -923,7 +926,7 @@ public class Parser {
 			else {
 				NamespacePath path = this.parseNamespacePath();
 				
-				ID_WRITEBACK idWb = (current.type == TokenType.INCR)? ID_WRITEBACK.INCR : ID_WRITEBACK.DECR;
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
 				
 				accept();
 				if (acceptSemicolon) accept(TokenType.SEMICOLON);
@@ -933,6 +936,30 @@ public class Parser {
 		}
 		else {
 			LhsId target = this.parseLhsIdentifer();
+			
+			/*
+			 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
+			 * operation, needs to be handeled like this. This occurs for example in an assignment:
+			 * 
+			 * x [0].value++;
+			 * 
+			 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
+			 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
+			 * with a StructSelectWriteback as payload.
+			 */
+			if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+				StructSelectLhsId lhs = (StructSelectLhsId) target;
+				
+				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
+				accept();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
+			
+				return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
+			}
+			
+			/*
+			 * Normal behaviour.
+			 */
 			ASSIGN_ARITH arith = this.parseAssignOperator();
 			Expression value = this.parseExpression();
 			if (acceptSemicolon) accept(TokenType.SEMICOLON);
@@ -1002,21 +1029,19 @@ public class Parser {
 			return ASSIGN_ARITH.ORR_ASSIGN;
 		}
 		/* Shifts */
-		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) {
+		else if (current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLE) {
 			accept();
 			accept();
-			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSL_ASSIGN;
 		}
-		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT) {
+		else if (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGE) {
 			accept();
 			accept();
-			accept(TokenType.LET);
 			return ASSIGN_ARITH.LSR_ASSIGN;
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			this.progress.abort();
-			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types, " + current.getSource().getSourceMarker());
+			throw new SNIPS_EXCEPTION("Got '" + current.spelling + "', check for misspelled types or tokens, " + current.getSource().getSourceMarker());
 		}
 		else {
 			this.progress.abort();
@@ -1047,7 +1072,7 @@ public class Parser {
 		}
 	}
 	
-	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier) throws PARSE_EXCEPTION {
+	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
 		Expression value = null;
 		
 		if (current.type == TokenType.LET) {
@@ -1056,12 +1081,12 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, identifier.source);
+		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, mod, identifier.source);
 		this.scopes.peek().add(d);
 		return d;
 	}
 	
-	protected Declaration parseDeclaration() throws PARSE_EXCEPTION {
+	protected Declaration parseDeclaration(MODIFIER mod) throws PARSE_EXCEPTION {
 		Source source = current.getSource();
 		TYPE type = this.parseType();
 		
@@ -1074,7 +1099,7 @@ public class Parser {
 		}
 		
 		accept(TokenType.SEMICOLON);
-		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, source);
+		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, source);
 		this.scopes.peek().add(d);
 		return d;
 	}
@@ -1154,7 +1179,9 @@ public class Parser {
 	}
 	
 	protected Expression parseArrayInit() throws PARSE_EXCEPTION {
-		if (current.type == TokenType.LBRACE) {
+		if (current.type == TokenType.LBRACE || current.type == TokenType.LBRACKET) {
+			boolean dontCare = current.type == TokenType.LBRACKET;
+			
 			Source source = accept().getSource();
 			List<Expression> elements = new ArrayList();
 			while (current.type != TokenType.RBRACE) {
@@ -1166,8 +1193,10 @@ public class Parser {
 				else break;
 			}
 			
-			accept(TokenType.RBRACE);
-			return new ArrayInit(elements, source);
+			if (dontCare) accept(TokenType.RBRACKET);
+			else accept(TokenType.RBRACE);
+			
+			return new ArrayInit(elements, dontCare, source);
 		}
 		else return this.parseTernary();
 	}
@@ -1351,8 +1380,21 @@ public class Parser {
 			accept(TokenType.RPAREN);
 		}
 		
-		if (sof == null) sof = this.parseAddressOf();
+		if (sof == null) sof = this.parseInstanceOf();
 		return sof;
+	}
+	
+	protected Expression parseInstanceOf() throws PARSE_EXCEPTION {
+		Expression iof = this.parseAddressOf();
+		if (current.type == TokenType.INSTANCEOF) {
+			Source source = accept().getSource();
+			
+			TYPE type = this.parseType();
+			
+			iof = new InstanceofExpression(iof, type, source);
+		}
+		
+		return iof;
 	}
 	
 	protected Expression parseAddressOf() throws PARSE_EXCEPTION {
@@ -1471,11 +1513,15 @@ public class Parser {
 			Source source = current.getSource();
 			if (current.type == TokenType.INCR) {
 				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.INCR, ref, source);
+				if (ref instanceof IDRef)
+					ref = new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else ref = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
 			}
 			else {
 				accept();
-				ref = new IDRefWriteback(ID_WRITEBACK.DECR, ref, source);
+				if (ref instanceof IDRef)
+					ref = new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else ref = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
 			}
 		}
 		
@@ -1519,6 +1565,11 @@ public class Parser {
 			Expression expression = this.parseExpression();
 			accept(TokenType.RPAREN);
 			return expression;
+		}
+		else if (current.type == TokenType.NULL) {
+			Token id = accept();
+			CompilerDriver.null_referenced = true;
+			return new Atom(new NULL(), id, id.getSource());
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
@@ -1607,7 +1658,7 @@ public class Parser {
 				
 				if (lambda != null) {
 					/* Predicate without proviso */
-					return new FunctionRef(new ArrayList(), path, source);
+					return new FunctionRef(new ArrayList(), lambda, source);
 				}
 				else {
 					/* Identifier Reference */
@@ -1637,7 +1688,7 @@ public class Parser {
 				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
 			}
 			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
-			return new ArrayInit(charAtoms, token.getSource());
+			return new ArrayInit(charAtoms, false, token.getSource());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
@@ -1972,6 +2023,23 @@ public class Parser {
 		
 		this.scopes.pop();
 		return body;
+	}
+	
+	protected MODIFIER parseModifier() {
+		MODIFIER mod = MODIFIER.SHARED;
+		
+		if (current.type.group == TokenGroup.MODIFIER) {
+			Token modT = accept();
+			mod = this.resolve(modT);
+		}
+		
+		return mod;
+	}
+	
+	protected MODIFIER resolve(Token t) {
+		if (t.type == TokenType.SHARED) return MODIFIER.SHARED;
+		else if (t.type == TokenType.RESTRICTED) return MODIFIER.RESTRICTED;
+		else return MODIFIER.EXCLUSIVE;
 	}
 	
 }

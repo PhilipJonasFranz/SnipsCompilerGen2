@@ -1,0 +1,39 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility math functions and operations.
+ */
+namespace Math {
+
+	/*
+	 * Returns x to the n-th power.
+	 */
+	shared int pow(int x, int n) {
+		int r = 1;
+		while (n > 0) {
+			r = r * x;
+			n--;
+		}
+		return r;
+	}
+	
+	/*
+	 * Returns the absolute value of x.
+	 */
+	shared int abs(int x) {
+		return (x < 0)? -x : x;
+	}
+	
+	/*
+	 * Returns the n-th faculty.
+	 */
+	shared int fac(int n) {
+		int r = 1;
+		while (n > 0) {
+			r = r * n;
+			n--;
+		}
+		return r;
+	}
+	
+}

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Ctx.NamespaceProcessor;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -22,11 +21,13 @@ import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
 import Par.Token;
 import Par.Token.TokenType;
+import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
 import Util.NamespacePath;
@@ -60,8 +61,10 @@ public class CompilerDriver {
 		silenced = true,
 		imm = false,
 		enableComments = true,
+		disableModifiers = false,
 		disableOptimizer = false,
-		disableWarnings = false;
+		disableWarnings = false,
+		disableStructSIDHeaders = false;
 			
 	/* Debug */
 	public static boolean
@@ -87,8 +90,12 @@ public class CompilerDriver {
 	/* Reserved Declarations */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
+	
+	public static boolean null_referenced = false;
+	public static Declaration NULL_PTR = new Declaration(new NamespacePath("NULL"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
+	
 	public static boolean heap_referenced = false;
-	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, nullSource);
+	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
 													
 													
 			/* --- MAIN --- */
@@ -143,6 +150,7 @@ public class CompilerDriver {
 	
 	public static void reset() {
 		heap_referenced = false;
+		null_referenced = false;
 	}
 	
 	
@@ -267,7 +275,7 @@ public class CompilerDriver {
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
 				double before = body.getInstructions().size();
-				ProgressMessage aopt_progress = new ProgressMessage("AOPT -> Starting", 30, Message.Type.INFO);
+				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, Message.Type.INFO);
 				
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
@@ -276,7 +284,7 @@ public class CompilerDriver {
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 				CompilerDriver.compressions.add(rate);
-				log.add(new Message("AOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
 			
@@ -285,6 +293,13 @@ public class CompilerDriver {
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
+			/* Remove double empty lines */
+			for (int i = 1; i < output.size(); i++) {
+				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) {
+					output.remove(i - 1);
+					i--;
+				}
+			}
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
@@ -339,6 +354,11 @@ public class CompilerDriver {
 			
 			/* Read from file */
 			List<String> code = Util.readFile(file);
+			
+			if (code == null) {
+				file = new File("release\\" + filePath);
+				code = Util.readFile(file);
+			}
 			
 			/* Read from jar */
 			if (code == null) {
@@ -490,6 +510,8 @@ public class CompilerDriver {
 				else if (args [i].equals("-warn"))disableWarnings = true;
 				else if (args [i].equals("-opt"))disableOptimizer = true;
 				else if (args [i].equals("-com"))enableComments = false;
+				else if (args [i].equals("-rov"))disableModifiers = true;
+				else if (args [i].equals("-sid"))disableStructSIDHeaders = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -514,6 +536,8 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
 		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
 		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
+		System.out.println(CompilerDriver.printDepth + "-rov      : Disable visibility modifiers");
+		System.out.println(CompilerDriver.printDepth + "-sid      : Disable SID headers, lower memory usage, but no instanceof");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
@@ -535,8 +559,8 @@ public class CompilerDriver {
 		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
-		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
 	}
 	
 }

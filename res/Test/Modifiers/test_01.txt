@@ -1,0 +1,68 @@
+SOURCE
+namespace Test {
+	
+	exclusive struct S {
+		int x;
+		int y;
+	}
+	
+	shared S getter() {
+		return S::(10, 5);
+	}
+	
+}
+
+int main() {
+	S s = Test::getter();
+	return s.x + s.y;
+}
+TESTCASES
+15
+OUTPUT
+/* --test_01.txt */
+    b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    push { r2 }
+    sub r0, r0, #4
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+Test.getter:                                 /* Function: Test.getter */
+    push { fp }
+    mov fp, sp
+    mov r0, #5                               /* Evaluate Expression */
+    mov r1, #10
+    push { r1, r0 }
+    mov r0, #1
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    pop { fp }
+    mov r0, #12
+    add r1, r2, #12
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl Test.getter                           /* Evaluate Expression */
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #4
+    ldr r0, [r1]                             /* Load field from struct */
+    push { r0 }
+    sub r1, fp, #12                          /* Load field location */
+    add r1, r1, #8
+    ldr r2, [r1]                             /* Load field from struct */
+    pop { r1 }
+    add r0, r1, r2
+    mov sp, fp
+    pop { fp, lr }
+    bx lr
+    

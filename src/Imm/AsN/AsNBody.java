@@ -122,6 +122,21 @@ public class AsNBody extends AsNNode {
 			map.add(heap, reference);
 		}
 		
+		if (CompilerDriver.null_referenced) {
+			Declaration nullPtr = CompilerDriver.NULL_PTR;
+			
+			/* Create instruction for .data Section */
+			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOperand(nullPtr.value));
+			body.instructions.add(dataEntry);
+			
+			/* Create address reference instruction for .text section */
+			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOperand(dataEntry));
+			globalVarReferences.add(reference);
+			
+			/* Add declaration to global memory */
+			map.add(nullPtr, reference);
+		}
+		
 		/* No globals, remove .data annotation */
 		if (!globals) body.instructions.remove(data);
 		

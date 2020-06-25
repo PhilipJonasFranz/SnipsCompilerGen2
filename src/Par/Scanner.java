@@ -1,6 +1,7 @@
 package Par;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,52 +13,205 @@ import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
+			/* --- NESTED --- */
+	/**
+	 * Defines the current accumulation state of the scanner.
+	 */
+	private enum ACC_STATE {
+		/* Default */
+		NONE, 
+		
+		/* IDs */
+		ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, 
+		
+		/* Literals */
+		INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
+	}
+	
+	public class ScannableToken {
+	
+		String base;
+		
+		String [] resetTokens;
+		
+		boolean setCustomSpelling = false, await = false;
+		
+		TokenType type;
+		
+		ACC_STATE resultingState;
+		
+		public ScannableToken(String base, TokenType type, ACC_STATE resultingState, String...resetTokens) {
+			this.base = base;
+			this.resetTokens = resetTokens;
+			this.type = type;
+			this.resultingState = resultingState;
+		}
+		
+		public ScannableToken(String base, TokenType type, ACC_STATE resultingState, boolean customSpelling, String...resetTokens) {
+			this.base = base;
+			this.resetTokens = resetTokens;
+			this.type = type;
+			this.resultingState = resultingState;
+			this.setCustomSpelling = customSpelling;
+		}
+		
+		public ScannableToken(String base, TokenType type, ACC_STATE resultingState, String [] resetTokens, boolean await) {
+			this.base = base;
+			this.resetTokens = resetTokens;
+			this.type = type;
+			this.resultingState = resultingState;
+			this.await = await;
+		}
+	
+	}
+
+	
+			/* --- FIELDS --- */
+	/**
+	 * All simple scannable tokens, represented in base/reset token format.
+	 */
+	protected ScannableToken [] scannables = {
+			new ScannableToken("(",			TokenType.LPAREN,		ACC_STATE.NONE,			""),
+			new ScannableToken(")",			TokenType.RPAREN,		ACC_STATE.NONE,			""),
+			new ScannableToken("@",			TokenType.AT,			ACC_STATE.NONE,			""),
+			new ScannableToken("{",			TokenType.LBRACE,		ACC_STATE.NONE,			""),
+			new ScannableToken("}",			TokenType.RBRACE,		ACC_STATE.NONE,			""),
+			new ScannableToken("[",			TokenType.LBRACKET,		ACC_STATE.NONE,			""),
+			new ScannableToken("]",			TokenType.RBRACKET,		ACC_STATE.NONE,			""),
+			new ScannableToken(".",			TokenType.DOT,			ACC_STATE.NONE,			""),
+			new ScannableToken(";",			TokenType.SEMICOLON,	ACC_STATE.NONE,			""),
+			new ScannableToken(":",			TokenType.COLON,		ACC_STATE.NONE,			""),
+			new ScannableToken(",",			TokenType.COMMA,		ACC_STATE.NONE,			""),
+			new ScannableToken("?",			TokenType.TERN,			ACC_STATE.NONE,			""),
+			new ScannableToken("*",			TokenType.MUL,			ACC_STATE.NONE,			""),
+			new ScannableToken("^",			TokenType.XOR,			ACC_STATE.NONE,			""),
+			new ScannableToken("~",			TokenType.NOT,			ACC_STATE.NONE,			""),
+			new ScannableToken("#",			TokenType.DIRECTIVE,	ACC_STATE.NONE,			""),
+			new ScannableToken("namespace",	TokenType.NAMESPACE,	ACC_STATE.NAMESPACE_ID,	" "),
+			new ScannableToken("shared",	TokenType.SHARED,		ACC_STATE.NONE,			" "),
+			new ScannableToken("restricted",TokenType.RESTRICTED,	ACC_STATE.NONE,			" "),
+			new ScannableToken("exclusive",	TokenType.EXCLUSIVE,	ACC_STATE.NONE,			" "),
+			new ScannableToken("null",		TokenType.NULL,			ACC_STATE.NONE,			""),
+			new ScannableToken("sizeof",	TokenType.SIZEOF,		ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("instanceof",TokenType.INSTANCEOF,	ACC_STATE.NONE,			" "),
+			new ScannableToken("try",		TokenType.TRY,			ACC_STATE.NONE,			" ", "{"),
+			new ScannableToken("watch",		TokenType.WATCH,		ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("\\",		TokenType.BACKSL,		ACC_STATE.NONE,			""),
+			new ScannableToken("if",		TokenType.IF,			ACC_STATE.NONE,			""),
+			new ScannableToken("true",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
+			new ScannableToken("false",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
+			new ScannableToken("else",		TokenType.ELSE,			ACC_STATE.NONE,			""),
+			new ScannableToken("void",		TokenType.VOID,			ACC_STATE.NONE,			""),
+			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			""),
+			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			""),
+			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			""),
+			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			""),
+			new ScannableToken("return",	TokenType.RETURN,		ACC_STATE.NONE,			" ", ";"),
+			new ScannableToken("break",		TokenType.BREAK,		ACC_STATE.NONE,			" ", ";"),
+			new ScannableToken("continue",	TokenType.CONTINUE,		ACC_STATE.NONE,			" ", ";"),
+			new ScannableToken("while",		TokenType.WHILE,		ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("do",		TokenType.DO,			ACC_STATE.NONE,			" ", "{"),
+			new ScannableToken("for",		TokenType.FOR,			ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("switch",	TokenType.SWITCH,		ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("case",		TokenType.CASE,			ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("default",	TokenType.DEFAULT,		ACC_STATE.NONE,			" ", ":"),
+			new ScannableToken("struct",	TokenType.STRUCT,		ACC_STATE.STRUCT_ID,	" "),
+			new ScannableToken("enum",		TokenType.ENUM,			ACC_STATE.ENUM_ID,		" "),
+			new ScannableToken("%",			TokenType.MOD,			ACC_STATE.NONE,			""),
+			new ScannableToken("signal",	TokenType.SIGNAL,		ACC_STATE.NONE,			" "),
+			new ScannableToken("signals",	TokenType.SIGNALS,		ACC_STATE.NONE,			" "),
+			new ScannableToken("|",			TokenType.BITOR,		ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("||",		TokenType.OR,			ACC_STATE.NONE,			""),
+			new ScannableToken("+",			TokenType.ADD,			ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("++",		TokenType.INCR,			ACC_STATE.NONE,			""),
+			new ScannableToken("-",			TokenType.SUB,			ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("--",		TokenType.DECR,			ACC_STATE.NONE,			""),
+			new ScannableToken("->",		TokenType.UNION_ACCESS,	ACC_STATE.NONE,			""),
+			new ScannableToken("&",			TokenType.ADDROF,		ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("&&",		TokenType.AND,			ACC_STATE.NONE,			""),
+			new ScannableToken("!",			TokenType.NEG,			ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("!=",		TokenType.CMPNE,		ACC_STATE.NONE,			""),
+			new ScannableToken("=",			TokenType.LET,			ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("==",		TokenType.CMPEQ,		ACC_STATE.NONE,			""),
+			new ScannableToken("<",			TokenType.CMPLT,		ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken("<=",		TokenType.CMPLE,		ACC_STATE.NONE,			""),
+			new ScannableToken(">",			TokenType.CMPGT,		ACC_STATE.NONE,			new String [] {""}, true),
+			new ScannableToken(">=",		TokenType.CMPGE,		ACC_STATE.NONE,			"")
+	};
+	
+	protected static ScannableToken [] staticScannables;
+	
+	/** 
+	 * A map containing all combinations of scannable token bases and reset 
+	 * tokens appended, used to quick check for a complete token.
+	 * This map is setup once.
+	 */
+	static HashMap<String, ScannableToken> scannableMap = new HashMap();
+	
 	List<LineObject> input;
 	
 	public ProgressMessage progress;
 	
+	
+			/* --- CONSTRUCTORS --- */
 	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
 		this.progress = progress;
+		
+		if (staticScannables == null) {
+			staticScannables = this.scannables;
+			
+			/* Setup scanable map */
+			for (ScannableToken t : this.scannables) {
+				for (String reset : t.resetTokens) {
+					scannableMap.put(t.base + reset, t);
+				}
+			}
+		}
+		
 	}
 	
+	
+			/* --- METHODS --- */
 	public LinkedList<Token> scan() {
-		
 		ScannerFSM sFSM = new ScannerFSM(new LinkedList(), progress);
 		
 		for (int i = 0; i < input.size(); i++) {
+			/* Replace tabs with 4 spaces */
 			input.get(i).line = input.get(i).line.replace("\t", "    ");
-			for (int a = 0; a < input.get(i).line.length(); a++) {
-				sFSM.readChar(input.get(i).line.charAt(a), input.get(i).lineNumber, a, input.get(i).fileName);
-			}
 			
-			if (progress != null) {
-				progress.incProgress((double) i / input.size());
-			}
+			/* For every char in every line, let fsm read char and check state */
+			for (int a = 0; a < input.get(i).line.length(); a++) 
+				sFSM.readChar(input.get(i).line.charAt(a), input.get(i).lineNumber, a, input.get(i).fileName);
+			
+			/* Increase progress based on read input lines */
+			if (progress != null) progress.incProgress((double) i / input.size());
 		}
 		
 		if (progress != null) progress.incProgress(1);
 		
 		LinkedList<Token> tokens = sFSM.tokens;
 		tokens.add(new Token(TokenType.EOF, new Source(null, 0, 0), null));
-		
 		return tokens;
 	}
 	
 	private static class ScannerFSM {
+
+				/* --- REGEXES --- */
+		public static String int_match = "[0-9]+",
+							 hex_match = "hx([0-9]|[a-f]|[A-F])+",
+							 bin_match = "bx[0-1]+";
+
 		
+				/* --- FIELDS --- */
+		/* All struct ids that have been scanned */
 		List<String> structIds = new ArrayList();
 		
+		/* All namespace ids that have been scanned */
 		List<String> enumIds = new ArrayList();
 		
+		/* All namespace ids that have been scanned */
 		List<String> namespaces = new ArrayList();
-		
-		/**
-		 * Defines the current accumulation state of the scanner.
-		 */
-		private enum ACC_STATE {
-			NONE, ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
-		}
 		
 		private ACC_STATE state = ACC_STATE.NONE;
 		
@@ -69,24 +223,37 @@ public class Scanner {
 		
 		private ProgressMessage progress;
 		
+		public boolean wasAwaiting = false;
+		
+		
+				/* --- CONSTRUCTORS --- */
 		public ScannerFSM(LinkedList<Token> tokens, ProgressMessage progress) {
 			this.tokens = tokens;
 			this.progress = progress;
 		}
 		
-		public boolean readChar(char c, int i, int a, String fileName) {
-			if (this.buffer.isEmpty() && ("" + c).trim().equals(""))return false;
+		
+				/* --- METHODS --- */
+		/**
+		 * Read a single char, append it to the buffer and check the state.
+		 */
+		public void readChar(char c, int i, int a, String fileName) {
+			if (this.buffer.isEmpty() && ("" + c).trim().equals("")) return;
 			else {
 				if (this.state != ACC_STATE.COMMENT && this.state != ACC_STATE.CHARLIT && this.state != ACC_STATE.STRINGLIT) 
 					this.buffer = this.buffer.trim();
-				this.buffer = buffer + c;
-				boolean b = this.checkState(i, a, fileName);
+				
+				this.buffer += c;
+				
+				boolean b = true;
+				while (b) b = this.checkState(i, a, fileName);
+				
 				this.lastLine = i;
-				return b;
 			}
 		}
 		
 		public boolean checkState(int i, int a, String fileName) {
+			/* --- COMMENT SCANNER --- */
 			if (this.state == ACC_STATE.COMMENT) {
 				if (i != this.lastLine && this.buffer.startsWith("//")) {
 					/* End of single line comment */
@@ -100,7 +267,7 @@ public class Scanner {
 						this.state = ACC_STATE.NONE;
 						this.buffer = this.buffer.trim();
 						tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.substring(2, this.buffer.length() - 2).trim()));
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 					else {
 						if (!buffer.trim().equals("/*"))
@@ -116,76 +283,52 @@ public class Scanner {
 						if (!this.buffer.equals("*/"))
 							tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.substring(2, this.buffer.length() - 2)));
 						
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 					else if (i != this.lastLine) {
 						tokens.add(new Token(TokenType.COMMENT, new Source(fileName, i, a), this.buffer.trim().substring(1).trim()));
-						this.emptyBuffer();
+						this.buffer = "";
 					}
 				}
 				return false;
 			}
 			
-			if (this.buffer.equals("(")) {
-				tokens.add(new Token(TokenType.LPAREN, new Source(fileName, i, a)));
-				this.emptyBuffer();
+			/* --- REGULAR & SIMPLE TOKEN SCANNER --- */
+			ScannableToken t = scannableMap.get(buffer);
+			
+			/* Nothing found, if was awaiting check for match with previous buffer */
+			if (t == null && this.wasAwaiting) 
+				t = scannableMap.get(buffer.substring(0, buffer.length() - 1));
+			
+			if (t != null && (!t.await || this.wasAwaiting)) {
+				this.wasAwaiting = false;
+				
+				/* Create new token, either with or without custom spelling */
+				if (t.setCustomSpelling) tokens.add(new Token(t.type, new Source(fileName, i, a), t.base));
+				else tokens.add(new Token(t.type, new Source(fileName, i, a)));
+				
+				/* Set resulting state defined by scannable */
+				this.state = t.resultingState;
+				
+				/* Adjust buffer */
+				this.buffer = buffer.substring(t.base.length());
+				
+				/* Signal new token found */
+				return true;
 			}
-			else if (this.buffer.equals(")")) {
-				tokens.add(new Token(TokenType.RPAREN, new Source(fileName, i, a)));
-				this.emptyBuffer();
+			else if (t != null && t.await) {
+				this.wasAwaiting = true;
+				return false;
 			}
-			else if (this.buffer.equals("@")) {
-				tokens.add(new Token(TokenType.AT, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("{")) {
-				tokens.add(new Token(TokenType.LBRACE, new Source(fileName, i, a)));
-				this.state = ACC_STATE.NONE;
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("}")) {
-				tokens.add(new Token(TokenType.RBRACE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("[")) {
-				tokens.add(new Token(TokenType.LBRACKET, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("]")) {
-				tokens.add(new Token(TokenType.RBRACKET, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("'")) {
+				
+			/* --- LITERAL SCANNER --- */
+			if (this.buffer.equals("'")) {
 				this.state = ACC_STATE.CHARLIT;
 				return false;
 			}
 			else if (this.buffer.equals("\"")) {
 				this.state = ACC_STATE.STRINGLIT;
 				return false;
-			}
-			else if (this.buffer.equals(".")) {
-				tokens.add(new Token(TokenType.DOT, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals(";")) {
-				tokens.add(new Token(TokenType.SEMICOLON, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals(":")) {
-				tokens.add(new Token(TokenType.COLON, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals(",")) {
-				tokens.add(new Token(TokenType.COMMA, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("?")) {
-				tokens.add(new Token(TokenType.TERN, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("*")) {
-				tokens.add(new Token(TokenType.MUL, new Source(fileName, i, a)));
-				this.emptyBuffer();
 			}
 			else if (this.buffer.startsWith("/")) {
 				if (this.buffer.length() == 1)return false;
@@ -200,298 +343,25 @@ public class Scanner {
 				else {
 					tokens.add(new Token(TokenType.DIV, new Source(fileName, i, a - this.buffer.length())));
 					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("+")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("++")) {
-					tokens.add(new Token(TokenType.INCR, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.ADD, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("-")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("--")) {
-					tokens.add(new Token(TokenType.DECR, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else if (this.buffer.equals("->")) {
-					tokens.add(new Token(TokenType.UNION_ACCESS, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.SUB, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.equals("^")) {
-				tokens.add(new Token(TokenType.XOR, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-				this.buffer = this.buffer.substring(1);
-				this.checkState(i, a, fileName);
-			}
-			else if (this.buffer.equals("~")) {
-				tokens.add(new Token(TokenType.NOT, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-				this.buffer = this.buffer.substring(1);
-				this.checkState(i, a, fileName);
-			}
-			else if (this.buffer.equals("#")) {
-				tokens.add(new Token(TokenType.DIRECTIVE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("namespace")) {
-				tokens.add(new Token(TokenType.NAMESPACE, new Source(fileName, i, a)));
-				this.state = ACC_STATE.NAMESPACE_ID;
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("include")) {
-				tokens.add(new Token(TokenType.INCLUDE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("sizeof")) {
-				tokens.add(new Token(TokenType.SIZEOF, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("try")) {
-				tokens.add(new Token(TokenType.TRY, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("watch")) {
-				tokens.add(new Token(TokenType.WATCH, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("\\")) {
-				tokens.add(new Token(TokenType.BACKSL, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("if")) {
-				tokens.add(new Token(TokenType.IF, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("true")) {
-				tokens.add(new Token(TokenType.BOOLLIT, new Source(fileName, i, a), "true"));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("false")) {
-				tokens.add(new Token(TokenType.BOOLLIT, new Source(fileName, i, a), "false"));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("else")) {
-				tokens.add(new Token(TokenType.ELSE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("||")) {
-				tokens.add(new Token(TokenType.OR, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.equals("void")) {
-				tokens.add(new Token(TokenType.VOID, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("func")) {
-				tokens.add(new Token(TokenType.FUNC, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("int")) {
-				tokens.add(new Token(TokenType.INT, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("char")) {
-				tokens.add(new Token(TokenType.CHAR, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("bool")) {
-				tokens.add(new Token(TokenType.BOOL, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("return")) {
-				tokens.add(new Token(TokenType.RETURN, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("break")) {
-				tokens.add(new Token(TokenType.BREAK, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("continue")) {
-				tokens.add(new Token(TokenType.CONTINUE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("while")) {
-				tokens.add(new Token(TokenType.WHILE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("do")) {
-				tokens.add(new Token(TokenType.DO, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("for")) {
-				tokens.add(new Token(TokenType.FOR, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("switch")) {
-				tokens.add(new Token(TokenType.SWITCH, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("case")) {
-				tokens.add(new Token(TokenType.CASE, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("default")) {
-				tokens.add(new Token(TokenType.DEFAULT, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.NONE;
-				return true;
-			}
-			else if (this.buffer.equals("struct")) {
-				tokens.add(new Token(TokenType.STRUCT, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.STRUCT_ID;
-				return true;
-			}
-			else if (this.buffer.equals("enum")) {
-				tokens.add(new Token(TokenType.ENUM, new Source(fileName, i, a)));
-				this.emptyBuffer();
-				this.state = ACC_STATE.ENUM_ID;
-				return true;
-			}
-			else if (this.buffer.startsWith("signal")) {
-				if (this.buffer.length() == 6)return false;
-				if (this.buffer.equals("signals")) {
-					tokens.add(new Token(TokenType.SIGNALS, new Source(fileName, i, a)));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.SIGNAL, new Source(fileName, i, a - this.buffer.length())));
-					this.buffer = this.buffer.substring(this.buffer.length() - 1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("|")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("||")) {
-					tokens.add(new Token(TokenType.OR, new Source(fileName, i, a)));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.BITOR, new Source(fileName, i, a - this.buffer.length())));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("&")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("&&")) {
-					tokens.add(new Token(TokenType.AND, new Source(fileName, i, a)));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.ADDROF, new Source(fileName, i, a - this.buffer.length())));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.equals("%")) {
-				tokens.add(new Token(TokenType.MOD, new Source(fileName, i, a)));
-				this.emptyBuffer();
-			}
-			else if (this.buffer.startsWith("!")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("!=")) {
-					tokens.add(new Token(TokenType.CMPNE, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.NEG, new Source(fileName, i, a), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("=")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("==")) {
-					tokens.add(new Token(TokenType.CMPEQ, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.LET, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith("<")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("<=")) {
-					tokens.add(new Token(TokenType.CMPLE, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.CMPLT, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
-				}
-			}
-			else if (this.buffer.startsWith(">")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals(">=")) {
-					tokens.add(new Token(TokenType.CMPGE, new Source(fileName, i, a), this.buffer));
-					this.emptyBuffer();
-				}
-				else {
-					tokens.add(new Token(TokenType.CMPGT, new Source(fileName, i, a - this.buffer.length()), this.buffer.substring(0, 1)));
-					this.buffer = this.buffer.substring(1);
-					this.checkState(i, a, fileName);
+					return true;
 				}
 			}
 			else {
+				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
 					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) {
 						this.state = ACC_STATE.ID;
 					}
 				}
 				
-				if (this.buffer.matches(int_match)) {
+				if (this.buffer.matches(int_match)) 
 					this.state = ACC_STATE.INT;
-				}
 				
-				if (this.buffer.matches(bin_match)) {
+				if (this.buffer.matches(bin_match)) 
 					this.state = ACC_STATE.BIN_INT;
-				}
 				
-				if (this.buffer.matches(hex_match)) {
+				if (this.buffer.matches(hex_match)) 
 					this.state = ACC_STATE.HEX_INT;
-				}
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
@@ -525,23 +395,21 @@ public class Scanner {
 					
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
-					this.checkState(i, a, fileName);
+					return true;
 				}
-				else if (this.buffer.matches("\"(.)*\"") && (this.state == ACC_STATE.STRINGLIT)) {
+				else if (this.buffer.matches("\"(.)*\"") && (this.state == ACC_STATE.STRINGLIT) && !this.buffer.endsWith("\\\"")) {
 					String id = this.buffer.substring(1, this.buffer.length() - 1);
-				
 					tokens.add(new Token(TokenType.STRINGLIT, new Source(fileName, i, a), id));
 					
-					this.emptyBuffer();
+					this.buffer = "";
 					this.state = ACC_STATE.NONE;
 					return true;
 				}
 				else if (this.buffer.matches("'.'") && (this.state == ACC_STATE.CHARLIT)) {
 					String id = this.buffer.substring(1, this.buffer.length() - 1);
-				
 					tokens.add(new Token(TokenType.CHARLIT, new Source(fileName, i, a), id));
 					
-					this.emptyBuffer();
+					this.buffer = "";
 					this.state = ACC_STATE.NONE;
 					return true;
 				}
@@ -555,7 +423,7 @@ public class Scanner {
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
-					this.checkState(i, a, fileName);
+					return true;
 				}
 				else if ((this.buffer.endsWith(" ") || !this.buffer.matches(hex_match)) && this.state == ACC_STATE.HEX_INT) {
 					String lit = this.buffer.substring(0, this.buffer.length() - 1);
@@ -565,19 +433,10 @@ public class Scanner {
 						throw new SNIPS_EXCEPTION("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
-					lit = lit.substring(2);
-					String [] sp = lit.split("");
-					int s = 0;
-					for (int k = 0; k < sp.length; k++) {
-						s += Math.pow(16, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 16);
-					}
-				
-					lit = s + "";
-					
-					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
+					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 16)));
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
-					this.checkState(i, a, fileName);
+					return true;
 				}
 				else if ((this.buffer.endsWith(" ") || !this.buffer.matches(bin_match)) && this.state == ACC_STATE.BIN_INT) {
 					String lit = this.buffer.substring(0, this.buffer.length() - 1);
@@ -587,34 +446,29 @@ public class Scanner {
 						throw new SNIPS_EXCEPTION("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
-					lit = lit.substring(2);
-					String [] sp = lit.split("");
-					int s = 0;
-					for (int k = 0; k < sp.length; k++) {
-						s += Math.pow(2, sp.length - k - 1) * Character.digit(sp [k].charAt(0), 2);
-					}
-					
-					lit = s + "";
-					
-					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), lit));
+					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 2)));
 					this.buffer = this.buffer.substring(this.buffer.length() - 1);
 					this.state = ACC_STATE.NONE;
-					this.checkState(i, a, fileName);
+					return true;
 				}
 			}
 			
 			return false;
 		}
 		
-		public void emptyBuffer() {
-			this.buffer = "";
+		/**
+		 * Converts given literal from fromBase to base 10.
+		 */
+		public String convertBase10(String lit, int fromBase) {
+			String [] sp = lit.split("");
+			int s = 0;
+			for (int k = 0; k < sp.length; k++) {
+				s += Math.pow(fromBase, sp.length - k - 1) * Character.digit(sp [k].charAt(0), fromBase);
+			}
+			lit = s + "";
+			return lit;
 		}
 		
 	}
-	
-			/* --- REGEXES --- */
-	public static String int_match = "[0-9]+";
-	public static String hex_match = "hx([0-9]|[a-f]|[A-F])+";
-	public static String bin_match = "bx[0-1]+";
 	
 }

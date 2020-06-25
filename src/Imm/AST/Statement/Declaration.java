@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Expression.Expression;
+import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -17,6 +18,8 @@ import Util.Source;
 public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
+	public MODIFIER modifier;
+	
 	public NamespacePath path;
 	
 	private TYPE type;
@@ -29,17 +32,19 @@ public class Declaration extends Statement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Declaration(NamespacePath path, TYPE type, Source source) {
+	public Declaration(NamespacePath path, TYPE type, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		this.type = type;
+		this.modifier = modifier;
 	}
 	
-	public Declaration(NamespacePath path, TYPE type, Expression value, Source source) {
+	public Declaration(NamespacePath path, TYPE type, Expression value, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		this.type = type;
 		this.value = value;
+		this.modifier = modifier;
 	}
 	
 	
@@ -92,7 +97,7 @@ public class Declaration extends Statement {
 	}
 	
 	public Declaration clone() {
-		Declaration clone = new Declaration(this.path, this.type.clone(), this.getSource());
+		Declaration clone = new Declaration(this.path, this.type.clone(), this.modifier, this.getSource());
 		return clone;
 	}
 	

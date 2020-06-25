@@ -1,5 +1,6 @@
 package Imm.TYPE.COMPOSIT;
 
+import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
@@ -26,7 +27,8 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
+		if (type instanceof NULL) return true;
+		if (type.getCoreType() instanceof VOID || this.getCoreType() instanceof VOID) return true;
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
 			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {

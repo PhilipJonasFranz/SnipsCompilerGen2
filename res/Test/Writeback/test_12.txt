@@ -1,0 +1,40 @@
+SOURCE
+struct X {
+	int x;
+	int y;
+}
+
+int main() {
+	X x0 = X::(10, 5);
+	x0.y++;
+	return x0.x + (x0.y * 2);
+}
+TESTCASES
+22
+OUTPUT
+/* --test_12.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #5                               /* Evaluate Expression */
+    mov r1, #10
+    push { r1, r0 }
+    mov r0, #1
+    push { r0 }
+    sub r1, fp, #12                          /* Load field location */
+    add r1, r1, #8
+    ldr r0, [r1]
+    add r0, r0, #1
+    str r0, [r1]
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #4
+    ldr r0, [r1]                             /* Load field from struct */
+    push { r0 }
+    sub r1, fp, #12                          /* Load field location */
+    add r1, r1, #8
+    ldr r1, [r1]                             /* Load field from struct */
+    mov r2, #2
+    mul r2, r1, r2
+    pop { r1 }
+    add r0, r1, r2
+    bx lr
+    

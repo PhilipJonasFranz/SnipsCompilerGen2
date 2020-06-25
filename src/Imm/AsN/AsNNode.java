@@ -19,6 +19,14 @@ import Imm.AST.SyntaxElement;
 
 public abstract class AsNNode {
 
+			/* --- NESTED --- */
+	public enum MODIFIER {
+		
+		SHARED, RESTRICTED, EXCLUSIVE;
+		
+	}
+	
+	
 			/* --- FIELDS --- */
 	public List<ASMInstruction> instructions = new ArrayList();
 	

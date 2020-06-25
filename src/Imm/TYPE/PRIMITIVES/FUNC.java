@@ -54,13 +54,7 @@ public class FUNC extends PRIMITIVE<Function> {
 			s += "?";
 		}
 		
-		s += "> ";
-		
-		if (this.funcHead != null) {
-			s += this.funcHead.toString().split("@") [1];
-		}
-		else s = s.trim();
-		
+		s += ">";
 		return s;
 	}
 

@@ -133,7 +133,7 @@ resv.L18:
 main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
+    mov r0, #8                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
@@ -141,11 +141,15 @@ main:                                        /* Function: main */
     mov r0, #9
     mov r1, #8
     push { r1, r0 }
+    mov r0, #1
+    push { r0 }
     mov r0, #9
     mov r1, #2
     push { r1, r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #2
     lsl r1, r3, #2
-    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -155,24 +159,33 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     pop { r0 }
     str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
+    pop { r0 }
+    str r0, [r1, #24]
+    pop { r0 }
+    str r0, [r1, #28]
     lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
     push { r1 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
-    mov r1, #8
+    mov r1, #12
     mul r0, r0, r1
     add r2, r2, r0
     pop { r1 }
     add r1, r1, r2
-    ldr r0, [r1, #4]
-    ldr r2, [r1, #0]
+    ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
     push { r2, r0 }
-    sub r1, fp, #8                           /* Evaluate Expression */
-    add r1, r1, #4
+    ldr r0, [r1, #0]
+    push { r0 }
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #16
+    add r1, r1, #28
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

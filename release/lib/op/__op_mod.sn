@@ -1,0 +1,22 @@
+shared int __op_mod(int a, int b) {
+	bool neg = false;
+	if (a < 0) {
+		neg = true;
+		a = -a;
+	}
+
+	int s = b;
+	while (s <= a) {
+		s = s << 1;
+	}
+	int r = a;
+	while (r >= b) {
+	s = s >> 1;
+		if (s <= r) {    
+			r = r - s;
+		}
+	}
+	
+	if (r != 0 && neg) r = b - r;
+	return r;
+}

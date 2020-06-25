@@ -80,6 +80,7 @@ public class Token {
 		DEFAULT("default"),
 		INCLUDE("include"),
 		SIZEOF("sizeof"),
+		INSTANCEOF("instanceof"),
 		RETURN("return"),
 		
 		DOT("."),
@@ -89,6 +90,11 @@ public class Token {
 		COMMA(","),
 		LET("="),
 		TERN("?"),
+		
+		/* Modifiers */
+		SHARED("shared", 			TokenGroup.MODIFIER),
+		RESTRICTED("restricted", 	TokenGroup.MODIFIER),
+		EXCLUSIVE("exclusive", 		TokenGroup.MODIFIER),
 		
 		/* Arithmetic Operators */
 		ADD("+"),
@@ -132,13 +138,15 @@ public class Token {
 		CHARLIT("charlit",			TokenGroup.LITERAL),
 		STRINGLIT("",				TokenGroup.LITERAL),
 		BOOLLIT("boollit",			TokenGroup.LITERAL),
-		ENUMLIT("enumlit",			TokenGroup.LITERAL);
+		ENUMLIT("enumlit",			TokenGroup.LITERAL),
+		NULL("null",				TokenGroup.LITERAL);
 		
 		public enum TokenGroup {
 			IDENTIFIER,
 			TYPE,
 			LITERAL,
 			COMPARE,
+			MODIFIER,
 			MISC;
 		}
 		

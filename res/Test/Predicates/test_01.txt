@@ -3,7 +3,7 @@ bool sortPred(int a, int b) {
 	return a < b;
 }
 
-void sort(int* arr, int size, func (int a, int b) -> bool pred) {
+void sort(int* arr, int size, func (int, int) -> bool pred) {
 	if (size > 1) {
 		while (true) {
 			bool sorted = true;

@@ -1,0 +1,70 @@
+SOURCE
+int r;
+
+int f(int x) {
+	r = x * x;
+}
+
+int map(int x, func int -> int pred) {
+	pred(x);
+}
+
+int main() {
+	int p = (int) f;
+	func pred0 = (func) p;
+
+	map(10, pred0);
+
+	return r;
+}
+TESTCASES
+100
+OUTPUT
+/* --test_05.txt */
+.data
+r: .word 0
+    
+.text
+    b main
+lambda_f:                                    /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+f:                                           /* Function: f */
+    push { r3 }
+    mov r3, r0
+    mul r0, r0, r0
+    ldr r1, .POOL0_main.L0_r
+    str r0, [r1]
+    pop { r3 }
+    bx lr
+.POOL0_main.L0_r: .word r
+    
+map:                                         /* Function: map */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3                               /* Load parameters */
+    add lr, pc, #8
+    mov pc, r4
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, fp, lr }
+    mov fp, sp
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_f
+    mov r3, r0
+    mov r4, r0
+    mov r1, r0
+    mov r0, #10
+    bl map                                   /* Call map */
+    ldr r0, .POOL1_main.L0_r                 /* Evaluate Expression */
+    ldr r0, [r0]
+    mov sp, fp
+    pop { r3, r4, fp, lr }
+    bx lr
+.POOL1_main.L0_r: .word r
+    
