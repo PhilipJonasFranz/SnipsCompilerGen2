@@ -56,6 +56,14 @@ public class ASMOptimizer {
 			OPT_DONE = false;
 			
 			/**
+			 * add r0, r0, #2
+			 * add r0, r0, #4
+			 * Replace with:
+			 * add r0, r0, #6
+			 */
+			this.defragmentAdditions(body);
+			
+			/**
 			 * add r0, r1, r2
 			 * mov r4, r0
 			 * Replace with:
@@ -197,6 +205,25 @@ public class ASMOptimizer {
 		}
 		// TODO: Implement missing instructions
 		else return false;
+	}
+	
+	private void defragmentAdditions(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMAdd) {
+				ASMAdd add0 = (ASMAdd) body.instructions.get(i - 1);
+				ASMAdd add1 = (ASMAdd) body.instructions.get(i);
+				if (add0.target.reg == add1.target.reg && add0.target.reg == add0.op0.reg && 
+						add0.op1 instanceof ImmOperand && add1.op1 instanceof ImmOperand) {
+					ImmOperand op0 = (ImmOperand) add0.op1;
+					ImmOperand op1 = (ImmOperand) add1.op1;
+					
+					op0.value += op1.value;
+					body.instructions.remove(i);
+					i--;
+					OPT_DONE = true;
+				}
+			}
+		}
 	}
 	
 	private void removeZeroInstruction(AsNBody body) {
@@ -449,7 +476,7 @@ public class ASMOptimizer {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
-				for (int a = 0; a < 15; a++) {
+				for (int a = 0; a < 10; a++) {
 					if (mov.target.reg == RegOperand.toReg(a) && mov.op1 instanceof RegOperand) {
 						RegOperand target = (RegOperand) mov.op1;
 						

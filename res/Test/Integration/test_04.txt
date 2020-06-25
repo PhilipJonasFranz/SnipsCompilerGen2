@@ -19,7 +19,7 @@ OUTPUT
 sarrus:                                      /* Function: sarrus */
     push { fp }
     mov fp, sp
-    add r0, sp, #4
+    add r0, fp, #4
     ldr r1, [r0]
     add r0, fp, #4
     add r0, r0, #16

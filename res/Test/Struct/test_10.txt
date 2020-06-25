@@ -21,8 +21,10 @@ main:                                        /* Function: main */
     mul r0, r0, r2
     push { r0 }
     push { r3 }
-    sub r1, fp, #8                           /* Evaluate Expression */
-    add r1, r1, #4
+    mov r0, #1
+    push { r0 }
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
     mov sp, fp
     pop { r3 }

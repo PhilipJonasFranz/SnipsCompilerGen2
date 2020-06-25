@@ -26,32 +26,37 @@ main:                                        /* Function: main */
     mov r1, #5
     mov r2, #4
     push { r2, r1, r0 }
+    mov r0, #1
+    push { r0 }
     mov r0, #3
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
+    mov r0, #1
+    push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }                              /* Load field location */
-    sub r1, fp, #24
+    sub r1, fp, #32
     push { r1 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
-    mov r1, #12
+    mov r1, #16
     mul r0, r0, r1
     add r2, r2, r0
     pop { r1 }
     add r1, r1, r2
-    add r1, r1, #4
+    add r1, r1, #8
     pop { r0 }
     str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #24                          /* Evaluate Expression */
+    sub r1, fp, #32                          /* Evaluate Expression */
     push { r1 }
     mov r2, #0                               /* Calculate offset of sub structure */
-    mov r1, #12
+    mov r1, #16
     mul r0, r4, r1
     add r2, r2, r0
     pop { r1 }
     add r1, r1, r2
+    add r1, r1, #4
     lsl r2, r3, #2
     add r1, r1, r2
     ldr r0, [r1]                             /* Load field from struct */

@@ -64,6 +64,7 @@ public class AsNStructSelect extends AsNExpression {
 	 * Loads the address of the target of the selection into R1.
 	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+		
 		/* Load base address */
 		if (select.selector instanceof IDRef) {
 			IDRef ref = (IDRef) select.selector;
@@ -206,6 +207,9 @@ public class AsNStructSelect extends AsNExpression {
 						injectIDRef(node, struct, (IDRef) sel1.selector);
 					}
 					else if (sel1.selector instanceof ArraySelect) {
+						/* Add offset for header */
+						node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+						
 						injectArraySelect(node, (ArraySelect) sel1.selector, r, map, st);
 					}
 				}

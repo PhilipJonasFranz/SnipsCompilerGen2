@@ -18,7 +18,7 @@ OUTPUT
 vecProd:                                     /* Function: vecProd */
     push { fp }
     mov fp, sp
-    add r0, sp, #16
+    add r0, fp, #16
     ldr r1, [r0]
     add r0, fp, #4
     ldr r2, [r0]

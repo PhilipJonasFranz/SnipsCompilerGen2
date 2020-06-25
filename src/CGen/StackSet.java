@@ -159,12 +159,30 @@ public class StackSet {
 	 */
 	public int getDeclarationInStackByteOffset(Declaration dec) {
 		int off = 4;
+		
+		boolean regs = false;
+		
+		/* Check if LR or FP regs were pushed */
+		for (int i = 0; i < stack.size(); i++) {
+			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) {
+				regs = true;
+			}
+		}
+		
+		boolean hook = false;
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
-				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;
+				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) {
+					hook = true;
+					off = 4;
+				}
 				else off += 4;
 			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
-				if (stack.get(i).declaration.equals(dec)) break;
+				if (stack.get(i).declaration.equals(dec)) {
+					/* Hook was not found and there is a reg section */
+					if (!hook && regs) return -1;
+					else break;
+				}
 				off += (stack.get(i).declaration.getType().wordsize() * 4);
 			}
 		}

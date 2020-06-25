@@ -7,6 +7,8 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.Atom;
@@ -26,6 +28,13 @@ public class AsNStructureInit extends AsNExpression {
 		r.free(0, 1, 2);
 		
 		structureInit(init, s.elements, r, map, st);
+		
+		/* Push SID header */
+		init.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.structType.typedef.SID)));
+		init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+		
+		/* Push dummy for SID header */
+		st.push(REGISTER.R0);
 		
 		return init;
 	}

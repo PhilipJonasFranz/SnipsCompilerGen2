@@ -135,7 +135,7 @@ resv.L18:
 main:                                        /* Function: main */
     push { r3, r4, r5, fp, lr }
     mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
+    mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
@@ -143,13 +143,17 @@ main:                                        /* Function: main */
     mov r0, #0
     push { r0 }
     mov r0, #0
+    push { r0 }
+    mov r0, #1
     lsl r1, r3, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, #3                               /* Evaluate Expression */
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r4, r0
     mov r0, #1                               /* Evaluate Expression */
@@ -157,13 +161,17 @@ main:                                        /* Function: main */
     mov r0, #0
     push { r0 }
     mov r0, #0
+    push { r0 }
+    mov r0, #1
     lsl r1, r4, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, #3                               /* Evaluate Expression */
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #15                              /* Evaluate Expression */
@@ -171,18 +179,22 @@ main:                                        /* Function: main */
     mov r0, #0
     push { r0 }
     mov r0, #0
+    push { r0 }
+    mov r0, #1
     lsl r1, r5, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
+    add r1, r1, #12
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #8
+    add r1, r1, #12
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
