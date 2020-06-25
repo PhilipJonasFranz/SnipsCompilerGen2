@@ -63,7 +63,8 @@ public class CompilerDriver {
 		enableComments = true,
 		disableModifiers = false,
 		disableOptimizer = false,
-		disableWarnings = false;
+		disableWarnings = false,
+		disableStructSIDHeaders = false;
 			
 	/* Debug */
 	public static boolean
@@ -510,6 +511,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-opt"))disableOptimizer = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-rov"))disableModifiers = true;
+				else if (args [i].equals("-sid"))disableStructSIDHeaders = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -534,6 +536,8 @@ public class CompilerDriver {
 		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
 		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
 		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
+		System.out.println(CompilerDriver.printDepth + "-rov      : Disable visibility modifiers");
+		System.out.println(CompilerDriver.printDepth + "-sid      : Disable SID headers, lower memory usage, but no instanceof");
 		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
 		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
 		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");

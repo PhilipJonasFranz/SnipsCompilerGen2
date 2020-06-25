@@ -17,6 +17,7 @@ import Imm.AST.Expression.StructureInit;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Snips.CompilerDriver;
 
 public class AsNStructureInit extends AsNExpression {
 
@@ -29,12 +30,14 @@ public class AsNStructureInit extends AsNExpression {
 		
 		structureInit(init, s.elements, r, map, st);
 		
-		/* Push SID header */
-		init.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.structType.typedef.SID)));
-		init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-		
-		/* Push dummy for SID header */
-		st.push(REGISTER.R0);
+		if (!CompilerDriver.disableStructSIDHeaders) {
+			/* Push SID header */
+			init.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.structType.typedef.SID)));
+			init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			
+			/* Push dummy for SID header */
+			st.push(REGISTER.R0);
+		}
 		
 		return init;
 	}

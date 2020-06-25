@@ -93,6 +93,7 @@ public class Scanner {
 			new ScannableToken("exclusive",	TokenType.EXCLUSIVE,	ACC_STATE.NONE,			" "),
 			new ScannableToken("null",		TokenType.NULL,			ACC_STATE.NONE,			""),
 			new ScannableToken("sizeof",	TokenType.SIZEOF,		ACC_STATE.NONE,			" ", "("),
+			new ScannableToken("instanceof",TokenType.INSTANCEOF,	ACC_STATE.NONE,			" "),
 			new ScannableToken("try",		TokenType.TRY,			ACC_STATE.NONE,			" ", "{"),
 			new ScannableToken("watch",		TokenType.WATCH,		ACC_STATE.NONE,			" ", "("),
 			new ScannableToken("\\",		TokenType.BACKSL,		ACC_STATE.NONE,			""),
