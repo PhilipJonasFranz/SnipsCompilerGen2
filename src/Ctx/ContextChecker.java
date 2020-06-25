@@ -1413,8 +1413,8 @@ public class ContextChecker {
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXCEPTION {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef) && !(aof.expression instanceof ArraySelect)) {
-			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or element select.");
+		if (!(aof.expression instanceof IDRef || aof.expression instanceof ArraySelect || aof.expression instanceof StructSelect)) {
+			throw new CTX_EXCEPTION(aof.getSource(), "Can only get address of variable reference or array select");
 		}
 		
 		aof.setType(new POINTER(t.getCoreType()));
@@ -1603,7 +1603,7 @@ public class ContextChecker {
 		else if (reg.equals("lr")) a.reg = REGISTER.LR;
 		else if (reg.equals("fp")) a.reg = REGISTER.FP;
 		else if (reg.equals("pc")) a.reg = REGISTER.PC;
-		else if (reg.equals("er")) a.reg = REGISTER.R12;
+		else if (reg.equals("ex")) a.reg = REGISTER.R12;
 		else {
 			if (reg.length() < 2) {
 				throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);

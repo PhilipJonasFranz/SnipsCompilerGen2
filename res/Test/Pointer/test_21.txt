@@ -1,0 +1,55 @@
+SOURCE
+struct X {
+	int x;
+}
+
+struct Y {
+	X x0;
+}
+
+bool pred0(int x, int y) {
+	return x == y;
+}
+
+int main() {
+	Y y0 = Y::(X::(10));
+	
+	X* p = &y0.x0;
+	
+	y0.x0.x = 20;
+	
+	int k = 12;
+	
+	return p->x;
+}
+TESTCASES
+20
+OUTPUT
+/* --test_21.txt */
+    b main
+    
+main:                                        /* Function: main */
+    push { r3, r4 }
+    mov fp, sp
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #2
+    push { r0 }
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #4
+    lsr r3, r1, #2
+    mov r0, #20                              /* Evaluate Expression */
+    sub r1, fp, #12
+    add r1, r1, #8
+    str r0, [r1]                             /* Store value to struct field */
+    mov r4, #12
+    push { r4 }                              /* Push declaration on stack, referenced by addressof. */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
+    ldr r0, [r1]                             /* Load field from struct */
+    mov sp, fp
+    pop { r3, r4 }
+    bx lr
+    

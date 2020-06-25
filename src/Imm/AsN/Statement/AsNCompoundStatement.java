@@ -251,6 +251,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			if (aof.expression instanceof IDRef) {
 				if (((IDRef) aof.expression).origin.equals(dec)) return true;
 			}
+			else if (aof.expression instanceof StructSelect) {
+				/* Struct will be on the stack anyway */
+				return true;
+			}
 			else {
 				if (((ArraySelect) aof.expression).idRef.origin.equals(dec)) return true;
 			}
