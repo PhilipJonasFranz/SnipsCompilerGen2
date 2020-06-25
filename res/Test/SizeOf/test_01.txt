@@ -5,8 +5,7 @@ int main() {
 TESTCASES
 3
 OUTPUT
-/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_01.txt */
 main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     bx lr

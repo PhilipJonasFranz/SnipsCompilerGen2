@@ -15,8 +15,7 @@ int main(int a) {
 TESTCASES
 3 4656
 OUTPUT
-/* --test_03.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_03.txt */
 main:                                        /* Function: main */
     push { r3, r4, r5, r6 }
     mov r3, r0

@@ -15,8 +15,7 @@ TESTCASES
 1 2 3 4 5 55
 2 2 2 2 2 20
 OUTPUT
-/* --test_04.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_04.txt */
     b main
 sq:                                          /* Function: sq */
     push { r3 }

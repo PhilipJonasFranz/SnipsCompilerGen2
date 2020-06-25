@@ -12,8 +12,7 @@ TESTCASES
 1 2 3
 5 2 7
 OUTPUT
-/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_01.txt */
 main:                                        /* Function: main */
     push { r3, r4 }
     mov r3, r0

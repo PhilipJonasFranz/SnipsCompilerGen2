@@ -1342,9 +1342,14 @@ public class ContextChecker {
 		if (lambda.signals) 
 			throw new CTX_EXCEPTION(r.getSource(), "Predicates may not signal exceptions");
 		
-		/* Add default mapping, function may not be casted otherwise */
-		if (r.proviso.size() == 0) 
-			lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		/* Set context and add mapping */
+		lambda.setContext(r.proviso);
+		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		
+		/* Make sure function is check, may only be called through anonymous predicate */
+		this.scopes.push(new Scope(this.scopes.get(0)));
+		lambda.check(this);
+		this.scopes.pop();
 		
 		r.origin = lambda;
 		

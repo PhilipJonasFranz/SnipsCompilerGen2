@@ -13,8 +13,7 @@ int main() {
 TESTCASES
 128
 OUTPUT
-/* --test_04.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_04.txt */
     b main
 baz:                                         /* Function: baz */
     push { r3 }

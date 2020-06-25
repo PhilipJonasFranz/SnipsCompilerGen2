@@ -79,6 +79,7 @@ public class TestDriver {
 		comp.printLogo();
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
+		CompilerDriver.includeMetaInformation = false;
 		
 		List<String> paths = new ArrayList();
 		

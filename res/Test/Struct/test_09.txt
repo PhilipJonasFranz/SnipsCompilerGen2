@@ -16,8 +16,7 @@ TESTCASES
 2 0 0
 2 1 0
 OUTPUT
-/* --test_09.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_09.txt */
 .data
 HEAP_START: .word 0
 NULL: .word 0
@@ -226,6 +225,8 @@ List.create_P0:                              /* Function: List.create, Provisos:
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
+    
+/* Removes all elements from the list */
     
 main:                                        /* Function: main */
     push { r3, r4, r5, fp, lr }

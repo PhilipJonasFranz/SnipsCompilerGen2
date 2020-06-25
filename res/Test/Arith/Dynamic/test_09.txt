@@ -24,8 +24,7 @@ TESTCASES
 0 15
 2 21
 OUTPUT
-/* --test_09.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_09.txt */
     b main
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

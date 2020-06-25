@@ -46,8 +46,7 @@ TESTCASES
 10 9
 11 9
 OUTPUT
-/* --test_03.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_03.txt */
 .data
 HEAP_START: .word 0
     

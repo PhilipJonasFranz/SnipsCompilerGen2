@@ -78,8 +78,8 @@ public class AsNBody extends AsNNode {
 		Date today = Calendar.getInstance().getTime();        
 		String todayAsString = df.format(today);
 		
-		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName() + ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString));
-		body.instructions.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
+		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName() + ((CompilerDriver.includeMetaInformation)? ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString : "")));
+		if (CompilerDriver.includeMetaInformation) body.instructions.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
 											 ", Optimizer: " + ((!CompilerDriver.disableOptimizer)? "Enabled" : "Disabled") + 
 											 ", Modifiers: " + ((!CompilerDriver.disableModifiers)? "Enabled" : "Disabled")));
 		

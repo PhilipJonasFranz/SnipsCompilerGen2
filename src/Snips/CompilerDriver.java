@@ -64,7 +64,8 @@ public class CompilerDriver {
 		disableModifiers = false,
 		disableOptimizer = false,
 		disableWarnings = false,
-		disableStructSIDHeaders = false;
+		disableStructSIDHeaders = false,
+		includeMetaInformation = true;
 			
 	/* Debug */
 	public static boolean

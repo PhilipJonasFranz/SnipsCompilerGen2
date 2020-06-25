@@ -72,8 +72,7 @@ int main() {
 TESTCASES
 18
 OUTPUT
-/* --test_08.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_08.txt */
 .data
 arr: 
         .word 5
@@ -295,7 +294,6 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
-/* Dereference through pointer */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
@@ -504,6 +502,8 @@ List.remove.L15:
     pop { r3, r4, r5, r6, fp, lr }
     bx lr
 .POOL4_main.L5_NULL: .word NULL
+    
+/* Removes all elements from the list */
     
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
     push { r3, r4, r5, r6 }

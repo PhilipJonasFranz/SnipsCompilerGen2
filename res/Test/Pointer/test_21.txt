@@ -25,8 +25,7 @@ int main() {
 TESTCASES
 20
 OUTPUT
-/* --test_21.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_21.txt */
     b main
     
 main:                                        /* Function: main */

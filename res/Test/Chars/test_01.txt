@@ -10,8 +10,7 @@ bool main() {
 TESTCASES
 1
 OUTPUT
-/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_01.txt */
 .data
 HEAP_START: .word 0
 NULL: .word 0
@@ -230,7 +229,6 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
-/* Dereference through pointer */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
@@ -338,6 +336,8 @@ List.size.L2:
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
+    
+/* Removes all elements from the list */
     
 /* This package contains various utility functions for Strings chars. */
 /* Compares the two given strings. Checks if all chars are equal and returns the */

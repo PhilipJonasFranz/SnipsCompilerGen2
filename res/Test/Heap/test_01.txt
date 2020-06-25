@@ -10,8 +10,7 @@ int main(int a) {
 TESTCASES
 2
 OUTPUT
-/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_01.txt */
 .data
 HEAP_START: .word 0
     

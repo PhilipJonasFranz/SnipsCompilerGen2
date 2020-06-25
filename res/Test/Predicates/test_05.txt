@@ -1,0 +1,37 @@
+SOURCE
+T get<T>() {
+	return (T) 5;
+}
+
+int main(int x) {
+	int p0 = (int) get<int>;
+	func pred = (func) p0;
+	
+	return pred();
+}
+TESTCASES
+5
+OUTPUT
+/* --test_05.txt */
+    b main
+lambda_get_P0:                               /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+get_P0:                                      /* Function: get, Provisos: INT */
+    mov r0, #5                               /* Evaluate Expression */
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, r4, r5, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_get_P0
+    mov r4, r0
+    mov r5, r0
+    add lr, pc, #8                           /* Evaluate Expression */
+    mov pc, r5
+    mov sp, fp
+    pop { r3, r4, r5, fp, lr }
+    bx lr
+    

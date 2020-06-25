@@ -19,13 +19,12 @@ TESTCASES
 0 5
 1 4
 OUTPUT
-/* --test_04.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_04.txt */
     b main
 lambda_add5_P0:                              /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-add5_P0:                                     /* Function: add5, Provisos: BOOL | INT */
+add5_P0:                                     /* Function: add5, Provisos: INT | BOOL */
     push { r3 }
     mov r3, r0
     cmp r3, #0

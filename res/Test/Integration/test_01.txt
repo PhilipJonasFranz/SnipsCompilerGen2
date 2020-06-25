@@ -15,8 +15,7 @@ TESTCASES
 4 24
 5 120
 OUTPUT
-/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_01.txt */
     b main
 fac:                                         /* Function: fac */
     push { r3, fp, lr }

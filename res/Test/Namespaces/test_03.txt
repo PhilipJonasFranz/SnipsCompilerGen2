@@ -14,8 +14,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_03.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_03.txt */
 .data
 Foo.x: .word 10
 Foo.y: .word 15

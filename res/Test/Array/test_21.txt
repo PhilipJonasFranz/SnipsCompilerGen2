@@ -10,8 +10,7 @@ TESTCASES
 1 0 2
 1 1 0
 OUTPUT
-/* --test_21.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_21.txt */
 .data
 vec: 
         .word 3

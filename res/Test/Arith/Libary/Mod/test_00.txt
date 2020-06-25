@@ -9,8 +9,7 @@ TESTCASES
 25 7 4
 213829 213 190
 OUTPUT
-/* --test_00.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
-/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
+/* --test_00.txt */
     b main
 __op_mod:                                    /* Function: __op_mod */
     push { r3, r4, r5, r6, r7 }
