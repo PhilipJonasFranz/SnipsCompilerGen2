@@ -56,13 +56,15 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public int getFieldByteOffset(NamespacePath path) {
-		int offset = 0;
+		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
+		
 		for (Declaration dec : this.typedef.fields) {
 			if (dec.path.build().equals(path.build())) {
 				return offset * 4;
 			}
 			else offset += dec.getType().wordsize();
 		}
+	
 		return -1;
 	}
 	
@@ -128,7 +130,8 @@ public class STRUCT extends COMPOSIT {
 		for (Declaration dec : this.typedef.fields) {
 			sum += dec.getType().wordsize();
 		}
-		return sum;
+		
+		return sum + ((!CompilerDriver.disableStructSIDHeaders)? 1 : 0);
 	}
 
 	public TYPE getCoreType() {

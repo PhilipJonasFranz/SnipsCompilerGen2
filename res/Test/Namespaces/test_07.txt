@@ -19,7 +19,7 @@ int main() {
 }
 
 TESTCASES
-24
+28
 OUTPUT
 /* --test_07.txt */
 .data
@@ -30,12 +30,16 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
+    mov r0, #1
+    push { r0 }
     ldr r1, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
     ldr r1, [r1]
-    add r0, r1, #4
-    sub r1, fp, #4
+    add r0, r1, #8
+    sub r1, fp, #8
+    add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #4                           /* Evaluate Expression */
+    sub r1, fp, #8                           /* Evaluate Expression */
+    add r1, r1, #4
     ldr r1, [r1]                             /* Load field from struct */
     ldr r2, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
     ldr r2, [r2]

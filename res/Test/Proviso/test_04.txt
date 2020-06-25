@@ -22,7 +22,10 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
-    sub r1, fp, #12                          /* Evaluate Expression */
+    mov r0, #1
+    push { r0 }
+    sub r1, fp, #16                          /* Evaluate Expression */
+    add r1, r1, #4
     ldr r3, [r1]                             /* Load field from struct */
     add r0, r3, #1
     lsl r0, r0, #2                           /* Convert to bytes */

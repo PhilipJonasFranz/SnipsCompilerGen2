@@ -18,14 +18,18 @@ main:                                        /* Function: main */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #3
     push { r1, r0 }
+    mov r0, #1
+    push { r0 }
     mov r0, #8                               /* Evaluate Expression */
-    sub r1, fp, #8
+    sub r1, fp, #12
+    add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #8                           /* Evaluate Expression */
+    sub r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
-    sub r1, fp, #8                           /* Load field location */
-    add r1, r1, #4
+    sub r1, fp, #12                          /* Load field location */
+    add r1, r1, #8
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

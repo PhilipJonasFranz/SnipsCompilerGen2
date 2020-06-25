@@ -22,6 +22,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -1380,6 +1381,21 @@ public class ContextChecker {
 		
 		init.setType(new ARRAY((init.dontCareTypes)? new VOID() : type0, (init.dontCareTypes)? dontCareSize : init.elements.size()));
 		return init.getType();
+	}
+	
+	public TYPE checkInstanceofExpression(InstanceofExpression iof) throws CTX_EXCEPTION {
+		iof.expression.check(this);
+		
+		if (CompilerDriver.disableStructSIDHeaders) {
+			throw new CTX_EXCEPTION(iof.getSource(), "SID headers are disabled, instanceof is not available");
+		}
+		
+		if (!(iof.instanceType instanceof STRUCT)) {
+			throw new CTX_EXCEPTION(iof.getSource(), "Expected struct type, got " + iof.instanceType.typeString());
+		}
+		
+		iof.setType(new BOOL());
+		return iof.getType();
 	}
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXCEPTION {

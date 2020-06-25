@@ -15,6 +15,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -77,6 +78,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof SizeOfExpression) {
 			node = AsNSizeOfExpression.cast((SizeOfExpression) e, r, map, st, 0);
+		}
+		else if (e instanceof InstanceofExpression) {
+			node = AsNInstanceOfExpression.cast((InstanceofExpression) e, r, map, st, 0);
 		}
 		else if (e instanceof AddressOf) {
 			node = AsNAddressOf.cast((AddressOf) e, r, map, st, 0); 

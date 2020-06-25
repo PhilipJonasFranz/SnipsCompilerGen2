@@ -25,6 +25,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -1379,8 +1380,21 @@ public class Parser {
 			accept(TokenType.RPAREN);
 		}
 		
-		if (sof == null) sof = this.parseAddressOf();
+		if (sof == null) sof = this.parseInstanceOf();
 		return sof;
+	}
+	
+	protected Expression parseInstanceOf() throws PARSE_EXCEPTION {
+		Expression iof = this.parseAddressOf();
+		if (current.type == TokenType.INSTANCEOF) {
+			Source source = accept().getSource();
+			
+			TYPE type = this.parseType();
+			
+			iof = new InstanceofExpression(iof, type, source);
+		}
+		
+		return iof;
 	}
 	
 	protected Expression parseAddressOf() throws PARSE_EXCEPTION {

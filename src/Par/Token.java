@@ -80,6 +80,7 @@ public class Token {
 		DEFAULT("default"),
 		INCLUDE("include"),
 		SIZEOF("sizeof"),
+		INSTANCEOF("instanceof"),
 		RETURN("return"),
 		
 		DOT("."),

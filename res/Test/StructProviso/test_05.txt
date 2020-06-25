@@ -138,7 +138,7 @@ insert_P0:                                   /* Function: insert, Provisos: INT 
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r0, #3                               /* Evaluate Expression */
+    mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r5, r0
     mov sp, fp
@@ -148,7 +148,7 @@ insert_P0:                                   /* Function: insert, Provisos: INT 
 main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
+    mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
@@ -156,17 +156,21 @@ main:                                        /* Function: main */
     mov r0, #0
     push { r0 }
     mov r0, #0
+    push { r0 }
+    mov r0, #1
     lsl r1, r3, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
     mov r1, #15
     mov r0, r3
     bl insert_P0                             /* Call insert */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
+    add r1, r1, #12
     ldr r0, [r1]                             /* Load field from struct */
     mov sp, fp
     pop { r3, fp, lr }

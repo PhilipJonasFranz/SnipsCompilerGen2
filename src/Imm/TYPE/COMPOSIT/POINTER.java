@@ -28,7 +28,7 @@ public class POINTER extends COMPOSIT {
 
 	public boolean isEqual(TYPE type) {
 		if (type instanceof NULL) return true;
-		if (type.getCoreType() instanceof VOID) return true;
+		if (type.getCoreType() instanceof VOID || this.getCoreType() instanceof VOID) return true;
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
 			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {

@@ -128,25 +128,29 @@ resv.L18:
 main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #3
     push { r1, r0 }
+    mov r0, #1
     lsl r1, r3, #2
-    pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
     mov r0, #8                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
+    add r1, r1, #8
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
