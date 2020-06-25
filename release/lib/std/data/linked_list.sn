@@ -60,7 +60,7 @@ namespace List {
 		*n = ListNode<T>::(null, x);
 	
 		if (lp->head == null) {
-			lp->head = n; // Dereference through pointer
+			lp->head = n;
 			lp->tail = n;
 		}
 		else {
@@ -238,6 +238,22 @@ namespace List {
 				return;
 			}
 		}
+	}
+	
+	/*
+	 * Removes all elements from the list
+	 */
+	shared void clear(LinkedList<void>* lp) {
+		ListNode<void>* n = lp->head;
+		while (n != null) {
+			free(n);
+			n = n->next;
+		}
+		
+		lp->head = null;
+		lp->tail = null;
+		
+		return;
 	}
 	
 }
