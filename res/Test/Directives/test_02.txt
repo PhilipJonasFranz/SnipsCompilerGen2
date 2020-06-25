@@ -14,7 +14,8 @@ TESTCASES
 1 0 11
 1 1 25
 OUTPUT
-/* --test_02.txt */
+/* --test_02.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
     
 mult:                                        /* Function: mult */

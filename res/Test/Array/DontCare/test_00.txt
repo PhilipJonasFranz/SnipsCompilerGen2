@@ -19,7 +19,8 @@ TESTCASES
 5 10
 6 5
 OUTPUT
-/* --test_00.txt */
+/* --test_00.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8

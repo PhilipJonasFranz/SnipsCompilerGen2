@@ -12,7 +12,8 @@ int main() {
 TESTCASES
 22
 OUTPUT
-/* --test_12.txt */
+/* --test_12.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:53 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */

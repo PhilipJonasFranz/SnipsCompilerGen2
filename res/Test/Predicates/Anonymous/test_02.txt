@@ -17,7 +17,8 @@ int main() {
 TESTCASES
 11
 OUTPUT
-/* --test_02.txt */
+/* --test_02.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

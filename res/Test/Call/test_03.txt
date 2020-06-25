@@ -16,7 +16,8 @@ TESTCASES
 0 8
 6 26
 OUTPUT
-/* --test_03.txt */
+/* --test_03.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 bar:                                         /* Function: bar */
     mov r0, #2                               /* Evaluate Expression */

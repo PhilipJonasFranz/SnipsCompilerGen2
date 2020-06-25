@@ -16,7 +16,8 @@ int main() {
 TESTCASES
 30
 OUTPUT
-/* --test_19.txt */
+/* --test_19.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:50 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 __vec_cross:                                 /* Function: __vec_cross */
     push { r3, r4, fp }

@@ -12,7 +12,8 @@ TESTCASES
 1 1
 2 2
 OUTPUT
-/* --test_04.txt */
+/* --test_04.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 forEach:                                     /* Function: forEach */
     push { r3, r4 }

@@ -7,7 +7,8 @@ TESTCASES
 10 5 2
 20 4 5
 OUTPUT
-/* --test_10.txt */
+/* --test_10.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:53 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 __op_div:                                    /* Function: __op_div */
     push { r3, r4, r5, r6 }

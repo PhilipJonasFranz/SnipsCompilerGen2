@@ -1,6 +1,10 @@
 package Imm.AsN;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import CGen.LabelGen;
@@ -70,8 +74,14 @@ public class AsNBody extends AsNNode {
 		MemoryMap map = new MemoryMap();
 		
 		/* File name comment */
-		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName()));
+		DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		Date today = Calendar.getInstance().getTime();        
+		String todayAsString = df.format(today);
 		
+		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName() + ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString));
+		body.instructions.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
+											 ", Optimizer: " + ((!CompilerDriver.disableOptimizer)? "Enabled" : "Disabled") + 
+											 ", Modifiers: " + ((!CompilerDriver.disableModifiers)? "Enabled" : "Disabled")));
 		
 		/* Create .data section annotation */
 		ASMSectionAnnotation data = new ASMSectionAnnotation(SECTION.DATA);

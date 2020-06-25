@@ -30,7 +30,8 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 62
 OUTPUT
-/* --test_11.txt */
+/* --test_11.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 bar:                                         /* Function: bar */
     push { r3, r4, r5, fp }

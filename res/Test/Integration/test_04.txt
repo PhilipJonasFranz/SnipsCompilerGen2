@@ -14,7 +14,8 @@ int main() {
 TESTCASES
 78
 OUTPUT
-/* --test_04.txt */
+/* --test_04.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:51 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 sarrus:                                      /* Function: sarrus */
     push { fp }

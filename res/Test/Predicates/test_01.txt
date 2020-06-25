@@ -37,7 +37,8 @@ TESTCASES
 3 6
 4 8
 OUTPUT
-/* --test_01.txt */
+/* --test_01.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
     b main
 lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8

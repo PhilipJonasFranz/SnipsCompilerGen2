@@ -18,7 +18,8 @@ TESTCASES
 1 5
 2 12
 OUTPUT
-/* --test_12.txt */
+/* --test_12.txt, Snips Version: v.3.3.1, Date: 06/25/2020 22:19:52 */
+/*  SID-Headers: Enabled, Optimizer: Enabled, Modifiers: Enabled */
 .data
 HEAP_START: .word 0
 NULL: .word 0
