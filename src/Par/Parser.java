@@ -15,7 +15,6 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Directive.CompileDirective;
 import Imm.AST.Directive.CompileDirective.COMP_DIR;
 import Imm.AST.Directive.Directive;
-import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
@@ -236,37 +235,14 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
-		boolean incEnd = false;
-		List<Directive> include = new ArrayList();
-		List<Directive> directives = new ArrayList();
-		
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
-			if (current.type == TokenType.DIRECTIVE) {
-				Directive dir = this.parseDirective();
-				
-				if (incEnd) {
-					buffered.add(new Message("All include statements should be at the head of the file", Message.Type.WARN, true));
-				}
-				
-				if (dir instanceof IncludeDirective) {
-					include.add(dir);
-				}
-				else {
-					incEnd = true;
-					directives.add(dir);
-				}
-			}
-			else {
-				incEnd = true;
-				elements.add(this.parseProgramElement());
-			}
+			elements.add(this.parseProgramElement());
 		}
 		
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
-		program.directives.addAll(include);
 		
 		for (Message m : buffered) m.flush();
 		
@@ -427,17 +403,7 @@ public class Parser {
 	
 	public Directive parseDirective() throws PARSE_EXCEPTION {
 		Source source = accept(TokenType.DIRECTIVE).getSource();
-		if (current.type == TokenType.INCLUDE) {
-			accept();
-			accept(TokenType.CMPLT);
-			String path = "";
-			while (current.type != TokenType.CMPGT) {
-				path += accept().spelling;
-			}
-			accept();
-			return new IncludeDirective(path, source);
-		}
-		else if (current.type == TokenType.IDENTIFIER) {
+		if (current.type == TokenType.IDENTIFIER) {
 			COMP_DIR dir;
 			String s = accept(TokenType.IDENTIFIER).spelling.toLowerCase();
 			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
@@ -452,7 +418,7 @@ public class Parser {
 		}
 		else {
 			this.progress.abort();
-			throw new PARSE_EXCEPTION(source, TokenType.INCLUDE, TokenType.IDENTIFIER);
+			throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
 		}
 	}
 	
@@ -866,10 +832,6 @@ public class Parser {
 		Expression ex0 = this.parseExpression();
 		
 		accept(TokenType.SEMICOLON);
-		
-		/* Signal Statement will transform in resv and assign statement */
-		//CompilerDriver.heap_referenced = true;
-		//CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 		
 		return new SignalStatement(ex0, source);
 	}

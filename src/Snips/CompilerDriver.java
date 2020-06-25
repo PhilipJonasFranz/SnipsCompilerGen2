@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Ctx.NamespaceProcessor;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -28,6 +27,7 @@ import Par.Parser;
 import Par.Scanner;
 import Par.Token;
 import Par.Token.TokenType;
+import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
 import Util.NamespacePath;
@@ -274,7 +274,7 @@ public class CompilerDriver {
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
 				double before = body.getInstructions().size();
-				ProgressMessage aopt_progress = new ProgressMessage("AOPT -> Starting", 30, Message.Type.INFO);
+				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, Message.Type.INFO);
 				
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
@@ -283,7 +283,7 @@ public class CompilerDriver {
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 				CompilerDriver.compressions.add(rate);
-				log.add(new Message("AOPT -> Compression rate: " + rate + "%", Message.Type.INFO));
+				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
 			
@@ -555,8 +555,8 @@ public class CompilerDriver {
 		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
-		log.add(new Message("SNIPS_ASMOPT -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_ASMOPT -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
 	}
 	
 }
