@@ -4,8 +4,7 @@
  
 ## What is Snips?
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
- the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
- operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling and predicates are supported.
+ the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling, predicates and inline assembly are supported.
  
  Currently supported data types are Integers and Booleans, Chars and Strings, Enums, Predicates as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
  
