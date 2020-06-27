@@ -82,6 +82,7 @@ public class Token {
 		SIZEOF("sizeof"),
 		INSTANCEOF("instanceof"),
 		RETURN("return"),
+		ASM("asm"),
 		
 		DOT("."),
 		APOS("'"),

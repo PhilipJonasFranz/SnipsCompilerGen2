@@ -30,4 +30,31 @@ public class RegOperand extends Operand {
 		return this.reg.toString().toLowerCase();
 	}
 	
+	public static REGISTER convertStringToReg(String reg) {
+		if (reg.equals("sp")) return REGISTER.SP;
+		else if (reg.equals("lr")) return REGISTER.LR;
+		else if (reg.equals("fp")) return REGISTER.FP;
+		else if (reg.equals("pc")) return REGISTER.PC;
+		else if (reg.equals("ex")) return REGISTER.R12;
+		else {
+			if (reg.length() < 2) {
+				return null;
+			}
+			else {
+				String r0 = reg.substring(1);
+				try {
+					int regNum = Integer.parseInt(r0);
+					
+					if (regNum < 0 || regNum > 15) {
+						return null;
+					}
+					
+					return RegOperand.toReg(regNum);
+				} catch (NumberFormatException e) {
+					return null;
+				}
+			}
+		}
+	}
+	
 }

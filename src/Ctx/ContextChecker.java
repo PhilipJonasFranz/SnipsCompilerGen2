@@ -48,6 +48,7 @@ import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
@@ -1604,32 +1605,44 @@ public class ContextChecker {
 	public TYPE checkRegisterAtom(RegisterAtom a) throws CTX_EXCEPTION {
 		String reg = a.spelling.toLowerCase();
 		
-		if (reg.equals("sp")) a.reg = REGISTER.SP;
-		else if (reg.equals("lr")) a.reg = REGISTER.LR;
-		else if (reg.equals("fp")) a.reg = REGISTER.FP;
-		else if (reg.equals("pc")) a.reg = REGISTER.PC;
-		else if (reg.equals("ex")) a.reg = REGISTER.R12;
-		else {
-			if (reg.length() < 2) {
-				throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
-			}
-			else {
-				String r0 = reg.substring(1);
-				try {
-					int regNum = Integer.parseInt(r0);
-					
-					if (regNum < 0 || regNum > 15) {
-						throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
-					}
-					
-					a.reg = RegOperand.toReg(regNum);
-				} catch (NumberFormatException e) {
-					throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
-				}
+		REGISTER reg0 = RegOperand.convertStringToReg(reg);
+		
+		if (reg0 == null) {
+			throw new CTX_EXCEPTION(a.getSource(), "Unknown register: " + reg);
+		}
+		else a.reg = reg0;
+		
+		return a.getType();
+	}
+	
+	public TYPE checkDirectASMStatement(DirectASMStatement d) throws CTX_EXCEPTION {
+		for (Pair<Expression, REGISTER> p : d.dataIn) {
+			TYPE t = p.first.check(this);
+			
+			if (t.wordsize() > 1) {
+				throw new CTX_EXCEPTION(p.first.getSource(), "All data typs of direct asm must be 1 data word large, got " + t.typeString());
 			}
 		}
 		
-		return a.getType();
+		for (Pair<Expression, REGISTER> p : d.dataOut) {
+			TYPE t = p.first.check(this);
+			
+			if (!(p.first instanceof IDRef)) {
+				throw new CTX_EXCEPTION(p.first.getSource(), "Expected IDRef, got " + p.first.getClass().getName());
+			}
+			
+			if (t.wordsize() > 1) {
+				throw new CTX_EXCEPTION(p.first.getSource(), "All data typs of direct asm must be 1 data word large, got " + t.typeString());
+			}
+		}
+		
+		if (d.dataOut.isEmpty()) {
+			if (!CompilerDriver.disableWarnings) {
+				messages.add(new Message("Direct ASM Operation has no explicit outputs, " + d.getSource(), Message.Type.WARN, true));
+			}
+		}
+		
+		return new VOID();
 	}
 	
 }

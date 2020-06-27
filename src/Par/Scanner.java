@@ -107,6 +107,7 @@ public class Scanner {
 			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			""),
 			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			""),
 			new ScannableToken("return",	TokenType.RETURN,		ACC_STATE.NONE,			" ", ";"),
+			new ScannableToken("asm",		TokenType.ASM,			ACC_STATE.NONE,			" ", "(", "{"),
 			new ScannableToken("break",		TokenType.BREAK,		ACC_STATE.NONE,			" ", ";"),
 			new ScannableToken("continue",	TokenType.CONTINUE,		ACC_STATE.NONE,			" ", ";"),
 			new ScannableToken("while",		TokenType.WHILE,		ACC_STATE.NONE,			" ", "("),

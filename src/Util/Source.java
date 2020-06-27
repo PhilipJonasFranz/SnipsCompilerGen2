@@ -5,7 +5,7 @@ public class Source {
 			/* --- FIELDS --- */
 	private String sourceFile;
 	
-	private int row, col;
+	public int row, col;
 	
 	
 			/* --- CONSTRUCTORS --- */

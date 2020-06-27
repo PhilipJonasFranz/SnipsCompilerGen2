@@ -11,6 +11,7 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
@@ -56,6 +57,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof SignalStatement) {
 			node = AsNSignalStatement.cast((SignalStatement) s, r, map, st); 
+		}
+		else if (s instanceof DirectASMStatement) {
+			node = AsNDirectASMStatement.cast((DirectASMStatement) s, r, map, st); 
 		}
 		else if (s instanceof Comment) {
 			node = AsNComment.cast((Comment) s, r, map, st); 

@@ -42,6 +42,7 @@ import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
@@ -49,6 +50,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
+import Util.Pair;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -165,7 +167,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (s instanceof Declaration) {
 			if (s.equals(dec)) return false;
-			else return this.hasAddressReference(((Declaration) s).value, dec);
+			else {
+				Declaration d = (Declaration) s;
+				if (d.value != null) return this.hasAddressReference(d.value, dec);
+				else return false;
+			}
 		}
 		else if (s instanceof Assignment) {
 			return this.hasAddressReference(((Assignment) s).value, dec);
@@ -191,6 +197,21 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (s instanceof AssignWriteback) {
 			AssignWriteback awb = (AssignWriteback) s;
 			return this.hasAddressReference(awb.reference, dec);
+		}
+		else if (s instanceof DirectASMStatement) {
+			DirectASMStatement d = (DirectASMStatement) s;
+			
+			boolean hasRef = false;
+			
+			for (Pair<Expression, REGISTER> p : d.dataIn) {
+				hasRef |= this.hasAddressReference(p.first, dec);
+			}
+			
+			for (Pair<Expression, REGISTER> p : d.dataOut) {
+				hasRef |= this.hasAddressReference(p.first, dec);
+			}
+			
+			return hasRef;
 		}
 		else if (s instanceof SignalStatement) {
 			SignalStatement s0 = (SignalStatement) s;
