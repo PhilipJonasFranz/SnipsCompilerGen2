@@ -1638,7 +1638,7 @@ public class ContextChecker {
 		
 		if (d.dataOut.isEmpty()) {
 			if (!CompilerDriver.disableWarnings) {
-				messages.add(new Message("Direct ASM Operation has no explicit outputs, " + d.getSource(), Message.Type.WARN, true));
+				messages.add(new Message("Direct ASM Operation has no explicit outputs, " + d.getSource().getSourceMarker(), Message.Type.WARN, true));
 			}
 		}
 		

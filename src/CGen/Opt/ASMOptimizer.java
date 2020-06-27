@@ -3,6 +3,7 @@ package CGen.Opt;
 import java.util.ArrayList;
 import java.util.List;
 
+import Imm.ASM.ASMHardcode;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -824,6 +825,10 @@ public class ASMOptimizer {
 							if (p.op0.reg == target || (p.op1 instanceof RegOperand && ((RegOperand) p.op1).reg == target)) {
 								clear = false;
 							}
+						}
+						else if (body.instructions.get(a) instanceof ASMHardcode) {
+							clear = false;
+							break;
 						}
 						else {
 							clear = false;
