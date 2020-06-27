@@ -12,9 +12,7 @@ import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOperand;
 import Imm.AsN.AsNNode;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class LiteralManager {
 
 			/* --- FIELDS --- */

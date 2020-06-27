@@ -7,7 +7,6 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -17,7 +16,6 @@ public class IDRefWriteback extends Expression {
 			/* --- FIELDS --- */
 	public WRITEBACK writeback;
 	
-	@Getter
 	private Expression shadowRef;
 	
 	public IDRef idRef;
@@ -51,6 +49,10 @@ public class IDRefWriteback extends Expression {
 
 	public void releaseContext() {
 		this.shadowRef.releaseContext();
+	}
+	
+	public Expression getShadowRef() {
+		return this.shadowRef;
 	}
 	
 }

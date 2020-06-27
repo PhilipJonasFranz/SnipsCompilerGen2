@@ -33,7 +33,6 @@
  If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips (Full Path to file to compile)". With "snips -help" you can get more information on the arguments.
 
 ### Running the code
-The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
  Code examples and testcases can be found under res/Test/ and under release/examples/.

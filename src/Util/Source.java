@@ -1,14 +1,19 @@
 package Util;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public class Source {
 
 			/* --- FIELDS --- */
 	private String sourceFile;
 	
 	private int row, col;
+	
+	
+			/* --- CONSTRUCTORS --- */
+	public Source(String sourceFile, int row, int col) {
+		this.sourceFile = sourceFile;
+		this.row = row;
+		this.col = col;
+	}
 	
 	
 			/* --- METHODS --- */

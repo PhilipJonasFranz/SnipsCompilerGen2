@@ -1,14 +1,10 @@
 package REv.Modules.RAsm;
 
-import lombok.Getter;
-
 public class Instruction {
 	
 			/* --- FIELDS --- */
-	@Getter
 	String instruction;
 	
-	@Getter
 	int line;
 	
 	
@@ -26,6 +22,14 @@ public class Instruction {
 	
 	public boolean isEmpty() {
 		return this.instruction.equals("");
+	}
+	
+	public String getInstruction() {
+		return this.instruction;
+	}
+	
+	public int getLine() {
+		return this.line;
 	}
 	
 }

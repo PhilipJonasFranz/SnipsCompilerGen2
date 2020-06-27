@@ -13,13 +13,11 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.EnumTypedef;
 import Imm.AST.Statement.StructTypedef;
-import lombok.NoArgsConstructor;
 
 /**
  * The namespace processor is responsible to merge namespaces with the same name,
  * and flatten their syntax elements into the syntax elements of the program.
  */
-@NoArgsConstructor
 public class NamespaceProcessor {
 	
 	public void process(Program p) {

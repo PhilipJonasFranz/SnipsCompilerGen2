@@ -6,20 +6,20 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token;
 import Par.Token.TokenType;
 import Util.Logging.Message;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public abstract class TYPE<T> {
 
 			/* --- FIELDS --- */
 	protected int wordSize = 1;
 	
-	@Getter
 	public T value;
 	
 	
 			/* --- CONSTRUCTORS --- */
+	public TYPE() {
+		
+	}
+	
 	public TYPE(String initialValue) {
 		this.setValue(initialValue);
 	}
@@ -59,5 +59,9 @@ public abstract class TYPE<T> {
 	}
 	
 	public abstract TYPE clone();
+	
+	public T getValue() {
+		return this.value;
+	}
 	
 }

@@ -10,18 +10,26 @@ import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
-import lombok.AllArgsConstructor;
 
 public class PreProcessor {
 
-	@AllArgsConstructor
 	public class LineObject {
 		
+				/* --- FIELDS --- */
 		public int lineNumber;
 		
 		public String line;
 		
 		public String fileName;
+		
+		
+				/* --- CONSTRUCTORS --- */
+		public LineObject(int lineNumber, String line, String fileName) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.fileName = fileName;
+		}
+		
 	}
 	
 	List<LineObject> process = new ArrayList();
