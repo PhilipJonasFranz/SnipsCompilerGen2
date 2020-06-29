@@ -107,7 +107,9 @@ public class AsNBody extends AsNNode {
 		boolean addGlobalInit = false;
 		List<ASMInstruction> globalsInit = new ArrayList();
 		globalsInit.add(new ASMComment("Initialize the global variables"));
-		globalsInit.add(new ASMPushStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		ASMLabel initLabel = new ASMLabel("main_init");
+		globalsInit.add(initLabel);
+		globalsInit.add(new ASMPushStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR)));
 		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
@@ -125,31 +127,6 @@ public class AsNBody extends AsNNode {
 				/* Add declaration to global memory */
 				map.add(dec, reference);
 				globals = true;
-				
-				/* Has value, cast assembly into globalsInit */
-				if (dec.value != null && !(dec.value instanceof Atom)) {
-					addGlobalInit = true;
-					
-					/* Cast Expression before main call */
-					globalsInit.addAll(AsNExpression.cast(dec.value, r, map, st).getInstructions());
-					
-					ASMDataLabel label = map.resolve(dec);
-					
-					/* Load memory address */
-					ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), dec);
-					ins.comment = new ASMComment("Load from .data section");
-					globalsInit.add(ins);
-					
-					if (dec.value.getType().wordsize() == 1) {
-						globalsInit.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
-					}
-					else {
-						/* Quick and dirty way to relay the generated instructions into a AsNNode */
-						AsNIdRef ref = new AsNIdRef();
-						AsNAssignment.copyStackSection(dec.getType().wordsize(), ref, st);
-						globalsInit.addAll(ref.instructions);
-					}
-				}
 				
 				done++;
 				progress.incProgress((double) done / p.programElements.size());
@@ -193,15 +170,10 @@ public class AsNBody extends AsNNode {
 		
 		
 		/* Add .text annotation if other sections exist */
+		ASMInstruction TEXT = new ASMSectionAnnotation(SECTION.TEXT);
 		if (globals) {
 			body.instructions.add(new ASMSeperator());
-			body.instructions.add(new ASMSectionAnnotation(SECTION.TEXT));
-		}
-		
-		/* Add global initialization instruction */
-		if (addGlobalInit) {
-			globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
-			body.instructions.addAll(globalsInit);
+			body.instructions.add(TEXT);
 		}
 		
 		/* Branch to main Function if main function is not first function, patch target later */
@@ -213,6 +185,7 @@ public class AsNBody extends AsNNode {
 		List<ASMInstruction> routine = body.buildStackCopyRoutine();
 		body.instructions.addAll(routine);
 	
+		ASMLabel mainLabel = null;
 		
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
@@ -225,8 +198,10 @@ public class AsNBody extends AsNNode {
 				
 				if (!ins.isEmpty()) {
 					/* Patch Branch to Main Function */
-					if (((Function) s).path.build().equals("main")) 
+					if (((Function) s).path.build().equals("main")) {
 						((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
+						mainLabel = (ASMLabel) ins.get(0);
+					}
 				}
 				
 				body.instructions.addAll(ins);
@@ -240,6 +215,84 @@ public class AsNBody extends AsNNode {
 			
 				done++;
 				progress.incProgress((double) done / p.programElements.size());
+			}
+		}
+		
+		for (int i = 0; i < p.programElements.size(); i++) {
+			SyntaxElement s = p.programElements.get(i);
+			if (s instanceof Declaration) {
+				Declaration dec = (Declaration) s;
+				
+				/* Has value, cast assembly into globalsInit */
+				if (dec.value != null && !(dec.value instanceof Atom)) {
+					addGlobalInit = true;
+					
+					/* Cast Expression before main call */
+					globalsInit.addAll(AsNExpression.cast(dec.value, r, map, st).getInstructions());
+					
+					ASMDataLabel label = map.resolve(dec);
+					
+					/* Load memory address */
+					ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), dec);
+					ins.comment = new ASMComment("Load from .data section");
+					globalsInit.add(ins);
+					
+					if (dec.value.getType().wordsize() == 1) {
+						globalsInit.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+					}
+					else {
+						/* Quick and dirty way to relay the generated instructions into a AsNNode */
+						AsNIdRef ref = new AsNIdRef();
+						AsNAssignment.copyStackSection(dec.getType().wordsize(), ref, st);
+						globalsInit.addAll(ref.instructions);
+					}
+				}
+			}
+		}
+		
+		/* Add global initialization instruction */
+		if (addGlobalInit) {
+			boolean hasCall = false;
+			for (int i = 0; i < globalsInit.size(); i++) {
+				if (globalsInit.get(i) instanceof ASMBranch && ((ASMBranch) globalsInit.get(i)).type == BRANCH_TYPE.BL) {
+					hasCall = true;
+				}
+				else if (globalsInit.get(i) instanceof ASMMov && ((ASMMov) globalsInit.get(i)).target.reg == REGISTER.PC) {
+					hasCall = true;
+				}
+			}
+			
+			if (!hasCall) {
+				ASMPushStack push = (ASMPushStack) globalsInit.get(2);
+				push.operands.remove(push.operands.size() - 1);
+				push.operands.remove(push.operands.size() - 1);
+				
+				globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			}
+			else globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR)));
+			
+			/* Only main function present, dont need branch */
+			if (p.programElements.stream().filter(x -> x instanceof Function).count() == 1 && !AsNBody.usedStackCopyRoutine) {
+				body.instructions.remove(branch);
+			}
+			else {
+				/* Add seperator before init block to other functions */
+				globalsInit.add(0, new ASMSeperator());
+			}
+			
+			/* Inject global init before main function, relay main jump at start to new block */
+			for (int i = 0; i < body.instructions.size(); i++) {
+				if (body.instructions.get(i).equals(mainLabel)) {
+					/* Remove seperator before main function */
+					if (body.instructions.get(i - 1) instanceof ASMSeperator) body.instructions.remove(i - 1);
+					
+					/* Inject global init code */
+					body.instructions.addAll(i - 1, globalsInit);
+					
+					/* Relay start branch to init block */
+					((LabelOperand) branch.target).label = initLabel;
+					break;
+				}
 			}
 		}
 		
@@ -304,10 +357,6 @@ public class AsNBody extends AsNNode {
 				}
 			}
 		}
-		
-		/* Main function not present */
-		if (((LabelOperand) branch.target).label == null) 
-			body.instructions.remove(branch);
 		
 		progress.incProgress(1);
 		

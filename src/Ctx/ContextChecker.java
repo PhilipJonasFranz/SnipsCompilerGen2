@@ -124,11 +124,16 @@ public class ContextChecker {
 		/* Add global reserved declarations */
 		scopes.peek().addDeclaration(CompilerDriver.HEAP_START);
 		
+		boolean gotMain = false;
+		
 		this.head = p;
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Function) {
 				Function f = (Function) s;
+				
+				if (f.path.build().equals("main")) gotMain = true;
+				
 				/* Check main function as entrypoint, if a function is called, context is provided
 				 * and then checked */
 				if (f.path.build().equals("main") && !f.manager.provisosTypes.isEmpty()) {
@@ -149,6 +154,9 @@ public class ContextChecker {
 					f.check(this);
 				}
 			}
+			else if (s instanceof Declaration) {
+				s.check(this);
+			}
 			else if (s instanceof Namespace) {
 				p.namespaces.add((Namespace) s);
 				s.check(this);
@@ -158,6 +166,10 @@ public class ContextChecker {
 			if (progress != null) {
 				progress.incProgress((double) i / p.programElements.size());
 			}
+		}
+		
+		if (!gotMain) {
+			throw new CTX_EXCEPTION(p.getSource(), "Missing main function");
 		}
 		
 		if (progress != null) progress.incProgress(1);
@@ -1117,7 +1129,8 @@ public class ContextChecker {
 		Function f = this.linkFunction(i.path, i, i.getSource());
 		
 		i.calledFunction = f;
-		i.watchpoint = this.exceptionEscapeStack.peek();
+		
+		if (!this.exceptionEscapeStack.isEmpty()) i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		if (f != null) {
 			

@@ -79,18 +79,7 @@ HEAP_START: .word 0
 NULL: .word 0
     
 .text
-/* Initialize the global variables */
-    push { r0, r1, r2 }
-    mov r0, #8
-    mov r1, #5
-    push { r1, r0 }
-    ldr r1, .POOL0_main.L3_arr               /* Load from .data section */
-    pop { r0 }
-    str r0, [r1, #0]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0, r1, r2 }
-    b main
+    b main_init
 /* Reseve a memory block with given size + 1. The block size has to be increased */
 /* by one to accomodate the block metadata. The function returns a void pointer to */
 /* the start of the reserved memory section + 1. This means the pointer points to */
@@ -196,7 +185,6 @@ resv.L18:
     pop { r3, r4, r5, r6 }
     bx lr
 .POOL0_main.L4_HEAP_START: .word HEAP_START
-.POOL0_main.L3_arr: .word arr
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -546,6 +534,19 @@ GameObject.Items.get:                        /* Function: GameObject.Items.get *
     
 /* A tuple containing two different value types */
 /* A contianer containing a value */
+    
+/* Initialize the global variables */
+main_init: 
+    push { r0, r1, r2 }
+    mov r0, #8
+    mov r1, #5
+    push { r1, r0 }
+    ldr r1, .POOL5_main.L3_arr               /* Load from .data section */
+    pop { r0 }
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0, r1, r2 }
 /* Inital Player data */
 main:                                        /* Function: main */
     push { r3, r4, r5, fp, lr }
