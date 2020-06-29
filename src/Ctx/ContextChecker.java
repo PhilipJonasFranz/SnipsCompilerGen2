@@ -1202,7 +1202,7 @@ public class ContextChecker {
 	}
 	
 	public void checkModifier(MODIFIER mod, NamespacePath path, Source source) throws CTX_EXCEPTION {
-		String currentPath = this.currentFunction.peek().path.buildPathOnly();
+		String currentPath = (this.currentFunction.isEmpty())? "" : this.currentFunction.peek().path.buildPathOnly();
 		
 		if (mod == MODIFIER.SHARED) return;
 		else if (mod == MODIFIER.RESTRICTED) {

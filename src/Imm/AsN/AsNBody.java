@@ -20,7 +20,9 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
+import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -44,8 +46,12 @@ import Imm.ASM.Util.Operands.Memory.MemoryWordRefOperand;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AsN.Expression.AsNExpression;
+import Imm.AsN.Expression.AsNIdRef;
+import Imm.AsN.Statement.AsNAssignment;
 import Imm.AsN.Statement.AsNComment;
 import Snips.CompilerDriver;
 import Util.Logging.ProgressMessage;
@@ -93,6 +99,16 @@ public class AsNBody extends AsNNode {
 		
 		int done = 0;
 		
+		/* Create new stack set and reg set that can be used during global variable init. */
+		StackSet st = new StackSet();
+		RegSet r = new RegSet();
+		
+		/* Instructions generated for global value init */
+		boolean addGlobalInit = false;
+		List<ASMInstruction> globalsInit = new ArrayList();
+		globalsInit.add(new ASMComment("Initialize the global variables"));
+		globalsInit.add(new ASMPushStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Declaration) {
@@ -101,7 +117,7 @@ public class AsNBody extends AsNNode {
 				/* Create instruction for .data Section */
 				ASMDataLabel dataEntry = new ASMDataLabel(dec.path.build(), new MemoryWordOperand(dec.value));
 				body.instructions.add(dataEntry);
-				
+
 				/* Create address reference instruction for .text section */
 				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.path.build()), new MemoryWordRefOperand(dataEntry));
 				globalVarReferences.add(reference);
@@ -109,6 +125,31 @@ public class AsNBody extends AsNNode {
 				/* Add declaration to global memory */
 				map.add(dec, reference);
 				globals = true;
+				
+				/* Has value, cast assembly into globalsInit */
+				if (dec.value != null && !(dec.value instanceof Atom)) {
+					addGlobalInit = true;
+					
+					/* Cast Expression before main call */
+					globalsInit.addAll(AsNExpression.cast(dec.value, r, map, st).getInstructions());
+					
+					ASMDataLabel label = map.resolve(dec);
+					
+					/* Load memory address */
+					ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), dec);
+					ins.comment = new ASMComment("Load from .data section");
+					globalsInit.add(ins);
+					
+					if (dec.value.getType().wordsize() == 1) {
+						globalsInit.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+					}
+					else {
+						/* Quick and dirty way to relay the generated instructions into a AsNNode */
+						AsNIdRef ref = new AsNIdRef();
+						AsNAssignment.copyStackSection(dec.getType().wordsize(), ref, st);
+						globalsInit.addAll(ref.instructions);
+					}
+				}
 				
 				done++;
 				progress.incProgress((double) done / p.programElements.size());
@@ -157,6 +198,11 @@ public class AsNBody extends AsNNode {
 			body.instructions.add(new ASMSectionAnnotation(SECTION.TEXT));
 		}
 		
+		/* Add global initialization instruction */
+		if (addGlobalInit) {
+			globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			body.instructions.addAll(globalsInit);
+		}
 		
 		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand());
@@ -171,7 +217,7 @@ public class AsNBody extends AsNNode {
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
-				StackSet st = new StackSet();
+				st = new StackSet();
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, st).getInstructions();
 				
 				/* Ensure that stack was emptied, so no stack shift at compile time occurred */

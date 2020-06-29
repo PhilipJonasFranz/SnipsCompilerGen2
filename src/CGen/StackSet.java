@@ -189,13 +189,13 @@ public class StackSet {
 				if (stack.get(i).declaration.equals(dec)) {
 					/* Hook was not found and there is a reg section */
 					if (!hook && regs) return -1;
-					else break;
+					else return off;
 				}
 				off += (stack.get(i).declaration.getType().wordsize() * 4);
 			}
 		}
 		
-		return off;
+		return -1;
 	}
 	
 	/**
