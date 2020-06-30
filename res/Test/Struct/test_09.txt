@@ -213,7 +213,8 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Returns the the node at the given index. Returns */
 /* null if the index is invalid. */
     
-/* Check if given list contains given value. */
+/* Check if given list contains given value. If the current value matches */
+/* the searched value determines the predicate. */
     
 /* Finds the first node in the list that has given value. */
 /* Returns a pointer to this list node, or 0 in case the */

@@ -1,0 +1,70 @@
+SOURCE
+int x = 10;
+
+struct S {
+	int x;
+}
+
+namespace X {
+
+	int get(S x) {
+		if (true) {
+			S* s = &x;
+			int x = 2;
+			s->x <<= 1;
+		}
+		return x.x;
+	}
+	
+}
+
+int main(int x) {
+	return X::get(S::(x));
+}
+TESTCASES
+0 0
+1 2
+2 4
+OUTPUT
+/* --test_02.txt */
+.data
+x: .word 10
+    
+.text
+    b main
+X.get:                                       /* Function: X.get */
+    push { r3, r4, fp }
+    mov fp, sp
+    mov r0, #1
+    cmp r0, #0
+    beq X.get.L1
+    add r0, fp, #12                          /* Evaluate Expression */
+    lsr r0, r0, #2
+    mov r3, r0
+    mov r4, #2
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
+    ldr r2, [r1]
+    lsl r0, r2, #1
+    str r0, [r1]                             /* Store value to struct field */
+X.get.L1: 
+    add r1, fp, #12                          /* Evaluate Expression */
+    add r1, r1, #4
+    ldr r0, [r1]                             /* Load field from struct */
+    mov sp, fp
+    pop { r3, r4, fp }
+    add sp, sp, #8
+    bx lr
+    
+main:                                        /* Function: main */
+    push { r3, fp, lr }
+    mov fp, sp
+    mov r3, r0
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    bl X.get                                 /* Call X.get */
+    mov sp, fp
+    pop { r3, fp, lr }
+    bx lr
+    

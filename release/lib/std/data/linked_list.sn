@@ -108,13 +108,14 @@ namespace List {
 	}
 	
 	/*
-	 * Check if given list contains given value.
+	 * Check if given list contains given value. If the current value matches
+	 * the searched value determines the predicate.
 	 */
-	shared bool contains<T>(LinkedList<T>* lp, T x) {
+	shared bool contains<T>(LinkedList<T>* lp, func (T, T) -> bool pred, T x) {
 		ListNode<T>* n = lp->head;
 		while (true) {
 			if (n == null) return false;
-			if (n->value == x) {
+			if (pred(x, n->value)) {
 				/* Value found */
 				return true;
 			}

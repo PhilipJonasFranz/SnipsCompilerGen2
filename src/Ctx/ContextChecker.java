@@ -708,7 +708,8 @@ public class ContextChecker {
 			}
 		}
 		
-		scopes.peek().addDeclaration(d);
+		Message m = scopes.peek().addDeclaration(d);
+		if (m != null) this.messages.add(m);
 		
 		/* No need to set type here, is done while parsing */
 		return d.getType();

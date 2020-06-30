@@ -7,9 +7,11 @@ import java.util.Map.Entry;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
+import Util.Logging.Message;
 
 /**
  * A scope capsules a reference to its parent scope and a 
@@ -48,23 +50,42 @@ public class Scope {
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
-	public void addDeclaration(Declaration dec) throws CTX_EXCEPTION {
-		this.checkDuplicate(dec);
+	public Message addDeclaration(Declaration dec) throws CTX_EXCEPTION {
+		Message m = this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
+		return m;
 	}
 	
 	/** 
 	 * Check if this scope or any of the parent scopes contains a declaration with the identifier
 	 * of the given declaration. Throws a CTX_EXCEPTION if this is the case.
 	 */
-	public void checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
+	public Message checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
 		if (this.declarations.containsKey(dec.path.build())) {
 			throw new CTX_EXCEPTION(dec.getSource(), "Duplicate field name: " + dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
-				this.parentScope.checkDuplicate(dec);
+				if (this.parentScope.checkDuplicateRec(dec) != null) {
+					if (!CompilerDriver.disableWarnings) {
+						return new Message("Declaration name " + dec.path.build() + " shadows variable with same name, " + dec.getSource().getSourceMarker(), Message.Type.WARN, true);
+					}
+				}
 			}
+		}
+		
+		return null;
+	}
+	
+	private Declaration checkDuplicateRec(Declaration dec) throws CTX_EXCEPTION {
+		if (this.declarations.containsKey(dec.path.build())) {
+			return this.declarations.get(dec.path.build()).first;
+		}
+		else {
+			if (this.parentScope != null) {
+				return this.parentScope.checkDuplicateRec(dec);
+			}
+			else return null;
 		}
 	}
 	
