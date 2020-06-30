@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
+import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
+import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
@@ -308,8 +311,15 @@ public class CompilerDriver {
 			}
 			
 			CompilerDriver.instructionsGenerated += output.size();
+		
 		} catch (Exception e) {
-			if (printErrors || e instanceof IndexOutOfBoundsException || e instanceof NullPointerException) e.printStackTrace();
+			boolean customExc = (e instanceof CGEN_EXCEPTION) || (e instanceof CTX_EXCEPTION) || (e instanceof PARSE_EXCEPTION) || (e instanceof SNIPS_EXCEPTION);
+			
+			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
+			
+			if (printErrors || !customExc) e.printStackTrace();
+			
+			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
 		}
 		
 		/* Report Status */
