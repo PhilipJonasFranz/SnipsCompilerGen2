@@ -1134,6 +1134,10 @@ public class ContextChecker {
 		if (!this.exceptionEscapeStack.isEmpty()) i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		if (f != null) {
+			/* Inline calls made during global setup may not signal, since exception cannot be watched */
+			if (f.signals && this.scopes.size() == 1) {
+				throw new CTX_EXCEPTION(i.getSource(), "Calls made during initial setup may not signal, but '" + f.path.build() + "' does");
+			}
 			
 			checkModifier(f.modifier, f.path, i.getSource());
 			
