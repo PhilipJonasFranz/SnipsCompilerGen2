@@ -52,22 +52,28 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		}
 		/* Variable is global variable and type is primitive, store to memory.
 		 * 		Other types in memory are handled down below. */
-		else if (map.declarationLoaded(ref.origin) && ref.origin.getType() instanceof PRIMITIVE) {
+		else if (map.declarationLoaded(ref.origin)) {
 			ASMDataLabel label = map.resolve(ref.origin);
 			
 			/* Load memory address */
 			id.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin));
-				
-			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
-				
-				/* Injector will calculate assignment arith into R0 */
-				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
-				id.instructions.addAll(inj);
-			}
 			
-			/* Store computed to memory */
-			id.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+			if (ref.origin.getType().wordsize() == 1) {
+				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
+					id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+					
+					/* Injector will calculate assignment arith into R0 */
+					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
+					id.instructions.addAll(inj);
+				}
+				
+				/* Store computed to memory */
+				id.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+			}
+			else {
+				/* Copy the value on the stack to the desired location */
+				AsNAssignment.copyStackSection(ref.origin.getType().wordsize(), id, st);
+			}
 		}
 		/* Store to stack */
 		else {

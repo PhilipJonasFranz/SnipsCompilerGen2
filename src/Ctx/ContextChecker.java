@@ -739,8 +739,8 @@ public class ContextChecker {
 		}
 		
 		if (a.assignArith != ASSIGN_ARITH.NONE) {
-			if (!(t instanceof PRIMITIVE)) {
-				throw new CTX_EXCEPTION(a.getSource(), "Assign arith operation is only applicable for primitive types");
+			if (t.wordsize() > 1) {
+				throw new CTX_EXCEPTION(a.getSource(), "Assign arith operation is only applicable for 1-Word types");
 			}
 			
 			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
