@@ -66,9 +66,10 @@ public class Scope {
 		}
 		else {
 			if (this.parentScope != null) {
-				if (this.parentScope.checkDuplicateRec(dec) != null) {
+				Declaration dec0 = null;
+				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
 					if (!CompilerDriver.disableWarnings) {
-						return new Message("Declaration name " + dec.path.build() + " shadows variable with same name, " + dec.getSource().getSourceMarker(), Message.Type.WARN, true);
+						return new Message("Variable '" + dec0.path.build() + "' at " + dec0.getSource().getSourceMarker() + " shadowed by '" + dec.path.build() + "' at " + dec.getSource().getSourceMarker(), Message.Type.WARN, true);
 					}
 				}
 			}
