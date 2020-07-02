@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.3.4.4</Version>
+	<Version>v.3.4.5</Version>
 	<Library>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
 		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
@@ -18,5 +18,6 @@
 		
 		<Alias>bits.sn:lib/std/util/bits.sn</Alias>
 		<Alias>color.sn:lib/std/util/color.sn</Alias>
+		<Alias>graphics.sn:lib/std/util/graphics.sn</Alias>
 	</Library>
 </Inf>
