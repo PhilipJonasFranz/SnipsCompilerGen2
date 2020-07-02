@@ -1388,7 +1388,7 @@ public class ContextChecker {
 		
 		int dontCareSize = 0;
 		
-		if (init.elements.size() > 1) {
+		if (init.elements.size() > 1 || init.dontCareTypes) {
 			for (int i = 0; i < init.elements.size(); i++) {
 				TYPE typeX = init.elements.get(i).check(this);
 				

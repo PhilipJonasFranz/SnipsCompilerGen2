@@ -1,0 +1,142 @@
+#include<integer.sn>
+#include<string.sn>
+
+/*
+ * Includes integer.sn, string.sn
+ *
+ * This package contains utility that implements
+ * floating-point arithmetic. Since Snips currently has
+ * no float-support, this package has to emulate floating-point
+ * by using two seperate integers.
+ *
+ * This library is only temporary until Snips has
+ * fully implemented floating point support.
+ */
+namespace Float {
+
+	enum CMP {
+		EQ, NE, GE, GT, LE, LT;
+	}
+
+	/* 
+	 * Sets the precision to work with. A precision
+	 * of 10 means that SFloats will have 1 decimal place
+	 * after the comma. Precisions should be set to
+	 * 10^n for n > 0.
+	 */
+	int precision = 100;
+
+	/*
+	 * Capsules a number and a fraction.
+	 */
+	restricted struct SFloat {
+		int n;
+		int f;
+	}
+	
+	shared SFloat* create(int n, int f) {
+		SFloat* f0 = resv(sizeof(SFloat));
+		
+		*f0 = SFloat::(n, f);
+		return f0;
+	}
+	
+	/*
+	 * Add the second SFloat from the first.
+	 */
+	shared SFloat* add(SFloat* f0, SFloat* f1) {
+		f0->f += f1->f;
+		f0->n += f1->n + (f0->f/ precision);
+		f0->f = f0->f % precision;
+		return f0;
+	}
+	
+	/*
+	 * Subtract the second SFloat from the first.
+	 */
+	shared SFloat* sub(SFloat* f0, SFloat* f1) {
+		f0->f -= f1->f;
+		f0->n -= f1->n + (f0->f / precision) + ((f0->f < 0)? 1 : 0);
+		f0->f = f0->f % precision;
+		return f0;
+	}
+	
+	/*
+	 * Multiply the two given floats.
+	 */
+	shared SFloat* mul(SFloat* f0, SFloat* f1) {
+		bool neg = false;
+		if (f0->n < 0) {
+			neg = !neg;
+			f0->n = -f0->n;
+		}
+		
+		if (f1->n < 0) {
+			neg = !neg;
+			f1->n = -f1->n;
+		}
+		
+		int acc = (f0->n * f1->n) * precision + (f0->n * f1->f) + (f0->f * f1->n) + (f0->f * f1->f) / precision;
+		f0->n = acc / precision;
+		f0->f = acc % precision;
+		
+		if (neg) f0->n = -f0->n;
+		return f0;
+	}
+
+	/*
+	 * Divide the first float by the second.
+	 */
+	shared SFloat* div(SFloat* f0, SFloat* f1) {
+		bool neg = false;
+		if (f0->n < 0) {
+			neg = !neg;
+			f0->n = -f0->n;
+		}
+		
+		if (f1->n < 0) {
+			neg = !neg;
+			f1->n = -f1->n;
+		}
+		
+		int p0 = ((f0->n * precision) + f0->f);
+		int p1 = ((f1->n * precision) + f1->f);
+		f0->n = p0 / p1;
+		f0->f = ((p0 * precision) / p1) % precision;
+		
+		if (neg) f0->n = -f0->n;
+		return f0;
+	}
+	
+	/*
+	 * Compare the two given floats based on given comparator.
+	 */
+	shared bool compare(SFloat* f0, SFloat* f1, CMP cmp) {
+		switch (cmp) {
+			case (CMP.EQ) : return f0->n == f1->n && f0->f == f1->f;
+			case (CMP.NE) : return f0->n != f1->n || f0->f != f1->f;
+			case (CMP.GE) : return f0->n >= f1->n || (f0->n == f1->n && f0->f >= f1->f);
+			case (CMP.GT) : return f0->n >  f1->n || (f0->n == f1->n && f0->f >  f1->f);
+			case (CMP.LE) : return f0->n <= f1->n || (f0->n == f1->n && f0->f <= f1->f);
+			case (CMP.LT) : return f0->n <  f1->n || (f0->n == f1->n && f0->f <  f1->f);
+			default : return false;
+		}
+	}
+	
+	/*
+	 * Convert given SFloat to a String representation.
+	 */
+	shared char* toString(SFloat* f0) {
+		char* n1 = Integer::toString(f0->n);
+		char [2] c = ",";
+		char* f1 = Integer::toString(f0->f);
+		
+		char* r = String::concat(String::concat(n1, &c), f1);
+		
+		free(n1);
+		free(f1);
+		
+		return r;
+	}
+
+}
