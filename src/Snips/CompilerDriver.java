@@ -186,13 +186,13 @@ public class CompilerDriver {
 	    return lines;
 	}
 	
-	public List<String> compile(File file, List<String> code) {
+	public List<String> compile(File file0, List<String> code) {
 		long start = System.currentTimeMillis();
 		
 		/* Setup & set settings */
 		List<String> output = null;
 		LabelGen.reset();
-		CompilerDriver.file = file;
+		file = file0;
 		printLogo();
 		log.clear();
 		
@@ -203,7 +203,7 @@ public class CompilerDriver {
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
-				code.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
+				code.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
@@ -287,7 +287,7 @@ public class CompilerDriver {
 				aopt_progress.incProgress(1);
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-				CompilerDriver.compressions.add(rate);
+				compressions.add(rate);
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
@@ -307,10 +307,10 @@ public class CompilerDriver {
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
-				output.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
+				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			CompilerDriver.instructionsGenerated += output.size();
+			instructionsGenerated += output.size();
 		
 		} catch (Exception e) {
 			boolean customExc = (e instanceof CGEN_EXCEPTION) || (e instanceof CTX_EXCEPTION) || (e instanceof PARSE_EXCEPTION) || (e instanceof SNIPS_EXCEPTION);
@@ -541,17 +541,22 @@ public class CompilerDriver {
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
-		System.out.println(CompilerDriver.printDepth + "-info     : Print Version Compiler Version and information");
-		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
-		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
-		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
-		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
-		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
-		System.out.println(CompilerDriver.printDepth + "-rov      : Disable visibility modifiers");
-		System.out.println(CompilerDriver.printDepth + "-sid      : Disable SID headers, lower memory usage, but no instanceof");
-		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
-		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
-		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
+		
+		String [] params = {
+				"-info     : Print Version Compiler Version and information",
+				"[Path]    : First argument, set input file",
+				"-log      : Print out log and compile information",
+				"-com      : Remove comments from assembly",
+				"-warn     : Disable Warnings",
+				"-opt      : Disable Optimizer",
+				"-rov      : Disable visibility modifiers",
+				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
+				"-imm      : Print out immediate representations",
+				"-o [Path] : Specify output file",
+				"-viz      : Disable Ansi Color in Log messages"
+		};
+	
+		for (String s : params) System.out.println(printDepth + s);
 	}
 	
 	public void printInfo() {
@@ -559,19 +564,19 @@ public class CompilerDriver {
 		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
 	}
 	
-	public void setBurstMode(boolean value, boolean imm) {
-		CompilerDriver.silenced = value;
-		CompilerDriver.imm = imm;
-		CompilerDriver.printErrors = !value;
+	public void setBurstMode(boolean value, boolean imm0) {
+		silenced = value;
+		imm = imm0;
+		printErrors = !value;
 	}
 	
 	public static void printAverageCompression() {
 		double [] rate = {0};
-		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
+		compressions.stream().forEach(x -> rate [0] += x / compressions.size());
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + instructionsGenerated, Message.Type.INFO));
 	}
 	
 }
