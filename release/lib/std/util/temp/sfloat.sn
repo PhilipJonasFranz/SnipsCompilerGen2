@@ -14,6 +14,7 @@
  */
 namespace Float {
 
+	/* Comparator used for float-comparisons */
 	enum CMP {
 		EQ, NE, GE, GT, LE, LT;
 	}
@@ -24,7 +25,7 @@ namespace Float {
 	 * after the comma. Precisions should be set to
 	 * 10^n for n > 0.
 	 */
-	int precision = 100;
+	restricted int precision = 100;
 
 	/*
 	 * Capsules a number and a fraction.
@@ -39,6 +40,13 @@ namespace Float {
 		
 		*f0 = SFloat::(n, f);
 		return f0;
+	}
+	
+	/*
+	 * Set the SFloat precision to given value.
+	 */
+	shared void setPrecision(int pre) {
+		Float::precision = pre;
 	}
 	
 	/*

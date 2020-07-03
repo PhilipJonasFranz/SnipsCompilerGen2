@@ -21,6 +21,7 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMMvn;
+import Imm.ASM.Processing.Arith.ASMRsb;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
@@ -63,6 +64,22 @@ public class ASMOptimizer {
 			 * add r0, r0, #6
 			 */
 			this.defragmentAdditions(body);
+			
+			/**
+			 * mov r0, #10
+			 * add r0, r0, r2
+			 * Replace with:
+			 * add r0, r2, #10
+			 */
+			this.additionCommutative(body);
+			
+			/**
+			 * mov r0, #10
+			 * sub r0, r0, r2
+			 * Replace with:
+			 * rsb r0, r2, #10
+			 */
+			this.subtractionSemiCommutative(body);
 			
 			/**
 			 * add r0, r1, r2
@@ -220,6 +237,44 @@ public class ASMOptimizer {
 					
 					op0.value += op1.value;
 					body.instructions.remove(i);
+					i--;
+					OPT_DONE = true;
+				}
+			}
+		}
+	}
+	
+	private void additionCommutative(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+				ASMAdd add = (ASMAdd) body.instructions.get(i);
+				
+				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOperand && add.op1 instanceof RegOperand) {
+					RegOperand op1 = (RegOperand) add.op1;
+					add.op1 = mov.op1;
+					add.op0 = op1;
+					
+					body.instructions.remove(i - 1);
+					i--;
+					OPT_DONE = true;
+				}
+			}
+		}
+	}
+
+	private void subtractionSemiCommutative(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMSub && body.instructions.get(i - 1) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+				ASMSub sub = (ASMSub) body.instructions.get(i);
+				
+				if (mov.target.reg == sub.op0.reg && mov.op1 instanceof ImmOperand && sub.op1 instanceof RegOperand) {
+					RegOperand op1 = (RegOperand) sub.op1;
+					
+					body.instructions.set(i, new ASMRsb(sub.target, op1, mov.op1));
+					
+					body.instructions.remove(i - 1);
 					i--;
 					OPT_DONE = true;
 				}

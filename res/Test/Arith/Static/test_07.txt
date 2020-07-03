@@ -7,8 +7,7 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
 main:                                        /* Function: main */
-    mvn r2, #1
-    mov r1, #2
-    sub r0, r1, r2
+    mvn r0, #1
+    rsb r0, r0, #2
     bx lr
     

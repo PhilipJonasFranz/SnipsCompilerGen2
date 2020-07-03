@@ -44,7 +44,7 @@ main:                                        /* Function: main */
     mov r0, #5
     mov r1, #1
     push { r1, r0 }
-    ldr r1, .POOL0_main.L0_vec               /* Load data section address */
+    ldr r1, .POOL0_main.L0_vec
     pop { r0 }
     str r0, [r1, #0]
     pop { r0 }
