@@ -192,9 +192,9 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #12
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
     lsl r1, r5, #2                           /* Convert to bytes */
     add r1, r1, #12
+    push { r0 }
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

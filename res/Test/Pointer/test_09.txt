@@ -24,8 +24,8 @@ set:                                         /* Function: set */
     ldr r0, [fp, #12]                        /* Evaluate Expression */
     ldr r1, [fp, #8]
     push { r1, r0 }
-    lsl r1, r3, #2
     pop { r0 }
+    lsl r1, r3, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]

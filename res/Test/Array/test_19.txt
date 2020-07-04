@@ -30,8 +30,9 @@ __vec_cross.L1:
     lsl r2, r4, #2
     add r0, fp, #24
     add r0, r0, r2
-    ldr r1, [r0]
+    ldr r0, [r0]
     lsl r2, r4, #2
+    mov r1, r0
     add r0, fp, #12
     add r0, r0, r2
     ldr r2, [r0]
@@ -84,8 +85,8 @@ main:                                        /* Function: main */
     ldr r2, [r1, #4]
     push { r2, r0 }
     ldr r0, [r1, #0]
-    push { r0 }
     mov r2, #0                               /* Calculate offset of sub structure */
+    push { r0 }
     mov r0, #0
     mov r1, #12
     mul r0, r0, r1

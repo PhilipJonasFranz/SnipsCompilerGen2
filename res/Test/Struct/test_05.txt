@@ -167,25 +167,25 @@ main:                                        /* Function: main */
     str r0, [r1, #28]
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
-    push { r1 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
+    push { r1 }
     mov r1, #12
     mul r0, r0, r1
-    add r2, r2, r0
     pop { r1 }
+    add r2, r2, r0
     add r1, r1, r2
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     push { r2, r0 }
     ldr r0, [r1, #0]
-    push { r0 }
     sub r1, fp, #12                          /* Evaluate Expression */
     add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
+    ldr r0, [r1]                             /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #28
+    push { r0 }
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

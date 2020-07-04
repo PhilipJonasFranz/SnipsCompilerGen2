@@ -26,8 +26,8 @@ foo:                                         /* Function: foo */
     add r0, fp, #20
     add r0, r0, r2
     ldr r0, [r0]
-    push { r0 }
     lsl r2, r3, #2
+    push { r0 }
     add r0, fp, #8
     add r0, r0, r2
     ldr r1, [r0]

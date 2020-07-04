@@ -27,8 +27,8 @@ foo:                                         /* Function: foo */
     mov r0, #5
     mov r1, #1
     push { r1, r0 }
-    add r1, fp, #12                          /* Start of structure in stack */
     pop { r0 }
+    add r1, fp, #12                          /* Start of structure in stack */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]

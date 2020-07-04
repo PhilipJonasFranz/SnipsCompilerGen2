@@ -23,10 +23,10 @@ set:                                         /* Function: set */
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    push { r4 }
     mov r1, #2
-    mul r2, r1, r5
+    mul r2, r1, r2
     add r1, r3, r2
+    push { r4 }
     ldr r2, [fp, #16]
     add r0, r1, r2
     lsl r1, r0, #2
@@ -48,9 +48,9 @@ main:                                        /* Function: main */
     mov r0, #2
     mov r1, #1
     push { r1, r0 }
+    mov r0, #5
     push { r4 }
     push { r3 }
-    mov r0, #5
     push { r0 }
     sub r0, fp, #16
     lsr r0, r0, #2

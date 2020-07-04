@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 v.3.4.7-RELEASE
+# Snips Compiler Gen.2 v.3.4.8-RELEASE
 ## Some words in advance
  This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
@@ -56,10 +56,6 @@ All instructions do support the condition field. If you compile your assembly co
  - Rework Parser to use Vendor System, implement improved comment and directive attatching to syntax elements
  - Rework Struct Type System to use SSOT Vendor
  
-### v.5.0.0-RELEASE: Optimization, extended compilation control
- - Implement AST Optimizer
- - Implement Optimizer Annotations
-
 ## License & Copyright
  © Philip Jonas Franz
  

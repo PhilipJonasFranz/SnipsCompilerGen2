@@ -29,12 +29,12 @@ main:                                        /* Function: main */
     mov r3, r0
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #10
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
     mov r1, r0
     sub r0, fp, #8
     lsr r0, r0, #2
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     bl forEach                               /* Call forEach */
     mov sp, fp
     pop { r3, fp, lr }

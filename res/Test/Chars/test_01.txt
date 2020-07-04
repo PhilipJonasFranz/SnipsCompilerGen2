@@ -371,8 +371,8 @@ String.equals.L1:                            /* Evaluate condition */
     cmp r7, #0
     moveq r0, #1
     movne r0, #0
-    push { r0 }
     cmp r8, #0
+    push { r0 }
     moveq r0, #1
     movne r0, #0
     mov r1, r0
@@ -417,8 +417,8 @@ String.substring.L1:                         /* Evaluate condition */
     cmp r7, r4
     movge r0, #1
     movlt r0, #0
-    push { r0 }
     cmp r7, r5
+    push { r0 }
     movlt r0, #1
     movge r0, #0
     mov r1, r0
@@ -447,8 +447,8 @@ String.substring.L2:
     cmp r8, #1
     moveq r0, #1
     movne r0, #0
-    push { r0 }
     mov r1, #0
+    push { r0 }
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
     cmp r0, #0
@@ -488,8 +488,8 @@ String.substring.L8:
     ldr r1, [fp, #-4]                        /* Evaluate Expression */
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
-    push { r0 }
     mov r1, r9
+    push { r0 }
     ldr r2, [fp, #-4]
     add r0, r1, r2
     lsl r1, r0, #2

@@ -25,8 +25,8 @@ main:                                        /* Function: main */
     cmp r0, #0
     movne r0, r1
     moveq r0, #0
-    push { r0 }
     cmp r5, #0
+    push { r0 }
     moveq r0, #1
     movne r0, #0
     mov r1, r0

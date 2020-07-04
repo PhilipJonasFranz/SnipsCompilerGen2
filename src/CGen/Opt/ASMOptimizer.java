@@ -3,6 +3,7 @@ package CGen.Opt;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.ASMHardcode;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
@@ -53,6 +54,7 @@ public class ASMOptimizer {
 			/* --- METHODS --- */
 	/** Optimize given body. */
 	public void optimize(AsNBody body) {
+		
 		/* While an optimization was done in this iteration */
 		while (OPT_DONE) {
 			OPT_DONE = false;
@@ -169,6 +171,25 @@ public class ASMOptimizer {
 			 * add r0, r0, #0 <- Remove this line
 			 */
 			this.removeZeroInstruction(body);
+			
+			/**
+			 * Execute these routines when no other optimization can be made.
+			 * Executing this routine to early can block data-paths that could
+			 * under other circumstances be simplified.
+			 */
+			if (!OPT_DONE) {
+				/**
+				 * Attempts to move pop operations further up to allow 
+				 * for more data-path analysis. This will result in push and pop
+				 * operation positions to be closer together, which makes it easier
+				 * to potentially remove/simplify them.
+				 * 
+				 * This routine can - in some cases - prevent other optimizations
+				 * from working out well. But - seeing the average numbers - this
+				 * routine should improve the overall assembly.
+				 */
+				this.pushPopRelocation(body);
+			}
 		}
 		
 		/* Filter duplicate empty lines */
@@ -206,7 +227,15 @@ public class ASMOptimizer {
 			ASMPopStack pop = (ASMPopStack) ins;
 			return pop.operands.stream().filter(x -> x.reg == reg).count() > 0;
 		}
-		else return false;
+		else if (ins instanceof ASMPushStack || ins instanceof ASMLabel || ins instanceof ASMComment || 
+				 ins instanceof ASMSeperator || ins instanceof ASMBranch || ins instanceof ASMCmp) {
+			return false;
+		}
+		else if (ins instanceof ASMHardcode) {
+			/* Better safe than sorry */
+			return true;
+		}
+		else throw new SNIPS_EXCEPTION("Cannot check if instruction overwrites register: " + ins.getClass().getName());
 	}
 	
 	/**
@@ -217,12 +246,98 @@ public class ASMOptimizer {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == reg);
 		}
+		else if (ins instanceof ASMCmp) {
+			ASMCmp cmp = (ASMCmp) ins;
+			return cmp.op0.reg == reg || (cmp.op1 instanceof RegOperand && ((RegOperand) cmp.op1).reg == reg);
+		}
+		else if (ins instanceof ASMMemOp) {
+			ASMMemOp op = (ASMMemOp) ins;
+			return (op.op0 instanceof RegOperand && ((RegOperand) op.op0).reg == reg) || (op.op1 instanceof RegOperand && ((RegOperand) op.op1).reg == reg);
+		}
+		else if (ins instanceof ASMLdrStack) {
+			ASMLdrStack ldr = (ASMLdrStack) ins;
+			return (ldr.op0 instanceof RegOperand && ((RegOperand) ldr.op0).reg == reg) || (ldr.op1 instanceof RegOperand && ((RegOperand) ldr.op1).reg == reg);
+		}
+		else if (ins instanceof ASMMult) {
+			ASMMult mul = (ASMMult) ins;
+			return mul.op0.reg == reg || mul.op1.reg == reg;
+		}
 		else if (ins instanceof ASMStrStack) {
 			ASMLdrStack load = (ASMLdrStack) ins;
 			return load.target.reg == reg || load.op0.reg == reg || (load.op1 != null && load.op1 instanceof RegOperand && ((RegOperand) load.op1).reg == reg);
 		}
-		// TODO: Implement missing instructions
-		else return false;
+		else if (ins instanceof ASMPushStack) {
+			ASMPushStack push = (ASMPushStack) ins;
+			for (RegOperand r : push.operands) if (r.reg == reg) return true;
+			return false;
+		}
+		else if (ins instanceof ASMLabel || ins instanceof ASMComment || 
+				 ins instanceof ASMSeperator || ins instanceof ASMBranch) {
+			return false;
+		}
+		else if (ins instanceof ASMHardcode) {
+			/* Better safe than sorry */
+			return true;
+		}
+		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	private void pushPopRelocation(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+					
+					body.instructions.remove(i);
+					
+					REGISTER reg = push.operands.get(0).reg;
+					
+					int line = i;
+					while (true) {
+						if (this.overwritesReg(body.instructions.get(line), reg) || 
+								body.instructions.get(line) instanceof ASMBranch || body.instructions.get(line) instanceof ASMLabel || 
+								body.instructions.get(line) instanceof ASMStackOp || body.instructions.get(line) instanceof ASMPushStack ||
+								body.instructions.get(line) instanceof ASMLdr || body.instructions.get(line) instanceof ASMPopStack) {
+							break;
+						}
+						else line++;
+					}
+					
+					if (line != i) OPT_DONE = true;
+					body.instructions.add(line, push);
+				}
+			}
+		}
+		
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPopStack) {
+				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
+				
+				if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+					body.instructions.remove(i);
+					
+					REGISTER reg = pop.operands.get(0).reg;
+					
+					int line = i - 1;
+					while (true) {
+						if (this.readsReg(body.instructions.get(line), reg) || this.overwritesReg(body.instructions.get(line), reg) ||
+								body.instructions.get(line) instanceof ASMBranch || body.instructions.get(line) instanceof ASMLabel || 
+								body.instructions.get(line) instanceof ASMStackOp || 
+								body.instructions.get(line) instanceof ASMStr || body.instructions.get(line) instanceof ASMPushStack ) {
+							break;
+						}
+						
+						line--;
+					}
+					
+					if (line != i - 1) OPT_DONE = true;
+					body.instructions.add(line + 1, pop);
+					
+					i = line + 2;
+				}
+			}
+		}
 	}
 	
 	private void defragmentAdditions(AsNBody body) {
@@ -370,7 +485,7 @@ public class ASMOptimizer {
 							if (pop0.operands.size() == 1 && !pop0.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 								found = true;
 								pop = pop0;
-								end = a - 1;
+								end = a;
 								break;
 							}
 						}
@@ -382,13 +497,20 @@ public class ASMOptimizer {
 						
 						/* Check if register if newReg is overwritten in the span between the push pop */
 						for (int a = i + 1; a < end; a++) {
+							/* Old register is overwritten, value from mov would be shadowed */
+							if (this.overwritesReg(body.instructions.get(a), push.operands.get(0).reg)) {
+								replace = false;
+								break;
+							}
+							
 							/* New register is overwritten, value from mov would be shadowed */
 							if (this.overwritesReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;
 							}
+							
 							/* New register is read after new mov, would read wrong value */
-							else if (this.readsReg(body.instructions.get(a), newReg)) {
+							if (this.readsReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;
 							}

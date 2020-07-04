@@ -29,8 +29,8 @@ _routine_stack_copy_:
     cmp r0, #0
     beq _routine_stack_copy_end_
     ldr r2, [r1, #-4]!
-    push { r2 }
     sub r0, r0, #4
+    push { r2 }
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
@@ -319,9 +319,9 @@ Queue.enqueue_P1:                            /* Function: Queue.enqueue, Proviso
     cmp r0, r1
     moveq r0, #1
     movne r0, #0
-    push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #28
+    push { r0 }
     ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     moveq r0, #1
@@ -362,9 +362,9 @@ Queue.enqueue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #16
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #20
+    push { r0 }
     ldr r1, [r1]                             /* Load field from struct */
     add r0, r1, #1
     pop { r1 }
@@ -406,9 +406,9 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #24
+    push { r0 }
     ldr r1, [r1]                             /* Load field from struct */
     mov r2, #2
     mul r2, r1, r2
@@ -418,14 +418,14 @@ Queue.dequeue.L0:
     ldr r0, [r1, #0]
     push { r0 }
     ldr r0, [r1, #4]
-    push { r0 }
 /* Increment tail */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #16
-    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
+    ldr r0, [r1]                             /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #24
+    push { r0 }
     ldr r1, [r1]                             /* Load field from struct */
     add r0, r1, #1
     pop { r1 }

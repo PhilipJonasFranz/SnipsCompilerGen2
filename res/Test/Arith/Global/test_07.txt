@@ -375,9 +375,11 @@ main_init:
 main:                                        /* Function: main */
     push { r3, fp, lr }
     mov fp, sp
-    mov r1, #12
+    mov r0, #12                              /* Load parameters */
+    push { r0 }
     ldr r2, .POOL5_main.L3_list0             /* Load data section address */
     ldr r0, [r2] #-4
+    pop { r1 }
     bl List.add_P1                           /* Call List.add */
     ldr r2, .POOL5_main.L3_list0             /* Load parameters */
     ldr r0, [r2] #-4
@@ -385,15 +387,19 @@ main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_List.add_P1
     mov r3, r0
-    mov r1, #30
+    mov r0, #30                              /* Load parameters */
+    push { r0 }
     ldr r2, .POOL5_main.L3_list0             /* Load data section address */
     ldr r0, [r2] #-4
+    pop { r1 }
     add lr, pc, #8
     mov pc, r3
     sub sp, fp, #48                          /* Reset the stack after anonymous call */
-    mov r1, #0
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
     ldr r2, .POOL5_main.L3_list0             /* Load data section address */
     ldr r0, [r2] #-4
+    pop { r1 }
     bl List.get_P2                           /* Call List.get */
     mov sp, fp
     pop { r3, fp, lr }

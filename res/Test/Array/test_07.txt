@@ -59,8 +59,8 @@ main:                                        /* Function: main */
     add r0, r0, r2
     ldr r1, [r0]
     add r0, r1, r3
-    push { r0 }
     mov r2, #0                               /* Load parameters */
+    push { r0 }
     mov r0, #2
     mov r1, #12
     mul r0, r0, r1
@@ -73,9 +73,8 @@ main:                                        /* Function: main */
     ldr r0, [r1, #0]
     push { r0 }
     bl foo                                   /* Call foo */
-    mov r2, r0
     pop { r1 }
-    add r0, r1, r2
+    add r0, r1, r0
     mov sp, fp
     pop { r3, r4, r5, fp, lr }
     bx lr

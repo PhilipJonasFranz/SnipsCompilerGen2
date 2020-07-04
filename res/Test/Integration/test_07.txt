@@ -204,9 +204,9 @@ __mat_mult.L7:
     mul r2, r1, r2
     add r1, r4, r2
     add r0, r1, r8
+    pop { r1 }
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r2, [r0]                             /* Load from address */
-    pop { r1 }
     mul r0, r1, r2
     add r9, r9, r0
     ldr r0, [fp, #-4]
@@ -215,8 +215,8 @@ __mat_mult.L7:
     b __mat_mult.L7
 __mat_mult.L8: 
     add sp, sp, #4
-    push { r9 }
     mov r1, r7
+    push { r9 }
     ldr r2, [fp, #36]
     mul r2, r1, r2
     add r1, r6, r2
@@ -258,9 +258,9 @@ allocMatrix.L4:
     bge allocMatrix.L5
     mul r1, r6, r4
     add r0, r1, r7
-    push { r0 }
     mul r2, r6, r4
     add r1, r5, r2
+    push { r0 }
     add r0, r1, r7
     lsl r1, r0, #2
     pop { r0 }
@@ -294,8 +294,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     push { r0 }
-    push { r5 }
     mov r0, r4
+    push { r5 }
     pop { r1, r2 }
     bl __mat_mult                            /* Call __mat_mult */
     mov r6, r0

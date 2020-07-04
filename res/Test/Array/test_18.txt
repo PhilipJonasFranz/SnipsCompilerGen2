@@ -34,8 +34,8 @@ foo:                                         /* Function: foo */
     mov r4, r1
     mov r5, r2
     mov r0, #8                               /* Evaluate Expression */
-    push { r0 }
     mov r2, #0                               /* Calculate offset of sub structure */
+    push { r0 }
     mov r0, #0
     mov r1, #24
     mul r0, r0, r1
@@ -43,11 +43,11 @@ foo:                                         /* Function: foo */
     mov r0, #1
     mov r1, #8
     mul r0, r0, r1
+    pop { r1 }
     add r2, r2, r0
     add r2, r2, #4
     add r0, fp, #16
     add r0, r0, r2
-    pop { r1 }
     str r1, [r0]
     mov r2, #0                               /* Evaluate Expression */
     mov r1, #24
@@ -106,9 +106,9 @@ main:                                        /* Function: main */
     ldr r1, [fp, #-44]
     ldr r2, [fp, #-48]
     push { r2, r1, r0 }
+    mov r0, r3
     push { r5 }
     push { r4 }
-    mov r0, r3
     pop { r1, r2 }
     bl foo                                   /* Call foo */
     mov sp, fp

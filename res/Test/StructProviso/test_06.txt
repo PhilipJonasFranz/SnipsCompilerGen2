@@ -31,9 +31,9 @@ main:                                        /* Function: main */
     sub r1, fp, #20                          /* Evaluate Expression */
     add r1, r1, #8
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
     sub r1, fp, #20                          /* Load field location */
     add r1, r1, #16
+    push { r0 }
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

@@ -42,9 +42,9 @@ main:                                        /* Function: main */
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
-    push { r3 }
     sub r0, fp, #24
     lsr r0, r0, #2
+    push { r3 }
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2

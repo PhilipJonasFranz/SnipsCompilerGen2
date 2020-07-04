@@ -51,9 +51,9 @@ foo:                                         /* Function: foo */
     ldr r2, [fp, #12]
     push { r2, r1, r0 }
     bl bar                                   /* Call bar */
+    pop { r1 }
     mov r2, #2
     mul r2, r0, r2
-    pop { r1 }
     add r0, r1, r2
     mov sp, fp
     pop { r3, fp, lr }

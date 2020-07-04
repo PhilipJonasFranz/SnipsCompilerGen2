@@ -23,8 +23,8 @@ vec: .skip 16
     mov r0, #7
     mov r1, #3
     push { r1, r0 }
-    ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
     pop { r0 }
+    ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]

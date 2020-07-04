@@ -36,10 +36,10 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r1, [fp, #32]                        /* Evaluate Expression */
     add r0, r1, #7
-    push { r0 }
     add r1, r6, r7
     add r1, r1, r8
     add r1, r1, r9
+    push { r0 }
     ldr r2, [fp, #-4]
     add r1, r1, r2
     ldr r2, [fp, #-8]

@@ -57,8 +57,8 @@ _routine_stack_copy_:
     cmp r0, #0
     beq _routine_stack_copy_end_
     ldr r2, [r1, #-4]!
-    push { r2 }
     sub r0, r0, #4
+    push { r2 }
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
@@ -245,8 +245,8 @@ main:                                        /* Function: main */
     mov r0, #1
     mov r1, #6
     push { r1, r0 }
-    lsl r1, r4, #2
     pop { r0 }
+    lsl r1, r4, #2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -257,9 +257,9 @@ main:                                        /* Function: main */
     pop { r0 }
     str r0, [r1, #16]
     mov r5, #0
-    push { sp }
     mov r1, r3
     mov r0, r4
+    push { sp }
     bl checkThreshold                        /* Call checkThreshold */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */

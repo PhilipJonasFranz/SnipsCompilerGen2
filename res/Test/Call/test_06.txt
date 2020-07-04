@@ -42,9 +42,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r3                               /* Load parameters */
     bl bar                                   /* Call bar */
-    mov r2, r0
     pop { r1 }
-    add r0, r1, r2
+    add r0, r1, r0
     mov sp, fp
     pop { r3, r4, fp, lr }
     bx lr

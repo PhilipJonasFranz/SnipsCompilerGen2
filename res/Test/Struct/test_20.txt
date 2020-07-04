@@ -29,9 +29,9 @@ main:                                        /* Function: main */
     lsl r2, r3, #2
     add r1, r1, r2
     ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
     sub r1, fp, #16                          /* Load field location */
     add r1, r1, #4
+    push { r0 }
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2

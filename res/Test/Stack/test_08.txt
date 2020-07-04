@@ -55,22 +55,26 @@ main:                                        /* Function: main */
     mov r1, #4
     mov r0, r5
     bl foo                                   /* Call foo */
-    push { r0 }
     mov r1, #5
+    push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
     push { r0 }
-    mov r1, #6
+    mov r0, #6                               /* Evaluate Expression */
+    push { r0 }
     ldr r0, [fp, #36]
+    pop { r1 }
     bl foo                                   /* Call foo */
     push { r0 }
-    mov r1, #7
-    ldr r0, [fp, #36]
-    bl foo                                   /* Call foo */
+    mov r0, #7                               /* Evaluate Expression */
     push { r0 }
+    ldr r0, [fp, #36]
+    pop { r1 }
+    bl foo                                   /* Call foo */
     add r1, r6, r7
     add r1, r1, r8
     add r1, r1, r9
+    push { r0 }
     ldr r2, [fp, #-4]
     add r1, r1, r2
     ldr r2, [fp, #-8]

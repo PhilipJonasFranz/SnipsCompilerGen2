@@ -34,13 +34,13 @@ main:                                        /* Function: main */
     push { r0 }
     sub r1, fp, #24                          /* Evaluate Expression */
     add r1, r1, #4
-    push { r1 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #1
+    push { r1 }
     mov r1, #8
     mul r0, r0, r1
-    add r2, r2, r0
     pop { r1 }
+    add r2, r2, r0
     add r1, r1, r2
     add r1, r1, #4
     ldr r0, [r1]                             /* Load field from struct */

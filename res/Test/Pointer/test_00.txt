@@ -39,10 +39,10 @@ main:                                        /* Function: main */
     mov r0, #2
     mov r1, #1
     push { r1, r0 }
-    push { r4 }
-    push { r3 }
     sub r0, fp, #16
     lsr r0, r0, #2
+    push { r4 }
+    push { r3 }
     pop { r1, r2 }
     bl get                                   /* Call get */
     mov sp, fp

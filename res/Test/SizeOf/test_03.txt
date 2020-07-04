@@ -11,9 +11,9 @@ main:                                        /* Function: main */
     push { r3 }
     mov fp, sp
     mov r3, r0
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     sub r0, fp, #4                           /* Evaluate Expression */
     lsr r0, r0, #2
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, r0
     mov r0, #1                               /* Evaluate Expression */
     mov sp, fp
