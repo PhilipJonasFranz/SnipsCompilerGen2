@@ -4,7 +4,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Directive.Directive;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -30,7 +29,6 @@ public class ForStatement extends ConditionalCompoundStatement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		for (Directive dir : this.directives) dir.print(d, rec);
 		System.out.println(this.pad(d) + "For");
 		this.iterator.print(d + this.printDepthStep, rec);
 		this.condition.print(d + this.printDepthStep, rec);

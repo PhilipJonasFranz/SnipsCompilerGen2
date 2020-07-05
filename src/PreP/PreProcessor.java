@@ -102,11 +102,6 @@ public class PreProcessor {
 			code = Util.readFile(file);
 		}
 		
-		/* Read from jar */
-		if (code == null) {
-			code = CompilerDriver.driver.readFromJar(filePath);
-		}
-		
 		return code;
 	}
 	

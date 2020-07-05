@@ -19,8 +19,6 @@ import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Directive.Directive;
-import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
@@ -228,31 +226,19 @@ public class CompilerDriver {
 					/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
-			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
-				List<SyntaxElement> dependencies = this.addDependencies(p.directives, p.fileName);
-				
-				/* An error occured during importing, probably loop in dependencies */
-				if (dependencies == null) {
-					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libraries, possible loop in #include statements.");
-				}
+			if (!referencedLibaries.isEmpty()) {
+				List<Program> dependencies = this.addDependencies();
 				
 				/* Print out imported libaries */
-				for (SyntaxElement s : dependencies) {
+				for (SyntaxElement s : dependencies) 
 					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
-				}
 				
 				/* Add libaries to AST, duplicates were already filtered */
 				int c = 0;
-				for (int i = 0; i < dependencies.size(); i++) {
-					Program p0 = (Program) dependencies.get(i);
-					for (int a = 0; a < p0.programElements.size(); a++) {
-						p.programElements.add(c, p0.programElements.get(a));
-						c++;
-					}
+				for (Program p0 : dependencies) {
+					for (SyntaxElement s : p0.programElements) 
+						p.programElements.add(c++, s);
 				}
-				
-				/* Clear program directives */
-				p.directives.clear();
 			}
 			
 			
@@ -315,10 +301,9 @@ public class CompilerDriver {
 		} catch (Exception e) {
 			boolean customExc = (e instanceof CGEN_EXCEPTION) || (e instanceof CTX_EXCEPTION) || (e instanceof PARSE_EXCEPTION) || (e instanceof SNIPS_EXCEPTION);
 			
+			/* Exception is not ordinary and internal, print message and stack trace */
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
-			
 			if (printErrors || !customExc) e.printStackTrace();
-			
 			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
 		}
 		
@@ -350,8 +335,8 @@ public class CompilerDriver {
 	 * @return A list of ASTs containing the contents of the files as AST.
 	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
-		List<SyntaxElement> ASTs = new ArrayList();
+	public List<Program> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
+		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
 			for (XMLNode c : sys_config.getNode("Library").children) {
@@ -371,21 +356,17 @@ public class CompilerDriver {
 				code = Util.readFile(file);
 			}
 			
-			/* Read from jar */
-			if (code == null) {
-				code = readFromJar(filePath);
-			}
-			
 			/* Libary was not found */
-			if (code == null) {
+			if (code == null) 
 				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
-			}
 			
-			SyntaxElement AST = null;
+			Program AST = null;
 			
 			try {
+					/* --- PRE-PROCESS --- */
 				PreProcessor preProcess = new PreProcessor(code, file.getName());
 				List<LineObject> lines = preProcess.getProcessed();
+				
 				
 					/* --- SCANNING --- */
 				Scanner scanner = new Scanner(lines, null);
@@ -394,18 +375,9 @@ public class CompilerDriver {
 				
 						/* --- PARSING --- */
 				Parser parser = new Parser(deque, null);
-				AST = parser.parse();
-				((Program) AST).fileName = file.getPath();
+				AST = (Program) parser.parse();
+				AST.fileName = file.getPath();
 				
-				
-						/* --- PROCESS IMPORTS --- */
-				List<SyntaxElement> dependencies = this.addDependencies(((Program) AST).directives, ((Program) AST).fileName);
-				
-				if (dependencies == null) return null;
-				else {
-					this.removeDuplicates(dependencies);
-					ASTs.addAll(dependencies);
-				}
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
 				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", Message.Type.FAIL));
@@ -415,17 +387,15 @@ public class CompilerDriver {
 		}
 		
 		this.removeDuplicates(ASTs);
-		
 		return ASTs;
 	}
 
 	/**
-	 * Import depencendies listed by include directives
-	 * @param importer The program that lists the include directives
+	 * Import dependencies of dynamic imports
 	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> addDependencies(List<Directive> imports, String fileName) throws SNIPS_EXCEPTION {
-		List<SyntaxElement> ASTs = new ArrayList();
+	public List<Program> addDependencies() throws SNIPS_EXCEPTION {
+		List<Program> ASTs = new ArrayList();
 		
 		for (String s : this.referencedLibaries) {
 			List<String> file0 = new ArrayList();
@@ -435,47 +405,15 @@ public class CompilerDriver {
 			ASTs.addAll(driver.hotCompile(file0));
 		}
 		
-		try {
-			for (Directive dir : imports) {
-				if (dir instanceof IncludeDirective) {
-					IncludeDirective inc = (IncludeDirective) dir;
-					
-					if (inc.file.equals(fileName)) continue;
-					for (int i = 0; i < ASTs.size(); i++) {
-						if (((Program) ASTs.get(i)).fileName.equals(inc.file)) {
-							continue;
-						}
-					}
-					
-					List<String> file0 = new ArrayList();
-					file0.add(inc.file);
-					
-					CompilerDriver driver = new CompilerDriver();
-					List<SyntaxElement> dependencies = driver.hotCompile(file0);
-					
-					/* Error during importing, propagate back */
-					if (dependencies == null) return null;
-					else {
-						ASTs.addAll(dependencies);
-					}
-				}
-			}
-		} catch (StackOverflowError st) {
-			return null;
-		}
-		
 		this.removeDuplicates(ASTs);
 		
 		return ASTs;
 	}
 	
-	public void removeDuplicates(List<SyntaxElement> ASTs) {
+	public void removeDuplicates(List<Program> ASTs) {
 		if (ASTs.size() > 1) for (int i = 0; i < ASTs.size(); i++) {
 			for (int a = i + 1; a < ASTs.size(); a++) {
-				Program p0 = (Program) ASTs.get(i);
-				Program p1 = (Program) ASTs.get(a);
-				
-				if (p0.fileName.equals(p1.fileName)) {
+				if (ASTs.get(i).fileName.equals(ASTs.get(a).fileName)) {
 					ASTs.remove(a);
 					a--;
 				}
@@ -488,18 +426,17 @@ public class CompilerDriver {
 	}
 	
 	public void printLogo() {
-		/* Print out all lines of the SNIPS logo */
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
-		for (String s : logo)System.out.println(s);
+		for (String s : logo) System.out.println(s);
 		
 		String ver = "Gen.2 " + sys_config.getValue("Version");
+		
 		int l = ver.length();
 		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
-		ver = "\t" + ver;
-		System.out.println(ver);
-		System.out.println();
+		
+		System.out.println("\t" + ver + "\n");
 	}
 	
 	public void readArgs(String [] args) {
@@ -538,6 +475,7 @@ public class CompilerDriver {
 		if (silenced) logoPrinted = true;
 	}
 	
+			/* --- CONSOLE INFORMATION --- */
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
@@ -564,6 +502,8 @@ public class CompilerDriver {
 		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
 	}
 	
+	
+			/* --- DEBUG --- */
 	public void setBurstMode(boolean value, boolean imm0) {
 		silenced = value;
 		imm = imm0;

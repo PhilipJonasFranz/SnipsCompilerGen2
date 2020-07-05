@@ -46,7 +46,7 @@ public class FunctionCall extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
-		if (!this.proviso.isEmpty()) {
+		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
 			s = s.substring(0, s.length() - 2);

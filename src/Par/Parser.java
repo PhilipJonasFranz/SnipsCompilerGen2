@@ -14,9 +14,6 @@ import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Directive.CompileDirective;
-import Imm.AST.Directive.CompileDirective.COMP_DIR;
-import Imm.AST.Directive.Directive;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
@@ -403,27 +400,6 @@ public class Parser {
 			path.path.addAll(this.namespaces.get(i).path);
 		}
 		return path;
-	}
-	
-	public Directive parseDirective() throws PARSE_EXCEPTION {
-		Source source = accept(TokenType.DIRECTIVE).getSource();
-		if (current.type == TokenType.IDENTIFIER) {
-			COMP_DIR dir;
-			String s = accept(TokenType.IDENTIFIER).spelling.toLowerCase();
-			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
-			else if (s.equals("libary")) dir = COMP_DIR.LIBARY;
-			else if (s.equals("unroll")) dir = COMP_DIR.UNROLL;
-			else {
-				this.progress.abort();
-				throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
-			}
-			
-			return new CompileDirective(dir, source);
-		}
-		else {
-			this.progress.abort();
-			throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
-		}
 	}
 	
 	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
