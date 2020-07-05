@@ -14,8 +14,10 @@ import Util.Source;
 public class ForStatement extends ConditionalCompoundStatement {
 
 			/* --- FIELDS --- */
+	/** The declaration of the iterator. */
 	public Declaration iterator;
 	
+	/** The iterator increment statement. */
 	public Statement increment;
 	
 	
@@ -34,9 +36,8 @@ public class ForStatement extends ConditionalCompoundStatement {
 		this.condition.print(d + this.printDepthStep, rec);
 		this.increment.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

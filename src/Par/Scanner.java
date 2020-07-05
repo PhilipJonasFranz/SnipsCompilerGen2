@@ -332,20 +332,18 @@ public class Scanner {
 				return false;
 			}
 			else if (this.buffer.startsWith("/")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("//")) {
+				if (this.buffer.length() == 1) return false;
+				if (this.buffer.equals("//")) 
 					this.state = ACC_STATE.COMMENT;
-					return false;
-				}
-				else if (this.buffer.equals("/*")) {
+				else if (this.buffer.equals("/*")) 
 					this.state = ACC_STATE.COMMENT;
-					return false;
-				}
 				else {
 					tokens.add(new Token(TokenType.DIV, new Source(fileName, i, a - this.buffer.length())));
 					this.buffer = this.buffer.substring(1);
 					return true;
 				}
+				
+				return false;
 			}
 			else {
 				/* --- REGEX MATCHER --- */

@@ -32,7 +32,8 @@ public class ReturnStatement extends Statement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Return");
 		if (rec) {
-			if (this.value != null) this.value.print(d + this.printDepthStep, rec);
+			if (this.value != null) 
+				this.value.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -41,8 +42,8 @@ public class ReturnStatement extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		if (this.value != null) this.value.setContext(context);
+		if (this.value != null) 
+			this.value.setContext(context);
 	}
 
 	public void releaseContext() {

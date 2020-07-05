@@ -50,9 +50,9 @@ public class EnumTypedef extends SyntaxElement {
 	}
 	
 	public ENUM getEnumField(String value, Source source) {
-		for (ENUM t : this.enumFields) {
+		for (ENUM t : this.enumFields) 
 			if (t.fieldName.equals(value)) return t;
-		}
+		
 		throw new SNIPS_EXCEPTION("The enum " + this.path.build() + " does not contain the field " + value + ", " + source.getSourceMarker());
 	}
 	
@@ -61,9 +61,8 @@ public class EnumTypedef extends SyntaxElement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Enum Typedef <" + this.path.build() + ">");
 		if (rec) {
-			for (String e : this.enums) {
+			for (String e : this.enums) 
 				System.out.println(this.pad(d + this.printDepthStep) + e);
-			}
 		}
 	}
 

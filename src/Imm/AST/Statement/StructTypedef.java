@@ -60,9 +60,8 @@ public class StructTypedef extends SyntaxElement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
 		if (rec) {
-			for (Declaration dec : this.fields) {
+			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);
-			}
 		}
 	}
 
@@ -77,10 +76,9 @@ public class StructTypedef extends SyntaxElement {
 			ProvisoManager.setContext(context, p0);
 		}
 		
-		for (int i = 0; i < context.size(); i++) {
+		for (int i = 0; i < context.size(); i++) 
 			context.set(i, ProvisoManager.setHiddenContext(context.get(i)));
-		}
-			
+		
 		/* Apply new internal proviso mapping to capsuled declarations */
 		for (Declaration dec : this.fields) {
 			ProvisoManager.setContext(context, dec.getType());
@@ -88,7 +86,8 @@ public class StructTypedef extends SyntaxElement {
 	}
 
 	public void releaseContext() {
-		for (Declaration dec : this.fields) dec.releaseContext();
+		for (Declaration dec : this.fields) 
+			dec.releaseContext();
 	}
 	
 	public StructTypedef clone() {
@@ -96,13 +95,10 @@ public class StructTypedef extends SyntaxElement {
 		for (TYPE t : this.proviso) prov0.add(t.clone());
 		
 		List<Declaration> dec0 = new ArrayList();
-		for (Declaration dec : this.fields) {
+		for (Declaration dec : this.fields) 
 			dec0.add(dec.clone());
-		}
 		
 		StructTypedef clone = new StructTypedef(this.path, this.SID, prov0, dec0, this.extension, this.modifier, this.getSource());
-		
-		assert(clone.fields.size() == this.fields.size());
 		
 		return clone;
 	}
@@ -113,9 +109,8 @@ public class StructTypedef extends SyntaxElement {
 	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXCEPTION {
 		/* Do not clone type, struct types and typedef are already cloned during parsing */
 		
-		if (this.proviso.size() != proviso.size()) {
+		if (this.proviso.size() != proviso.size()) 
 			throw new CTX_EXCEPTION(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
-		}
 		
 		this.setContext(proviso);
 		

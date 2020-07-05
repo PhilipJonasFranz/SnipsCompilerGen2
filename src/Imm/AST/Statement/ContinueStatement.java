@@ -13,6 +13,7 @@ import Util.Source;
 public class ContinueStatement extends Statement {
 
 			/* --- FIELDS --- */
+	/** The compound statement or loop this continue statements jumps in. */
 	public CompoundStatement superLoop;
 	
 	

@@ -26,9 +26,8 @@ public class DefaultStatement extends CompoundStatement {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Default");
 		
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

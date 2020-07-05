@@ -57,23 +57,19 @@ public class DirectASMStatement extends Statement {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		for (Pair<Expression, REGISTER> p : this.dataIn) {
+		for (Pair<Expression, REGISTER> p : this.dataIn) 
 			p.first.setContext(context);
-		}
 		
-		for (Pair<Expression, REGISTER> p : this.dataOut) {
+		for (Pair<Expression, REGISTER> p : this.dataOut) 
 			p.first.setContext(context);
-		}
 	}
 
 	public void releaseContext() {
-		for (Pair<Expression, REGISTER> p : this.dataIn) {
+		for (Pair<Expression, REGISTER> p : this.dataIn) 
 			p.first.releaseContext();
-		}
 		
-		for (Pair<Expression, REGISTER> p : this.dataOut) {
+		for (Pair<Expression, REGISTER> p : this.dataOut) 
 			p.first.releaseContext();
-		}
 	}
 	
 }

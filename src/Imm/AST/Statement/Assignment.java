@@ -16,11 +16,17 @@ public class Assignment extends Statement {
 
 			/* --- NESTED --- */
 	public enum ASSIGN_ARITH {
+		
+		/* Just assign value */
 		NONE,
+		
+		/* Add, sub... value from existing */
 		ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN,
 		LSL_ASSIGN, LSR_ASSIGN,
+		
 		/* Boolean Operation */
 		ORR_ASSIGN, AND_ASSIGN,
+		
 		/* Bitwise Operation */
 		BIT_ORR_ASSIGN, BIT_AND_ASSIGN, BIT_XOR_ASSIGN
 	}
@@ -29,10 +35,13 @@ public class Assignment extends Statement {
 			/* --- FIELDS --- */
 	public ASSIGN_ARITH assignArith = ASSIGN_ARITH.NONE;
 	
+	/** The LHS that defines the assigning method, f.E direct, assign by dereference... */
 	public LhsId lhsId;
 	
+	/** The declaration of the targeted variable */
 	public Declaration origin;
 	
+	/** The value to be assigned. */
 	public Expression value;
 	
 	

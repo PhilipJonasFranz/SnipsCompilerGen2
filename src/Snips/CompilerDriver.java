@@ -66,7 +66,8 @@ public class CompilerDriver {
 		disableOptimizer = false,
 		disableWarnings = false,
 		disableStructSIDHeaders = false,
-		includeMetaInformation = true;
+		includeMetaInformation = true,
+		printErrors = false;
 			
 	/* Debug */
 	public static boolean
@@ -75,9 +76,7 @@ public class CompilerDriver {
 		printObjectIDs = false;
 	
 	public static String outputPath;
-	
-	public static boolean printErrors = false;
-	
+
 	public static String printDepth = "    ";
 	public static int commentDistance = 45;
 	
@@ -89,7 +88,7 @@ public class CompilerDriver {
 	
 	public static XMLNode sys_config;
 	
-	/* Reserved Declarations */
+	/* Reserved Declarations & Ressources */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	
@@ -112,11 +111,13 @@ public class CompilerDriver {
 		CompilerDriver scd = new CompilerDriver(args);
 		driver = scd;
 		
+		/* Output path is not set, use path of input file, and save to out.s */
 		if (outputPath == null) {
 			outputPath = args [0];
-			if (outputPath.contains("\\")) {
+			
+			/* Trim input file name from path */
+			if (outputPath.contains("\\")) 
 				while (!outputPath.endsWith("\\")) outputPath = outputPath.substring(0, outputPath.length() - 1);
-			}
 			
 			outputPath += "out.s";
 		}
@@ -129,30 +130,32 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
+		/* Read code from input file... */
 		List<String> code = Util.readFile(file);
 		
-		/* Perform compilation */
+		/* ...and compile! */
 		scd.compile(file, code);
 	}
 	
 	
 			/* --- FIELDS --- */
+	/** 
+	 * Dynamic libraries referenced in the program, like resv or __op_div. 
+	 * These will be included in second stage import resolving.
+	 */
 	public List<String> referencedLibaries = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */
+	/** Default constructor */
 	public CompilerDriver(String [] args) {
 		this.readConfig();
 		this.readArgs(args);
 	}
 	
+	/** Used for debug purposes */
 	public CompilerDriver() {
 		this.readConfig();
-	}
-	
-	public static void reset() {
-		heap_referenced = false;
-		null_referenced = false;
 	}
 	
 	
@@ -195,9 +198,8 @@ public class CompilerDriver {
 		log.clear();
 		
 		try {
-			if (code == null) {
+			if (code == null) 
 				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
-			}
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
@@ -285,10 +287,8 @@ public class CompilerDriver {
 		
 			/* Remove double empty lines */
 			for (int i = 1; i < output.size(); i++) {
-				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) {
-					output.remove(i - 1);
-					i--;
-				}
+				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
+					output.remove(i-- - 1);
 			}
 			
 			if (imm) {
@@ -341,9 +341,8 @@ public class CompilerDriver {
 		for (String filePath : files) {
 			for (XMLNode c : sys_config.getNode("Library").children) {
 				String [] v = c.value.split(":");
-				if (v [0].equals(filePath)) {
+				if (v [0].equals(filePath)) 
 					filePath = v [1];
-				}
 			}
 			
 			File file = new File(filePath);
@@ -351,10 +350,8 @@ public class CompilerDriver {
 			/* Read from file */
 			List<String> code = Util.readFile(file);
 			
-			if (code == null) {
-				file = new File("release\\" + filePath);
-				code = Util.readFile(file);
-			}
+			if (code == null) 
+				code = Util.readFile(new File("release\\" + filePath));
 			
 			/* Libary was not found */
 			if (code == null) 
@@ -464,10 +461,7 @@ public class CompilerDriver {
 					logoPrinted = false;
 					silenced = false;
 				}
-				else if (args [i].equals("-o")) {
-					outputPath = args [i + 1];
-					i++;
-				}
+				else if (args [i].equals("-o")) outputPath = args [i++ + 1];
 				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
 			}
 		}
@@ -517,6 +511,12 @@ public class CompilerDriver {
 		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
 		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + instructionsGenerated, Message.Type.INFO));
+	}
+	
+	/** Resets flags during burst compilation */
+	public static void reset() {
+		heap_referenced = false;
+		null_referenced = false;
 	}
 	
 }

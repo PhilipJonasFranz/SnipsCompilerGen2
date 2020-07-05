@@ -40,9 +40,8 @@ public class PreProcessor {
 	 * Create new instance, convert code input into LineObject representation
 	 */
 	public PreProcessor(List<String> code, String filePath) {
-		for (int i = 0; i < code.size(); i++) {
+		for (int i = 0; i < code.size(); i++) 
 			this.process.add(new LineObject(i + 1, code.get(i), filePath));
-		}
 	}
 	
 	/**
@@ -62,9 +61,9 @@ public class PreProcessor {
 					if (!this.imported.contains(path)) {
 						try {
 							List<String> lines = getFile(path);
-							for (int a = 0; a < lines.size(); a++) {
+							for (int a = 0; a < lines.size(); a++) 
 								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
-							}
+							
 							new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
 							this.imported.add(path);
 						} catch (NullPointerException e) {

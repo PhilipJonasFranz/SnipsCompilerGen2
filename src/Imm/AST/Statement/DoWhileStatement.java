@@ -22,9 +22,9 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Do");
-		for (Statement s : this.body) {
+		
+		for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
-		}
 		
 		System.out.println(this.pad(d) + "While");
 		this.condition.print(d + this.printDepthStep, rec);

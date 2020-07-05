@@ -13,6 +13,7 @@ import Util.Source;
 public class BreakStatement extends Statement {
 
 			/* --- FIELDS --- */
+	/** The loop this break statements breaks out of. */
 	public CompoundStatement superLoop;
 	
 	

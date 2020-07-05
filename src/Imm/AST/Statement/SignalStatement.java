@@ -51,8 +51,8 @@ public class SignalStatement extends Statement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		if (this.shadowRef != null) this.shadowRef.setContext(context);
+		if (this.shadowRef != null) 
+			this.shadowRef.setContext(context);
 	}
 
 	public void releaseContext() {

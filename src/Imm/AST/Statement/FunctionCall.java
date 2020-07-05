@@ -53,10 +53,11 @@ public class FunctionCall extends Statement {
 			s += "}";
 			System.out.print(s);
 		}
+		
 		System.out.println();
-		for (Expression e : this.parameters) {
+		
+		for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
@@ -81,9 +82,8 @@ public class FunctionCall extends Statement {
 			}
 		}
 		
-		for (Expression e : this.parameters) {
+		for (Expression e : this.parameters) 
 			e.setContext(context);
-		}
 	}
 
 	public void releaseContext() {
@@ -96,9 +96,8 @@ public class FunctionCall extends Statement {
 			}
 		}
 		
-		for (Expression e : this.parameters) {
+		for (Expression e : this.parameters) 
 			e.releaseContext();
-		}
 	}
 	
 }
