@@ -24,21 +24,17 @@ vecProd:                                     /* Function: vecProd */
     ldr r2, [r0]
     mul r0, r1, r2
     push { r0 }
-    add r0, fp, #16
-    add r0, r0, #4
+    add r0, fp, #20
     ldr r1, [r0]
-    add r0, fp, #4
-    add r0, r0, #4
+    add r0, fp, #8
     ldr r2, [r0]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    add r0, fp, #16
-    add r0, r0, #8
+    add r0, fp, #24
     ldr r1, [r0]
-    add r0, fp, #4
-    add r0, r0, #8
+    add r0, fp, #12
     ldr r2, [r0]
     mul r2, r1, r2
     pop { r1 }

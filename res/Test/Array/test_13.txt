@@ -21,36 +21,28 @@ add:                                         /* Function: add */
     mov fp, sp
     add r0, fp, #4
     ldr r1, [r0]
-    add r0, fp, #4
-    add r0, r0, #4
+    add r0, fp, #8
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #8
+    add r0, fp, #12
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #12
+    add r0, fp, #16
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #16
+    add r0, fp, #20
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #20
+    add r0, fp, #24
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #24
+    add r0, fp, #28
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #28
+    add r0, fp, #32
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #32
+    add r0, fp, #36
     ldr r2, [r0]
     add r0, r1, r2
     mov sp, fp

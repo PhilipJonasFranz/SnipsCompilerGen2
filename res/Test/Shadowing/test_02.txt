@@ -46,8 +46,7 @@ X.get:                                       /* Function: X.get */
     lsl r0, r2, #1
     str r0, [r1]                             /* Store value to struct field */
 X.get.L1: 
-    add r1, fp, #12                          /* Evaluate Expression */
-    add r1, r1, #4
+    add r1, fp, #16                          /* Evaluate Expression */
     ldr r0, [r1]                             /* Load field from struct */
     mov sp, fp
     pop { r3, r4, fp }

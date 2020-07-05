@@ -24,12 +24,10 @@ bar:                                         /* Function: bar */
     mov fp, sp
     add r0, fp, #4
     ldr r1, [r0]
-    add r0, fp, #4
-    add r0, r0, #4
+    add r0, fp, #8
     ldr r2, [r0]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #8
+    add r0, fp, #12
     ldr r2, [r0]
     add r0, r1, r2
     mov sp, fp

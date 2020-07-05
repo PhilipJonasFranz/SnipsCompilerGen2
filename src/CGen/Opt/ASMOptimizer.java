@@ -108,6 +108,10 @@ public class ASMOptimizer {
 			 */
 			this.removeOperandIndirectTargeting(body);
 			
+			/**
+			 * Substitute immediate values after assignment
+			 * to register into other instructions.
+			 */
 			this.constantOperandPropagation(body);
 			
 			/**
@@ -434,7 +438,7 @@ public class ASMOptimizer {
 			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMAdd) {
 				ASMAdd add0 = (ASMAdd) body.instructions.get(i - 1);
 				ASMAdd add1 = (ASMAdd) body.instructions.get(i);
-				if (add0.target.reg == add1.target.reg && add0.target.reg == add0.op0.reg && 
+				if (add0.target.reg == add1.target.reg && add0.target.reg == add1.op0.reg && 
 						add0.op1 instanceof ImmOperand && add1.op1 instanceof ImmOperand) {
 					ImmOperand op0 = (ImmOperand) add0.op1;
 					ImmOperand op1 = (ImmOperand) add1.op1;
