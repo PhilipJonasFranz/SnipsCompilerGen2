@@ -24,14 +24,12 @@ main:                                        /* Function: main */
     push { r3, r4, r5, r6 }
     mov r3, r0
     mov r4, #0
-    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 main.L1: 
     cmp r5, r3
     bge main.L2
     add r1, r4, r5
     add r4, r1, #1
-    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 main.L4: 
     cmp r6, r3

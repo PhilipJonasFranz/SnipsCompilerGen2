@@ -30,9 +30,8 @@ main.L1:                                     /* Evaluate condition */
     mov r2, #2
     mul r5, r3, r2
     sub r0, fp, #4                           /* Evaluate Expression */
-    lsr r0, r0, #2
     push { r5 }                              /* Push declaration on stack, referenced by addressof. */
-    mov r5, r0
+    lsr r5, r0, #2
     ldr r0, [fp, #-4]
     cmp r0, #4
     bne main.L3

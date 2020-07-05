@@ -62,8 +62,7 @@ resv:                                        /* Function: resv */
     add r3, r3, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r4, r0
+    lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     lsl r0, r4, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
@@ -112,9 +111,8 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r0, r5, #0
-    mov r5, r0
-    cmp r0, r3
+    rsb r5, r5, #0
+    cmp r5, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
@@ -170,12 +168,10 @@ __mat_mult:                                  /* Function: __mat_mult */
     mul r0, r1, r2
     bl resv                                  /* Call resv */
     mov r6, r0
-    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
 __mat_mult.L1: 
     cmp r7, r5
     bge __mat_mult.L2
-    mov r0, #0                               /* Evaluate Expression */
     mov r8, #0
 __mat_mult.L4: 
     mov r0, r8
@@ -246,12 +242,10 @@ allocMatrix:                                 /* Function: allocMatrix */
     mul r0, r0, r1
     bl resv                                  /* Call resv */
     mov r5, r0
-    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 allocMatrix.L1: 
     cmp r6, r4
     bge allocMatrix.L2
-    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
 allocMatrix.L4: 
     cmp r7, r3

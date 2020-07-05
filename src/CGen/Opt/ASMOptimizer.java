@@ -173,6 +173,15 @@ public class ASMOptimizer {
 			this.removeZeroInstruction(body);
 			
 			/**
+			 * instruction a <- Assigns to rx
+			 * ... <- Do not reassign or read rx
+			 * instruction b <- Assigns to rx
+			 * 
+			 * -> Remove instruction a
+			 */
+			this.removeUnusedAssignment(body);
+			
+			/**
 			 * Execute these routines when no other optimization can be made.
 			 * Executing this routine to early can block data-paths that could
 			 * under other circumstances be simplified.
@@ -250,6 +259,10 @@ public class ASMOptimizer {
 			ASMCmp cmp = (ASMCmp) ins;
 			return cmp.op0.reg == reg || (cmp.op1 instanceof RegOperand && ((RegOperand) cmp.op1).reg == reg);
 		}
+		else if (ins instanceof ASMStr) {
+			ASMStr str = (ASMStr) ins;
+			return str.target.reg == reg || (str.op0 instanceof RegOperand && ((RegOperand) str.op0).reg == reg) || (str.op1 instanceof RegOperand && ((RegOperand) str.op1).reg == reg);
+		}
 		else if (ins instanceof ASMMemOp) {
 			ASMMemOp op = (ASMMemOp) ins;
 			return (op.op0 instanceof RegOperand && ((RegOperand) op.op0).reg == reg) || (op.op1 instanceof RegOperand && ((RegOperand) op.op1).reg == reg);
@@ -263,8 +276,8 @@ public class ASMOptimizer {
 			return mul.op0.reg == reg || mul.op1.reg == reg;
 		}
 		else if (ins instanceof ASMStrStack) {
-			ASMLdrStack load = (ASMLdrStack) ins;
-			return load.target.reg == reg || load.op0.reg == reg || (load.op1 != null && load.op1 instanceof RegOperand && ((RegOperand) load.op1).reg == reg);
+			ASMStrStack str = (ASMStrStack) ins;
+			return str.target.reg == reg || str.op0.reg == reg || (str.op1 != null && str.op1 instanceof RegOperand && ((RegOperand) str.op1).reg == reg);
 		}
 		else if (ins instanceof ASMPushStack) {
 			ASMPushStack push = (ASMPushStack) ins;
@@ -272,7 +285,8 @@ public class ASMOptimizer {
 			return false;
 		}
 		else if (ins instanceof ASMLabel || ins instanceof ASMComment || 
-				 ins instanceof ASMSeperator || ins instanceof ASMBranch) {
+				 ins instanceof ASMSeperator || ins instanceof ASMBranch ||
+				 ins instanceof ASMPopStack) {
 			return false;
 		}
 		else if (ins instanceof ASMHardcode) {
@@ -280,6 +294,46 @@ public class ASMOptimizer {
 			return true;
 		}
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	private void removeUnusedAssignment(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			REGISTER reg = null;
+			
+			if (body.instructions.get(i) instanceof ASMBinaryData) {
+				ASMBinaryData d = (ASMBinaryData) body.instructions.get(i);
+				if (d.updateConditionField || d.cond != null) continue;
+				reg = d.target.reg;
+			}
+			else if (body.instructions.get(i) instanceof ASMLdr) {
+				ASMLdr d = (ASMLdr) body.instructions.get(i);
+				if (d.cond != null) continue;
+				reg = d.target.reg;
+			}
+			else if (body.instructions.get(i) instanceof ASMLdrStack) {
+				ASMLdrStack d = (ASMLdrStack) body.instructions.get(i);
+				if (d.cond != null) continue;
+				reg = d.target.reg;
+			}
+			
+			if (reg == null) continue;
+			
+			if (reg == REGISTER.R0 || reg == REGISTER.R1 || reg == REGISTER.R2) {
+				for (int a = i + 1; a < body.instructions.size(); a++) {
+					ASMInstruction ins = body.instructions.get(a);
+					
+					if (this.readsReg(ins, reg) || ins instanceof ASMBranch || this.overwritesReg(ins, REGISTER.PC)) {
+						break;
+					}
+					else if (this.overwritesReg(ins, reg) && !this.readsReg(ins, reg)) {
+						body.instructions.remove(i);
+						i--;
+						OPT_DONE = true;
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	private void pushPopRelocation(AsNBody body) {
@@ -540,10 +594,6 @@ public class ASMOptimizer {
 						
 						boolean replace = true;
 						
-						if (this.overwritesReg(body.instructions.get(i - 2), reg)) {
-							replace = false;
-						}
-						
 						if (body.instructions.get(i + 1) instanceof ASMCmp) {
 							ASMCmp cmp = (ASMCmp) body.instructions.get(i + 1);
 							if (cmp.op0.reg == reg) replace = false;
@@ -567,17 +617,7 @@ public class ASMOptimizer {
 							}
 						}
 						
-						if (patchUp) {
-							if (!this.overwritesReg(body.instructions.get(i - 2), reg)) {
-								body.instructions.remove(i);
-								i--;
-							}
-							else {
-								ASMInstruction rem = body.instructions.remove(i);
-								body.instructions.add(i - 1, rem);
-								i--;
-							}
-						}
+						if (patchUp) body.instructions.remove(i);
 					}
 				}
 			}

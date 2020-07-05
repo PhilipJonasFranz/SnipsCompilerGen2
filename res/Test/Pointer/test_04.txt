@@ -30,8 +30,7 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #10
     sub r0, fp, #4                           /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r1, r0
+    lsr r1, r0, #2
     sub r0, fp, #8
     lsr r0, r0, #2
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */

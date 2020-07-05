@@ -14,7 +14,6 @@ main:                                        /* Function: main */
     mov r3, #49
     cmp r3, #49
     bne main.L0
-    mov r0, #50                              /* Evaluate Expression */
     mov r3, #50
 main.L0: 
     mov r0, r3                               /* Evaluate Expression */

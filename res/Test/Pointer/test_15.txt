@@ -38,8 +38,8 @@ main:                                        /* Function: main */
     mov r1, #5
     push { r1, r0 }
     sub r0, fp, #16                          /* Evaluate Expression */
-    lsr r0, r0, #2
-    add r4, r0, #2
+    lsr r1, r0, #2
+    add r4, r1, #2
     mov r1, r3
     mov r0, r4
     bl get                                   /* Call get */
