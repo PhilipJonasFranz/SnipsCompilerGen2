@@ -18,7 +18,7 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6, r7, r8, r9, fp }
+    push { fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -31,10 +31,10 @@ main:                                        /* Function: main */
     push { r0 }
     add r0, r5, #5
     push { r0 }
-    ldr r1, [fp, #32]                        /* Evaluate Expression */
+    ldr r1, [fp, #4]                         /* Evaluate Expression */
     add r0, r1, #6
     push { r0 }
-    ldr r1, [fp, #32]                        /* Evaluate Expression */
+    ldr r1, [fp, #4]                         /* Evaluate Expression */
     add r0, r1, #7
     add r1, r6, r7
     add r1, r1, r8
@@ -49,7 +49,7 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp }
+    pop { fp }
     add sp, sp, #4
     bx lr
     

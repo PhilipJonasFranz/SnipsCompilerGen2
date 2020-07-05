@@ -136,7 +136,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -168,8 +167,7 @@ free.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: CHAR */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { r3, r4, lr }
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -189,8 +187,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, r4, lr }
     bx lr
 .POOL1_main.L4_NULL: .word NULL
     
@@ -199,8 +196,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                                 /* Function: List.add, Provisos: CHAR */
-    push { r3, r4, r5, fp, lr }
-    mov fp, sp
+    push { r3, r4, r5, lr }
     mov r3, r0
     mov r4, r1
     mov r0, #3                               /* Evaluate Expression */
@@ -245,8 +241,7 @@ List.add.L1:
     add r1, r1, #8
     str r0, [r1]                             /* Store value to struct field */
 List.add.L0: 
-    mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, lr }
     bx lr
 .POOL2_main.L4_NULL: .word NULL
     
@@ -309,7 +304,6 @@ List.get.L7:
 /* Returns the amount of elements stored in the list. */
 List.size:                                   /* Function: List.size */
     push { r3, r4, r5 }
-    mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r4, [r1]                             /* Load field from struct */
@@ -538,7 +532,7 @@ String.length.L2:
 /* only read the two given strings. */
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #67
@@ -562,12 +556,11 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     pop { r1, r2 }
     bl String.substring                      /* Call String.substring */
-    mov r3, r0
     mov r1, r0
     sub r0, fp, #16
     lsr r0, r0, #2
     bl String.equals                         /* Call String.equals */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

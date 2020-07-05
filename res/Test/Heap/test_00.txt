@@ -136,7 +136,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -159,26 +158,20 @@ free.L2:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6, r7, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     mov r0, #1                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r4, r0
     mov r0, #5                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r6, r0
     bl free                                  /* Call free */
     mov r0, r5                               /* Load parameters */
     bl free                                  /* Call free */
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r7, r0
     bl free                                  /* Call free */
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
+    pop { lr }
     bx lr
     

@@ -16,7 +16,7 @@ public class AsNIDRefWriteback extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		AsNAssignWriteback.injectWriteback(w, wb, r, map, st);
+		AsNAssignWriteback.injectWriteback(w, wb, r, map, st, true);
 		
 		return w;
 	}

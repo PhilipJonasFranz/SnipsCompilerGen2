@@ -17,31 +17,26 @@ OUTPUT
     b main
 baz:                                         /* Function: baz */
     push { r3 }
-    mov r3, r0
     lsl r0, r0, #1
     pop { r3 }
     bx lr
     
 foo:                                         /* Function: foo */
-    push { fp, lr }
-    mov fp, sp
+    push { lr }
     mov r0, #4                               /* Evaluate Expression */
     bl baz                                   /* Call baz */
     mov r1, #8
     mul r0, r1, r0
-    mov sp, fp
-    pop { fp, lr }
+    pop { lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
+    push { lr }
     bl foo                                   /* Evaluate Expression */
     push { r0 }
     bl foo                                   /* Call foo */
     pop { r1 }
     add r0, r1, r0
-    mov sp, fp
-    pop { fp, lr }
+    pop { lr }
     bx lr
     

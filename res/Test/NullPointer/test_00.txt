@@ -10,7 +10,6 @@ OUTPUT
 /* --test_00.txt */
 NULL: .word 0
 main:                                        /* Function: main */
-    push { r3 }
     ldr r3, .POOL0_main.L0_NULL              /* Evaluate Expression */
     ldr r1, .POOL0_main.L0_NULL              /* Load null address */
     cmp r3, r1
@@ -20,7 +19,6 @@ main:                                        /* Function: main */
 main.L1: 
     mov r0, #5                               /* Evaluate Expression */
 main.L2: 
-    pop { r3 }
     bx lr
 .POOL0_main.L0_NULL: .word NULL
     

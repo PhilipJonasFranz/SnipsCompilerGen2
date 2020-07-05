@@ -16,8 +16,7 @@ OUTPUT
 /* --test_03.txt */
     b main
 getDiff_P0:                                  /* Function: getDiff, Provisos: INT, INT */
-    push { r3, r4, r5, fp, lr }
-    mov fp, sp
+    push { r3, r4, r5, lr }
     mov r3, r0
     mov r4, r1
     mov r0, r3                               /* Evaluate Expression */
@@ -31,18 +30,12 @@ getDiff.L1:
     mov r0, r4
     bl getDiff_P0                            /* Call getDiff */
 getDiff.L2: 
-    mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3
+    push { lr }
     bl getDiff_P0                            /* Call getDiff */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

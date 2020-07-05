@@ -34,7 +34,6 @@ vec: .skip 16
     str r0, [r1, #12]
     pop { r0, r1, r2 }
 main:                                        /* Function: main */
-    push { r3, r4 }
     mov r3, r0
     mov r4, r1
     mov r2, #0                               /* Evaluate Expression */
@@ -46,7 +45,6 @@ main:                                        /* Function: main */
     ldr r0, .POOL0_main.L0_vec               /* Load data section address */
     add r0, r0, r2
     ldr r0, [r0]
-    pop { r3, r4 }
     bx lr
 .POOL0_main.L0_vec: .word vec
     

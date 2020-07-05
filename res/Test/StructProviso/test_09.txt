@@ -19,7 +19,6 @@ TESTCASES
 OUTPUT
 /* --test_09.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, #19
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
@@ -51,6 +50,5 @@ main:                                        /* Function: main */
     ldr r2, [r0]                             /* Load from address */
     add r0, r1, r2
     mov sp, fp
-    pop { r3 }
     bx lr
     

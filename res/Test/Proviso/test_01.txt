@@ -15,8 +15,6 @@ OUTPUT
     b main
     
 main:                                        /* Function: main */
-    push { r3, r4 }
     mov r0, #1                               /* Evaluate Expression */
-    pop { r3, r4 }
     bx lr
     

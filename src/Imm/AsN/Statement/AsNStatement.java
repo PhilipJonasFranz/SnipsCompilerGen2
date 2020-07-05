@@ -50,7 +50,7 @@ public abstract class AsNStatement extends AsNNode {
 			node = AsNAssignment.cast((Assignment) s, r, map, st); 
 		}
 		else if (s instanceof AssignWriteback) {
-			node = AsNAssignWriteback.cast((AssignWriteback) s, r, map, st); 
+			node = AsNAssignWriteback.cast((AssignWriteback) s, r, map, st, true); 
 		}
 		else if (s instanceof SwitchStatement) {
 			node = AsNSwitchStatement.cast((SwitchStatement) s, r, map, st); 

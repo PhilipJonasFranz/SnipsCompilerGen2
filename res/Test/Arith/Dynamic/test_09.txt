@@ -78,7 +78,7 @@ foo:                                         /* Function: foo */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     bl foo                                   /* Call foo */
@@ -102,6 +102,6 @@ main:                                        /* Function: main */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

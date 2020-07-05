@@ -40,7 +40,6 @@ X.get:                                       /* Function: X.get */
     beq X.get.L1
     add r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
-    mov r4, #2
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r2, [r1]
@@ -56,14 +55,11 @@ X.get.L1:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     push { r0 }
     mov r0, #1
     push { r0 }
     bl X.get                                 /* Call X.get */
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { lr }
     bx lr
     

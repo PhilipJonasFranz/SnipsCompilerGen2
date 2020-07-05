@@ -16,14 +16,12 @@ foo:                                         /* Function: foo */
     bx lr
     
 main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
+    push { lr }
     bl foo                                   /* Evaluate Expression */
     push { r0 }
     bl foo                                   /* Call foo */
     pop { r1 }
     mul r0, r1, r0
-    mov sp, fp
-    pop { fp, lr }
+    pop { lr }
     bx lr
     

@@ -49,7 +49,7 @@ get:                                         /* Function: get */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_get
@@ -70,6 +70,6 @@ main:                                        /* Function: main */
     ldr r2, [r0]
     add r0, r1, r2
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

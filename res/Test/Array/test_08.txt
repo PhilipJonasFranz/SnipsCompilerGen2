@@ -53,7 +53,7 @@ foo:                                         /* Function: foo */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
@@ -99,6 +99,6 @@ main:                                        /* Function: main */
     pop { r1 }
     add r0, r1, r0
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

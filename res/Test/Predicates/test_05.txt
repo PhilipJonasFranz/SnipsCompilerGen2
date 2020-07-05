@@ -22,16 +22,12 @@ get_P0:                                      /* Function: get, Provisos: INT */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_get_P0
-    mov r4, r0
     mov r5, r0
     add lr, pc, #8                           /* Evaluate Expression */
     mov pc, r5
-    mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { lr }
     bx lr
     

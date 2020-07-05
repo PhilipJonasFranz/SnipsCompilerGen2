@@ -46,7 +46,7 @@ id:                                          /* Function: id */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     add r10, pc, #8                          /* Evaluate Expression */
@@ -64,6 +64,6 @@ main:                                        /* Function: main */
     add r0, r0, r2
     ldr r0, [r0]
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

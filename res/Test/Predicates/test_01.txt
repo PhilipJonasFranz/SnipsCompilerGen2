@@ -53,8 +53,7 @@ sortPred:                                    /* Function: sortPred */
     bx lr
     
 sort:                                        /* Function: sort */
-    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
-    mov fp, sp
+    push { r3, r4, r5, r6, r7, r8, r9, lr }
     mov r3, r0
     mov r4, r1
     mov r5, r2
@@ -93,8 +92,7 @@ sort.L6:
     mov r0, r8
     str r0, [r1]
 sort.L9: 
-    mov r0, r7
-    add r7, r0, #1
+    add r7, r7, #1
     b sort.L6
 sort.L7: 
     cmp r6, #0
@@ -103,12 +101,11 @@ sort.L7:
 sort.L11: 
     b sort.L3
 sort.L4: 
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
+    pop { r3, r4, r5, r6, r7, r8, r9, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #2                               /* Evaluate Expression */
@@ -132,6 +129,6 @@ main:                                        /* Function: main */
     add r0, r0, r2
     ldr r0, [r0]
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

@@ -16,6 +16,7 @@ import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp;
+import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -182,6 +183,12 @@ public class ASMOptimizer {
 			this.removeUnusedAssignment(body);
 			
 			/**
+			 * Removes mov rx, ... instructions, where rx = r3 - r9,
+			 * and rx is not being used until a bx lr
+			 */
+			this.removeUnusedRegistersStrict(body);
+			
+			/**
 			 * Execute these routines when no other optimization can be made.
 			 * Executing this routine to early can block data-paths that could
 			 * under other circumstances be simplified.
@@ -215,7 +222,7 @@ public class ASMOptimizer {
 	/**
 	 * Check if given register is overwritten by given instruction.
 	 */
-	private boolean overwritesReg(ASMInstruction ins, REGISTER reg) {
+	public static boolean overwritesReg(ASMInstruction ins, REGISTER reg) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return data.target.reg == reg;
@@ -231,6 +238,10 @@ public class ASMOptimizer {
 		else if (ins instanceof ASMLdrStack) {
 			ASMLdrStack load = (ASMLdrStack) ins;
 			return load.target.reg == reg;
+		}
+		else if (ins instanceof ASMStrStack) {
+			ASMStrStack load = (ASMStrStack) ins;
+			return (load.memOp == MEM_OP.POST_WRITEBACK || load.memOp == MEM_OP.PRE_WRITEBACK) && (load.op1 instanceof RegOperand && ((RegOperand) load.op1).reg == reg);
 		}
 		else if (ins instanceof ASMPopStack) {
 			ASMPopStack pop = (ASMPopStack) ins;
@@ -250,7 +261,7 @@ public class ASMOptimizer {
 	/**
 	 * Check if given register is read by given instruction.
 	 */
-	private boolean readsReg(ASMInstruction ins, REGISTER reg) {
+	public static boolean readsReg(ASMInstruction ins, REGISTER reg) {
 		if (ins instanceof ASMBinaryData) {
 			ASMBinaryData data = (ASMBinaryData) ins;
 			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOperand && ((RegOperand) data.op1).reg == reg);
@@ -296,6 +307,30 @@ public class ASMOptimizer {
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
 	}
 	
+	private void removeUnusedRegistersStrict(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i);
+				REGISTER reg = mov.target.reg;
+				
+				if (reg != REGISTER.R0 && reg != REGISTER.R1 && reg != REGISTER.R2 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
+					boolean used = false;
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BX) break;
+						else {
+							used |= readsReg(body.instructions.get(a), reg);
+						}
+					}
+					
+					if (!used) {
+						body.instructions.remove(i);
+						i--;
+					}
+				}
+			}
+		}
+	}
+	
 	private void removeUnusedAssignment(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			REGISTER reg = null;
@@ -322,10 +357,10 @@ public class ASMOptimizer {
 				for (int a = i + 1; a < body.instructions.size(); a++) {
 					ASMInstruction ins = body.instructions.get(a);
 					
-					if (this.readsReg(ins, reg) || ins instanceof ASMBranch || this.overwritesReg(ins, REGISTER.PC)) {
+					if (readsReg(ins, reg) || ins instanceof ASMBranch || overwritesReg(ins, REGISTER.PC)) {
 						break;
 					}
-					else if (this.overwritesReg(ins, reg) && !this.readsReg(ins, reg)) {
+					else if (overwritesReg(ins, reg) && !readsReg(ins, reg)) {
 						body.instructions.remove(i);
 						i--;
 						OPT_DONE = true;
@@ -349,7 +384,7 @@ public class ASMOptimizer {
 					
 					int line = i;
 					while (true) {
-						if (this.overwritesReg(body.instructions.get(line), reg) || 
+						if (overwritesReg(body.instructions.get(line), reg) || 
 								body.instructions.get(line) instanceof ASMBranch || body.instructions.get(line) instanceof ASMLabel || 
 								body.instructions.get(line) instanceof ASMStackOp || body.instructions.get(line) instanceof ASMPushStack ||
 								body.instructions.get(line) instanceof ASMLdr || body.instructions.get(line) instanceof ASMPopStack) {
@@ -375,7 +410,7 @@ public class ASMOptimizer {
 					
 					int line = i - 1;
 					while (true) {
-						if (this.readsReg(body.instructions.get(line), reg) || this.overwritesReg(body.instructions.get(line), reg) ||
+						if (readsReg(body.instructions.get(line), reg) || overwritesReg(body.instructions.get(line), reg) ||
 								body.instructions.get(line) instanceof ASMBranch || body.instructions.get(line) instanceof ASMLabel || 
 								body.instructions.get(line) instanceof ASMStackOp || 
 								body.instructions.get(line) instanceof ASMStr || body.instructions.get(line) instanceof ASMPushStack ) {
@@ -503,7 +538,7 @@ public class ASMOptimizer {
 							}
 						}
 						
-						if (this.overwritesReg(ins, reg) || ins instanceof ASMBranch || ins instanceof ASMLabel) {
+						if (overwritesReg(ins, reg) || ins instanceof ASMBranch || ins instanceof ASMLabel) {
 							break;
 						}
 					}
@@ -552,19 +587,19 @@ public class ASMOptimizer {
 						/* Check if register if newReg is overwritten in the span between the push pop */
 						for (int a = i + 1; a < end; a++) {
 							/* Old register is overwritten, value from mov would be shadowed */
-							if (this.overwritesReg(body.instructions.get(a), push.operands.get(0).reg)) {
+							if (overwritesReg(body.instructions.get(a), push.operands.get(0).reg)) {
 								replace = false;
 								break;
 							}
 							
 							/* New register is overwritten, value from mov would be shadowed */
-							if (this.overwritesReg(body.instructions.get(a), newReg)) {
+							if (overwritesReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;
 							}
 							
 							/* New register is read after new mov, would read wrong value */
-							if (this.readsReg(body.instructions.get(a), newReg)) {
+							if (readsReg(body.instructions.get(a), newReg)) {
 								replace = false;
 								break;
 							}

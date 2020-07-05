@@ -29,7 +29,6 @@ OUTPUT
     b main
     
 main:                                        /* Function: main */
-    push { r3, r4 }
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
@@ -50,6 +49,5 @@ main:                                        /* Function: main */
     push { r4 }                              /* Push declaration on stack, referenced by addressof. */
     ldr r0, [r1]                             /* Load field from struct */
     mov sp, fp
-    pop { r3, r4 }
     bx lr
     

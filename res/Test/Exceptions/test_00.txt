@@ -77,7 +77,7 @@ get.L4:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #8                               /* Evaluate Expression */
@@ -120,10 +120,9 @@ main.L0:
     pop { r1 }
     add r4, r1, r2
     add sp, sp, #12
-    mov r12, #0
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

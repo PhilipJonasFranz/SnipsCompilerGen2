@@ -24,7 +24,7 @@ public abstract class ASMInstruction {
 		 *  into<br>
 		 *  add r1, rx, #1<br>
 		 */
-		WRITEBACK,
+		WRITEBACK, 
 		
 		EXC_EXIT,
 		

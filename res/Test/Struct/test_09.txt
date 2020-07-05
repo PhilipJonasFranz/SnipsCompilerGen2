@@ -142,7 +142,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -174,8 +173,7 @@ free.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT* */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { r3, r4, lr }
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -195,8 +193,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, r4, lr }
     bx lr
 .POOL1_main.L2_NULL: .word NULL
     
@@ -228,19 +225,16 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Removes all elements from the list */
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { fp, lr }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r0, #20                              /* Evaluate Expression */
     mov r1, #10
     push { r1, r0 }
     ldr r0, .POOL2_main.L2_NULL              /* Evaluate Expression */
     bl List.create_P0                        /* Call List.create */
-    mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { fp, lr }
     bx lr
 .POOL2_main.L2_NULL: .word NULL
     

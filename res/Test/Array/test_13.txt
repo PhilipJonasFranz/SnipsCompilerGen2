@@ -59,7 +59,7 @@ add:                                         /* Function: add */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #9                               /* Evaluate Expression */
@@ -102,6 +102,6 @@ main.L0:                                     /* Copy memory section with loop */
 main.L1: 
     bl add                                   /* Call add */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

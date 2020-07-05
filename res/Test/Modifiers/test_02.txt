@@ -28,10 +28,8 @@ Test.getter:                                 /* Function: Test.getter */
 .POOL0_main.L0_Test.var: .word Test.var
     
 main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
+    push { lr }
     bl Test.getter                           /* Evaluate Expression */
-    mov sp, fp
-    pop { fp, lr }
+    pop { lr }
     bx lr
     

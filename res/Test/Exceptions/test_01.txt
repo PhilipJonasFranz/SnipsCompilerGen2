@@ -108,7 +108,7 @@ throw.L2:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #8                               /* Evaluate Expression */
@@ -168,10 +168,9 @@ main.L2:
     add r1, r1, #4
     ldr r4, [r1]                             /* Load field from struct */
     add sp, sp, #8
-    mov r12, #0
 main.L3: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

@@ -22,8 +22,7 @@ OUTPUT
 /* --test_02.txt */
     b main
 log2:                                        /* Function: log2 */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { r3, lr }
     mov r3, r0
     cmp r3, #0
     beq log2.L1
@@ -34,16 +33,12 @@ log2:                                        /* Function: log2 */
 log2.L1: 
     mov r0, #0                               /* Evaluate Expression */
 log2.L2: 
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     bl log2                                  /* Call log2 */
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { lr }
     bx lr
     

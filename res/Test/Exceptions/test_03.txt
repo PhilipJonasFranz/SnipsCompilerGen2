@@ -211,8 +211,7 @@ checkThreshold.L5:
     mov r0, r8                               /* Evaluate Expression */
     mov r5, r0
 checkThreshold.L6: 
-    mov r0, r7
-    add r7, r0, #1
+    add r7, r7, #1
     b checkThreshold.L2
 checkThreshold.L3: 
     mov r0, r5                               /* Evaluate Expression */
@@ -229,7 +228,7 @@ checkThreshold.L9:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
@@ -278,10 +277,9 @@ main.L0:
     add r1, r1, #4
     ldr r5, [r1]                             /* Load field from struct */
     add sp, sp, #8
-    mov r12, #0
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { fp, lr }
     bx lr
     

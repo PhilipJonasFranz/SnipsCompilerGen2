@@ -121,9 +121,7 @@ resv.L18:
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r4, r0
@@ -145,7 +143,6 @@ main:                                        /* Function: main */
     add r0, r4, #1
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

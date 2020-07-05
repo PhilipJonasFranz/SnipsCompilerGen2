@@ -43,7 +43,7 @@ get:                                         /* Function: get */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #1                               /* Evaluate Expression */
@@ -70,6 +70,6 @@ main:                                        /* Function: main */
     mov r0, r3
     bl get                                   /* Call get */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

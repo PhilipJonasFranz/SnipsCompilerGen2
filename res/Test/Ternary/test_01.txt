@@ -13,7 +13,6 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
 main:                                        /* Function: main */
-    push { r3, r4 }
     mov r3, r0
     cmp r3, #3
     bne main.L0
@@ -27,7 +26,5 @@ main.L0:
 main.L2: 
     mov r0, #10
 main.L3: 
-    mov r4, r0
-    pop { r3, r4 }
     bx lr
     

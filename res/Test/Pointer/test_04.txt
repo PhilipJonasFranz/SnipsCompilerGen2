@@ -16,15 +16,13 @@ OUTPUT
     b main
 forEach:                                     /* Function: forEach */
     push { r3, r4 }
-    mov r3, r0
-    mov r4, r1
     lsl r0, r1, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
@@ -36,6 +34,6 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     bl forEach                               /* Call forEach */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

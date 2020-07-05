@@ -154,7 +154,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -284,8 +283,7 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
 /* Frees the allocated storage of the queue, */
 /* as well as the queue itself. */
 Queue.destroy:                               /* Function: Queue.destroy */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { r3, lr }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
@@ -293,8 +291,7 @@ Queue.destroy:                               /* Function: Queue.destroy */
     bl free                                  /* Call free */
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, lr }
     bx lr
     
 /* Returns true if currently no elements are in the queue. */
@@ -465,7 +462,7 @@ Queue.dequeue.L4:
 /* stored in the queue. */
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #0
@@ -497,6 +494,6 @@ main:                                        /* Function: main */
     ldr r2, [r0]
     add r0, r1, r2
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

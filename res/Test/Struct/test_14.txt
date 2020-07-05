@@ -22,7 +22,6 @@ TESTCASES
 OUTPUT
 /* --test_14.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
@@ -64,6 +63,5 @@ main.L0:
     ldr r0, [r1]                             /* Load field from struct */
 main.L1: 
     mov sp, fp
-    pop { r3 }
     bx lr
     

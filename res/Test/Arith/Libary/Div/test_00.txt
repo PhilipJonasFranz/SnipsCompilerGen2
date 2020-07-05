@@ -56,13 +56,8 @@ __op_div.L2:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3
+    push { lr }
     bl __op_div                              /* Call __op_div */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

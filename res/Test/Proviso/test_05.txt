@@ -20,11 +20,8 @@ foo_P0:                                      /* Function: foo, Provisos: INT */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { lr }
     bl foo_P0                                /* Evaluate Expression */
-    mov r3, r0
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { lr }
     bx lr
     

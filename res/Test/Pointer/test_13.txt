@@ -42,7 +42,7 @@ set:                                         /* Function: set */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -104,6 +104,6 @@ main:                                        /* Function: main */
     add r0, r0, r2
     ldr r0, [r0]
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

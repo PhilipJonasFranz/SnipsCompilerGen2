@@ -134,18 +134,14 @@ resv.L18:
 .POOL0_main.L1_HEAP_START: .word HEAP_START
     
 create_P0:                                   /* Function: create, Provisos: INT[2] */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { r3, lr }
     mov r0, #6                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r3, r0
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { lr }
     mov r3, r0
     bl create_P0                             /* Evaluate Expression */
     mov r4, r0
@@ -180,7 +176,6 @@ main:                                        /* Function: main */
     ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     
