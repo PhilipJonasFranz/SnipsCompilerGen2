@@ -245,8 +245,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
 List.add.L1: 
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r1, [r1]
+    ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */

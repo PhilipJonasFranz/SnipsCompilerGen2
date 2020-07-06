@@ -14,6 +14,9 @@ public abstract class ASMMemOp extends ASMInstruction {
 	
 	public Operand op0, op1;
 	
+	/* Set to true when op1 is reg Operand and is supposed to be subtracted from base */
+	public boolean subFromBase = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/** Example Usage: ldr/str r0, [r1, #2] */
@@ -37,7 +40,7 @@ public abstract class ASMMemOp extends ASMInstruction {
 		operation += " ";
 		String s = CompilerDriver.printDepth + operation + target.toString();
 		if (op1 != null) {
-			s += ", [" + this.op0.toString() + ", " + this.op1.toString() + "]";
+			s += ", [" + this.op0.toString() + ", " + ((this.subFromBase)? "-" : "") + this.op1.toString() + "]";
 		}
 		else s += ", [" + this.op0.toString() + "]";
 		

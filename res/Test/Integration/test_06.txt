@@ -62,8 +62,7 @@ mult.L7:
     lsl r0, r8, #2
     add r2, r2, r0
     add r0, fp, #44
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r1, #8
     push { r0 }
@@ -102,8 +101,7 @@ mult.L2:
     lsl r0, r4, #2
     add r2, r2, r0
     sub r0, fp, #16
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, fp }
     add sp, sp, #32

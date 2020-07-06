@@ -350,24 +350,43 @@ public class ASMOptimizer {
 					op0 = add.op0;
 					op1 = add.op1;
 				}
+				else if (body.instructions.get(i - 1) instanceof ASMSub) {
+					ASMSub sub = (ASMSub) body.instructions.get(i - 1);
+					
+					target = sub.target.reg;
+					op0 = sub.op0;
+					
+					if (sub.op1 instanceof RegOperand) {
+						op1 = sub.op1;
+						negate = true;
+					}
+					else if (sub.op1 instanceof ImmOperand) {
+						ImmOperand imm = (ImmOperand) sub.op1;
+						op1 = new ImmOperand(-imm.value);
+					}
+					else continue;
+				}
 				else continue;
 				
 				REGISTER addr = ((RegOperand) ldr.op0).reg;
 					
-				boolean clear = (target == addr && target != op0.reg);
+				if (target != addr) continue;
 				
-				if (!clear && target == addr) {
-					clear = true;
-					for (int a = i + 1; a < body.instructions.size(); a++) {
-						if (readsReg(body.instructions.get(a), target)) {
-							clear = false;
-							break;
-						}
-						if (overwritesReg(body.instructions.get(a), target) && !readsReg(body.instructions.get(a), target)) {
-							break;
-						}
+				boolean clear = true;
+				
+				for (int a = i + 1; a < body.instructions.size(); a++) {
+					if (readsReg(body.instructions.get(a), target)) {
+						clear = false;
+						break;
+					}
+					if (overwritesReg(body.instructions.get(a), target) && 
+						!readsReg(body.instructions.get(a), target)) {
+						break;
 					}
 				}
+				
+				/* Ldr itself will overwrite register */
+				clear |= ldr.target.reg == target;
 				
 				if (clear) {
 					/* Substitute */

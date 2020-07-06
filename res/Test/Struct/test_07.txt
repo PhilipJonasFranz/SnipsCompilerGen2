@@ -30,18 +30,12 @@ main:                                        /* Function: main */
     mov r0, #2
     push { r0 }
     mov r0, #9                               /* Evaluate Expression */
-    sub r1, fp, #12
-    str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #12                          /* Evaluate Expression */
-    ldr r0, [r1]                             /* Load field from struct */
-    sub r1, fp, #8                           /* Load field location */
-    push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    str r0, [fp, #-12]                       /* Store value to struct field */
+    ldr r1, [fp, #-12]                       /* Load field from struct */
+    ldr r2, [fp, #-8]                        /* Load field from struct */
     add r0, r1, r2
-    sub r1, fp, #4                           /* Load field location */
     push { r0 }
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-4]                        /* Load field from struct */
     mov r2, #2
     mul r2, r1, r2
     pop { r1 }

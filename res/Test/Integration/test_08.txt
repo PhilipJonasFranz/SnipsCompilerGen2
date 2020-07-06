@@ -291,8 +291,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
 List.add.L1: 
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r1, [r1]
+    ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -381,8 +380,7 @@ List.remove.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r1, [r1]
+    ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -431,8 +429,7 @@ List.remove.L10:
     b List.remove.L15
 List.remove.L14: 
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r1, [r1]
+    ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL4_main.L5_NULL              /* Load null address */
@@ -452,8 +449,7 @@ List.remove.L14:
 List.remove.L16: 
 /* Cut out element and set next pointers */
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r1, [r1]
+    ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r6, [r1, #4]                         /* Load field from struct */
     lsl r1, r5, #2                           /* Convert to bytes */
@@ -534,8 +530,7 @@ main:                                        /* Function: main */
     mov r4, r0
     push { r3 }
     ldr r0, .POOL5_main.L3_arr               /* Load data section address */
-    add r0, r0, #4
-    ldr r0, [r0]
+    ldr r0, [r0, #4]
     push { r0 }
     ldr r0, .POOL5_main.L3_arr               /* Load data section address */
     ldr r0, [r0]
@@ -566,17 +561,10 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #5
     push { r0 }
-    sub r1, fp, #24                          /* Evaluate Expression */
-    ldr r0, [r1]                             /* Load field from struct */
-    sub r1, fp, #20                          /* Load field location */
-    push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
-    add r0, r1, r2
-    sub r1, fp, #16                          /* Load field location */
-    push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    ldr r1, [fp, #-24]                       /* Load field from struct */
+    ldr r2, [fp, #-20]                       /* Load field from struct */
+    add r1, r1, r2
+    ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r1, r2
     push { r0 }
     mov r0, #6
@@ -588,8 +576,7 @@ main:                                        /* Function: main */
     mov r0, #5
     push { r0 }
 /* Set item at index 1 to 5 */
-    sub r1, fp, #36                          /* Load parameters */
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [fp, #-36]                       /* Load field from struct */
     push { r0 }
     mov r0, #1
     lsl r1, r4, #2                           /* Convert to bytes */
@@ -600,21 +587,18 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     bl List.create_P0                        /* Call List.create */
     mov r5, r0
-    sub r1, fp, #8                           /* Load parameters */
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-8]                        /* Load field from struct */
     mov r0, r5
     bl List.add_P1                           /* Call List.add */
-    sub r1, fp, #4                           /* Load parameters */
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-4]                        /* Load field from struct */
     mov r0, r5
     bl List.add_P1                           /* Call List.add */
     mov r1, #0
     mov r0, r5
     bl List.remove                           /* Call List.remove */
     mov r0, #1                               /* Evaluate Expression */
-    sub r1, fp, #52                          /* Load field location */
     push { r0 }
-    ldr r1, [r1]
+    ldr r1, [fp, #-52]
     lsl r1, r1, #2
     ldr r0, [r1, #12]                        /* Load field from struct */
     pop { r1 }
@@ -624,11 +608,8 @@ main:                                        /* Function: main */
     mov r0, r5
     bl List.get_P2                           /* Call List.get */
     pop { r1 }
-    add r0, r1, r0
-    sub r1, fp, #44                          /* Load field location */
-    push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    add r1, r1, r0
+    ldr r2, [fp, #-44]                       /* Load field from struct */
     add r0, r1, r2
     mov sp, fp
     pop { fp, lr }

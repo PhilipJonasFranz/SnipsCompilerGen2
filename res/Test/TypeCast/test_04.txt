@@ -25,10 +25,8 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     push { r1, r0 }
-    sub r0, fp, #16
-    ldr r1, [r0]
-    sub r0, fp, #12
-    ldr r2, [r0]
+    ldr r1, [fp, #-16]
+    ldr r2, [fp, #-12]
     add r0, r1, r2
     mov sp, fp
     bx lr

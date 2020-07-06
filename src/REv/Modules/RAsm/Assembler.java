@@ -522,6 +522,13 @@ public class Assembler {
 						}
 						else {
 							if (sp.length > 5)shift = getShiftBin(sp [4] + " " + sp [5]);
+							
+							/* - before rm operand */
+							if (sp [3].startsWith("-")) {
+								upDown = "0";
+								sp [3] = sp [3].substring(1);
+							}
+							
 							rm = shift + getReg(sp [3]);
 						}
 					}
@@ -543,6 +550,12 @@ public class Assembler {
 						}
 						else {
 							if (sp.length > 5) shift = getShiftBin(sp [4] + " " + sp [5].substring(0, sp [5].length() - 1));
+							
+							/* - before rm operand */
+							if (sp [3].startsWith("-")) {
+								upDown = "0";
+								sp [3] = sp [3].substring(1);
+							}
 							
 							rm = shift + getReg(sp [3]);
 						}
@@ -569,6 +582,12 @@ public class Assembler {
 							if (sp.length > 5) {
 								if (sp [5].endsWith("]"))sp [5] = sp [5].substring(0, sp [5].length() - 1);
 								shift = getShiftBin(sp [4] + " " + sp [5]);
+							}
+							
+							/* - before rm operand */
+							if (sp [3].startsWith("-")) {
+								upDown = "0";
+								sp [3] = sp [3].substring(1);
 							}
 							
 							rm = shift + getReg(sp [3]);

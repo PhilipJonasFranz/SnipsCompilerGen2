@@ -25,11 +25,8 @@ main:                                        /* Function: main */
     push { r0 }
     sub r1, fp, #8                           /* Evaluate Expression */
     lsl r2, r3, #2
-    ldr r0, [r1, r2]                         /* Load field from struct */
-    sub r1, fp, #12                          /* Load field location */
-    push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    ldr r1, [r1, r2]                         /* Load field from struct */
+    ldr r2, [fp, #-12]                       /* Load field from struct */
     add r0, r1, r2
     mov sp, fp
     bx lr

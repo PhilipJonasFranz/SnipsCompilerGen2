@@ -307,8 +307,7 @@ Queue.enqueue_P1:                            /* Function: Queue.enqueue, Proviso
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #20]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #24
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #24]                        /* Load field from struct */
     cmp r0, r1
     moveq r0, #1
     movne r0, #0
@@ -333,8 +332,7 @@ Queue.enqueue.L0:
 /* Calculate word offset to the storage location based on the */
 /* Size of the proviso type and the head index */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #20
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #20]                        /* Load field from struct */
     mov r2, #2
     mul r4, r1, r2
 /* Write value */
@@ -342,8 +340,7 @@ Queue.enqueue.L0:
     ldr r1, [fp, #16]
     push { r1, r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
     lsl r1, r0, #2
     pop { r0 }
@@ -354,9 +351,8 @@ Queue.enqueue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #20
     push { r0 }
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #20]                        /* Load field from struct */
     add r0, r1, #1
     pop { r1 }
     bl __op_mod                              /* Call __op_mod */
@@ -394,9 +390,8 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #24
     push { r0 }
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #24]                        /* Load field from struct */
     mov r2, #2
     mul r2, r1, r2
     pop { r1 }
@@ -410,9 +405,8 @@ Queue.dequeue.L0:
     push { r0 }
     ldr r0, [r1, #16]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #24
     push { r0 }
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #24]                        /* Load field from struct */
     add r0, r1, #1
     pop { r1 }
     bl __op_mod                              /* Call __op_mod */
@@ -422,8 +416,7 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #24]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #20
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [r1, #20]                        /* Load field from struct */
     cmp r0, r1
     bne Queue.dequeue.L2
     mov r0, #1                               /* Evaluate Expression */
@@ -475,10 +468,8 @@ main:                                        /* Function: main */
     bl Queue.dequeue_P2                      /* Call Queue.dequeue */
     mov r0, r3                               /* Load parameters */
     bl Queue.destroy                         /* Call Queue.destroy */
-    sub r0, fp, #8
-    ldr r1, [r0]
-    sub r0, fp, #4
-    ldr r2, [r0]
+    ldr r1, [fp, #-8]
+    ldr r2, [fp, #-4]
     add r0, r1, r2
     mov sp, fp
     pop { fp, lr }

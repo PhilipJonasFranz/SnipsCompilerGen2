@@ -54,8 +54,7 @@ main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_get
     push { r0 }
-    sub r0, fp, #4
-    ldr r3, [r0]
+    ldr r3, [fp, #-4]
 /* Call the predicate */
     add lr, pc, #8
     mov pc, r3
@@ -63,10 +62,8 @@ main:                                        /* Function: main */
     mov r0, #6                               /* Evaluate Expression */
     mov r1, #5
     push { r1, r0 }
-    sub r0, fp, #12
-    ldr r1, [r0]
-    sub r0, fp, #8
-    ldr r2, [r0]
+    ldr r1, [fp, #-12]
+    ldr r2, [fp, #-8]
     add r0, r1, r2
     mov sp, fp
     pop { fp, lr }

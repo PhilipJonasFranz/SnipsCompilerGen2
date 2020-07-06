@@ -29,8 +29,7 @@ det:                                         /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
@@ -61,8 +60,7 @@ det:                                         /* Function: det */
     add r2, r2, r0
     add r2, r2, #4
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
@@ -94,8 +92,7 @@ det:                                         /* Function: det */
     add r2, r2, r0
     add r2, r2, #8
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
@@ -126,8 +123,7 @@ det:                                         /* Function: det */
     mul r0, r0, r1
     add r2, r2, r0
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
@@ -160,8 +156,7 @@ det:                                         /* Function: det */
     add r2, r2, r0
     add r2, r2, #4
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
@@ -193,8 +188,7 @@ det:                                         /* Function: det */
     add r2, r2, r0
     add r2, r2, #8
     add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1
