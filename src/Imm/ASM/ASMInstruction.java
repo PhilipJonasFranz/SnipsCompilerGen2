@@ -5,12 +5,10 @@ import java.util.List;
 
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Cond;
-import lombok.NoArgsConstructor;
 
 /**
  * Acts as a base class for all assembly instructions.
  */
-@NoArgsConstructor
 public abstract class ASMInstruction {
 
 			/* --- FIELDS --- */
@@ -26,7 +24,7 @@ public abstract class ASMInstruction {
 		 *  into<br>
 		 *  add r1, rx, #1<br>
 		 */
-		WRITEBACK,
+		WRITEBACK, 
 		
 		EXC_EXIT,
 		
@@ -55,6 +53,10 @@ public abstract class ASMInstruction {
 	
 	
 			/* --- CONSTRUCTORS --- */
+	public ASMInstruction() {
+		
+	}
+	
 	/**
 	 * Constructor for instruction with conditional.
 	 */

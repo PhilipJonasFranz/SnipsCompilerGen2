@@ -19,14 +19,13 @@ TESTCASES
 OUTPUT
 /* --test_09.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, #19
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #11
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     push { r0 }
     mov r0, #1
     push { r0 }
@@ -37,20 +36,13 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #2
     push { r0 }
-    sub r1, fp, #28                          /* Evaluate Expression */
-    add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [fp, #-20]                       /* Load field from struct */
     lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    push { r0 }
-    sub r1, fp, #28                          /* Load field location */
-    add r1, r1, #16
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r1, [r0]                             /* Load from address */
+    ldr r0, [fp, #-12]                       /* Load field from struct */
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r2, [r0]                             /* Load from address */
-    pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3 }
     bx lr
     

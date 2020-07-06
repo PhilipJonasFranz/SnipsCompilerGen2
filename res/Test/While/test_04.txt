@@ -19,7 +19,6 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6 }
     mov fp, sp
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */
@@ -29,10 +28,9 @@ main.L1:                                     /* Evaluate condition */
     ble main.L2
     mov r2, #2
     mul r5, r3, r2
-    push { r5 }                              /* Push declaration on stack, referenced by addressof. */
     sub r0, fp, #4                           /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r5, r0
+    push { r5 }                              /* Push declaration on stack, referenced by addressof. */
+    lsr r5, r0, #2
     ldr r0, [fp, #-4]
     cmp r0, #4
     bne main.L3
@@ -51,6 +49,5 @@ main.L3:
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, r6 }
     bx lr
     

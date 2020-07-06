@@ -7,6 +7,7 @@ import Exc.CGEN_EXCEPTION;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsr;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -19,6 +20,7 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.StructSelect;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.COMPOSIT.ARRAY;
 
@@ -29,7 +31,7 @@ public class AsNAddressOf extends AsNExpression {
 		AsNAddressOf aof = new AsNAddressOf();
 		a.castedNode = aof;
 		
-		aof.clearReg(r, st, 0);
+		aof.clearReg(r, st, 0, 1);
 		
 		if (a.expression instanceof IDRef) {
 			IDRef ref = (IDRef) a.expression;
@@ -97,6 +99,13 @@ public class AsNAddressOf extends AsNExpression {
 			ASMAdd add = new ASMAdd(new RegOperand(target), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2));
 			add.comment = new ASMComment("Add structure offset");
 			aof.instructions.add(add);
+		}
+		else if (a.expression instanceof StructSelect) {
+			StructSelect select = (StructSelect) a.expression;
+			
+			AsNStructSelect.injectAddressLoader(aof, select, r, map, st);
+			
+			aof.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
 		
 		/* Convert to words for pointer arithmetic */

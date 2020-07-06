@@ -73,12 +73,13 @@ public class Util {
     }
     
 	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) {
-		// Load Devices
+		/* Load devices */
 		XMLNode devices = head.getNode("Devices");
 		List<Device> deviceList = new ArrayList();
 		for (XMLNode device : devices.children) {
 			String [] s = device.value.split(",");
-			// Build static Device
+			
+			/* Build static device */
 			Device d = new Device(s [0].trim(), Integer.parseInt(s [2].trim()), Integer.parseInt(s [3].trim()), Integer.parseInt(s [4].trim()));
 			deviceList.add(d);
 		}
@@ -86,9 +87,8 @@ public class Util {
 		int [] [] program = Assembler.assemble(asmIn, silent, false);
 		if (program != null) {
 			Device d = deviceList.get(0);
-			for (int i = 0; i < program.length; i++) {
+			for (int i = 0; i < program.length; i++) 
 				d.internalMemory [i] = program [i];
-			}
 		}
 		
 		ProcessorUnit pcu = new ProcessorUnit(deviceList.stream().toArray(Device []::new));

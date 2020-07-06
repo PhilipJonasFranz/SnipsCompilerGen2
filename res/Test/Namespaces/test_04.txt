@@ -39,9 +39,7 @@ Foo.Baz.x: .word 10
 Foo.get:                                     /* Function: Foo.get */
     push { fp }
     mov fp, sp
-    add r1, fp, #4                           /* Evaluate Expression */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [fp, #8]                         /* Load field from struct */
     mov sp, fp
     pop { fp }
     add sp, sp, #8

@@ -9,7 +9,6 @@ import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Util.Pair;
-import lombok.Getter;
 
 public class StackSet {
 
@@ -27,15 +26,12 @@ public class StackSet {
 	public class StackCell {
 		
 		/** The content type of the cell. */
-		@Getter
 		private CONTENT_TYPE type;
 		
 		/** The stored register. */
-		@Getter
 		private REGISTER reg;
 		
 		/** The stored declaration */
-		@Getter
 		private Declaration declaration;
 		
 		/** Create a new stack cell, set the type to register and set given register. */
@@ -49,11 +45,23 @@ public class StackSet {
 			this.declaration = dec;
 			this.type = CONTENT_TYPE.DECLARATION;
 		}
+		
+		public CONTENT_TYPE getType() {
+			return this.type;
+		}
+		
+		public REGISTER getReg() {
+			return this.reg;
+		}
+		
+		public Declaration getDeclaration() {
+			return this.declaration;
+		}
+		
 	}
 	
 	
 			/* --- FIELDS --- */
-	@Getter
 	/** The stack that houses the stack cells. */
 	private Stack<StackCell> stack = new Stack();
 	
@@ -181,13 +189,13 @@ public class StackSet {
 				if (stack.get(i).declaration.equals(dec)) {
 					/* Hook was not found and there is a reg section */
 					if (!hook && regs) return -1;
-					else break;
+					else return off;
 				}
 				off += (stack.get(i).declaration.getType().wordsize() * 4);
 			}
 		}
 		
-		return off;
+		return -1;
 	}
 	
 	/**
@@ -274,6 +282,10 @@ public class StackSet {
 		}
 		
 		return off;
+	}
+	
+	public Stack<StackCell> getStack() {
+		return this.stack;
 	}
 	
 }

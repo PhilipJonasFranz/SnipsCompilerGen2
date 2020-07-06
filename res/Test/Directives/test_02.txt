@@ -51,25 +51,22 @@ mult.L7:
     lsl r0, r8, #2
     add r2, r2, r0
     add r0, fp, #44
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
+    ldr r0, [r0, r2]
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r1, #8
+    push { r0 }
     mul r0, r8, r1
+    pop { r1 }
     add r2, r2, r0
     lsl r0, r6, #2
     add r2, r2, r0
     add r0, fp, #28
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r2, [r0, r2]
     mul r2, r1, r2
     add r7, r7, r2
     add r8, r8, #1
     b mult.L7
 mult.L8: 
-    push { r7 }
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r1, #8
     mul r0, r5, r1
@@ -78,7 +75,7 @@ mult.L8:
     add r2, r2, r0
     sub r0, fp, #16
     add r0, r0, r2
-    pop { r1 }
+    mov r1, r7
     str r1, [r0]
     add r6, r6, #1
     b mult.L4
@@ -93,15 +90,14 @@ mult.L2:
     lsl r0, r4, #2
     add r2, r2, r0
     sub r0, fp, #16
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, fp }
     add sp, sp, #32
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -133,6 +129,6 @@ main:                                        /* Function: main */
     mov r0, r3
     bl mult                                  /* Call mult */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

@@ -2,9 +2,7 @@ package Imm.TYPE;
 
 import Exc.SNIPS_EXCEPTION;
 import Imm.TYPE.COMPOSIT.POINTER;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class NULL extends TYPE<Object> {
 	
 			/* --- METHODS --- */

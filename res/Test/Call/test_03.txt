@@ -23,24 +23,20 @@ bar:                                         /* Function: bar */
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { r3, lr }
     mov r3, r0
     bl bar                                   /* Evaluate Expression */
     mul r0, r3, r0
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { lr }
     mov r3, r0
     add r0, r0, #4
     bl foo                                   /* Call foo */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { lr }
     bx lr
     

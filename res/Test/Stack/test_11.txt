@@ -35,12 +35,10 @@ OUTPUT
 bar:                                         /* Function: bar */
     push { r3, r4, r5, fp }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
-    mul r0, r3, r1
-    push { r0 }
+    mul r0, r0, r1
     mov r1, r5
+    push { r0 }
     ldr r2, [fp, #16]
     mul r2, r1, r2
     pop { r1 }
@@ -51,8 +49,7 @@ bar:                                         /* Function: bar */
     bx lr
     
 fooRec:                                      /* Function: fooRec */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { r3, r4, lr }
     mov r3, r0
     mov r4, r1
     cmp r4, #0
@@ -65,23 +62,17 @@ fooRec.L1:
     bl fooRec                                /* Call fooRec */
     add r0, r0, #1
 fooRec.L2: 
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, r4, lr }
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3
+    push { r3, r4, lr }
     bl fooRec                                /* Call fooRec */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, r4, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6, r7, r8, r9, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -102,33 +93,37 @@ main:                                        /* Function: main */
     mov r0, r4
     bl foo                                   /* Call foo */
     mov r9, r0
-    ldr r0, [fp, #36]                        /* Evaluate Expression */
+    ldr r0, [fp, #8]                         /* Evaluate Expression */
     push { r0 }
+    mov r0, r3
     push { r5 }
     push { r4 }
-    mov r0, r3
     pop { r1, r2 }
     bl bar                                   /* Call bar */
-    push { r0 }
     mov r1, #4
+    push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
-    push { r0 }
     mov r1, #5
+    push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
     push { r0 }
-    mov r1, #6
-    ldr r0, [fp, #36]
+    mov r0, #6                               /* Evaluate Expression */
+    push { r0 }
+    ldr r0, [fp, #8]
+    pop { r1 }
     bl foo                                   /* Call foo */
     push { r0 }
-    mov r1, #7
-    ldr r0, [fp, #36]
-    bl foo                                   /* Call foo */
+    mov r0, #7                               /* Evaluate Expression */
     push { r0 }
+    ldr r0, [fp, #8]
+    pop { r1 }
+    bl foo                                   /* Call foo */
     add r1, r6, r7
     add r1, r1, r8
     add r1, r1, r9
+    push { r0 }
     ldr r2, [fp, #-8]
     add r1, r1, r2
     ldr r2, [fp, #-12]
@@ -140,7 +135,7 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
+    pop { fp, lr }
     add sp, sp, #4
     bx lr
     

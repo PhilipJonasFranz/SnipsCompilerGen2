@@ -12,12 +12,13 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
+import Exc.CGEN_EXCEPTION;
+import Exc.CTX_EXCEPTION;
+import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Directive.Directive;
-import Imm.AST.Directive.IncludeDirective;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
@@ -64,7 +65,9 @@ public class CompilerDriver {
 		disableModifiers = false,
 		disableOptimizer = false,
 		disableWarnings = false,
-		disableStructSIDHeaders = false;
+		disableStructSIDHeaders = false,
+		includeMetaInformation = true,
+		printErrors = false;
 			
 	/* Debug */
 	public static boolean
@@ -73,9 +76,7 @@ public class CompilerDriver {
 		printObjectIDs = false;
 	
 	public static String outputPath;
-	
-	public static boolean printErrors = false;
-	
+
 	public static String printDepth = "    ";
 	public static int commentDistance = 45;
 	
@@ -87,7 +88,7 @@ public class CompilerDriver {
 	
 	public static XMLNode sys_config;
 	
-	/* Reserved Declarations */
+	/* Reserved Declarations & Ressources */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	
@@ -110,11 +111,13 @@ public class CompilerDriver {
 		CompilerDriver scd = new CompilerDriver(args);
 		driver = scd;
 		
+		/* Output path is not set, use path of input file, and save to out.s */
 		if (outputPath == null) {
 			outputPath = args [0];
-			if (outputPath.contains("\\")) {
+			
+			/* Trim input file name from path */
+			if (outputPath.contains("\\")) 
 				while (!outputPath.endsWith("\\")) outputPath = outputPath.substring(0, outputPath.length() - 1);
-			}
 			
 			outputPath += "out.s";
 		}
@@ -127,30 +130,32 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
+		/* Read code from input file... */
 		List<String> code = Util.readFile(file);
 		
-		/* Perform compilation */
+		/* ...and compile! */
 		scd.compile(file, code);
 	}
 	
 	
 			/* --- FIELDS --- */
+	/** 
+	 * Dynamic libraries referenced in the program, like resv or __op_div. 
+	 * These will be included in second stage import resolving.
+	 */
 	public List<String> referencedLibaries = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */
+	/** Default constructor */
 	public CompilerDriver(String [] args) {
 		this.readConfig();
 		this.readArgs(args);
 	}
 	
+	/** Used for debug purposes */
 	public CompilerDriver() {
 		this.readConfig();
-	}
-	
-	public static void reset() {
-		heap_referenced = false;
-		null_referenced = false;
 	}
 	
 	
@@ -182,24 +187,23 @@ public class CompilerDriver {
 	    return lines;
 	}
 	
-	public List<String> compile(File file, List<String> code) {
+	public List<String> compile(File file0, List<String> code) {
 		long start = System.currentTimeMillis();
 		
 		/* Setup & set settings */
 		List<String> output = null;
 		LabelGen.reset();
-		CompilerDriver.file = file;
+		file = file0;
 		printLogo();
 		log.clear();
 		
 		try {
-			if (code == null) {
+			if (code == null) 
 				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
-			}
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
-				code.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
+				code.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
@@ -224,31 +228,19 @@ public class CompilerDriver {
 					/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
 			p.fileName = file.getPath();
-			if (p.directives.stream().filter(x -> x instanceof IncludeDirective).count() > 0 || !referencedLibaries.isEmpty()) {
-				List<SyntaxElement> dependencies = this.addDependencies(p.directives, p.fileName);
-				
-				/* An error occured during importing, probably loop in dependencies */
-				if (dependencies == null) {
-					throw new SNIPS_EXCEPTION("SNIPS -> Failed to import libraries, possible loop in #include statements.");
-				}
+			if (!referencedLibaries.isEmpty()) {
+				List<Program> dependencies = this.addDependencies();
 				
 				/* Print out imported libaries */
-				for (SyntaxElement s : dependencies) {
+				for (SyntaxElement s : dependencies) 
 					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
-				}
 				
 				/* Add libaries to AST, duplicates were already filtered */
 				int c = 0;
-				for (int i = 0; i < dependencies.size(); i++) {
-					Program p0 = (Program) dependencies.get(i);
-					for (int a = 0; a < p0.programElements.size(); a++) {
-						p.programElements.add(c, p0.programElements.get(a));
-						c++;
-					}
+				for (Program p0 : dependencies) {
+					for (SyntaxElement s : p0.programElements) 
+						p.programElements.add(c++, s);
 				}
-				
-				/* Clear program directives */
-				p.directives.clear();
 			}
 			
 			
@@ -283,7 +275,7 @@ public class CompilerDriver {
 				aopt_progress.incProgress(1);
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-				CompilerDriver.compressions.add(rate);
+				compressions.add(rate);
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
@@ -295,20 +287,24 @@ public class CompilerDriver {
 		
 			/* Remove double empty lines */
 			for (int i = 1; i < output.size(); i++) {
-				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) {
-					output.remove(i - 1);
-					i--;
-				}
+				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
+					output.remove(i-- - 1);
 			}
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
-				output.stream().forEach(x -> System.out.println(CompilerDriver.printDepth + x));
+				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			CompilerDriver.instructionsGenerated += output.size();
+			instructionsGenerated += output.size();
+		
 		} catch (Exception e) {
-			if (printErrors || e instanceof IndexOutOfBoundsException || e instanceof NullPointerException) e.printStackTrace();
+			boolean customExc = (e instanceof CGEN_EXCEPTION) || (e instanceof CTX_EXCEPTION) || (e instanceof PARSE_EXCEPTION) || (e instanceof SNIPS_EXCEPTION);
+			
+			/* Exception is not ordinary and internal, print message and stack trace */
+			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
+			if (printErrors || !customExc) e.printStackTrace();
+			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
 		}
 		
 		/* Report Status */
@@ -339,15 +335,14 @@ public class CompilerDriver {
 	 * @return A list of ASTs containing the contents of the files as AST.
 	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
-		List<SyntaxElement> ASTs = new ArrayList();
+	public List<Program> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
+		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
 			for (XMLNode c : sys_config.getNode("Library").children) {
 				String [] v = c.value.split(":");
-				if (v [0].equals(filePath)) {
+				if (v [0].equals(filePath)) 
 					filePath = v [1];
-				}
 			}
 			
 			File file = new File(filePath);
@@ -355,26 +350,20 @@ public class CompilerDriver {
 			/* Read from file */
 			List<String> code = Util.readFile(file);
 			
-			if (code == null) {
-				file = new File("release\\" + filePath);
-				code = Util.readFile(file);
-			}
-			
-			/* Read from jar */
-			if (code == null) {
-				code = readFromJar(filePath);
-			}
+			if (code == null) 
+				code = Util.readFile(new File("release\\" + filePath));
 			
 			/* Libary was not found */
-			if (code == null) {
+			if (code == null) 
 				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
-			}
 			
-			SyntaxElement AST = null;
+			Program AST = null;
 			
 			try {
+					/* --- PRE-PROCESS --- */
 				PreProcessor preProcess = new PreProcessor(code, file.getName());
 				List<LineObject> lines = preProcess.getProcessed();
+				
 				
 					/* --- SCANNING --- */
 				Scanner scanner = new Scanner(lines, null);
@@ -383,18 +372,9 @@ public class CompilerDriver {
 				
 						/* --- PARSING --- */
 				Parser parser = new Parser(deque, null);
-				AST = parser.parse();
-				((Program) AST).fileName = file.getPath();
+				AST = (Program) parser.parse();
+				AST.fileName = file.getPath();
 				
-				
-						/* --- PROCESS IMPORTS --- */
-				List<SyntaxElement> dependencies = this.addDependencies(((Program) AST).directives, ((Program) AST).fileName);
-				
-				if (dependencies == null) return null;
-				else {
-					this.removeDuplicates(dependencies);
-					ASTs.addAll(dependencies);
-				}
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
 				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", Message.Type.FAIL));
@@ -404,17 +384,15 @@ public class CompilerDriver {
 		}
 		
 		this.removeDuplicates(ASTs);
-		
 		return ASTs;
 	}
 
 	/**
-	 * Import depencendies listed by include directives
-	 * @param importer The program that lists the include directives
+	 * Import dependencies of dynamic imports
 	 * @throws SNIPS_EXCEPTION 
 	 */
-	public List<SyntaxElement> addDependencies(List<Directive> imports, String fileName) throws SNIPS_EXCEPTION {
-		List<SyntaxElement> ASTs = new ArrayList();
+	public List<Program> addDependencies() throws SNIPS_EXCEPTION {
+		List<Program> ASTs = new ArrayList();
 		
 		for (String s : this.referencedLibaries) {
 			List<String> file0 = new ArrayList();
@@ -424,47 +402,15 @@ public class CompilerDriver {
 			ASTs.addAll(driver.hotCompile(file0));
 		}
 		
-		try {
-			for (Directive dir : imports) {
-				if (dir instanceof IncludeDirective) {
-					IncludeDirective inc = (IncludeDirective) dir;
-					
-					if (inc.file.equals(fileName)) continue;
-					for (int i = 0; i < ASTs.size(); i++) {
-						if (((Program) ASTs.get(i)).fileName.equals(inc.file)) {
-							continue;
-						}
-					}
-					
-					List<String> file0 = new ArrayList();
-					file0.add(inc.file);
-					
-					CompilerDriver driver = new CompilerDriver();
-					List<SyntaxElement> dependencies = driver.hotCompile(file0);
-					
-					/* Error during importing, propagate back */
-					if (dependencies == null) return null;
-					else {
-						ASTs.addAll(dependencies);
-					}
-				}
-			}
-		} catch (StackOverflowError st) {
-			return null;
-		}
-		
 		this.removeDuplicates(ASTs);
 		
 		return ASTs;
 	}
 	
-	public void removeDuplicates(List<SyntaxElement> ASTs) {
+	public void removeDuplicates(List<Program> ASTs) {
 		if (ASTs.size() > 1) for (int i = 0; i < ASTs.size(); i++) {
 			for (int a = i + 1; a < ASTs.size(); a++) {
-				Program p0 = (Program) ASTs.get(i);
-				Program p1 = (Program) ASTs.get(a);
-				
-				if (p0.fileName.equals(p1.fileName)) {
+				if (ASTs.get(i).fileName.equals(ASTs.get(a).fileName)) {
 					ASTs.remove(a);
 					a--;
 				}
@@ -477,18 +423,17 @@ public class CompilerDriver {
 	}
 	
 	public void printLogo() {
-		/* Print out all lines of the SNIPS logo */
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
-		for (String s : logo)System.out.println(s);
+		for (String s : logo) System.out.println(s);
 		
 		String ver = "Gen.2 " + sys_config.getValue("Version");
+		
 		int l = ver.length();
 		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
-		ver = "\t" + ver;
-		System.out.println(ver);
-		System.out.println();
+		
+		System.out.println("\t" + ver + "\n");
 	}
 	
 	public void readArgs(String [] args) {
@@ -516,10 +461,7 @@ public class CompilerDriver {
 					logoPrinted = false;
 					silenced = false;
 				}
-				else if (args [i].equals("-o")) {
-					outputPath = args [i + 1];
-					i++;
-				}
+				else if (args [i].equals("-o")) outputPath = args [i++ + 1];
 				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
 			}
 		}
@@ -527,20 +469,26 @@ public class CompilerDriver {
 		if (silenced) logoPrinted = true;
 	}
 	
+			/* --- CONSOLE INFORMATION --- */
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", Message.Type.INFO);
-		System.out.println(CompilerDriver.printDepth + "-info     : Print Version Compiler Version and information");
-		System.out.println(CompilerDriver.printDepth + "[Path]    : First argument, set input file");
-		System.out.println(CompilerDriver.printDepth + "-log      : Print out log and compile information");
-		System.out.println(CompilerDriver.printDepth + "-com      : Remove comments from assembly");
-		System.out.println(CompilerDriver.printDepth + "-warn     : Disable Warnings");
-		System.out.println(CompilerDriver.printDepth + "-opt      : Disable Optimizer");
-		System.out.println(CompilerDriver.printDepth + "-rov      : Disable visibility modifiers");
-		System.out.println(CompilerDriver.printDepth + "-sid      : Disable SID headers, lower memory usage, but no instanceof");
-		System.out.println(CompilerDriver.printDepth + "-imm      : Print out immediate representations");
-		System.out.println(CompilerDriver.printDepth + "-o [Path] : Specify output file");
-		System.out.println(CompilerDriver.printDepth + "-viz      : Disable Ansi Color in Log messages");
+		
+		String [] params = {
+				"-info     : Print Version Compiler Version and information",
+				"[Path]    : First argument, set input file",
+				"-log      : Print out log and compile information",
+				"-com      : Remove comments from assembly",
+				"-warn     : Disable Warnings",
+				"-opt      : Disable Optimizer",
+				"-rov      : Disable visibility modifiers",
+				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
+				"-imm      : Print out immediate representations",
+				"-o [Path] : Specify output file",
+				"-viz      : Disable Ansi Color in Log messages"
+		};
+	
+		for (String s : params) System.out.println(printDepth + s);
 	}
 	
 	public void printInfo() {
@@ -548,19 +496,27 @@ public class CompilerDriver {
 		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
 	}
 	
-	public void setBurstMode(boolean value, boolean imm) {
-		CompilerDriver.silenced = value;
-		CompilerDriver.imm = imm;
-		CompilerDriver.printErrors = !value;
+	
+			/* --- DEBUG --- */
+	public void setBurstMode(boolean value, boolean imm0) {
+		silenced = value;
+		imm = imm0;
+		printErrors = !value;
 	}
 	
 	public static void printAverageCompression() {
 		double [] rate = {0};
-		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
+		compressions.stream().forEach(x -> rate [0] += x / compressions.size());
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + CompilerDriver.instructionsGenerated, Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + instructionsGenerated, Message.Type.INFO));
+	}
+	
+	/** Resets flags during burst compilation */
+	public static void reset() {
+		heap_referenced = false;
+		null_referenced = false;
 	}
 	
 }

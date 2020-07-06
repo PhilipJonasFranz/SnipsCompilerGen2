@@ -28,8 +28,7 @@ resv:                                        /* Function: resv */
     add r3, r3, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L3_HEAP_START        /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r4, r0
+    lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     lsl r0, r4, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
@@ -78,9 +77,8 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r0, r5, #0
-    mov r5, r0
-    cmp r0, r3
+    rsb r5, r5, #0
+    cmp r5, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
@@ -138,7 +136,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -170,8 +167,7 @@ free.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: CHAR */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { r3, r4, lr }
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -191,8 +187,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { r3, r4, lr }
     bx lr
 .POOL1_main.L4_NULL: .word NULL
     
@@ -201,8 +196,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                                 /* Function: List.add, Provisos: CHAR */
-    push { r3, r4, r5, fp, lr }
-    mov fp, sp
+    push { r3, r4, r5, lr }
     mov r3, r0
     mov r4, r1
     mov r0, #3                               /* Evaluate Expression */
@@ -220,36 +214,29 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     pop { r0 }
     str r0, [r1, #8]
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL2_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]                             /* Store value to struct field */
-/* Dereference through pointer */
+    str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
     b List.add.L0
 List.add.L1: 
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r1, [r1]
+    ldr r1, [r1, #8]
     lsl r1, r1, #2
-    add r1, r1, #4
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     str r0, [r1]                             /* Store value to struct field */
 List.add.L0: 
-    mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    pop { r3, r4, r5, lr }
     bx lr
 .POOL2_main.L4_NULL: .word NULL
     
@@ -262,38 +249,32 @@ List.get_P2:                                 /* Function: List.get, Provisos: CH
     cmp r4, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b List.get.L7
 List.get.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r5, [r1]                             /* Load field from struct */
+    ldr r5, [r1, #4]                         /* Load field from struct */
 List.get.L3:                                 /* Evaluate condition */
     cmp r4, #0
     beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b List.get.L7
 List.get.L5: 
 /* Jump to next */
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r5, [r1]                             /* Load field from struct */
+    ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r0, #1
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #8]                         /* Load field from struct */
 List.get.L7: 
     pop { r3, r4, r5 }
     bx lr
@@ -302,7 +283,8 @@ List.get.L7:
 /* Returns the the node at the given index. Returns */
 /* null if the index is invalid. */
     
-/* Check if given list contains given value. */
+/* Check if given list contains given value. If the current value matches */
+/* the searched value determines the predicate. */
     
 /* Finds the first node in the list that has given value. */
 /* Returns a pointer to this list node, or 0 in case the */
@@ -311,10 +293,8 @@ List.get.L7:
 /* Returns the amount of elements stored in the list. */
 List.size:                                   /* Function: List.size */
     push { r3, r4, r5 }
-    mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r4, [r1]                             /* Load field from struct */
+    ldr r4, [r1, #4]                         /* Load field from struct */
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 List.size.L1:                                /* Evaluate condition */
@@ -338,6 +318,8 @@ List.size.L2:
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
     
+/* Removes all elements from the list */
+    
 /* This package contains various utility functions for Strings chars. */
 /* Compares the two given strings. Checks if all chars are equal and returns the */
 /* boolean result. */
@@ -346,7 +328,6 @@ String.equals:                               /* Function: String.equals */
     mov r3, r0
     mov r4, r1
     mov r5, #1
-    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
 String.equals.L1:                            /* Evaluate condition */
     mov r0, #1
@@ -369,8 +350,8 @@ String.equals.L1:                            /* Evaluate condition */
     cmp r7, #0
     moveq r0, #1
     movne r0, #0
-    push { r0 }
     cmp r8, #0
+    push { r0 }
     moveq r0, #1
     movne r0, #0
     mov r1, r0
@@ -404,7 +385,6 @@ String.substring:                            /* Function: String.substring */
     bl List.create_P0                        /* Call List.create */
     mov r6, r0
 /* Iterate over String and collect characters in range */
-    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
 String.substring.L1:                         /* Evaluate condition */
     add r0, r3, r7
@@ -415,8 +395,8 @@ String.substring.L1:                         /* Evaluate condition */
     cmp r7, r4
     movge r0, #1
     movlt r0, #0
-    push { r0 }
     cmp r7, r5
+    push { r0 }
     movlt r0, #1
     movge r0, #0
     mov r1, r0
@@ -445,8 +425,8 @@ String.substring.L2:
     cmp r8, #1
     moveq r0, #1
     movne r0, #0
-    push { r0 }
     mov r1, #0
+    push { r0 }
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
     cmp r0, #0
@@ -486,8 +466,8 @@ String.substring.L8:
     ldr r1, [fp, #-4]                        /* Evaluate Expression */
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
-    push { r0 }
     mov r1, r9
+    push { r0 }
     ldr r2, [fp, #-4]
     add r0, r1, r2
     lsl r1, r0, #2
@@ -519,7 +499,6 @@ String.substring.L10:
 String.length:                               /* Function: String.length */
     push { r3, r4 }
     mov r3, r0
-    mov r0, #0                               /* Evaluate Expression */
     mov r4, #0
 String.length.L1:                            /* Evaluate condition */
     add r0, r3, r4
@@ -541,7 +520,7 @@ String.length.L2:
 /* only read the two given strings. */
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #67
@@ -565,12 +544,11 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     pop { r1, r2 }
     bl String.substring                      /* Call String.substring */
-    mov r3, r0
     mov r1, r0
     sub r0, fp, #16
     lsr r0, r0, #2
     bl String.equals                         /* Call String.equals */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

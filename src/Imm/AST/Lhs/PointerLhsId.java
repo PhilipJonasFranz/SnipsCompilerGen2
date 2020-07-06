@@ -11,7 +11,6 @@ import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -19,7 +18,6 @@ import lombok.Getter;
 public class PointerLhsId extends LhsId {
 
 			/* --- FIELDS --- */
-	@Getter
 	private Expression shadowDeref;
 	
 	public Deref deref;
@@ -64,6 +62,10 @@ public class PointerLhsId extends LhsId {
 
 	public void releaseContext() {
 		this.shadowDeref.releaseContext();
+	}
+	
+	public Expression getShadowDeref() {
+		return this.shadowDeref;
 	}
 	
 }

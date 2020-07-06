@@ -33,15 +33,15 @@ get:                                         /* Function: get */
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r1, [r0]                             /* Load from address */
     add r0, r1, r4
+    pop { r1 }
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r2, [r0]                             /* Load from address */
-    pop { r1 }
     sub r0, r1, r2
     pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #1                               /* Evaluate Expression */
@@ -67,6 +67,6 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     bl get                                   /* Call get */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

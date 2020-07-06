@@ -6,7 +6,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -21,11 +20,9 @@ public abstract class UnaryExpression extends Expression {
 	
 			/* --- FIELDS --- */
 	/** The operator */
-	@Getter
 	private UnaryOperator operator;
 	
 	/** The expression operand */
-	@Getter
 	private Expression operand;
 	
 	
@@ -60,5 +57,15 @@ public abstract class UnaryExpression extends Expression {
 	public void releaseContext() {
 		this.operand.releaseContext();
 	}
+	
+	public Expression getOperand() {
+		return this.operand;
+	}
+	
+	public UnaryOperator getOperator() {
+		return this.operator;
+	}
+	
+	
 	
 }

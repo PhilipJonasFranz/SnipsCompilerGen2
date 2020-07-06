@@ -16,7 +16,6 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
 main:                                        /* Function: main */
-    push { r3, r4 }
     mov r3, r0
     mov r4, r1
     cmp r3, r4
@@ -29,6 +28,5 @@ main.L0:
     add r4, r4, r3
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4 }
     bx lr
     

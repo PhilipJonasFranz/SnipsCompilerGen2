@@ -1,0 +1,32 @@
+SOURCE
+int x = 10;
+
+int get(int x) {
+	return x;
+}
+
+int main(int x) {
+	return get(x);
+}
+TESTCASES
+0 0
+1 1
+2 2
+OUTPUT
+/* --test_00.txt */
+.data
+x: .word 10
+    
+.text
+    b main
+get:                                         /* Function: get */
+    push { r3 }
+    pop { r3 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { lr }
+    bl get                                   /* Call get */
+    pop { lr }
+    bx lr
+    

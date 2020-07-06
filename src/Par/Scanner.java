@@ -107,6 +107,7 @@ public class Scanner {
 			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			""),
 			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			""),
 			new ScannableToken("return",	TokenType.RETURN,		ACC_STATE.NONE,			" ", ";"),
+			new ScannableToken("asm",		TokenType.ASM,			ACC_STATE.NONE,			" ", "(", "{"),
 			new ScannableToken("break",		TokenType.BREAK,		ACC_STATE.NONE,			" ", ";"),
 			new ScannableToken("continue",	TokenType.CONTINUE,		ACC_STATE.NONE,			" ", ";"),
 			new ScannableToken("while",		TokenType.WHILE,		ACC_STATE.NONE,			" ", "("),
@@ -331,20 +332,18 @@ public class Scanner {
 				return false;
 			}
 			else if (this.buffer.startsWith("/")) {
-				if (this.buffer.length() == 1)return false;
-				if (this.buffer.equals("//")) {
+				if (this.buffer.length() == 1) return false;
+				if (this.buffer.equals("//")) 
 					this.state = ACC_STATE.COMMENT;
-					return false;
-				}
-				else if (this.buffer.equals("/*")) {
+				else if (this.buffer.equals("/*")) 
 					this.state = ACC_STATE.COMMENT;
-					return false;
-				}
 				else {
 					tokens.add(new Token(TokenType.DIV, new Source(fileName, i, a - this.buffer.length())));
 					this.buffer = this.buffer.substring(1);
 					return true;
 				}
+				
+				return false;
 			}
 			else {
 				/* --- REGEX MATCHER --- */

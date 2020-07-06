@@ -1,11 +1,10 @@
-# Snips Compiler Gen.2 v.3.3.0-RELEASE
+# Snips Compiler Gen.2 v.3.4.12-RELEASE
 ## Some words in advance
  This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
 ## What is Snips?
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
- the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in 
- operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling and predicates are supported.
+ the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling, predicates and inline assembly are supported.
  
  Currently supported data types are Integers and Booleans, Chars and Strings, Enums, Predicates as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
  
@@ -33,7 +32,6 @@
  If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips (Full Path to file to compile)". With "snips -help" you can get more information on the arguments.
 
 ### Running the code
-The project uses the lombok plugin. If you want to modify the code and build the project, you will have to install the plugin.
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
 ### Code Examples
  Code examples and testcases can be found under res/Test/ and under release/examples/.
@@ -58,10 +56,6 @@ All instructions do support the condition field. If you compile your assembly co
  - Rework Parser to use Vendor System, implement improved comment and directive attatching to syntax elements
  - Rework Struct Type System to use SSOT Vendor
  
-### v.5.0.0-RELEASE: Optimization, extended compilation control
- - Implement AST Optimizer
- - Implement Optimizer Annotations
-
 ## License & Copyright
  © Philip Jonas Franz
  

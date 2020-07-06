@@ -6,7 +6,6 @@ import java.util.List;
 
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.AST.Statement.Declaration;
-import lombok.Getter;
 
 /**
  * The memory map is used to lay out the static .data memory and get the memory offsets of the
@@ -23,7 +22,6 @@ public class MemoryMap {
 		
 				/* --- FIELDS --- */
 		/** The declaration that this cell houses */
-		@Getter
 		private Declaration declaration;
 		
 		
@@ -39,12 +37,15 @@ public class MemoryMap {
 			return this.declaration.getType().wordsize();
 		}
 		
+		public Declaration getDeclaration() {
+			return this.declaration;
+		}
+		
 	}
 	
 	
 			/* --- FIELDS --- */
 	/** The map that houses all active memory cells. */
-	@Getter
 	private List<MemoryCell> map = new ArrayList();
 
 	/**
@@ -87,6 +88,10 @@ public class MemoryMap {
 			x.declaration.print(4, true);
 		}
 		System.out.println("---- MEMORY END ----\n");
+	}
+	
+	public List<MemoryCell> getMap() {
+		return this.map;
 	}
 	
 }

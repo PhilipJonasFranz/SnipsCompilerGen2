@@ -23,7 +23,6 @@ TESTCASES
 OUTPUT
 /* --test_17.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5 }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -49,18 +48,8 @@ main:                                        /* Function: main */
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #7
     push { r1, r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #24
-    mul r0, r0, r1
-    add r2, r2, r0
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    sub r1, fp, #48                          /* Start of structure in stack */
-    add r1, r1, r2                           /* Start of sub structure in stack */
     pop { r0 }
+    sub r1, fp, #40                          /* Start of structure in stack */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -74,9 +63,7 @@ main:                                        /* Function: main */
     lsl r0, r5, #2
     add r2, r2, r0
     sub r0, fp, #48
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
-    pop { r3, r4, r5 }
     bx lr
     

@@ -8,13 +8,12 @@ import CGen.LabelGen;
 import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
+import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Directive.CompileDirective;
-import Imm.AST.Directive.CompileDirective.COMP_DIR;
-import Imm.AST.Directive.Directive;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
@@ -64,6 +63,7 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.EnumTypedef;
 import Imm.AST.Statement.ForStatement;
@@ -402,27 +402,6 @@ public class Parser {
 		return path;
 	}
 	
-	public Directive parseDirective() throws PARSE_EXCEPTION {
-		Source source = accept(TokenType.DIRECTIVE).getSource();
-		if (current.type == TokenType.IDENTIFIER) {
-			COMP_DIR dir;
-			String s = accept(TokenType.IDENTIFIER).spelling.toLowerCase();
-			if (s.equals("operator")) dir = COMP_DIR.OPERATOR;
-			else if (s.equals("libary")) dir = COMP_DIR.LIBARY;
-			else if (s.equals("unroll")) dir = COMP_DIR.UNROLL;
-			else {
-				this.progress.abort();
-				throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
-			}
-			
-			return new CompileDirective(dir, source);
-		}
-		else {
-			this.progress.abort();
-			throw new PARSE_EXCEPTION(source, TokenType.IDENTIFIER);
-		}
-	}
-	
 	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXCEPTION {
 		this.scopes.push(new ArrayList());
 		
@@ -631,7 +610,9 @@ public class Parser {
 						TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
 						TokenType.IF);
 			}
-			
+			else if (current.type == TokenType.ASM) {
+				return this.parseDirectASM();
+			}
 			else if (current.type == TokenType.COMMENT) {
 				return this.parseComment();
 			}
@@ -680,6 +661,99 @@ public class Parser {
 				TokenType.IF);
 			}
 		}
+	}
+	
+	protected DirectASMStatement parseDirectASM() throws PARSE_EXCEPTION {
+		Source source = current.getSource();
+		
+		accept(TokenType.ASM);
+		
+		List<Pair<Expression, REGISTER>> dataIn = new ArrayList();
+		
+		List<Pair<Expression, REGISTER>> dataOut = new ArrayList();
+		
+		if (current.type == TokenType.LPAREN) {
+			accept();
+			
+			while (current.type != TokenType.RPAREN) {
+				Expression in = this.parseExpression();
+				
+				accept(TokenType.COLON);
+				
+				REGISTER reg = RegOperand.convertStringToReg(accept(TokenType.IDENTIFIER).spelling);
+				
+				dataIn.add(new Pair<Expression, REGISTER>(in, reg));
+				
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+			
+			accept(TokenType.RPAREN);
+		}
+		
+		accept(TokenType.LBRACE);
+		
+		List<String> assembly = new ArrayList();
+		String c = "";
+		
+		int last = -1;
+		
+		while (!(current.type == TokenType.RBRACE && (this.tokenStream.get(0).type == TokenType.LPAREN || this.tokenStream.get(0).type == TokenType.SEMICOLON))) {
+			if (last == -1) {
+				last = current.getSource().row;
+			}
+			
+			if (current.type == TokenType.COLON || (current.getSource().row != last)) {
+				if (!c.trim().equals("")) assembly.add(c);
+				c = "";
+				last = current.getSource().row;
+				if (current.type == TokenType.COLON) accept();
+			}
+			else {
+				Token t = accept();
+				if (t.type != TokenType.COMMA && t.type != TokenType.DIRECTIVE && t.type != TokenType.COMMENT) c += t.spelling + " ";
+				else if (t.type == TokenType.COMMENT) {
+					c += "/* " + t.spelling + " */";
+					assembly.add(c);
+					c = "";
+				}
+				else if (t.type == TokenType.COMMA) c = c.substring(0, c.length() - 1) + ", ";
+				else c += t.spelling;
+				
+				if (t.type == TokenType.DIRECTIVE) {
+					c += current.spelling;
+					current = tokenStream.get(0);
+					tokenStream.remove(0);
+				}
+			}
+		}
+		
+		if (!c.trim().equals("")) assembly.add(c);
+		
+		accept(TokenType.RBRACE);
+		
+		if (current.type == TokenType.LPAREN) {
+			accept();
+			
+			while (current.type != TokenType.RPAREN) {
+				REGISTER reg = RegOperand.convertStringToReg(accept(TokenType.IDENTIFIER).spelling);
+				
+				accept(TokenType.COLON);
+				
+				Expression out = this.parseExpression();
+				
+				dataOut.add(new Pair<Expression, REGISTER>(out, reg));
+				
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+			
+			accept(TokenType.RPAREN);
+		}
+		
+		accept(TokenType.SEMICOLON);
+		
+		return new DirectASMStatement(assembly, dataIn, dataOut, source);
 	}
 	
 	protected FunctionCall parseFunctionCall() throws PARSE_EXCEPTION {
@@ -1093,8 +1167,9 @@ public class Parser {
 		Token id = accept(TokenType.IDENTIFIER);
 		
 		Expression value = null;
+		
 		if (current.type == TokenType.LET) {
-			accept();
+			accept(TokenType.LET);
 			value = this.parseExpression();
 		}
 		

@@ -23,210 +23,48 @@ OUTPUT
 det:                                         /* Function: det */
     push { fp }
     mov fp, sp
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #4]
+    ldr r2, [fp, #20]
+    mul r1, r1, r2
+    ldr r2, [fp, #36]
     mul r0, r1, r2
     push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #8]
+    ldr r2, [fp, #24]
+    mul r1, r1, r2
+    ldr r2, [fp, #28]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #12]
+    ldr r2, [fp, #16]
+    mul r1, r1, r2
+    ldr r2, [fp, #32]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #28]
+    ldr r2, [fp, #20]
+    mul r1, r1, r2
+    ldr r2, [fp, #12]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #32]
+    ldr r2, [fp, #24]
+    mul r1, r1, r2
+    ldr r2, [fp, #4]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
-    mul r0, r1, r2
-    push { r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r2, [r0]
-    pop { r1 }
+    ldr r1, [fp, #36]
+    ldr r2, [fp, #16]
+    mul r1, r1, r2
+    ldr r2, [fp, #8]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2

@@ -6,7 +6,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -15,7 +14,6 @@ public class ArraySelect extends Expression {
 
 			/* --- FIELDS --- */
 	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
-	@Getter
 	private Expression shadowRef;
 	
 	public IDRef idRef;
@@ -60,6 +58,10 @@ public class ArraySelect extends Expression {
 		for (Expression e : this.selection) {
 			e.releaseContext();
 		}
+	}
+	
+	public Expression getShadowRef() {
+		return this.shadowRef;
 	}
 	
 }

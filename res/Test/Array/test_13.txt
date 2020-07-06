@@ -19,39 +19,22 @@ OUTPUT
 add:                                         /* Function: add */
     push { fp }
     mov fp, sp
-    add r0, fp, #4
-    ldr r1, [r0]
-    add r0, fp, #4
-    add r0, r0, #4
-    ldr r2, [r0]
+    ldr r1, [fp, #4]
+    ldr r2, [fp, #8]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #8
-    ldr r2, [r0]
+    ldr r2, [fp, #12]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #12
-    ldr r2, [r0]
+    ldr r2, [fp, #16]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #16
-    ldr r2, [r0]
+    ldr r2, [fp, #20]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #20
-    ldr r2, [r0]
+    ldr r2, [fp, #24]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #24
-    ldr r2, [r0]
+    ldr r2, [fp, #28]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #28
-    ldr r2, [r0]
+    ldr r2, [fp, #32]
     add r1, r1, r2
-    add r0, fp, #4
-    add r0, r0, #32
-    ldr r2, [r0]
+    ldr r2, [fp, #36]
     add r0, r1, r2
     mov sp, fp
     pop { fp }
@@ -59,7 +42,7 @@ add:                                         /* Function: add */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #9                               /* Evaluate Expression */
@@ -102,6 +85,6 @@ main.L0:                                     /* Copy memory section with loop */
 main.L1: 
     bl add                                   /* Call add */
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     

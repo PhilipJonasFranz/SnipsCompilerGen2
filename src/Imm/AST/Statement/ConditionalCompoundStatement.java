@@ -10,6 +10,7 @@ import Util.Source;
 public abstract class ConditionalCompoundStatement extends CompoundStatement {
 
 			/* --- FIELDS --- */
+	/** The condition that has to be true so that the body is executed, f.E if-statement */
 	public Expression condition;
 	
 	
@@ -25,12 +26,14 @@ public abstract class ConditionalCompoundStatement extends CompoundStatement {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		super.setContext(context);
-		if (this.condition != null) this.condition.setContext(context);
+		if (this.condition != null) 
+			this.condition.setContext(context);
 	}
 
 	public void releaseContext() {
 		super.releaseContext();
-		if (this.condition != null) this.condition.releaseContext();
+		if (this.condition != null) 
+			this.condition.releaseContext();
 	}
 
 }

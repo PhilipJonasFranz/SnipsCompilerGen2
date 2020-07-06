@@ -7,7 +7,6 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
-import lombok.Getter;
 
 public class ARRAY extends COMPOSIT {
 
@@ -15,7 +14,6 @@ public class ARRAY extends COMPOSIT {
 	
 	private Expression length0;
 	
-	@Getter
 	private TYPE coreType;
 	
 	public int length;
@@ -105,6 +103,10 @@ public class ARRAY extends COMPOSIT {
 			return arr;
 		}
 		else return new ARRAY(this.elementType.clone(), this.length);
+	}
+	
+	public TYPE getCoreType() {
+		return this.coreType;
 	}
 
 }

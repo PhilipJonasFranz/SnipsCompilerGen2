@@ -62,7 +62,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean writebackResults = true;
+	public boolean writebackResults = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -79,6 +79,7 @@ public class TestDriver {
 		comp.printLogo();
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
+		CompilerDriver.includeMetaInformation = false;
 		
 		List<String> paths = new ArrayList();
 		

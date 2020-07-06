@@ -7,6 +7,7 @@ import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Opt.ASMOptimizer;
 import Exc.CGEN_EXCEPTION;
 import Exc.CTX_EXCEPTION;
 import Imm.ASM.ASMInstruction;
@@ -202,8 +203,9 @@ public class AsNFunction extends AsNCompoundStatement {
 			func.instructions.add(push);
 			st.push(REGISTER.LR, REGISTER.FP);
 			
-			/* Save Stackpointer from caller perspective */
+			/* TODO Save Stackpointer from caller perspective */
 			ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
+			ASMMov fpMovBack = null;
 			func.instructions.add(fpMov);
 			
 			/* Save parameters in register */
@@ -226,12 +228,16 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Cast all statements and add all instructions */
-			for (int i = 0; i < f.body.size(); i++) { 
+			for (int i = 0; i < f.body.size(); i++) 
 				func.loadStatement(f, f.body.get(i), r, map, st);
-				//func.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
+			
+			/* Check if any instruction reads or writes to the frame-pointer */
+			boolean fpInteraction = false;
+			for (ASMInstruction x : func.instructions) {
+				if (x.equals(fpMov) || x.equals(push)) continue;
+				fpInteraction |= ASMOptimizer.overwritesReg(x, REGISTER.FP) || ASMOptimizer.readsReg(x, REGISTER.FP);
 			}
-			
-			
+				
 			/* Check if other function is called within this function */
 			boolean hasCall = func.instructions.stream().filter(x -> {
 				return x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
@@ -244,6 +250,11 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REGISTER> used = func.getUsed();
 			
 			
+			if (!func.hasParamsInStack() && !f.signals && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
+				func.instructions.remove(fpMov);
+				push.operands.remove(0);
+			}
+			
 			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
@@ -253,28 +264,39 @@ public class AsNFunction extends AsNCompoundStatement {
 					used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
 					
 					func.patchBxToB(funcReturn);
-				}
-				
-				if (!st.newDecsOnStack && f.getReturnType().wordsize() == 1) func.instructions.remove(fpMov);
+				}		
 			}
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();
 				used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
-				push.operands.add(new RegOperand(REGISTER.FP));
+				
+				if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) push.operands.add(new RegOperand(REGISTER.FP));
+				
 				if (hasCall) push.operands.add(new RegOperand(REGISTER.LR));
 				
 				func.patchBxToB(funcReturn);
 			}
 			
+			/* 
+			 * Main specific removals, need to remove from push here already since
+			 * FP-relativ addressing is patched down below and is dependent on pushed
+			 * regs.
+			 */
+			if (f.path.build().equals("main")) {
+				for (int i = 0; i < push.operands.size(); i++) {
+					if (push.operands.get(i).reg != REGISTER.FP && push.operands.get(i).reg != REGISTER.LR) {
+						push.operands.remove(i);
+						i--;
+					}
+				}
+			}
 			
 			/* Patch offset based on amount of pushed registers excluding LR and FP */
 			func.patchFramePointerAddressing(push.operands.size() * 4);
 			
 			/* If function signals exceptions, add escape target for exceptions to jump to */
-			if (f.signals) {
-				func.instructions.add(func.copyLoopEscape);
-			}
+			if (f.signals) func.instructions.add(func.copyLoopEscape);
 			
 			ASMPopStack pop = null;
 			
@@ -290,15 +312,19 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
 					/* Backup SP in R2 */
-					if (f.getReturnType().wordsize() > 1 || f.signals) {
+					if (f.getReturnType().wordsize() > 1 || f.signals) 
 						func.instructions.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.SP)));
-					}
 					
-					func.instructions.add(new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP)));
+					if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
+						fpMovBack = new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP));
+						func.instructions.add(fpMovBack);
+					}
 				
 					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
 						/* Need to restore registers */
-						pop.operands.add(new RegOperand(REGISTER.FP));
+						if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOperand(REGISTER.FP));
+						
+						/* Function has a call, must save LR */
 						if (hasCall) pop.operands.add(new RegOperand(REGISTER.LR));
 					}
 				}
@@ -354,6 +380,21 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Branch back */
 			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
+
+			/* Main specific removals */
+			if (f.path.build().equals("main") && pop != null) {
+				for (int i = 0; i < pop.operands.size(); i++) {
+					if (pop.operands.get(i).reg != REGISTER.FP && pop.operands.get(i).reg != REGISTER.LR) {
+						pop.operands.remove(i);
+						i--;
+					}
+				}
+			}
+			
+			if (push.operands.isEmpty()) {
+				func.instructions.remove(push);
+				func.instructions.remove(pop);
+			}
 			
 			if (f.manager.provisosCalls.size() > 1 && k < f.manager.provisosCalls.size() - 1) {
 				func.instructions.add(new ASMSeperator());

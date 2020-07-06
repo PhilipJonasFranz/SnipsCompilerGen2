@@ -22,7 +22,6 @@ TESTCASES
 OUTPUT
 /* --test_14.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
@@ -43,27 +42,16 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    sub r1, fp, #16                          /* Evaluate Expression */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [fp, #-12]                       /* Load field from struct */
     cmp r0, #0
     beq main.L0
-    sub r1, fp, #36                          /* Load field location */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
-    push { r0 }
-    sub r1, fp, #36                          /* Load field location */
-    add r1, r1, #16
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    ldr r1, [fp, #-24]                       /* Load field from struct */
+    ldr r2, [fp, #-20]                       /* Load field from struct */
     add r0, r1, r2
     b main.L1
 main.L0: 
-    sub r1, fp, #8                           /* Load field location */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [fp, #-4]                        /* Load field from struct */
 main.L1: 
     mov sp, fp
-    pop { r3 }
     bx lr
     

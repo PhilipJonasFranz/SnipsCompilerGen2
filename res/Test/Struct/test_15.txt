@@ -15,7 +15,6 @@ TESTCASES
 OUTPUT
 /* --test_15.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, r0
     mov r0, #3                               /* Evaluate Expression */
@@ -25,15 +24,10 @@ main:                                        /* Function: main */
     mov r0, #1
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
-    sub r1, fp, #16
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #16                          /* Evaluate Expression */
-    add r1, r1, #4
+    str r0, [fp, #-8]                        /* Store value to struct field */
+    sub r1, fp, #12                          /* Evaluate Expression */
     lsl r2, r3, #2
-    add r1, r1, r2
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, r2]                         /* Load field from struct */
     mov sp, fp
-    pop { r3 }
     bx lr
     

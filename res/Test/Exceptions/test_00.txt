@@ -39,8 +39,8 @@ _routine_stack_copy_:
     cmp r0, #0
     beq _routine_stack_copy_end_
     ldr r2, [r1, #-4]!
-    push { r2 }
     sub r0, r0, #4
+    push { r2 }
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
@@ -77,7 +77,7 @@ get.L4:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #8                               /* Evaluate Expression */
@@ -85,12 +85,12 @@ main:                                        /* Function: main */
     mov r2, #5
     push { r2, r1, r0 }
     mov r4, #0
-    push { sp }
     mov r0, #3                               /* Evaluate Expression */
+    push { sp }
     push { r0 }
-    push { r3 }
     sub r0, fp, #12
     lsr r0, r0, #2
+    push { r3 }
     pop { r1, r2 }
     bl get                                   /* Call get */
     cmp r12, #0
@@ -109,21 +109,14 @@ main.L0:
     mov r0, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
-    sub r1, fp, #24                          /* Evaluate Expression */
-    add r1, r1, #4
-    ldr r1, [r1]                             /* Load field from struct */
-    lsl r0, r1, #1
-    push { r0 }
-    sub r1, fp, #24                          /* Load field location */
-    add r1, r1, #8
-    ldr r2, [r1]                             /* Load field from struct */
-    pop { r1 }
+    ldr r1, [fp, #-20]                       /* Load field from struct */
+    lsl r1, r1, #1
+    ldr r2, [fp, #-16]                       /* Load field from struct */
     add r4, r1, r2
     add sp, sp, #12
-    mov r12, #0
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

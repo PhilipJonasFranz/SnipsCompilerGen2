@@ -28,8 +28,7 @@ resv:                                        /* Function: resv */
     add r3, r3, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r4, r0
+    lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     lsl r0, r4, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
@@ -78,9 +77,8 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r0, r5, #0
-    mov r5, r0
-    cmp r0, r3
+    rsb r5, r5, #0
+    cmp r5, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
@@ -138,7 +136,6 @@ free:                                        /* Function: free */
     rsb r0, r4, #0
     lsl r1, r3, #2
     str r0, [r1]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     lsl r0, r6, #2                           /* Convert to bytes */
@@ -161,26 +158,20 @@ free.L2:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, r5, r6, r7, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     mov r0, #1                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r4, r0
     mov r0, #5                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r6, r0
     bl free                                  /* Call free */
     mov r0, r5                               /* Load parameters */
     bl free                                  /* Call free */
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r7, r0
     bl free                                  /* Call free */
-    mov sp, fp
-    pop { r3, r4, r5, r6, r7, fp, lr }
+    pop { lr }
     bx lr
     

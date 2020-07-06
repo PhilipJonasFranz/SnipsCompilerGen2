@@ -14,7 +14,6 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
     mov r5, r2
@@ -24,8 +23,8 @@ main:                                        /* Function: main */
     cmp r0, #0
     movne r0, r1
     moveq r0, #0
-    push { r0 }
     cmp r5, #0
+    push { r0 }
     moveq r0, #1
     movne r0, #0
     mov r1, r0
@@ -33,6 +32,5 @@ main:                                        /* Function: main */
     orrs r0, r0, r1
     movne r0, #1
     moveq r0, #0
-    pop { r3, r4, r5 }
     bx lr
     

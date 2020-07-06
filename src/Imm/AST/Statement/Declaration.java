@@ -18,12 +18,16 @@ import Util.Source;
 public class Declaration extends Statement {
 
 			/* --- FIELDS --- */
+	/** The visibility modifer of this declaration. Can only be applied to global declarations. */
 	public MODIFIER modifier;
 	
+	/** The namespace path of this declaration. */
 	public NamespacePath path;
 	
+	/** The effective type of this declaration. */
 	private TYPE type;
 	
+	/** The initial value of this declaration. */
 	public Expression value;
 	
 	
@@ -55,9 +59,9 @@ public class Declaration extends Statement {
 		} catch (Exception e) {
 			System.out.println(this.pad(d) + "Declaration <?> " + this.path.build());
 		}
-		if (rec && this.value != null) {
+		
+		if (rec && this.value != null) 
 			this.value.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

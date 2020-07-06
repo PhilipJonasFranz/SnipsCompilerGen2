@@ -20,7 +20,6 @@ TESTCASES
 OUTPUT
 /* --test_15.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5 }
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -53,9 +52,7 @@ main:                                        /* Function: main */
     lsl r0, r5, #2
     add r2, r2, r0
     sub r0, fp, #48
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
-    pop { r3, r4, r5 }
     bx lr
     

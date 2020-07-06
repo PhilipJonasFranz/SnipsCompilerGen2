@@ -24,7 +24,6 @@ TESTCASES
 OUTPUT
 /* --test_10.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov fp, sp
     mov r3, r0
     mov r0, #3                               /* Evaluate Expression */
@@ -49,56 +48,22 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    sub r1, fp, #44                          /* Load field location */
-    add r1, r1, #4
-    push { r1 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    pop { r1 }
-    add r1, r1, r2
-    add r1, r1, #4
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-36]                       /* Load field from struct */
     add r0, r1, #1
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    sub r1, fp, #44                          /* Evaluate Expression */
-    add r1, r1, #4
-    push { r1 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    pop { r1 }
-    add r1, r1, r2
-    add r1, r1, #4
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-36]                       /* Load field from struct */
     add r0, r1, r3
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     push { r0 }
-    sub r1, fp, #44                          /* Load field location */
-    add r1, r1, #4
-    push { r1 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    pop { r1 }
-    add r1, r1, r2
-    add r1, r1, #4
-    ldr r1, [r1]                             /* Load field from struct */
+    ldr r1, [fp, #-28]                       /* Load field from struct */
     add r0, r1, r3
+    pop { r1 }
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r2, [r0]                             /* Load from address */
-    pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3 }
     bx lr
     

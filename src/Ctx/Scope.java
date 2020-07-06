@@ -7,8 +7,11 @@ import java.util.Map.Entry;
 
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.Declaration;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
+import Util.Pair;
 import Util.Source;
+import Util.Logging.Message;
 
 /**
  * A scope capsules a reference to its parent scope and a 
@@ -21,7 +24,7 @@ public class Scope {
 	Scope parentScope;
 	
 	/** Stores all the declarations made in this scope. */
-	HashMap<NamespacePath, Declaration> declarations = new HashMap();
+	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -34,8 +37,8 @@ public class Scope {
 	public void print(int d) {
 		if (d != 0) System.out.println("--- SCOPE ---");
 		else System.out.println("--- TOP SCOPE ---");
-		for (Entry<NamespacePath, Declaration> dec : this.declarations.entrySet()) {
-			dec.getValue().print(d, true);
+		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) {
+			dec.getValue().first.print(d, true);
 		}
 		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
@@ -43,27 +46,47 @@ public class Scope {
 	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
 	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXCEPTION {
 		if (checkDups) this.checkDuplicate(dec);
-		this.declarations.put(dec.path, dec);
+		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
-	public void addDeclaration(Declaration dec) throws CTX_EXCEPTION {
-		this.checkDuplicate(dec);
-		this.declarations.put(dec.path, dec);
+	public Message addDeclaration(Declaration dec) throws CTX_EXCEPTION {
+		Message m = this.checkDuplicate(dec);
+		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
+		return m;
 	}
 	
 	/** 
 	 * Check if this scope or any of the parent scopes contains a declaration with the identifier
 	 * of the given declaration. Throws a CTX_EXCEPTION if this is the case.
 	 */
-	public void checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
-		if (this.declarations.containsKey(dec.path)) {
+	public Message checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
+		if (this.declarations.containsKey(dec.path.build())) {
 			throw new CTX_EXCEPTION(dec.getSource(), "Duplicate field name: " + dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
-				this.parentScope.checkDuplicate(dec);
+				Declaration dec0 = null;
+				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
+					if (!CompilerDriver.disableWarnings) {
+						return new Message("Variable '" + dec0.path.build() + "' at " + dec0.getSource().getSourceMarker() + " shadowed by '" + dec.path.build() + "' at " + dec.getSource().getSourceMarker(), Message.Type.WARN, true);
+					}
+				}
 			}
+		}
+		
+		return null;
+	}
+	
+	private Declaration checkDuplicateRec(Declaration dec) throws CTX_EXCEPTION {
+		if (this.declarations.containsKey(dec.path.build())) {
+			return this.declarations.get(dec.path.build()).first;
+		}
+		else {
+			if (this.parentScope != null) {
+				return this.parentScope.checkDuplicateRec(dec);
+			}
+			else return null;
 		}
 	}
 	
@@ -73,8 +96,8 @@ public class Scope {
 	 * @throws CTX_EXCEPTION 
 	 */
 	public Declaration getField(NamespacePath path, Source source) throws CTX_EXCEPTION {
-		if (this.declarations.containsKey(path)) {
-			return this.declarations.get(path);
+		if (path != null && this.declarations.containsKey(path.build())) {
+			return this.declarations.get(path.build()).first;
 		}
 		else {
 			if (this.parentScope != null) {
@@ -87,9 +110,9 @@ public class Scope {
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<NamespacePath, Declaration> entry : this.declarations.entrySet()) {
-						if (entry.getKey().getLast().equals(path.getLast())) {
-							decs.add(entry.getValue());
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
+						if (entry.getValue().second.getLast().equals(path.getLast())) {
+							decs.add(entry.getValue().first);
 						}
 					}
 					
@@ -118,8 +141,8 @@ public class Scope {
 	 * throwing exception.
 	 */
 	public Declaration getFieldNull(NamespacePath path, Source source) {
-		if (this.declarations.containsKey(path)) {
-			return this.declarations.get(path);
+		if (path != null && this.declarations.containsKey(path.build())) {
+			return this.declarations.get(path.build()).first;
 		}
 		else {
 			if (this.parentScope != null) {
@@ -132,9 +155,9 @@ public class Scope {
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<NamespacePath, Declaration> entry : this.declarations.entrySet()) {
-						if (entry.getKey().getLast().equals(path.getLast())) {
-							decs.add(entry.getValue());
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
+						if (entry.getValue().second.getLast().equals(path.getLast())) {
+							decs.add(entry.getValue().first);
 						}
 					}
 					

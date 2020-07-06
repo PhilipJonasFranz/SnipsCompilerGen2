@@ -6,7 +6,6 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -22,15 +21,12 @@ public abstract class BinaryExpression extends Expression {
 	
 			/* --- FIELDS --- */
 	/** The left operand expression */
-	@Getter
 	public Expression left;
 	
 	/** The operator */
-	@Getter
 	public Operator operator;
 	
 	/** The right operand expression */
-	@Getter
 	public Expression right;
 	
 	
@@ -69,5 +65,19 @@ public abstract class BinaryExpression extends Expression {
 		this.left.releaseContext();
 		this.right.releaseContext();
 	}
+	
+	public Expression getLeft() {
+		return this.left;
+	}
+	
+	public Expression getRight() {
+		return this.right;
+	}
+	
+	public Operator getOperator() {
+		return this.operator;
+	}
+	
+	
 	
 }

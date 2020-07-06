@@ -7,7 +7,6 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
 main:                                        /* Function: main */
-    push { r3 }
     mov r3, r0
     mov r2, #2
     mul r1, r0, r2
@@ -15,6 +14,5 @@ main:                                        /* Function: main */
     mul r2, r3, r3
     sub r2, r3, r2
     add r0, r1, r2
-    pop { r3 }
     bx lr
     

@@ -7,7 +7,6 @@ import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
 import Util.Source;
-import lombok.Getter;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -17,7 +16,6 @@ public class StructSelectWriteback extends Expression {
 			/* --- FIELDS --- */
 	public WRITEBACK writeback;
 	
-	@Getter
 	private Expression shadowSelect;
 	
 	public StructSelect select;
@@ -52,5 +50,10 @@ public class StructSelectWriteback extends Expression {
 	public void releaseContext() {
 		this.shadowSelect.releaseContext();
 	}
+	
+	public Expression getShadowSelect() {
+		return this.shadowSelect;
+	}
+	
 	
 }

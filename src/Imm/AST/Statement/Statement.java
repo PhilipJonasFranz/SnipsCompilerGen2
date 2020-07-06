@@ -4,7 +4,7 @@ import Imm.AST.SyntaxElement;
 import Util.Source;
 
 /**
- * This class represents a superclass for all AST-Nodes.
+ * This class represents a superclass for all Statements.
  */
 public abstract class Statement extends SyntaxElement {
 

@@ -33,8 +33,7 @@ resv:                                        /* Function: resv */
     add r3, r3, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
-    lsr r0, r0, #2
-    mov r4, r0
+    lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     lsl r0, r4, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
@@ -83,9 +82,8 @@ resv.L7:
     str r0, [r1]
 resv.L12: 
 /* Memory location is free, check size */
-    rsb r0, r5, #0
-    mov r5, r0
-    cmp r0, r3
+    rsb r5, r5, #0
+    cmp r5, r3
     bne resv.L15
 /* Fits */
     mov r0, r3                               /* Evaluate Expression */
@@ -129,8 +127,7 @@ resv.L18:
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 create:                                      /* Function: create */
-    push { r3, fp, lr }
-    mov fp, sp
+    push { r3, lr }
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
@@ -150,20 +147,15 @@ create:                                      /* Function: create */
     pop { r0 }
     str r0, [r1]
     mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    pop { r3, fp, lr }
+    pop { r3, lr }
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
+    push { lr }
     bl create                                /* Evaluate Expression */
-    mov r4, r0
     add r0, r0, #1
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

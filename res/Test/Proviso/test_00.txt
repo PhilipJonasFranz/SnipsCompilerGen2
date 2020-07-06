@@ -18,8 +18,7 @@ get_P0:                                      /* Function: get, Provisos: INT | B
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { lr }
     bl get_P0                                /* Evaluate Expression */
     mov r3, r0
     bl get_P0                                /* Evaluate Expression */
@@ -31,7 +30,6 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #2
 main.L1: 
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

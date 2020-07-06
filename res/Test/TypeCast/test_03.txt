@@ -10,10 +10,6 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
 main:                                        /* Function: main */
-    push { r3, r4 }
-    mov r3, r0
-    mov r4, r1
-    add r0, r3, r1
-    pop { r3, r4 }
+    add r0, r0, r1
     bx lr
     

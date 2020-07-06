@@ -13,12 +13,8 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
 main:                                        /* Function: main */
-    push { r3, r4 }
-    mov r3, r0
-    mov r4, r1
-    orrs r0, r1, r3
+    orrs r0, r1, r0
     movne r0, #1
     moveq r0, #0
-    pop { r3, r4 }
     bx lr
     

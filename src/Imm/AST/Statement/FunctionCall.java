@@ -46,17 +46,18 @@ public class FunctionCall extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
-		if (!this.proviso.isEmpty()) {
+		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
 			s = s.substring(0, s.length() - 2);
 			s += "}";
 			System.out.print(s);
 		}
+		
 		System.out.println();
-		for (Expression e : this.parameters) {
+		
+		for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
@@ -81,9 +82,8 @@ public class FunctionCall extends Statement {
 			}
 		}
 		
-		for (Expression e : this.parameters) {
+		for (Expression e : this.parameters) 
 			e.setContext(context);
-		}
 	}
 
 	public void releaseContext() {
@@ -96,9 +96,8 @@ public class FunctionCall extends Statement {
 			}
 		}
 		
-		for (Expression e : this.parameters) {
+		for (Expression e : this.parameters) 
 			e.releaseContext();
-		}
 	}
 	
 }

@@ -17,14 +17,10 @@ TESTCASES
 OUTPUT
 /* --test_28.txt */
 .data
-vec: 
-        .word 3
-        .word 7
-        .word 2
-        .word 0
+vec: .skip 16
     
 .text
-    b main
+    b main_init
 foo:                                         /* Function: foo */
     push { r3, r4, fp }
     mov fp, sp
@@ -36,8 +32,8 @@ foo:                                         /* Function: foo */
     mov r0, #5
     mov r1, #1
     push { r1, r0 }
-    add r1, fp, #12                          /* Start of structure in stack */
     pop { r0 }
+    add r1, fp, #12                          /* Start of structure in stack */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
@@ -52,16 +48,33 @@ foo:                                         /* Function: foo */
     lsl r0, r4, #2
     add r2, r2, r0
     add r0, fp, #12
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
     pop { r3, r4, fp }
     add sp, sp, #16
     bx lr
     
+/* Initialize the global variables */
+main_init: 
+    push { r0, r1, r2 }
+    mov r0, #0
+    mov r1, #2
+    push { r1, r0 }
+    mov r0, #7
+    mov r1, #3
+    push { r1, r0 }
+    pop { r0 }
+    ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
+    str r0, [r1, #0]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0, r1, r2 }
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
+    push { lr }
     mov r3, r0
     mov r4, r1
     ldr r2, .POOL0_main.L0_vec               /* Evaluate Expression */
@@ -75,8 +88,7 @@ main:                                        /* Function: main */
     mov r1, r4
     mov r0, r3
     bl foo                                   /* Call foo */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
 .POOL0_main.L0_vec: .word vec
     

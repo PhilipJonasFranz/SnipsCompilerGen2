@@ -3,9 +3,6 @@ package Util;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-
-@Data
 public class NamespacePath {
 
 	public enum PATH_TERMINATION {
@@ -63,6 +60,10 @@ public class NamespacePath {
 		}
 		if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
 		return s;
+	}
+	
+	public List<String> getPath() {
+		return this.path;
 	}
 	
 }

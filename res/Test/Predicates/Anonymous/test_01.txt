@@ -20,8 +20,8 @@ _routine_stack_copy_:
     cmp r0, #0
     beq _routine_stack_copy_end_
     ldr r2, [r1, #-4]!
-    push { r2 }
     sub r0, r0, #4
+    push { r2 }
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
@@ -46,14 +46,13 @@ id:                                          /* Function: id */
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_id
     push { r0 }
-    sub r0, fp, #4
-    ldr r4, [r0]
+    ldr r4, [fp, #-4]
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
     push { r1, r0 }
@@ -61,9 +60,8 @@ main:                                        /* Function: main */
     mov pc, r4
     lsl r2, r3, #2
     sub r0, fp, #12
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { fp, lr }
     bx lr
     

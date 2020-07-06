@@ -9,6 +9,7 @@ import Util.Source;
 public abstract class CompoundStatement extends Statement {
 
 			/* --- FIELDS --- */
+	/** All statements contained in the body of the compound statement. */
 	public List<Statement> body;
 	
 	
@@ -23,15 +24,13 @@ public abstract class CompoundStatement extends Statement {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.setContext(context);
-		}
 	}
 
 	public void releaseContext() {
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.releaseContext();
-		}
 	}
 
 }

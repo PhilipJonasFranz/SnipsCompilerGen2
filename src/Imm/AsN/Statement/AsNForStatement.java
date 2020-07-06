@@ -16,6 +16,7 @@ import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
@@ -89,7 +90,11 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.instructions.add(continueJump);
 		
 		/* Add increment */
-		f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
+		if (a.increment instanceof AssignWriteback) {
+			AssignWriteback awb = (AssignWriteback) a.increment;
+			f.instructions.addAll(AsNAssignWriteback.cast(awb, r, map, st, false).getInstructions());
+		}
+		else f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */
 		popDeclarationScope(f, a, r, st, true);

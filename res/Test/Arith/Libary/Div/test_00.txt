@@ -14,7 +14,6 @@ __op_div:                                    /* Function: __op_div */
     mov r3, r0
     mov r4, r1
     mov r5, #0
-    mov r0, #1                               /* Evaluate Expression */
     mov r6, #1
 __op_div.L1:                                 /* Evaluate condition */
     cmp r3, r4
@@ -33,8 +32,8 @@ __op_div.L7:                                 /* Evaluate condition */
     cmp r4, r3
     movgt r0, #1
     movle r0, #0
-    push { r0 }
     cmp r6, #1
+    push { r0 }
     movgt r0, #1
     movle r0, #0
     mov r1, r0
@@ -57,13 +56,8 @@ __op_div.L2:
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, r4, fp, lr }
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3
+    push { lr }
     bl __op_div                              /* Call __op_div */
-    mov sp, fp
-    pop { r3, r4, fp, lr }
+    pop { lr }
     bx lr
     

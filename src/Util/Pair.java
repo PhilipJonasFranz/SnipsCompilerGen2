@@ -1,11 +1,6 @@
 package Util;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 /** A pair of two different data types. */
-@Data
-@AllArgsConstructor
 public class Pair<K, V> {
 
 			/* --- FIELDS --- */
@@ -14,5 +9,32 @@ public class Pair<K, V> {
 	
 	/* The second component */
 	public V second;
+	
+			
+			/* --- CONSTRUCTORS --- */
+	public Pair(K first, V second) {
+		this.first = first;
+		this.second = second;
+	}
+	
+	
+			/* --- METHODS --- */
+	public K getFirst() {
+		return this.first;
+	}
+	
+	public void setFirst(K k) {
+		this.first = k;
+	}
+	
+	public V getSecond() {
+		return this.second;
+	}
+	
+	public void setSecond(V v) {
+		this.second = v;
+	}
+	
+
 	
 }

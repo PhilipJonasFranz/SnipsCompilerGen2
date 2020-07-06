@@ -33,9 +33,8 @@ public class IfStatement extends ConditionalCompoundStatement {
 		System.out.println(this.pad(d) + "If");
 		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
-		}
 		
 		IfStatement if0 = this.elseStatement;
 		while (if0 != null) {
@@ -43,18 +42,16 @@ public class IfStatement extends ConditionalCompoundStatement {
 				System.out.println(this.pad(d) + "Else If");
 				if0.condition.print(d + this.printDepthStep, rec);
 				
-				for (Statement s : if0.body) {
+				for (Statement s : if0.body) 
 					s.print(d + this.printDepthStep, rec);
-				}
 				
 				if0 = if0.elseStatement;
 			}
 			else {
 				System.out.println(this.pad(d) + "Else");
 				
-				for (Statement s : if0.body) {
+				for (Statement s : if0.body) 
 					s.print(d + this.printDepthStep, rec);
-				}
 				
 				return;
 			}
@@ -67,14 +64,22 @@ public class IfStatement extends ConditionalCompoundStatement {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
 		super.setContext(context);
-		if (this.condition != null) this.condition.setContext(context);
-		if (this.elseStatement != null) this.elseStatement.setContext(context);
+		
+		if (this.condition != null) 
+			this.condition.setContext(context);
+		
+		if (this.elseStatement != null) 
+			this.elseStatement.setContext(context);
 	}
 
 	public void releaseContext() {
 		super.releaseContext();
-		if (this.condition != null) this.condition.releaseContext();
-		if (this.elseStatement != null) this.elseStatement.releaseContext();
+		
+		if (this.condition != null) 
+			this.condition.releaseContext();
+		
+		if (this.elseStatement != null)
+			this.elseStatement.releaseContext();
 	}
 	
 }

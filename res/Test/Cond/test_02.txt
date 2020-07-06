@@ -13,11 +13,10 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
 main:                                        /* Function: main */
-    push { r3, r4, r5, fp }
+    push { fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r5, r2
     cmp r3, #2
     bne main.L1
     mov r0, r3                               /* Evaluate Expression */
@@ -31,7 +30,7 @@ main.L3:
     add r0, r3, r4
 main.L4: 
     mov sp, fp
-    pop { r3, r4, r5, fp }
+    pop { fp }
     add sp, sp, #4
     bx lr
     

@@ -1,0 +1,36 @@
+SOURCE
+int main(int a) {
+	int r = 0;
+	
+	asm(a : r0) {
+		/* Directley inject assembly */
+		lsl r0, #1
+		push { r0 }
+		mov r0, #10
+		pop { r0 }
+		and r0, r0, #15
+	} (r0 : r);
+	
+	return r;
+}
+TESTCASES
+0 0
+1 2
+2 4
+4 8
+8 0
+OUTPUT
+/* --test_00.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r3, r0
+    mov r4, #0
+    mov r0, r3
+    /* Directley inject assembly */
+    lsl r0, #1
+    push { r0 } 
+    mov r0, #10
+    pop { r0 } 
+    and r0, r0, #15
+    bx lr
+    

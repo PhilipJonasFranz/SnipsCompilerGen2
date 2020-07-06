@@ -10,18 +10,26 @@ import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.Message;
-import lombok.AllArgsConstructor;
 
 public class PreProcessor {
 
-	@AllArgsConstructor
 	public class LineObject {
 		
+				/* --- FIELDS --- */
 		public int lineNumber;
 		
 		public String line;
 		
 		public String fileName;
+		
+		
+				/* --- CONSTRUCTORS --- */
+		public LineObject(int lineNumber, String line, String fileName) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.fileName = fileName;
+		}
+		
 	}
 	
 	List<LineObject> process = new ArrayList();
@@ -32,9 +40,8 @@ public class PreProcessor {
 	 * Create new instance, convert code input into LineObject representation
 	 */
 	public PreProcessor(List<String> code, String filePath) {
-		for (int i = 0; i < code.size(); i++) {
+		for (int i = 0; i < code.size(); i++) 
 			this.process.add(new LineObject(i + 1, code.get(i), filePath));
-		}
 	}
 	
 	/**
@@ -54,9 +61,9 @@ public class PreProcessor {
 					if (!this.imported.contains(path)) {
 						try {
 							List<String> lines = getFile(path);
-							for (int a = 0; a < lines.size(); a++) {
+							for (int a = 0; a < lines.size(); a++) 
 								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
-							}
+							
 							new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
 							this.imported.add(path);
 						} catch (NullPointerException e) {
@@ -92,11 +99,6 @@ public class PreProcessor {
 		if (code == null) {
 			file = new File("release\\" + filePath);
 			code = Util.readFile(file);
-		}
-		
-		/* Read from jar */
-		if (code == null) {
-			code = CompilerDriver.driver.readFromJar(filePath);
 		}
 		
 		return code;

@@ -33,9 +33,7 @@ public class AssignWriteback extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign Writeback");
-		if (rec) {
-			this.reference.print(d + this.printDepthStep, rec);
-		}
+		if (rec) this.reference.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {

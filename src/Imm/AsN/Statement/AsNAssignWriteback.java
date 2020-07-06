@@ -33,15 +33,15 @@ import Imm.AsN.Expression.AsNStructSelect;
 
 public class AsNAssignWriteback extends AsNStatement {
 
-	public static AsNAssignWriteback cast(AssignWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNAssignWriteback cast(AssignWriteback wb, RegSet r, MemoryMap map, StackSet st, boolean partOfExpression) throws CGEN_EXCEPTION {
 		AsNAssignWriteback w = new AsNAssignWriteback();
 		
-		injectWriteback(w, wb.reference, r, map, st);
+		injectWriteback(w, wb.reference, r, map, st, partOfExpression);
 		
 		return w;
 	}
 	
-	public static void injectWriteback(AsNNode node, Expression reference, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void injectWriteback(AsNNode node, Expression reference, RegSet r, MemoryMap map, StackSet st, boolean partOfExpression) throws CGEN_EXCEPTION {
 		if (reference instanceof IDRefWriteback) {
 			IDRefWriteback wb = (IDRefWriteback) reference;
 			IDRef ref = wb.idRef;
@@ -56,11 +56,11 @@ public class AsNAssignWriteback extends AsNStatement {
 				int reg = r.declarationRegLocation(ref.origin);
 				
 				/* Apply writeback operation */
-				injectWriteback(node, wb.writeback, reg);
+				injectWriteback(node, wb.writeback, reg, partOfExpression);
 			}
 			else {
 				/* Apply writeback operation */
-				injectWriteback(node, wb.writeback, 1);
+				injectWriteback(node, wb.writeback, 1, partOfExpression);
 				
 				if (map.declarationLoaded(ref.origin)) {
 					/* Load value from memory */
@@ -101,14 +101,14 @@ public class AsNAssignWriteback extends AsNStatement {
 			node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 			
 			/* Apply writeback operation */
-			injectWriteback(node, sel.writeback, 0);
+			injectWriteback(node, sel.writeback, 0, partOfExpression);
 			
 			node.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
 		}
 		else throw new SNIPS_EXCEPTION("Assign writeback not implemented for expression " + reference.getClass().getName());
 	}
 	
-	private static void injectWriteback(AsNNode node, WRITEBACK wb, int target) {
+	private static void injectWriteback(AsNNode node, WRITEBACK wb, int target, boolean partOfExpression) {
 		if (wb == WRITEBACK.INCR) {
 			node.instructions.add(new ASMAdd(new RegOperand(target), new RegOperand(REGISTER.R0), new ImmOperand(1)));
 		}
@@ -116,8 +116,11 @@ public class AsNAssignWriteback extends AsNStatement {
 			node.instructions.add(new ASMSub(new RegOperand(target), new RegOperand(REGISTER.R0), new ImmOperand(1)));
 		}
 		
-		/* Add opt flag for optimizer */
-		node.instructions.get(node.instructions.size() - 1).optFlags.add(OPT_FLAG.WRITEBACK);
+		/* 
+		 * Add opt flag for optimizer, but only if this writeback is part of an expression, meaning that the result
+		 * needs to stay in R0. If this assignment is a statement like i++, the value does not have to stay in R0.
+		 */
+		if (partOfExpression) node.instructions.get(node.instructions.size() - 1).optFlags.add(OPT_FLAG.WRITEBACK);
 	}
 	
 }

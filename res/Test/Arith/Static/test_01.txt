@@ -7,8 +7,6 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
 main:                                        /* Function: main */
-    mov r0, #4                               /* Evaluate Expression */
-    mov r2, #2
-    mul r0, r0, r2
+    mov r0, #8
     bx lr
     

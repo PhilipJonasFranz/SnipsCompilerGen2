@@ -1,0 +1,123 @@
+#include<color.sn>
+
+/*
+ * This package includes the color.sn library.
+ *
+ * This package provides simple functions to "draw" on a specified
+ * memory section. This can be done by calling the provided drawing
+ * functions. This library works best with the PixelDisplay component
+ * for the SWARM32Pc.
+ */
+namespace Graphics {
+
+	/*
+	 * Capsules a color pointer, the start of the
+	 * canvas memory section, the width and the height
+	 * of the canvas.
+	 */
+	restricted struct Graphics2D {
+		Color* color;
+		void* targetBase;
+		int targetWidth;
+		int targetHeight;
+	}
+	
+	/*
+	 * Creates a new 2D Graphics Object that holds given color.
+	 */
+	shared Graphics2D* create(void* base, int w, int h, Color* c) {
+		Graphics2D* g = resv(sizeof(Graphics2D));
+		
+		/* Initialize graphics object with given color */
+		*g = Graphics2D::(c, base, w, h);
+		return g;
+	}
+	
+	/*
+	 * Calculates the address in the vbuffer of the canvas based on
+	 * the given coordinates.
+	 */
+	shared int pixelAddress(Graphics2D* g, int x, int y) {
+		return g->targetBase + (g->targetWidth * y) + x;
+	}
+	
+	/*
+	 * Changes the pixel at given coordinates to the color
+	 * specified by the graphics object
+	 */
+	shared void setPix(Graphics2D* g, int x, int y) {
+		void* addr = (void*) (g->targetBase + (g->targetWidth * y) + x);
+		*addr = g->color->rgba;
+		return;
+	}
+
+	/*
+	 * Contains algorithms to draw primitive shapes
+	 */
+	namespace Draw {
+
+		/*
+		 * Draws the outline of a rectangle. Uses the color of the graphics object. Top left corner
+		 * is specified by the x and y coordinates. The width and height is specified
+		 * by the w and h parameters.
+		 */
+		shared void drawRect(Graphics2D* g, int x, int y, int w, int h) {
+			int dx = x + w;
+			int dy = y + h;
+			
+			int rgba = g->color->rgba;
+			
+			void* base = g->targetBase;
+			int w0 = g->targetWidth;
+			
+			/* Horizontal Lines */
+			for (int i = x; i < dx; i++) {
+				void* addr = (void*) (base + (w0 * y) + i);
+				*addr = rgba;
+				
+				addr = (void*) (base + (w0 * dy) + i);
+				*addr = rgba;
+			}
+			
+			/* Vertical Lines */
+			for (int i = y; i < dy; i++) {
+				void* addr = (void*) (base + (w0 * i) + x);
+				*addr = rgba;
+				
+				addr = (void*) (base + (w0 * i) + dx);
+				*addr = rgba;
+			}
+			
+			return;
+		}
+		
+		/*
+		 * Fill a rectangle. Uses the color of the graphics object. Top left corner
+		 * is specified by the x and y coordinates. The width and height is specified
+		 * by the w and h parameters.
+		 */
+		shared void fillRect(Graphics2D* g, int x, int y, int w, int h) {
+			int dx = x + w;
+			int dy = y + h;
+			
+			void* base = g->targetBase;
+			int w0 = g->targetWidth;
+			
+			if (dx > w0) dx = w0;
+			if (dy > g->targetHeight) dy = g->targetHeight;
+			
+			int rgba = g->color->rgba;
+			
+			for (int i = x; i < dx; i++) {
+				for (int a = y; a < dy; a++) {
+					void* addr = (void*) (base + (w0 * a) + i);
+					*addr = rgba;
+				}
+			}
+			
+			return;
+		}
+
+	}
+
+}

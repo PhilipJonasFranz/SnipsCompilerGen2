@@ -6,6 +6,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.ImmOperand;
@@ -33,13 +34,18 @@ public class AsNStructureInit extends AsNExpression {
 		if (!CompilerDriver.disableStructSIDHeaders) {
 			/* Push SID header */
 			init.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.structType.typedef.SID)));
-			init.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			init.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
 			
 			/* Push dummy for SID header */
 			st.push(REGISTER.R0);
 		}
 		
 		return init;
+	}
+	
+	public static ASMPushStack attatchFlag(ASMPushStack push) {
+		push.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+		return push;
 	}
 	
 	/*
@@ -75,7 +81,7 @@ public class AsNStructureInit extends AsNExpression {
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
 				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
-					node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+					node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
 					st.push(REGISTER.R0);
 				}
 			}
@@ -94,9 +100,9 @@ public class AsNStructureInit extends AsNExpression {
 	 */
 	public static void flush(int regs, AsNNode node) {
 		if (regs > 0) {
-			if (regs == 3) node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else if (regs == 2) node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-			else node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+			if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0))));
+			else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0))));
+			else node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
 		}
 	}
 	

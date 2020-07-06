@@ -29,10 +29,8 @@ Foo.get:                                     /* Function: Foo.get */
 .POOL0_main.L0_Baz.x: .word Baz.x
     
 main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
+    push { lr }
     bl Foo.get                               /* Evaluate Expression */
-    mov sp, fp
-    pop { fp, lr }
+    pop { lr }
     bx lr
     

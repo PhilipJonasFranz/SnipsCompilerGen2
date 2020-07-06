@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTX_EXCEPTION;
-import Imm.AST.Directive.Directive;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
 import Util.Source;
@@ -38,7 +37,6 @@ public class Namespace extends SyntaxElement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Namespace: " + this.path.build());
-		for (Directive dir : this.directives) dir.print(d + this.printDepthStep, rec);
 		for (SyntaxElement e : this.programElements) {
 			e.print(d + this.printDepthStep, rec);
 		}

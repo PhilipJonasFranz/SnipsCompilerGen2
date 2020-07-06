@@ -21,15 +21,7 @@ OUTPUT
 bar:                                         /* Function: bar */
     push { fp }
     mov fp, sp
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [fp, #16]
     mov sp, fp
     pop { fp }
     add sp, sp, #16
@@ -38,22 +30,14 @@ bar:                                         /* Function: bar */
 foo:                                         /* Function: foo */
     push { fp }
     mov fp, sp
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #8
-    add r0, fp, #4
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [fp, #36]
     mov sp, fp
     pop { fp }
     add sp, sp, #36
     bx lr
     
 main:                                        /* Function: main */
-    push { r3, fp, lr }
+    push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
@@ -96,10 +80,9 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-52]
     push { r2, r1, r0 }
     bl foo                                   /* Call foo */
-    mov r2, r0
     pop { r1 }
-    add r0, r1, r2
+    add r0, r1, r0
     mov sp, fp
-    pop { r3, fp, lr }
+    pop { fp, lr }
     bx lr
     
