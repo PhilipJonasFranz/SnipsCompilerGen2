@@ -17,8 +17,7 @@ OUTPUT
 foo:                                         /* Function: foo */
     push { fp }
     mov fp, sp
-    add r0, fp, #12
-    ldr r0, [r0]
+    ldr r0, [fp, #12]
     mov sp, fp
     pop { fp }
     add sp, sp, #12
@@ -53,8 +52,7 @@ main:                                        /* Function: main */
     add r2, r2, r0
     add r2, r2, #4
     sub r0, fp, #16
-    add r0, r0, r2
-    ldr r1, [r0]
+    ldr r1, [r0, r2]
     add r0, r1, r3
     mov r2, #0                               /* Load parameters */
     push { r0 }

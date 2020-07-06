@@ -187,12 +187,10 @@ main:                                        /* Function: main */
     pop { r0 }
     str r0, [r1, #12]
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #12
     push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
+    ldr r2, [r1, #12]                        /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     pop { lr }

@@ -30,8 +30,7 @@ main:                                        /* Function: main */
     sub r1, fp, #16                          /* Evaluate Expression */
     add r1, r1, #4
     lsl r2, r3, #2
-    add r1, r1, r2
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, r2]                         /* Load field from struct */
     mov sp, fp
     bx lr
     

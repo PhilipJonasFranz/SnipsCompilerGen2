@@ -163,8 +163,7 @@ main:                                        /* Function: main */
     pop { r0 }
     str r0, [r1, #24]
     lsl r1, r4, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     pop { lr }
     bx lr
     

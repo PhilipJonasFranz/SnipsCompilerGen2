@@ -51,8 +51,7 @@ main:                                        /* Function: main */
     bl set                                   /* Call set */
     lsl r2, r4, #2
     sub r0, fp, #12
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
     pop { fp, lr }
     bx lr

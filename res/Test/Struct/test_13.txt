@@ -204,14 +204,12 @@ Tree.insert.L1:                              /* Evaluate condition */
     cmp r6, r1
     beq Tree.insert.L2
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     cmp r0, r4
     ble Tree.insert.L4
 /* Left leaf is 0, insert here */
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL2_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne Tree.insert.L6
@@ -223,14 +221,12 @@ Tree.insert.L1:                              /* Evaluate condition */
     b Tree.insert.L9
 Tree.insert.L6: 
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r6, [r1]                             /* Load field from struct */
+    ldr r6, [r1, #4]                         /* Load field from struct */
     b Tree.insert.L3
 Tree.insert.L4: 
 /* Right leaf is 0, insert here */
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #8]                         /* Load field from struct */
     ldr r1, .POOL2_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne Tree.insert.L8
@@ -282,8 +278,7 @@ main:                                        /* Function: main */
     cmp r3, #1
     bne main.L1
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b main.L8
 main.L1: 
     mov r0, r6                               /* Evaluate Expression */
@@ -291,35 +286,29 @@ main.L1:
     cmp r4, #1
     bne main.L3
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r7, [r1]                             /* Load field from struct */
+    ldr r7, [r1, #8]                         /* Load field from struct */
     b main.L2
 main.L3: 
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r7, [r1]                             /* Load field from struct */
+    ldr r7, [r1, #4]                         /* Load field from struct */
 main.L2: 
     cmp r5, #2
     bne main.L4
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b main.L8
 main.L4: 
     cmp r5, #1
     bne main.L7
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r7, [r1]                             /* Load field from struct */
+    ldr r7, [r1, #8]                         /* Load field from struct */
     b main.L6
 main.L7: 
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r7, [r1]                             /* Load field from struct */
+    ldr r7, [r1, #4]                         /* Load field from struct */
 main.L6: 
     lsl r1, r7, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
 main.L8: 
     pop { lr }
     bx lr

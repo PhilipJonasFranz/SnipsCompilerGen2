@@ -34,12 +34,10 @@ main:                                        /* Function: main */
     add r1, r1, #8
     str r0, [r1]                             /* Store value to struct field */
     sub r1, fp, #20                          /* Evaluate Expression */
-    add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #8]                         /* Load field from struct */
     sub r1, fp, #20                          /* Load field location */
-    add r1, r1, #12
     push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
+    ldr r2, [r1, #12]                        /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     sub r1, fp, #20                          /* Load field location */

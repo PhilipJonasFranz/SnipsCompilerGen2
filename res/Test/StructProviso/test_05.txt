@@ -162,8 +162,7 @@ main:                                        /* Function: main */
     mov r0, r3
     bl insert_P0                             /* Call insert */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     pop { lr }
     bx lr
     

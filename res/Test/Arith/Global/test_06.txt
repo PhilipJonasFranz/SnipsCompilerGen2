@@ -56,8 +56,7 @@ main:                                        /* Function: main */
     pop { r1 }
     add r2, r2, r0
     add r1, r1, r2
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
     ldr r1, .POOL0_main.L0_s0                /* Load field location */
     mov r2, #0                               /* Calculate offset of sub structure */
@@ -68,8 +67,7 @@ main:                                        /* Function: main */
     pop { r1 }
     add r2, r2, r0
     add r1, r1, r2
-    add r1, r1, #8
-    ldr r2, [r1]                             /* Load field from struct */
+    ldr r2, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     add r2, r1, r2
     mul r0, r3, r2

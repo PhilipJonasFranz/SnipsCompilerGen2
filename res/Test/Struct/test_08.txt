@@ -143,12 +143,10 @@ main:                                        /* Function: main */
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
     push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
+    ldr r2, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     pop { lr }

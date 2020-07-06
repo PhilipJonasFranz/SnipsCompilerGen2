@@ -37,12 +37,10 @@ main:                                        /* Function: main */
     mov r0, #2
     push { r0 }
     sub r1, fp, #28                          /* Evaluate Expression */
-    add r1, r1, #24
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #24]                        /* Load field from struct */
     sub r1, fp, #28                          /* Load field location */
-    add r1, r1, #8
     push { r0 }
-    ldr r2, [r1]                             /* Load field from struct */
+    ldr r2, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

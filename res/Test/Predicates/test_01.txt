@@ -126,8 +126,7 @@ main:                                        /* Function: main */
     bl sort                                  /* Call sort */
     lsl r2, r3, #2
     sub r0, fp, #20
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     mov sp, fp
     pop { fp, lr }
     bx lr

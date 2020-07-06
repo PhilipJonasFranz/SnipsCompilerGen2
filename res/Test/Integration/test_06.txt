@@ -73,8 +73,7 @@ mult.L7:
     lsl r0, r6, #2
     add r2, r2, r0
     add r0, fp, #28
-    add r0, r0, r2
-    ldr r2, [r0]
+    ldr r2, [r0, r2]
     mul r2, r1, r2
     add r7, r7, r2
     add r8, r8, #1

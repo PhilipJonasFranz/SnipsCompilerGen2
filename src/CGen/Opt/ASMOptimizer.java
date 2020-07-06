@@ -191,6 +191,16 @@ public class ASMOptimizer {
 			 * and rx is not being used until a bx lr
 			 */
 			this.removeUnusedRegistersStrict(body);
+
+			if (!OPT_DONE) {
+				/**
+				 * add r0, fp, #4
+				 * ldr r0, [r0]
+				 * Replace with:
+				 * ldr r0, [fp, #4]
+				 */
+				this.removeIndirectLoadAddressing(body);
+			}
 			
 			/**
 			 * Execute these routines when no other optimization can be made.
@@ -309,6 +319,54 @@ public class ASMOptimizer {
 			return true;
 		}
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	private void removeIndirectLoadAddressing(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMLdr) {
+				ASMLdr ldr = (ASMLdr) body.instructions.get(i);
+				
+				/* Can only work if addressing consists out of single register */
+				if (ldr.op1 == null && ldr.op0 instanceof RegOperand && body.instructions.get(i - 1) instanceof ASMAdd) {
+					REGISTER addr = ((RegOperand) ldr.op0).reg;
+					
+					ASMAdd add = (ASMAdd) body.instructions.get(i - 1);
+					
+					if (add.target.reg == addr && add.target.reg != add.op0.reg) {
+						/* Substitute */
+						ldr.op0 = add.op0;
+						ldr.op1 = add.op1;
+						
+						body.instructions.remove(i - 1);
+						i--;
+						OPT_DONE = true;
+					}
+					else if (add.target.reg == addr) {
+						/* Target of add is same as op0, search for double overwrite so instruction can be safeley removed */
+						boolean clear = true;
+						for (int a = i + 1; a < body.instructions.size(); a++) {
+							if (readsReg(body.instructions.get(a), add.target.reg)) {
+								clear = false;
+								break;
+							}
+							if (overwritesReg(body.instructions.get(a), add.target.reg) && !readsReg(body.instructions.get(a), add.target.reg)) {
+								break;
+							}
+						}
+						
+						if (clear) {
+							/* Substitute */
+							ldr.op0 = add.op0;
+							ldr.op1 = add.op1;
+							
+							body.instructions.remove(i - 1);
+							i--;
+							OPT_DONE = true;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private void removeUnusedRegistersStrict(AsNBody body) {

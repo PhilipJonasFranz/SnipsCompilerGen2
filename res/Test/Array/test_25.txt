@@ -59,8 +59,7 @@ main:                                        /* Function: main */
     lsl r0, r4, #2
     add r2, r2, r0
     ldr r0, .POOL0_main.L0_vec               /* Load data section address */
-    add r0, r0, r2
-    ldr r0, [r0]
+    ldr r0, [r0, r2]
     bx lr
 .POOL0_main.L0_vec: .word vec
     

@@ -214,8 +214,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     pop { r0 }
     str r0, [r1, #8]
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL2_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
@@ -254,38 +253,32 @@ List.get_P2:                                 /* Function: List.get, Provisos: CH
     cmp r4, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b List.get.L7
 List.get.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r5, [r1]                             /* Load field from struct */
+    ldr r5, [r1, #4]                         /* Load field from struct */
 List.get.L3:                                 /* Evaluate condition */
     cmp r4, #0
     beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     b List.get.L7
 List.get.L5: 
 /* Jump to next */
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r5, [r1]                             /* Load field from struct */
+    ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r0, #1
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #8]                         /* Load field from struct */
 List.get.L7: 
     pop { r3, r4, r5 }
     bx lr
@@ -305,8 +298,7 @@ List.get.L7:
 List.size:                                   /* Function: List.size */
     push { r3, r4, r5 }
     lsl r1, r0, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r4, [r1]                             /* Load field from struct */
+    ldr r4, [r1, #4]                         /* Load field from struct */
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 List.size.L1:                                /* Evaluate condition */

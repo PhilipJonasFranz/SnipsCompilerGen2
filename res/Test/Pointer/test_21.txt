@@ -45,9 +45,8 @@ main:                                        /* Function: main */
     str r0, [r1]                             /* Store value to struct field */
     mov r4, #12
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
     push { r4 }                              /* Push declaration on stack, referenced by addressof. */
-    ldr r0, [r1]                             /* Load field from struct */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     mov sp, fp
     bx lr
     

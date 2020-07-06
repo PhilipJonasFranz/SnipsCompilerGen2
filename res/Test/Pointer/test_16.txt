@@ -23,14 +23,12 @@ get:                                         /* Function: get */
     push { r3, fp }
     mov fp, sp
     mov r3, r0
-    add r0, fp, #8
-    ldr r1, [r0]
+    ldr r1, [fp, #8]
     add r0, r1, r3
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
     push { r0 }
-    add r0, fp, #12
-    ldr r1, [r0]
+    ldr r1, [fp, #12]
     add r0, r1, r3
     pop { r1 }
     lsl r0, r0, #2                           /* Convert to bytes */
