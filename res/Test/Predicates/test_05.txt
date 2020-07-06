@@ -25,6 +25,7 @@ main:                                        /* Function: main */
     push { lr }
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_get_P0
+    mov r10, #0
     mov r5, r0
     add lr, pc, #8                           /* Evaluate Expression */
     mov pc, r5

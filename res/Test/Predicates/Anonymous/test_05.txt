@@ -52,6 +52,7 @@ main:                                        /* Function: main */
     push { lr }
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_f
+    mov r10, #0
     mov r1, r0
     mov r0, #10
     bl map                                   /* Call map */

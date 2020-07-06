@@ -1,5 +1,7 @@
 package Imm.ASM.Util.Operands;
 
+import Imm.ASM.Util.Shift;
+
 public class RegOperand extends Operand {
 
 	public enum REGISTER {
@@ -10,6 +12,8 @@ public class RegOperand extends Operand {
 	}
 	
 	public REGISTER reg;
+	
+	public Shift shift;
 	
 	public RegOperand(REGISTER reg) {
 		this.reg = reg;
@@ -50,7 +54,7 @@ public class RegOperand extends Operand {
 	}
 
 	public String toString() {
-		return this.reg.toString().toLowerCase();
+		return this.reg.toString().toLowerCase() + ((this.shift != null)? this.shift.getShiftPostfix() : "");
 	}
 	
 	public static REGISTER convertStringToReg(String reg) {
@@ -78,6 +82,12 @@ public class RegOperand extends Operand {
 				}
 			}
 		}
+	}
+
+	public RegOperand clone() {
+		RegOperand op = new RegOperand(this.reg);
+		if (this.shift != null) op.shift = this.shift.clone();
+		return op;
 	}
 	
 }

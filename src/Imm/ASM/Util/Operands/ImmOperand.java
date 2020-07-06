@@ -11,5 +11,9 @@ public class ImmOperand extends Operand {
 	public String toString() {
 		return "#" + this.value;
 	}
+
+	public ImmOperand clone() {
+		return new ImmOperand(this.value);
+	}
 	
 }

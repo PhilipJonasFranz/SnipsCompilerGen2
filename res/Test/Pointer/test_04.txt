@@ -16,8 +16,7 @@ OUTPUT
     b main
 forEach:                                     /* Function: forEach */
     push { r3, r4 }
-    lsl r0, r1, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    ldr r0, [r10, r1, lsl #2]                /* Load from address */
     pop { r3, r4 }
     bx lr
     

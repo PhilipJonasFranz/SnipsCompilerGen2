@@ -27,5 +27,9 @@ public class PatchableImmOperand extends Operand {
 		
 		return this.value;
 	}
+
+	public PatchableImmOperand clone() {
+		return new PatchableImmOperand(this.dir, this.value);
+	}
 	
 }

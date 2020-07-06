@@ -56,6 +56,7 @@ baz:                                         /* Function: baz */
     add r1, r2, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 foo:                                         /* Function: foo */
@@ -75,6 +76,7 @@ foo:                                         /* Function: foo */
     add r1, r2, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 main:                                        /* Function: main */

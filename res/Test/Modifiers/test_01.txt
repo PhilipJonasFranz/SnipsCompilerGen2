@@ -47,6 +47,7 @@ Test.getter:                                 /* Function: Test.getter */
     add r1, r2, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 main:                                        /* Function: main */

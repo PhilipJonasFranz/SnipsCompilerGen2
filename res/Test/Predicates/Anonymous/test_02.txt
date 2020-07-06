@@ -46,6 +46,7 @@ get:                                         /* Function: get */
     add r1, r2, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 main:                                        /* Function: main */
@@ -53,6 +54,7 @@ main:                                        /* Function: main */
     mov fp, sp
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_get
+    mov r10, #0
     push { r0 }
     ldr r3, [fp, #-4]
 /* Call the predicate */

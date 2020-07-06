@@ -28,11 +28,9 @@ main:                                        /* Function: main */
     lsr r5, r0, #2
     mov r0, r5                               /* Evaluate Expression */
     mov r6, r0
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r1, [r0]                             /* Load from address */
+    ldr r1, [r10, r0, lsl #2]                /* Load from address */
     add r0, r6, #1
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r2, [r0]                             /* Load from address */
+    ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
     mov sp, fp
     bx lr

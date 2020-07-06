@@ -43,6 +43,7 @@ main:                                        /* Function: main */
     mov r4, r0
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_add5_P0
+    mov r10, #0
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
     add lr, pc, #8

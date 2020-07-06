@@ -8,4 +8,6 @@ public abstract class Operand {
 	
 	public abstract String toString();
 	
+	public abstract Operand clone();
+	
 }

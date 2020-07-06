@@ -35,12 +35,15 @@ public class LabelOperand extends Operand {
 		this.label = label;
 	}
 
-	@Override
 	/**
 	 * Return the name of the label.
 	 */
 	public String toString() {
 		return this.label.name;
+	}
+
+	public LabelOperand clone() {
+		return new LabelOperand(this.label);
 	}
 	
 }

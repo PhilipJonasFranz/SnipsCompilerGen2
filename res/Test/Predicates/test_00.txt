@@ -59,10 +59,12 @@ main:                                        /* Function: main */
     beq main.L0
     add r10, pc, #8
     b lambda_add10
+    mov r10, #0
     b main.L1
 main.L0: 
     add r10, pc, #8
     b lambda_add5
+    mov r10, #0
 main.L1: 
     mov r1, r0
     mov r0, r3

@@ -489,7 +489,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * @return
 	 */
 	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
+		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R10, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
 		List<REGISTER> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {

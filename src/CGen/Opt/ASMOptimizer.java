@@ -20,6 +20,7 @@ import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMMvn;
@@ -30,6 +31,8 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Shift;
+import Imm.ASM.Util.Shift.SHIFT;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.Operand;
@@ -191,7 +194,7 @@ public class ASMOptimizer {
 			 * ... <- Do not reassign or read rx
 			 * instruction b <- Assigns to rx
 			 * 
-			 * -> Remove instruction a
+			 * -> Remove instruction 
 			 */
 			this.removeUnusedAssignment(body);
 			
@@ -390,6 +393,8 @@ public class ASMOptimizer {
 				RegOperand op0 = null;
 				Operand op1 = null;
 				
+				Shift shift = null;
+				
 				boolean negate = false;
 				
 				if (body.instructions.get(i - 1) instanceof ASMAdd) {
@@ -415,6 +420,21 @@ public class ASMOptimizer {
 					}
 					else continue;
 				}
+				else if (body.instructions.get(i - 1) instanceof ASMLsl) {
+					/* 
+					 * Will mostly target dereferencing operations. 
+					 * Assumes that R10 is set to 0 at any given time. In most of the cases, this is given.
+					 * In some special cases, like when calling the stack copy routine or the lambda head of a function,
+					 * R10 is set temporary to the pc + 8. R10 is reset to 0 afterwards.
+					 */
+					ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
+					
+					target = lsl.target.reg;
+					op0 = lsl.op0.clone();
+					
+					op1 = lsl.op0.clone();
+					shift = new Shift(SHIFT.LSL, lsl.op1.clone());
+				}
 				else continue;
 				
 				REGISTER addr = ((RegOperand) ldr.op0).reg;
@@ -438,9 +458,20 @@ public class ASMOptimizer {
 				clear |= ldr.target.reg == target;
 				
 				if (clear) {
-					/* Substitute */
-					ldr.op0 = op0;
-					ldr.op1 = op1;
+					if (shift == null) {
+						/* Substitute */
+						ldr.op0 = op0;
+						ldr.op1 = op1;
+					}
+					else {
+						/* Special treatment for shifts */
+						
+						/* Is always 0 */
+						ldr.op0 = new RegOperand(REGISTER.R10);
+						
+						ldr.op1 = op0;
+						op0.shift = shift;
+					}
 					
 					if (negate) ldr.subFromBase = true;
 					
@@ -458,7 +489,7 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
 				REGISTER reg = mov.target.reg;
 				
-				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
+				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.R10 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
 					boolean used = false;
 					for (int a = i + 1; a < body.instructions.size(); a++) {
 						if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BX) break;

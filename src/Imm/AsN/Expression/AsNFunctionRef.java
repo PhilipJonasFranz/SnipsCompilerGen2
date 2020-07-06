@@ -8,6 +8,7 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
@@ -29,6 +30,9 @@ public class AsNFunctionRef extends AsNExpression {
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(new ASMLabel(label)));
 		branch.optFlags.add(OPT_FLAG.SYS_JMP);
 		ref.instructions.add(branch);
+		
+		/* Reset R10 */
+		ref.instructions.add(new ASMMov(new RegOperand(REGISTER.R10), new ImmOperand(0)));
 		
 		return ref;
 	}

@@ -379,6 +379,10 @@ public class AsNBody extends AsNNode {
 		 */
 		branch.optFlags.add(OPT_FLAG.SYS_JMP);
 		node.instructions.add(branch);
+		
+		/* Move 0 into R10 */
+		ASMMov resetR10 = new ASMMov(new RegOperand(REGISTER.R10), new ImmOperand(0));
+		node.instructions.add(resetR10);
 	}
 	
 	public List<ASMInstruction> buildStackCopyRoutine() {
