@@ -200,6 +200,8 @@ public class ASMOptimizer {
 			 * and rx is not being used until a bx lr
 			 */
 			this.removeUnusedRegistersStrict(body);
+			
+			this.multPrecalc(body);
 
 			if (!OPT_DONE) {
 				/**
@@ -330,6 +332,53 @@ public class ASMOptimizer {
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
 	}
 	
+	private void multPrecalc(AsNBody body) {
+		for (int i = 2; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMMult) {
+				ASMMult mul = (ASMMult) body.instructions.get(i);
+				
+				REGISTER mReg0 = mul.op0.reg;
+				REGISTER mReg1 = mul.op1.reg;
+				
+				ImmOperand op0 = null;
+				ImmOperand op1 = null;
+				
+				if (RegOperand.toInt(mReg0) < 3 && RegOperand.toInt(mReg1) < 3) {
+					if (body.instructions.get(i - 2) instanceof ASMMov) {
+						ASMMov mov = (ASMMov) body.instructions.get(i - 2);
+						if (RegOperand.toInt(mov.target.reg) < 3 && mov.op1 instanceof ImmOperand) {
+							if (mov.target.reg == mReg0) op0 = (ImmOperand) mov.op1;
+							if (mov.target.reg == mReg1) op1 = (ImmOperand) mov.op1;
+						}
+					}
+					
+					if (body.instructions.get(i - 1) instanceof ASMMov) {
+						ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+						if (RegOperand.toInt(mov.target.reg) < 3 && mov.op1 instanceof ImmOperand) {
+							if (mov.target.reg == mReg0) op0 = (ImmOperand) mov.op1;
+							if (mov.target.reg == mReg1) op1 = (ImmOperand) mov.op1;
+						}
+					}
+					
+					if (op0 != null && op1 != null) {
+						int r = op0.value * op1.value;
+						
+						/* Can only move a value 0 <= r <= 255 */
+						if (r <= 255) {
+							body.instructions.set(i, new ASMMov(new RegOperand(mul.target.reg), new ImmOperand(r)));
+							
+							/* Remove two movs */
+							body.instructions.remove(i - 2);
+							body.instructions.remove(i - 2);
+							
+							OPT_DONE = true;
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	private void removeIndirectMemOpAddressing(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMMemOp) {
@@ -409,7 +458,7 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
 				REGISTER reg = mov.target.reg;
 				
-				if (reg != REGISTER.R0 && reg != REGISTER.R1 && reg != REGISTER.R2 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
+				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
 					boolean used = false;
 					for (int a = i + 1; a < body.instructions.size(); a++) {
 						if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BX) break;
@@ -449,7 +498,7 @@ public class ASMOptimizer {
 			
 			if (reg == null) continue;
 			
-			if (reg == REGISTER.R0 || reg == REGISTER.R1 || reg == REGISTER.R2) {
+			if (RegOperand.toInt(reg) < 3) {
 				for (int a = i + 1; a < body.instructions.size(); a++) {
 					ASMInstruction ins = body.instructions.get(a);
 					
@@ -786,7 +835,7 @@ public class ASMOptimizer {
 					REGISTER reg = ((RegOperand) mov.op1).reg;
 					
 					/* Only perform action if target is a operand register. */
-					if (!(reg == REGISTER.R0 || reg == REGISTER.R1 || reg == REGISTER.R2)) continue;
+					if (RegOperand.toInt(reg) > 2) continue;
 					
 					if (body.instructions.get(i - 1) instanceof ASMLdrStack) {
 						ASMLdrStack ldr = (ASMLdrStack) body.instructions.get(i - 1);

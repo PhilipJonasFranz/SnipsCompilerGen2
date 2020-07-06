@@ -28,6 +28,26 @@ public class RegOperand extends Operand {
 		else reg = REGISTER.valueOf("R" + reg0);
 		return reg;
 	}
+	
+	public static int toInt(REGISTER reg) {
+		if (reg == REGISTER.R0) return 0;
+		if (reg == REGISTER.R1) return 1;
+		if (reg == REGISTER.R2) return 2;
+		if (reg == REGISTER.R3) return 3;
+		if (reg == REGISTER.R4) return 4;
+		if (reg == REGISTER.R5) return 5;
+		if (reg == REGISTER.R6) return 6;
+		if (reg == REGISTER.R7) return 7;
+		if (reg == REGISTER.R8) return 8;
+		if (reg == REGISTER.R9) return 9;
+		if (reg == REGISTER.R10) return 10;
+		if (reg == REGISTER.FP) return 11;
+		if (reg == REGISTER.R12) return 12;
+		if (reg == REGISTER.SP) return 13;
+		if (reg == REGISTER.LR) return 14;
+		if (reg == REGISTER.PC) return 15;
+		return -1;
+	}
 
 	public String toString() {
 		return this.reg.toString().toLowerCase();

@@ -17,14 +17,7 @@ main:                                        /* Function: main */
     mov r0, #2
     mov r1, #1
     push { r1, r0 }
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    sub r0, fp, #16
-    ldr r1, [r0, r2]
+    ldr r1, [fp, #-4]
     add r0, r1, r3
     mov sp, fp
     bx lr

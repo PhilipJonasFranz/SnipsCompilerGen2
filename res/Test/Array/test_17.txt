@@ -48,18 +48,8 @@ main:                                        /* Function: main */
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #7
     push { r1, r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #24
-    mul r0, r0, r1
-    add r2, r2, r0
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
     pop { r0 }
-    sub r1, fp, #48                          /* Start of structure in stack */
-    add r1, r1, r2                           /* Start of sub structure in stack */
+    sub r1, fp, #40                          /* Start of structure in stack */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]

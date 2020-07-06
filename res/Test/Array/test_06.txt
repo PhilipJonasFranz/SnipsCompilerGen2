@@ -30,25 +30,9 @@ main:                                        /* Function: main */
     mov r1, #2
     mov r2, #1
     push { r2, r1, r0 }
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
-    add r2, r2, #4
-    sub r0, fp, #16
-    ldr r1, [r0, r2]
-    add r0, r1, r3
-    mov r2, #0                               /* Calculate offset of sub structure */
-    push { r0 }
-    mov r0, #2
-    mov r1, #12
-    mul r0, r0, r1
-    pop { r1 }
-    add r2, r2, r0
-    add r2, r2, #8
-    sub r0, fp, #52
-    ldr r2, [r0, r2]
+    ldr r1, [fp, #-4]
+    add r1, r1, r3
+    ldr r2, [fp, #-20]
     add r0, r1, r2
     mov sp, fp
     bx lr

@@ -55,11 +55,7 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     pop { r1, r2 }
     bl set                                   /* Call set */
-    mov r2, #0                               /* Evaluate Expression */
-    mov r0, #1
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
+    mov r2, #8
     lsl r0, r4, #2
     add r2, r2, r0
     sub r0, fp, #16

@@ -30,16 +30,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #2
     push { r0 }
-    sub r1, fp, #20                          /* Evaluate Expression */
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #1
-    push { r1 }
-    mov r1, #8
-    mul r0, r0, r1
-    pop { r1 }
-    add r2, r2, r0
-    add r1, r1, r2
-    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r0, [fp, #-8]                        /* Load field from struct */
     mov sp, fp
     bx lr
     

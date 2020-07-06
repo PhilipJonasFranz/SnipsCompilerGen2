@@ -164,12 +164,6 @@ main:                                        /* Function: main */
     str r0, [r1, #28]
     mov r0, #5                               /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
-    mov r2, #0
-    push { r0 }                              /* Load field location */
-    mov r0, #4
-    mul r2, r2, r0
-    pop { r0 }
-    add r1, r1, r2
     str r0, [r1, #8]                         /* Store value to struct field */
     lsl r1, r5, #2                           /* Convert to bytes */
     lsl r2, r4, #2

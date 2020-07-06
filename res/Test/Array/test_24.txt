@@ -40,14 +40,8 @@ main:                                        /* Function: main */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #1
     push { r1, r0 }
-    mov r2, #0                               /* Calculate offset of sub structure */
-    mov r0, #0
-    mov r1, #8
-    mul r0, r0, r1
-    add r2, r2, r0
     pop { r0 }
     ldr r1, .POOL0_main.L0_vec               /* Load data section address */
-    add r1, r1, r2
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
