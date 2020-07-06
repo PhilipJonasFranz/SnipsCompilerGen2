@@ -145,8 +145,7 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     mov r0, #5                               /* Evaluate Expression */
     lsl r1, r4, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
     lsl r1, r4, #2                           /* Convert to bytes */
     add r1, r1, #4
     lsl r2, r3, #2

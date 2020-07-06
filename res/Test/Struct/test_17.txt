@@ -45,8 +45,7 @@ main:                                        /* Function: main */
     add r2, r2, r0
     pop { r0 }
     add r1, r1, r2
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
     sub r1, fp, #32                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r1 }

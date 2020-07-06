@@ -199,7 +199,7 @@ public class ASMOptimizer {
 				 * Replace with:
 				 * ldr r0, [fp, #4]
 				 */
-				this.removeIndirectLoadAddressing(body);
+				this.removeIndirectMemOpAddressing(body);
 			}
 			
 			/**
@@ -321,10 +321,10 @@ public class ASMOptimizer {
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
 	}
 	
-	private void removeIndirectLoadAddressing(AsNBody body) {
+	private void removeIndirectMemOpAddressing(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
-			if (body.instructions.get(i) instanceof ASMLdr) {
-				ASMLdr ldr = (ASMLdr) body.instructions.get(i);
+			if (body.instructions.get(i) instanceof ASMMemOp) {
+				ASMMemOp ldr = (ASMMemOp) body.instructions.get(i);
 				
 				/* Can only work if addressing consists out of single register */
 				if (ldr.op1 == null && ldr.op0 instanceof RegOperand && body.instructions.get(i - 1) instanceof ASMAdd) {

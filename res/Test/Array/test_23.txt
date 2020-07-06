@@ -47,8 +47,7 @@ main:                                        /* Function: main */
     add r2, r2, r0
     add r2, r2, #4
     ldr r0, .POOL0_main.L0_vec               /* Load data section address */
-    add r0, r0, r2
-    str r1, [r0]
+    str r1, [r0, r2]
     mov r2, #0                               /* Evaluate Expression */
     mov r1, #8
     mul r0, r3, r1

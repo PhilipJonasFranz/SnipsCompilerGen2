@@ -22,8 +22,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #8                               /* Evaluate Expression */
     sub r1, fp, #12
-    add r1, r1, #4
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #4]                         /* Store value to struct field */
     sub r1, fp, #12                          /* Evaluate Expression */
     ldr r0, [r1, #4]                         /* Load field from struct */
     sub r1, fp, #12                          /* Load field location */

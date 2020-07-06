@@ -220,12 +220,10 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     bne List.add.L1
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
     b List.add.L0
 List.add.L1: 
     mov r0, r5                               /* Evaluate Expression */
@@ -233,8 +231,7 @@ List.add.L1:
     add r1, r1, #8
     ldr r1, [r1]
     lsl r1, r1, #2
-    add r1, r1, #4
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8

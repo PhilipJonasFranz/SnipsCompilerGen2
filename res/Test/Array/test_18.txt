@@ -47,8 +47,7 @@ foo:                                         /* Function: foo */
     add r2, r2, r0
     add r2, r2, #4
     add r0, fp, #16
-    add r0, r0, r2
-    str r1, [r0]
+    str r1, [r0, r2]
     mov r2, #0                               /* Evaluate Expression */
     mov r1, #24
     mul r0, r3, r1

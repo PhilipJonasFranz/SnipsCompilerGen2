@@ -361,13 +361,11 @@ Queue.enqueue.L0:
     pop { r1 }
     bl __op_mod                              /* Call __op_mod */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #20
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #20]                        /* Store value to struct field */
 /* Set is empty flag and return */
     mov r0, #0                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #28
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #28]                        /* Store value to struct field */
 Queue.enqueue.L2: 
     mov sp, fp
     pop { r3, r4, fp, lr }
@@ -419,8 +417,7 @@ Queue.dequeue.L0:
     pop { r1 }
     bl __op_mod                              /* Call __op_mod */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #24
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #24]                        /* Store value to struct field */
 /* If tail now is equal to head the queue must be empty */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #24]                        /* Load field from struct */
@@ -431,8 +428,7 @@ Queue.dequeue.L0:
     bne Queue.dequeue.L2
     mov r0, #1                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #28
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #28]                        /* Store value to struct field */
 Queue.dequeue.L2: 
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
