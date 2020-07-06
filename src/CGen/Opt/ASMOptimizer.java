@@ -32,6 +32,7 @@ import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
+import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AsN.AsNBody;
@@ -67,6 +68,14 @@ public class ASMOptimizer {
 			 * add r0, r0, #6
 			 */
 			this.defragmentAdditions(body);
+			
+			/**
+			 * sub r0, fp, #8
+			 * add r0, r0, #4
+			 * Replace with:
+			 * sub r0, fp, #4
+			 */
+			this.defragmentDeltas(body);
 			
 			/**
 			 * mov r0, #10
@@ -326,44 +335,50 @@ public class ASMOptimizer {
 			if (body.instructions.get(i) instanceof ASMMemOp) {
 				ASMMemOp ldr = (ASMMemOp) body.instructions.get(i);
 				
-				/* Can only work if addressing consists out of single register */
-				if (ldr.op1 == null && ldr.op0 instanceof RegOperand && body.instructions.get(i - 1) instanceof ASMAdd) {
-					REGISTER addr = ((RegOperand) ldr.op0).reg;
-					
+				if (ldr.op1 != null || !(ldr.op0 instanceof RegOperand)) continue;
+				
+				REGISTER target = null;
+				RegOperand op0 = null;
+				Operand op1 = null;
+				
+				boolean negate = false;
+				
+				if (body.instructions.get(i - 1) instanceof ASMAdd) {
 					ASMAdd add = (ASMAdd) body.instructions.get(i - 1);
 					
-					if (add.target.reg == addr && add.target.reg != add.op0.reg) {
-						/* Substitute */
-						ldr.op0 = add.op0;
-						ldr.op1 = add.op1;
-						
-						body.instructions.remove(i - 1);
-						i--;
-						OPT_DONE = true;
-					}
-					else if (add.target.reg == addr) {
-						/* Target of add is same as op0, search for double overwrite so instruction can be safeley removed */
-						boolean clear = true;
-						for (int a = i + 1; a < body.instructions.size(); a++) {
-							if (readsReg(body.instructions.get(a), add.target.reg)) {
-								clear = false;
-								break;
-							}
-							if (overwritesReg(body.instructions.get(a), add.target.reg) && !readsReg(body.instructions.get(a), add.target.reg)) {
-								break;
-							}
+					target = add.target.reg;
+					op0 = add.op0;
+					op1 = add.op1;
+				}
+				else continue;
+				
+				REGISTER addr = ((RegOperand) ldr.op0).reg;
+					
+				boolean clear = (target == addr && target != op0.reg);
+				
+				if (!clear && target == addr) {
+					clear = true;
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						if (readsReg(body.instructions.get(a), target)) {
+							clear = false;
+							break;
 						}
-						
-						if (clear) {
-							/* Substitute */
-							ldr.op0 = add.op0;
-							ldr.op1 = add.op1;
-							
-							body.instructions.remove(i - 1);
-							i--;
-							OPT_DONE = true;
+						if (overwritesReg(body.instructions.get(a), target) && !readsReg(body.instructions.get(a), target)) {
+							break;
 						}
 					}
+				}
+				
+				if (clear) {
+					/* Substitute */
+					ldr.op0 = op0;
+					ldr.op1 = op1;
+					
+					if (negate) ldr.subFromBase = true;
+					
+					body.instructions.remove(i - 1);
+					i--;
+					OPT_DONE = true;
 				}
 			}
 		}
@@ -505,6 +520,28 @@ public class ASMOptimizer {
 					body.instructions.remove(i);
 					i--;
 					OPT_DONE = true;
+				}
+			}
+		}
+	}
+	
+	private void defragmentDeltas(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMSub) {
+				ASMSub sub = (ASMSub) body.instructions.get(i - 1);
+				ASMAdd add = (ASMAdd) body.instructions.get(i);
+				
+				if (sub.target.reg == add.target.reg && add.target.reg == add.op0.reg && 
+						sub.op1 instanceof ImmOperand && add.op1 instanceof ImmOperand) {
+					ImmOperand subOp = (ImmOperand) sub.op1;
+					ImmOperand addOp = (ImmOperand) add.op1;
+					
+					if (subOp.value >= addOp.value) {
+						subOp.value -= addOp.value;
+						body.instructions.remove(i);
+						i--;
+						OPT_DONE = true;
+					}
 				}
 			}
 		}

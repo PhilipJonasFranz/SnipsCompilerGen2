@@ -27,8 +27,8 @@ main:                                        /* Function: main */
     push { r1, r0 }
     sub r0, fp, #16
     ldr r1, [r0]
-    sub r0, fp, #16
-    ldr r2, [r0, #4]
+    sub r0, fp, #12
+    ldr r2, [r0]
     add r0, r1, r2
     mov sp, fp
     bx lr

@@ -91,12 +91,12 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     ldr r2, [r0]
     add r1, r1, r2
-    sub r0, fp, #16
-    ldr r2, [r0, #4]
+    sub r0, fp, #12
+    ldr r2, [r0]
     add r0, r1, r2
-    sub r1, fp, #28                          /* Load field location */
+    sub r1, fp, #20                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #8]                         /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

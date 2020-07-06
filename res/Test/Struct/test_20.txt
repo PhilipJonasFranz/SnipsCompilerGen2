@@ -23,13 +23,12 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    sub r1, fp, #16                          /* Evaluate Expression */
-    add r1, r1, #8
+    sub r1, fp, #8                           /* Evaluate Expression */
     lsl r2, r3, #2
     ldr r0, [r1, r2]                         /* Load field from struct */
-    sub r1, fp, #16                          /* Load field location */
+    sub r1, fp, #12                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #4]                         /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

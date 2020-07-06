@@ -35,10 +35,9 @@ main:                                        /* Function: main */
     ldr r1, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
     ldr r1, [r1]
     add r0, r1, #8
-    sub r1, fp, #8
-    str r0, [r1, #4]                         /* Store value to struct field */
-    sub r1, fp, #8                           /* Evaluate Expression */
-    add r1, r1, #4
+    sub r1, fp, #4
+    str r0, [r1]                             /* Store value to struct field */
+    sub r1, fp, #4                           /* Evaluate Expression */
     ldr r1, [r1]                             /* Load field from struct */
     ldr r2, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
     ldr r2, [r2]

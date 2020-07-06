@@ -566,16 +566,16 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #5
     push { r0 }
-    sub r1, fp, #32                          /* Evaluate Expression */
-    ldr r0, [r1, #8]                         /* Load field from struct */
-    sub r1, fp, #32                          /* Load field location */
+    sub r1, fp, #24                          /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
+    sub r1, fp, #20                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #12]                        /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
-    sub r1, fp, #32                          /* Load field location */
+    sub r1, fp, #16                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #16]                        /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     push { r0 }
@@ -588,8 +588,8 @@ main:                                        /* Function: main */
     mov r0, #5
     push { r0 }
 /* Set item at index 1 to 5 */
-    sub r1, fp, #40                          /* Load parameters */
-    ldr r0, [r1, #4]                         /* Load field from struct */
+    sub r1, fp, #36                          /* Load parameters */
+    ldr r0, [r1]                             /* Load field from struct */
     push { r0 }
     mov r0, #1
     lsl r1, r4, #2                           /* Convert to bytes */
@@ -600,20 +600,19 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     bl List.create_P0                        /* Call List.create */
     mov r5, r0
-    sub r1, fp, #12                          /* Load parameters */
-    ldr r1, [r1, #4]                         /* Load field from struct */
+    sub r1, fp, #8                           /* Load parameters */
+    ldr r1, [r1]                             /* Load field from struct */
     mov r0, r5
     bl List.add_P1                           /* Call List.add */
-    sub r1, fp, #12                          /* Load parameters */
-    ldr r1, [r1, #8]                         /* Load field from struct */
+    sub r1, fp, #4                           /* Load parameters */
+    ldr r1, [r1]                             /* Load field from struct */
     mov r0, r5
     bl List.add_P1                           /* Call List.add */
     mov r1, #0
     mov r0, r5
     bl List.remove                           /* Call List.remove */
     mov r0, #1                               /* Evaluate Expression */
-    sub r1, fp, #56                          /* Load field location */
-    add r1, r1, #4
+    sub r1, fp, #52                          /* Load field location */
     push { r0 }
     ldr r1, [r1]
     lsl r1, r1, #2
@@ -626,9 +625,9 @@ main:                                        /* Function: main */
     bl List.get_P2                           /* Call List.get */
     pop { r1 }
     add r0, r1, r0
-    sub r1, fp, #56                          /* Load field location */
+    sub r1, fp, #44                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #12]                        /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

@@ -273,8 +273,8 @@ main.L0:
     mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
-    sub r1, fp, #8                           /* Evaluate Expression */
-    ldr r5, [r1, #4]                         /* Load field from struct */
+    sub r1, fp, #4                           /* Evaluate Expression */
+    ldr r5, [r1]                             /* Load field from struct */
     add sp, sp, #8
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */

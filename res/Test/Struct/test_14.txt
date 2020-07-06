@@ -42,21 +42,21 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    sub r1, fp, #16                          /* Evaluate Expression */
-    ldr r0, [r1, #4]                         /* Load field from struct */
+    sub r1, fp, #12                          /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     cmp r0, #0
     beq main.L0
-    sub r1, fp, #36                          /* Load field location */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    sub r1, fp, #36                          /* Load field location */
+    sub r1, fp, #24                          /* Load field location */
+    ldr r0, [r1]                             /* Load field from struct */
+    sub r1, fp, #20                          /* Load field location */
     push { r0 }
-    ldr r2, [r1, #16]                        /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     b main.L1
 main.L0: 
-    sub r1, fp, #8                           /* Load field location */
-    ldr r0, [r1, #4]                         /* Load field from struct */
+    sub r1, fp, #4                           /* Load field location */
+    ldr r0, [r1]                             /* Load field from struct */
 main.L1: 
     mov sp, fp
     bx lr

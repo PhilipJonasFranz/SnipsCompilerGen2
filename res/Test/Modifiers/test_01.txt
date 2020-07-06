@@ -53,11 +53,11 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     bl Test.getter                           /* Evaluate Expression */
-    sub r1, fp, #12                          /* Evaluate Expression */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    sub r1, fp, #12                          /* Load field location */
+    sub r1, fp, #8                           /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
+    sub r1, fp, #4                           /* Load field location */
     push { r0 }
-    ldr r2, [r1, #8]                         /* Load field from struct */
+    ldr r2, [r1]                             /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp

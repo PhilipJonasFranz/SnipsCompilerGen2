@@ -34,7 +34,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    sub r1, fp, #16                          /* Evaluate Expression */
-    ldr r0, [r1, #12]                        /* Load field from struct */
+    sub r1, fp, #4                           /* Evaluate Expression */
+    ldr r0, [r1]                             /* Load field from struct */
     bx lr
     

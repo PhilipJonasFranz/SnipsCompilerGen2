@@ -47,8 +47,7 @@ main:                                        /* Function: main */
     mov r0, #2
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
-    sub r1, fp, #44                          /* Load field location */
-    add r1, r1, #4
+    sub r1, fp, #40                          /* Load field location */
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #0
@@ -64,8 +63,7 @@ main:                                        /* Function: main */
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    sub r1, fp, #44                          /* Evaluate Expression */
-    add r1, r1, #4
+    sub r1, fp, #40                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
     mov r0, #0
     push { r1 }
@@ -79,8 +77,7 @@ main:                                        /* Function: main */
     add r0, r1, r3
     lsl r0, r0, #2                           /* Convert to bytes */
     ldr r0, [r0]                             /* Load from address */
-    sub r1, fp, #44                          /* Load field location */
-    add r1, r1, #4
+    sub r1, fp, #40                          /* Load field location */
     mov r2, #0                               /* Calculate offset of sub structure */
     push { r0 }
     mov r0, #1

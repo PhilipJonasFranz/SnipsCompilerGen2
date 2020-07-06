@@ -36,12 +36,11 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #2
     push { r0 }
-    sub r1, fp, #12                          /* Evaluate Expression */
-    add r0, r1, #4
+    sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, #20                              /* Evaluate Expression */
-    sub r1, fp, #12
-    str r0, [r1, #8]                         /* Store value to struct field */
+    sub r1, fp, #4
+    str r0, [r1]                             /* Store value to struct field */
     mov r4, #12
     lsl r1, r3, #2                           /* Convert to bytes */
     push { r4 }                              /* Push declaration on stack, referenced by addressof. */
