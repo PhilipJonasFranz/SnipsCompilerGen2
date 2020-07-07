@@ -59,10 +59,8 @@ __op_div.L2:
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3 }
     mov r2, #4
     mul r0, r0, r2
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */

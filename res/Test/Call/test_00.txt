@@ -14,9 +14,7 @@ OUTPUT
 /* --test_00.txt */
     b main
 foo:                                         /* Function: foo */
-    push { r3 }
     mov r0, #10                              /* Evaluate Expression */
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */

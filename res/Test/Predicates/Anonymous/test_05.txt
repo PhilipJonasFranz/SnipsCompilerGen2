@@ -30,11 +30,9 @@ lambda_f:                                    /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 f:                                           /* Function: f */
-    push { r3 }
     mul r0, r0, r0
     ldr r1, .POOL0_main.L0_r
     str r0, [r1]
-    pop { r3 }
     bx lr
 .POOL0_main.L0_r: .word r
     

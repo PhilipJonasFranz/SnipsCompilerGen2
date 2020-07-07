@@ -10,4 +10,6 @@ public abstract class Operand {
 	
 	public abstract Operand clone();
 	
+	public abstract boolean equals(Operand operand);
+	
 }

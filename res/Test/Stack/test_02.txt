@@ -16,9 +16,7 @@ OUTPUT
 /* --test_02.txt */
     b main
 foo:                                         /* Function: foo */
-    push { r3, r4 }
     mul r0, r0, r1
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */

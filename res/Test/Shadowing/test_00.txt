@@ -20,8 +20,6 @@ x: .word 10
 .text
     b main
 get:                                         /* Function: get */
-    push { r3 }
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */

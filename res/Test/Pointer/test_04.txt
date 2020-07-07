@@ -15,9 +15,7 @@ OUTPUT
 /* --test_04.txt */
     b main
 forEach:                                     /* Function: forEach */
-    push { r3, r4 }
     ldr r0, [r10, r1, lsl #2]                /* Load from address */
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */

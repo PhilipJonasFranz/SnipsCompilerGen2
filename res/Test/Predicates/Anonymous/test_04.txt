@@ -24,9 +24,7 @@ lambda_f:                                    /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 f:                                           /* Function: f */
-    push { r3 }
     mul r0, r0, r0
-    pop { r3 }
     bx lr
     
 map:                                         /* Function: map */

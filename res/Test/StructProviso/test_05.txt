@@ -125,10 +125,10 @@ resv.L18:
 .POOL0_main.L1_HEAP_START: .word HEAP_START
     
 insert_P0:                                   /* Function: insert, Provisos: INT */
-    push { r3, r4, r5, lr }
+    push { lr }
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    pop { r3, r4, r5, lr }
+    pop { lr }
     bx lr
     
 main:                                        /* Function: main */

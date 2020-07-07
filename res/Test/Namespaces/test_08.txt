@@ -12,10 +12,8 @@ OUTPUT
 /* --test_08.txt */
     b main
 Test.foo:                                    /* Function: Test.foo */
-    push { r3 }
     mov r2, #4
     mul r0, r0, r2
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */

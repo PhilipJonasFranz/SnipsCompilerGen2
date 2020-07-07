@@ -36,6 +36,8 @@ import Imm.ASM.Util.Shift.SHIFT;
 import Imm.ASM.Util.Operands.ImmOperand;
 import Imm.ASM.Util.Operands.LabelOperand;
 import Imm.ASM.Util.Operands.Operand;
+import Imm.ASM.Util.Operands.PatchableImmOperand;
+import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AsN.AsNBody;
@@ -234,6 +236,15 @@ public class ASMOptimizer {
 				 */
 				this.pushPopRelocation(body);
 			}
+			
+			if (!OPT_DONE) {
+				/**
+				 * Checks through all function bodies and removes the pushed/popped regs 
+				 * at the function start/end, which are strictly not used in the function
+				 * body.
+				 */
+				this.removeFuncCleanStrict(body);
+			}
 		}
 		
 		/* Filter duplicate empty lines */
@@ -333,6 +344,110 @@ public class ASMOptimizer {
 			return true;
 		}
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	public void patchFramePointerAddressing(List<ASMInstruction> body, int sub) {
+		for (ASMInstruction ins : body) {
+			if (ins instanceof ASMStackOp) {
+				ASMStackOp stackOp = (ASMStackOp) ins;
+				
+				if (stackOp.op0 != null && stackOp.op0.reg == REGISTER.FP) {
+					if (stackOp.op1 instanceof ImmOperand && ((ImmOperand) stackOp.op1).patchable != null) {
+						PatchableImmOperand op = ((ImmOperand) stackOp.op1).patchable;
+						
+						/* Patch the offset for parameters because they are located under the pushed regs,
+						 * dont patch local data since its located above the pushed regs.
+						 */
+						if (op.dir == PATCH_DIR.UP) {
+							((ImmOperand) stackOp.op1).value -= sub;
+						}
+					}
+				}
+			}
+			else if (ins instanceof ASMBinaryData) {
+				ASMBinaryData binary = (ASMBinaryData) ins;
+				
+				if (binary.op0 != null && binary.op0.reg == REGISTER.FP) {
+					if (binary.op1 instanceof ImmOperand && ((ImmOperand) binary.op1).patchable != null) {
+						PatchableImmOperand op = ((ImmOperand) binary.op1).patchable;
+						
+						if (op.dir == PATCH_DIR.UP) {
+							((ImmOperand) binary.op1).value -= sub;
+						}
+					}
+				}
+			}
+			else if (ins instanceof ASMMemOp) {
+				ASMMemOp mem = (ASMMemOp) ins;
+				
+				if (mem.op0 != null && mem.op0 instanceof RegOperand && ((RegOperand) mem.op0).reg == REGISTER.FP) {
+					if (mem.op1 instanceof ImmOperand && ((ImmOperand) mem.op1).patchable != null) {
+						PatchableImmOperand op = ((ImmOperand) mem.op1).patchable;
+						
+						if (op.dir == PATCH_DIR.UP) {
+							((ImmOperand) mem.op1).value -= sub;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void removeFuncCleanStrict(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack && body.instructions.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				boolean done = false;
+				List<ASMInstruction> ins = new ArrayList();
+				
+				if (push.popCounterpart != null) {
+					ASMPopStack pop = push.popCounterpart;
+					
+					int sub = 0;
+					
+					for (int k = i + 1; k < body.instructions.indexOf(push.popCounterpart) - 1; k++) ins.add(body.instructions.get(k));
+					
+					/* Check betweeen interval */
+					for (int x = 0; x < push.operands.size(); x++) {
+						RegOperand reg = push.operands.get(x);
+						
+						/* Only for regular registers */
+						if (RegOperand.toInt(reg.reg) < 10) {
+							
+							/* Check if register was strictly not used */
+							boolean regInteraction = false;
+							for (int k = i + 1; k < body.instructions.indexOf(push.popCounterpart) - 1; k++) 
+								regInteraction |= readsReg(body.instructions.get(k), reg.reg) || overwritesReg(body.instructions.get(k), reg.reg);
+							
+							if (!regInteraction) {
+								push.operands.remove(x);
+								pop.operands.remove(x);
+								
+								sub += 4;
+								
+								x--;
+								OPT_DONE = true;
+								done = true;
+							}
+						}
+					}
+					
+					/* Jump forward */
+					i = body.instructions.indexOf(push.popCounterpart);
+					
+					if (push.operands.isEmpty()) {
+						body.instructions.remove(push);
+						body.instructions.remove(pop);
+						OPT_DONE = true;
+						
+						i--;
+					}
+					
+					if (done) patchFramePointerAddressing(ins, sub);
+				}
+			}
+		}
 	}
 	
 	private void multPrecalc(AsNBody body) {
@@ -552,7 +667,7 @@ public class ASMOptimizer {
 			if (body.instructions.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
 				
-				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !push.optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
 					
 					body.instructions.remove(i);
 					

@@ -35,7 +35,7 @@ public abstract class ASMInstruction {
 		 */
 		SYS_JMP,
 		
-		FUNC_CLEAN;
+		FUNC_CLEAN, STRUCT_INIT;
 	}
 	
 	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */

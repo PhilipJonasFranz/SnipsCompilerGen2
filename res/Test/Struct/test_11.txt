@@ -127,10 +127,10 @@ resv.L18:
 .POOL0_main.L1_HEAP_START: .word HEAP_START
     
 create_P0:                                   /* Function: create, Provisos: INT[2] */
-    push { r3, lr }
+    push { lr }
     mov r0, #6                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    pop { r3, lr }
+    pop { lr }
     bx lr
     
 main:                                        /* Function: main */

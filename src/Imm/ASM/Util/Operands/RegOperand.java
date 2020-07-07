@@ -89,5 +89,21 @@ public class RegOperand extends Operand {
 		if (this.shift != null) op.shift = this.shift.clone();
 		return op;
 	}
+
+	public boolean equals(Operand operand) {
+		if (!(operand instanceof RegOperand)) return false;
+		else {
+			RegOperand op = (RegOperand) operand;
+			if (this.shift != null) {
+				if (op.shift == null) return false;
+				else {
+					if (op.shift.distance != this.shift.distance || op.shift.shift != this.shift.shift) return false;
+				}
+			}
+			else if (this.shift != null) return false;
+			
+			return this.reg == op.reg;
+		}
+	}
 	
 }

@@ -1,5 +1,6 @@
 package Imm.ASM.Util.Operands.Memory;
 
+import Imm.ASM.Util.Operands.Operand;
 import Imm.AST.Expression.ArrayInit;
 
 public class MemorySkipOperand extends MemoryOperand {
@@ -17,6 +18,13 @@ public class MemorySkipOperand extends MemoryOperand {
 
 	public MemoryOperand clone() {
 		return new MemorySkipOperand(this.init);
+	}
+
+	public boolean equals(Operand operand) {
+		if (!(operand instanceof MemorySkipOperand)) return false;
+		else {
+			return ((MemorySkipOperand) operand).init.equals(this.init);
+		}
 	}
 	
 }

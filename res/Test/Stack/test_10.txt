@@ -44,9 +44,7 @@ bar:                                         /* Function: bar */
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, r4 }
     add r0, r1, r0
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */

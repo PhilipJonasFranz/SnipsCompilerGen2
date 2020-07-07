@@ -15,6 +15,8 @@ public class ASMPushStack extends ASMInstruction {
 	/** The list of operands that are pushed in the order of the list. */
 	public List<RegOperand>operands;
 	
+	public ASMPopStack popCounterpart;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public ASMPushStack(RegOperand...operands) {

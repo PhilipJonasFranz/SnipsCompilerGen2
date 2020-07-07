@@ -16,9 +16,7 @@ OUTPUT
 /* --test_04.txt */
     b main
 baz:                                         /* Function: baz */
-    push { r3 }
     lsl r0, r0, #1
-    pop { r3 }
     bx lr
     
 foo:                                         /* Function: foo */

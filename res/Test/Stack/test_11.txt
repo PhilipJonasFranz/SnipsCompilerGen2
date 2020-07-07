@@ -33,18 +33,18 @@ OUTPUT
 /* --test_11.txt */
     b main
 bar:                                         /* Function: bar */
-    push { r3, r4, r5, fp }
+    push { r5, fp }
     mov fp, sp
     mov r5, r2
     mul r0, r0, r1
     mov r1, r5
     push { r0 }
-    ldr r2, [fp, #16]
+    ldr r2, [fp, #8]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { r3, r4, r5, fp }
+    pop { r5, fp }
     add sp, sp, #4
     bx lr
     
@@ -66,9 +66,9 @@ fooRec.L2:
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, r4, lr }
+    push { lr }
     bl fooRec                                /* Call fooRec */
-    pop { r3, r4, lr }
+    pop { lr }
     bx lr
     
 main:                                        /* Function: main */

@@ -16,8 +16,6 @@ OUTPUT
 /* --test_02.txt */
     b main
 bar:                                         /* Function: bar */
-    push { r3 }
-    pop { r3 }
     bx lr
     
 foo:                                         /* Function: foo */

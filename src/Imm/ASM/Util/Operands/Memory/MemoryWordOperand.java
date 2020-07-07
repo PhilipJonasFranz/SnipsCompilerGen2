@@ -1,5 +1,6 @@
 package Imm.ASM.Util.Operands.Memory;
 
+import Imm.ASM.Util.Operands.Operand;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 
@@ -46,6 +47,10 @@ public class MemoryWordOperand extends MemoryOperand {
 		MemoryWordOperand clone = new MemoryWordOperand(this.value);
 		clone.intValue = this.intValue;
 		return clone;
+	}
+
+	public boolean equals(Operand operand) {
+		return false;
 	}
 	
 }

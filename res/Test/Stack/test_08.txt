@@ -23,9 +23,7 @@ OUTPUT
 /* --test_08.txt */
     b main
 foo:                                         /* Function: foo */
-    push { r3, r4 }
     add r0, r0, r1
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */

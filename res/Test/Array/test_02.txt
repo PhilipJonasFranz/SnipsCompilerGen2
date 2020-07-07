@@ -15,13 +15,13 @@ OUTPUT
 /* --test_02.txt */
     b main
 foo:                                         /* Function: foo */
-    push { r3, fp }
+    push { fp }
     mov fp, sp
     lsl r2, r0, #2
-    add r0, fp, #8
+    add r0, fp, #4
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { r3, fp }
+    pop { fp }
     add sp, sp, #12
     bx lr
     

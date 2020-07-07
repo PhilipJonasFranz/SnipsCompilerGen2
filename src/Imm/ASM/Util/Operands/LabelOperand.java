@@ -45,5 +45,9 @@ public class LabelOperand extends Operand {
 	public LabelOperand clone() {
 		return new LabelOperand(this.label);
 	}
+
+	public boolean equals(Operand operand) {
+		return operand instanceof LabelOperand && ((LabelOperand) operand).label.equals(this.label);
+	}
 	
 }

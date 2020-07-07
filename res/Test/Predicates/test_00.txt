@@ -27,18 +27,14 @@ lambda_add5:                                 /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 add5:                                        /* Function: add5 */
-    push { r3 }
     add r0, r0, #5
-    pop { r3 }
     bx lr
     
 lambda_add10:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
 add10:                                       /* Function: add10 */
-    push { r3 }
     add r0, r0, #10
-    pop { r3 }
     bx lr
     
 foo:                                         /* Function: foo */
