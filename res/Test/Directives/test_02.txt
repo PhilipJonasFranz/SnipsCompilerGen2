@@ -74,9 +74,7 @@ mult.L8:
     lsl r0, r6, #2
     add r2, r2, r0
     sub r0, fp, #16
-    add r0, r0, r2
-    mov r1, r7
-    str r1, [r0]
+    str r7, [r0, r2]
     add r6, r6, #1
     b mult.L4
 mult.L5: 

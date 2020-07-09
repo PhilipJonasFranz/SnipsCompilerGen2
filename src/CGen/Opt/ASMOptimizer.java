@@ -1039,6 +1039,39 @@ public class ASMOptimizer {
 			}
 		}
 		
+		/**
+		 * mov r0, r3
+		 * str r0, [rx]
+		 * ->
+		 * str r3, [rx]
+		 */
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMStr && body.instructions.get(i - 1) instanceof ASMMov) {
+				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
+				ASMStr str = (ASMStr) body.instructions.get(i);
+				
+				if (str.target.reg == mov.target.reg && mov.op1 instanceof RegOperand) {
+					boolean clear = true;
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						if (readsReg(body.instructions.get(a), mov.target.reg)) {
+							clear = false;
+							break;
+						}
+						
+						if (overwritesReg(body.instructions.get(a), mov.target.reg))
+							break;
+					}
+					
+					if (clear) {
+						body.instructions.remove(i - 1);
+						str.target = (RegOperand) mov.op1;
+						i--;
+						OPT_DONE = true;
+					}
+				}
+			}
+		}
+		
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
