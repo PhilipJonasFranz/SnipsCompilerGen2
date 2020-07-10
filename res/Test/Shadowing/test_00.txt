@@ -25,6 +25,5 @@ get:                                         /* Function: get */
 main:                                        /* Function: main */
     push { lr }
     bl get                                   /* Call get */
-    pop { lr }
-    bx lr
+    pop { pc }
     

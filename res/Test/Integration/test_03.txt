@@ -59,6 +59,5 @@ main:                                        /* Function: main */
     push { r2, r1, r0 }
     bl vecProd                               /* Call vecProd */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

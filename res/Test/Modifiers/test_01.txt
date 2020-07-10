@@ -58,6 +58,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

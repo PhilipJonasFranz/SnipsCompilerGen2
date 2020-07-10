@@ -65,6 +65,5 @@ main:                                        /* Function: main */
     mov r0, r3
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

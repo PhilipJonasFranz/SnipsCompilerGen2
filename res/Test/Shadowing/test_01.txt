@@ -38,6 +38,5 @@ Getter.get:                                  /* Function: Getter.get */
 main:                                        /* Function: main */
     push { lr }
     bl Getter.get                            /* Call Getter.get */
-    pop { lr }
-    bx lr
+    pop { pc }
     

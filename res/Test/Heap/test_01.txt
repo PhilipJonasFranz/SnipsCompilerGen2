@@ -130,6 +130,5 @@ main:                                        /* Function: main */
     str r0, [r1]
     add r0, r4, #1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -58,6 +58,5 @@ __op_div.L2:
 main:                                        /* Function: main */
     push { lr }
     bl __op_div
-    pop { lr }
-    bx lr
+    pop { pc }
     

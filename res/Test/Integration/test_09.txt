@@ -272,8 +272,7 @@ Queue.destroy:                               /* Function: Queue.destroy */
     bl free                                  /* Call free */
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 /* Returns true if currently no elements are in the queue. */
     
@@ -455,6 +454,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

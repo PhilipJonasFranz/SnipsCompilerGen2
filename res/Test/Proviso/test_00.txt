@@ -30,6 +30,5 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #2
 main.L1: 
-    pop { lr }
-    bx lr
+    pop { pc }
     

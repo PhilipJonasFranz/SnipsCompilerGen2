@@ -85,6 +85,5 @@ main.L0:                                     /* Copy memory section with loop */
 main.L1: 
     bl add                                   /* Call add */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

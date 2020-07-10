@@ -34,12 +34,10 @@ fib.L1:
     pop { r1 }
     add r0, r1, r0
 fib.L2: 
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 main:                                        /* Function: main */
     push { lr }
     bl fib                                   /* Call fib */
-    pop { lr }
-    bx lr
+    pop { pc }
     

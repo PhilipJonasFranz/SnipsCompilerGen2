@@ -33,12 +33,10 @@ log2:                                        /* Function: log2 */
 log2.L1: 
     mov r0, #0                               /* Evaluate Expression */
 log2.L2: 
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 main:                                        /* Function: main */
     push { lr }
     bl log2                                  /* Call log2 */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -226,6 +226,5 @@ main:                                        /* Function: main */
     ldr r2, [r1, #12]                        /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
-    pop { lr }
-    bx lr
+    pop { pc }
     

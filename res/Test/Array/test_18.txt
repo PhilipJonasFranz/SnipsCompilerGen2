@@ -97,6 +97,5 @@ main:                                        /* Function: main */
     pop { r1, r2 }
     bl foo                                   /* Call foo */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

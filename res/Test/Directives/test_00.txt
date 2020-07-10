@@ -76,6 +76,5 @@ main.L0:
     bl foo                                   /* Call foo */
     pop { r1 }
     bl __op_div                              /* Call __op_div */
-    pop { lr }
-    bx lr
+    pop { pc }
     

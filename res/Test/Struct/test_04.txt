@@ -161,6 +161,5 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

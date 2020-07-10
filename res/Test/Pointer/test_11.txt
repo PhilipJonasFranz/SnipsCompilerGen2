@@ -65,6 +65,5 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

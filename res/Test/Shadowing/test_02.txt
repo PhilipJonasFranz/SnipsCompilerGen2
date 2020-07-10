@@ -58,6 +58,5 @@ main:                                        /* Function: main */
     mov r0, #1
     push { r0 }
     bl X.get                                 /* Call X.get */
-    pop { lr }
-    bx lr
+    pop { pc }
     

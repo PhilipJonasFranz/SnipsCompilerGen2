@@ -22,6 +22,5 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     pop { r1 }
     mul r0, r1, r0
-    pop { lr }
-    bx lr
+    pop { pc }
     

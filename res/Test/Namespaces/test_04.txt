@@ -61,7 +61,6 @@ main:                                        /* Function: main */
     ldr r2, [r2]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
 .POOL0_main.L1_Foo.Baz.x: .word Foo.Baz.x
     

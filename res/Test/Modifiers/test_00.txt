@@ -26,12 +26,10 @@ Test.calc:                                   /* Function: Test.calc */
 Test.getter:                                 /* Function: Test.getter */
     push { lr }
     bl Test.calc                             /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    pop { pc }
     
 main:                                        /* Function: main */
     push { lr }
     bl Test.getter                           /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -26,6 +26,5 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    pop { pc }
     

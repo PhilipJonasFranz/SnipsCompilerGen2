@@ -98,6 +98,5 @@ main:                                        /* Function: main */
     push { r2, r1, r0 }
     bl sarrus                                /* Call sarrus */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

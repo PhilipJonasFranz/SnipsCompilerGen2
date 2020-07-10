@@ -208,6 +208,8 @@ public class ASMOptimizer {
 			
 			this.multPrecalc(body);
 
+			this.popReturnDirect(body);
+			
 			if (!OPT_DONE) {
 				/**
 				 * add r0, fp, #4
@@ -344,6 +346,24 @@ public class ASMOptimizer {
 			return true;
 		}
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	public void popReturnDirect(AsNBody body) {
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMBranch) {
+				ASMBranch branch = (ASMBranch) body.instructions.get(i);
+				if (branch.type == BRANCH_TYPE.BX && body.instructions.get(i - 1) instanceof ASMPopStack) {
+					ASMPopStack pop = (ASMPopStack) body.instructions.get(i - 1);
+					
+					if (pop.operands.size() > 0 && pop.operands.get(pop.operands.size() - 1).reg == REGISTER.LR) {
+						pop.operands.set(pop.operands.size() - 1, new RegOperand(REGISTER.PC));
+						body.instructions.remove(i);
+						i--;
+						OPT_DONE = true;
+					}
+				}
+			}
+		}
 	}
 	
 	public void patchFramePointerAddressing(List<ASMInstruction> body, int sub) {

@@ -135,14 +135,12 @@ create:                                      /* Function: create */
     pop { r0 }
     str r0, [r1]
     mov r0, r3                               /* Evaluate Expression */
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 main:                                        /* Function: main */
     push { lr }
     bl create                                /* Evaluate Expression */
     add r0, r0, #1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    pop { lr }
-    bx lr
+    pop { pc }
     

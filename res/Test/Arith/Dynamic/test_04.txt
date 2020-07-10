@@ -25,8 +25,7 @@ foo:                                         /* Function: foo */
     bl baz                                   /* Call baz */
     mov r1, #8
     mul r0, r1, r0
-    pop { lr }
-    bx lr
+    pop { pc }
     
 main:                                        /* Function: main */
     push { lr }
@@ -35,6 +34,5 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     pop { r1 }
     add r0, r1, r0
-    pop { lr }
-    bx lr
+    pop { pc }
     

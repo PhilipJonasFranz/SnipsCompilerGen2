@@ -30,6 +30,5 @@ Test.getter:                                 /* Function: Test.getter */
 main:                                        /* Function: main */
     push { lr }
     bl Test.getter                           /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    pop { pc }
     

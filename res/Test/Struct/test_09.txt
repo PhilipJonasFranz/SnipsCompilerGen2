@@ -176,8 +176,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
 .POOL1_main.L2_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
@@ -217,7 +216,6 @@ main:                                        /* Function: main */
     bl List.create_P0                        /* Call List.create */
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
 .POOL2_main.L2_NULL: .word NULL
     

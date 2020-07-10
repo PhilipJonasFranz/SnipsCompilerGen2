@@ -161,8 +161,7 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
 .POOL1_main.L3_NULL: .word NULL
     
 Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
@@ -231,8 +230,7 @@ Tree.insert.L3:
 Tree.insert.L2: 
     ldr r0, .POOL2_main.L3_NULL              /* Evaluate Expression */
 Tree.insert.L9: 
-    pop { r3, r4, r5, r6, lr }
-    bx lr
+    pop { r3, r4, r5, r6, pc }
 .POOL2_main.L3_NULL: .word NULL
     
 main:                                        /* Function: main */
@@ -295,6 +293,5 @@ main.L6:
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
 main.L8: 
-    pop { lr }
-    bx lr
+    pop { pc }
     

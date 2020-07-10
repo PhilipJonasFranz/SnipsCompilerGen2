@@ -29,12 +29,10 @@ fac.L1:
     bl fac                                   /* Call fac */
     mul r0, r0, r3
 fac.L2: 
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 main:                                        /* Function: main */
     push { lr }
     bl fac                                   /* Call fac */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -62,14 +62,15 @@ fooRec.L1:
     bl fooRec                                /* Call fooRec */
     add r0, r0, #1
 fooRec.L2: 
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
     
 foo:                                         /* Function: foo */
-    push { lr }
+    push { r3, r4, lr }
+    mov r3, r0
+    mov r4, r1
+    mov r0, r3
     bl fooRec                                /* Call fooRec */
-    pop { lr }
-    bx lr
+    pop { r3, r4, pc }
     
 main:                                        /* Function: main */
     push { fp, lr }

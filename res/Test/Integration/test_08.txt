@@ -233,8 +233,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
 .POOL1_main.L5_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
@@ -282,8 +281,7 @@ List.add.L1:
     add r1, r1, #8
     str r0, [r1]                             /* Store value to struct field */
 List.add.L0: 
-    pop { r3, r4, r5, lr }
-    bx lr
+    pop { r3, r4, r5, pc }
 .POOL2_main.L5_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
@@ -443,8 +441,7 @@ List.remove.L16:
     add r1, r1, #4
     str r0, [r1]                             /* Store value to struct field */
 List.remove.L15: 
-    pop { r3, r4, r5, r6, lr }
-    bx lr
+    pop { r3, r4, r5, r6, pc }
 .POOL4_main.L5_NULL: .word NULL
     
 /* Removes all elements from the list */
@@ -594,7 +591,6 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-44]                       /* Load field from struct */
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
 .POOL5_main.L3_arr: .word arr
     

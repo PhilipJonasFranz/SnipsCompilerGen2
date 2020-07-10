@@ -126,8 +126,7 @@ create_P0:                                   /* Function: create, Provisos: INT[
     push { lr }
     mov r0, #6                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    pop { lr }
-    bx lr
+    pop { pc }
     
 main:                                        /* Function: main */
     push { lr }
@@ -163,6 +162,5 @@ main:                                        /* Function: main */
     ldr r2, [r1, #20]                        /* Load field from struct */
     pop { r1 }
     add r0, r1, r2
-    pop { lr }
-    bx lr
+    pop { pc }
     

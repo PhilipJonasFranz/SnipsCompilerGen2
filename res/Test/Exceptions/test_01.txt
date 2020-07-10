@@ -166,6 +166,5 @@ main.L2:
 main.L3: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

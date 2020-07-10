@@ -31,6 +31,5 @@ Foo.get:                                     /* Function: Foo.get */
 main:                                        /* Function: main */
     push { lr }
     bl Foo.get                               /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -43,8 +43,7 @@ map:                                         /* Function: map */
     mov r0, r3                               /* Load parameters */
     add lr, pc, #8
     mov pc, r4
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
     
 main:                                        /* Function: main */
     push { lr }
@@ -56,7 +55,6 @@ main:                                        /* Function: main */
     bl map                                   /* Call map */
     ldr r0, .POOL1_main.L0_r                 /* Evaluate Expression */
     ldr r0, [r0]
-    pop { lr }
-    bx lr
+    pop { pc }
 .POOL1_main.L0_r: .word r
     

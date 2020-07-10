@@ -29,6 +29,5 @@ main:                                        /* Function: main */
     mov r5, r0
     add lr, pc, #8                           /* Evaluate Expression */
     mov pc, r5
-    pop { lr }
-    bx lr
+    pop { pc }
     

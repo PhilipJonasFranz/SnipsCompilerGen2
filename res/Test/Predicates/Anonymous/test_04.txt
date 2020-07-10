@@ -34,8 +34,7 @@ map:                                         /* Function: map */
     mov r0, r3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r4
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
     
 main:                                        /* Function: main */
     push { lr }
@@ -45,6 +44,5 @@ main:                                        /* Function: main */
     mov r1, r0
     mov r0, #10
     bl map                                   /* Call map */
-    pop { lr }
-    bx lr
+    pop { pc }
     

@@ -170,8 +170,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
 .POOL1_main.L4_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
@@ -219,8 +218,7 @@ List.add.L1:
     add r1, r1, #8
     str r0, [r1]                             /* Store value to struct field */
 List.add.L0: 
-    pop { r3, r4, r5, lr }
-    bx lr
+    pop { r3, r4, r5, pc }
 .POOL2_main.L4_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
@@ -469,8 +467,7 @@ String.substring.L9:
     mov r0, r9                               /* Evaluate Expression */
 String.substring.L10: 
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
-    bx lr
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, pc }
     
 /* Returns the length of the string. The length is determined by the first */
 /* occurrence of the 0 termination char. The length does include the 0 char. */
@@ -526,6 +523,5 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     bl String.equals                         /* Call String.equals */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     
