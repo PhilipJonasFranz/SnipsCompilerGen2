@@ -1218,6 +1218,12 @@ public class ASMOptimizer {
 						i--;
 						OPT_DONE = true;
 					}
+					else if (move0.target.reg == op1.reg && !move0.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !move1.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+						op1.reg = op0.reg;
+						body.instructions.remove(i - 1);
+						i--;
+						OPT_DONE = true;
+					}
 				}
 			}
 		}
