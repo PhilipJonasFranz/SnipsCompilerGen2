@@ -28,7 +28,5 @@ Test.getter:                                 /* Function: Test.getter */
 .POOL0_main.L0_Test.var: .word Test.var
     
 main:                                        /* Function: main */
-    push { lr }
-    bl Test.getter                           /* Evaluate Expression */
-    pop { pc }
+    b Test.getter                            /* Evaluate Expression */
     

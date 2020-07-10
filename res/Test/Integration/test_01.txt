@@ -32,7 +32,5 @@ fac.L2:
     pop { r3, pc }
     
 main:                                        /* Function: main */
-    push { lr }
-    bl fac                                   /* Call fac */
-    pop { pc }
+    b fac                                    /* Call fac */
     

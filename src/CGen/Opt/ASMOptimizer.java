@@ -207,8 +207,6 @@ public class ASMOptimizer {
 			this.removeUnusedRegistersStrict(body);
 			
 			this.multPrecalc(body);
-
-			this.popReturnDirect(body);
 			
 			if (!OPT_DONE) {
 				/**
@@ -246,6 +244,14 @@ public class ASMOptimizer {
 				 * body.
 				 */
 				this.removeFuncCleanStrict(body);
+			}
+			
+			if (!OPT_DONE) {
+				this.implicitReturn(body);
+			}
+			
+			if (!OPT_DONE) {
+				this.popReturnDirect(body);
 			}
 		}
 		
@@ -346,6 +352,71 @@ public class ASMOptimizer {
 			return true;
 		}
 		else throw new SNIPS_EXCEPTION("Cannot check if instruction reads register: " + ins.getClass().getName());
+	}
+	
+	public void implicitReturn(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				RegOperand lr = null;
+				for (RegOperand r : push.operands) if (r.reg == REGISTER.LR) {
+					lr = r;
+					break;
+				}
+				
+				if (push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && lr != null) {
+					ASMPopStack pop = push.popCounterpart;
+					
+					ASMBranch branch = null;
+					boolean clear = true;
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						if (body.instructions.get(a).equals(pop)) break;
+						if (body.instructions.get(a) instanceof ASMBranch) {
+							if (branch != null) {
+								clear = false;
+								break;
+							}
+							else {
+								ASMBranch b = (ASMBranch) body.instructions.get(a);
+								if (b.type == BRANCH_TYPE.BL) {
+									branch = b;
+								}
+							}
+						}
+						else if (body.instructions.get(a) instanceof ASMMov && ((ASMMov) body.instructions.get(a)).target.reg == REGISTER.PC) {
+							clear = false;
+						}
+						else if (branch != null) {
+							clear = false;
+							break;
+						}
+					}
+					
+					if (clear) {
+						push.operands.remove(lr);
+						for (RegOperand r : pop.operands) {
+							if (r.reg == REGISTER.LR) {
+								pop.operands.remove(r);
+								break;
+							}
+						}
+						
+						i = body.instructions.indexOf(pop) + 1;
+						
+						if (push.operands.isEmpty()) {
+							body.instructions.remove(push);
+							body.instructions.remove(pop);
+							i -= 2;
+						}
+						
+						branch.type = BRANCH_TYPE.B;
+						
+						OPT_DONE = true;
+					}
+				}
+			}
+		}
 	}
 	
 	public void popReturnDirect(AsNBody body) {
@@ -461,7 +532,7 @@ public class ASMOptimizer {
 						body.instructions.remove(pop);
 						OPT_DONE = true;
 						
-						i--;
+						if (i > 0) i--;
 					}
 					
 					if (done) patchFramePointerAddressing(ins, sub);

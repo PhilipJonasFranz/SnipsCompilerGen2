@@ -32,7 +32,5 @@ getDiff.L2:
     pop { r3, r4, r5, pc }
     
 main:                                        /* Function: main */
-    push { lr }
-    bl getDiff_P0                            /* Call getDiff */
-    pop { pc }
+    b getDiff_P0                             /* Call getDiff */
     

@@ -36,7 +36,5 @@ log2.L2:
     pop { r3, pc }
     
 main:                                        /* Function: main */
-    push { lr }
-    bl log2                                  /* Call log2 */
-    pop { pc }
+    b log2                                   /* Call log2 */
     

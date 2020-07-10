@@ -23,7 +23,5 @@ get:                                         /* Function: get */
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl get                                   /* Call get */
-    pop { pc }
+    b get                                    /* Call get */
     

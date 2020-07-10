@@ -53,10 +53,8 @@ X.get.L1:
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
     push { r0 }
     mov r0, #1
     push { r0 }
-    bl X.get                                 /* Call X.get */
-    pop { pc }
+    b X.get                                  /* Call X.get */
     

@@ -65,12 +65,7 @@ fooRec.L2:
     pop { r3, r4, pc }
     
 foo:                                         /* Function: foo */
-    push { r3, r4, lr }
-    mov r3, r0
-    mov r4, r1
-    mov r0, r3
-    bl fooRec                                /* Call fooRec */
-    pop { r3, r4, pc }
+    b fooRec                                 /* Call fooRec */
     
 main:                                        /* Function: main */
     push { fp, lr }

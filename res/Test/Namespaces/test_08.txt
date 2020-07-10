@@ -17,8 +17,6 @@ Test.foo:                                    /* Function: Test.foo */
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
     mov r0, #10                              /* Evaluate Expression */
-    bl Test.foo                              /* Call Test.foo */
-    pop { pc }
+    b Test.foo                               /* Call Test.foo */
     

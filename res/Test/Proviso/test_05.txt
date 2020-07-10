@@ -18,7 +18,5 @@ foo_P0:                                      /* Function: foo, Provisos: INT */
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl foo_P0                                /* Evaluate Expression */
-    pop { pc }
+    b foo_P0                                 /* Evaluate Expression */
     

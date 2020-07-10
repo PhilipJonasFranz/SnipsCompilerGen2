@@ -56,7 +56,5 @@ __op_mod.L11:
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl __op_mod
-    pop { pc }
+    b __op_mod
     

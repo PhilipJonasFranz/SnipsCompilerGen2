@@ -37,7 +37,5 @@ fib.L2:
     pop { r3, pc }
     
 main:                                        /* Function: main */
-    push { lr }
-    bl fib                                   /* Call fib */
-    pop { pc }
+    b fib                                    /* Call fib */
     
