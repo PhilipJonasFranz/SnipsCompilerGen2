@@ -19,6 +19,7 @@ import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
+import Imm.ASM.Processing.ASMBinaryData.SHIFT_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMla;
@@ -1270,6 +1271,27 @@ public class ASMOptimizer {
 				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOperand && add.op1 instanceof RegOperand) {
 					RegOperand op1 = (RegOperand) add.op1;
 					add.op1 = mov.op1;
+					add.op0 = op1;
+					
+					body.instructions.remove(i - 1);
+					i--;
+					OPT_DONE = true;
+				}
+			}
+		}
+		
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMLsl) {
+				ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
+				ASMAdd add = (ASMAdd) body.instructions.get(i);
+				
+				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOperand && add.op1 instanceof RegOperand) {
+					RegOperand op1 = (RegOperand) add.op1;
+					add.op1 = lsl.op0;
+					
+					add.shiftType = SHIFT_TYPE.LSL;
+					add.shiftDist = ((ImmOperand) lsl.op1).value;
+					
 					add.op0 = op1;
 					
 					body.instructions.remove(i - 1);

@@ -62,12 +62,14 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
 	
 	public int progress = 0, amount;
+	
+	public long totalCPUCycles = 0;
 	
 	public long start, firstStart;
 	
@@ -104,7 +106,7 @@ public class TestDriver {
 		}
 		
 		/* Setup Test Node Tree */
-		new Message("Starting run, found " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ".", Message.Type.INFO);
+		new Message("Starting run, found " + Util.formatNum(paths.size()) + " test" + ((paths.size() == 1)? "" : "s") + ".", Message.Type.INFO);
 		TestNode head = new TestNode(paths);
 		new Message("Successfully built package tree.", Message.Type.INFO);
 		
@@ -125,10 +127,12 @@ public class TestDriver {
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
 		new Message("Finished " + paths.size() + " test" + ((paths.size() == 1)? "" : "s") + ((res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? " successfully in " + 
-				(System.currentTimeMillis() - firstStart) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
+				Util.formatNum((System.currentTimeMillis() - firstStart)) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
 				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
 				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
 				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
+		
+		new Message("Total CPU Cycles: " + Util.formatNum(totalCPUCycles), Message.Type.INFO);
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
@@ -158,9 +162,8 @@ public class TestDriver {
 		
 		/* Test all child nodes */
 		if (!node.childs.isEmpty()) {
-			for (TestNode node0 : node.childs) {
+			for (TestNode node0 : node.childs) 
 				testPackage(node0);
-			}
 		}
 		
 		/* Run all tests in package */
@@ -187,12 +190,11 @@ public class TestDriver {
 		
 		/* Get package results */
 		ResultCnt res = resCnt.pop();
-		if ((res.getTimeout() > 0 || res.getCrashed() > 0 || res.getFailed() > 0) && !node.tests.isEmpty()) {
+		if ((res.getTimeout() > 0 || res.getCrashed() > 0 || res.getFailed() > 0) && !node.tests.isEmpty()) 
 			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
-		}
 		
 		if (System.currentTimeMillis() - start > progressIndicatorSpeed) {
-			new Message("Progress: " + progress + "/" + amount + " test(s), total time: " + (System.currentTimeMillis() - firstStart) + " ms", Message.Type.INFO);
+			new Message("Progress: " + Util.formatNum(progress) + "/" + Util.formatNum(amount) + " test(s), total time: " + Util.formatNum((System.currentTimeMillis() - firstStart)) + " ms", Message.Type.INFO);
 			start = System.currentTimeMillis();
 		}
 		
@@ -352,6 +354,7 @@ public class TestDriver {
 			}
 			
 			int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
+			this.totalCPUCycles += pcu.cycles;
 			
 			if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
 				/* Output does match expected value */
