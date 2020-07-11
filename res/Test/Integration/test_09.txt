@@ -43,7 +43,7 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L3_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
@@ -135,7 +135,7 @@ free:                                        /* Function: free */
     push { r3, r4, r6, r7 }
     mov r3, r0
 /* Jump to block head */
-    sub r3, r3, #1
+    sub r3, r0, #1
 /* Load Block Size */
     ldr r4, [r10, r3, lsl #2]                /* Load from address */
 /* Store negated block size */
@@ -314,8 +314,7 @@ Queue.enqueue.L0:
 /* Size of the proviso type and the head index */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #20]                        /* Load field from struct */
-    mov r2, #2
-    mul r4, r1, r2
+    lsl r4, r1, #1
 /* Write value */
     ldr r0, [fp, #20]                        /* Evaluate Expression */
     ldr r1, [fp, #16]
@@ -373,8 +372,7 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
     ldr r1, [r1, #24]                        /* Load field from struct */
-    mov r2, #2
-    mul r2, r1, r2
+    lsl r2, r1, #1
     pop { r1 }
     add r0, r1, r2
     lsl r1, r0, #2                           /* Convert to bytes */

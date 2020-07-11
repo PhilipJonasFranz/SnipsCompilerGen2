@@ -21,55 +21,51 @@ OUTPUT
 /* --test_05.txt */
     b main
 det:                                         /* Function: det */
-    push { fp }
-    mov fp, sp
-    ldr r1, [fp, #4]
-    ldr r2, [fp, #20]
+    ldr r1, [sp, #0]
+    ldr r2, [sp, #16]
     mul r1, r1, r2
-    ldr r2, [fp, #36]
+    ldr r2, [sp, #32]
     mul r0, r1, r2
     push { r0 }
-    ldr r1, [fp, #8]
-    ldr r2, [fp, #24]
+    ldr r1, [sp, #8]
+    ldr r2, [sp, #24]
     mul r1, r1, r2
-    ldr r2, [fp, #28]
+    ldr r2, [sp, #28]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    ldr r1, [fp, #12]
-    ldr r2, [fp, #16]
+    ldr r1, [sp, #12]
+    ldr r2, [sp, #16]
     mul r1, r1, r2
-    ldr r2, [fp, #32]
+    ldr r2, [sp, #32]
     mul r2, r1, r2
     pop { r1 }
     add r0, r1, r2
     push { r0 }
-    ldr r1, [fp, #28]
-    ldr r2, [fp, #20]
+    ldr r1, [sp, #28]
+    ldr r2, [sp, #20]
     mul r1, r1, r2
-    ldr r2, [fp, #12]
+    ldr r2, [sp, #12]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    ldr r1, [fp, #32]
-    ldr r2, [fp, #24]
+    ldr r1, [sp, #32]
+    ldr r2, [sp, #24]
     mul r1, r1, r2
-    ldr r2, [fp, #4]
+    ldr r2, [sp, #4]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2
     push { r0 }
-    ldr r1, [fp, #36]
-    ldr r2, [fp, #16]
+    ldr r1, [sp, #36]
+    ldr r2, [sp, #16]
     mul r1, r1, r2
-    ldr r2, [fp, #8]
+    ldr r2, [sp, #8]
     mul r2, r1, r2
     pop { r1 }
     sub r0, r1, r2
-    mov sp, fp
-    pop { fp }
     add sp, sp, #36
     bx lr
     

@@ -59,14 +59,13 @@ __op_div.L2:
     bx lr
     
 foo:                                         /* Function: foo */
-    mov r2, #4
-    mul r0, r0, r2
+    lsl r0, r0, #2
     bx lr
     
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
-    cmp r3, #2
+    cmp r0, #2
     bne main.L0
     mov r3, #3
 main.L0: 

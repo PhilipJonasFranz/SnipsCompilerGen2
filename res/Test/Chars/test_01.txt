@@ -25,7 +25,7 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L3_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
@@ -117,7 +117,7 @@ free:                                        /* Function: free */
     push { r3, r4, r6, r7 }
     mov r3, r0
 /* Jump to block head */
-    sub r3, r3, #1
+    sub r3, r0, #1
 /* Load Block Size */
     ldr r4, [r10, r3, lsl #2]                /* Load from address */
 /* Store negated block size */
@@ -227,7 +227,7 @@ List.get_P2:                                 /* Function: List.get, Provisos: CH
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
-    cmp r4, #0
+    cmp r1, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
@@ -251,7 +251,7 @@ List.get.L5:
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
-    sub r4, r0, #1
+    sub r4, r4, #1
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
@@ -286,7 +286,7 @@ List.size.L1:                                /* Evaluate condition */
     add r1, r1, #4
     ldr r4, [r1]                             /* Load field from struct */
     mov r0, r5
-    add r5, r0, #1
+    add r5, r5, #1
     b List.size.L1
 List.size.L2: 
     mov r0, r5                               /* Evaluate Expression */
@@ -343,7 +343,7 @@ String.equals.L1:                            /* Evaluate condition */
     b String.equals.L2
 String.equals.L4: 
     mov r0, r6
-    add r6, r0, #1
+    add r6, r6, #1
     b String.equals.L1
 String.equals.L2: 
     mov r0, r5                               /* Evaluate Expression */
@@ -392,14 +392,14 @@ String.substring.L1:                         /* Evaluate condition */
     bl List.add_P1                           /* Call List.add */
 String.substring.L4: 
     mov r0, r7
-    add r7, r0, #1
+    add r7, r7, #1
     b String.substring.L1
 String.substring.L2: 
     mov r0, r6                               /* Evaluate Expression */
     bl List.size                             /* Call List.size */
     mov r8, r0
 /* Substring only consists out of null char */
-    cmp r8, #1
+    cmp r0, #1
     moveq r0, #1
     movne r0, #0
     mov r1, #0
@@ -442,10 +442,9 @@ String.substring.L8:
     ldr r1, [fp, #-4]                        /* Evaluate Expression */
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
-    mov r1, r9
     push { r0 }
     ldr r2, [fp, #-4]
-    add r0, r1, r2
+    add r0, r9, r2
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
@@ -481,11 +480,10 @@ String.length.L1:                            /* Evaluate condition */
     cmp r0, #0
     beq String.length.L2
     mov r0, r4
-    add r4, r0, #1
+    add r4, r4, #1
     b String.length.L1
 String.length.L2: 
-    mov r0, r4
-    add r4, r0, #1
+    add r4, r4, #1
     mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr

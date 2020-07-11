@@ -37,13 +37,12 @@ f:                                           /* Function: f */
 .POOL0_main.L0_r: .word r
     
 map:                                         /* Function: map */
-    push { r3, r4, lr }
-    mov r3, r0
+    push { r4, lr }
     mov r4, r1
-    mov r0, r3                               /* Load parameters */
+    mov r0, r0                               /* Load parameters */
     add lr, pc, #8
     mov pc, r4
-    pop { r3, r4, pc }
+    pop { r4, pc }
     
 main:                                        /* Function: main */
     push { lr }

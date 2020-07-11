@@ -48,7 +48,7 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L2_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
@@ -242,7 +242,7 @@ main:                                        /* Function: main */
     bl Tree.create_P0                        /* Call Tree.create */
     mov r6, r0
     mov r1, #5
-    mov r0, r6
+    mov r0, r0
     bl Tree.insert_P1                        /* Call Tree.insert */
     mov r1, #12
     mov r0, r6

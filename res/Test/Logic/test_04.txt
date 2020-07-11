@@ -14,8 +14,7 @@ OUTPUT
 /* --test_04.txt */
 main:                                        /* Function: main */
     mov r3, r0
-    mov r4, r1
-    mov r0, r4                               /* Evaluate Expression */
+    mov r0, r1                               /* Evaluate Expression */
     adds r1, r3, #0
     movne r1, #1
     cmp r0, #0

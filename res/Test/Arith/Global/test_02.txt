@@ -26,10 +26,9 @@ main:                                        /* Function: main */
     ldr r2, .POOL0_main.L0_x                 /* Load from .data section */
     ldr r2, [r2]
     mul r0, r1, r2
-    b main.L1
+    bx lr
 main.L0: 
     mov r0, r3
-main.L1: 
     bx lr
 .POOL0_main.L0_x: .word x
 .POOL0_main.L1_y: .word y

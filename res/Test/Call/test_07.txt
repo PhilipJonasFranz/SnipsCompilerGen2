@@ -12,13 +12,11 @@ OUTPUT
 /* --test_07.txt */
     b main
 foo:                                         /* Function: foo */
-    push { r3, r4 }
-    mov r3, r0
+    push { r4 }
     mov r4, r1
-    mov r2, #2
-    mul r1, r3, r2
+    lsl r1, r0, #1
     add r0, r1, r4
-    pop { r3, r4 }
+    pop { r4 }
     bx lr
     
 main:                                        /* Function: main */

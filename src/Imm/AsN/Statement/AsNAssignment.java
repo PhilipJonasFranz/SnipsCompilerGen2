@@ -61,7 +61,6 @@ public class AsNAssignment extends AsNStatement {
 				offset += 4;
 			}
 		}
-		/* Do it via ASM Loop for bigger data chunks */
 		else {
 			if (size * 4 < 255) {
 				/* Move counter in R2 */

@@ -28,13 +28,12 @@ f:                                           /* Function: f */
     bx lr
     
 map:                                         /* Function: map */
-    push { r3, r4, lr }
-    mov r3, r0
+    push { r4, lr }
     mov r4, r1
-    mov r0, r3                               /* Evaluate Expression */
+    mov r0, r0                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r4
-    pop { r3, r4, pc }
+    pop { r4, pc }
     
 main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */

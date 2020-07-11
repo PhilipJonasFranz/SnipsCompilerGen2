@@ -510,7 +510,7 @@ public class CompilerDriver {
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
 		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + instructionsGenerated, Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
 	}
 	
 	/** Resets flags during burst compilation */

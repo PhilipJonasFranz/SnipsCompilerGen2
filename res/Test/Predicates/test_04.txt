@@ -27,7 +27,7 @@ lambda_add5_P0:                              /* Function address getter for pred
 add5_P0:                                     /* Function: add5, Provisos: INT | BOOL */
     push { r3 }
     mov r3, r0
-    cmp r3, #0
+    cmp r0, #0
     beq add5.L1
     sub r3, r3, #2
 add5.L1: 

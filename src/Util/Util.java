@@ -32,5 +32,17 @@ public class Util {
 		
 		}
 	}
+	
+	public static String formatNum(long num) {
+		String [] sp = ("" + num).split("");
+		String r = "";
+		int c = 0;
+		for (int i = sp.length - 1; i >= 0; i--) {
+			c++;
+			r = sp [i] + r;
+			if (c % 3 == 0 && i > 0) r = "." + r;
+		}
+		return r;
+	}
     
 }

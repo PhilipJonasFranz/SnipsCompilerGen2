@@ -12,8 +12,7 @@ OUTPUT
 /* --test_08.txt */
     b main
 Test.foo:                                    /* Function: Test.foo */
-    mov r2, #4
-    mul r0, r0, r2
+    lsl r0, r0, #2
     bx lr
     
 main:                                        /* Function: main */

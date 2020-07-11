@@ -69,7 +69,7 @@ hsize:                                       /* Function: hsize */
     push { r3 }
     mov r3, r0
 /* Jump to block head */
-    sub r3, r3, #1
+    sub r3, r0, #1
 /* Load Block Size and return */
     ldr r1, [r10, r3, lsl #2]                /* Load from address */
     sub r0, r1, #1
@@ -84,7 +84,7 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L0_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
@@ -177,7 +177,7 @@ checkThreshold:                              /* Function: checkThreshold */
     mov r3, r0
     mov r4, r1
     mov r5, #0
-    mov r0, r3                               /* Evaluate Expression */
+    mov r0, r0                               /* Evaluate Expression */
     bl hsize                                 /* Call hsize */
     mov r6, r0
     mov r7, #0
@@ -208,12 +208,11 @@ checkThreshold.L0:
     mov r2, sp
     mov sp, fp
     pop { r3, r4, r5, r6, r7, r8, fp, lr }
-    beq checkThreshold.L9
+    bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
-checkThreshold.L9: 
     bx lr
     
 main:                                        /* Function: main */

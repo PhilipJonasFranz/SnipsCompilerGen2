@@ -26,8 +26,7 @@ main:                                        /* Function: main */
 main.L1:                                     /* Evaluate condition */
     cmp r3, #0
     ble main.L2
-    mov r2, #2
-    mul r5, r3, r2
+    lsl r5, r3, #1
     sub r0, fp, #4                           /* Evaluate Expression */
     push { r5 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r5, r0, #2
@@ -39,9 +38,8 @@ main.L1:                                     /* Evaluate condition */
 /* Break */
 main.L3: 
     ldr r6, [fp, #-4]                        /* Evaluate Expression */
-    mov r1, r4                               /* Evaluate Expression */
     ldr r2, [fp, #-4]
-    add r1, r1, r2
+    add r1, r4, r2
     add r4, r1, r6
     sub r3, r3, #1
     add sp, sp, #4

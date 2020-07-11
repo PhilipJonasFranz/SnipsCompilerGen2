@@ -22,11 +22,10 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
     mov r4, r1
     mov r5, r2
     ldr r1, [fp, #8]                         /* Evaluate Expression */
-    mov r0, r3
+    mov r0, r0
     bl foo                                   /* Call foo */
     add r0, r0, r4
     push { r0 }
@@ -35,7 +34,5 @@ main:                                        /* Function: main */
     pop { r1 }
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    add sp, sp, #8
-    bx lr
+    pop { fp, pc }
     

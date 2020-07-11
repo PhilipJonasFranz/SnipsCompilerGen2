@@ -52,8 +52,7 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     bl set                                   /* Call set */
     mov r2, #0                               /* Evaluate Expression */
-    mov r1, #8
-    mul r0, r3, r1
+    lsl r0, r3, #3
     add r2, r2, r0
     lsl r0, r4, #2
     add r2, r2, r0

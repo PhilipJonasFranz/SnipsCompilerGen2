@@ -18,10 +18,10 @@ OUTPUT
 x: .word 10
     
 .text
-    b main
+    bx lr
 get:                                         /* Function: get */
     bx lr
     
 main:                                        /* Function: main */
-    b get                                    /* Call get */
+    bx lr                                    /* Call get */
     

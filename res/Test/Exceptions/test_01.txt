@@ -62,7 +62,7 @@ get:                                         /* Function: get */
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    cmp r4, #2
+    cmp r1, #2
     ble get.L2
     push { r5 }
     push { r4 }
@@ -79,12 +79,11 @@ get.L0:
     mov r2, sp
     mov sp, fp
     pop { r3, r4, r5, fp }
-    beq get.L4
+    bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
-get.L4: 
     bx lr
     
 throw:                                       /* Function: throw */
@@ -100,12 +99,11 @@ throw:                                       /* Function: throw */
     mov r2, sp
     mov sp, fp
     pop { fp }
-    beq throw.L2
+    bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
-throw.L2: 
     bx lr
     
 main:                                        /* Function: main */

@@ -39,7 +39,7 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
     ldr r0, .POOL0_main.L4_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
@@ -131,7 +131,7 @@ free:                                        /* Function: free */
     push { r3, r4, r6, r7 }
     mov r3, r0
 /* Jump to block head */
-    sub r3, r3, #1
+    sub r3, r0, #1
 /* Load Block Size */
     ldr r4, [r10, r3, lsl #2]                /* Load from address */
 /* Store negated block size */
@@ -244,7 +244,7 @@ List.get_P2:                                 /* Function: List.get, Provisos: IN
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
-    cmp r4, #0
+    cmp r1, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
@@ -268,7 +268,7 @@ List.get.L5:
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
-    sub r4, r0, #1
+    sub r4, r4, #1
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */

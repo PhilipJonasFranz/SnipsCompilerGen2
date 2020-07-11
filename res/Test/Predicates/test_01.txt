@@ -43,13 +43,9 @@ lambda_sortPred:                             /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 sortPred:                                    /* Function: sortPred */
-    push { r3, r4 }
-    mov r3, r0
-    mov r4, r1
-    cmp r3, r4
+    cmp r0, r1
     movlt r0, #1
     movge r0, #0
-    pop { r3, r4 }
     bx lr
     
 sort:                                        /* Function: sort */
@@ -57,7 +53,7 @@ sort:                                        /* Function: sort */
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    cmp r4, #1
+    cmp r1, #1
     ble sort.L4
 sort.L3:                                     /* Evaluate condition */
     mov r0, #1

@@ -37,8 +37,7 @@ foo:                                         /* Function: foo */
     pop { r0 }
     str r0, [r1, #12]
     mov r2, #0                               /* Evaluate Expression */
-    mov r1, #8
-    mul r0, r3, r1
+    lsl r0, r3, #3
     add r2, r2, r0
     lsl r0, r4, #2
     add r2, r2, r0

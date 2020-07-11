@@ -24,7 +24,7 @@ OUTPUT
 log2:                                        /* Function: log2 */
     push { r3, lr }
     mov r3, r0
-    cmp r3, #0
+    cmp r0, #0
     beq log2.L1
     lsr r0, r3, #1
     bl log2                                  /* Call log2 */

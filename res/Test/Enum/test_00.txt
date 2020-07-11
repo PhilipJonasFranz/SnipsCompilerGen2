@@ -20,9 +20,8 @@ main:                                        /* Function: main */
     cmp r3, #0
     bne main.L1
     mov r0, #10                              /* Evaluate Expression */
-    b main.L2
+    bx lr
 main.L1: 
     mov r0, #20                              /* Evaluate Expression */
-main.L2: 
     bx lr
     

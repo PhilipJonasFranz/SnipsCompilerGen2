@@ -17,27 +17,23 @@ OUTPUT
 /* --test_13.txt */
     b main
 add:                                         /* Function: add */
-    push { fp }
-    mov fp, sp
-    ldr r1, [fp, #4]
-    ldr r2, [fp, #8]
+    ldr r1, [sp, #0]
+    ldr r2, [sp, #4]
     add r1, r1, r2
-    ldr r2, [fp, #12]
+    ldr r2, [sp, #8]
     add r1, r1, r2
-    ldr r2, [fp, #16]
+    ldr r2, [sp, #12]
     add r1, r1, r2
-    ldr r2, [fp, #20]
+    ldr r2, [sp, #16]
     add r1, r1, r2
-    ldr r2, [fp, #24]
+    ldr r2, [sp, #20]
     add r1, r1, r2
-    ldr r2, [fp, #28]
+    ldr r2, [sp, #24]
     add r1, r1, r2
-    ldr r2, [fp, #32]
+    ldr r2, [sp, #28]
     add r1, r1, r2
-    ldr r2, [fp, #36]
+    ldr r2, [sp, #32]
     add r0, r1, r2
-    mov sp, fp
-    pop { fp }
     add sp, sp, #36
     bx lr
     

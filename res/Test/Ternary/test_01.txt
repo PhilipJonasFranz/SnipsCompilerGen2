@@ -14,17 +14,16 @@ OUTPUT
 /* --test_01.txt */
 main:                                        /* Function: main */
     mov r3, r0
-    cmp r3, #3
+    cmp r0, #3
     bne main.L0
     mov r0, #5
-    b main.L3
+    bx lr
 main.L0: 
     cmp r3, #4
     bne main.L2
     mov r0, #8
-    b main.L3
+    bx lr
 main.L2: 
     mov r0, #10
-main.L3: 
     bx lr
     

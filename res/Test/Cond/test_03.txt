@@ -18,7 +18,7 @@ OUTPUT
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
-    cmp r3, r4
+    cmp r0, r1
     bne main.L0
     mov r1, #2
     mul r4, r1, r4

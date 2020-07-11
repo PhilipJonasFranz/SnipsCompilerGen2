@@ -21,7 +21,7 @@ OUTPUT
 fib:                                         /* Function: fib */
     push { r3, lr }
     mov r3, r0
-    cmp r3, #3
+    cmp r0, #3
     bge fib.L1
     mov r0, #1                               /* Evaluate Expression */
     b fib.L2

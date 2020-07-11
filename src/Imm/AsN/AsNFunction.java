@@ -343,7 +343,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			
-			if (size != 0) {
+			if (size != 0 && !f.path.build().equals("main")) {
 				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
 			}
 			

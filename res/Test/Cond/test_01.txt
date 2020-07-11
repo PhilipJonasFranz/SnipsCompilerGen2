@@ -15,17 +15,16 @@ OUTPUT
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
-    cmp r3, #2
+    cmp r0, #2
     bne main.L1
     mov r0, r3                               /* Evaluate Expression */
-    b main.L4
+    bx lr
 main.L1: 
     cmp r4, #5
     bne main.L3
     mov r0, r4                               /* Evaluate Expression */
-    b main.L4
+    bx lr
 main.L3: 
     add r0, r3, r4
-main.L4: 
     bx lr
     
