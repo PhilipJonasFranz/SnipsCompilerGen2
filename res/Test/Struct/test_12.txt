@@ -194,8 +194,7 @@ List.destroy.L1:                             /* Evaluate condition */
     mov r0, r4                               /* Load parameters */
     bl free                                  /* Call free */
     lsl r1, r4, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r4, [r1]                             /* Load field from struct */
+    ldr r4, [r1, #4]                         /* Load field from struct */
     b List.destroy.L1
 List.destroy.L2: 
     mov r0, r3                               /* Load parameters */
@@ -243,8 +242,7 @@ List.add.L1:
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
 List.add.L0: 
     pop { r3, r4, r5, pc }
 .POOL3_main.L4_NULL: .word NULL
@@ -315,7 +313,6 @@ main:                                        /* Function: main */
     bl List.create_P0                        /* Call List.create */
     mov r4, r0
     mov r1, #10
-    mov r0, r0
     bl List.add_P1                           /* Call List.add */
     mov r1, #5
     mov r0, r4
@@ -323,8 +320,8 @@ main:                                        /* Function: main */
     mov r1, #12
     mov r0, r4
     bl List.add_P1                           /* Call List.add */
-    mov r1, r3
     mov r0, r4
+    mov r1, r3
     bl List.get_P2                           /* Call List.get */
     mov r5, r0
     mov r0, r4                               /* Load parameters */

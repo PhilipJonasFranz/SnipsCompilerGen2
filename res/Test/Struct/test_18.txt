@@ -110,9 +110,7 @@ resv.L3:
     b resv.L1
 resv.L2: 
 /* End reached, create new block */
-    mov r0, r3                               /* Evaluate Expression */
-    lsl r1, r4, #2
-    str r0, [r1]
+    str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
     pop { r3, r4, r5, r6 }

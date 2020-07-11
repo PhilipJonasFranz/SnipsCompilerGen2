@@ -30,11 +30,9 @@ OUTPUT
 bar:                                         /* Function: bar */
     mul r0, r0, r1
     mov r1, r2
-    push { r0 }
-    ldr r2, [sp, #4]
+    ldr r2, [sp, #0]
     mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
+    add r0, r0, r2
     add sp, sp, #4
     bx lr
     
@@ -49,7 +47,6 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r5, r2
     mov r1, #0
-    mov r0, r0
     bl foo                                   /* Call foo */
     mov r6, r0
     mov r1, #1

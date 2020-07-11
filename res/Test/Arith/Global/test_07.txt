@@ -232,8 +232,7 @@ List.add.L1:
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
 List.add.L0: 
     pop { r3, r4, r5, pc }
 .POOL2_main.L5_NULL: .word NULL
@@ -316,8 +315,7 @@ List.clear.L2:
     str r0, [r1, #4]                         /* Store value to struct field */
     ldr r0, .POOL4_main.L5_NULL              /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r0, [r1, #8]                         /* Store value to struct field */
     pop { r3, r4, pc }
 .POOL4_main.L5_NULL: .word NULL
     

@@ -183,11 +183,9 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    push { r0 }
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r2, [r1, #12]                        /* Load field from struct */
-    pop { r1 }
-    add r0, r1, r2
+    add r0, r0, r2
     pop { pc }
     

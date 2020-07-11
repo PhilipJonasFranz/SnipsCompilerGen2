@@ -14,7 +14,6 @@ TESTCASES
 OUTPUT
 /* --test_08.txt */
 main:                                        /* Function: main */
-    mov r0, r0                               /* Evaluate Expression */
     adds r1, r1, #0
     movne r1, #1
     cmp r0, #0

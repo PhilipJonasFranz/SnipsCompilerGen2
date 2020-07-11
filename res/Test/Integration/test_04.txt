@@ -17,50 +17,40 @@ OUTPUT
 /* --test_04.txt */
     b main
 sarrus:                                      /* Function: sarrus */
-    ldr r1, [sp, #0]
+    ldr r0, [sp, #0]
     ldr r2, [sp, #16]
-    mul r1, r1, r2
+    mul r0, r0, r2
     ldr r2, [sp, #32]
-    mul r0, r1, r2
-    push { r0 }
-    ldr r1, [sp, #8]
-    ldr r2, [sp, #24]
-    mul r1, r1, r2
-    ldr r2, [sp, #28]
-    mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
-    push { r0 }
-    ldr r1, [sp, #12]
-    ldr r2, [sp, #16]
-    mul r1, r1, r2
-    ldr r2, [sp, #32]
-    mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
-    push { r0 }
-    ldr r1, [sp, #28]
+    mul r1, r0, r2
+    ldr r0, [sp, #4]
     ldr r2, [sp, #20]
-    mul r1, r1, r2
-    ldr r2, [sp, #12]
-    mul r2, r1, r2
-    pop { r1 }
-    sub r0, r1, r2
-    push { r0 }
-    ldr r1, [sp, #32]
+    mul r0, r0, r2
     ldr r2, [sp, #24]
-    mul r1, r1, r2
-    ldr r2, [sp, #4]
-    mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
-    push { r0 }
-    ldr r1, [sp, #36]
+    mul r2, r0, r2
+    add r1, r1, r2
+    ldr r0, [sp, #8]
+    ldr r2, [sp, #12]
+    mul r0, r0, r2
+    ldr r2, [sp, #28]
+    mul r2, r0, r2
+    add r1, r1, r2
+    ldr r0, [sp, #24]
     ldr r2, [sp, #16]
-    mul r1, r1, r2
+    mul r0, r0, r2
     ldr r2, [sp, #8]
-    mul r2, r1, r2
-    pop { r1 }
+    mul r2, r0, r2
+    sub r1, r1, r2
+    ldr r0, [sp, #28]
+    ldr r2, [sp, #20]
+    mul r0, r0, r2
+    ldr r2, [sp, #0]
+    mul r2, r0, r2
+    add r1, r1, r2
+    ldr r0, [sp, #32]
+    ldr r2, [sp, #12]
+    mul r0, r0, r2
+    ldr r2, [sp, #4]
+    mul r2, r0, r2
     add r0, r1, r2
     add sp, sp, #36
     bx lr

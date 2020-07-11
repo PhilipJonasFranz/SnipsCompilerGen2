@@ -56,9 +56,9 @@ main:                                        /* Function: main */
     ldr r1, [fp, #-24]
     push { r1, r0 }
     bl set                                   /* Call set */
-    ldr r1, [fp, #-12]
+    ldr r0, [fp, #-12]
     ldr r2, [fp, #-4]
-    add r0, r1, r2
+    add r0, r0, r2
     mov sp, fp
     pop { fp, pc }
     

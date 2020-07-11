@@ -24,11 +24,10 @@ set:                                         /* Function: set */
     mov r1, #2
     mul r2, r1, r2
     add r1, r0, r2
-    push { r4 }
     ldr r2, [fp, #8]
     add r0, r1, r2
     lsl r1, r0, #2
-    pop { r0 }
+    mov r0, r4
     str r0, [r1]
     mov sp, fp
     pop { r4, fp }

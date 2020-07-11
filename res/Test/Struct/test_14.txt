@@ -44,9 +44,9 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-12]                       /* Load field from struct */
     cmp r0, #0
     beq main.L0
-    ldr r1, [fp, #-24]                       /* Load field from struct */
+    ldr r0, [fp, #-24]                       /* Load field from struct */
     ldr r2, [fp, #-20]                       /* Load field from struct */
-    add r0, r1, r2
+    add r0, r0, r2
     b main.L1
 main.L0: 
     ldr r0, [fp, #-4]                        /* Load field from struct */

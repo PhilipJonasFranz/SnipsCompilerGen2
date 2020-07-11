@@ -33,7 +33,6 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r5, r2
     mov r1, #0
-    mov r0, r0
     bl foo                                   /* Call foo */
     mov r6, r0
     mov r1, #1

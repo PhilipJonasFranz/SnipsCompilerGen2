@@ -26,7 +26,6 @@ sqsum:                                       /* Function: sqsum */
     mov fp, sp
     mov r4, r1
     mov r5, r2
-    mov r0, r0                               /* Evaluate Expression */
     bl sq                                    /* Call sq */
     push { r0 }
     mov r0, r4                               /* Load parameters */

@@ -39,7 +39,6 @@ f:                                           /* Function: f */
 map:                                         /* Function: map */
     push { r4, lr }
     mov r4, r1
-    mov r0, r0                               /* Load parameters */
     add lr, pc, #8
     mov pc, r4
     pop { r4, pc }

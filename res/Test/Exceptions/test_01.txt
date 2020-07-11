@@ -145,9 +145,9 @@ main.L0:
     b _routine_stack_copy_
     mov r10, #0
     ldr r1, [fp, #-20]                       /* Load field from struct */
-    lsl r1, r1, #1
+    lsl r0, r1, #1
     ldr r2, [fp, #-16]                       /* Load field from struct */
-    add r4, r1, r2
+    add r4, r0, r2
     add sp, sp, #12
     mov r12, #0
     b main.L3

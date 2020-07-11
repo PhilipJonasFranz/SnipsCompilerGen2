@@ -161,10 +161,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
-    push { r0 }
     ldr r2, [r1, #28]                        /* Load field from struct */
-    pop { r1 }
-    add r0, r1, r2
+    add r0, r0, r2
     mov sp, fp
     pop { fp, pc }
     

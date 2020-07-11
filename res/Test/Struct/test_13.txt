@@ -223,8 +223,7 @@ Tree.insert.L4:
     b Tree.insert.L9
 Tree.insert.L8: 
     lsl r1, r6, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r6, [r1]                             /* Load field from struct */
+    ldr r6, [r1, #8]                         /* Load field from struct */
 Tree.insert.L3: 
     b Tree.insert.L1
 Tree.insert.L2: 
@@ -242,7 +241,6 @@ main:                                        /* Function: main */
     bl Tree.create_P0                        /* Call Tree.create */
     mov r6, r0
     mov r1, #5
-    mov r0, r0
     bl Tree.insert_P1                        /* Call Tree.insert */
     mov r1, #12
     mov r0, r6

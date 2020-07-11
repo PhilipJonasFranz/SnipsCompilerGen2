@@ -29,8 +29,8 @@ main:                                        /* Function: main */
     ldr r0, [r1]
     add r0, r0, #1
     str r0, [r1]
-    ldr r1, [fp, #-16]                       /* Load field from struct */
+    ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
-    add r0, r1, r2
+    add r0, r0, r2
     bx lr
     

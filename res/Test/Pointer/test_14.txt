@@ -40,9 +40,9 @@ main:                                        /* Function: main */
     mov r0, #3
     mov r1, #5
     push { r1, r0 }
-    mov r1, r3
     sub r0, fp, #16
     lsr r0, r0, #2
+    mov r1, r3
     bl shift                                 /* Call shift */
     mov sp, fp
     pop { fp, pc }

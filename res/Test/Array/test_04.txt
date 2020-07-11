@@ -20,11 +20,11 @@ OUTPUT
 /* --test_04.txt */
     b main
 bar:                                         /* Function: bar */
-    ldr r1, [sp, #0]
+    ldr r0, [sp, #0]
     ldr r2, [sp, #4]
-    add r1, r1, r2
+    add r0, r0, r2
     ldr r2, [sp, #8]
-    add r0, r1, r2
+    add r0, r0, r2
     add sp, sp, #12
     bx lr
     

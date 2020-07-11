@@ -110,7 +110,6 @@ relay:                                       /* Function: relay */
     mov r4, r1
     mov r5, r2
     mov r6, #0
-    mov r0, r0
     push { sp }
     push { r5 }
     push { r4 }
@@ -133,8 +132,7 @@ relay.L1:
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
-    sub r1, fp, #4                           /* Evaluate Expression */
-    ldr r6, [r1]                             /* Load field from struct */
+    ldr r6, [fp, #-4]                        /* Load field from struct */
     add sp, sp, #8
     mov r12, #0
     b relay.L2
@@ -193,9 +191,9 @@ main.L0:
     b _routine_stack_copy_
     mov r10, #0
     ldr r1, [fp, #-20]                       /* Load field from struct */
-    lsl r1, r1, #1
+    lsl r0, r1, #1
     ldr r2, [fp, #-16]                       /* Load field from struct */
-    add r4, r1, r2
+    add r4, r0, r2
     add sp, sp, #12
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
