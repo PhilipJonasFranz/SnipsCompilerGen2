@@ -80,9 +80,7 @@ sort.L6:
     sub r0, r1, #1
     str r9, [r10, r0, lsl #2]
     add r0, r3, r7
-    lsl r1, r0, #2
-    mov r0, r8
-    str r0, [r1]
+    str r8, [r10, r0, lsl #2]
 sort.L9: 
     add r7, r7, #1
     b sort.L6

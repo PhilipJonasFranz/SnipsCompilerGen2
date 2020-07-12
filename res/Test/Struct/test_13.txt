@@ -200,9 +200,8 @@ Tree.insert.L1:                              /* Evaluate condition */
     ldr r1, .POOL2_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne Tree.insert.L6
-    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r6, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
+    str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     b Tree.insert.L9
 Tree.insert.L6: 
@@ -216,9 +215,8 @@ Tree.insert.L4:
     ldr r1, .POOL2_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne Tree.insert.L8
-    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r6, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     b Tree.insert.L9
 Tree.insert.L8: 

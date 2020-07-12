@@ -263,22 +263,20 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     ldr r1, .POOL2_main.L5_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     b List.add.L0
 List.add.L1: 
-    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
-    str r0, [r1, #4]                         /* Store value to struct field */
+    str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
 List.add.L0: 
     pop { r3, r4, r5, pc }
 .POOL2_main.L5_NULL: .word NULL
@@ -423,7 +421,7 @@ List.remove.L14:
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     b List.remove.L15
 List.remove.L16: 
 /* Cut out element and set next pointers */
@@ -436,7 +434,7 @@ List.remove.L16:
     bl free                                  /* Call free */
     mov r0, r6                               /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
+    str r6, [r1, #4]                         /* Store value to struct field */
 List.remove.L15: 
     pop { r3, r4, r5, r6, pc }
 .POOL4_main.L5_NULL: .word NULL
@@ -449,9 +447,7 @@ GameObject.Items.set:                        /* Function: GameObject.Items.set *
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
     add r0, r6, r4
-    lsl r1, r0, #2
-    mov r0, r2
-    str r0, [r1]
+    str r2, [r10, r0, lsl #2]
     pop { r4, r6 }
     bx lr
     
