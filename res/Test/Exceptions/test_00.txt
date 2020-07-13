@@ -114,6 +114,7 @@ main.L0:
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r4, r0, r2
     add sp, sp, #12
+    mov r12, #0
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp

@@ -5,6 +5,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -101,7 +102,10 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		
 		/* Branch to loop start */
-		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(forStart)));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(forStart));
+		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
+		f.instructions.add(branch);
+		
 		
 		/* Add loop end */
 		f.instructions.add(forEnd);

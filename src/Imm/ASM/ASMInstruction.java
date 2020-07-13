@@ -37,7 +37,13 @@ public abstract class ASMInstruction {
 		
 		FUNC_CLEAN, STRUCT_INIT,
 		
-		BX_SEMI_EXIT;
+		BX_SEMI_EXIT,
+		
+		/**
+		 * Mark that a jump will target a loop start, or that its jumping upwards, which means
+		 * that it can distrupt dataflows.
+		 */
+		LOOP_BRANCH;
 	}
 	
 	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */

@@ -185,6 +185,7 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
+    mov r0, r3                               /* Evaluate Expression */
     mov r6, r3
 Tree.insert.L1:                              /* Evaluate condition */
     ldr r1, .POOL2_main.L3_NULL              /* Load null address */
@@ -261,6 +262,7 @@ main:                                        /* Function: main */
     ldr r0, [r1, #12]                        /* Load field from struct */
     b main.L8
 main.L1: 
+    mov r0, r6                               /* Evaluate Expression */
     mov r7, r6
     cmp r4, #1
     bne main.L3

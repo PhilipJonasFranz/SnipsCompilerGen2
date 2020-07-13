@@ -623,7 +623,7 @@ public class ASMOptimizer {
 						else if (ins instanceof ASMCmp) {
 							ASMCmp d = (ASMCmp) ins;
 							
-							if (d.op0.reg == mov.target.reg && d.op0.reg != reg) {
+							if (d.op0.reg == mov.target.reg) {
 								d.op0.reg = reg;
 								markOpt();
 							}
@@ -668,7 +668,7 @@ public class ASMOptimizer {
 					}
 					
 					if (remove) {
-						body.instructions.remove(mov);
+						body.instructions.remove(i);
 						i--;
 						markOpt();
 					}
@@ -1171,10 +1171,29 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
 				REGISTER reg = mov.target.reg;
 				
-				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.R10 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC) {
+				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.R10 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC && reg != REGISTER.R12) {
 					boolean used = false;
 					for (int a = i + 1; a < body.instructions.size(); a++) {
 						if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BX && !body.instructions.get(a).optFlags.contains(OPT_FLAG.BX_SEMI_EXIT)) break;
+						else if (body.instructions.get(a).optFlags.contains(OPT_FLAG.LOOP_BRANCH)) {
+							/* Check if register appeared before until function start */
+							boolean appeared = false;
+							for (int z = a - 1; z >= 0; z--) {
+								ASMInstruction ins = body.instructions.get(z);
+								if (ins instanceof ASMPopStack && ins.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) break;
+								else if (ins instanceof ASMLabel && ((ASMLabel) ins).isFunctionLabel) break;
+								else {
+									appeared |= readsReg(ins, reg);
+								}
+							}
+							
+							/* 
+							 * Appeared, that will most likely mean that the register contains something like 
+							 * an iterator, that will be required further up in the code, so it cannot be removed.
+							 */
+							if (appeared) used = true;
+							break;
+						}
 						else if (body.instructions.get(a) instanceof ASMLabel && ((ASMLabel) body.instructions.get(a)).isFunctionLabel) {
 							break;
 						}
@@ -1828,12 +1847,6 @@ public class ASMOptimizer {
 					
 					if (op0.reg == move1.target.reg && move0.target.reg == op1.reg) {
 						body.instructions.remove(i);
-						i--;
-						markOpt();
-					}
-					else if (move0.target.reg == op1.reg && !move0.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !move1.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
-						op1.reg = op0.reg;
-						body.instructions.remove(i - 1);
 						i--;
 						markOpt();
 					}
