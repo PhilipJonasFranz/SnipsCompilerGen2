@@ -1980,6 +1980,17 @@ public class ASMOptimizer {
 								break;
 							}
 						}
+						else if (body.instructions.get(a) instanceof ASMMla) {
+							ASMMla mla = (ASMMla) body.instructions.get(a);
+							
+							if (mla.op0.reg == target || mla.op1.reg == target || mla.op2.reg == target) {
+								clear = false;
+							}
+							
+							if (mla.target.reg == target) {
+								break;
+							}
+						}
 						else if (body.instructions.get(a) instanceof ASMCmp) {
 							ASMCmp cmp = (ASMCmp) body.instructions.get(a);
 							
