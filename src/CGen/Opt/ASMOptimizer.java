@@ -662,7 +662,7 @@ public class ASMOptimizer {
 						}
 						
 						if (overwritesReg(ins, mov.target.reg) || overwritesReg(ins, reg)) {
-							if (!ins.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) remove = false;
+							remove = false;
 							break;
 						}
 					}
