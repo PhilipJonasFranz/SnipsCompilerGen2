@@ -177,7 +177,7 @@ resv.L18:
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    push { r3, r4, r5, r6, r7 }
+    push { r3, r4, r6, r7 }
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -186,7 +186,6 @@ free:                                        /* Function: free */
 /* Store negated block size */
     rsb r0, r4, #0
     str r0, [r10, r3, lsl #2]
-    mov r5, r0                               /* Evaluate Expression */
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r6, lsl #2]                /* Load from address */
@@ -201,7 +200,7 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    pop { r3, r4, r5, r6, r7 }
+    pop { r3, r4, r6, r7 }
     bx lr
     
 /* [BASE-PACKAGE] */

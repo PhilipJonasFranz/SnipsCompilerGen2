@@ -432,6 +432,8 @@ public class ASMOptimizer {
 	public int countPushedWords(List<ASMInstruction> patch, ASMInstruction end) {
 		int pushed = 0;
 		for (ASMInstruction ins : patch) {
+			if (ins.optFlags.contains(OPT_FLAG.LOOP_BREAK_RESET)) continue;
+			
 			if (ins.equals(end)) break;
 			if (ins instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) ins;
@@ -445,6 +447,12 @@ public class ASMOptimizer {
 				ASMAdd add = (ASMAdd) ins;
 				if (add.target.reg == REGISTER.SP && add.target.reg == REGISTER.SP && add.op1 instanceof ImmOperand) {
 					pushed -= ((ImmOperand) add.op1).value >> 2;
+				}
+			}
+			else if (ins instanceof ASMSub) {
+				ASMSub sub = (ASMSub) ins;
+				if (sub.target.reg == REGISTER.SP && sub.target.reg == REGISTER.SP && sub.op1 instanceof ImmOperand) {
+					pushed += ((ImmOperand) sub.op1).value >> 2;
 				}
 			}
 			else if (ins instanceof ASMMemOp) {
@@ -503,7 +511,6 @@ public class ASMOptimizer {
 					int words = this.countPushedWords(patch, memOp);
 					memOp.op1 = new ImmOperand(op.value + (words * 4));
 				}
-				
 				
 				if (memOp.op0 instanceof RegOperand) {
 					RegOperand op = (RegOperand) memOp.op0;
@@ -576,10 +583,10 @@ public class ASMOptimizer {
 				ASMPopStack pop = (ASMPopStack) ins;
 				for (RegOperand r : pop.operands) if (r.reg == REGISTER.FP) r.reg = REGISTER.SP;
 			}
-			else if (ins instanceof ASMLabel || ins instanceof ASMComment) {
+			else if (ins instanceof ASMLabel || ins instanceof ASMComment || ins instanceof ASMSeperator) {
 				
 			}
-			else throw new SNIPS_EXCEPTION("Cannot patch FP to SP: " + ins.getClass().getName());
+			else throw new RuntimeException("OPT: Cannot patch FP to SP: " + ins.getClass().getName());
 		}
 	}
 	
@@ -682,59 +689,58 @@ public class ASMOptimizer {
 			if (body.instructions.get(i) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) body.instructions.get(i);
 				
-				if (body.instructions.get(i - 1) instanceof ASMPushStack) {
-					ASMPushStack push = (ASMPushStack) body.instructions.get(i - 1);
+				ASMPushStack push = null;
+				if (body.instructions.get(i - 1) instanceof ASMPushStack) push = (ASMPushStack) body.instructions.get(i - 1);
+				
+				if (mov.target.reg == REGISTER.FP && mov.op1 instanceof RegOperand && ((RegOperand) mov.op1).reg == REGISTER.SP) {
+					boolean clear = true;
+					ASMMov mov0 = null;
 					
-					if (mov.target.reg == REGISTER.FP) {
-						boolean clear = true;
-						ASMMov mov0 = null;
-						
-						List<ASMInstruction> patch = new ArrayList();
-						
-						for (int a = i + 1; a < body.instructions.size(); a++) {
-							if (body.instructions.get(a) instanceof ASMMov) {
+					List<ASMInstruction> patch = new ArrayList();
+					
+					for (int a = i + 1; a < body.instructions.size(); a++) {
+						if (body.instructions.get(a) instanceof ASMMov) {
+							mov0 = (ASMMov) body.instructions.get(a);
+							if (mov0.target.reg == REGISTER.SP && mov0.op1 instanceof RegOperand && ((RegOperand) mov0.op1).reg == REGISTER.FP) {
 								mov0 = (ASMMov) body.instructions.get(a);
-								if (mov0.target.reg == REGISTER.SP && mov0.op1 instanceof RegOperand && ((RegOperand) mov0.op1).reg == REGISTER.FP) {
-									mov0 = (ASMMov) body.instructions.get(a);
-									break;
-								}
-							}
-							else if (body.instructions.get(a).equals(push.popCounterpart)) {
-								clear = false;
-								break;
-							}
-							else patch.add(body.instructions.get(a));
-							
-							if (body.instructions.get(a) instanceof ASMPushStack && body.instructions.get(a).optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
-								clear = false;
-								break;
-							}
-							else if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BL) {
-								clear = false;
 								break;
 							}
 						}
+						else patch.add(body.instructions.get(a));
 						
-						if (clear) {
-							if (push.operands.size() == 1 && push.operands.get(0).reg == REGISTER.FP) {
-								
-								/* 
-								 * Check if the patch contains direct asm. If yes, the operation may be unsafe since the
-								 * direct ASM could interfere with the FP/SP.
-								 */
-								boolean containsDirectASM = patch.stream().filter(x -> x instanceof ASMHardcode).count() > 0;
-								if (!containsDirectASM) {
+						if (body.instructions.get(a) instanceof ASMPushStack && body.instructions.get(a).optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
+							clear = false;
+							break;
+						}
+						else if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BL) {
+							clear = false;
+							break;
+						}
+					}
+					
+					if (clear) {
+						if (push == null || push.operands.size() == 1 && push.operands.get(0).reg == REGISTER.FP) {
+							
+							/* 
+							 * Check if the patch contains direct asm. If yes, the operation may be unsafe since the
+							 * direct ASM could interfere with the FP/SP.
+							 */
+							boolean containsDirectASM = patch.stream().filter(x -> x instanceof ASMHardcode).count() > 0;
+							if (!containsDirectASM) {
+								if (push != null) {
 									body.instructions.remove(push);
 									body.instructions.remove(push.popCounterpart);
-									body.instructions.remove(mov);
-									
-									this.patchFramePointerAddressing(patch, 4);
-									
-									this.patchFPtoSP(patch);
 								}
+								
+								body.instructions.remove(mov);
+								
+								if (push != null) this.patchFramePointerAddressing(patch, 4);
+								
+								this.patchFPtoSP(patch);
 								
 								i = body.instructions.indexOf(mov0) + 1;
 								body.instructions.remove(mov0);
+								
 								markOpt();
 							}
 						}
@@ -1167,44 +1173,40 @@ public class ASMOptimizer {
 	
 	private void removeUnusedRegistersStrict(AsNBody body) {
 		for (int i = 0; i < body.instructions.size(); i++) {
-			if (body.instructions.get(i) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) body.instructions.get(i);
-				REGISTER reg = mov.target.reg;
+			if (body.instructions.get(i) instanceof ASMLabel && ((ASMLabel) body.instructions.get(i)).isFunctionLabel) {
+				List<REGISTER> probed = new ArrayList();
 				
-				if (RegOperand.toInt(reg) > 2 && reg != REGISTER.R10 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC && reg != REGISTER.R12) {
-					boolean used = false;
-					for (int a = i + 1; a < body.instructions.size(); a++) {
-						if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BX && !body.instructions.get(a).optFlags.contains(OPT_FLAG.BX_SEMI_EXIT)) break;
-						else if (body.instructions.get(a).optFlags.contains(OPT_FLAG.LOOP_BRANCH)) {
-							/* Check if register appeared before until function start */
-							boolean appeared = false;
-							for (int z = a - 1; z >= 0; z--) {
-								ASMInstruction ins = body.instructions.get(z);
-								if (ins instanceof ASMPopStack && ins.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) break;
-								else if (ins instanceof ASMLabel && ((ASMLabel) ins).isFunctionLabel) break;
+				for (int k = i; k < body.instructions.size(); k++) {
+					if (body.instructions.get(k) instanceof ASMMov) {
+						ASMMov mov = (ASMMov) body.instructions.get(k);
+						REGISTER reg = mov.target.reg;
+						
+						/*
+						 *  Only probe first occurrence of assignment to register after 
+						 *  function start. If mov instruction would not be first, but last
+						 *  to assign to register, algorithm would delete the instruction
+						 *  destroying the data flow.
+						 */
+						if (probed.contains(reg)) continue;
+						else probed.add(reg);
+						
+						if (RegOperand.toInt(reg) > 2 && reg != REGISTER.R10 && reg != REGISTER.FP && reg != REGISTER.SP && reg != REGISTER.LR && reg != REGISTER.PC && reg != REGISTER.R12) {
+							boolean used = false;
+							for (int a = k + 1; a < body.instructions.size(); a++) {
+								if (body.instructions.get(a) instanceof ASMLabel && ((ASMLabel) body.instructions.get(a)).isFunctionLabel) {
+									break;
+								}
 								else {
-									appeared |= readsReg(ins, reg);
+									used |= readsReg(body.instructions.get(a), reg);
 								}
 							}
 							
-							/* 
-							 * Appeared, that will most likely mean that the register contains something like 
-							 * an iterator, that will be required further up in the code, so it cannot be removed.
-							 */
-							if (appeared) used = true;
-							break;
+							if (!used) {
+								body.instructions.remove(k);
+								i--;
+								markOpt();
+							}
 						}
-						else if (body.instructions.get(a) instanceof ASMLabel && ((ASMLabel) body.instructions.get(a)).isFunctionLabel) {
-							break;
-						}
-						else {
-							used |= readsReg(body.instructions.get(a), reg);
-						}
-					}
-					
-					if (!used) {
-						body.instructions.remove(i);
-						i--;
 					}
 				}
 			}
@@ -1248,6 +1250,21 @@ public class ASMOptimizer {
 					}
 				}
 			}
+			else if (RegOperand.toInt(reg) < 10) {
+				for (int a = i + 1; a < body.instructions.size(); a++) {
+					ASMInstruction ins = body.instructions.get(a);
+					
+					if (readsReg(ins, reg) || ins.optFlags.contains(OPT_FLAG.LOOP_BRANCH)) {
+						break;
+					}
+					else if (ins instanceof ASMLabel && ((ASMLabel) ins).isFunctionLabel || a == body.instructions.size() - 1) {
+						body.instructions.remove(i);
+						i--;
+						markOpt();
+						break;
+					}
+				}
+			}
 		}
 	}
 	
@@ -1262,6 +1279,7 @@ public class ASMOptimizer {
 					
 					REGISTER reg = push.operands.get(0).reg;
 					
+					boolean afterFPExchange = false;
 					int line = i;
 					while (true) {
 						if (overwritesReg(body.instructions.get(line), reg) || 
@@ -1270,11 +1288,20 @@ public class ASMOptimizer {
 								body.instructions.get(line) instanceof ASMLdr || body.instructions.get(line) instanceof ASMPopStack) {
 							break;
 						}
-						else line++;
+						else if (readsReg(body.instructions.get(line), REGISTER.SP)) break;
+						else {
+							if (body.instructions.get(line) instanceof ASMMov) {
+								ASMMov mov = (ASMMov) body.instructions.get(line);
+								if (mov.target.reg == REGISTER.SP && mov.op1 instanceof RegOperand && ((RegOperand) mov.op1).reg == REGISTER.FP) {
+									afterFPExchange = true;
+								}
+							}
+							line++;
+						}
 					}
 					
-					if (line != i) markOpt();
-					body.instructions.add(line, push);
+					if (line != i || afterFPExchange) markOpt();
+					if (!afterFPExchange) body.instructions.add(line, push);
 				}
 			}
 		}

@@ -44,8 +44,7 @@ main:                                        /* Function: main */
     add r1, r1, r5
     ldr r2, [sp, #0]
     add r7, r1, r2
-    add r8, r6, r3
-    add r9, r6, r3
+    mov r1, r6                               /* Evaluate Expression */
     add r0, r6, r3
     push { r0 }
     add r0, r6, r3

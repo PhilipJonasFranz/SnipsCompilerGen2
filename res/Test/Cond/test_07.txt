@@ -33,8 +33,7 @@ main:                                        /* Function: main */
     add r1, r1, r5
     ldr r2, [sp, #0]
     add r7, r1, r2
-    add r8, r6, r3
-    add r9, r6, r3
+    mov r1, r6                               /* Evaluate Expression */
     add r0, r6, r3
     push { r0 }
     add r0, r6, r3
@@ -43,8 +42,8 @@ main:                                        /* Function: main */
     push { r0 }
     add r0, r6, r3
     add r3, r3, r7
-    add sp, sp, #16
     push { r0 }
+    add sp, sp, #16
 main.L0: 
     mov r0, r3                               /* Evaluate Expression */
     bx lr
