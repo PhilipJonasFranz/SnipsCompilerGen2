@@ -73,6 +73,8 @@ public class AsNBody extends AsNNode {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralManager();
 		
+		stackCopyRoutine = new ASMLabel("_routine_stack_copy_");
+		
 		AsNBody body = new AsNBody();
 		p.castedNode = body;
 		AsNBody.progress = progress;

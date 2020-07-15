@@ -1796,6 +1796,9 @@ public class ASMOptimizer {
 								
 								ASMMult mul = (ASMMult) body.instructions.get(i + 1);
 								boolean remove = false;
+								
+								if (overwritesReg(ins0, target.reg)) continue;
+								
 								if (mul.op0 != null && mul.op0.reg == RegOperand.toReg(a)) {
 									/* Replace */
 									mul.op0 = target;
@@ -1803,7 +1806,7 @@ public class ASMOptimizer {
 									remove = true;
 								}
 								
-								if (mul.op1 != null && mul.op1 instanceof RegOperand && ((RegOperand) mul.op1).reg == RegOperand.toReg(a)) {
+								if (mul.op1 != null && mul.op1 instanceof RegOperand && mul.op1.reg == RegOperand.toReg(a)) {
 									/* Replace */
 									mul.op1 = target;
 									markOpt();
