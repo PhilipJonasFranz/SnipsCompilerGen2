@@ -44,7 +44,7 @@ public class AsNStructureInit extends AsNExpression {
 	}
 	
 	public static ASMPushStack attatchFlag(ASMPushStack push) {
-		push.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+		push.optFlags.add(OPT_FLAG.STRUCT_INIT);
 		return push;
 	}
 	

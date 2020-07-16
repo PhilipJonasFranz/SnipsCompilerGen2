@@ -19,12 +19,10 @@ OUTPUT
 /* --test_20.txt */
     b main
 set:                                         /* Function: set */
-    push { fp }
-    mov fp, sp
 /* Set m [0] [1] */
     mov r0, #8                               /* Evaluate Expression */
     push { r0 }
-    ldr r1, [fp, #4]
+    ldr r1, [sp, #4]
     add r0, r1, #1
     lsl r1, r0, #2
     pop { r0 }
@@ -32,12 +30,10 @@ set:                                         /* Function: set */
 /* Set m [1] [0] */
     mov r0, #7                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, [fp, #8]
+    ldr r0, [sp, #8]
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    mov sp, fp
-    pop { fp }
     add sp, sp, #8
     bx lr
     
@@ -60,10 +56,9 @@ main:                                        /* Function: main */
     ldr r1, [fp, #-24]
     push { r1, r0 }
     bl set                                   /* Call set */
-    ldr r1, [fp, #-12]
+    ldr r0, [fp, #-12]
     ldr r2, [fp, #-4]
-    add r0, r1, r2
+    add r0, r0, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

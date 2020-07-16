@@ -35,7 +35,23 @@ public abstract class ASMInstruction {
 		 */
 		SYS_JMP,
 		
-		FUNC_CLEAN;
+		FUNC_CLEAN, STRUCT_INIT,
+		
+		BX_SEMI_EXIT,
+		
+		/**
+		 * Mark that a jump will target a loop start, or that its jumping upwards, which means
+		 * that it can distrupt dataflows.
+		 */
+		LOOP_BRANCH, 
+		
+		/**
+		 * When casting a break or continue statement, a scope pop will be initiated. This will
+		 * result in an ASMAdd that adds a value to the SP. When setting this flag, the optimizer
+		 * knows that this is not the final loop stack reset, and will not count it to the pushed
+		 * words when patching FP to SP.
+		 */
+		LOOP_BREAK_RESET;
 	}
 	
 	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */

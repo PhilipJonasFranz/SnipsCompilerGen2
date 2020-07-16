@@ -139,7 +139,26 @@ namespace Float {
 		char [2] c = ",";
 		char* f1 = Integer::toString(f0->f);
 		
-		char* r = String::concat(String::concat(n1, &c), f1);
+		char* r = String::concat(n1, &c);
+		
+		/* 
+		 * If fraction is not 0, pad zeroes before 
+		 * the fraction number as required.
+		 */
+		if (f0->f != 0) {
+			int i = f0->f;
+			
+			while (i * 10 < precision) {
+				char* pad = resv(2);
+				*pad = "0";
+				r = String::concat(r, pad);
+				free(pad);
+				
+				i *= 10;
+			}
+		}
+		
+		r = String::concat(r, f1);
 		
 		free(n1);
 		free(f1);

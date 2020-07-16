@@ -18,21 +18,17 @@ OUTPUT
 /* --test_08.txt */
     b main
 set:                                         /* Function: set */
-    push { r3, r4, r5, fp }
+    push { r4, fp }
     mov fp, sp
-    mov r3, r0
     mov r4, r1
     mov r1, #2
     mul r2, r1, r2
-    add r1, r3, r2
-    push { r4 }
-    ldr r2, [fp, #16]
+    add r1, r0, r2
+    ldr r2, [fp, #8]
     add r0, r1, r2
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
+    str r4, [r10, r0, lsl #2]
     mov sp, fp
-    pop { r3, r4, r5, fp }
+    pop { r4, fp }
     add sp, sp, #4
     bx lr
     
@@ -61,6 +57,5 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

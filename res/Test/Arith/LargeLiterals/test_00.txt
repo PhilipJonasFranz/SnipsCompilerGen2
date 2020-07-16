@@ -10,8 +10,7 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
 main:                                        /* Function: main */
-    mov r3, r0
-    mov r1, r3                               /* Evaluate Expression */
+    mov r1, r0                               /* Evaluate Expression */
     ldr r2, .POOL0_LIT_1024                  /* Literal is too large, load from literal pool */
     mul r0, r1, r2
     bx lr

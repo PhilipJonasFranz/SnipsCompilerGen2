@@ -12,10 +12,7 @@ OUTPUT
 main:                                        /* Function: main */
     mov r3, r0
     add r3, r0, #1
-    mov r1, r0
-    mov r0, r3
-    add r3, r0, #1
-    add r4, r1, r0
+    add r4, r0, r3
     mov r0, r4                               /* Evaluate Expression */
     bx lr
     

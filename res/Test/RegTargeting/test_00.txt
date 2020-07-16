@@ -15,14 +15,9 @@ OUTPUT
 /* --test_00.txt */
     b main
 get:                                         /* Function: get */
-    push { r3, r4 }
     add r0, r0, #5
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl get                                   /* Call get */
-    pop { lr }
-    bx lr
+    b get                                    /* Call get */
     

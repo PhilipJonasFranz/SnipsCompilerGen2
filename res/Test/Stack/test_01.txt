@@ -12,22 +12,13 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
 main:                                        /* Function: main */
-    push { fp }
-    mov fp, sp
-    mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r1, r3                               /* Evaluate Expression */
-    ldr r2, [fp, #4]
-    mul r1, r1, r2
-    add r0, r1, r4
-    push { r0 }
-    ldr r1, [fp, #8]
+    mov r1, r0                               /* Evaluate Expression */
+    ldr r2, [sp, #0]
+    mla r0, r1, r2, r4
+    ldr r1, [sp, #4]
     mul r2, r1, r5
-    pop { r1 }
-    add r0, r1, r2
-    mov sp, fp
-    pop { fp }
-    add sp, sp, #8
+    add r0, r0, r2
     bx lr
     

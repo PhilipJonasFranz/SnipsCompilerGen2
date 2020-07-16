@@ -14,11 +14,8 @@ OUTPUT
 /* --test_05.txt */
     b main
 get:                                         /* Function: get */
-    push { r3, r4 }
     add r0, r0, r1
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
-    pop { r3, r4 }
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
     
 main:                                        /* Function: main */
@@ -37,6 +34,5 @@ main:                                        /* Function: main */
     mov r1, r3
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

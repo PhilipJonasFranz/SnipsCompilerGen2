@@ -21,9 +21,7 @@ lambda_add5_P0:                              /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 add5_P0:                                     /* Function: add5, Provisos: INT | BOOL */
-    push { r3 }
     add r0, r0, #5
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */
@@ -34,6 +32,7 @@ main:                                        /* Function: main */
     mov r4, r0
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_add5_P0
+    mov r10, #0
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
     add lr, pc, #8
@@ -41,6 +40,5 @@ main:                                        /* Function: main */
     mov r0, r3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r4
-    pop { lr }
-    bx lr
+    pop { pc }
     

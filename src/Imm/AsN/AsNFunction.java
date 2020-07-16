@@ -203,7 +203,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			func.instructions.add(push);
 			st.push(REGISTER.LR, REGISTER.FP);
 			
-			/* TODO Save Stackpointer from caller perspective */
+			/* Save Stackpointer from caller perspective */
 			ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
 			ASMMov fpMovBack = null;
 			func.instructions.add(fpMov);
@@ -329,6 +329,8 @@ public class AsNFunction extends AsNCompoundStatement {
 					}
 				}
 				
+				/* Set relation for optimizer */
+				push.popCounterpart = pop;
 				pop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
 				func.instructions.add(pop);
 			}
@@ -341,7 +343,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			
-			if (size != 0) {
+			if (size != 0 && !f.path.build().equals("main")) {
 				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
 			}
 			
@@ -439,8 +441,8 @@ public class AsNFunction extends AsNCompoundStatement {
 						 * dont patch local data since its located above the pushed regs.
 						 */
 						if (op.dir == PATCH_DIR.UP) {
-							int val = op.patch(offset);
-							stackOp.op1 = new ImmOperand(val);
+							op.patch(offset);
+							stackOp.op1 = new ImmOperand(op.patchedValue, op);
 						}
 					}
 					else throw new CGEN_EXCEPTION(this.source.getSource(), "Cannot patch non-patchable imm operand!");
@@ -454,8 +456,8 @@ public class AsNFunction extends AsNCompoundStatement {
 						PatchableImmOperand op = (PatchableImmOperand) binary.op1;
 						
 						if (op.dir == PATCH_DIR.UP) {
-							int val = op.patch(offset);
-							binary.op1 = new ImmOperand(val);
+							op.patch(offset);
+							binary.op1 = new ImmOperand(op.patchedValue, op);
 						}
 					}
 				}
@@ -468,8 +470,8 @@ public class AsNFunction extends AsNCompoundStatement {
 						PatchableImmOperand op = (PatchableImmOperand) mem.op1;
 						
 						if (op.dir == PATCH_DIR.UP) {
-							int val = op.patch(offset);
-							mem.op1 = new ImmOperand(val);
+							op.patch(offset);
+							mem.op1 = new ImmOperand(op.patchedValue, op);
 						}
 					}
 				}
@@ -489,7 +491,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * @return
 	 */
 	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
+		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R10, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
 		List<REGISTER> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {

@@ -8,6 +8,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
@@ -63,7 +64,12 @@ public abstract class AsNNode {
 					st.push(r.getReg(reg).declaration);
 				}
 				else {
-					this.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(reg)));
+					ASMMov mov = new ASMMov(new RegOperand(free), new RegOperand(reg));
+					
+					/* Mark for optimizer to prevent double crossing optimization */
+					mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+					
+					this.instructions.add(mov);
 					r.copy(reg, free);
 				}
 				

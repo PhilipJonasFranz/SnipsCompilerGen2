@@ -28,25 +28,22 @@ OUTPUT
 /* --test_10.txt */
     b main
 bar:                                         /* Function: bar */
-    push { r3, r4, r5, fp }
+    push { r3, r4, fp }
     mov fp, sp
     mov r3, r0
     mov r4, r1
-    mov r5, r2
-    mov r1, r5                               /* Evaluate Expression */
-    ldr r2, [fp, #16]
-    mul r1, r1, r2
+    mov r1, r2                               /* Evaluate Expression */
+    ldr r2, [fp, #12]
+    mul r0, r1, r2
     mul r2, r3, r4
-    add r0, r1, r2
+    add r0, r0, r2
     mov sp, fp
-    pop { r3, r4, r5, fp }
+    pop { r3, r4, fp }
     add sp, sp, #4
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, r4 }
     add r0, r1, r0
-    pop { r3, r4 }
     bx lr
     
 main:                                        /* Function: main */
@@ -113,7 +110,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-20]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    add sp, sp, #4
-    bx lr
+    pop { fp, pc }
     

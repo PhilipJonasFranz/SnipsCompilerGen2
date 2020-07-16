@@ -24,15 +24,13 @@ get:                                         /* Function: get */
     mov fp, sp
     mov r3, r0
     ldr r1, [fp, #8]
-    add r0, r1, r3
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    add r0, r1, r0
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
     ldr r1, [fp, #12]
     add r0, r1, r3
     pop { r1 }
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r2, [r0]                             /* Load from address */
+    ldr r2, [r10, r0, lsl #2]                /* Load from address */
     sub r0, r1, r2
     mov sp, fp
     pop { r3, fp }
@@ -67,6 +65,5 @@ main:                                        /* Function: main */
     mov r0, r3
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

@@ -5,6 +5,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -59,7 +60,9 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.add(continueJump);
 			
 			/* Branch to loop start */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart));
+			branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
+			w.instructions.add(branch);
 			
 			/* While End Label */
 			w.instructions.add(whileEnd);
@@ -98,8 +101,10 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		/* Add jump for continue statements to use as target */
 		this.instructions.add(continueJump);
 		
-		/* Branch to loop Start */
-		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart)));
+		/* Branch to loop start */
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart));
+		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
+		this.instructions.add(branch);
 		
 		this.instructions.add(whileEnd);
 	}

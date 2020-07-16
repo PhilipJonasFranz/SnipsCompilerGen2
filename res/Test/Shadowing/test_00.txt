@@ -18,15 +18,10 @@ OUTPUT
 x: .word 10
     
 .text
-    b main
+    bx lr
 get:                                         /* Function: get */
-    push { r3 }
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl get                                   /* Call get */
-    pop { lr }
-    bx lr
+    bx lr                                    /* Call get */
     

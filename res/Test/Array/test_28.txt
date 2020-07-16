@@ -42,8 +42,7 @@ foo:                                         /* Function: foo */
     pop { r0 }
     str r0, [r1, #12]
     mov r2, #0                               /* Evaluate Expression */
-    mov r1, #8
-    mul r0, r3, r1
+    lsl r0, r3, #3
     add r2, r2, r0
     lsl r0, r4, #2
     add r2, r2, r0
@@ -74,7 +73,6 @@ main_init:
     str r0, [r1, #12]
     pop { r0, r1, r2 }
 main:                                        /* Function: main */
-    push { lr }
     mov r3, r0
     mov r4, r1
     ldr r2, .POOL0_main.L0_vec               /* Evaluate Expression */
@@ -85,10 +83,8 @@ main:                                        /* Function: main */
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
     push { r1, r0 }
-    mov r1, r4
     mov r0, r3
-    bl foo                                   /* Call foo */
-    pop { lr }
-    bx lr
+    mov r1, r4
+    b foo                                    /* Call foo */
 .POOL0_main.L0_vec: .word vec
     

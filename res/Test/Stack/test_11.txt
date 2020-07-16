@@ -33,18 +33,11 @@ OUTPUT
 /* --test_11.txt */
     b main
 bar:                                         /* Function: bar */
-    push { r3, r4, r5, fp }
-    mov fp, sp
-    mov r5, r2
     mul r0, r0, r1
-    mov r1, r5
-    push { r0 }
-    ldr r2, [fp, #16]
+    mov r1, r2
+    ldr r2, [sp, #0]
     mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
-    mov sp, fp
-    pop { r3, r4, r5, fp }
+    add r0, r0, r2
     add sp, sp, #4
     bx lr
     
@@ -52,7 +45,7 @@ fooRec:                                      /* Function: fooRec */
     push { r3, r4, lr }
     mov r3, r0
     mov r4, r1
-    cmp r4, #0
+    cmp r1, #0
     bne fooRec.L1
     mov r0, r3                               /* Evaluate Expression */
     b fooRec.L2
@@ -62,14 +55,10 @@ fooRec.L1:
     bl fooRec                                /* Call fooRec */
     add r0, r0, #1
 fooRec.L2: 
-    pop { r3, r4, lr }
-    bx lr
+    pop { r3, r4, pc }
     
 foo:                                         /* Function: foo */
-    push { r3, r4, lr }
-    bl fooRec                                /* Call fooRec */
-    pop { r3, r4, lr }
-    bx lr
+    b fooRec                                 /* Call fooRec */
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -78,7 +67,6 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r5, r2
     mov r1, #0
-    mov r0, r3
     bl foo                                   /* Call foo */
     mov r6, r0
     mov r1, #1
@@ -135,7 +123,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, lr }
-    add sp, sp, #4
-    bx lr
+    pop { fp, pc }
     

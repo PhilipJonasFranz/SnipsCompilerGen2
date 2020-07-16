@@ -25,9 +25,7 @@ lambda_add5:                                 /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 add5:                                        /* Function: add5 */
-    push { r3 }
     add r0, r0, #5
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */
@@ -40,6 +38,7 @@ main:                                        /* Function: main */
     push { r0 }
     add r10, pc, #8
     b lambda_add5
+    mov r10, #0
     push { r0 }
     mov r0, #99
     mov r1, #1

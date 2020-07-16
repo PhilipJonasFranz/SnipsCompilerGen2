@@ -7,6 +7,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXCEPTION;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Structural.ASMComment;
@@ -101,7 +102,9 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		int add = st.closeScope(s, close);
 		
 		if (add != 0) {
-			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
+			ASMAdd add0 = new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add));
+			if (!close) add0.optFlags.add(OPT_FLAG.LOOP_BREAK_RESET);
+			node.instructions.add(add0);
 		}
 	}
 	

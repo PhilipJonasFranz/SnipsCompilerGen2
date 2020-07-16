@@ -12,8 +12,8 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
 .data
-HEAP_START: .word 0
 NULL: .word 0
+HEAP_START: .word 0
     
 .text
     b main
@@ -25,19 +25,17 @@ resv:                                        /* Function: resv */
     push { r3, r4, r5, r6 }
     mov r3, r0
 /* Add block header to size */
-    add r3, r3, #1
+    add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_main.L3_HEAP_START        /* Evaluate Expression */
+    ldr r0, .POOL0_main.L4_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
-    lsl r0, r4, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
     cmp r0, #0
     beq resv.L2
 /* Memory Section is allocated or free */
 /* Load block size from memory */
-    lsl r0, r4, #2                           /* Convert to bytes */
-    ldr r5, [r0]                             /* Load from address */
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
     cmp r5, #0
     bge resv.L4
 /* Defragment Heap */
@@ -46,8 +44,7 @@ resv.L6:                                     /* Evaluate condition */
     cmp r0, #1
     bne resv.L7
     sub r0, r4, r5
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r6, [r0]                             /* Load from address */
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
     cmp r6, #0
     ble resv.L9
     b resv.L7
@@ -63,9 +60,7 @@ resv.L11:
 /* Add to current size */
     b resv.L6
 resv.L7: 
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r4, #2
-    str r0, [r1]
+    str r5, [r10, r4, lsl #2]
 /* Write defragmented size to heap */
     cmp r5, #0
     bne resv.L12
@@ -81,9 +76,7 @@ resv.L12:
     cmp r5, r3
     bne resv.L15
 /* Fits */
-    mov r0, r3                               /* Evaluate Expression */
-    lsl r1, r4, #2
-    str r0, [r1]
+    str r3, [r10, r4, lsl #2]
     add r0, r4, #1
     b resv.L18
 resv.L15: 
@@ -91,9 +84,7 @@ resv.L15:
     ble resv.L17
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
-    mov r0, r3                               /* Evaluate Expression */
-    lsl r1, r4, #2
-    str r0, [r1]
+    str r3, [r10, r4, lsl #2]
     rsb r0, r5, #0
     push { r0 }
     add r0, r4, r3
@@ -112,49 +103,41 @@ resv.L3:
     b resv.L1
 resv.L2: 
 /* End reached, create new block */
-    mov r0, r3                               /* Evaluate Expression */
-    lsl r1, r4, #2
-    str r0, [r1]
+    str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
     pop { r3, r4, r5, r6 }
     bx lr
-.POOL0_main.L3_HEAP_START: .word HEAP_START
+.POOL0_main.L4_HEAP_START: .word HEAP_START
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    push { r3, r4, r5, r6, r7 }
+    push { r3, r4, r6, r7 }
     mov r3, r0
 /* Jump to block head */
-    sub r3, r3, #1
+    sub r3, r0, #1
 /* Load Block Size */
-    lsl r0, r3, #2                           /* Convert to bytes */
-    ldr r4, [r0]                             /* Load from address */
+    ldr r4, [r10, r3, lsl #2]                /* Load from address */
 /* Store negated block size */
     rsb r0, r4, #0
-    lsl r1, r3, #2
-    str r0, [r1]
+    str r0, [r10, r3, lsl #2]
     add r6, r3, r4
 free.L1:                                     /* Evaluate condition */
-    lsl r0, r6, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    ldr r0, [r10, r6, lsl #2]                /* Load from address */
     cmp r0, #0
     bge free.L2
-    lsl r0, r6, #2                           /* Convert to bytes */
-    ldr r7, [r0]                             /* Load from address */
+    ldr r7, [r10, r6, lsl #2]                /* Load from address */
 /* Add size to freed block */
-    lsl r0, r3, #2                           /* Convert to bytes */
-    ldr r1, [r0]                             /* Load from address */
+    ldr r1, [r10, r3, lsl #2]                /* Load from address */
     add r0, r1, r7
-    lsl r1, r3, #2
-    str r0, [r1]
+    str r0, [r10, r3, lsl #2]
 /* Shift pointer to next block */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    pop { r3, r4, r5, r6, r7 }
+    pop { r3, r4, r6, r7 }
     bx lr
     
 /* [BASE-PACKAGE] */
@@ -174,8 +157,8 @@ List.create_P0:                              /* Function: List.create, Provisos:
     mov r4, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL1_main.L4_NULL              /* Load null address */
-    ldr r1, .POOL1_main.L4_NULL              /* Load null address */
+    ldr r0, .POOL1_main.L3_NULL              /* Load null address */
+    ldr r1, .POOL1_main.L3_NULL              /* Load null address */
     push { r1, r0 }
     mov r0, #2
     lsl r1, r4, #2
@@ -187,11 +170,8 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, lr }
-    bx lr
-.POOL1_main.L4_NULL: .word NULL
-    
-/* Free the list by freeing all contained list nodes, and the list itself. */
+    pop { r3, r4, pc }
+.POOL1_main.L3_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
@@ -204,7 +184,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL2_main.L4_NULL              /* Load null address */
+    ldr r0, .POOL2_main.L3_NULL              /* Load null address */
     push { r0 }
     mov r0, #1
     lsl r1, r5, #2
@@ -215,30 +195,26 @@ List.add_P1:                                 /* Function: List.add, Provisos: CH
     str r0, [r1, #8]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_main.L4_NULL              /* Load null address */
+    ldr r1, .POOL2_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     b List.add.L0
 List.add.L1: 
-    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
-    str r0, [r1, #4]                         /* Store value to struct field */
+    str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    str r0, [r1]                             /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
 List.add.L0: 
-    pop { r3, r4, r5, lr }
-    bx lr
-.POOL2_main.L4_NULL: .word NULL
+    pop { r3, r4, r5, pc }
+.POOL2_main.L3_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
@@ -246,7 +222,7 @@ List.get_P2:                                 /* Function: List.get, Provisos: CH
     push { r3, r4, r5 }
     mov r3, r0
     mov r4, r1
-    cmp r4, #0
+    cmp r1, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
@@ -259,7 +235,7 @@ List.get.L3:                                 /* Evaluate condition */
     beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_main.L4_NULL              /* Load null address */
+    ldr r1, .POOL3_main.L3_NULL              /* Load null address */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -270,7 +246,7 @@ List.get.L5:
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
-    sub r4, r0, #1
+    sub r4, r4, #1
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
@@ -278,47 +254,29 @@ List.get.L4:
 List.get.L7: 
     pop { r3, r4, r5 }
     bx lr
-.POOL3_main.L4_NULL: .word NULL
-    
-/* Returns the the node at the given index. Returns */
-/* null if the index is invalid. */
-    
-/* Check if given list contains given value. If the current value matches */
-/* the searched value determines the predicate. */
-    
-/* Finds the first node in the list that has given value. */
-/* Returns a pointer to this list node, or 0 in case the */
-/* value wasnt found. */
+.POOL3_main.L3_NULL: .word NULL
     
 /* Returns the amount of elements stored in the list. */
 List.size:                                   /* Function: List.size */
-    push { r3, r4, r5 }
+    push { r4, r5 }
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 List.size.L1:                                /* Evaluate condition */
-    ldr r1, .POOL4_main.L4_NULL              /* Load null address */
+    ldr r1, .POOL4_main.L3_NULL              /* Load null address */
     cmp r4, r1
     beq List.size.L2
     lsl r1, r4, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r4, [r1]                             /* Load field from struct */
+    ldr r4, [r1, #4]                         /* Load field from struct */
     mov r0, r5
-    add r5, r0, #1
+    add r5, r5, #1
     b List.size.L1
 List.size.L2: 
     mov r0, r5                               /* Evaluate Expression */
-    pop { r3, r4, r5 }
+    pop { r4, r5 }
     bx lr
-.POOL4_main.L4_NULL: .word NULL
-    
-/* Returns the index of given node in the list. */
-    
-/* Removes the index at given index. */
-/* If the index is out of bounds nothing is removed. */
-    
-/* Removes all elements from the list */
+.POOL4_main.L3_NULL: .word NULL
     
 /* This package contains various utility functions for Strings chars. */
 /* Compares the two given strings. Checks if all chars are equal and returns the */
@@ -334,11 +292,9 @@ String.equals.L1:                            /* Evaluate condition */
     cmp r0, #1
     bne String.equals.L2
     add r0, r3, r6
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r7, [r0]                             /* Load from address */
+    ldr r7, [r10, r0, lsl #2]                /* Load from address */
     add r0, r4, r6
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r8, [r0]                             /* Load from address */
+    ldr r8, [r10, r0, lsl #2]                /* Load from address */
     cmp r7, r8
     moveq r0, #1
     movne r0, #0
@@ -364,7 +320,7 @@ String.equals.L1:                            /* Evaluate condition */
     b String.equals.L2
 String.equals.L4: 
     mov r0, r6
-    add r6, r0, #1
+    add r6, r6, #1
     b String.equals.L1
 String.equals.L2: 
     mov r0, r5                               /* Evaluate Expression */
@@ -388,8 +344,7 @@ String.substring:                            /* Function: String.substring */
     mov r7, #0
 String.substring.L1:                         /* Evaluate condition */
     add r0, r3, r7
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     cmp r0, #0
     beq String.substring.L2
     cmp r7, r4
@@ -409,20 +364,19 @@ String.substring.L1:                         /* Evaluate condition */
     cmp r0, #0
     beq String.substring.L4
     add r0, r3, r7
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r1, [r0]                             /* Load from address */
+    ldr r1, [r10, r0, lsl #2]                /* Load from address */
     mov r0, r6
     bl List.add_P1                           /* Call List.add */
 String.substring.L4: 
     mov r0, r7
-    add r7, r0, #1
+    add r7, r7, #1
     b String.substring.L1
 String.substring.L2: 
     mov r0, r6                               /* Evaluate Expression */
     bl List.size                             /* Call List.size */
     mov r8, r0
 /* Substring only consists out of null char */
-    cmp r8, #1
+    cmp r0, #1
     moveq r0, #1
     movne r0, #0
     mov r1, #0
@@ -445,8 +399,7 @@ String.substring.L2:
     bl resv                                  /* Call resv */
     mov r9, r0
     mov r0, #0                               /* Evaluate Expression */
-    lsl r1, r3, #2
-    str r0, [r1]
+    str r0, [r10, r3, lsl #2]
 /* Cleanup and return result */
     mov r0, r6                               /* Load parameters */
     bl free                                  /* Call free */
@@ -466,10 +419,9 @@ String.substring.L8:
     ldr r1, [fp, #-4]                        /* Evaluate Expression */
     mov r0, r6
     bl List.get_P2                           /* Call List.get */
-    mov r1, r9
     push { r0 }
     ldr r2, [fp, #-4]
-    add r0, r1, r2
+    add r0, r9, r2
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
@@ -491,8 +443,7 @@ String.substring.L9:
     mov r0, r9                               /* Evaluate Expression */
 String.substring.L10: 
     mov sp, fp
-    pop { r3, r4, r5, r6, r7, r8, r9, fp, lr }
-    bx lr
+    pop { r3, r4, r5, r6, r7, r8, r9, fp, pc }
     
 /* Returns the length of the string. The length is determined by the first */
 /* occurrence of the 0 termination char. The length does include the 0 char. */
@@ -502,22 +453,17 @@ String.length:                               /* Function: String.length */
     mov r4, #0
 String.length.L1:                            /* Evaluate condition */
     add r0, r3, r4
-    lsl r0, r0, #2                           /* Convert to bytes */
-    ldr r0, [r0]                             /* Load from address */
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     cmp r0, #0
     beq String.length.L2
     mov r0, r4
-    add r4, r0, #1
+    add r4, r4, #1
     b String.length.L1
 String.length.L2: 
-    mov r0, r4
-    add r4, r0, #1
+    add r4, r4, #1
     mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr
-    
-/* Concatenates the two given strings. Result is one string. Does */
-/* only read the two given strings. */
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -549,6 +495,5 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     bl String.equals                         /* Call String.equals */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

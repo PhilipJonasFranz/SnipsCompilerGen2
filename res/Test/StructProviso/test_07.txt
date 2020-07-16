@@ -36,8 +36,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     push { r0 }
-    ldr r1, [fp, #-16]                       /* Load field from struct */
+    ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
-    add r0, r1, r2
+    add r0, r0, r2
     bx lr
     

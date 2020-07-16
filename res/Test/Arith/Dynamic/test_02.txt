@@ -16,8 +16,6 @@ OUTPUT
 /* --test_02.txt */
     b main
 bar:                                         /* Function: bar */
-    push { r3 }
-    pop { r3 }
     bx lr
     
 foo:                                         /* Function: foo */
@@ -29,8 +27,7 @@ foo:                                         /* Function: foo */
     bl bar                                   /* Call bar */
     pop { r1 }
     mul r0, r1, r0
-    pop { lr }
-    bx lr
+    pop { pc }
     
 main:                                        /* Function: main */
     push { lr }
@@ -39,6 +36,5 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     pop { r1 }
     add r0, r1, r0
-    pop { lr }
-    bx lr
+    pop { pc }
     

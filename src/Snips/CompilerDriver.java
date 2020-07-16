@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import CGen.LabelGen;
@@ -17,6 +19,7 @@ import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
@@ -32,6 +35,7 @@ import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
 import Util.NamespacePath;
+import Util.Pair;
 import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
@@ -81,6 +85,10 @@ public class CompilerDriver {
 	public static int commentDistance = 45;
 	
 	public static List<Double> compressions = new ArrayList();
+	
+	public static double c_min = 100, c_max = 0;
+	
+	public static HashMap<String, Integer> ins_p = new HashMap();
 	
 	public static int instructionsGenerated = 0;
 	
@@ -262,7 +270,16 @@ public class CompilerDriver {
 					/* --- CODE GENERATION --- */
 			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, Message.Type.INFO);
 			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
-		
+
+			/* Remove comments left over by removed functions */
+			for (int i = 1; i < body.instructions.size(); i++) {
+				if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
+					body.instructions.remove(i - 1);
+					i -= 2;
+					if (i < 1) i = 1;
+				}
+			}
+			
 			
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
@@ -276,12 +293,21 @@ public class CompilerDriver {
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 				compressions.add(rate);
+				
+				if (rate < c_min) c_min = rate;
+				if (rate > c_max) c_max = rate;
+				
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
 			
 			
 					/* --- OUTPUT BUILDING --- */
+			output = new ArrayList();
+			
 			output = body.getInstructions().stream().filter(x -> ((x instanceof ASMComment)? enableComments : true)).map(x -> {
+				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
+				else ins_p.put(x.getClass().getName(), 1);
+				
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
@@ -509,8 +535,102 @@ public class CompilerDriver {
 		compressions.stream().forEach(x -> rate [0] += x / compressions.size());
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
-		log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%", Message.Type.INFO));
-		log.add(new Message("SNIPS_OPT1 -> Instructions generated: " + instructionsGenerated, Message.Type.INFO));
+		
+		String f = "  ";
+		
+		if (!disableOptimizer) {
+			log.add(new Message("SNIPS_OPT1 -> Compression Statistics: ", Message.Type.INFO));
+			
+			/* Plot compression statistics */		
+			System.out.println();
+			
+			int [] map = new int [100];
+			for (double d : compressions) {
+				map [(int) d - 1]++;
+			}
+			
+			int m = 0;
+			for (int i : map) if (i > m) m = i;
+			
+			f = ("" + m).replaceAll(".", " ");
+			
+			for (int i = m; i >= 0; i--) {
+				
+				if (i % 5 == 0) {
+					String num = "" + i;
+					for (int k = 0; k < f.length() - num.length(); k++) System.out.print(" ");
+					System.out.print(num + "|");
+				}
+				else System.out.print(f + "|");
+				for (int a = 0; a < 100; a++) {
+					if (map [a] > i) System.out.print("\u2588");
+					else System.out.print(" ");
+				}
+				System.out.println();
+			}
+			
+			for (int i = 0; i < 100; i++) {
+				if (i > f.length()) System.out.print("-");
+				else System.out.print(" ");
+			}
+			System.out.println();
+			
+			System.out.print(" ");
+			String s = f;
+			for (int i = 0; i <= 100; i += 10) {
+				if (i % 10 == 0) {
+					s += "" + i;
+					while (s.length() < i + 10) s += " ";
+				}
+			}
+			
+			System.out.println(s + "\n");
+			
+			log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + c_min + "%, max: " + c_max + "%", Message.Type.INFO));
+		}
+		
+		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Message.Type.INFO));
+		
+		System.out.println();
+		List<Pair<Integer, String>> rmap = new ArrayList();
+		for (Entry<String, Integer> e : ins_p.entrySet()) {
+			if (rmap.isEmpty()) {
+				rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
+			}
+			else {
+				boolean added = false;
+				for (int i = 0; i < rmap.size(); i++) {
+					if (e.getValue() > rmap.get(i).first) {
+						rmap.add(i, new Pair<Integer, String>(e.getValue(), e.getKey()));
+						added = true;
+						break;
+					}
+				}
+				
+				if (!added) rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
+			}
+		}
+		
+		double stretch = 1.0;
+		
+		if (rmap.get(0).first > 75) {
+			stretch = 75.0 / rmap.get(0).first;
+		}
+		
+		for (int i = 0; i < rmap.size(); i++) {
+			System.out.print(f + "|");
+			for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
+				System.out.print("\u2588");
+			}
+			
+			String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+			
+			System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+		}
+		
+		System.out.println();
+		
+		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
 	}
 	
 	/** Resets flags during burst compilation */

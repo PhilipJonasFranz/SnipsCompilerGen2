@@ -14,14 +14,9 @@ OUTPUT
 /* --test_05.txt */
     b main
 foo_P0:                                      /* Function: foo, Provisos: INT */
-    push { r3 }
     mov r0, #5                               /* Evaluate Expression */
-    pop { r3 }
     bx lr
     
 main:                                        /* Function: main */
-    push { lr }
-    bl foo_P0                                /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    b foo_P0                                 /* Evaluate Expression */
     

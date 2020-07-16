@@ -59,24 +59,20 @@ __op_div.L2:
     bx lr
     
 bar:                                         /* Function: bar */
-    push { r3 }
-    mov r2, #2
-    mul r0, r0, r2
-    pop { r3 }
+    lsl r0, r0, #1
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, lr }
+    push { lr }
     bl bar                                   /* Call bar */
     mov r1, #2
     mul r0, r1, r0
-    pop { r3, lr }
-    bx lr
+    pop { pc }
     
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
-    cmp r3, #2
+    cmp r0, #2
     bne main.L0
     mov r3, #3
 main.L0: 
@@ -86,6 +82,5 @@ main.L0:
     bl foo                                   /* Call foo */
     pop { r1 }
     bl __op_div                              /* Call __op_div */
-    pop { lr }
-    bx lr
+    pop { pc }
     

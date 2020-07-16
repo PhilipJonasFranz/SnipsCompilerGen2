@@ -17,27 +17,23 @@ OUTPUT
 /* --test_13.txt */
     b main
 add:                                         /* Function: add */
-    push { fp }
-    mov fp, sp
-    ldr r1, [fp, #4]
-    ldr r2, [fp, #8]
-    add r1, r1, r2
-    ldr r2, [fp, #12]
-    add r1, r1, r2
-    ldr r2, [fp, #16]
-    add r1, r1, r2
-    ldr r2, [fp, #20]
-    add r1, r1, r2
-    ldr r2, [fp, #24]
-    add r1, r1, r2
-    ldr r2, [fp, #28]
-    add r1, r1, r2
-    ldr r2, [fp, #32]
-    add r1, r1, r2
-    ldr r2, [fp, #36]
-    add r0, r1, r2
-    mov sp, fp
-    pop { fp }
+    ldr r0, [sp, #0]
+    ldr r2, [sp, #4]
+    add r0, r0, r2
+    ldr r2, [sp, #8]
+    add r0, r0, r2
+    ldr r2, [sp, #12]
+    add r0, r0, r2
+    ldr r2, [sp, #16]
+    add r0, r0, r2
+    ldr r2, [sp, #20]
+    add r0, r0, r2
+    ldr r2, [sp, #24]
+    add r0, r0, r2
+    ldr r2, [sp, #28]
+    add r0, r0, r2
+    ldr r2, [sp, #32]
+    add r0, r0, r2
     add sp, sp, #36
     bx lr
     
@@ -85,6 +81,5 @@ main.L0:                                     /* Copy memory section with loop */
 main.L1: 
     bl add                                   /* Call add */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

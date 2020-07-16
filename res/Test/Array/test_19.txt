@@ -86,6 +86,5 @@ main:                                        /* Function: main */
     push { r0 }
     bl __vec_cross                           /* Call __vec_cross */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

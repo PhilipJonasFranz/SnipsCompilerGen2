@@ -6,6 +6,7 @@ int main(int a) {
 		if (i < 5) {
 			for (int b = 0; b < 4; b = b + 1) {
 				c = c + c;
+				int [2] x = {4, 6};
 			}
 		}
 	}
@@ -17,6 +18,7 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
 main:                                        /* Function: main */
+    mov fp, sp
     mov r3, r0
     mov r4, #0
     mov r5, #0
@@ -33,12 +35,17 @@ main.L6:
     cmp r6, #4
     bge main.L7
     add r4, r4, r4
+    mov r0, #6                               /* Evaluate Expression */
+    mov r1, #4
+    push { r1, r0 }
     add r6, r6, #1
+    add sp, sp, #8
     b main.L6
 main.L7: 
     add r5, r5, #1
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
+    mov sp, fp
     bx lr
     

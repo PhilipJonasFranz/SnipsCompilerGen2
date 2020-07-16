@@ -16,25 +16,17 @@ OUTPUT
 /* --test_03.txt */
     b main
 vecProd:                                     /* Function: vecProd */
-    push { fp }
-    mov fp, sp
-    ldr r1, [fp, #16]
-    ldr r2, [fp, #4]
-    mul r0, r1, r2
-    push { r0 }
-    ldr r1, [fp, #20]
-    ldr r2, [fp, #8]
-    mul r2, r1, r2
-    pop { r1 }
+    ldr r0, [sp, #12]
+    ldr r2, [sp, #0]
+    mul r1, r0, r2
+    ldr r0, [sp, #16]
+    ldr r2, [sp, #4]
+    mul r2, r0, r2
+    add r1, r1, r2
+    ldr r0, [sp, #20]
+    ldr r2, [sp, #8]
+    mul r2, r0, r2
     add r0, r1, r2
-    push { r0 }
-    ldr r1, [fp, #24]
-    ldr r2, [fp, #12]
-    mul r2, r1, r2
-    pop { r1 }
-    add r0, r1, r2
-    mov sp, fp
-    pop { fp }
     add sp, sp, #24
     bx lr
     
@@ -59,6 +51,5 @@ main:                                        /* Function: main */
     push { r2, r1, r0 }
     bl vecProd                               /* Call vecProd */
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

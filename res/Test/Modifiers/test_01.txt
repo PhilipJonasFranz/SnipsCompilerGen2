@@ -47,16 +47,16 @@ Test.getter:                                 /* Function: Test.getter */
     add r1, r2, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     bl Test.getter                           /* Evaluate Expression */
-    ldr r1, [fp, #-8]                        /* Load field from struct */
+    ldr r0, [fp, #-8]                        /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
-    add r0, r1, r2
+    add r0, r0, r2
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

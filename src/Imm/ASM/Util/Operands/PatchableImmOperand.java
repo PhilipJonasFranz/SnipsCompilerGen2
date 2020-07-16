@@ -10,22 +10,37 @@ public class PatchableImmOperand extends Operand {
 	
 	public int value;
 	
+	public int patchedValue;
+	
 	public PatchableImmOperand(PATCH_DIR dir, int value) {
 		this.dir = dir;
 		this.value = value;
+		this.patchedValue = value;
 	}
 
 	public String toString() {
-		return "#" + this.value;
+		return "#" + this.patchedValue;
 	}
 	
-	public int patch(int off) {
+	public void patch(int off) {
 		if (this.dir == PATCH_DIR.UP) {
-			this.value += off;
+			this.patchedValue = this.value + off;
 		}
-		else this.value -= off;
-		
-		return this.value;
+		else this.patchedValue = this.value - off;
+	}
+
+	public PatchableImmOperand clone() {
+		PatchableImmOperand p = new PatchableImmOperand(this.dir, this.value);
+		p.patchedValue = this.patchedValue;
+		return p;
+	}
+
+	public boolean equals(Operand operand) {
+		if (!(operand instanceof PatchableImmOperand)) return false;
+		else {
+			PatchableImmOperand op = (PatchableImmOperand) operand;
+			return op.dir == this.dir && op.value == this.value;
+		}
 	}
 	
 }

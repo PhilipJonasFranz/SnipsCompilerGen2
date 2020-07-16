@@ -16,8 +16,7 @@ OUTPUT
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
-    mov r2, #2
-    mul r0, r0, r2
+    lsl r0, r0, #1
     push { r0 }
     push { r3 }
     mov r0, #1

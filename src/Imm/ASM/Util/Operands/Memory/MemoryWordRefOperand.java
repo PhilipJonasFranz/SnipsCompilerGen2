@@ -1,6 +1,7 @@
 package Imm.ASM.Util.Operands.Memory;
 
 import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.Operand;
 
 public class MemoryWordRefOperand extends MemoryOperand {
 
@@ -18,6 +19,14 @@ public class MemoryWordRefOperand extends MemoryOperand {
 
 	public MemoryOperand clone() {
 		return new MemoryWordRefOperand(this.dataLabel.clone());
+	}
+
+	public boolean equals(Operand operand) {
+		if (!(operand instanceof MemoryWordRefOperand)) return false;
+		else {
+			MemoryWordRefOperand op = (MemoryWordRefOperand) operand;
+			return op.prefix.equals(this.prefix) && op.dataLabel.equals(this.dataLabel);
+		}
 	}
 	
 }

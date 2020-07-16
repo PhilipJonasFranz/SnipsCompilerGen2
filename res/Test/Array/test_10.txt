@@ -18,11 +18,7 @@ OUTPUT
 /* --test_10.txt */
     b main
 bar:                                         /* Function: bar */
-    push { fp }
-    mov fp, sp
-    ldr r0, [fp, #12]
-    mov sp, fp
-    pop { fp }
+    ldr r0, [sp, #8]
     add sp, sp, #12
     bx lr
     
@@ -72,6 +68,5 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     add r0, r0, r3
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

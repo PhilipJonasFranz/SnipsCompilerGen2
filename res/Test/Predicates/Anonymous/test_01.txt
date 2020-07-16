@@ -43,6 +43,7 @@ id:                                          /* Function: id */
     add r1, r2, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
+    mov r10, #0
     bx lr
     
 main:                                        /* Function: main */
@@ -51,6 +52,7 @@ main:                                        /* Function: main */
     mov r3, r0
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_id
+    mov r10, #0
     push { r0 }
     ldr r4, [fp, #-4]
     mov r0, #3                               /* Evaluate Expression */
@@ -62,6 +64,5 @@ main:                                        /* Function: main */
     sub r0, fp, #12
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { fp, lr }
-    bx lr
+    pop { fp, pc }
     

@@ -37,10 +37,7 @@ main:                                        /* Function: main */
     str r0, [fp, #-24]                       /* Store value to struct field */
     sub r1, fp, #32                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
-    push { r1 }
-    mov r1, #16
-    mul r0, r4, r1
-    pop { r1 }
+    lsl r0, r4, #4
     add r2, r2, r0
     add r1, r1, r2
     add r1, r1, #4

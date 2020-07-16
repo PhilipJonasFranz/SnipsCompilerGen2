@@ -18,18 +18,14 @@ OUTPUT
 /* --test_04.txt */
     b main
 sq:                                          /* Function: sq */
-    push { r3 }
     mul r0, r0, r0
-    pop { r3 }
     bx lr
     
 sqsum:                                       /* Function: sqsum */
-    push { r3, r4, r5, r6, fp, lr }
+    push { r4, r5, r6, fp, lr }
     mov fp, sp
-    mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, r3                               /* Evaluate Expression */
     bl sq                                    /* Call sq */
     push { r0 }
     mov r0, r4                               /* Load parameters */
@@ -42,18 +38,18 @@ sqsum:                                       /* Function: sqsum */
     pop { r1 }
     add r0, r1, r0
     push { r0 }
-    ldr r0, [fp, #28]                        /* Load parameters */
+    ldr r0, [fp, #24]                        /* Load parameters */
     bl sq                                    /* Call sq */
     pop { r1 }
     add r0, r1, r0
     push { r0 }
-    ldr r0, [fp, #24]                        /* Load parameters */
+    ldr r0, [fp, #20]                        /* Load parameters */
     bl sq                                    /* Call sq */
     pop { r1 }
     add r6, r1, r0
     mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, r6, fp, lr }
+    pop { r4, r5, r6, fp, lr }
     add sp, sp, #8
     bx lr
     
@@ -73,7 +69,5 @@ main:                                        /* Function: main */
     pop { r1, r2 }
     bl sqsum                                 /* Call sqsum */
     mov sp, fp
-    pop { fp, lr }
-    add sp, sp, #8
-    bx lr
+    pop { fp, pc }
     

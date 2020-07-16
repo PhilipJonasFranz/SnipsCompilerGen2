@@ -24,7 +24,7 @@ OUTPUT
 log2:                                        /* Function: log2 */
     push { r3, lr }
     mov r3, r0
-    cmp r3, #0
+    cmp r0, #0
     beq log2.L1
     lsr r0, r3, #1
     bl log2                                  /* Call log2 */
@@ -33,12 +33,8 @@ log2:                                        /* Function: log2 */
 log2.L1: 
     mov r0, #0                               /* Evaluate Expression */
 log2.L2: 
-    pop { r3, lr }
-    bx lr
+    pop { r3, pc }
     
 main:                                        /* Function: main */
-    push { lr }
-    bl log2                                  /* Call log2 */
-    pop { lr }
-    bx lr
+    b log2                                   /* Call log2 */
     

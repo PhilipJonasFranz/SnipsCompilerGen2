@@ -29,8 +29,5 @@ Foo.get:                                     /* Function: Foo.get */
 .POOL0_main.L0_Baz.x: .word Baz.x
     
 main:                                        /* Function: main */
-    push { lr }
-    bl Foo.get                               /* Evaluate Expression */
-    pop { lr }
-    bx lr
+    b Foo.get                                /* Evaluate Expression */
     

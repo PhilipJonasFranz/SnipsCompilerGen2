@@ -213,7 +213,7 @@ public class StackSet {
 	 * has to be added onto the stack pointer to reset the stack to the correct size.
 	 */
 	public int closeScope(CompoundStatement cs, boolean close) {
-		int target = 0;
+		int target = this.stack.size();
 		
 		if (close) {
 			target = this.scopes.pop().getFirst();
@@ -227,7 +227,7 @@ public class StackSet {
 		
 		int add = 0;
 		if (close) {
-			while (this.stack.size() != target) {
+			while (this.stack.size() > target) {
 				StackCell c = this.stack.pop();
 				if (c.type == CONTENT_TYPE.REGISTER) add++;
 				else add += c.declaration.getType().wordsize();
@@ -235,7 +235,7 @@ public class StackSet {
 		}
 		else {
 			Stack<StackCell> st0 = new Stack();
-			while (this.stack.size() != target) {
+			while (this.stack.size() > target) {
 				StackCell c = this.stack.pop();
 				if (c.type == CONTENT_TYPE.REGISTER) add++;
 				else add += c.declaration.getType().wordsize();

@@ -10,6 +10,7 @@ public class ProcessorUnit {
 
 	/* Debug */
 	public int debug = 1, step = 0, cpuExit = 0;
+	public long cycles = 0;
 	
 	/* Bit Mode */
 	public final int BIT = 1 << 5;
@@ -77,6 +78,8 @@ public class ProcessorUnit {
 	
 	public void execute() {
 		while (true) {
+			cycles++;
+			
 			// PC out of bounds
 			int pcD = toDecimal(regs [15]);
 			if (pcD >> 2 >= memSize || pcD < 0) {
