@@ -285,25 +285,6 @@ List.get.L7:
     bx lr
 .POOL4_main.L3_NULL: .word NULL
     
-/* Returns the the node at the given index. Returns */
-/* null if the index is invalid. */
-    
-/* Check if given list contains given value. If the current value matches */
-/* the searched value determines the predicate. */
-    
-/* Finds the first node in the list that has given value. */
-/* Returns a pointer to this list node, or 0 in case the */
-/* value wasnt found. */
-    
-/* Returns the amount of elements stored in the list. */
-    
-/* Returns the index of given node in the list. */
-    
-/* Removes the index at given index. */
-/* If the index is out of bounds nothing is removed. */
-    
-/* Removes all elements from the list */
-    
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0

@@ -173,8 +173,6 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r3, r4, pc }
 .POOL1_main.L3_NULL: .word NULL
     
-/* Free the list by freeing all contained list nodes, and the list itself. */
-    
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                                 /* Function: List.add, Provisos: CHAR */
@@ -258,16 +256,6 @@ List.get.L7:
     bx lr
 .POOL3_main.L3_NULL: .word NULL
     
-/* Returns the the node at the given index. Returns */
-/* null if the index is invalid. */
-    
-/* Check if given list contains given value. If the current value matches */
-/* the searched value determines the predicate. */
-    
-/* Finds the first node in the list that has given value. */
-/* Returns a pointer to this list node, or 0 in case the */
-/* value wasnt found. */
-    
 /* Returns the amount of elements stored in the list. */
 List.size:                                   /* Function: List.size */
     push { r4, r5 }
@@ -289,13 +277,6 @@ List.size.L2:
     pop { r4, r5 }
     bx lr
 .POOL4_main.L3_NULL: .word NULL
-    
-/* Returns the index of given node in the list. */
-    
-/* Removes the index at given index. */
-/* If the index is out of bounds nothing is removed. */
-    
-/* Removes all elements from the list */
     
 /* This package contains various utility functions for Strings chars. */
 /* Compares the two given strings. Checks if all chars are equal and returns the */
@@ -483,9 +464,6 @@ String.length.L2:
     mov r0, r4                               /* Evaluate Expression */
     pop { r3, r4 }
     bx lr
-    
-/* Concatenates the two given strings. Result is one string. Does */
-/* only read the two given strings. */
     
 main:                                        /* Function: main */
     push { fp, lr }

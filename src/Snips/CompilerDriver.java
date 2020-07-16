@@ -19,6 +19,7 @@ import Exc.CTX_EXCEPTION;
 import Exc.PARSE_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
@@ -270,6 +271,15 @@ public class CompilerDriver {
 			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, Message.Type.INFO);
 			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
 
+			/* Remove comments left over by removed functions */
+			for (int i = 1; i < body.instructions.size(); i++) {
+				if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
+					body.instructions.remove(i - 1);
+					i -= 2;
+					if (i < 1) i = 1;
+				}
+			}
+			
 			
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {

@@ -187,8 +187,6 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r3, r4, pc }
 .POOL1_main.L4_NULL: .word NULL
     
-/* Free the list by freeing all contained list nodes, and the list itself. */
-    
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 lambda_List.add_P1:                          /* Function address getter for predication */
@@ -274,23 +272,6 @@ List.get.L7:
     pop { r3, r4, r5 }
     bx lr
 .POOL3_main.L4_NULL: .word NULL
-    
-/* Returns the the node at the given index. Returns */
-/* null if the index is invalid. */
-    
-/* Check if given list contains given value. If the current value matches */
-/* the searched value determines the predicate. */
-    
-/* Finds the first node in the list that has given value. */
-/* Returns a pointer to this list node, or 0 in case the */
-/* value wasnt found. */
-    
-/* Returns the amount of elements stored in the list. */
-    
-/* Returns the index of given node in the list. */
-    
-/* Removes the index at given index. */
-/* If the index is out of bounds nothing is removed. */
     
 /* Removes all elements from the list */
 List.clear:                                  /* Function: List.clear */

@@ -273,11 +273,6 @@ Queue.destroy:                               /* Function: Queue.destroy */
     bl free                                  /* Call free */
     pop { r3, pc }
     
-/* Returns true if currently no elements are in the queue. */
-    
-/* Returns true if the amount of elements in the queue is */
-/* equal to the specified size when the queue was created. */
-    
 /* Enqueue a new value. The value is only enqueued if the */
 /* queue is not full. */
 Queue.enqueue_P1:                            /* Function: Queue.enqueue, Provisos: INT[2] */
@@ -414,12 +409,6 @@ Queue.dequeue.L4:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
-/* Clears all elements in the queue by resetting the */
-/* head and tail indexes, and setting the isEmpty flag to true. */
-    
-/* Returns the amount of elements that are currently */
-/* stored in the queue. */
     
 main:                                        /* Function: main */
     push { fp, lr }
