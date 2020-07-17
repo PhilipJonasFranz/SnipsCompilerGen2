@@ -83,6 +83,9 @@ public class TestDriver {
 		CompilerDriver.silenced = false;
 		CompilerDriver.includeMetaInformation = false;
 		
+		/* Experimental Flags */
+		//CompilerDriver.optimizeFileSize = true;
+		
 		List<String> paths = new ArrayList();
 		
 		/* Add add files to the paths list */

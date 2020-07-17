@@ -41,7 +41,7 @@ map:                                         /* Function: map */
     mov r4, r1
     add lr, pc, #8
     mov pc, r4
-    pop { r4, pc }
+    ldmfd sp!, {R4, PC}
     
 main:                                        /* Function: main */
     push { lr }

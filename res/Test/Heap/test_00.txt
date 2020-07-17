@@ -22,7 +22,8 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -106,7 +107,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
@@ -114,7 +115,8 @@ resv.L18:
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    push { r3, r4, r6, r7 }
+    sub sp, sp, #16
+    stmea sp, {R3, R4, R6, R7}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -137,7 +139,7 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    pop { r3, r4, r6, r7 }
+    ldmfd sp!, {R3, R4, R6, R7}
     bx lr
     
 main:                                        /* Function: main */

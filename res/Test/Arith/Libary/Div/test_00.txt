@@ -10,7 +10,8 @@ OUTPUT
 /* --test_00.txt */
     b main
 __op_div:                                    /* Function: __op_div */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
     mov r4, r1
     mov r5, #0
@@ -52,7 +53,7 @@ __op_div.L8:
     b __op_div.L1
 __op_div.L2: 
     mov r0, r5                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
     
 main:                                        /* Function: main */

@@ -466,6 +466,83 @@ public class Assembler {
 					app += "1001";
 					app += getReg(sp [2]); //Rm
 				}
+				else if (sp [0].startsWith("ldm") || sp [0].startsWith("stm")) {
+					/* Block Memory Op Code */
+					String op = sp [0].substring(3);
+					
+					String cond = null;
+					
+					if (op.length() > 2) {
+						cond = getCond(op.substring(op.length() - 2, op.length()));
+						op = op.substring(0, op.length() - 2);
+					}
+					
+					String p = "0";
+					String u = "0";
+					String l0 = "0";
+					
+					if (sp [0].startsWith("ldm")) {
+						if (op.equals("ed")) {
+							l0 = "1"; p = "1"; u = "1"; }
+						else if (op.equals("fd")) {
+							l0 = "1"; p = "0"; u = "1"; }
+						else if (op.equals("ea")) {
+							l0 = "1"; p = "1"; u = "0"; }
+						else if (op.equals("fa")) {
+							l0 = "1"; p = "0"; u = "0"; }
+					}
+					else {
+						if (op.equals("fa")) {
+							l0 = "0"; p = "1"; u = "1"; }
+						else if (op.equals("ea")) {
+							l0 = "0"; p = "0"; u = "1"; }
+						else if (op.equals("fd")) {
+							l0 = "0"; p = "1"; u = "0"; }
+						else if (op.equals("ed")) {
+							l0 = "0"; p = "0"; u = "0"; }
+					}
+					
+					String wb = "0";
+					
+					/* Extract Rn, cut away , */
+					String rn = sp [1].trim();
+					
+					if (rn.endsWith("!")) {
+						wb = "1";
+						rn = rn.substring(0, rn.length() - 1);
+					}
+
+					String regListCode = "0000000000000000";
+					
+					for (int k = 2; k < sp.length; k++) {
+						sp [k] = sp [k].trim();
+						if (sp [k].endsWith(",")) sp [k] = sp [k].substring(0, sp [k].length() - 1);
+						if (sp [k].endsWith("}")) sp [k] = sp [k].substring(0, sp [k].length() - 1);
+						if (sp [k].startsWith("{")) sp [k] = sp [k].substring(1);
+						
+						if (toInt(sp [k]) != -1) {
+							regListCode = replaceChar(regListCode, "1".charAt(0), 15 - toInt(sp [k]));
+						}
+						else {
+							String [] sp0 = sp [k].split("-");
+							int s = toInt(sp0 [0].trim());
+							int e = toInt(sp0 [1].trim());
+							
+							for (int z = s; z <= e; z++) 
+								regListCode = replaceChar(regListCode, "1".charAt(0), 15 - z);
+						}
+					}
+					
+					app += (cond != null)? cond : "1110";
+					app += "100";
+					app += p;
+					app += u;
+					app += "0";
+					app += wb;
+					app += l0;
+					app += getReg(rn);
+					app += regListCode;
+				}
 				else if (sp [0].startsWith("ldr") || sp [0].startsWith("str")) {
 					String ls = (sp [0].startsWith("str"))? "0" : "1";
 					sp [0] = sp [0].substring(3);
@@ -809,6 +886,37 @@ public class Assembler {
 		if (r.equals("fp"))return "1011";
 		log.add(new Message("Not a register: " + r, Message.Type.FAIL));
 		throw new Exception();
+	}
+	
+	public static int toInt(String r) {
+		r = r.trim();
+		if (r.equals("r0"))return 0;
+		if (r.equals("r1"))return 1;
+		if (r.equals("r2"))return 2;
+		if (r.equals("r3"))return 3;
+		if (r.equals("r4"))return 4;
+		if (r.equals("r5"))return 5;
+		if (r.equals("r6"))return 6;
+		if (r.equals("r7"))return 7;
+		if (r.equals("r8"))return 8;
+		if (r.equals("r9"))return 9;
+		if (r.equals("r10"))return 10;
+		if (r.equals("r11"))return 11;
+		if (r.equals("r12"))return 12;
+		if (r.equals("r13"))return 13;
+		if (r.equals("r14"))return 14;
+		if (r.equals("r15"))return 15;
+		if (r.equals("sp"))return 13;
+		if (r.equals("lr"))return 14;
+		if (r.equals("pc"))return 15;
+		if (r.equals("fp"))return 11;
+		return -1;
+	}
+	
+	public static String replaceChar(String str, char ch, int index) {
+	    StringBuilder myString = new StringBuilder(str);
+	    myString.setCharAt(index, ch);
+	    return myString.toString();
 	}
 
 }

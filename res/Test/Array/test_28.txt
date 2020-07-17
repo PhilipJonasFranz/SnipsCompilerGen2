@@ -22,16 +22,17 @@ vec: .skip 16
 .text
     b main_init
 foo:                                         /* Function: foo */
-    push { r3, r4, fp }
+    sub sp, sp, #12
+    stmea sp, {R3, R4, FP}
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r0, #2                               /* Evaluate Expression */
     mov r1, #9
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #5
     mov r1, #1
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     pop { r0 }
     add r1, fp, #12                          /* Start of structure in stack */
     str r0, [r1, #0]
@@ -49,19 +50,20 @@ foo:                                         /* Function: foo */
     add r0, fp, #12
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { r3, r4, fp }
+    ldmfd sp!, {R3, R4, FP}
     add sp, sp, #16
     bx lr
     
 /* Initialize the global variables */
 main_init: 
-    push { r0, r1, r2 }
+    sub sp, sp, #12
+    stmea sp, {R0-R2}
     mov r0, #0
     mov r1, #2
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #7
     mov r1, #3
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     pop { r0 }
     ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
     str r0, [r1, #0]
@@ -71,7 +73,7 @@ main_init:
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    pop { r0, r1, r2 }
+    ldmfd sp!, {R0-R2}
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
@@ -79,10 +81,10 @@ main:                                        /* Function: main */
     add r2, r2, #12
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, r3
     mov r1, r4
     b foo                                    /* Call foo */

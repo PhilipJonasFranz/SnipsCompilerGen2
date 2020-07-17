@@ -25,7 +25,8 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -109,7 +110,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
 .POOL0_main.L4_HEAP_START: .word HEAP_START
     
@@ -117,7 +118,8 @@ resv.L18:
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    push { r3, r4, r6, r7 }
+    sub sp, sp, #16
+    stmea sp, {R3, R4, R6, R7}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -140,7 +142,7 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    pop { r3, r4, r6, r7 }
+    ldmfd sp!, {R3, R4, R6, R7}
     bx lr
     
 /* [BASE-PACKAGE] */
@@ -153,7 +155,8 @@ free.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT */
-    push { r3, r4, lr }
+    sub sp, sp, #12
+    stmea sp, {R3, R4, LR}
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -162,7 +165,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     push { r3 }
     ldr r0, .POOL1_main.L3_NULL              /* Load null address */
     ldr r1, .POOL1_main.L3_NULL              /* Load null address */
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #2
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -173,13 +176,14 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, pc }
+    ldmfd sp!, {R3, R4, PC}
 .POOL1_main.L3_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                                 /* Function: List.add, Provisos: INT */
-    push { r3, r4, r5, lr }
+    sub sp, sp, #16
+    stmea sp, {R3-R5, LR}
     mov r3, r0
     mov r4, r1
     mov r0, #3                               /* Evaluate Expression */
@@ -206,7 +210,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    pop { r3, r4, r5, pc }
+    b List.add.L0
 List.add.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
@@ -215,13 +219,15 @@ List.add.L1:
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    pop { r3, r4, r5, pc }
+List.add.L0: 
+    ldmfd sp!, {R3-R5, PC}
 .POOL2_main.L3_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
 List.get_P2:                                 /* Function: List.get, Provisos: INT */
-    push { r3, r4, r5 }
+    sub sp, sp, #12
+    stmea sp, {R3-R5}
     mov r3, r0
     mov r4, r1
     cmp r1, #0
@@ -254,7 +260,7 @@ List.get.L4:
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
 List.get.L7: 
-    pop { r3, r4, r5 }
+    ldmfd sp!, {R3-R5}
     bx lr
 .POOL3_main.L3_NULL: .word NULL
     

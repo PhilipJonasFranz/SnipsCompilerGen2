@@ -10,6 +10,8 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMMemBlock;
+import Imm.ASM.Memory.ASMMemBlock.MEM_BLOCK_MODE;
 import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
@@ -324,12 +326,69 @@ public class ASMOptimizer {
 			this.clearUnusedLabels(body);
 		}
 		
+		/* Replace large push/pop operations with ldm/stm */
+		this.replacePushPopWithBlockMemory(body);
+		
 		/* Filter duplicate empty lines */
 		if (body.instructions.size() > 1) {
 			for (int i = 1; i < body.instructions.size(); i++) {
 				if (body.instructions.get(i - 1) instanceof ASMSeperator && body.instructions.get(i) instanceof ASMSeperator) {
 					body.instructions.remove(i);
 					i--;
+				}
+			}
+		}
+	}
+	
+	public void replacePushPopWithBlockMemory(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
+					body.instructions.set(i, new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(push.operands.size() * 4)));
+					
+					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMEA;
+					
+					ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.SP), push.operands, push.cond);
+					body.instructions.add(i + 1, block);
+				}
+				else {
+					/* Operands are flipped here */
+					List<RegOperand> ops = new ArrayList();
+					for (RegOperand r : push.operands) ops.add(0, r);
+					
+					if (ASMMemBlock.checkInOrder(ops) && push.operands.size() > 1) {
+						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMFD;
+						
+						ASMMemBlock block = new ASMMemBlock(mode, true, new RegOperand(REGISTER.SP), ops, push.cond);
+						body.instructions.set(i, block);
+					}
+				}
+			}
+			else if (body.instructions.get(i) instanceof ASMPopStack) {
+				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
+				
+				if (ASMMemBlock.checkInOrder(pop.operands) && pop.operands.size() > 1) {
+					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFD;
+					
+					ASMMemBlock block = new ASMMemBlock(mode, true, new RegOperand(REGISTER.SP), pop.operands, pop.cond);
+
+					body.instructions.set(i, block);
+				}
+				else {
+					/* Operands are flipped here */
+					List<RegOperand> ops = new ArrayList();
+					for (RegOperand r : pop.operands) ops.add(0, r);
+					
+					if (ASMMemBlock.checkInOrder(ops) && pop.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
+						body.instructions.set(i, new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(ops.size() * 4)));
+						
+						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMEA;
+						
+						ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.SP), ops, pop.cond);
+						body.instructions.add(i + 1, block);
+					}
 				}
 			}
 		}

@@ -27,19 +27,19 @@ main:                                        /* Function: main */
     mov r0, #12                              /* Evaluate Expression */
     mov r1, #11
     mov r2, #10
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #9
     mov r1, #8
     mov r2, #7
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #6
     mov r1, #5
     mov r2, #4
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #3
     mov r1, #2
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r2, #0                               /* Evaluate Expression */
     mov r1, #24
     mul r0, r3, r1

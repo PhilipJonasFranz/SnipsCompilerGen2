@@ -40,7 +40,8 @@ _routine_stack_copy_end_:
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -124,7 +125,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
 .POOL0_main.L3_HEAP_START: .word HEAP_START
     
@@ -132,7 +133,8 @@ resv.L18:
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    push { r3, r4, r6, r7 }
+    sub sp, sp, #16
+    stmea sp, {R3, R4, R6, R7}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -155,11 +157,12 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    pop { r3, r4, r6, r7 }
+    ldmfd sp!, {R3, R4, R6, R7}
     bx lr
     
 __op_mod:                                    /* Function: __op_mod */
-    push { r3, r4, r5, r6, r7 }
+    sub sp, sp, #20
+    stmea sp, {R3-R7}
     mov r3, r0
     mov r4, r1
     mov r0, #0                               /* Evaluate Expression */
@@ -202,7 +205,7 @@ __op_mod.L7:
     sub r7, r4, r7
 __op_mod.L11: 
     mov r0, r7                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6, r7 }
+    ldmfd sp!, {R3-R7}
     bx lr
     
 /* [BASE-PACKAGE] */
@@ -218,7 +221,8 @@ __op_mod.L11:
 /* The passed size will be set as the maximum amount of elements */
 /* in the queue. */
 Queue.create_P0:                             /* Function: Queue.create, Provisos: INT[2] */
-    push { r3, r4, r5, fp, lr }
+    sub sp, sp, #20
+    stmea sp, {R3-R5, FP, LR}
     mov fp, sp
     mov r3, r0
 /* Allocate memory for storage of given size */
@@ -234,11 +238,11 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
     mov r0, #1                               /* Evaluate Expression */
     mov r1, #0
     mov r2, #0
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     push { r3 }
     ldr r0, [fp, #24]
     ldr r1, [fp, #20]
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #1
     lsl r1, r5, #2
     str r0, [r1, #0]
@@ -257,7 +261,7 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
     str r0, [r1, #28]
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, r5, fp, lr }
+    ldmfd sp!, {R3-R5, FP, LR}
     add sp, sp, #8
     bx lr
     
@@ -271,12 +275,13 @@ Queue.destroy:                               /* Function: Queue.destroy */
     bl free                                  /* Call free */
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
-    pop { r3, pc }
+    ldmfd sp!, {R3, PC}
     
 /* Enqueue a new value. The value is only enqueued if the */
 /* queue is not full. */
 Queue.enqueue_P1:                            /* Function: Queue.enqueue, Provisos: INT[2] */
-    push { r3, r4, fp, lr }
+    sub sp, sp, #16
+    stmea sp, {R3, R4, FP, LR}
     mov fp, sp
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -312,7 +317,7 @@ Queue.enqueue.L0:
 /* Write value */
     ldr r0, [fp, #20]                        /* Evaluate Expression */
     ldr r1, [fp, #16]
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
@@ -338,14 +343,15 @@ Queue.enqueue.L0:
     str r0, [r1, #28]                        /* Store value to struct field */
 Queue.enqueue.L2: 
     mov sp, fp
-    pop { r3, r4, fp, lr }
+    ldmfd sp!, {R3, R4, FP, LR}
     add sp, sp, #8
     bx lr
     
 /* Dequeues a value and removes it from the queue. Returns */
 /* the default value if the queue is empty. */
 Queue.dequeue_P2:                            /* Function: Queue.dequeue, Provisos: INT[2] */
-    push { r3, fp, lr }
+    sub sp, sp, #12
+    stmea sp, {R3, FP, LR}
     mov fp, sp
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -357,7 +363,7 @@ Queue.dequeue_P2:                            /* Function: Queue.dequeue, Proviso
     add r1, r1, #8
     ldr r0, [r1, #4]
     ldr r2, [r1, #0]
-    push { r2, r0 }
+    stmfd sp!, {R0, R2}
     b Queue.dequeue.L4
 Queue.dequeue.L0: 
 /* Read value from tail */
@@ -398,11 +404,11 @@ Queue.dequeue.L0:
 Queue.dequeue.L2: 
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
 Queue.dequeue.L4: 
     mov r2, sp
     mov sp, fp
-    pop { r3, fp, lr }
+    ldmfd sp!, {R3, FP, LR}
     mov r0, #8
     add r1, r2, #8
     add r10, pc, #8                          /* Setup return address for routine */
@@ -415,18 +421,18 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #0
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #3
     bl Queue.create_P0                       /* Call Queue.create */
     mov r3, r0
     mov r0, #4                               /* Load parameters */
     mov r1, #3
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, r3
     bl Queue.enqueue_P1                      /* Call Queue.enqueue */
     mov r0, #3                               /* Load parameters */
     mov r1, #9
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, r3
     bl Queue.enqueue_P1                      /* Call Queue.enqueue */
     mov r0, r3                               /* Load parameters */
@@ -440,5 +446,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r0, r2
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

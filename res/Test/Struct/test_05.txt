@@ -29,7 +29,8 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -113,7 +114,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
@@ -127,12 +128,12 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #9
     mov r1, #8
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #1
     push { r0 }
     mov r0, #9
     mov r1, #2
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #1
     push { r0 }
     mov r0, #2
@@ -156,7 +157,7 @@ main:                                        /* Function: main */
     add r1, r1, #16
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
-    push { r2, r0 }
+    stmfd sp!, {R0, R2}
     ldr r0, [r1, #0]
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
@@ -164,5 +165,5 @@ main:                                        /* Function: main */
     ldr r2, [r1, #28]                        /* Load field from struct */
     add r0, r0, r2
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

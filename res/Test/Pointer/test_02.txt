@@ -29,7 +29,7 @@ get:                                         /* Function: get */
     add r1, r0, r2
     add r0, r1, r5
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    pop { r4, r5 }
+    ldmfd sp!, {R4, R5}
     bx lr
     
 main:                                        /* Function: main */
@@ -40,21 +40,21 @@ main:                                        /* Function: main */
     mov r0, #9                               /* Evaluate Expression */
     mov r1, #8
     mov r2, #7
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #6
     mov r1, #5
     mov r2, #4
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #3
     mov r1, #2
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     sub r0, fp, #36
     lsr r0, r0, #2
     push { r4 }
     push { r3 }
-    pop { r1, r2 }
+    ldmfd sp!, {R1, R2}
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

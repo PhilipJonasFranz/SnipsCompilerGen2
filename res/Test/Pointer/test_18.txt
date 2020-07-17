@@ -36,7 +36,8 @@ set:                                         /* Function: set */
     bx lr
     
 get:                                         /* Function: get */
-    push { r3, r4, lr }
+    sub sp, sp, #12
+    stmea sp, {R3, R4, LR}
     mov r3, r0
     mov r4, r1
     bl set                                   /* Call set */
@@ -50,7 +51,7 @@ get:                                         /* Function: get */
     pop { r1 }
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
-    pop { r3, r4, pc }
+    ldmfd sp!, {R3, R4, PC}
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -58,16 +59,16 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #1                               /* Evaluate Expression */
     mov r1, #9
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #3
     mov r1, #5
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #4
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #2
     mov r1, #1
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     sub r0, fp, #32                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
@@ -79,5 +80,5 @@ main:                                        /* Function: main */
     mov r1, r3
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

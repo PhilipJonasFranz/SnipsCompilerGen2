@@ -19,7 +19,8 @@ OUTPUT
 /* --test_19.txt */
     b main
 __vec_cross:                                 /* Function: __vec_cross */
-    push { r3, r4, fp }
+    sub sp, sp, #12
+    stmea sp, {R3, R4, FP}
     mov fp, sp
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
@@ -41,7 +42,7 @@ __vec_cross.L1:
 __vec_cross.L2: 
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
-    pop { r3, r4, fp }
+    ldmfd sp!, {R3, R4, FP}
     add sp, sp, #24
     bx lr
     
@@ -51,40 +52,40 @@ main:                                        /* Function: main */
     mov r0, #9                               /* Evaluate Expression */
     mov r1, #8
     mov r2, #7
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #6
     mov r1, #5
     mov r2, #4
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #3
     mov r1, #2
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #9                               /* Evaluate Expression */
     mov r1, #6
     mov r2, #3
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #8
     mov r1, #5
     mov r2, #2
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #7
     mov r1, #4
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     sub r1, fp, #36                          /* Start of structure in stack */
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
-    push { r2, r0 }
+    stmfd sp!, {R0, R2}
     ldr r0, [r1, #0]
     sub r1, fp, #72                          /* Start of structure in stack */
     push { r0 }
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
-    push { r2, r0 }
+    stmfd sp!, {R0, R2}
     ldr r0, [r1, #0]
     push { r0 }
     bl __vec_cross                           /* Call __vec_cross */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

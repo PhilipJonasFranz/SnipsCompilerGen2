@@ -36,20 +36,20 @@ main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #2
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #6                               /* Evaluate Expression */
     mov r1, #5
     mov r2, #4
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     ldr r2, [fp, #-12]
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     ldr r0, [fp, #-16]
     ldr r1, [fp, #-20]
     ldr r2, [fp, #-24]
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     bl vecProd                               /* Call vecProd */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {FP, PC}
     

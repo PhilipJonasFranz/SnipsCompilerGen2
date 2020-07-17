@@ -45,7 +45,8 @@ HEAP_START: .word 0
 /* the start of the reserved memory section + 1. This means the pointer points to */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
-    push { r3, r4, r5, r6 }
+    sub sp, sp, #16
+    stmea sp, {R3-R6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -129,7 +130,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    pop { r3, r4, r5, r6 }
+    ldmfd sp!, {R3-R6}
     bx lr
 .POOL0_main.L3_HEAP_START: .word HEAP_START
     
@@ -141,7 +142,8 @@ resv.L18:
 /* Create a new Tree, initialize both childs to 0, set root value */
 /* to given value. Return a pointer to the root. */
 Tree.create_P0:                              /* Function: Tree.create, Provisos: INT */
-    push { r3, r4, lr }
+    sub sp, sp, #12
+    stmea sp, {R3, R4, LR}
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -150,7 +152,7 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     push { r3 }
     ldr r0, .POOL1_main.L2_NULL              /* Load null address */
     ldr r1, .POOL1_main.L2_NULL              /* Load null address */
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #1
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -161,11 +163,12 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    pop { r3, r4, pc }
+    ldmfd sp!, {R3, R4, PC}
 .POOL1_main.L2_NULL: .word NULL
     
 Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
-    push { r3, r4, r5, r6, lr }
+    sub sp, sp, #20
+    stmea sp, {R3-R6, LR}
     mov r3, r0
     mov r4, r1
     mov r0, #4                               /* Evaluate Expression */
@@ -175,7 +178,7 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     push { r4 }
     ldr r0, .POOL2_main.L2_NULL              /* Load null address */
     ldr r1, .POOL2_main.L2_NULL              /* Load null address */
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #1
     lsl r1, r5, #2
     str r0, [r1, #0]
@@ -204,7 +207,7 @@ Tree.insert.L1:                              /* Evaluate condition */
     lsl r1, r6, #2                           /* Convert to bytes */
     str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6, pc }
+    b Tree.insert.L9
 Tree.insert.L6: 
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
@@ -219,7 +222,7 @@ Tree.insert.L4:
     lsl r1, r6, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6, pc }
+    b Tree.insert.L9
 Tree.insert.L8: 
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r6, [r1, #8]                         /* Load field from struct */
@@ -227,7 +230,8 @@ Tree.insert.L3:
     b Tree.insert.L1
 Tree.insert.L2: 
     ldr r0, .POOL2_main.L2_NULL              /* Evaluate Expression */
-    pop { r3, r4, r5, r6, pc }
+Tree.insert.L9: 
+    ldmfd sp!, {R3-R6, PC}
 .POOL2_main.L2_NULL: .word NULL
     
 main:                                        /* Function: main */
@@ -259,7 +263,7 @@ main:                                        /* Function: main */
     bne main.L1
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    pop { pc }
+    b main.L8
 main.L1: 
     mov r0, r6                               /* Evaluate Expression */
     mov r7, r6
@@ -276,7 +280,7 @@ main.L2:
     bne main.L4
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    pop { pc }
+    b main.L8
 main.L4: 
     cmp r5, #1
     bne main.L7
@@ -289,5 +293,6 @@ main.L7:
 main.L6: 
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
+main.L8: 
     pop { pc }
     

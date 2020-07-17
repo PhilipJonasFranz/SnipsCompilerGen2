@@ -30,11 +30,11 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #1
     mov r2, #0
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     mov r0, #1
     mov r1, #0
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {R0-R2}
     lsl r2, r4, #2
     sub r0, fp, #20
     ldr r0, [r0, r2]

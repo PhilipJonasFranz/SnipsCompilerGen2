@@ -18,7 +18,7 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #8
-    push { r1, r0 }
+    stmfd sp!, {R0, R1}
     mov r0, #10
     push { r0 }
     mov r0, #1
