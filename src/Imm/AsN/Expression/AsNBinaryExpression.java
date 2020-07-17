@@ -41,7 +41,6 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Snips.CompilerDriver;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
@@ -152,7 +151,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			 * Expression is inline call, which means that push/pop most likely
 			 * cannot be removed during optimizing. Attempt to move to other reg.
 			 */
-			if (right instanceof InlineCall && CompilerDriver.optimizeFileSize) free = r.findFree();
+			if (right instanceof InlineCall) free = r.findFree();
 			
 			if (free != -1) {
 				m.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));

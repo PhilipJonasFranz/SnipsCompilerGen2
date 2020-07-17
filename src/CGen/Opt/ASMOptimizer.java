@@ -321,10 +321,8 @@ public class ASMOptimizer {
 		}
 
 		/* Finishing touches, no iteration required */
-		if (CompilerDriver.optimizeFileSize) {
-			this.popPcSubstitution(body);
-			this.clearUnusedLabels(body);
-		}
+		this.popPcSubstitution(body);
+		this.clearUnusedLabels(body);
 		
 		/* Replace large push/pop operations with ldm/stm */
 		this.replacePushPopWithBlockMemory(body);
@@ -1072,14 +1070,16 @@ public class ASMOptimizer {
 					if (x != -1 && body.instructions.get(x + 1) instanceof ASMPopStack) {
 						ASMPopStack pop = (ASMPopStack) body.instructions.get(x + 1);
 					
-						if (pop.operands.get(pop.operands.size() - 1).reg == REGISTER.PC) {
-							for (int a = i; a < x + 1; a++) {
-								if (body.instructions.get(a) instanceof ASMBranch) {
-									branch = (ASMBranch) body.instructions.get(a);
-									if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
-										body.instructions.set(a, pop.clone());
-										body.instructions.get(a).cond = branch.cond;
-										markOpt();
+						if (ASMMemBlock.checkInOrder(pop.operands) || !CompilerDriver.optimizeFileSize) {
+							if (pop.operands.get(pop.operands.size() - 1).reg == REGISTER.PC) {
+								for (int a = i; a < x + 1; a++) {
+									if (body.instructions.get(a) instanceof ASMBranch) {
+										branch = (ASMBranch) body.instructions.get(a);
+										if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
+											body.instructions.set(a, pop.clone());
+											body.instructions.get(a).cond = branch.cond;
+											markOpt();
+										}
 									}
 								}
 							}

@@ -207,7 +207,7 @@ Tree.insert.L1:                              /* Evaluate condition */
     lsl r1, r6, #2                           /* Convert to bytes */
     str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
-    b Tree.insert.L9
+    ldmfd sp!, {R3-R6, PC}
 Tree.insert.L6: 
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
@@ -222,7 +222,7 @@ Tree.insert.L4:
     lsl r1, r6, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
-    b Tree.insert.L9
+    ldmfd sp!, {R3-R6, PC}
 Tree.insert.L8: 
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r6, [r1, #8]                         /* Load field from struct */
@@ -230,7 +230,6 @@ Tree.insert.L3:
     b Tree.insert.L1
 Tree.insert.L2: 
     ldr r0, .POOL2_main.L2_NULL              /* Evaluate Expression */
-Tree.insert.L9: 
     ldmfd sp!, {R3-R6, PC}
 .POOL2_main.L2_NULL: .word NULL
     
@@ -263,7 +262,7 @@ main:                                        /* Function: main */
     bne main.L1
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b main.L8
+    pop { pc }
 main.L1: 
     mov r0, r6                               /* Evaluate Expression */
     mov r7, r6
@@ -280,7 +279,7 @@ main.L2:
     bne main.L4
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b main.L8
+    pop { pc }
 main.L4: 
     cmp r5, #1
     bne main.L7
@@ -293,6 +292,5 @@ main.L7:
 main.L6: 
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-main.L8: 
     pop { pc }
     

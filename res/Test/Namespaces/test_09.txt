@@ -210,7 +210,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    b List.add.L0
+    ldmfd sp!, {R3-R5, PC}
 List.add.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
@@ -219,7 +219,6 @@ List.add.L1:
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-List.add.L0: 
     ldmfd sp!, {R3-R5, PC}
 .POOL2_main.L3_NULL: .word NULL
     

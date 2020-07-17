@@ -23,12 +23,11 @@ getDiff_P0:                                  /* Function: getDiff, Provisos: INT
     cmp r0, #0
     bne getDiff.L1
     mov r0, r4                               /* Evaluate Expression */
-    b getDiff.L2
+    ldmfd sp!, {R3, R4, PC}
 getDiff.L1: 
     sub r1, r3, #1
     mov r0, r4
     bl getDiff_P0                            /* Call getDiff */
-getDiff.L2: 
     ldmfd sp!, {R3, R4, PC}
     
 main:                                        /* Function: main */

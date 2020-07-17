@@ -509,7 +509,7 @@ public class CompilerDriver {
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable Warnings",
 				"-opt      : Disable Optimizer",
-				"-ofs      : Optimize for Filesize, slight performance reduction",
+				"-ofs      : Optimize for Filesize, slight performance hit",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-imm      : Print out immediate representations",
