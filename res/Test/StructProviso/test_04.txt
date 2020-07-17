@@ -39,7 +39,7 @@ HEAP_START: .word 0
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
-    stmea sp, {R3-R6}
+    stmea sp, {r3-r6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -123,7 +123,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    ldmfd sp!, {R3-R6}
+    ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     

@@ -30,12 +30,12 @@ bar:                                         /* Function: bar */
     
 foo:                                         /* Function: foo */
     sub sp, sp, #12
-    stmea sp, {R3, R5, LR}
+    stmea sp, {r3, r5, lr}
     mov r3, r0
     bl bar                                   /* Call bar */
     add r5, r3, r0
     mov r0, r5                               /* Evaluate Expression */
-    ldmfd sp!, {R3, R5, PC}
+    ldmfd sp!, {r3, r5, pc}
     
 main:                                        /* Function: main */
     push { lr }

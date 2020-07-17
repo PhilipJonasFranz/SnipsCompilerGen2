@@ -31,5 +31,5 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     bl forEach                               /* Call forEach */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

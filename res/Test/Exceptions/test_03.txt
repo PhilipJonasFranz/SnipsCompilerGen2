@@ -82,7 +82,7 @@ hsize:                                       /* Function: hsize */
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
-    stmea sp, {R3-R6}
+    stmea sp, {r3-r6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -166,13 +166,13 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    ldmfd sp!, {R3-R6}
+    ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_main.L0_HEAP_START: .word HEAP_START
     
 checkThreshold:                              /* Function: checkThreshold */
     sub sp, sp, #32
-    stmea sp, {R3-R8, FP, LR}
+    stmea sp, {r3-r8, fp, lr}
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -207,7 +207,7 @@ checkThreshold.L0:
     cmp r12, #0
     mov r2, sp
     mov sp, fp
-    ldmfd sp!, {R3-R8, FP, LR}
+    ldmfd sp!, {r3-r8, fp, lr}
     bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
@@ -225,10 +225,10 @@ main:                                        /* Function: main */
     mov r0, #9                               /* Evaluate Expression */
     mov r1, #5
     mov r2, #7
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0-r2}
     mov r0, #1
     mov r1, #6
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     pop { r0 }
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -268,5 +268,5 @@ main.L0:
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

@@ -324,6 +324,9 @@ public class ASMOptimizer {
 		this.popPcSubstitution(body);
 		this.clearUnusedLabels(body);
 		
+		/* Replace sub-structure loads with ldm */
+		this.replaceR0R1R2LdrWithLdm(body);
+		
 		/* Replace large push/pop operations with ldm/stm */
 		this.replacePushPopWithBlockMemory(body);
 		
@@ -333,6 +336,69 @@ public class ASMOptimizer {
 				if (body.instructions.get(i - 1) instanceof ASMSeperator && body.instructions.get(i) instanceof ASMSeperator) {
 					body.instructions.remove(i);
 					i--;
+				}
+			}
+		}
+	}
+	
+	public void replaceR0R1R2LdrWithLdm(AsNBody body) {
+		for (int i = 2; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i - 2) instanceof ASMLdr) {
+				ASMLdr ldr0 = (ASMLdr) body.instructions.get(i - 2);
+				
+				if (ldr0.op0 instanceof RegOperand && ldr0.op1 != null && ldr0.op1 instanceof ImmOperand && ldr0.cond == null) { 
+				
+					REGISTER base = ((RegOperand) ldr0.op0).reg;
+					
+					if (base == REGISTER.SP || base == REGISTER.FP) {
+						List<ASMLdr> ldrs = new ArrayList();
+						ldrs.add(ldr0);
+						
+						for (int a = i - 1; a <= i; a++) {
+							if (body.instructions.get(a).cond != null) break;
+							if (body.instructions.get(a) instanceof ASMLdr) {
+								ASMLdr ldr = (ASMLdr) body.instructions.get(a);
+								
+								if (ldr.op0 instanceof RegOperand && ((RegOperand) ldr.op0).reg == base && ldr.op1 != null && ldr.op1 instanceof ImmOperand) {
+									ldrs.add(ldr);
+								}
+								else break;
+							}
+							else break;
+						}
+						
+						if (ldrs.size() > 2) {
+							/* Check that all immediates are back-to-back */
+							boolean clear = true;
+							for (int a = 1; a < ldrs.size(); a++) {
+								clear &= ((ImmOperand) ldrs.get(a - 1).op1).value - 4 == ((ImmOperand) ldrs.get(a).op1).value;
+							}
+							
+							int start = ((ImmOperand) ldrs.get(0).op1).value;
+							
+							if (clear && Math.abs(start) < 256 && start != 0) {
+								
+								List<RegOperand> regs = new ArrayList();
+								
+								for (int a = 0; a < ldrs.size(); a++) 
+									regs.add(ldrs.get(a).target);
+								
+								for (int a = 0; a < ldrs.size(); a++) 
+									body.instructions.remove(i - 2);
+								
+								MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFA;
+								
+								if (start < 0) 
+									body.instructions.add(i - 2, new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(base), new ImmOperand(-start)));
+								else 
+									body.instructions.add(i - 2, new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(base), new ImmOperand(start)));
+									
+								ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.R0), regs, null);
+							
+								body.instructions.add(i - 1, block);
+							}
+						}
+					}
 				}
 			}
 		}

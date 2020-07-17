@@ -35,16 +35,15 @@ foo:                                         /* Function: foo */
     add r0, fp, #20
     ldr r0, [r0, r2]
     push { r0 }
-    ldr r0, [fp, #16]                        /* Load parameters */
-    ldr r1, [fp, #12]
-    ldr r2, [fp, #8]
-    stmfd sp!, {R0-R2}
+    add r0, fp, #16
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     bl bar                                   /* Call bar */
     pop { r1 }
     lsl r2, r0, #1
     add r0, r1, r2
     mov sp, fp
-    ldmfd sp!, {FP, LR}
+    ldmfd sp!, {fp, lr}
     add sp, sp, #24
     bx lr
     
@@ -55,21 +54,19 @@ main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #2
     mov r2, #1
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0-r2}
     mov r0, #6                               /* Evaluate Expression */
     mov r1, #5
     mov r2, #4
-    stmfd sp!, {R0-R2}
-    ldr r0, [fp, #-4]                        /* Evaluate Expression */
-    ldr r1, [fp, #-8]
-    ldr r2, [fp, #-12]
-    stmfd sp!, {R0-R2}
-    ldr r0, [fp, #-16]
-    ldr r1, [fp, #-20]
-    ldr r2, [fp, #-24]
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0-r2}
+    sub r0, fp, #4
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    sub r0, fp, #16
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     mov r0, r3
     bl foo                                   /* Call foo */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

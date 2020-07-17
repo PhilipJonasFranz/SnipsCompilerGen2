@@ -116,7 +116,7 @@ public class ASMMemBlock extends ASMInstruction {
 		if (op.endsWith(",")) op = op.substring(0, op.length() - 1);
 		
 		op += "}";
-		return CompilerDriver.printDepth + op;
+		return (CompilerDriver.printDepth + op).toLowerCase();
 	}
 	
 }

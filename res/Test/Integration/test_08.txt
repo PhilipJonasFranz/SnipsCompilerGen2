@@ -86,7 +86,7 @@ HEAP_START: .word 0
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
-    stmea sp, {R3-R6}
+    stmea sp, {r3-r6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -170,7 +170,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    ldmfd sp!, {R3-R6}
+    ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_main.L5_HEAP_START: .word HEAP_START
     
@@ -179,7 +179,7 @@ resv.L18:
 /* thus can be overwritten. */
 free:                                        /* Function: free */
     sub sp, sp, #16
-    stmea sp, {R3, R4, R6, R7}
+    stmea sp, {r3, r4, r6, r7}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -202,7 +202,7 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    ldmfd sp!, {R3, R4, R6, R7}
+    ldmfd sp!, {r3, r4, r6, r7}
     bx lr
     
 /* [BASE-PACKAGE] */
@@ -216,7 +216,7 @@ free.L2:
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT */
     sub sp, sp, #12
-    stmea sp, {R3, R4, LR}
+    stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -225,7 +225,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     push { r3 }
     ldr r0, .POOL1_main.L4_NULL              /* Load null address */
     ldr r1, .POOL1_main.L4_NULL              /* Load null address */
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -236,14 +236,14 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    ldmfd sp!, {R3, R4, PC}
+    ldmfd sp!, {r3, r4, pc}
 .POOL1_main.L4_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
 List.add_P1:                                 /* Function: List.add, Provisos: INT */
     sub sp, sp, #16
-    stmea sp, {R3-R5, LR}
+    stmea sp, {r3-r5, lr}
     mov r3, r0
     mov r4, r1
     mov r0, #3                               /* Evaluate Expression */
@@ -270,7 +270,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {R3-R5, PC}
+    ldmfd sp!, {r3-r5, pc}
 List.add.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
@@ -279,14 +279,14 @@ List.add.L1:
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {R3-R5, PC}
+    ldmfd sp!, {r3-r5, pc}
 .POOL2_main.L4_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
 List.get_P2:                                 /* Function: List.get, Provisos: INT */
     sub sp, sp, #12
-    stmea sp, {R3-R5}
+    stmea sp, {r3-r5}
     mov r3, r0
     mov r4, r1
     cmp r1, #0
@@ -319,7 +319,7 @@ List.get.L4:
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
 List.get.L7: 
-    ldmfd sp!, {R3-R5}
+    ldmfd sp!, {r3-r5}
     bx lr
 .POOL3_main.L4_NULL: .word NULL
     
@@ -327,13 +327,13 @@ List.get.L7:
 /* If the index is out of bounds nothing is removed. */
 List.remove:                                 /* Function: List.remove */
     sub sp, sp, #20
-    stmea sp, {R3-R6, LR}
+    stmea sp, {r3-r6, lr}
     mov r3, r0
     mov r4, r1
 /* Out of bounds */
     cmp r1, #0
     bge List.remove.L0
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 List.remove.L0: 
     cmp r4, #0
     bne List.remove.L3
@@ -342,7 +342,7 @@ List.remove.L0:
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
-    ldmfdeq sp!, {R3-R6, PC}
+    ldmfdeq sp!, {r3-r6, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -362,7 +362,7 @@ List.remove.L0:
 List.remove.L6: 
     mov r0, r5                               /* Load parameters */
     bl free                                  /* Call free */
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 List.remove.L3: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
@@ -377,7 +377,7 @@ List.remove.L9:                              /* Evaluate condition */
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L12
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 List.remove.L12: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
@@ -391,7 +391,7 @@ List.remove.L10:
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L14
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 List.remove.L14: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
@@ -410,7 +410,7 @@ List.remove.L14:
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 List.remove.L16: 
 /* Cut out element and set next pointers */
     lsl r1, r5, #2                           /* Convert to bytes */
@@ -423,7 +423,7 @@ List.remove.L16:
     mov r0, r6                               /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r6, [r1, #4]                         /* Store value to struct field */
-    ldmfd sp!, {R3-R6, PC}
+    ldmfd sp!, {r3-r6, pc}
 .POOL4_main.L4_NULL: .word NULL
     
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
@@ -433,7 +433,7 @@ GameObject.Items.set:                        /* Function: GameObject.Items.set *
     ldr r6, [r1, #4]                         /* Load field from struct */
     add r0, r6, r4
     str r2, [r10, r0, lsl #2]
-    ldmfd sp!, {R4, R6}
+    ldmfd sp!, {r4, r6}
     bx lr
     
 GameObject.Items.get:                        /* Function: GameObject.Items.get */
@@ -443,22 +443,22 @@ GameObject.Items.get:                        /* Function: GameObject.Items.get *
     ldr r5, [r1, #4]                         /* Load field from struct */
     add r0, r5, r4
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    ldmfd sp!, {R4, R5}
+    ldmfd sp!, {r4, r5}
     bx lr
     
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #12
-    stmea sp, {R0-R2}
+    stmea sp, {r0-r2}
     mov r0, #8
     mov r1, #5
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .POOL5_main.L3_arr               /* Load from .data section */
     str r0, [r1, #0]
     pop { r0 }
     str r0, [r1, #4]
-    ldmfd sp!, {R0-R2}
+    ldmfd sp!, {r0-r2}
 /* Inital Player data */
 main:                                        /* Function: main */
     push { fp, lr }
@@ -507,7 +507,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     mov r1, #1
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #5
     push { r0 }
     mov r0, #5
@@ -522,7 +522,7 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #-36]                       /* Evaluate Expression */
     ldr r1, [fp, #-40]
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     push { r4 }
     mov r0, #5
     push { r0 }
@@ -533,7 +533,7 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     push { r0 }
     ldr r0, [r1, #12]                        /* Load field from struct */
-    ldmfd sp!, {R1, R2}
+    ldmfd sp!, {r1, r2}
     bl GameObject.Items.set                  /* Call GameObject.Items.set */
     mov r0, #0                               /* Evaluate Expression */
     bl List.create_P0                        /* Call List.create */
@@ -561,6 +561,6 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-44]                       /* Load field from struct */
     add r0, r0, r2
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
 .POOL5_main.L3_arr: .word arr
     

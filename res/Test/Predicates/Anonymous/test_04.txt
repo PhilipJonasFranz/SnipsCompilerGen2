@@ -32,7 +32,7 @@ map:                                         /* Function: map */
     mov r4, r1
     add lr, pc, #8
     mov pc, r4
-    ldmfd sp!, {R4, PC}
+    ldmfd sp!, {r4, pc}
     
 main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */

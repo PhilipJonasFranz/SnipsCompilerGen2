@@ -48,7 +48,7 @@ X.get:                                       /* Function: X.get */
 X.get.L1: 
     ldr r0, [fp, #12]                        /* Load field from struct */
     mov sp, fp
-    ldmfd sp!, {R3, FP}
+    ldmfd sp!, {r3, fp}
     add sp, sp, #8
     bx lr
     

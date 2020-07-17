@@ -23,7 +23,7 @@ sq:                                          /* Function: sq */
     
 sqsum:                                       /* Function: sqsum */
     sub sp, sp, #20
-    stmea sp, {R4-R6, FP, LR}
+    stmea sp, {r4-r6, fp, lr}
     mov fp, sp
     mov r4, r1
     mov r5, r2
@@ -43,7 +43,7 @@ sqsum:                                       /* Function: sqsum */
     add r6, r6, r0
     mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
-    ldmfd sp!, {R4-R6, FP, LR}
+    ldmfd sp!, {r4-r6, fp, lr}
     add sp, sp, #8
     bx lr
     
@@ -60,8 +60,8 @@ main:                                        /* Function: main */
     mov r0, r3
     push { r5 }
     push { r4 }
-    ldmfd sp!, {R1, R2}
+    ldmfd sp!, {r1, r2}
     bl sqsum                                 /* Call sqsum */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

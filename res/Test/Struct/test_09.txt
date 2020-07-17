@@ -29,7 +29,7 @@ HEAP_START: .word 0
 /* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
-    stmea sp, {R3-R6}
+    stmea sp, {r3-r6}
     mov r3, r0
 /* Add block header to size */
     add r3, r0, #1
@@ -113,7 +113,7 @@ resv.L2:
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L18: 
-    ldmfd sp!, {R3-R6}
+    ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_main.L2_HEAP_START: .word HEAP_START
     
@@ -122,7 +122,7 @@ resv.L18:
 /* thus can be overwritten. */
 free:                                        /* Function: free */
     sub sp, sp, #16
-    stmea sp, {R3, R4, R6, R7}
+    stmea sp, {r3, r4, r6, r7}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -145,7 +145,7 @@ free.L1:                                     /* Evaluate condition */
     sub r6, r6, r7
     b free.L1
 free.L2: 
-    ldmfd sp!, {R3, R4, R6, R7}
+    ldmfd sp!, {r3, r4, r6, r7}
     bx lr
     
 /* [BASE-PACKAGE] */
@@ -159,7 +159,7 @@ free.L2:
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT* */
     sub sp, sp, #12
-    stmea sp, {R3, R4, LR}
+    stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -168,7 +168,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     push { r3 }
     ldr r0, .POOL1_main.L1_NULL              /* Load null address */
     ldr r1, .POOL1_main.L1_NULL              /* Load null address */
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     lsl r1, r4, #2
     str r0, [r1, #0]
@@ -179,7 +179,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
-    ldmfd sp!, {R3, R4, PC}
+    ldmfd sp!, {r3, r4, pc}
 .POOL1_main.L1_NULL: .word NULL
     
 main:                                        /* Function: main */
@@ -187,11 +187,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #20                              /* Evaluate Expression */
     mov r1, #10
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     ldr r0, .POOL2_main.L1_NULL              /* Evaluate Expression */
     bl List.create_P0                        /* Call List.create */
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
 .POOL2_main.L1_NULL: .word NULL
     

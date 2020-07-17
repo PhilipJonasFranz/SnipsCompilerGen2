@@ -37,7 +37,7 @@ main.L6:
     add r4, r4, r4
     mov r0, #6                               /* Evaluate Expression */
     mov r1, #4
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     add r6, r6, #1
     add sp, sp, #8
     b main.L6

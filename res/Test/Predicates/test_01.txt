@@ -50,16 +50,16 @@ sortPred:                                    /* Function: sortPred */
     
 sort:                                        /* Function: sort */
     sub sp, sp, #32
-    stmea sp, {R3-R9, LR}
+    stmea sp, {r3-r9, lr}
     mov r3, r0
     mov r4, r1
     mov r5, r2
     cmp r1, #1
-    ldmfdle sp!, {R3-R9, PC}
+    ldmfdle sp!, {r3-r9, pc}
 sort.L3:                                     /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
-    ldmfdne sp!, {R3-R9, PC}
+    ldmfdne sp!, {r3-r9, pc}
     mov r6, #1
     mov r7, #1
 sort.L6: 
@@ -88,10 +88,10 @@ sort.L9:
 sort.L7: 
     cmp r6, #0
     beq sort.L11
-    ldmfd sp!, {R3-R9, PC}
+    ldmfd sp!, {r3-r9, pc}
 sort.L11: 
     b sort.L3
-    ldmfd sp!, {R3-R9, PC}
+    ldmfd sp!, {r3-r9, pc}
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -100,10 +100,10 @@ main:                                        /* Function: main */
     mov r0, #2                               /* Evaluate Expression */
     mov r1, #4
     mov r2, #8
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0-r2}
     mov r0, #3
     mov r1, #6
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     add r10, pc, #8                          /* Load parameters */
     b lambda_sortPred
     mov r10, #0
@@ -112,11 +112,11 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #20
     lsr r0, r0, #2
-    ldmfd sp!, {R1, R2}
+    ldmfd sp!, {r1, r2}
     bl sort                                  /* Call sort */
     lsl r2, r3, #2
     sub r0, fp, #20
     ldr r0, [r0, r2]
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

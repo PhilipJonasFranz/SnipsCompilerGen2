@@ -390,8 +390,8 @@ public class ProcessorUnit {
 				
 				/* Post Index */
 				if (indexBit == 0) {
-					if (instr [23] == 1) addr = this.add(addr, this.add4);
-					else addr = this.sub(addr, this.add4);
+					if (instr [23] == 1) addr = this.add(addr, this.add4.clone());
+					else addr = this.sub(addr, this.add4.clone());
 				}
 			}
 		}

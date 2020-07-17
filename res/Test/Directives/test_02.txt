@@ -19,16 +19,16 @@ OUTPUT
     
 mult:                                        /* Function: mult */
     sub sp, sp, #28
-    stmea sp, {R3-R8, FP}
+    stmea sp, {r3-r8, fp}
     mov fp, sp
     mov r3, r0
     mov r4, r1
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #0
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #0
     mov r1, #0
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 mult.L1: 
@@ -86,7 +86,7 @@ mult.L2:
     sub r0, fp, #16
     ldr r0, [r0, r2]
     mov sp, fp
-    ldmfd sp!, {R3-R8, FP}
+    ldmfd sp!, {r3-r8, fp}
     add sp, sp, #32
     bx lr
     
@@ -97,31 +97,29 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r0, #4                               /* Evaluate Expression */
     mov r1, #3
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     mov r1, #1
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #4                               /* Evaluate Expression */
     mov r1, #2
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #3
     mov r1, #1
-    stmfd sp!, {R0, R1}
-    ldr r0, [fp, #-4]                        /* Evaluate Expression */
-    ldr r1, [fp, #-8]
-    ldr r2, [fp, #-12]
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0, r1}
+    sub r0, fp, #4
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     ldr r0, [fp, #-16]
     push { r0 }
-    ldr r0, [fp, #-20]
-    ldr r1, [fp, #-24]
-    ldr r2, [fp, #-28]
-    stmfd sp!, {R0-R2}
+    sub r0, fp, #20
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     ldr r0, [fp, #-32]
     push { r0 }
     mov r0, r3
     mov r1, r4
     bl mult                                  /* Call mult */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

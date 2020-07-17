@@ -29,10 +29,10 @@ s1: .skip 12
 .text
 /* Initialize the global variables */
     sub sp, sp, #12
-    stmea sp, {R0-R2}
+    stmea sp, {r0-r2}
     mov r0, #5
     mov r1, #10
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #1
     ldr r1, .POOL0_main.L1_s0                /* Load from .data section */
     str r0, [r1, #0]
@@ -57,7 +57,7 @@ main.L2:
     add r2, r2, #8
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
 main.L3: 
     pop { r0 }
     ldr r1, .POOL0_main.L2_s1                /* Load from .data section */
@@ -66,7 +66,7 @@ main.L3:
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    ldmfd sp!, {R0-R2}
+    ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     mov r3, r0
     ldr r1, .POOL0_main.L1_s0                /* Evaluate Expression */

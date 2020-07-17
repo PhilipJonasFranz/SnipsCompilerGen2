@@ -29,25 +29,25 @@ main:                                        /* Function: main */
     mov r5, r2
     mov r0, #12                              /* Evaluate Expression */
     mov r1, #11
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #10
     mov r1, #9
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #8
     mov r1, #7
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #6
     mov r1, #5
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #4
     mov r1, #3
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     mov r1, #1
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #7
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     pop { r0 }
     sub r1, fp, #40                          /* Start of structure in stack */
     str r0, [r1, #0]

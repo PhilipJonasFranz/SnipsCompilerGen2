@@ -25,7 +25,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #15                              /* Evaluate Expression */
     mov r1, #10
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */

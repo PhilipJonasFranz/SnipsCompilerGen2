@@ -45,10 +45,10 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #2                               /* Evaluate Expression */
     mov r1, #1
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #6
     mov r1, #3
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     sub r0, fp, #8
     lsr r0, r0, #2
     push { r0 }
@@ -62,5 +62,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r0, r2
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

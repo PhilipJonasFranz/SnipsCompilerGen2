@@ -47,7 +47,7 @@ _routine_stack_copy_end_:
     
 get:                                         /* Function: get */
     sub sp, sp, #16
-    stmea sp, {R3-R5, FP}
+    stmea sp, {r3-r5, fp}
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -68,7 +68,7 @@ get.L0:
     cmp r12, #0
     mov r2, sp
     mov sp, fp
-    ldmfd sp!, {R3-R5, FP}
+    ldmfd sp!, {r3-r5, fp}
     bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
@@ -83,7 +83,7 @@ main:                                        /* Function: main */
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #3
     mov r2, #5
-    stmfd sp!, {R0-R2}
+    stmfd sp!, {r0-r2}
     mov r4, #0
     mov r0, #3                               /* Evaluate Expression */
     push { sp }
@@ -91,7 +91,7 @@ main:                                        /* Function: main */
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r3 }
-    ldmfd sp!, {R1, R2}
+    ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */
@@ -119,5 +119,5 @@ main.L0:
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

@@ -17,12 +17,12 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #9                               /* Evaluate Expression */
     mov r1, #4
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #1
     push { r0 }
     mov r0, #5
     mov r1, #10
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #1
     push { r0 }
     sub r1, fp, #16                          /* Load field location */

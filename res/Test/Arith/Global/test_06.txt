@@ -23,15 +23,15 @@ s0: .skip 24
 .text
 /* Initialize the global variables */
     sub sp, sp, #12
-    stmea sp, {R0-R2}
+    stmea sp, {r0-r2}
     mov r0, #8
     mov r1, #6
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #1
     push { r0 }
     mov r0, #5
     mov r1, #10
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #1
     ldr r1, .POOL0_main.L0_s0                /* Load from .data section */
     str r0, [r1, #0]
@@ -45,7 +45,7 @@ s0: .skip 24
     str r0, [r1, #16]
     pop { r0 }
     str r0, [r1, #20]
-    ldmfd sp!, {R0-R2}
+    ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     mov r3, r0
     ldr r1, .POOL0_main.L0_s0                /* Evaluate Expression */

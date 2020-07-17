@@ -25,7 +25,7 @@ get:                                         /* Function: get */
     pop { r1 }
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     mul r0, r1, r2
-    ldmfd sp!, {R3, R4}
+    ldmfd sp!, {r3, r4}
     bx lr
     
 main:                                        /* Function: main */
@@ -34,14 +34,14 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #4                               /* Evaluate Expression */
     mov r1, #3
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     mov r0, #2
     mov r1, #1
-    stmfd sp!, {R0, R1}
+    stmfd sp!, {r0, r1}
     sub r0, fp, #16
     lsr r0, r0, #2
     mov r1, r3
     bl get                                   /* Call get */
     mov sp, fp
-    ldmfd sp!, {FP, PC}
+    ldmfd sp!, {fp, pc}
     

@@ -27,7 +27,7 @@ foo:                                         /* Function: foo */
     mov r3, r0
     bl bar                                   /* Call bar */
     add r0, r3, r0
-    ldmfd sp!, {R3, PC}
+    ldmfd sp!, {r3, pc}
     
 main:                                        /* Function: main */
     push { lr }
