@@ -30,10 +30,9 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, r1                               /* Evaluate Expression */
     bl foo                                   /* Call foo */
-    push { r0 }
+    mov r5, r0
     mov r0, r3                               /* Load parameters */
     bl bar                                   /* Call bar */
-    pop { r1 }
-    add r0, r1, r0
+    add r0, r5, r0
     pop { pc }
     

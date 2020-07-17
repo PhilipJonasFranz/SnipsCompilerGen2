@@ -68,6 +68,7 @@ public class CompilerDriver {
 		enableComments = true,
 		disableModifiers = false,
 		disableOptimizer = false,
+		optimizeFileSize = false,
 		disableWarnings = false,
 		disableStructSIDHeaders = false,
 		includeMetaInformation = true,
@@ -480,6 +481,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-imm"))imm = true;
 				else if (args [i].equals("-warn"))disableWarnings = true;
 				else if (args [i].equals("-opt"))disableOptimizer = true;
+				else if (args [i].equals("-ofs"))optimizeFileSize = true;
 				else if (args [i].equals("-com"))enableComments = false;
 				else if (args [i].equals("-rov"))disableModifiers = true;
 				else if (args [i].equals("-sid"))disableStructSIDHeaders = true;
@@ -507,6 +509,7 @@ public class CompilerDriver {
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable Warnings",
 				"-opt      : Disable Optimizer",
+				"-ofs      : Optimize for Filesize, slight performance reduction",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-imm      : Print out immediate representations",

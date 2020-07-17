@@ -54,11 +54,11 @@ sort:                                        /* Function: sort */
     mov r4, r1
     mov r5, r2
     cmp r1, #1
-    ble sort.L4
+    pople { r3, r4, r5, r6, r7, r8, r9, pc }
 sort.L3:                                     /* Evaluate condition */
     mov r0, #1
     cmp r0, #1
-    bne sort.L4
+    popne { r3, r4, r5, r6, r7, r8, r9, pc }
     mov r6, #1
     mov r7, #1
 sort.L6: 
@@ -87,10 +87,9 @@ sort.L9:
 sort.L7: 
     cmp r6, #0
     beq sort.L11
-    b sort.L4
+    pop { r3, r4, r5, r6, r7, r8, r9, pc }
 sort.L11: 
     b sort.L3
-sort.L4: 
     pop { r3, r4, r5, r6, r7, r8, r9, pc }
     
 main:                                        /* Function: main */

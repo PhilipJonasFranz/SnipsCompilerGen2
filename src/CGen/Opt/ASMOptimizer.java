@@ -43,6 +43,7 @@ import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AsN.AsNBody;
+import Snips.CompilerDriver;
 import Util.Logging.Message;
 import Util.Logging.Message.Type;
 
@@ -315,6 +316,12 @@ public class ASMOptimizer {
 				
 			}
 			
+		}
+
+		/* Finishing touches, no iteration required */
+		if (CompilerDriver.optimizeFileSize) {
+			this.popPcSubstitution(body);
+			this.clearUnusedLabels(body);
 		}
 		
 		/* Filter duplicate empty lines */
@@ -963,14 +970,56 @@ public class ASMOptimizer {
 						ASMBranch b0 = (ASMBranch) body.instructions.get(x + 1);
 					
 						if (b0.type == BRANCH_TYPE.BX) {
-							for (int a = i; a < body.instructions.size(); a++) {
+							for (int a = i; a < x + 1; a++) {
 								if (body.instructions.get(a) instanceof ASMBranch) {
-									branch = (ASMBranch) body.instructions.get(i);
+									branch = (ASMBranch) body.instructions.get(a);
 									if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
 										branch.type = BRANCH_TYPE.BX;
 										branch.optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 										branch.target = b0.target.clone();
 										
+										markOpt();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void popPcSubstitution(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMBranch) {
+				ASMBranch branch = (ASMBranch) body.instructions.get(i);
+				
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand) {
+					LabelOperand label = (LabelOperand) branch.target;
+				
+					int x = -1;
+					
+					/* Search for targeted label, indexOf is buggy in this situation :( */
+					for (int a = 0; a < body.instructions.size(); a++) {
+						if (body.instructions.get(a) instanceof ASMLabel) {
+							ASMLabel l = (ASMLabel) body.instructions.get(a);
+							if (l.name.equals(label.label.name)) {
+								x = a;
+								break;
+							}
+						}
+					}
+					
+					if (x != -1 && body.instructions.get(x + 1) instanceof ASMPopStack) {
+						ASMPopStack pop = (ASMPopStack) body.instructions.get(x + 1);
+					
+						if (pop.operands.get(pop.operands.size() - 1).reg == REGISTER.PC) {
+							for (int a = i; a < x + 1; a++) {
+								if (body.instructions.get(a) instanceof ASMBranch) {
+									branch = (ASMBranch) body.instructions.get(a);
+									if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
+										body.instructions.set(a, pop.clone());
+										body.instructions.get(a).cond = branch.cond;
 										markOpt();
 									}
 								}
