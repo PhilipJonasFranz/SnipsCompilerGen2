@@ -11,7 +11,8 @@ OUTPUT
 /* --test_11.txt */
     b main
 __op_mod:                                    /* Function: __op_mod */
-    push { r3, r4, r5, r6, r7 }
+    sub sp, sp, #20
+    stmea sp, {r3-r7}
     mov r3, r0
     mov r4, r1
     mov r0, #0                               /* Evaluate Expression */
@@ -54,7 +55,7 @@ __op_mod.L7:
     sub r7, r4, r7
 __op_mod.L11: 
     mov r0, r7                               /* Evaluate Expression */
-    pop { r3, r4, r5, r6, r7 }
+    ldmfd sp!, {r3-r7}
     bx lr
     
 main:                                        /* Function: main */

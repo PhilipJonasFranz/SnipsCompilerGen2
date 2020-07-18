@@ -14,6 +14,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
@@ -143,8 +144,24 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			
 			/* Compute left operand and push the result on the stack */
 			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
-			m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-			st.push(REGISTER.R0);
+			
+			int free = -1;
+			
+			/* 
+			 * Expression is inline call, which means that push/pop most likely
+			 * cannot be removed during optimizing. Attempt to move to other reg.
+			 */
+			if (right instanceof InlineCall) free = r.findFree();
+			
+			if (free != -1) {
+				m.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));
+				r.getReg(free).setDeclaration(null);
+			}
+			else {
+				m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+				st.push(REGISTER.R0);
+			}
+			
 			r.free(0);
 			
 			/* Compute the right operand and move it to target location */
@@ -156,9 +173,15 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				r.copy(0, target1);
 			}
 			
-			/* Pop the left operand in the target register */
-			m.instructions.add(new ASMPopStack(new RegOperand(target0)));
-			st.pop();
+			if (free == -1) {
+				/* Pop the left operand in the target register */
+				m.instructions.add(new ASMPopStack(new RegOperand(target0)));
+				st.pop();
+			}
+			else {
+				r.free(free);
+				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(free)));
+			}
 		}
 	}
 	

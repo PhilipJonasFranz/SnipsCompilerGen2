@@ -16,19 +16,19 @@ OUTPUT
 /* --test_03.txt */
     b main
 getDiff_P0:                                  /* Function: getDiff, Provisos: INT, INT */
-    push { r3, r4, lr }
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r4, r1
     cmp r0, #0
     bne getDiff.L1
     mov r0, r4                               /* Evaluate Expression */
-    b getDiff.L2
+    ldmfd sp!, {r3, r4, pc}
 getDiff.L1: 
     sub r1, r3, #1
     mov r0, r4
     bl getDiff_P0                            /* Call getDiff */
-getDiff.L2: 
-    pop { r3, r4, pc }
+    ldmfd sp!, {r3, r4, pc}
     
 main:                                        /* Function: main */
     b getDiff_P0                             /* Call getDiff */

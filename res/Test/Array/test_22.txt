@@ -14,13 +14,14 @@ vec: .skip 16
     
 .text
 /* Initialize the global variables */
-    push { r0, r1, r2 }
+    sub sp, sp, #12
+    stmea sp, {r0-r2}
     mov r0, #0
     mov r1, #2
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #7
     mov r1, #3
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
     str r0, [r1, #0]
@@ -30,12 +31,12 @@ vec: .skip 16
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    pop { r0, r1, r2 }
+    ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     ldr r1, .POOL0_main.L0_vec               /* Load data section address */
     ldr r0, [r1, #4]
     ldr r2, [r1, #0]
-    push { r2, r0 }
+    stmfd sp!, {r0, r2}
     ldr r0, [sp, #0]
     bx lr
 .POOL0_main.L0_vec: .word vec

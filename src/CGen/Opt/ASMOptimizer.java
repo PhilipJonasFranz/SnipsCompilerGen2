@@ -10,6 +10,8 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMMemBlock;
+import Imm.ASM.Memory.ASMMemBlock.MEM_BLOCK_MODE;
 import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
@@ -43,6 +45,7 @@ import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOperand;
 import Imm.ASM.Util.Operands.RegOperand.REGISTER;
 import Imm.AsN.AsNBody;
+import Snips.CompilerDriver;
 import Util.Logging.Message;
 import Util.Logging.Message.Type;
 
@@ -316,6 +319,16 @@ public class ASMOptimizer {
 			}
 			
 		}
+
+		/* Finishing touches, no iteration required */
+		this.popPcSubstitution(body);
+		this.clearUnusedLabels(body);
+		
+		/* Replace sub-structure loads with ldm */
+		this.replaceR0R1R2LdrWithLdm(body);
+		
+		/* Replace large push/pop operations with ldm/stm */
+		this.replacePushPopWithBlockMemory(body);
 		
 		/* Filter duplicate empty lines */
 		if (body.instructions.size() > 1) {
@@ -323,6 +336,123 @@ public class ASMOptimizer {
 				if (body.instructions.get(i - 1) instanceof ASMSeperator && body.instructions.get(i) instanceof ASMSeperator) {
 					body.instructions.remove(i);
 					i--;
+				}
+			}
+		}
+	}
+	
+	public void replaceR0R1R2LdrWithLdm(AsNBody body) {
+		for (int i = 2; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i - 2) instanceof ASMLdr) {
+				ASMLdr ldr0 = (ASMLdr) body.instructions.get(i - 2);
+				
+				if (ldr0.op0 instanceof RegOperand && ldr0.op1 != null && ldr0.op1 instanceof ImmOperand && ldr0.cond == null) { 
+				
+					REGISTER base = ((RegOperand) ldr0.op0).reg;
+					
+					if (base == REGISTER.SP || base == REGISTER.FP) {
+						List<ASMLdr> ldrs = new ArrayList();
+						ldrs.add(ldr0);
+						
+						for (int a = i - 1; a <= i; a++) {
+							if (body.instructions.get(a).cond != null) break;
+							if (body.instructions.get(a) instanceof ASMLdr) {
+								ASMLdr ldr = (ASMLdr) body.instructions.get(a);
+								
+								if (ldr.op0 instanceof RegOperand && ((RegOperand) ldr.op0).reg == base && ldr.op1 != null && ldr.op1 instanceof ImmOperand) {
+									ldrs.add(ldr);
+								}
+								else break;
+							}
+							else break;
+						}
+						
+						if (ldrs.size() > 2) {
+							/* Check that all immediates are back-to-back */
+							boolean clear = true;
+							for (int a = 1; a < ldrs.size(); a++) {
+								clear &= ((ImmOperand) ldrs.get(a - 1).op1).value - 4 == ((ImmOperand) ldrs.get(a).op1).value;
+							}
+							
+							int start = ((ImmOperand) ldrs.get(0).op1).value;
+							
+							if (clear && Math.abs(start) < 256 && start != 0) {
+								
+								List<RegOperand> regs = new ArrayList();
+								
+								for (int a = 0; a < ldrs.size(); a++) 
+									regs.add(ldrs.get(a).target);
+								
+								for (int a = 0; a < ldrs.size(); a++) 
+									body.instructions.remove(i - 2);
+								
+								MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFA;
+								
+								if (start < 0) 
+									body.instructions.add(i - 2, new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(base), new ImmOperand(-start)));
+								else 
+									body.instructions.add(i - 2, new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(base), new ImmOperand(start)));
+									
+								ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.R0), regs, null);
+							
+								body.instructions.add(i - 1, block);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void replacePushPopWithBlockMemory(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMPushStack) {
+				ASMPushStack push = (ASMPushStack) body.instructions.get(i);
+				
+				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
+					body.instructions.set(i, new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(push.operands.size() * 4)));
+					
+					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMEA;
+					
+					ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.SP), push.operands, push.cond);
+					body.instructions.add(i + 1, block);
+				}
+				else {
+					/* Operands are flipped here */
+					List<RegOperand> ops = new ArrayList();
+					for (RegOperand r : push.operands) ops.add(0, r);
+					
+					if (ASMMemBlock.checkInOrder(ops) && push.operands.size() > 1) {
+						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMFD;
+						
+						ASMMemBlock block = new ASMMemBlock(mode, true, new RegOperand(REGISTER.SP), ops, push.cond);
+						body.instructions.set(i, block);
+					}
+				}
+			}
+			else if (body.instructions.get(i) instanceof ASMPopStack) {
+				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
+				
+				if (ASMMemBlock.checkInOrder(pop.operands) && pop.operands.size() > 1) {
+					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFD;
+					
+					ASMMemBlock block = new ASMMemBlock(mode, true, new RegOperand(REGISTER.SP), pop.operands, pop.cond);
+
+					body.instructions.set(i, block);
+				}
+				else {
+					/* Operands are flipped here */
+					List<RegOperand> ops = new ArrayList();
+					for (RegOperand r : pop.operands) ops.add(0, r);
+					
+					if (ASMMemBlock.checkInOrder(ops) && pop.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
+						body.instructions.set(i, new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(ops.size() * 4)));
+						
+						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMEA;
+						
+						ASMMemBlock block = new ASMMemBlock(mode, false, new RegOperand(REGISTER.SP), ops, pop.cond);
+						body.instructions.add(i + 1, block);
+					}
 				}
 			}
 		}
@@ -963,15 +1093,59 @@ public class ASMOptimizer {
 						ASMBranch b0 = (ASMBranch) body.instructions.get(x + 1);
 					
 						if (b0.type == BRANCH_TYPE.BX) {
-							for (int a = i; a < body.instructions.size(); a++) {
+							for (int a = i; a < x + 1; a++) {
 								if (body.instructions.get(a) instanceof ASMBranch) {
-									branch = (ASMBranch) body.instructions.get(i);
+									branch = (ASMBranch) body.instructions.get(a);
 									if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
 										branch.type = BRANCH_TYPE.BX;
 										branch.optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 										branch.target = b0.target.clone();
 										
 										markOpt();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void popPcSubstitution(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMBranch) {
+				ASMBranch branch = (ASMBranch) body.instructions.get(i);
+				
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand) {
+					LabelOperand label = (LabelOperand) branch.target;
+				
+					int x = -1;
+					
+					/* Search for targeted label, indexOf is buggy in this situation :( */
+					for (int a = 0; a < body.instructions.size(); a++) {
+						if (body.instructions.get(a) instanceof ASMLabel) {
+							ASMLabel l = (ASMLabel) body.instructions.get(a);
+							if (l.name.equals(label.label.name)) {
+								x = a;
+								break;
+							}
+						}
+					}
+					
+					if (x != -1 && body.instructions.get(x + 1) instanceof ASMPopStack) {
+						ASMPopStack pop = (ASMPopStack) body.instructions.get(x + 1);
+					
+						if (ASMMemBlock.checkInOrder(pop.operands) || !CompilerDriver.optimizeFileSize) {
+							if (pop.operands.get(pop.operands.size() - 1).reg == REGISTER.PC) {
+								for (int a = i; a < x + 1; a++) {
+									if (body.instructions.get(a) instanceof ASMBranch) {
+										branch = (ASMBranch) body.instructions.get(a);
+										if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOperand && ((LabelOperand) branch.target).label.equals(label.label)) {
+											body.instructions.set(a, pop.clone());
+											body.instructions.get(a).cond = branch.cond;
+											markOpt();
+										}
 									}
 								}
 							}

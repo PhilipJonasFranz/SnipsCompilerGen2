@@ -34,7 +34,7 @@ id:                                          /* Function: id */
     mov fp, sp
     ldr r0, [fp, #8]                         /* Evaluate Expression */
     ldr r1, [fp, #4]
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r2, sp
     mov sp, fp
     pop { fp }
@@ -57,12 +57,12 @@ main:                                        /* Function: main */
     ldr r4, [fp, #-4]
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     add lr, pc, #8
     mov pc, r4
     lsl r2, r3, #2
     sub r0, fp, #12
     ldr r0, [r0, r2]
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     

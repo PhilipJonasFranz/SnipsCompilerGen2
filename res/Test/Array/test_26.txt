@@ -18,16 +18,16 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #2
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #7
     mov r1, #3
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #2                               /* Evaluate Expression */
     mov r1, #9
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #5
     mov r1, #1
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     pop { r0 }
     sub r1, fp, #16                          /* Start of structure in stack */
     str r0, [r1, #0]

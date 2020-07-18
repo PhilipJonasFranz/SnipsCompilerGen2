@@ -21,10 +21,10 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #6
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #4
     mov r1, #2
-    push { r1, r0 }
+    stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
     mov r0, #1

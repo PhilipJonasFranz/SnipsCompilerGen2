@@ -33,19 +33,19 @@ main:                                        /* Function: main */
     mov r0, #7                               /* Evaluate Expression */
     mov r1, #6
     mov r2, #3
-    push { r2, r1, r0 }
+    stmfd sp!, {r0-r2}
     mov r0, #4                               /* Evaluate Expression */
     mov r1, #2
     mov r2, #1
-    push { r2, r1, r0 }
+    stmfd sp!, {r0-r2}
     sub r0, fp, #24
     lsr r0, r0, #2
     push { r3 }
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
-    pop { r1, r2 }
+    ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     

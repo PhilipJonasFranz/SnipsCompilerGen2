@@ -29,12 +29,13 @@ bar:                                         /* Function: bar */
     bx lr
     
 foo:                                         /* Function: foo */
-    push { r3, r5, lr }
+    sub sp, sp, #12
+    stmea sp, {r3, r5, lr}
     mov r3, r0
     bl bar                                   /* Call bar */
     add r5, r3, r0
     mov r0, r5                               /* Evaluate Expression */
-    pop { r3, r5, pc }
+    ldmfd sp!, {r3, r5, pc}
     
 main:                                        /* Function: main */
     push { lr }

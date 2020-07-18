@@ -47,7 +47,7 @@ public class ProcessorUnit {
 	public int aluSrc, immSrc, setCond, n0, n1, carry, accum;
 	
 	/* Memory Flags */
-	public int enMem, bLink, wb, quantityBit, upDownBit, indexBit;
+	public int enMem, blMem, bLink, wb, quantityBit, upDownBit, indexBit;
 	
 	public int [] resSrc		= new int [1];
 	public int [] regSrc     	= new int [1 << 1];
@@ -87,14 +87,14 @@ public class ProcessorUnit {
 				break;
 			};
 			
-			// Reset all control flags set in previous cycle
-			resetFlags();
-			
 			// Fetch Instruction
 			instr = readMem(regs [15]);
 			
 			// Check Predication
 			if (checkCondition() == 1) {
+				// Reset all control flags set in previous cycle
+				resetFlags();
+				
 				decodeInstruction();
 				
 				// Get operands rn, rd, rm
@@ -110,6 +110,9 @@ public class ProcessorUnit {
 				if (enMem == 1 && indexBit == 0) {
 					if (memToReg == 1)readData = readMem(regs [rNwb].clone());
 					if (memWrite == 1)writeMem(regs [toDecimal(rN)].clone(), regs [toDecimal(rD)].clone());
+				}
+				else if (blMem == 1) {
+					this.blockMemory();
 				}
 					
 				// Get operands for alu
@@ -216,6 +219,7 @@ public class ProcessorUnit {
 		enMem = 0;
 		quantityBit = 0;
 		wb = 0;
+		blMem = 0;
 	}
 	
 	public void decodeInstruction() {
@@ -300,6 +304,23 @@ public class ProcessorUnit {
 			}
 			else shift = 1;
 		}
+		// 100 - Block Memory
+		else if (instr [27] == 1 && instr [26] == 0 && instr [25] == 0) {
+			enMem = 0;
+			blMem = 1;
+			
+			/* Add none */
+			aluSrc = 1;
+			imm = add0.clone();
+			
+			/* Write / Read manually */
+			regWrite = 0;
+			memWrite = 0;
+			
+			immSrc = 0;
+			wb = instr [21];
+			indexBit = instr [24];
+		}
 	}
 	
 	
@@ -336,6 +357,48 @@ public class ProcessorUnit {
     		acc += memoryBlocks [i].length;
     	}
     	return add0;
+    }
+    
+    public void blockMemory() {
+    	int [] addr = this.regs [this.toDecimal(rN)].clone();
+		
+		for (int i = 0; i < 16; i++) {
+			/* Store reg */
+			if (instr [i] == 1) {
+				
+				/* Pre-Index */
+				if (indexBit == 1) {
+					if (instr [23] == 1) addr = this.add(addr, this.add4.clone());
+					else addr = this.sub(addr, this.add4.clone());
+				}
+				
+				/* Store */
+		    	if (instr [20] == 0) 
+		    		this.writeMem(addr, this.regs [i].clone());
+		    	/* Load */
+		    	else {
+		    		int [] d = this.readMem(addr);
+		    		
+		    		/* 
+		    		 * When targeting PC, counter the +4 increment of the clock.
+		    		 */
+		    		if (i == 15) 
+		    			d = this.sub(d, this.add4.clone());
+		    		
+		    		this.regs [i] = d.clone();
+		    	}
+				
+				/* Post Index */
+				if (indexBit == 0) {
+					if (instr [23] == 1) addr = this.add(addr, this.add4.clone());
+					else addr = this.sub(addr, this.add4.clone());
+				}
+			}
+		}
+    	
+    	/* Writeback */
+		if (wb == 1) 
+			this.regs [this.toDecimal(rN)] = addr.clone();
     }
   
     

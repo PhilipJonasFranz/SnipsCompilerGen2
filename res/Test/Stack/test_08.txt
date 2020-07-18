@@ -79,5 +79,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     

@@ -27,7 +27,7 @@ foo:                                         /* Function: foo */
     mov r3, r0
     bl bar                                   /* Evaluate Expression */
     mul r0, r3, r0
-    pop { r3, pc }
+    ldmfd sp!, {r3, pc}
     
 main:                                        /* Function: main */
     push { lr }

@@ -40,4 +40,10 @@ public class ASMPopStack extends ASMInstruction {
 		return s;
 	}
 	
+	public ASMPopStack clone() {
+		ASMPopStack pop = new ASMPopStack();
+		for (RegOperand op : this.operands) pop.operands.add(op.clone());
+		return pop;
+	}
+	
 }

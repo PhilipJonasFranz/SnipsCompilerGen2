@@ -66,7 +66,8 @@ _routine_stack_copy_end_:
     mov pc, r10
     
 get:                                         /* Function: get */
-    push { r3, r4, r5, fp }
+    sub sp, sp, #16
+    stmea sp, {r3-r5, fp}
     mov fp, sp
     mov r3, r0
     mov r4, r1
@@ -96,7 +97,7 @@ get.L0:
     cmp r12, #0
     mov r2, sp
     mov sp, fp
-    pop { r3, r4, r5, fp }
+    ldmfd sp!, {r3-r5, fp}
     bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
@@ -105,7 +106,8 @@ get.L0:
     bx lr
     
 relay:                                       /* Function: relay */
-    push { r4, r5, r6, fp, lr }
+    sub sp, sp, #20
+    stmea sp, {r4-r6, fp, lr}
     mov fp, sp
     mov r4, r1
     mov r5, r2
@@ -113,7 +115,7 @@ relay:                                       /* Function: relay */
     push { sp }
     push { r5 }
     push { r4 }
-    pop { r1, r2 }
+    ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     cmp r12, #0
     bne relay.L1                             /* Exception thrown, branch to escape target */
@@ -148,7 +150,7 @@ relay.L0:
     cmp r12, #0
     mov r2, sp
     mov sp, fp
-    pop { r4, r5, r6, fp, lr }
+    ldmfd sp!, {r4-r6, fp, lr}
     bxeq lr
     add r1, r2, r0
     add r10, pc, #8                          /* Setup return address for routine */
@@ -163,7 +165,7 @@ main:                                        /* Function: main */
     mov r0, #8                               /* Evaluate Expression */
     mov r1, #3
     mov r2, #5
-    push { r2, r1, r0 }
+    stmfd sp!, {r0-r2}
     mov r4, #0
     mov r0, #3                               /* Evaluate Expression */
     push { sp }
@@ -171,7 +173,7 @@ main:                                        /* Function: main */
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r3 }
-    pop { r1, r2 }
+    ldmfd sp!, {r1, r2}
     bl relay                                 /* Call relay */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */
@@ -199,5 +201,5 @@ main.L0:
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     

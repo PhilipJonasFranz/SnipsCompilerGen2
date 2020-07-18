@@ -42,20 +42,20 @@ bar:                                         /* Function: bar */
     bx lr
     
 fooRec:                                      /* Function: fooRec */
-    push { r3, r4, lr }
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r4, r1
     cmp r1, #0
     bne fooRec.L1
     mov r0, r3                               /* Evaluate Expression */
-    b fooRec.L2
+    ldmfd sp!, {r3, r4, pc}
 fooRec.L1: 
     sub r1, r4, #1
     mov r0, r3
     bl fooRec                                /* Call fooRec */
     add r0, r0, #1
-fooRec.L2: 
-    pop { r3, r4, pc }
+    ldmfd sp!, {r3, r4, pc}
     
 foo:                                         /* Function: foo */
     b fooRec                                 /* Call fooRec */
@@ -86,7 +86,7 @@ main:                                        /* Function: main */
     mov r0, r3
     push { r5 }
     push { r4 }
-    pop { r1, r2 }
+    ldmfd sp!, {r1, r2}
     bl bar                                   /* Call bar */
     mov r1, #4
     push { r0 }
@@ -123,5 +123,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r1, r2
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     

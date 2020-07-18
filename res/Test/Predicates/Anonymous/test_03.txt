@@ -45,7 +45,7 @@ f:                                           /* Function: f */
     push { r3 }
     mov r2, sp
     mov sp, fp
-    pop { r3, fp }
+    ldmfd sp!, {r3, fp}
     mov r0, #8
     add r1, r2, #8
     add r10, pc, #8                          /* Setup return address for routine */
@@ -77,5 +77,5 @@ main.L1:
 main.L2: 
     mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
-    pop { fp, pc }
+    ldmfd sp!, {fp, pc}
     
