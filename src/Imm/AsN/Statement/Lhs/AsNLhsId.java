@@ -106,14 +106,14 @@ public class AsNLhsId extends AsNStatement {
 			if (sourceOperand != 0) {
 				if (combineOperand == 0) {
 					if (sourceOperand != 1) {
-						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
 						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(sourceOperand)));
 					}
 					else {
 						/* Swap */
-						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2)));
-						inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0)));
-						inj.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+						inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
 					}
 				}
 				else {
@@ -121,20 +121,18 @@ public class AsNLhsId extends AsNStatement {
 					inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(combineOperand)));
 				}
 			}
-			else if (combineOperand != 1) {
+			else if (combineOperand != 1) 
 				inj.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(combineOperand)));
-			}
 			
-			if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) {
+			/* Branch to subroutine */
+			if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) 
 				inj.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(new ASMLabel("__op_div"))));
-			}
-			else {
+			else 
 				inj.add(new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(new ASMLabel("__op_mod"))));
-			}
 			
-			if (directInjection) {
+			/* Move result to target */
+			if (directInjection) 
 				inj.add(new ASMMov(new RegOperand(sourceOperand), new RegOperand(REGISTER.R0)));
-			}
 		}
 		else if (a.assignArith == ASSIGN_ARITH.LSL_ASSIGN) {
 			if (!directInjection) {
