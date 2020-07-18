@@ -341,7 +341,7 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
-			def.fields.add(this.parseDeclaration(MODIFIER.SHARED));
+			def.fields.add(this.parseDeclaration(MODIFIER.SHARED, false, true));
 		}
 		accept(TokenType.RBRACE);
 		
@@ -416,7 +416,7 @@ public class Parser {
 		
 		List<Declaration> parameters = new ArrayList();
 		while (current.type != TokenType.RPAREN) {
-			parameters.add(this.parseParameterDeclaration());
+			parameters.add(this.parseDeclaration(MODIFIER.SHARED, false, false));
 			if (current.type == TokenType.COMMA) {
 				accept();
 			}
@@ -450,91 +450,23 @@ public class Parser {
 		return f;
 	}
 	
-	protected Declaration parseParameterDeclaration() throws PARSE_EXCEPTION {
-		if (current.type == TokenType.FUNC) {
-			Source source = accept().getSource();
-			
-			List<TYPE> proviso = new ArrayList();
-			List<TYPE> types = new ArrayList();
-			
-			TYPE ret = null;
-			
-			boolean anonymous = false;
-			
-			/* Convert next token */
-			if (this.activeProvisos.contains(current.spelling)) {
-				current.type = TokenType.PROVISO;
-			}
-			
-			/* Non-anonymous */
-			if (current.type != TokenType.IDENTIFIER) {
-				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-					if (current.type == TokenType.CMPLT) {
-						proviso = this.parseProviso();
-					}
-					
-					/* Params in braces */
-					accept(TokenType.LPAREN);
-					
-					while (current.type != TokenType.RPAREN) {
-						types.add(this.parseType());
-						
-						if (current.type == TokenType.COMMA) {
-							accept();
-						}
-						else {
-							break;
-						}
-					}
-					
-					accept(TokenType.RPAREN);
-				}
-				else if (current.type != TokenType.UNION_ACCESS) {
-					/* Only one param, no braces */
-					types.add(this.parseType());
-				}
-				
-				accept(TokenType.UNION_ACCESS);
-				
-				ret = this.parseType();
-			}
-			else {
-				anonymous = true;
-			}
-			
-			Token id = accept(TokenType.IDENTIFIER);
-			List<String> path = new ArrayList();
-			path.add(id.spelling);
-			
-			if (anonymous) {
-				/* Anonymous call, pass null function */
-				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(null, proviso), null, source);
-				this.scopes.peek().add(d);
-				return d;
-			}
-			else {
-				List<Declaration> params = new ArrayList();
-				int c = 0;
-				for (TYPE t : types) {
-					params.add(new Declaration(new NamespacePath("param" + c++), t, null, source));
-				}
-				
-				/* Wrap parsed function head in function object, wrap created head in declaration */
-				Function lambda = new Function(ret, new NamespacePath(path, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
-				lambda.isLambdaHead = true;
-				
-				Declaration d = new Declaration(new NamespacePath(id.spelling), new FUNC(lambda, proviso), null, source);
-				this.scopes.peek().add(d);
-				return d;
-			}
+	protected Declaration parseDeclaration(MODIFIER mod, boolean parseValue, boolean acceptSemicolon) throws PARSE_EXCEPTION {
+		TYPE type = this.parseType();
+		Token id = accept(TokenType.IDENTIFIER);
+
+		Expression value = null;
+		
+		if (parseValue) {
+			accept(TokenType.LET);
+			value = this.parseExpression();
 		}
-		else {
-			TYPE type = this.parseType();
-			Token id = accept(TokenType.IDENTIFIER);
-			Declaration d = new Declaration(new NamespacePath(id.spelling), type, MODIFIER.SHARED, id.getSource());
-			this.scopes.peek().add(d);
-			return d;
-		}
+
+		if (parseValue || acceptSemicolon) 
+			accept(TokenType.SEMICOLON);
+		
+		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, id.getSource());
+		this.scopes.peek().add(d);
+		return d;
 	}
 	
 	protected Statement parseStatement() throws PARSE_EXCEPTION {
@@ -599,8 +531,11 @@ public class Parser {
 			}
 		}
 		
+		/* Can only be func type dec */
+		if (current.type == TokenType.FUNC) decCheck = true;
+		
 		if (decCheck) {
-			return this.parseDeclaration(mod);
+			return this.parseDeclaration(mod, true, true);
 		}
 		else {
 			if (modT != null) {
@@ -888,7 +823,7 @@ public class Parser {
 		
 		accept(TokenType.LPAREN);
 		
-		Declaration watched = this.parseParameterDeclaration();
+		Declaration watched = this.parseDeclaration(MODIFIER.SHARED, false, false);
 		this.scopes.peek().add(watched);
 		
 		accept(TokenType.RPAREN);
@@ -918,7 +853,7 @@ public class Parser {
 		accept(TokenType.LPAREN);
 		
 		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED);
+		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED, true, true);
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -1156,25 +1091,6 @@ public class Parser {
 		
 		accept(TokenType.SEMICOLON);
 		Declaration d = new Declaration(new NamespacePath(identifier.spelling), type, value, mod, identifier.source);
-		this.scopes.peek().add(d);
-		return d;
-	}
-	
-	protected Declaration parseDeclaration(MODIFIER mod) throws PARSE_EXCEPTION {
-		Source source = current.getSource();
-		TYPE type = this.parseType();
-		
-		Token id = accept(TokenType.IDENTIFIER);
-		
-		Expression value = null;
-		
-		if (current.type == TokenType.LET) {
-			accept(TokenType.LET);
-			value = this.parseExpression();
-		}
-		
-		accept(TokenType.SEMICOLON);
-		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, source);
 		this.scopes.peek().add(d);
 		return d;
 	}
@@ -1963,6 +1879,84 @@ public class Parser {
 		else if (enu != null) {
 			/* Enum def was found, set reference to default enum field */
 			type = enu.enumType;
+		}
+		else if (token.type == TokenType.FUNC) {
+			Source source = current.getSource();
+			
+			List<TYPE> proviso = new ArrayList();
+			List<TYPE> types = new ArrayList();
+			
+			TYPE ret = null;
+			
+			boolean anonymous = false;
+			
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
+			
+			/* Non-anonymous */
+			if (current.type != TokenType.IDENTIFIER && current.type != TokenType.RPAREN && current.type != TokenType.LBRACKET && current.type != TokenType.MUL) {
+				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
+					if (current.type == TokenType.CMPLT) {
+						proviso = this.parseProviso();
+					}
+					
+					/* Params in braces */
+					accept(TokenType.LPAREN);
+					
+					while (current.type != TokenType.RPAREN) {
+						types.add(this.parseType());
+						
+						if (current.type == TokenType.COMMA) {
+							accept();
+						}
+						else {
+							break;
+						}
+					}
+					
+					accept(TokenType.RPAREN);
+				}
+				else if (current.type != TokenType.UNION_ACCESS) {
+					/* Only one param, no braces */
+					types.add(this.parseType());
+				}
+				
+				accept(TokenType.UNION_ACCESS);
+				
+				ret = this.parseType();
+			}
+			else {
+				anonymous = true;
+			}
+			
+			if (anonymous) {
+				/* Anonymous call, pass null function */
+				type = new FUNC(null, proviso);
+			}
+			else {
+				/* Need identifer next */
+				if (current.type != TokenType.IDENTIFIER) {
+					accept(TokenType.IDENTIFIER);
+				}
+				
+				Token id = current;
+				List<String> path0 = new ArrayList();
+				path0.add(id.spelling);
+				
+				List<Declaration> params = new ArrayList();
+				int c = 0;
+				for (TYPE t : types) {
+					params.add(new Declaration(new NamespacePath("param" + c++), t, null, source));
+				}
+				
+				/* Wrap parsed function head in function object, wrap created head in declaration */
+				Function lambda = new Function(ret, new NamespacePath(path0, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
+				lambda.isLambdaHead = true;
+				
+				type = new FUNC(lambda, proviso);
+			}
 		}
 		else {
 			type = TYPE.fromToken(token, buffered);

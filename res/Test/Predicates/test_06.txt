@@ -1,0 +1,47 @@
+SOURCE
+bool sortPred(int x, int y) {
+	return x < y;
+}
+
+int main() {
+	/* Context check predicate at this location */
+	func (int, int) -> bool sp = sortPred;
+	
+	if (sp(5, 10)) 
+		return 12;
+	
+	return 25;
+}
+TESTCASES
+12
+OUTPUT
+/* --test_06.txt */
+    b main
+lambda_sortPred:                             /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+sortPred:                                    /* Function: sortPred */
+    cmp r0, r1
+    movlt r0, #1
+    movge r0, #0
+    bx lr
+    
+main:                                        /* Function: main */
+    push { lr }
+/* Context check predicate at this location */
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_sortPred
+    mov r10, #0
+    mov r3, r0
+    mov r1, #10
+    mov r0, #5
+    add lr, pc, #8
+    mov pc, r3
+    cmp r0, #0
+    beq main.L1
+    mov r0, #12                              /* Evaluate Expression */
+    pop { pc }
+main.L1: 
+    mov r0, #25                              /* Evaluate Expression */
+    pop { pc }
+    

@@ -37,7 +37,7 @@ public class CHAR extends PRIMITIVE<Character> {
 	}
 	
 	public String typeString() {
-		return "CHAR" + ((this.value != null)? ": " + this.value : "");
+		return "CHAR";
 	}
 
 	public String sourceCodeRepresentation() {

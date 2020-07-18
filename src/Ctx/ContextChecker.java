@@ -626,7 +626,12 @@ public class ContextChecker {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
-			if (t instanceof FUNC) d.setType(t);
+			if (t instanceof FUNC) {
+				if (!t.isEqual(d.getType())) 
+					throw ((FUNC) d.getType()).getInequality((FUNC) t, d.getSource());
+				
+				d.setType(t);
+			}
 			
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) 

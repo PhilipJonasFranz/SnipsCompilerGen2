@@ -33,7 +33,7 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	}
 	
 	public String typeString() {
-		return "BOOL" + ((this.value != null)? ": " + this.value : "");
+		return "BOOL";
 	}
 
 	public String sourceCodeRepresentation() {
