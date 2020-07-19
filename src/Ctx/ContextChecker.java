@@ -759,6 +759,10 @@ public class ContextChecker {
 
 			this.currentFunction.peek().hasReturn = true;
 			
+			/* There was a return statement with no return value previously */
+			if (this.currentFunction.peek().noReturn != null) 
+				throw new CTX_EXCEPTION(this.currentFunction.peek().noReturn.getSource(), "Return statement has no return value, expected " + this.currentFunction.peek().getReturnType().typeString());
+			
 			if (t.isEqual(this.currentFunction.peek().getReturnType())) 
 				return t;
 			else throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.peek().getReturnType().typeString());
@@ -766,6 +770,8 @@ public class ContextChecker {
 		else {
 			if (this.currentFunction.peek().hasReturn) 
 				throw new CTX_EXCEPTION(r.getSource(), "Return statement has no return value, expected " + this.currentFunction.peek().getReturnType().typeString());
+			else 
+				this.currentFunction.peek().noReturn = r;
 			
 			if (!(currentFunction.peek().getReturnType() instanceof VOID)) 
 				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.peek().getReturnType().typeString());

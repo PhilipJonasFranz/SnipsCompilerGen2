@@ -8,6 +8,7 @@ import Ctx.ProvisoManager;
 import Exc.CTX_EXCEPTION;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
@@ -43,6 +44,8 @@ public class Function extends CompoundStatement {
 	public boolean isLambdaHead = false;
 	
 	public boolean hasReturn = false;
+	
+	public ReturnStatement noReturn = null;
 	
 	
 			/* --- CONSTRUCTORS --- */
