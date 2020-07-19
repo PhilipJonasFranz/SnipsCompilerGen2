@@ -757,11 +757,16 @@ public class ContextChecker {
 		if (r.value != null) {
 			TYPE t = r.value.check(this);
 
+			this.currentFunction.peek().hasReturn = true;
+			
 			if (t.isEqual(this.currentFunction.peek().getReturnType())) 
 				return t;
 			else throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.peek().getReturnType().typeString());
 		}
 		else {
+			if (this.currentFunction.peek().hasReturn) 
+				throw new CTX_EXCEPTION(r.getSource(), "Return statement has no return value, expected " + this.currentFunction.peek().getReturnType().typeString());
+			
 			if (!(currentFunction.peek().getReturnType() instanceof VOID)) 
 				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.peek().getReturnType().typeString());
 			
@@ -1082,8 +1087,8 @@ public class ContextChecker {
 			if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) 
 				i.setType(f.getReturnType().clone());
 			
-			if (i.getType() instanceof VOID) 
-				throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
+			if (i.getType() instanceof VOID && !f.hasReturn) 
+				throw new CTX_EXCEPTION(i.getSource(), "Expected return value from inline call");
 		}
 		else {
 			/* Set void as return type */

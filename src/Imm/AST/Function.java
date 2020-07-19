@@ -42,6 +42,8 @@ public class Function extends CompoundStatement {
 	
 	public boolean isLambdaHead = false;
 	
+	public boolean hasReturn = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
