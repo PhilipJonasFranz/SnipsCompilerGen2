@@ -1444,6 +1444,8 @@ public class Parser {
 		boolean castCheck = current.type == TokenType.LPAREN;
 		if (!castCheck) return false;
 		
+		if (this.tokenStream.get(0).type == TokenType.FUNC) return true;
+		
 		for (int i = 2; i < tokenStream.size(); i += 3) {
 			/* 
 			 * First type token, from here only allowed token are RPAREN and all other type related
@@ -1936,8 +1938,8 @@ public class Parser {
 				type = new FUNC(null, proviso);
 			}
 			else {
-				/* Need identifer next */
-				if (current.type != TokenType.IDENTIFIER) {
+				/* Need identifer next, or RPAREN when type casting */
+				if (current.type != TokenType.IDENTIFIER && current.type != TokenType.RPAREN) {
 					accept(TokenType.IDENTIFIER);
 				}
 				

@@ -342,7 +342,7 @@ public class ContextChecker {
 			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
 				if (t instanceof POINTER || e.structType.typedef.fields.get(i).getType() instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
-				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
+				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
 			}
 		}
 		
@@ -627,10 +627,20 @@ public class ContextChecker {
 			TYPE t = d.value.check(this);
 			
 			if (t instanceof FUNC) {
-				if (!t.isEqual(d.getType())) 
-					throw ((FUNC) d.getType()).getInequality((FUNC) t, d.getSource());
+				FUNC d0 = (FUNC) d.getType();
+				FUNC t0 = (FUNC) t;
 				
-				d.setType(t);
+				if (!t.isEqual(d.getType())) 
+					throw d0.getInequality(t0, d.getSource());
+				
+				/* 
+				 * If func head provided by declaration is anonymous, 
+				 * replace with func head of value. May still be null.
+				 */
+				if (d0.funcHead == null) {
+					d0.funcHead = t0.funcHead;
+					d0.proviso = t0.proviso;
+				}
 			}
 			
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
@@ -1065,7 +1075,7 @@ public class ContextChecker {
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument (" + (a + 1) + ") does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
 				}
 			}
 			
@@ -1161,7 +1171,7 @@ public class ContextChecker {
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument (" + (a + 1) + ") does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 				}
 			}
 		}
