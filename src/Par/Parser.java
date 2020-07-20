@@ -228,6 +228,8 @@ public class Parser {
 			}
 		}
 		
+		if (this.progress != null) this.progress.incProgress(1);
+		
 		return p;
 	}
 	
@@ -634,15 +636,14 @@ public class Parser {
 		int last = -1;
 		
 		while (!(current.type == TokenType.RBRACE && (this.tokenStream.get(0).type == TokenType.LPAREN || this.tokenStream.get(0).type == TokenType.SEMICOLON))) {
-			if (last == -1) {
+			if (last == -1) 
 				last = current.getSource().row;
-			}
 			
-			if (current.type == TokenType.COLON || (current.getSource().row != last)) {
+			if (current.type == TokenType.COLON) {
 				if (!c.trim().equals("")) assembly.add(c);
 				c = "";
 				last = current.getSource().row;
-				if (current.type == TokenType.COLON) accept();
+				accept(TokenType.COLON);
 			}
 			else {
 				Token t = accept();
