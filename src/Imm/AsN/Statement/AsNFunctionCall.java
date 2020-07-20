@@ -101,13 +101,12 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Integer> sMap = new ArrayList();
 		
 		/* Extract mapping locations from different mappings */
-		if (f == null) {
+		if (f == null || (f != null && f.isLambdaHead)) {
 			/* Load default mapping */
 			List<Pair<Expression, Integer>> mapping = getDefaultMapping(parameters);
 			mapping.stream().forEach(x -> sMap.add(x.second));
 		}
 		else {
-			/* Reload mapping for context */
 			List<Pair<Declaration, Integer>> mapping = ((AsNFunction) f.castedNode).getParameterMapping();
 			mapping.stream().forEach(x -> sMap.add(x.second));
 		}

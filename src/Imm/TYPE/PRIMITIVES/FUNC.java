@@ -2,12 +2,14 @@ package Imm.TYPE.PRIMITIVES;
 
 import java.util.List;
 
+import Exc.CTX_EXCEPTION;
 import Exc.SNIPS_EXCEPTION;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Util.Source;
 
 public class FUNC extends PRIMITIVE<Function> {
 
@@ -34,7 +36,37 @@ public class FUNC extends PRIMITIVE<Function> {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof FUNC;
 		}
-		return type instanceof FUNC;
+		else if (type instanceof FUNC) {
+			FUNC f0 = (FUNC) type;
+			boolean equal = true;
+			
+			if (f0.funcHead != null && this.funcHead != null) {
+				if (f0.funcHead.parameters.size() != this.funcHead.parameters.size()) equal = false;
+				else {
+					for (int i = 0; i < this.funcHead.parameters.size(); i++) equal &= f0.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType());
+					equal &= this.funcHead.getReturnType().isEqual(f0.funcHead.getReturnType());
+				}
+			}
+			
+			return equal;
+			
+		}
+		else return false;
+	}
+	
+	public CTX_EXCEPTION getInequality(FUNC func, Source source) {
+
+		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXCEPTION(source, "Missmatching argument number in predicate: Expected " + this.funcHead.parameters.size() + ", but got " + func.funcHead.parameters.size());
+		else {
+			for (int i = 0; i < this.funcHead.parameters.size(); i++) {
+				if (!func.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType())) {
+					return new CTX_EXCEPTION(source, "Predicate parameter type does not match stated parameter type: " + func.funcHead.parameters.get(i).getType().typeString() + " vs " + this.funcHead.parameters.get(i).getType().typeString());
+				}
+				
+			}
+			
+			return new CTX_EXCEPTION(source, "Predicate return type does not match stated return type: " + func.funcHead.getReturnType().typeString() + " vs " + this.funcHead.getReturnType().typeString());
+		}
 	}
 	
 	public String typeString() {

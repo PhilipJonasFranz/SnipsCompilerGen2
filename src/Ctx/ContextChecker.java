@@ -342,7 +342,7 @@ public class ContextChecker {
 			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
 				if (t instanceof POINTER || e.structType.typedef.fields.get(i).getType() instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
-				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
+				throw new CTX_EXCEPTION(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
 			}
 		}
 		
@@ -626,7 +626,22 @@ public class ContextChecker {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
-			if (t instanceof FUNC) d.setType(t);
+			if (t instanceof FUNC) {
+				FUNC d0 = (FUNC) d.getType();
+				FUNC t0 = (FUNC) t;
+				
+				if (!t.isEqual(d.getType())) 
+					throw d0.getInequality(t0, d.getSource());
+				
+				/* 
+				 * If func head provided by declaration is anonymous, 
+				 * replace with func head of value. May still be null.
+				 */
+				if (d0.funcHead == null) {
+					d0.funcHead = t0.funcHead;
+					d0.proviso = t0.proviso;
+				}
+			}
 			
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) 
@@ -742,11 +757,22 @@ public class ContextChecker {
 		if (r.value != null) {
 			TYPE t = r.value.check(this);
 
+			this.currentFunction.peek().hasReturn = true;
+			
+			/* There was a return statement with no return value previously */
+			if (this.currentFunction.peek().noReturn != null) 
+				throw new CTX_EXCEPTION(this.currentFunction.peek().noReturn.getSource(), "Return statement has no return value, expected " + this.currentFunction.peek().getReturnType().typeString());
+			
 			if (t.isEqual(this.currentFunction.peek().getReturnType())) 
 				return t;
 			else throw new CTX_EXCEPTION(r.getSource(), "Return type " + t.typeString() + " does not match function return type " + this.currentFunction.peek().getReturnType().typeString());
 		}
 		else {
+			if (this.currentFunction.peek().hasReturn) 
+				throw new CTX_EXCEPTION(r.getSource(), "Return statement has no return value, expected " + this.currentFunction.peek().getReturnType().typeString());
+			else 
+				this.currentFunction.peek().noReturn = r;
+			
 			if (!(currentFunction.peek().getReturnType() instanceof VOID)) 
 				throw new CTX_EXCEPTION(r.getSource(), "Return type does not match function type, " + new VOID().typeString() + " vs " + currentFunction.peek().getReturnType().typeString());
 			
@@ -1060,15 +1086,15 @@ public class ContextChecker {
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Inline Call argument (" + (a + 1) + ") does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
 				}
 			}
 			
 			if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) 
 				i.setType(f.getReturnType().clone());
 			
-			if (i.getType() instanceof VOID) 
-				throw new CTX_EXCEPTION(i.getSource(), "Expected return value, got " + i.getType().typeString());
+			if (i.getType() instanceof VOID && !f.hasReturn) 
+				throw new CTX_EXCEPTION(i.getSource(), "Expected return value from inline call");
 		}
 		else {
 			/* Set void as return type */
@@ -1156,7 +1182,7 @@ public class ContextChecker {
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					throw new CTX_EXCEPTION(i.parameters.get(a).getSource(), "Function call argument (" + (a + 1) + ") does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 				}
 			}
 		}

@@ -33,7 +33,7 @@ public class INT extends PRIMITIVE<Integer> {
 	}
 	
 	public String typeString() {
-		return "INT" + ((this.value != null)? ": " + this.value : "");
+		return "INT";
 	}
 
 	public String sourceCodeRepresentation() {

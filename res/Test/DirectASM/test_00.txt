@@ -4,10 +4,10 @@ int main(int a) {
 	
 	asm(a : r0) {
 		/* Directley inject assembly */
-		lsl r0, #1
-		push { r0 }
-		mov r0, #10
-		pop { r0 }
+		lsl r0, #1 :
+		push { r0 } :
+		mov r0, #10 :
+		pop { r0 } :
 		and r0, r0, #15
 	} (r0 : r);
 	
