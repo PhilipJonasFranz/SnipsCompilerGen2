@@ -3,11 +3,11 @@ package Imm.ASM.Util.Operands.Memory;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.AST.Expression.ArrayInit;
 
-public class MemorySkipOperand extends MemoryOperand {
+public class MemorySkipOp extends MemoryOperand {
 
 	public ArrayInit init;
 	
-	public MemorySkipOperand(ArrayInit init) {
+	public MemorySkipOp(ArrayInit init) {
 		this.init = init;
 	}
 	
@@ -17,13 +17,13 @@ public class MemorySkipOperand extends MemoryOperand {
 	}
 
 	public MemoryOperand clone() {
-		return new MemorySkipOperand(this.init);
+		return new MemorySkipOp(this.init);
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof MemorySkipOperand)) return false;
+		if (!(operand instanceof MemorySkipOp)) return false;
 		else {
-			return ((MemorySkipOperand) operand).init.equals(this.init);
+			return ((MemorySkipOp) operand).init.equals(this.init);
 		}
 	}
 	

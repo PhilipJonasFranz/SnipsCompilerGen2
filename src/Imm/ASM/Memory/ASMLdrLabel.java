@@ -1,7 +1,7 @@
 package Imm.ASM.Memory;
 
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 
@@ -14,7 +14,7 @@ public class ASMLdrLabel extends ASMLdr {
 	
 			/* --- CONSTRUCTORS --- */
 	/** Example Usage: ldr r0, a_label */
-	public ASMLdrLabel(RegOperand target, LabelOperand op0, Declaration dec) {
+	public ASMLdrLabel(RegOp target, LabelOp op0, Declaration dec) {
 		super(target, op0, null);
 		this.dec = dec;
 	}
@@ -33,8 +33,8 @@ public class ASMLdrLabel extends ASMLdr {
 	}
 	
 	public ASMLdrLabel clone() {
-		RegOperand r = new RegOperand(this.target.reg);
-		LabelOperand l = new LabelOperand(((LabelOperand) this.op0).label);
+		RegOp r = new RegOp(this.target.reg);
+		LabelOp l = new LabelOp(((LabelOp) this.op0).label);
 		return new ASMLdrLabel(r, l, this.dec);
 	}
 	

@@ -3,7 +3,7 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.BreakStatement;
@@ -21,7 +21,7 @@ import Imm.AsN.AsNNode;
 
 public abstract class AsNStatement extends AsNNode {
 
-	public static AsNStatement cast(Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNStatement cast(Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNStatement node = null;
 		
@@ -64,7 +64,7 @@ public abstract class AsNStatement extends AsNNode {
 		else if (s instanceof Comment) {
 			node = AsNComment.cast((Comment) s, r, map, st); 
 		}
-		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());
+		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());
 	
 		s.castedNode = node;
 		return node;

@@ -3,7 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
@@ -30,7 +30,7 @@ import Imm.AsN.Expression.Boolean.AsNTernary;
 public abstract class AsNExpression extends AsNNode {
 
 			/* --- METHODS --- */
-	public static AsNExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
 		AsNExpression node = null;
 		
@@ -91,7 +91,7 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof TypeCast) {
 			node = AsNTypeCast.cast((TypeCast) e, r, map, st); 
 		}
-		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
+		else throw new CGEN_EXC(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	
 		e.castedNode = node;
 		return node;

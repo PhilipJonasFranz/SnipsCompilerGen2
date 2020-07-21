@@ -3,21 +3,21 @@ package Imm.ASM.Processing.Logic;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public class ASMCmp extends ASMInstruction {
 
-	public RegOperand op0;
+	public RegOp op0;
 	
 	public Operand op1;
 	
-	public ASMCmp(RegOperand op0, Operand op1) {
+	public ASMCmp(RegOp op0, Operand op1) {
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
-	public ASMCmp(RegOperand op0, Operand op1, Cond cond) {
+	public ASMCmp(RegOp op0, Operand op1, Cond cond) {
 		super(cond);
 		this.op0 = op0;
 		this.op1 = op1;

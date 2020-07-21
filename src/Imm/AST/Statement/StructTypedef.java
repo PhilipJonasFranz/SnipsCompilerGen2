@@ -5,7 +5,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
@@ -65,11 +65,11 @@ public class StructTypedef extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkStructTypedef(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* Apply context to internal proviso */
 		for (int i = 0; i < this.proviso.size(); i++) {
 			PROVISO p0 = (PROVISO) this.proviso.get(i);
@@ -106,11 +106,11 @@ public class StructTypedef extends SyntaxElement {
 	/** 
 	 * Construct a new Struct Type based on this template and set given proviso as context.
 	 */
-	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXCEPTION {
+	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXC {
 		/* Do not clone type, struct types and typedef are already cloned during parsing */
 		
 		if (this.proviso.size() != proviso.size()) 
-			throw new CTX_EXCEPTION(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
+			throw new CTX_EXC(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
 		
 		this.setContext(proviso);
 		

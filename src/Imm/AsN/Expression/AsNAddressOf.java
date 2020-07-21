@@ -3,7 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsr;
@@ -11,12 +11,12 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
@@ -27,7 +27,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 public class AsNAddressOf extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNAddressOf cast(AddressOf a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXCEPTION {
+	public static AsNAddressOf cast(AddressOf a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNAddressOf aof = new AsNAddressOf();
 		a.castedNode = aof;
 		
@@ -43,7 +43,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(ref.origin);
 				
-				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(target), new LabelOperand(label), ref.origin);
+				ASMLdrLabel load = new ASMLdrLabel(new RegOp(target), new LabelOp(label), ref.origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
 			}
@@ -52,7 +52,7 @@ public class AsNAddressOf extends AsNExpression {
 				int offset = st.getParameterByteOffset(ref.origin);
 				
 				/* Get offset of parameter relative to fp */
-				aof.instructions.add(new ASMAdd(new RegOperand(target), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
+				aof.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
 			else {
 				/* Get address from local stack */
@@ -60,7 +60,7 @@ public class AsNAddressOf extends AsNExpression {
 				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
-				aof.instructions.add(new ASMSub(new RegOperand(target), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+				aof.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 		}
 		else if (a.expression instanceof ArraySelect) {
@@ -76,7 +76,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(origin);
 				
-				ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R0), new LabelOperand(label), origin);
+				ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R0), new LabelOp(label), origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
 			}
@@ -85,7 +85,7 @@ public class AsNAddressOf extends AsNExpression {
 				int offset = st.getParameterByteOffset(origin);
 				
 				/* Get offset of parameter relative to fp */
-				aof.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset)));
+				aof.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
 			else {
 				/* Get address from local stack */
@@ -93,10 +93,10 @@ public class AsNAddressOf extends AsNExpression {
 				offset += (origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
-				aof.instructions.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+				aof.instructions.add(new ASMSub(new RegOp(REG.R0), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 			
-			ASMAdd add = new ASMAdd(new RegOperand(target), new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R2));
+			ASMAdd add = new ASMAdd(new RegOp(target), new RegOp(REG.R0), new RegOp(REG.R2));
 			add.comment = new ASMComment("Add structure offset");
 			aof.instructions.add(add);
 		}
@@ -105,11 +105,11 @@ public class AsNAddressOf extends AsNExpression {
 			
 			AsNStructSelect.injectAddressLoader(aof, select, r, map, st);
 			
-			aof.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+			aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		
 		/* Convert to words for pointer arithmetic */
-		aof.instructions.add(new ASMLsr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(2)));
+		aof.instructions.add(new ASMLsr(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
 		
 		return aof;
 	}

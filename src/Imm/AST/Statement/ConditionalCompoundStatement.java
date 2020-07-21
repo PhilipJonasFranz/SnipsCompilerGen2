@@ -2,7 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -24,7 +24,7 @@ public abstract class ConditionalCompoundStatement extends CompoundStatement {
 		this.condition = condition;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		super.setContext(context);
 		if (this.condition != null) 
 			this.condition.setContext(context);

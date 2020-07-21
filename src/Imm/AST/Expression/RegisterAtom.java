@@ -3,8 +3,8 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Exc.CTX_EXC;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token;
@@ -19,7 +19,7 @@ public class RegisterAtom extends Expression {
 	/* Type information and potential value */
 	public String spelling;
 	
-	public REGISTER reg;
+	public REG reg;
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -39,11 +39,11 @@ public class RegisterAtom extends Expression {
 		System.out.println(this.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkRegisterAtom(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		return;
 	}

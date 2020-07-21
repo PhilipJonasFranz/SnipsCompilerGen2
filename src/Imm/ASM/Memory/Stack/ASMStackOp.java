@@ -3,7 +3,7 @@ package Imm.ASM.Memory.Stack;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public abstract class ASMStackOp extends ASMInstruction {
@@ -21,22 +21,22 @@ public abstract class ASMStackOp extends ASMInstruction {
 	/** Writeback and indexing behaviour */
 	public MEM_OP memOp;
 	
-	public RegOperand target;
+	public RegOp target;
 	
-	public RegOperand op0;
+	public RegOp op0;
 	
 	public Operand op1;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ASMStackOp(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1) {
+	public ASMStackOp(MEM_OP memOp, RegOp target, RegOp op0, Operand op1) {
 		this.memOp = memOp;
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
-	public ASMStackOp(MEM_OP memOp, RegOperand target, RegOperand op0, Operand op1, Cond cond) {
+	public ASMStackOp(MEM_OP memOp, RegOp target, RegOp op0, Operand op1, Cond cond) {
 		super(cond);
 		this.memOp = memOp;
 		this.target = target;

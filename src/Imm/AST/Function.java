@@ -5,7 +5,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
@@ -95,11 +95,11 @@ public class Function extends CompoundStatement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkFunction(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* Apply context to existing proviso types */
 		this.manager.setContext(context);
 		

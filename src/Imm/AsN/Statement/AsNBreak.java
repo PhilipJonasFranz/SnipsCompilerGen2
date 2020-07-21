@@ -3,16 +3,16 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Operands.LabelOperand;
+import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.BreakStatement;
 
 public class AsNBreak extends AsNStatement {
 
-	public static AsNBreak cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNBreak cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBreak br = new AsNBreak();
 		
 		/* Retrieve the jump label target from the super loop */
@@ -25,7 +25,7 @@ public class AsNBreak extends AsNStatement {
 		AsNCompoundStatement.popDeclarationScope(br, b.superLoop, r, st, false);
 		
 		/* Jump to the label */
-		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(target)));
+		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));
 		
 		return br;
 	}

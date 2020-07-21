@@ -1,6 +1,6 @@
 package Imm.TYPE;
 
-import Exc.SNIPS_EXCEPTION;
+import Exc.SNIPS_EXC;
 import Snips.CompilerDriver;
 
 public class PROVISO extends TYPE<Void> {
@@ -90,7 +90,7 @@ public class PROVISO extends TYPE<Void> {
 	public int wordsize() {
 		if (this.context != null) return this.context.wordsize();
 		else {
-			throw new SNIPS_EXCEPTION("INTERNAL : Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
+			throw new SNIPS_EXC("INTERNAL : Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
 		}
 	}
 	

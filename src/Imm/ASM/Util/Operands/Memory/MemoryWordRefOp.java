@@ -3,13 +3,13 @@ package Imm.ASM.Util.Operands.Memory;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.Operand;
 
-public class MemoryWordRefOperand extends MemoryOperand {
+public class MemoryWordRefOp extends MemoryOperand {
 
 	public String prefix = "";
 	
 	public ASMDataLabel dataLabel;
 	
-	public MemoryWordRefOperand(ASMDataLabel dataLabel) {
+	public MemoryWordRefOp(ASMDataLabel dataLabel) {
 		this.dataLabel = dataLabel;
 	}
 	
@@ -18,13 +18,13 @@ public class MemoryWordRefOperand extends MemoryOperand {
 	}
 
 	public MemoryOperand clone() {
-		return new MemoryWordRefOperand(this.dataLabel.clone());
+		return new MemoryWordRefOp(this.dataLabel.clone());
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof MemoryWordRefOperand)) return false;
+		if (!(operand instanceof MemoryWordRefOp)) return false;
 		else {
-			MemoryWordRefOperand op = (MemoryWordRefOperand) operand;
+			MemoryWordRefOp op = (MemoryWordRefOp) operand;
 			return op.prefix.equals(this.prefix) && op.dataLabel.equals(this.dataLabel);
 		}
 	}

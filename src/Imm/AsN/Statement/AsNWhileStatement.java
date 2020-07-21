@@ -4,7 +4,7 @@ import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -13,17 +13,17 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNWhileStatement cast(WhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNWhileStatement cast(WhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNWhileStatement w = new AsNWhileStatement();
 		a.castedNode = w;
 		
@@ -45,13 +45,13 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			w.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
 			
 			ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
 			w.breakJump = whileEnd;
 			
 			/* Condition was false, jump to else */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(whileEnd)));
+			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(whileEnd)));
 			
 			/* Add Body */
 			w.addBody(a, r, map, st);
@@ -60,7 +60,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.add(continueJump);
 			
 			/* Branch to loop start */
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart));
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
 			branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
 			w.instructions.add(branch);
 			
@@ -74,7 +74,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		return w;
 	}
 	
-	protected void topComparison(WhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	protected void topComparison(WhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
 		this.continueJump = continueJump;
 		
@@ -94,7 +94,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		this.breakJump = whileEnd;
 		
 		/* Condition was false, no else, skip body */
-		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(whileEnd)));
+		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(whileEnd)));
 		
 		/* Add Body */
 		this.addBody(a, r, map, st);
@@ -103,7 +103,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		this.instructions.add(continueJump);
 		
 		/* Branch to loop start */
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(whileStart));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
 		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
 		this.instructions.add(branch);
 		

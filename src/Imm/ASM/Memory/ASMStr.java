@@ -1,16 +1,16 @@
 package Imm.ASM.Memory;
 
 import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 
 public class ASMStr extends ASMMemOp {
 
 			/* --- CONSTRUCTORS --- */
-	public ASMStr(RegOperand target, Operand op0, Operand op1) {
+	public ASMStr(RegOp target, Operand op0, Operand op1) {
 		super(target, op0, op1);
 	}
 	
-	public ASMStr(RegOperand target, Operand op0) {
+	public ASMStr(RegOp target, Operand op0) {
 		super(target, op0, null);
 	}
 	

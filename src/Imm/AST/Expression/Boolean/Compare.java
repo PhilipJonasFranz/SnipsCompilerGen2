@@ -1,7 +1,7 @@
 package Imm.AST.Expression.Boolean;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
@@ -35,7 +35,7 @@ public class Compare extends BinaryExpression {
 		this.getRight().print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkCompare(this);
 	}
 	

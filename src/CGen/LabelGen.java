@@ -9,8 +9,13 @@ public class LabelGen {
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
+	/** Literal Pool number */
+	private static int p = 0;
+	
+	/** Counter that gives out SIDs */
 	private static int sid = 1;
 	
+	/** Current function prefix */
 	public static String funcPrefix = "";
 	
 			/* --- METHODS --- */
@@ -35,7 +40,6 @@ public class LabelGen {
 	 */
 	public static void reset() {
 		c = 0;
-		i = 0;
 		p = 0;
 		sid = 1;
 	}
@@ -46,14 +50,6 @@ public class LabelGen {
 	public static String mapToAddressName(String name) {
 		return getLabel() + "_" + name;
 	}
-	
-	private static int i = 0;
-	
-	public static String importLabelPrefix(String base) {
-		return ".I" + i++ + "_" + base;
-	}
-	
-	private static int p = 0;
 	
 	public static String literalPoolPrefix() {
 		return ".POOL" + p++ + "_";

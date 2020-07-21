@@ -4,7 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
@@ -66,11 +66,11 @@ public class Declaration extends Statement {
 			this.value.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkDeclaration(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* Apply to declaration type */
 		ProvisoManager.setContext(context, this.type);
 		

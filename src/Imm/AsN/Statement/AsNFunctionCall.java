@@ -6,9 +6,9 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
-import Exc.CTX_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -21,10 +21,10 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
@@ -40,7 +40,7 @@ import Util.Pair;
 public class AsNFunctionCall extends AsNStatement {
 
 			/* --- METHODS --- */
-	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
@@ -50,7 +50,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
 			if (fc.calledFunction.castedNode == null) {
-				throw new SNIPS_EXCEPTION("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
+				throw new SNIPS_EXC("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
 			}
 		}
 		
@@ -58,7 +58,7 @@ public class AsNFunctionCall extends AsNStatement {
 		
 		if (fc.anonTarget == null && fc.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */
-			call.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
+			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
 			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
 		}
 		
@@ -85,14 +85,14 @@ public class AsNFunctionCall extends AsNStatement {
 		return mapping;
 	}
 	
-	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Clear the operand regs */
 		r.free(0, 1, 2);
 		
 		if (f != null) {
 			try {
 				f.setContext(provisos);
-			} catch (CTX_EXCEPTION e) {
+			} catch (CTX_EXC e) {
 				e.printStackTrace();
 			}
 		}
@@ -126,7 +126,7 @@ public class AsNFunctionCall extends AsNStatement {
 				
 				/* Push Parameter in R0 on the stack */
 				if (parameters.get(i).getType().wordsize() == 1) {
-					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				}
 				
 				while (st.getStack().size() != s) st.pop();
@@ -142,7 +142,7 @@ public class AsNFunctionCall extends AsNStatement {
 				
 				/* Leave First Parameter directley in R0 */
 				if (sMap.get(i) > 0) {
-					call.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
+					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				}
 				r.getReg(0).free();
 			}
@@ -151,10 +151,10 @@ public class AsNFunctionCall extends AsNStatement {
 		/* Pop Parameters on the stack into the correct registers, 
 		 * 		Parameter for R0 is already located in reg */
 		if (regMapping >= 3) {
-			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			call.instructions.add(new ASMPopStack(new RegOp(REG.R1), new RegOp(REG.R2)));
 		}
 		else if (regMapping == 2) {
-			call.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		}
 		
 		if ((f != null && f.isLambdaHead) || anonCall != null) {
@@ -163,24 +163,24 @@ public class AsNFunctionCall extends AsNStatement {
 					int loc = r.declarationRegLocation(anonCall);
 					
 					/* Manual linking */
-					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+					call.instructions.add(new ASMAdd(new RegOp(REG.LR), new RegOp(REG.PC), new ImmOp(8)));
 					
 					/* Move address of function into pc */
-					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+					call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(loc)));
 				}
-				else throw new SNIPS_EXCEPTION("Anon call loader not implemented");
+				else throw new SNIPS_EXC("Anon call loader not implemented");
 			}
 			else {
 				if (r.declarationLoaded(f.lambdaDeclaration)) {
 					int loc = r.declarationRegLocation(f.lambdaDeclaration);
 					
 					/* Manual linking */
-					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.LR), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+					call.instructions.add(new ASMAdd(new RegOp(REG.LR), new RegOp(REG.PC), new ImmOp(8)));
 					
 					/* Move address of function into pc */
-					call.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(loc)));
+					call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(loc)));
 				}
-				else throw new SNIPS_EXCEPTION("Lambda Declaration loader not implemented");
+				else throw new SNIPS_EXC("Lambda Declaration loader not implemented");
 			}
 		}
 		else {
@@ -189,7 +189,7 @@ public class AsNFunctionCall extends AsNStatement {
 			
 			ASMLabel functionLabel = new ASMLabel(target);
 			
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOperand(functionLabel));
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
 			branch.comment = new ASMComment("Call " + f.path.build());
 			call.instructions.add(branch);
 		}
@@ -202,12 +202,12 @@ public class AsNFunctionCall extends AsNStatement {
 			if (f.getReturnType().wordsize() > 1) {
 				if (inlineCall) {
 					for (int i = 0; i < f.getReturnType().wordsize(); i++) {
-						st.push(REGISTER.R0);
+						st.push(REG.R0);
 					}
 				}
 				else {
 					/* No data target, reset stack */
-					call.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(f.getReturnType().wordsize() * 4)));
+					call.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(f.getReturnType().wordsize() * 4)));
 				}
 			}
 		}
@@ -220,13 +220,13 @@ public class AsNFunctionCall extends AsNStatement {
 				 */
 				if (ic.getType().wordsize() > 1) {
 					for (int i = 0; i < ic.getType().wordsize(); i++) {
-						st.push(REGISTER.R0);
+						st.push(REG.R0);
 					}
 				}
 			}
 			else {
 				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
-				ASMSub sub = new ASMSub(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP), new ImmOperand(st.getFrameSize() * 4));
+				ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.FP), new ImmOp(st.getFrameSize() * 4));
 				sub.comment = new ASMComment("Reset the stack after anonymous call");
 				
 				call.instructions.add(sub);

@@ -3,13 +3,13 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
@@ -54,7 +54,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 
 			/* --- METHODS --- */
-	public static AsNBinaryExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNBinaryExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
 		AsNBinaryExpression node = null;
 		
@@ -91,7 +91,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (e instanceof BitXor) {
 			node = AsNBitXor.cast((BitXor) e, r, map, st);
 		}
-		else throw new CGEN_EXCEPTION(e.getSource(), "No injection cast available for " + e.getClass().getName());
+		else throw new CGEN_EXC(e.getSource(), "No injection cast available for " + e.getClass().getName());
 	
 		e.castedNode = node;
 		return node;
@@ -99,7 +99,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 	
 		/* --- OPERAND LOADING --- */
-	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXCEPTION {
+	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
 		
 		/* Some assertions for debug purposes */
 		if (b.getLeft() instanceof TypeCast) {
@@ -123,7 +123,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (left instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
 			if (target1 != 0) {
-				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
+				m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
 				r.copy(0, target1);
 			}
 			
@@ -133,7 +133,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (right instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			if (target0 != 0) {
-				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(0)));
+				m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(0)));
 				r.copy(0, target0);
 			}
 			
@@ -154,12 +154,12 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			if (right instanceof InlineCall) free = r.findFree();
 			
 			if (free != -1) {
-				m.instructions.add(new ASMMov(new RegOperand(free), new RegOperand(REGISTER.R0)));
+				m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
 				r.getReg(free).setDeclaration(null);
 			}
 			else {
-				m.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R0)));
-				st.push(REGISTER.R0);
+				m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				st.push(REG.R0);
 			}
 			
 			r.free(0);
@@ -169,23 +169,23 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			
 			/* Check if instructions were added, if not, this means that the operand is already loaded in the correct location */
 			if (target1 != 0) {
-				m.instructions.add(new ASMMov(new RegOperand(target1), new RegOperand(0)));
+				m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
 				r.copy(0, target1);
 			}
 			
 			if (free == -1) {
 				/* Pop the left operand in the target register */
-				m.instructions.add(new ASMPopStack(new RegOperand(target0)));
+				m.instructions.add(new ASMPopStack(new RegOp(target0)));
 				st.pop();
 			}
 			else {
 				r.free(free);
-				m.instructions.add(new ASMMov(new RegOperand(target0), new RegOperand(free)));
+				m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(free)));
 			}
 		}
 	}
 	
-	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXCEPTION {
+	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXC {
 		/* Total Atomic Loading */
 		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
 			m.atomicPrecalc(b, solver);
@@ -213,7 +213,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 	}
 	
-	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Operand is ID Reference and can be loaded directley into the target register, 
 		 * 		no need for intermidiate result in R0 */
 		if (e instanceof IDRef) {
@@ -222,7 +222,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());
 			if (target != 0) {
-				this.instructions.add(new ASMMov(new RegOperand(target), new RegOperand(0)));
+				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(0)));
 				r.copy(0, target);
 			}
 		}

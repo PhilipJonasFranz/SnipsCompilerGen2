@@ -2,8 +2,8 @@ package Imm.TYPE.PRIMITIVES;
 
 import java.util.List;
 
-import Exc.CTX_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CTX_EXC;
+import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
@@ -54,18 +54,18 @@ public class FUNC extends PRIMITIVE<Function> {
 		else return false;
 	}
 	
-	public CTX_EXCEPTION getInequality(FUNC func, Source source) {
+	public CTX_EXC getInequality(FUNC func, Source source) {
 
-		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXCEPTION(source, "Missmatching argument number in predicate: Expected " + this.funcHead.parameters.size() + ", but got " + func.funcHead.parameters.size());
+		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXC(source, "Missmatching argument number in predicate: Expected " + this.funcHead.parameters.size() + ", but got " + func.funcHead.parameters.size());
 		else {
 			for (int i = 0; i < this.funcHead.parameters.size(); i++) {
 				if (!func.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType())) {
-					return new CTX_EXCEPTION(source, "Predicate parameter type does not match stated parameter type: " + func.funcHead.parameters.get(i).getType().typeString() + " vs " + this.funcHead.parameters.get(i).getType().typeString());
+					return new CTX_EXC(source, "Predicate parameter type does not match stated parameter type: " + func.funcHead.parameters.get(i).getType().typeString() + " vs " + this.funcHead.parameters.get(i).getType().typeString());
 				}
 				
 			}
 			
-			return new CTX_EXCEPTION(source, "Predicate return type does not match stated return type: " + func.funcHead.getReturnType().typeString() + " vs " + this.funcHead.getReturnType().typeString());
+			return new CTX_EXC(source, "Predicate return type does not match stated return type: " + func.funcHead.getReturnType().typeString() + " vs " + this.funcHead.getReturnType().typeString());
 		}
 	}
 	
@@ -91,7 +91,7 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXCEPTION("Cannot get source code representation of FUNC type.");
+		throw new SNIPS_EXC("Cannot get source code representation of FUNC type.");
 	}
 
 	public TYPE clone() {
@@ -101,7 +101,7 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public void setValue(String value) {
-		throw new SNIPS_EXCEPTION("Cannot set value of FUNC type.");
+		throw new SNIPS_EXC("Cannot set value of FUNC type.");
 	}
 	
 }

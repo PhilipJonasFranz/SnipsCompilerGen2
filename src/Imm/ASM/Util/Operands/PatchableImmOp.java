@@ -1,6 +1,6 @@
 package Imm.ASM.Util.Operands;
 
-public class PatchableImmOperand extends Operand {
+public class PatchableImmOp extends Operand {
 
 	public enum PATCH_DIR {
 		UP, DOWN;
@@ -12,7 +12,7 @@ public class PatchableImmOperand extends Operand {
 	
 	public int patchedValue;
 	
-	public PatchableImmOperand(PATCH_DIR dir, int value) {
+	public PatchableImmOp(PATCH_DIR dir, int value) {
 		this.dir = dir;
 		this.value = value;
 		this.patchedValue = value;
@@ -29,16 +29,16 @@ public class PatchableImmOperand extends Operand {
 		else this.patchedValue = this.value - off;
 	}
 
-	public PatchableImmOperand clone() {
-		PatchableImmOperand p = new PatchableImmOperand(this.dir, this.value);
+	public PatchableImmOp clone() {
+		PatchableImmOp p = new PatchableImmOp(this.dir, this.value);
 		p.patchedValue = this.patchedValue;
 		return p;
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof PatchableImmOperand)) return false;
+		if (!(operand instanceof PatchableImmOp)) return false;
 		else {
-			PatchableImmOperand op = (PatchableImmOperand) operand;
+			PatchableImmOp op = (PatchableImmOp) operand;
 			return op.dir == this.dir && op.value == this.value;
 		}
 	}

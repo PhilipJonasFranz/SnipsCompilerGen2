@@ -3,14 +3,14 @@ package Imm.ASM.Memory;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public abstract class ASMMemOp extends ASMInstruction {
 
 			/* --- FIELDS --- */
 	/** The target of the memory operation, or the origin when loading */
-	public RegOperand target;
+	public RegOp target;
 	
 	public Operand op0, op1;
 	
@@ -20,14 +20,14 @@ public abstract class ASMMemOp extends ASMInstruction {
 	
 			/* --- CONSTRUCTORS --- */
 	/** Example Usage: ldr/str r0, [r1, #2] */
-	public ASMMemOp(RegOperand target, Operand op0, Operand op1) {
+	public ASMMemOp(RegOp target, Operand op0, Operand op1) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
 	
 	/** Example Usage: ldr/str r0, [r1] */
-	public ASMMemOp(RegOperand target, Operand op0, Operand op1, Cond cond) {
+	public ASMMemOp(RegOp target, Operand op0, Operand op1, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

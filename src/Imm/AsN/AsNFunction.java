@@ -8,8 +8,8 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Opt.ASMOptimizer;
-import Exc.CGEN_EXCEPTION;
-import Exc.CTX_EXCEPTION;
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -27,12 +27,12 @@ import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Statement.AsNCompoundStatement;
@@ -54,9 +54,9 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* --- METHODS --- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
-	 * @throws CTX_EXCEPTION 
+	 * @throws CTX_EXC 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION, CTX_EXCEPTION {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTX_EXC {
 		AsNFunction func = new AsNFunction();
 		f.castedNode = func;
 		func.source = f;
@@ -163,10 +163,10 @@ public class AsNFunction extends AsNCompoundStatement {
 				l.comment = new ASMComment("Function address getter for predication");
 				func.instructions.add(l);
 				
-				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.PC), new ImmOperand(8)));
+				func.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.PC), new ImmOp(8)));
 				
 				/* Branch back via sys jump */
-				func.instructions.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(REGISTER.R10)));
+				func.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
 			}
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
@@ -198,13 +198,13 @@ public class AsNFunction extends AsNCompoundStatement {
 			func.instructions.add(label);
 			
 			/* Save FP and lr by default */
-			ASMPushStack push = new ASMPushStack(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR));
+			ASMPushStack push = new ASMPushStack(new RegOp(REG.FP), new RegOp(REG.LR));
 			push.optFlags.add(OPT_FLAG.FUNC_CLEAN);
 			func.instructions.add(push);
-			st.push(REGISTER.LR, REGISTER.FP);
+			st.push(REG.LR, REG.FP);
 			
 			/* Save Stackpointer from caller perspective */
-			ASMMov fpMov = new ASMMov(new RegOperand(REGISTER.FP), new RegOperand(REGISTER.SP));
+			ASMMov fpMov = new ASMMov(new RegOp(REG.FP), new RegOp(REG.SP));
 			ASMMov fpMovBack = null;
 			func.instructions.add(fpMov);
 			
@@ -217,7 +217,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					if (func.hasAddressReference(f, dec)) {
 						int location = r.declarationRegLocation(dec);
 						
-						ASMPushStack push0 = new ASMPushStack(new RegOperand(location));
+						ASMPushStack push0 = new ASMPushStack(new RegOp(location));
 						push0.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
 						func.instructions.add(push0);
 						
@@ -235,19 +235,19 @@ public class AsNFunction extends AsNCompoundStatement {
 			boolean fpInteraction = false;
 			for (ASMInstruction x : func.instructions) {
 				if (x.equals(fpMov) || x.equals(push)) continue;
-				fpInteraction |= ASMOptimizer.overwritesReg(x, REGISTER.FP) || ASMOptimizer.readsReg(x, REGISTER.FP);
+				fpInteraction |= ASMOptimizer.overwritesReg(x, REG.FP) || ASMOptimizer.readsReg(x, REG.FP);
 			}
 				
 			/* Check if other function is called within this function */
 			boolean hasCall = func.instructions.stream().filter(x -> {
 				return x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
-					   x instanceof ASMAdd && ((ASMAdd) x).target.reg == REGISTER.LR;
+					   x instanceof ASMAdd && ((ASMAdd) x).target.reg == REG.LR;
 			}).count() > 0;
 			
 			/* Jumplabel to centralized function return */
 			ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());
 			
-			List<REGISTER> used = func.getUsed();
+			List<REG> used = func.getUsed();
 			
 			
 			if (!func.hasParamsInStack() && !f.signals && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
@@ -261,7 +261,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				else {
 					/* Patch used registers into push instruction at the start */
 					push.operands.clear();
-					used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
+					used.stream().forEach(x -> push.operands.add(new RegOp(x)));
 					
 					func.patchBxToB(funcReturn);
 				}		
@@ -269,11 +269,11 @@ public class AsNFunction extends AsNCompoundStatement {
 			else {
 				/* Patch used registers into push instruction at the start */
 				push.operands.clear();
-				used.stream().forEach(x -> push.operands.add(new RegOperand(x)));
+				used.stream().forEach(x -> push.operands.add(new RegOp(x)));
 				
-				if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) push.operands.add(new RegOperand(REGISTER.FP));
+				if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) push.operands.add(new RegOp(REG.FP));
 				
-				if (hasCall) push.operands.add(new RegOperand(REGISTER.LR));
+				if (hasCall) push.operands.add(new RegOp(REG.LR));
 				
 				func.patchBxToB(funcReturn);
 			}
@@ -285,7 +285,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			 */
 			if (f.path.build().equals("main")) {
 				for (int i = 0; i < push.operands.size(); i++) {
-					if (push.operands.get(i).reg != REGISTER.FP && push.operands.get(i).reg != REGISTER.LR) {
+					if (push.operands.get(i).reg != REG.FP && push.operands.get(i).reg != REG.LR) {
 						push.operands.remove(i);
 						i--;
 					}
@@ -305,27 +305,27 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(funcReturn);
 				
 				/* Check if exception was thrown */
-				if (f.signals) func.instructions.add(new ASMCmp(new RegOperand(REGISTER.R12), new ImmOperand(0)));
+				if (f.signals) func.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
 				
 				pop = new ASMPopStack();
-				for (REGISTER reg : used) pop.operands.add(new RegOperand(reg));
+				for (REG reg : used) pop.operands.add(new RegOp(reg));
 				
 				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
 					/* Backup SP in R2 */
 					if (f.getReturnType().wordsize() > 1 || f.signals) 
-						func.instructions.add(new ASMMov(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.SP)));
+						func.instructions.add(new ASMMov(new RegOp(REG.R2), new RegOp(REG.SP)));
 					
 					if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
-						fpMovBack = new ASMMov(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.FP));
+						fpMovBack = new ASMMov(new RegOp(REG.SP), new RegOp(REG.FP));
 						func.instructions.add(fpMovBack);
 					}
 				
 					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
 						/* Need to restore registers */
-						if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOperand(REGISTER.FP));
+						if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOp(REG.FP));
 						
 						/* Function has a call, must save LR */
-						if (hasCall) pop.operands.add(new RegOperand(REGISTER.LR));
+						if (hasCall) pop.operands.add(new RegOp(REG.LR));
 					}
 				}
 				
@@ -344,12 +344,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			if (size != 0 && !f.path.build().equals("main")) {
-				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(size * 4)));
+				func.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 			}
 			
 			ASMLabel singleWordSkip = new ASMLabel(LabelGen.getLabel());
 			if (f.getReturnType().wordsize() == 1 && f.signals) {
-				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(singleWordSkip)));
+				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
 			}
 			
 			if (f.getReturnType().wordsize() > 1 || f.signals) {
@@ -358,19 +358,19 @@ public class AsNFunction extends AsNCompoundStatement {
 					 * No exception, move word size of return type in R0, if execption 
 					 * were thrown, the word size would already be in R0 
 					 */
-					ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4), new Cond(COND.EQ));
+					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), new Cond(COND.EQ));
 					mov.optFlags.add(OPT_FLAG.WRITEBACK);
 					func.instructions.add(mov);
 				}
 				else if (f.getReturnType().wordsize() > 1) {
 					/* Function does not signal, move word size of return type in R0 */
-					ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(f.getReturnType().wordsize() * 4));
+					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4));
 					mov.optFlags.add(OPT_FLAG.WRITEBACK);
 					func.instructions.add(mov);
 				}
 				
 				/* End address of return in stack */
-				func.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R0)));
+				func.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R2), new RegOp(REG.R0)));
 				
 				/* Copy the data from the top of the stack to the return stack location */
 				AsNBody.branchToCopyRoutine(func);
@@ -381,12 +381,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Branch back */
-			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
+			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
 
 			/* Main specific removals */
 			if (f.path.build().equals("main") && pop != null) {
 				for (int i = 0; i < pop.operands.size(); i++) {
-					if (pop.operands.get(i).reg != REGISTER.FP && pop.operands.get(i).reg != REGISTER.LR) {
+					if (pop.operands.get(i).reg != REG.FP && pop.operands.get(i).reg != REG.LR) {
 						pop.operands.remove(i);
 						i--;
 					}
@@ -423,41 +423,41 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Only patch bx and instructions that are not part of exceptional exit */
 				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
-					branch.target = new LabelOperand(funcReturn);
+					branch.target = new LabelOp(funcReturn);
 				}
 			}
 		}
 	}
 	
-	public void patchFramePointerAddressing(int offset) throws CGEN_EXCEPTION {
+	public void patchFramePointerAddressing(int offset) throws CGEN_EXC {
 		for (ASMInstruction ins : this.instructions) {
 			if (ins instanceof ASMStackOp) {
 				ASMStackOp stackOp = (ASMStackOp) ins;
-				if (stackOp.op0 != null && stackOp.op0.reg == REGISTER.FP) {
-					if (stackOp.op1 instanceof PatchableImmOperand) {
-						PatchableImmOperand op = (PatchableImmOperand) stackOp.op1;
+				if (stackOp.op0 != null && stackOp.op0.reg == REG.FP) {
+					if (stackOp.op1 instanceof PatchableImmOp) {
+						PatchableImmOp op = (PatchableImmOp) stackOp.op1;
 						
 						/* Patch the offset for parameters because they are located under the pushed regs,
 						 * dont patch local data since its located above the pushed regs.
 						 */
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);
-							stackOp.op1 = new ImmOperand(op.patchedValue, op);
+							stackOp.op1 = new ImmOp(op.patchedValue, op);
 						}
 					}
-					else throw new CGEN_EXCEPTION(this.source.getSource(), "Cannot patch non-patchable imm operand!");
+					else throw new CGEN_EXC(this.source.getSource(), "Cannot patch non-patchable imm operand!");
 				}
 			}
 			else if (ins instanceof ASMBinaryData) {
 				ASMBinaryData binary = (ASMBinaryData) ins;
 				
-				if (binary.op0 != null && binary.op0.reg == REGISTER.FP) {
-					if (binary.op1 instanceof PatchableImmOperand) {
-						PatchableImmOperand op = (PatchableImmOperand) binary.op1;
+				if (binary.op0 != null && binary.op0.reg == REG.FP) {
+					if (binary.op1 instanceof PatchableImmOp) {
+						PatchableImmOp op = (PatchableImmOp) binary.op1;
 						
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);
-							binary.op1 = new ImmOperand(op.patchedValue, op);
+							binary.op1 = new ImmOp(op.patchedValue, op);
 						}
 					}
 				}
@@ -465,13 +465,13 @@ public class AsNFunction extends AsNCompoundStatement {
 			else if (ins instanceof ASMMemOp) {
 				ASMMemOp mem = (ASMMemOp) ins;
 				
-				if (mem.op0 != null && mem.op0 instanceof RegOperand && ((RegOperand) mem.op0).reg == REGISTER.FP) {
-					if (mem.op1 instanceof PatchableImmOperand) {
-						PatchableImmOperand op = (PatchableImmOperand) mem.op1;
+				if (mem.op0 != null && mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
+					if (mem.op1 instanceof PatchableImmOp) {
+						PatchableImmOp op = (PatchableImmOp) mem.op1;
 						
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);
-							mem.op1 = new ImmOperand(op.patchedValue, op);
+							mem.op1 = new ImmOp(op.patchedValue, op);
 						}
 					}
 				}
@@ -490,16 +490,16 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Return a list of all registers that were used. Registers 0-2 and FP, SP, LR, PC are excluded.
 	 * @return
 	 */
-	public List<REGISTER> getUsed() {
-		REGISTER [] notIncluded = {REGISTER.R0, REGISTER.R1, REGISTER.R2, REGISTER.R10, REGISTER.R12, REGISTER.FP, REGISTER.SP, REGISTER.LR, REGISTER.PC};
-		List<REGISTER> used = new ArrayList();
+	public List<REG> getUsed() {
+		REG [] notIncluded = {REG.R0, REG.R1, REG.R2, REG.R10, REG.R12, REG.FP, REG.SP, REG.LR, REG.PC};
+		List<REG> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {
 			if (x instanceof ASMMov) {
 				ASMMov mov = (ASMMov) x;
 				
 				boolean use = true;
-				for (REGISTER r : notIncluded) if (r == mov.target.reg) use = false;
+				for (REG r : notIncluded) if (r == mov.target.reg) use = false;
 				
 				if (use) used.add(mov.target.reg);
 			}

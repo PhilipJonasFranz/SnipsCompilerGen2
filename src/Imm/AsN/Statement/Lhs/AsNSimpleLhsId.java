@@ -5,7 +5,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
@@ -17,12 +17,12 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
@@ -32,7 +32,7 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNSimpleLhsId extends AsNLhsId {
 
-	public static AsNSimpleLhsId cast(SimpleLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNSimpleLhsId cast(SimpleLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNSimpleLhsId id = new AsNSimpleLhsId();
 		lhs.castedNode = id;
@@ -48,7 +48,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				List<ASMInstruction> inj = id.buildInjector(lhs.assign, reg, 0, true, false);
 				id.instructions.addAll(inj);
 			}
-			else id.instructions.add(new ASMMov(new RegOperand(reg), new RegOperand(0)));
+			else id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
 		}
 		/* Variable is global variable and type is primitive, store to memory.
 		 * 		Other types in memory are handled down below. */
@@ -56,11 +56,11 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			ASMDataLabel label = map.resolve(ref.origin);
 			
 			/* Load memory address */
-			id.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin));
+			id.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			
 			if (ref.origin.getType().wordsize() == 1) {
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-					id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
 					
 					/* Injector will calculate assignment arith into R0 */
 					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
@@ -68,7 +68,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				}
 				
 				/* Store computed to memory */
-				id.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+				id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
 			else {
 				/* Copy the value on the stack to the desired location */
@@ -81,16 +81,16 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
 				
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-					id.instructions.add(new ASMLdr(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.FP), 
-							new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
+					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.FP), 
+							new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 					
 					/* R1 can be overwritten, offset is known */
 					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, false);
 					id.instructions.addAll(inj);
 				}
 				
-				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.FP), 
-					new PatchableImmOperand(PATCH_DIR.DOWN, -off)));
+				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
+					new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
 			else if (ref.origin.getType() instanceof ARRAY) {
 				/* Use light variations of the addressing injector from AsNElementSelect, since we 
@@ -101,14 +101,14 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				if (st.getParameterByteOffset(ref.origin) != -1) {
 					int offset = st.getParameterByteOffset(ref.origin);
 					
-					ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+					ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
 					start.comment = new ASMComment("Start of structure in stack");
 					id.instructions.add(start);
 				}
 				else if (map.resolve(ref.origin) != null) {
 					ASMDataLabel label = map.resolve(ref.origin);
 					
-					ASMLdrLabel load = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin);
+					ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin);
 					load.comment = new ASMComment("Load data section address");
 					id.instructions.add(load);
 				}
@@ -118,7 +118,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					offset += (ref.origin.getType().wordsize() - 1) * 4;
 					
 					/* Load the start of the structure into R1 */
-					ASMSub sub = new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset));
+					ASMSub sub = new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset));
 					sub.comment = new ASMComment("Start of structure in stack");
 					id.instructions.add(sub);
 				}

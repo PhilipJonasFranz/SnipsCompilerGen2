@@ -5,13 +5,13 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
@@ -23,7 +23,7 @@ import Snips.CompilerDriver;
 public class AsNStructureInit extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructureInit init = new AsNStructureInit();
 		s.castedNode = init;
 		
@@ -33,11 +33,11 @@ public class AsNStructureInit extends AsNExpression {
 		
 		if (!CompilerDriver.disableStructSIDHeaders) {
 			/* Push SID header */
-			init.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.structType.typedef.SID)));
-			init.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
+			init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.typedef.SID)));
+			init.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
 			
 			/* Push dummy for SID header */
-			st.push(REGISTER.R0);
+			st.push(REG.R0);
 		}
 		
 		return init;
@@ -52,7 +52,7 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static void structureInit(AsNNode node, List<Expression> elements, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -70,7 +70,7 @@ public class AsNStructureInit extends AsNExpression {
 					regs = 0;
 				}
 				
-				st.push(REGISTER.R0);
+				st.push(REG.R0);
 			}
 			else {
 				/* Flush all atoms to clear regs */
@@ -81,8 +81,8 @@ public class AsNStructureInit extends AsNExpression {
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
 				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
-					node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
-					st.push(REGISTER.R0);
+					node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+					st.push(REG.R0);
 				}
 			}
 		}
@@ -100,9 +100,9 @@ public class AsNStructureInit extends AsNExpression {
 	 */
 	public static void flush(int regs, AsNNode node) {
 		if (regs > 0) {
-			if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0))));
-			else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R0))));
-			else node.instructions.add(attatchFlag(new ASMPushStack(new RegOperand(REGISTER.R0))));
+			if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R1), new RegOp(REG.R0))));
+			else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R1), new RegOp(REG.R0))));
+			else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
 		}
 	}
 	

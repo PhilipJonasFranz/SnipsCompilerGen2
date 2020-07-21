@@ -3,7 +3,7 @@ package Imm.AST;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -55,14 +55,14 @@ public abstract class SyntaxElement {
 		return pad;
 	}
 	
-	public abstract void setContext(List<TYPE> context) throws CTX_EXCEPTION;
+	public abstract void setContext(List<TYPE> context) throws CTX_EXC;
 	
 	public abstract void releaseContext();
 	
 	/**
 	 * Visitor relay for context checking
 	 */
-	public abstract TYPE check(ContextChecker ctx) throws CTX_EXCEPTION;
+	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
 	
 	public Source getSource() {
 		return this.source;

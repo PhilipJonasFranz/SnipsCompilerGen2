@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CTX_EXC;
+import Exc.SNIPS_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.ENUM;
@@ -53,7 +53,7 @@ public class EnumTypedef extends SyntaxElement {
 		for (ENUM t : this.enumFields) 
 			if (t.fieldName.equals(value)) return t;
 		
-		throw new SNIPS_EXCEPTION("The enum " + this.path.build() + " does not contain the field " + value + ", " + source.getSourceMarker());
+		throw new SNIPS_EXC("The enum " + this.path.build() + " does not contain the field " + value + ", " + source.getSourceMarker());
 	}
 	
 	
@@ -66,11 +66,11 @@ public class EnumTypedef extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return new VOID();
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
 	}
 

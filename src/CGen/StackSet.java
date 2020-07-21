@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import Exc.CGEN_EXCEPTION;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Exc.CGEN_EXC;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Util.Pair;
@@ -29,13 +29,13 @@ public class StackSet {
 		private CONTENT_TYPE type;
 		
 		/** The stored register. */
-		private REGISTER reg;
+		private REG reg;
 		
 		/** The stored declaration */
 		private Declaration declaration;
 		
 		/** Create a new stack cell, set the type to register and set given register. */
-		public StackCell(REGISTER reg) {
+		public StackCell(REG reg) {
 			this.reg = reg;
 			this.type = CONTENT_TYPE.REGISTER;
 		}
@@ -50,7 +50,7 @@ public class StackSet {
 			return this.type;
 		}
 		
-		public REGISTER getReg() {
+		public REG getReg() {
 			return this.reg;
 		}
 		
@@ -87,8 +87,8 @@ public class StackSet {
 	/** Push all given registers on the stack and wrap them in stack cells. 
 	 * The first given register will end up on the bottom of the newly pushed stack section.
 	 */
-	public void push(REGISTER...reg) {
-		for (REGISTER reg0 : reg) this.stack.push(new StackCell(reg0));
+	public void push(REG...reg) {
+		for (REG reg0 : reg) this.stack.push(new StackCell(reg0));
 	}
 	
 	/** Pop a stack cell from the stack top. */
@@ -107,7 +107,7 @@ public class StackSet {
 	 * Pop given amount of words from the stack. Throws an CGEN_EXCEPTION if not exactly x words can be popped.
 	 * This will mostly be caused by an internal compilation logic error.
 	 */
-	public void popXWords(int x) throws CGEN_EXCEPTION {
+	public void popXWords(int x) throws CGEN_EXC {
 		int words = 0;
 		while (words < x) {
 			if (this.stack.peek().type == CONTENT_TYPE.REGISTER) {
@@ -120,7 +120,7 @@ public class StackSet {
 		}
 		
 		if (words != x) {
-			throw new CGEN_EXCEPTION("Unable to pop " + x + " Words from the stack, could only pop " + words);
+			throw new CGEN_EXC("Unable to pop " + x + " Words from the stack, could only pop " + words);
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class StackSet {
 		int off = 0;
 		boolean foundHook = false;
 		for (int x = 0; x < stack.size(); x++) {
-			if (stack.get(x).type == CONTENT_TYPE.REGISTER && stack.get(x).reg == REGISTER.LR) {
+			if (stack.get(x).type == CONTENT_TYPE.REGISTER && stack.get(x).reg == REG.LR) {
 				if (!foundHook) return -1;
 				else return off;
 			}
@@ -172,7 +172,7 @@ public class StackSet {
 		
 		/* Check if LR or FP regs were pushed */
 		for (int i = 0; i < stack.size(); i++) {
-			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) {
+			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) {
 				regs = true;
 			}
 		}
@@ -180,7 +180,7 @@ public class StackSet {
 		boolean hook = false;
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
-				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) {
+				if (stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) {
 					hook = true;
 					off = 4;
 				}
@@ -255,8 +255,8 @@ public class StackSet {
 		List<Integer> occurences = new ArrayList();
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
-				if (stack.get(i).reg == REGISTER.FP || stack.get(i).reg == REGISTER.LR) off = 4;
-				else if (stack.get(i).reg == REGISTER.SP) occurences.add(off);
+				if (stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) off = 4;
+				else if (stack.get(i).reg == REG.SP) occurences.add(off);
 				else off += 4;
 			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
 				off += (stack.get(i).declaration.getType().wordsize() * 4);
@@ -273,7 +273,7 @@ public class StackSet {
 		int off = 0;
 		for (StackCell c : this.stack) {
 			if (c.getType() == CONTENT_TYPE.REGISTER) {
-				if (c.getReg() == REGISTER.LR || c.getReg() == REGISTER.FP) {
+				if (c.getReg() == REG.LR || c.getReg() == REG.FP) {
 					off = 0;
 				}
 				else off += 4;

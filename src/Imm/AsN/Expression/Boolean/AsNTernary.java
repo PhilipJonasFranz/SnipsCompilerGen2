@@ -4,24 +4,24 @@ import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.Expression.AsNExpression;
 
 public class AsNTernary extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNTernary tern = new AsNTernary();
 		
 		r.free(0, 1, 2);
@@ -49,24 +49,24 @@ public class AsNTernary extends AsNExpression {
 			tern.instructions.addAll(com.getInstructions());
 			
 			/* Condition was false, no else, skip first result */
-			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(loadFalse)));
+			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(loadFalse)));
 		}
 		else {
 			/* Default condition evaluation */
 			tern.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			tern.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+			tern.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
 			/* Condition was false, jump to else */
-			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loadFalse)));
+			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loadFalse)));
 		}
 		
 		/* Load true result */
 		tern.instructions.addAll(AsNExpression.cast(t.leftOperand, r, map, st).getInstructions());
 		
 		/* Branch to end */
-		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(end)));
+		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(end)));
 		
 		/* False Target */
 		tern.instructions.add(loadFalse);

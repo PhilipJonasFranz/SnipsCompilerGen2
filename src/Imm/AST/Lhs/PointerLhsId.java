@@ -3,7 +3,7 @@ package Imm.AST.Lhs;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
@@ -36,9 +36,9 @@ public class PointerLhsId extends LhsId {
 		if (this.deref != null) this.deref.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		if (!(this.shadowDeref instanceof Deref)) {
-			throw new CTX_EXCEPTION(this.getSource(), "Left hand identifer is not a dereference");
+			throw new CTX_EXC(this.getSource(), "Left hand identifer is not a dereference");
 		}
 		else this.deref = (Deref) this.shadowDeref;
 		
@@ -56,7 +56,7 @@ public class PointerLhsId extends LhsId {
 		else return null;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.shadowDeref.setContext(context);
 	}
 

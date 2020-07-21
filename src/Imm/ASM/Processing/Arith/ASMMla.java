@@ -2,27 +2,27 @@ package Imm.ASM.Processing.Arith;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public class ASMMla extends ASMInstruction {
 
-	public RegOperand target;
+	public RegOp target;
 	
-	public RegOperand op0;
+	public RegOp op0;
 	
-	public RegOperand op1;
+	public RegOp op1;
 	
-	public RegOperand op2;
+	public RegOp op2;
 	
-	public ASMMla(RegOperand target, RegOperand op0, RegOperand op1, RegOperand op2) {
+	public ASMMla(RegOp target, RegOp op0, RegOp op1, RegOp op2) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 		this.op2 = op2;
 	}
 	
-	public ASMMla(RegOperand target, RegOperand op0, RegOperand op1, RegOperand op2, Cond cond) {
+	public ASMMla(RegOp target, RegOp op0, RegOp op1, RegOp op2, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

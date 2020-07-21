@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import Exc.SNIPS_EXCEPTION;
+import Exc.SNIPS_EXC;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Source;
@@ -429,7 +429,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXCEPTION("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 16)));
@@ -442,7 +442,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXCEPTION("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 2)));

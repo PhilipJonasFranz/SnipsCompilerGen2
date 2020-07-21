@@ -3,7 +3,7 @@ package Imm.AST.Lhs;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -31,7 +31,7 @@ public class SimpleLhsId extends LhsId {
 		this.ref.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		TYPE t = ctx.checkIDRef(this.ref);
 		this.origin = this.ref.origin;
 		return t;
@@ -41,7 +41,7 @@ public class SimpleLhsId extends LhsId {
 		return ref.path;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.ref.setContext(context);
 	}
 

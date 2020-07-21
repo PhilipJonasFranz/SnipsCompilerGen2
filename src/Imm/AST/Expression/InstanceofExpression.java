@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -38,11 +38,11 @@ public class InstanceofExpression extends Expression {
 		System.out.println(this.pad(d + this.printDepthStep) + this.instanceType.typeString());
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkInstanceofExpression(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (this.instanceType instanceof PROVISO) {
 			PROVISO p = (PROVISO) this.instanceType;
 			for (TYPE t : context) {

@@ -12,8 +12,8 @@ import CGen.LiteralManager;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
-import Exc.CTX_EXCEPTION;
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -37,12 +37,12 @@ import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
-import Imm.ASM.Util.Operands.Memory.MemoryWordOperand;
-import Imm.ASM.Util.Operands.Memory.MemoryWordRefOperand;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
+import Imm.ASM.Util.Operands.Memory.MemoryWordRefOp;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
@@ -69,7 +69,7 @@ public class AsNBody extends AsNNode {
 	public static LiteralManager literalManager;
 	
 			/* --- METHODS --- */
-	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXCEPTION, CTX_EXCEPTION {
+	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralManager();
 		
@@ -86,7 +86,7 @@ public class AsNBody extends AsNNode {
 		Date today = Calendar.getInstance().getTime();        
 		String todayAsString = df.format(today);
 		
-		body.instructions.add(new ASMComment("--" + CompilerDriver.file.getName() + ((CompilerDriver.includeMetaInformation)? ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString : "")));
+		body.instructions.add(new ASMComment("--" + CompilerDriver.inputFile.getName() + ((CompilerDriver.includeMetaInformation)? ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString : "")));
 		if (CompilerDriver.includeMetaInformation) body.instructions.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
 											 ", Optimizer: " + ((!CompilerDriver.disableOptimizer)? "Enabled" : "Disabled") + 
 											 ", Modifiers: " + ((!CompilerDriver.disableModifiers)? "Enabled" : "Disabled")));
@@ -111,7 +111,7 @@ public class AsNBody extends AsNNode {
 		globalsInit.add(new ASMComment("Initialize the global variables"));
 		ASMLabel initLabel = new ASMLabel("main_init");
 		globalsInit.add(initLabel);
-		globalsInit.add(new ASMPushStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR)));
+		globalsInit.add(new ASMPushStack(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2), new RegOp(REG.FP), new RegOp(REG.LR)));
 		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
@@ -119,11 +119,11 @@ public class AsNBody extends AsNNode {
 				Declaration dec = (Declaration) s;
 				
 				/* Create instruction for .data Section */
-				ASMDataLabel dataEntry = new ASMDataLabel(dec.path.build(), new MemoryWordOperand(dec.value));
+				ASMDataLabel dataEntry = new ASMDataLabel(dec.path.build(), new MemoryWordOp(dec.value));
 				body.instructions.add(dataEntry);
 
 				/* Create address reference instruction for .text section */
-				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.path.build()), new MemoryWordRefOperand(dataEntry));
+				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.path.build()), new MemoryWordRefOp(dataEntry));
 				globalVarReferences.add(reference);
 				
 				/* Add declaration to global memory */
@@ -139,11 +139,11 @@ public class AsNBody extends AsNNode {
 			Declaration nullPtr = CompilerDriver.NULL_PTR;
 			
 			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOperand(nullPtr.value));
+			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
 			body.instructions.add(dataEntry);
 			
 			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOperand(dataEntry));
+			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
 			globalVarReferences.add(reference);
 			
 			/* Add declaration to global memory */
@@ -156,11 +156,11 @@ public class AsNBody extends AsNNode {
 			Declaration heap = CompilerDriver.HEAP_START;
 			
 			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(heap.path.build(), new MemoryWordOperand(heap.value));
+			ASMDataLabel dataEntry = new ASMDataLabel(heap.path.build(), new MemoryWordOp(heap.value));
 			body.instructions.add(dataEntry);
 			
 			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.path.build()), new MemoryWordRefOperand(dataEntry));
+			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntry));
 			globalVarReferences.add(reference);
 			
 			/* Add declaration to global memory */
@@ -179,7 +179,7 @@ public class AsNBody extends AsNNode {
 		}
 		
 		/* Branch to main Function if main function is not first function, patch target later */
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand());
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp());
 		body.instructions.add(branch);
 				
 		
@@ -201,7 +201,7 @@ public class AsNBody extends AsNNode {
 				if (!ins.isEmpty()) {
 					/* Patch Branch to Main Function */
 					if (((Function) s).path.build().equals("main")) {
-						((LabelOperand) branch.target).patch((ASMLabel) ins.get(0));
+						((LabelOp) branch.target).patch((ASMLabel) ins.get(0));
 						mainLabel = (ASMLabel) ins.get(0);
 					}
 				}
@@ -235,12 +235,12 @@ public class AsNBody extends AsNNode {
 					ASMDataLabel label = map.resolve(dec);
 					
 					/* Load memory address */
-					ASMLdrLabel ins = new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), dec);
+					ASMLdrLabel ins = new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), dec);
 					ins.comment = new ASMComment("Load from .data section");
 					globalsInit.add(ins);
 					
 					if (dec.value.getType().wordsize() == 1) {
-						globalsInit.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1)));
+						globalsInit.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 					}
 					else {
 						/* Quick and dirty way to relay the generated instructions into a AsNNode */
@@ -259,7 +259,7 @@ public class AsNBody extends AsNNode {
 				if (globalsInit.get(i) instanceof ASMBranch && ((ASMBranch) globalsInit.get(i)).type == BRANCH_TYPE.BL) {
 					hasCall = true;
 				}
-				else if (globalsInit.get(i) instanceof ASMMov && ((ASMMov) globalsInit.get(i)).target.reg == REGISTER.PC) {
+				else if (globalsInit.get(i) instanceof ASMMov && ((ASMMov) globalsInit.get(i)).target.reg == REG.PC) {
 					hasCall = true;
 				}
 			}
@@ -269,9 +269,9 @@ public class AsNBody extends AsNNode {
 				push.operands.remove(push.operands.size() - 1);
 				push.operands.remove(push.operands.size() - 1);
 				
-				globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+				globalsInit.add(new ASMPopStack(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2)));
 			}
-			else globalsInit.add(new ASMPopStack(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.FP), new RegOperand(REGISTER.LR)));
+			else globalsInit.add(new ASMPopStack(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2), new RegOp(REG.FP), new RegOp(REG.LR)));
 			
 			/* Only main function present, dont need branch */
 			if (p.programElements.stream().filter(x -> x instanceof Function).count() == 1 && !AsNBody.usedStackCopyRoutine) {
@@ -292,7 +292,7 @@ public class AsNBody extends AsNNode {
 					body.instructions.addAll(i - 1, globalsInit);
 					
 					/* Relay start branch to init block */
-					((LabelOperand) branch.target).label = initLabel;
+					((LabelOp) branch.target).label = initLabel;
 					break;
 				}
 			}
@@ -337,7 +337,7 @@ public class AsNBody extends AsNNode {
 								ASMDataLabel l0 = null;
 								if (label.dec == null) 
 									/* Label is dynamic label, generated by literal manager */
-									l0 = AsNBody.literalManager.getValue((LabelOperand) label.op0).clone();
+									l0 = AsNBody.literalManager.getValue((LabelOp) label.op0).clone();
 								else 
 									/* Get label referenced by load instruction and clone it */
 									l0 = map.resolve(label.dec).clone();
@@ -365,15 +365,15 @@ public class AsNBody extends AsNNode {
 		return body;
 	}
 	
-	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXCEPTION {
+	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {
 		/* Mark routine as used */
 		AsNBody.usedStackCopyRoutine = true;
 		
-		ASMAdd add = new ASMAdd(new RegOperand(REGISTER.R10), new RegOperand(REGISTER.PC), new ImmOperand(8));
+		ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8));
 		add.comment = new ASMComment("Setup return address for routine");
 		node.instructions.add(add);
 		
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(AsNBody.stackCopyRoutine));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(AsNBody.stackCopyRoutine));
 		
 		/* 
 		 * Signal the optimizer that this is a controlled jump, and that the program will return, 
@@ -383,7 +383,7 @@ public class AsNBody extends AsNNode {
 		node.instructions.add(branch);
 		
 		/* Move 0 into R10 */
-		ASMMov resetR10 = new ASMMov(new RegOperand(REGISTER.R10), new ImmOperand(0));
+		ASMMov resetR10 = new ASMMov(new RegOp(REG.R10), new ImmOp(0));
 		node.instructions.add(resetR10);
 	}
 	
@@ -396,25 +396,25 @@ public class AsNBody extends AsNNode {
 		ASMLabel loopEnd = new ASMLabel("_routine_stack_copy_end_");
 		
 		/* Check if whole sub array was loaded */
-		routine.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(0)));
+		routine.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 		
 		/* Branch to loop end */
-		routine.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
+		routine.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
 		
-		routine.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(-4)));
+		routine.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(-4)));
 		
-		routine.add(new ASMPushStack(new RegOperand(REGISTER.R2)));
+		routine.add(new ASMPushStack(new RegOp(REG.R2)));
 		
 		/* Decrement counter */
-		routine.add(new ASMSub(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R0), new ImmOperand(4)));
+		routine.add(new ASMSub(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(4)));
 		
 		/* Branch to loop start */
-		routine.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(AsNBody.stackCopyRoutine)));
+		routine.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(AsNBody.stackCopyRoutine)));
 		
 		routine.add(loopEnd);
 		
 		/* Branch back */
-		routine.add(new ASMMov(new RegOperand(REGISTER.PC), new RegOperand(REGISTER.R10)));
+		routine.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
 		routine.add(new ASMSeperator());
 		
 		return routine;

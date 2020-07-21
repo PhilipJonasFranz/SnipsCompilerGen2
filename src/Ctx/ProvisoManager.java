@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CGen.LabelGen;
-import Exc.CTX_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CTX_EXC;
+import Exc.SNIPS_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -43,16 +43,14 @@ public class ProvisoManager {
 		}
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		if (context.size() != this.provisosTypes.size()) {
-			throw new CTX_EXCEPTION(source, "Missmatching number of provided provisos, expected " + this.provisosTypes.size() + ", got " + context.size());
-		}
+	public void setContext(List<TYPE> context) throws CTX_EXC {
+		if (context.size() != this.provisosTypes.size()) 
+			throw new CTX_EXC(source, "Missmatching number of provided provisos, expected " + this.provisosTypes.size() + ", got " + context.size());
 		
 		for (int i = 0; i < this.provisosTypes.size(); i++) {
 			TYPE pro = this.provisosTypes.get(i);
-			if (!(pro instanceof PROVISO)) {
-				throw new CTX_EXCEPTION(source, "Provided Type " + pro.typeString() + " is not a proviso type");
-			}
+			if (!(pro instanceof PROVISO)) 
+				throw new CTX_EXC(source, "Provided Type " + pro.typeString() + " is not a proviso type");
 			
 			PROVISO pro0 = (PROVISO) pro;
 			pro0.setContext(context.get(i));
@@ -74,11 +72,9 @@ public class ProvisoManager {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
 			
-			if (map0.size() != map.size()) throw new SNIPS_EXCEPTION("Recieved proviso mapping length is not equal to expected length, expected " + map0.size() + ", but got " + map.size());
+			if (map0.size() != map.size()) throw new SNIPS_EXC("Recieved proviso mapping length is not equal to expected length, expected " + map0.size() + ", but got " + map.size());
 			
-			if (this.mappingIsEqual(map0, map)) {
-				return true;
-			}
+			if (this.mappingIsEqual(map0, map)) return true;
 		}
 		
 		return false;
@@ -86,18 +82,17 @@ public class ProvisoManager {
 	
 	public boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
 		boolean isEqual = true;
-		for (int a = 0; a < map0.size(); a++) {
+		for (int a = 0; a < map0.size(); a++) 
 			isEqual &= map0.get(a).isEqual(map1.get(a));
-		}
 		return isEqual;
 	}
 	
 	public String getPostfix(List<TYPE> map) {
+		/* Search for postfix, if match is found return postfix */
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
-			if (this.mappingIsEqual(map0, map)) {
+			if (this.mappingIsEqual(map0, map)) 
 				return this.provisosCalls.get(i).first;
-			}
 		}
 		
 		return null;
@@ -108,27 +103,26 @@ public class ProvisoManager {
 			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
 			
 			boolean isEqual = true;
-			for (int a = 0; a < map0.size(); a++) {
+			for (int a = 0; a < map0.size(); a++) 
 				isEqual &= map0.get(a).isEqual(map.get(a));
-			}
 			
 			if (isEqual) return this.provisosCalls.get(i).second.first;
 		}
 		
-		throw new SNIPS_EXCEPTION("No mapping!");
+		throw new SNIPS_EXC("No mapping!");
 	}
 	
 	public void addProvisoMapping(TYPE type, List<TYPE> context) {
-		if (this.containsMapping(context)) {
-			return;
-		}
+		/* Proviso mapping already exists, just return */
+		if (this.containsMapping(context)) return;
 		else {
+			/* Add proviso mapping, create new proviso postfix for mapping */
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
 			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(postfix, new Pair<TYPE, List<TYPE>>(type, context)));
 		}
 	}
 	
-	public static void setContext(List<TYPE> context, TYPE type) throws CTX_EXCEPTION {
+	public static void setContext(List<TYPE> context, TYPE type) throws CTX_EXC {
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			for (TYPE t : context) {
@@ -141,9 +135,9 @@ public class ProvisoManager {
 		else if (type instanceof FUNC) {
 			FUNC f = (FUNC) type;
 			if (f.funcHead != null) {
-				for (Declaration d : f.funcHead.parameters) {
+				for (Declaration d : f.funcHead.parameters) 
 					d.setContext(context);
-				}
+				
 				setContext(context, f.funcHead.getReturnType());
 			}
 		}
@@ -171,9 +165,8 @@ public class ProvisoManager {
 			mapContextToStatic(s.typedef.proviso, s.proviso);
 			
 			/* Initialize capsuled proviso types */
-			for (int i = 0; i < s.typedef.proviso.size(); i++) {
+			for (int i = 0; i < s.typedef.proviso.size(); i++) 
 				s.typedef.proviso.set(i, setHiddenContext(s.typedef.proviso.get(i)));
-			}
 			
 			/* Iterate over every field in the struct and apply the proviso */
 			for (Declaration d : s.typedef.fields) {
@@ -204,20 +197,14 @@ public class ProvisoManager {
 						/* Map recieved context on the proviso types of the struct */
 						mapContextTo(s1.proviso, context);
 						
-						//if (ContextChecker.fieldType != null) System.out.println(ContextChecker.fieldType.typeString());
-						
-						if (s1.typedef.path.build().equals(s.typedef.path.build())) {
+						if (s1.typedef.path.build().equals(s.typedef.path.build())) 
 							/* Struct is recursive, set loop reference and return */
 							p.coreType = s1;
-						}
-						else {
-							setContext(s1.proviso, s1);
-						}
+						else setContext(s1.proviso, s1);
 					}
-					else {
+					else 
 						/* Set the context of the target type, proviso can be capsuled inside of pointer */
 						setContext(context, p.targetType);
-					}
 				}
 			}
 		}
@@ -247,7 +234,7 @@ public class ProvisoManager {
 		}
 	}
 	
-	public static TYPE setHiddenContext(TYPE type) throws CTX_EXCEPTION {
+	public static TYPE setHiddenContext(TYPE type) throws CTX_EXC {
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			
@@ -270,9 +257,8 @@ public class ProvisoManager {
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
-			if (s.proviso.size() != s.typedef.proviso.size()) {
-				throw new CTX_EXCEPTION(CompilerDriver.nullSource, "Expected " + s.typedef.proviso.size() + " provisos but got " + s.proviso.size());
-			}
+			if (s.proviso.size() != s.typedef.proviso.size()) 
+				throw new CTX_EXC(CompilerDriver.nullSource, "Expected " + s.typedef.proviso.size() + " provisos but got " + s.proviso.size());
 			
 			/* Map initialization proviso types to proviso head listing */
 			mapContextToStatic(s.typedef.proviso, s.proviso);

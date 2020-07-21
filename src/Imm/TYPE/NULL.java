@@ -1,6 +1,6 @@
 package Imm.TYPE;
 
-import Exc.SNIPS_EXCEPTION;
+import Exc.SNIPS_EXC;
 import Imm.TYPE.COMPOSIT.POINTER;
 
 public class NULL extends TYPE<Object> {
@@ -19,7 +19,7 @@ public class NULL extends TYPE<Object> {
 	}
 	
 	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXCEPTION("Cannot get Source Code representation of null type.");
+		throw new SNIPS_EXC("Cannot get Source Code representation of null type.");
 	}
 	
 	public int wordsize() {

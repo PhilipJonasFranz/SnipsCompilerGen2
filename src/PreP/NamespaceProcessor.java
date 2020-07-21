@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import Exc.SNIPS_EXCEPTION;
+import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
@@ -84,7 +84,7 @@ public class NamespaceProcessor {
 				else if (s instanceof Comment) {
 					/* Dont do anything */
 				}
-				else throw new SNIPS_EXCEPTION("Cannot flatten " + s.getClass().getName());
+				else throw new SNIPS_EXC("Cannot flatten " + s.getClass().getName());
 				
 				target.add(s);
 			}
