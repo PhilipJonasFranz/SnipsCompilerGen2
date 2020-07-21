@@ -133,7 +133,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     lsl r1, r3, #2
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
@@ -151,7 +151,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     lsl r1, r4, #2
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
@@ -160,7 +160,7 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r5, r0
+    mov r4, r0
     mov r0, #15                              /* Evaluate Expression */
     push { r0 }
     mov r0, #0
@@ -168,8 +168,8 @@ main:                                        /* Function: main */
     mov r0, #0
     push { r0 }
     mov r0, #1
-    lsl r1, r5, #2
-    str r0, [r1, #0]
+    lsl r1, r4, #2
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
@@ -178,7 +178,7 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    lsl r1, r5, #2                           /* Convert to bytes */
+    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r2, [r1, #12]                        /* Load field from struct */
     add r0, r0, r2
     pop { pc }

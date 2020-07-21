@@ -70,4 +70,11 @@ public abstract class AsNStatement extends AsNNode {
 		return node;
 	}
 	
+	public void freeDecs(RegSet r, Statement s) {
+		for (Declaration d : s.free) {
+			int loc = r.declarationRegLocation(d);
+			if (loc != -1) r.free(loc);
+		}
+	}
+	
 }

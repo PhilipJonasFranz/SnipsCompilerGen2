@@ -35,7 +35,7 @@ foo:                                         /* Function: foo */
     stmfd sp!, {r0, r1}
     pop { r0 }
     add r1, fp, #12                          /* Start of structure in stack */
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
@@ -66,7 +66,7 @@ main_init:
     stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .POOL0_main.L0_vec               /* Load from .data section */
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }

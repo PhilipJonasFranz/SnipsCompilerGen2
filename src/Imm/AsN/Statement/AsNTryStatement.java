@@ -117,6 +117,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		
 		tr0.instructions.add(endBranch);
 		
+		tr0.freeDecs(r, s);
 		return tr0;
 	}
 	

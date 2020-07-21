@@ -122,6 +122,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			}
 		}
 		
+		f.freeDecs(r, a);
 		return f;
 	}
 	

@@ -38,6 +38,7 @@ public class AsNAssignWriteback extends AsNStatement {
 		
 		injectWriteback(w, wb.reference, r, map, st, partOfExpression);
 		
+		w.freeDecs(r, wb);
 		return w;
 	}
 	

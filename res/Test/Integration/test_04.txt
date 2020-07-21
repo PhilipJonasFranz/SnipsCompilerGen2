@@ -17,7 +17,7 @@ OUTPUT
 /* --test_04.txt */
     b main
 sarrus:                                      /* Function: sarrus */
-    ldr r0, [sp, #0]
+    ldr r0, [sp]
     ldr r2, [sp, #16]
     mul r0, r0, r2
     ldr r2, [sp, #32]
@@ -43,7 +43,7 @@ sarrus:                                      /* Function: sarrus */
     ldr r0, [sp, #28]
     ldr r2, [sp, #20]
     mul r0, r0, r2
-    ldr r2, [sp, #0]
+    ldr r2, [sp]
     mul r2, r0, r2
     add r1, r1, r2
     ldr r0, [sp, #32]

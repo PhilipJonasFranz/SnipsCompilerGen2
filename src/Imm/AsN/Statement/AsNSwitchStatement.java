@@ -58,6 +58,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		/* Add end jump */
 		sw.instructions.add(end);
 		
+		sw.freeDecs(r, s);
 		return sw;
 	}
 	

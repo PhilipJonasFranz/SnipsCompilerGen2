@@ -62,6 +62,7 @@ public class AsNFunctionCall extends AsNStatement {
 			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
 		}
 		
+		call.freeDecs(r, fc);
 		return call;
 	}
 	

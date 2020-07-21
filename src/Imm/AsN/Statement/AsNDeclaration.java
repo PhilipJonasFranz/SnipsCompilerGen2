@@ -48,6 +48,7 @@ public class AsNDeclaration extends AsNStatement {
 			r.getReg(0).free();
 		}
 		
+		dec.freeDecs(r, d);
 		return dec;
 	}
 	

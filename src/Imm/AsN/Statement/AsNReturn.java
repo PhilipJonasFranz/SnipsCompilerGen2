@@ -24,6 +24,7 @@ public class AsNReturn extends AsNStatement {
 		
 		ret.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOperand(REGISTER.LR)));
 		
+		ret.freeDecs(r, s);
 		return ret;
 	}
 	

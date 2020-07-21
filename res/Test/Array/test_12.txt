@@ -15,7 +15,7 @@ OUTPUT
 /* --test_12.txt */
     b main
 add:                                         /* Function: add */
-    ldr r0, [sp, #0]
+    ldr r0, [sp]
     ldr r2, [sp, #4]
     add r0, r0, r2
     ldr r2, [sp, #8]

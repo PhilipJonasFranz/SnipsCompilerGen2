@@ -39,6 +39,7 @@ public class AsNAssignment extends AsNStatement {
 		/* Store value at location specified by lhs */
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());
 		
+		assign.freeDecs(r, a);
 		return assign;
 	}
 	

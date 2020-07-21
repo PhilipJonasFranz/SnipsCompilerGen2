@@ -14,7 +14,7 @@ OUTPUT
 main:                                        /* Function: main */
     add r1, r0, r1
     add r1, r1, r2
-    ldr r2, [sp, #0]
+    ldr r2, [sp]
     sub r0, r1, r2
     bx lr
     

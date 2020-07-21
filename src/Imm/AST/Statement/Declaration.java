@@ -30,6 +30,8 @@ public class Declaration extends Statement {
 	/** The initial value of this declaration. */
 	public Expression value;
 	
+	public Statement last = null;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

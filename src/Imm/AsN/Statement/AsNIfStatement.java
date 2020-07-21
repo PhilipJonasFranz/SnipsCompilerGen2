@@ -28,6 +28,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		
 		if (expr instanceof AsNCmp) {
 			if0.topComparison(a, (AsNCmp) expr, r, map, st);
+			if0.freeDecs(r, a);
 			return if0;
 		}
 		else {
@@ -83,6 +84,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			
 			if0.instructions.add(endTarget);
 			
+			if0.freeDecs(r, a);
 			return if0;
 		}
 	}

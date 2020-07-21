@@ -97,6 +97,10 @@ public class ContextChecker {
 	
 	Stack<SyntaxElement> exceptionEscapeStack = new Stack();
 	
+	public Statement currentStatement = null;
+	
+	public List<Declaration> toLink = new ArrayList();
+	
 	public static ContextChecker checker;
 	
 	public static ProgressMessage progress;
@@ -166,6 +170,12 @@ public class ContextChecker {
 		
 		if (progress != null) progress.incProgress(1);
 		
+		for (Declaration d : toLink) {
+			if (d.last != null) {
+				d.last.free.add(d);
+			}
+		}
+		
 		return null;
 	}
 	
@@ -217,7 +227,10 @@ public class ContextChecker {
 		/* Check body */
 		head.functions.add(f);
 		this.currentFunction.push(f);
-		for (Statement s : f.body) s.check(this);
+		for (Statement s : f.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.currentFunction.pop();
 		
 		/* Check for signaled types that are not thrown */
@@ -281,7 +294,10 @@ public class ContextChecker {
 		/* Setup new watchpoint target */
 		this.exceptionEscapeStack.push(e);
 		
-		for (Statement s : e.body) s.check(this);
+		for (Statement s : e.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		
 		for (int i = 0; i < e.watchpoints.size(); i++) {
 			for (int a = i + 1; a < e.watchpoints.size(); a++) {
@@ -324,7 +340,10 @@ public class ContextChecker {
 		
 		e.watched.check(this);
 		
-		for (Statement s : e.body) s.check(this);
+		for (Statement s : e.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		
 		this.scopes.pop();
 		return new VOID();
@@ -552,7 +571,10 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(w.getSource(), "Condition is not boolean");
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
-		for (Statement s : w.body) s.check(this);
+		for (Statement s : w.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.scopes.pop();
 
 		this.compoundStack.pop();
@@ -567,7 +589,10 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(w.getSource(), "Condition is not boolean");
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
-		for (Statement s : w.body) s.check(this);
+		for (Statement s : w.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.scopes.pop();
 
 		this.compoundStack.pop();
@@ -590,7 +615,10 @@ public class ContextChecker {
 		
 		f.increment.check(this);
 		
-		for (Statement s : f.body) s.check(this);
+		for (Statement s : f.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		
 		this.scopes.pop();
 		this.scopes.pop();
@@ -600,6 +628,9 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkIfStatement(IfStatement i) throws CTX_EXCEPTION {
+		/* Since else statement is directley checked, we need to set this explicitly here */
+		this.currentStatement = i;
+		
 		if (i.condition != null) {
 			TYPE cond = i.condition.check(this);
 			if (!(cond instanceof BOOL)) 
@@ -611,7 +642,10 @@ public class ContextChecker {
 		}
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
-		for (Statement s : i.body) s.check(this);
+		for (Statement s : i.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.scopes.pop();
 
 		if (i.elseStatement != null) 
@@ -622,6 +656,9 @@ public class ContextChecker {
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXCEPTION {
 		d.setType(ProvisoManager.setHiddenContext(d.getRawType()));
+		
+		/* Set self as last, implicitly unused */
+		d.last = d;
 		
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
@@ -641,6 +678,9 @@ public class ContextChecker {
 					d0.funcHead = t0.funcHead;
 					d0.proviso = t0.proviso;
 				}
+				
+				/* Wont be able to check, set to null */
+				d.last = null;
 			}
 			
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
@@ -660,6 +700,8 @@ public class ContextChecker {
 		
 		Message m = scopes.peek().addDeclaration(d);
 		if (m != null) this.messages.add(m);
+		
+		this.toLink.add(d);
 		
 		/* No need to set type here, is done while parsing */
 		return d.getType();
@@ -741,14 +783,20 @@ public class ContextChecker {
 			throw new CTX_EXCEPTION(c.condition.getSource(), "Condition type " + type.typeString() + " does not switch condition type " + c.superStatement.condition.getType().typeString());
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
-		for (Statement s : c.body) s.check(this);
+		for (Statement s : c.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.scopes.pop();
 		return null;
 	}
 	
 	public TYPE checkDefaultStatement(DefaultStatement d) throws CTX_EXCEPTION {
 		this.scopes.push(new Scope(this.scopes.peek()));
-		for (Statement s : d.body) s.check(this);
+		for (Statement s : d.body) {
+			currentStatement = s;
+			s.check(this);
+		}
 		this.scopes.pop();
 		return null;
 	}
@@ -1216,6 +1264,11 @@ public class ContextChecker {
 			
 			/* Check for modifier restrictions */
 			this.checkModifier(i.origin.modifier, i.origin.path, i.getSource());
+
+			if (this.scopes.peek().declarations.containsKey(i.path.build()) && !(i.origin.getType() instanceof FUNC)) {
+				i.origin.last = currentStatement;
+			}
+			else i.origin.last = null;
 			
 			return i.getType();
 		}

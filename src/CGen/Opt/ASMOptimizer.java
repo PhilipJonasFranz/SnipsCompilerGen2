@@ -54,7 +54,7 @@ import Util.Logging.Message.Type;
  * the optimizer will not change the behaviour of the program itself.<br>
  * The optimizer follows an internal logic of the Compiler, so this optimizer
  * will not work for any Assembly program, since it may violate the compiler internal
- * logic. This will lead to context changing optimizations.
+ * logic. This may lead to context changing optimizations.
  */
 public class ASMOptimizer {
 
@@ -330,6 +330,9 @@ public class ASMOptimizer {
 		/* Replace large push/pop operations with ldm/stm */
 		this.replacePushPopWithBlockMemory(body);
 		
+		/* Remove #0 operands from ldr and str instructions */
+		this.removeZeroOperands(body);
+		
 		/* Filter duplicate empty lines */
 		if (body.instructions.size() > 1) {
 			for (int i = 1; i < body.instructions.size(); i++) {
@@ -398,6 +401,28 @@ public class ASMOptimizer {
 								body.instructions.add(i - 1, block);
 							}
 						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void removeZeroOperands(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			ASMInstruction ins = body.instructions.get(i);
+			if (ins instanceof ASMMemOp) {
+				ASMMemOp op = (ASMMemOp) ins;
+				if (op.op1 != null && op.op1 instanceof ImmOperand) {
+					if (((ImmOperand) op.op1).value == 0) {
+						op.op1 = null;
+					}
+				}
+			}
+			else if (ins instanceof ASMStackOp) {
+				ASMStackOp op = (ASMStackOp) ins;
+				if (op.op1 != null && op.op1 instanceof ImmOperand) {
+					if (((ImmOperand) op.op1).value == 0) {
+						op.op1 = null;
 					}
 				}
 			}
