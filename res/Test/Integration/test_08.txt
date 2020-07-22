@@ -326,14 +326,14 @@ List.get.L7:
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
 List.remove:                                 /* Function: List.remove */
-    sub sp, sp, #20
-    stmea sp, {r3-r6, lr}
+    sub sp, sp, #16
+    stmea sp, {r3-r5, lr}
     mov r3, r0
     mov r4, r1
 /* Out of bounds */
     cmp r1, #0
     bge List.remove.L0
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r5, pc}
 List.remove.L0: 
     cmp r4, #0
     bne List.remove.L3
@@ -342,7 +342,7 @@ List.remove.L0:
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
-    ldmfdeq sp!, {r3-r6, pc}
+    ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -362,7 +362,7 @@ List.remove.L0:
 List.remove.L6: 
     mov r0, r5                               /* Load parameters */
     bl free                                  /* Call free */
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r5, pc}
 List.remove.L3: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
@@ -377,7 +377,7 @@ List.remove.L9:                              /* Evaluate condition */
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L12
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r5, pc}
 List.remove.L12: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
@@ -391,7 +391,7 @@ List.remove.L10:
     ldr r1, .POOL4_main.L4_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L14
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r5, pc}
 List.remove.L14: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
@@ -410,20 +410,20 @@ List.remove.L14:
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r5, pc}
 List.remove.L16: 
 /* Cut out element and set next pointers */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
     lsl r1, r1, #2
-    ldr r6, [r1, #4]                         /* Load field from struct */
+    ldr r3, [r1, #4]                         /* Load field from struct */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    mov r0, r6                               /* Evaluate Expression */
+    mov r0, r3                               /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
-    str r6, [r1, #4]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r6, pc}
+    str r3, [r1, #4]                         /* Store value to struct field */
+    ldmfd sp!, {r3-r5, pc}
 .POOL4_main.L4_NULL: .word NULL
     
 GameObject.Items.set:                        /* Function: GameObject.Items.set */

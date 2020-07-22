@@ -570,7 +570,7 @@ public class ContextChecker {
 		if (!(cond instanceof BOOL)) 
 			throw new CTX_EXC(w.getSource(), "Condition is not boolean");
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : w.body) {
 			currentStatement = s;
 			s.check(this);
@@ -588,7 +588,7 @@ public class ContextChecker {
 		if (!(cond instanceof BOOL)) 
 			throw new CTX_EXC(w.getSource(), "Condition is not boolean");
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : w.body) {
 			currentStatement = s;
 			s.check(this);
@@ -602,12 +602,12 @@ public class ContextChecker {
 	public TYPE checkForStatement(ForStatement f) throws CTX_EXC {
 		this.compoundStack.push(f);
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		f.iterator.check(this);
 		if (f.iterator.value == null) 
 			throw new CTX_EXC(f.getSource(), "Iterator must have initial value");
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
 		TYPE cond = f.condition.check(this);
 		if (!(cond instanceof BOOL)) 
@@ -642,12 +642,14 @@ public class ContextChecker {
 		}
 		
 		this.scopes.push(new Scope(this.scopes.peek()));
+		
 		for (Statement s : i.body) {
 			currentStatement = s;
 			s.check(this);
 		}
+		
 		this.scopes.pop();
-
+		
 		if (i.elseStatement != null) 
 			i.elseStatement.check(this);
 		
@@ -782,7 +784,7 @@ public class ContextChecker {
 		if (!type.isEqual(c.superStatement.condition.getType())) 
 			throw new CTX_EXC(c.condition.getSource(), "Condition type " + type.typeString() + " does not switch condition type " + c.superStatement.condition.getType().typeString());
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : c.body) {
 			currentStatement = s;
 			s.check(this);
@@ -792,7 +794,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDefaultStatement(DefaultStatement d) throws CTX_EXC {
-		this.scopes.push(new Scope(this.scopes.peek()));
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : d.body) {
 			currentStatement = s;
 			s.check(this);
@@ -1265,7 +1267,17 @@ public class ContextChecker {
 			/* Check for modifier restrictions */
 			this.checkModifier(i.origin.modifier, i.origin.path, i.getSource());
 
-			if (this.scopes.peek().declarations.containsKey(i.path.build()) && !(i.origin.getType() instanceof FUNC)) {
+			boolean contains = false;
+			for (int a = this.scopes.size() - 1; a >= 0; a--) {
+				if (this.scopes.get(a).isLoopedScope) break;
+				
+				if (this.scopes.get(a).declarations.containsKey(i.path.build())) {
+					contains = true;
+					break;
+				}
+			}
+			
+			if (contains && !(i.origin.getType() instanceof FUNC)) {
 				i.origin.last = currentStatement;
 			}
 			else i.origin.last = null;

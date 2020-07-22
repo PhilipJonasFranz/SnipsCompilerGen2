@@ -338,9 +338,8 @@ String.equals.L2:
 /* Valid inputs for the ranges can be negative numbers and indexes out of bounds, */
 /* but result may not be as expected. */
 String.substring:                            /* Function: String.substring */
-    sub sp, sp, #36
-    stmea sp, {r3-r9, fp, lr}
-    mov fp, sp
+    sub sp, sp, #32
+    stmea sp, {r3-r9, lr}
     mov r3, r0
     mov r4, r1
     mov r5, r2
@@ -411,46 +410,38 @@ String.substring.L2:
     mov r0, r6                               /* Load parameters */
     bl free                                  /* Call free */
     mov r0, r9                               /* Evaluate Expression */
-    b String.substring.L10
+    ldmfd sp!, {r3-r9, pc}
 String.substring.L5: 
 /* Collect chars in list in string and insert 0 char */
     add r0, r8, #1
     bl resv                                  /* Call resv */
-    mov r9, r0
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
+    mov r3, r0
+    mov r9, #0
 String.substring.L8: 
-    ldr r0, [fp, #-4]
-    cmp r0, r8
+    cmp r9, r8
     bge String.substring.L9
-    ldr r1, [fp, #-4]                        /* Evaluate Expression */
     mov r0, r6
+    mov r1, r9
     bl List.get_P2                           /* Call List.get */
     push { r0 }
-    ldr r2, [fp, #-4]
-    add r0, r9, r2
+    add r0, r3, r9
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    ldr r0, [fp, #-4]
-    add r1, r0, #1
-    str r1, [fp, #-4]
+    add r9, r9, #1
     b String.substring.L8
 String.substring.L9: 
-    add sp, sp, #4
     mov r0, #0                               /* Evaluate Expression */
     push { r0 }
-    add r0, r9, r8
+    add r0, r3, r8
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
 /* Cleanup and return result */
     mov r0, r6                               /* Load parameters */
     bl free                                  /* Call free */
-    mov r0, r9                               /* Evaluate Expression */
-String.substring.L10: 
-    mov sp, fp
-    ldmfd sp!, {r3-r9, fp, pc}
+    mov r0, r3                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r9, pc}
     
 /* Returns the length of the string. The length is determined by the first */
 /* occurrence of the 0 termination char. The length does include the 0 char. */

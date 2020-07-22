@@ -23,6 +23,9 @@ public class Scope {
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
+	/** Set to true if scope is part of a loop */
+	boolean isLoopedScope = false;
+	
 	/** Stores all the declarations made in this scope. */
 	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
@@ -31,6 +34,11 @@ public class Scope {
 	/** Create a new scope and set the parent scope. */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;
+	}
+	
+	public Scope(Scope parentScope, boolean isLoopedScope) {
+		this.parentScope = parentScope;
+		this.isLoopedScope = isLoopedScope;
 	}
 	
 	/** Print out the current scope and all parent scopes and the stored declarations */
