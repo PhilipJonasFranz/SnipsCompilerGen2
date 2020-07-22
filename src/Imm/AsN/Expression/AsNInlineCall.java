@@ -33,7 +33,7 @@ public class AsNInlineCall extends AsNExpression {
 			}
 		}
 		
-		AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, true, ic.proviso, ic.parameters, ic, call, r, map, st);
+		AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, ic.proviso, ic.parameters, ic, call, r, map, st);
 		
 		if (ic.anonTarget == null && ic.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */

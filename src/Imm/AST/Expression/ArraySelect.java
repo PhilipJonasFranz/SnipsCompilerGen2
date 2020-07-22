@@ -53,13 +53,6 @@ public class ArraySelect extends Expression {
 		}
 	}
 
-	public void releaseContext() {
-		this.shadowRef.releaseContext();
-		for (Expression e : this.selection) {
-			e.releaseContext();
-		}
-	}
-	
 	public Expression getShadowRef() {
 		return this.shadowRef;
 	}

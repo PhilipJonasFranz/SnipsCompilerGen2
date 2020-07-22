@@ -85,19 +85,5 @@ public class FunctionCall extends Statement {
 		for (Expression e : this.parameters) 
 			e.setContext(context);
 	}
-
-	public void releaseContext() {
-		for (int i = 0; i < this.proviso.size(); i++) {
-			TYPE pro = this.proviso.get(i);
-			
-			if (pro instanceof PROVISO) {
-				PROVISO pro0 = (PROVISO) pro;
-				pro0.releaseContext();
-			}
-		}
-		
-		for (Expression e : this.parameters) 
-			e.releaseContext();
-	}
 	
 }

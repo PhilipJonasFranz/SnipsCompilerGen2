@@ -14,9 +14,9 @@ public class AsNSizeOfType extends AsNExpression {
 		AsNSizeOfType s = new AsNSizeOfType();
 		sot.castedNode = s;
 		
-		s.clearReg(r, st, 0);
+		r.free(0);
 		
-		/* Move word size in target register */
+		/* Move word size in target register via literal manager, makes sure values > 255 are handeled correctly */
 		AsNBody.literalManager.loadValue(s, sot.sizeType.wordsize(), target);
 		
 		return s;

@@ -44,9 +44,5 @@ public class SimpleLhsId extends LhsId {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.ref.setContext(context);
 	}
-
-	public void releaseContext() {
-		this.ref.releaseContext();
-	}
 	
 }

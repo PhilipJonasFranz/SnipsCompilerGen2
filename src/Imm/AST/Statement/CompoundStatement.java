@@ -28,9 +28,4 @@ public abstract class CompoundStatement extends Statement {
 			s.setContext(context);
 	}
 
-	public void releaseContext() {
-		for (Statement s : this.body) 
-			s.releaseContext();
-	}
-
 }

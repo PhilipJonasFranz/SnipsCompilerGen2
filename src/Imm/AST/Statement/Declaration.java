@@ -78,10 +78,6 @@ public class Declaration extends Statement {
 		if (this.value != null) this.value.setContext(context);
 	}
 
-	public void releaseContext() {
-		if (this.value != null) this.value.releaseContext();
-	}
-	
 	/** 
 	 * Return the current context, or the actual type.
 	 */

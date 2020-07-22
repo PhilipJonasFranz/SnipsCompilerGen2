@@ -54,13 +54,4 @@ public class SizeOfExpression extends Expression {
 		this.expression.setContext(context);
 	}
 
-	public void releaseContext() {
-		if (this.sizeType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.sizeType;
-			p.releaseContext();
-		}
-		
-		this.expression.releaseContext();
-	}
-	
 }

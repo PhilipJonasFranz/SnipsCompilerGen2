@@ -13,7 +13,10 @@ public class AsNTypeCast extends AsNExpression {
 		AsNTypeCast t = new AsNTypeCast();
 		tc.castedNode = t;
 		
-		/* Relay to capsuled expression for now */
+		/* 
+		 * Relay to capsuled expression for now, currently no datatype requires some kind of transformation,
+		 * FLOAT -> INT, INT -> FLOAT in the future maybe.
+		 */
 		t.instructions.addAll(AsNExpression.cast(tc.expression, r, map, st).getInstructions());
 		
 		return t;

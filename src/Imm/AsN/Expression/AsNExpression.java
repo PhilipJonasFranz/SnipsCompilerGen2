@@ -59,7 +59,7 @@ public abstract class AsNExpression extends AsNNode {
 			node = AsNTernary.cast((Ternary) e, r, map, st);
 		}
 		else if (e instanceof IDRef) {
-			node = AsNIdRef.cast((IDRef) e, r, map, st, 0);
+			node = AsNIDRef.cast((IDRef) e, r, map, st, 0);
 		}
 		else if (e instanceof FunctionRef) {
 			node = AsNFunctionRef.cast((FunctionRef) e, r, map, st, 0);

@@ -37,8 +37,4 @@ public class Comment extends Statement {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

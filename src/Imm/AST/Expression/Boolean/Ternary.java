@@ -45,10 +45,4 @@ public class Ternary extends Expression {
 		this.rightOperand.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.condition.releaseContext();
-		this.leftOperand.releaseContext();
-		this.rightOperand.releaseContext();
-	}
-	
 }

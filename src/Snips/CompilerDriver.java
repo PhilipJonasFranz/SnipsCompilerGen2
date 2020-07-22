@@ -105,7 +105,7 @@ public class CompilerDriver {
 	public static XMLNode sys_config;
 	
 	
-			/* RESERVED DECLARATIONS & RESSOURCES */
+			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	

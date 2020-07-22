@@ -179,21 +179,6 @@ public class ContextChecker {
 		return null;
 	}
 	
-	public TYPE checkExpression(Expression e) throws CTX_EXC {
-		return e.check(this);
-	}
-	
-	public TYPE checkNamespace(Namespace n) throws CTX_EXC {
-		for (SyntaxElement s : n.programElements) {
-			if (s instanceof Namespace) 
-				n.namespaces.add((Namespace) s);
-			
-			s.check(this);
-		}
-		
-		return new VOID();
-	}
-	
 	public TYPE checkFunction(Function f) throws CTX_EXC {
 		/* Proviso Types are already set at this point */
 		

@@ -23,11 +23,11 @@ import Imm.AST.Expression.IDRef;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
-public class AsNIdRef extends AsNExpression {
+public class AsNIDRef extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNIdRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
-		AsNIdRef ref = new AsNIdRef();
+	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+		AsNIDRef ref = new AsNIDRef();
 		i.castedNode = ref;
 		
 		/* Declaration is already loaded in Reg Stack */

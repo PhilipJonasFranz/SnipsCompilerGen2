@@ -73,9 +73,4 @@ public class Assignment extends Statement {
 		this.lhsId.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.value.releaseContext();
-		this.lhsId.releaseContext();
-	}
-	
 }

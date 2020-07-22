@@ -28,7 +28,7 @@ import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.AsN.AsNNode;
-import Imm.AsN.Expression.AsNIdRef;
+import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 
 public class AsNAssignWriteback extends AsNStatement {
@@ -50,7 +50,7 @@ public class AsNAssignWriteback extends AsNStatement {
 			r.free(0, 1, 2);
 			
 			/* Load value of id ref */
-			node.instructions.addAll(AsNIdRef.cast(ref, r, map, st, 0).getInstructions());
+			node.instructions.addAll(AsNIDRef.cast(ref, r, map, st, 0).getInstructions());
 			
 			/* Write back to source */
 			if (r.declarationLoaded(ref.origin)) {

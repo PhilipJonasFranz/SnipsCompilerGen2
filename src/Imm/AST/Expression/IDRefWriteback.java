@@ -47,10 +47,6 @@ public class IDRefWriteback extends Expression {
 		this.shadowRef.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.shadowRef.releaseContext();
-	}
-	
 	public Expression getShadowRef() {
 		return this.shadowRef;
 	}

@@ -41,8 +41,4 @@ public class Deref extends Expression {
 		this.expression.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.expression.releaseContext();
-	}
-	
 }

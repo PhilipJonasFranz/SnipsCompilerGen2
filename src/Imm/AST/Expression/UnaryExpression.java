@@ -54,10 +54,6 @@ public abstract class UnaryExpression extends Expression {
 		this.operand.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.operand.releaseContext();
-	}
-	
 	public Expression getOperand() {
 		return this.operand;
 	}
@@ -65,7 +61,5 @@ public abstract class UnaryExpression extends Expression {
 	public UnaryOperator getOperator() {
 		return this.operator;
 	}
-	
-	
 	
 }

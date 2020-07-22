@@ -44,13 +44,8 @@ public class IDRef extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		if (this.origin != null) {
+		if (this.origin != null) 
 			this.setType(this.origin.getType());
-		}
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

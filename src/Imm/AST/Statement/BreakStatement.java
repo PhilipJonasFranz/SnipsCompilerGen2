@@ -40,8 +40,4 @@ public class BreakStatement extends Statement {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

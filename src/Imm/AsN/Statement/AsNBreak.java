@@ -21,10 +21,10 @@ public class AsNBreak extends AsNStatement {
 		/* Resets the stack. When declarations are made and a break statement is called, 
 		 * the normal loop exit is not taken, and thus the stack resetting is skipped.
 		 * By passing the parameter false the stack set and reg set is not changed, but the
-		 * correct offsets are determined. */
+		 * correct offsets are determined, and the stack reset operation is inserted */
 		AsNCompoundStatement.popDeclarationScope(br, b.superLoop, r, st, false);
 		
-		/* Jump to the label */
+		/* Jump to the loop escape label */
 		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));
 		
 		return br;

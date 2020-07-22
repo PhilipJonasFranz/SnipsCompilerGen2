@@ -49,8 +49,4 @@ public class Program extends SyntaxElement {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

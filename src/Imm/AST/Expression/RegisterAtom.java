@@ -48,8 +48,4 @@ public class RegisterAtom extends Expression {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

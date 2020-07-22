@@ -21,9 +21,9 @@
  - Processing dynamic imports
  - Context checking and creating the DAST
  - Code Generation, create list of Assembly instructions
- - Assembly Optimizer, local changes while keeping original functionality
+ - Assembly Optimizer, local changes while keeping mostly the original functionality
 
- The compiler uses a built-in system libary, located at release/lib. 
+ The compiler uses a built-in system library, located at release/lib. 
  
  The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
  
@@ -45,6 +45,7 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  - mrs, msr
  - mul, mla
  - ldr, str
+ - ldm, stm
  
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 ### XML-Parser
@@ -52,8 +53,7 @@ All instructions do support the condition field. If you compile your assembly co
 ### Utility
  Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
 ## Feature Roadmap
-### v.4.0.0-RELEASE: Function Pointers/Lambdas, Parser/Attachment rework, Struct Type Vendor
- - Rework Parser to use Vendor System, implement improved comment and directive attatching to syntax elements
+### v.4.0.0-RELEASE: Function Pointers/Lambdas, Struct Type Vendor
  - Rework Struct Type System to use SSOT Vendor
  
 ## License & Copyright

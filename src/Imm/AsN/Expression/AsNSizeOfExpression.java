@@ -14,9 +14,9 @@ public class AsNSizeOfExpression extends AsNExpression {
 		AsNSizeOfExpression s = new AsNSizeOfExpression();
 		soe.castedNode = s;
 		
-		s.clearReg(r, st, 0);
+		r.free(0);
 		
-		/* Move word size in target register */
+		/* Move word size in target register via literal manager, makes sure values > 255 are handeled correctly */
 		AsNBody.literalManager.loadValue(s, soe.sizeType.wordsize(), target);
 		
 		return s;

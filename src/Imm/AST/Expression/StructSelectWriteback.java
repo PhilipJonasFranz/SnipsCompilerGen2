@@ -47,10 +47,6 @@ public class StructSelectWriteback extends Expression {
 		this.shadowSelect.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.shadowSelect.releaseContext();
-	}
-	
 	public Expression getShadowSelect() {
 		return this.shadowSelect;
 	}

@@ -25,7 +25,7 @@ public class AsNDeref extends AsNExpression {
 		/* Load Expression */
 		ref.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
 		
-		/* Load from memory */
+		/* Load from memory, load into R0 */
 		if (a.getType().wordsize() == 1) {
 			/* Convert to bytes */
 			ASMLsl lsl = new ASMLsl(new RegOp(target), new RegOp(REG.R0), new ImmOp(2));
@@ -36,6 +36,7 @@ public class AsNDeref extends AsNExpression {
 			load.comment = new ASMComment("Load from address");
 			ref.instructions.add(load);
 		}
+		/* Load on stack */
 		else {
 			/* Convert to bytes */
 			ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R0), new ImmOp(2));

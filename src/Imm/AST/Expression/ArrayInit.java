@@ -48,10 +48,4 @@ public class ArrayInit extends Expression {
 		}
 	}
 
-	public void releaseContext() {
-		for (Expression e : this.elements) {
-			e.releaseContext();
-		}
-	}
-	
 }

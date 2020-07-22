@@ -96,13 +96,6 @@ public class StackSet {
 		this.stack.pop();
 	}
 	
-	/** Pop x cells from the top of the stack */
-	public void popXCells(int x) {
-		for (int i = 0; i < x; i++) {
-			this.stack.pop();
-		}
-	}
-	
 	/** 
 	 * Pop given amount of words from the stack. Throws an CGEN_EXCEPTION if not exactly x words can be popped.
 	 * This will mostly be caused by an internal compilation logic error.

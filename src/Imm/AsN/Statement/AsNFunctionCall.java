@@ -54,7 +54,7 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		
-		call(fc.calledFunction, fc.anonTarget, false, fc.proviso, fc.parameters, fc, call, r, map, st);
+		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
 		if (fc.anonTarget == null && fc.calledFunction.signals) {
 			/* Check if exception was thrown and jump to watchpoint */
@@ -85,7 +85,7 @@ public class AsNFunctionCall extends AsNStatement {
 		return mapping;
 	}
 	
-	public static void call(Function f, Declaration anonCall, boolean inlineCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static void call(Function f, Declaration anonCall, List<TYPE> provisos, List<Expression> parameters, SyntaxElement callee, AsNNode call, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Clear the operand regs */
 		r.free(0, 1, 2);
 		
@@ -200,7 +200,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * there is a data target.
 			 */
 			if (f.getReturnType().wordsize() > 1) {
-				if (inlineCall) {
+				if (callee instanceof InlineCall) {
 					for (int i = 0; i < f.getReturnType().wordsize(); i++) {
 						st.push(REG.R0);
 					}

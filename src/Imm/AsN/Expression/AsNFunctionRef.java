@@ -23,15 +23,18 @@ public class AsNFunctionRef extends AsNExpression {
 		AsNFunctionRef ref = new AsNFunctionRef();
 		i.castedNode = ref;
 		
+		/* Create return address in R10, used to return from sys jump */
 		ref.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8)));
 		
+		/* Construct label name for function lambda target with provided provisos */
 		String label = "lambda_" + i.origin.path.build() + i.origin.manager.getPostfix(i.proviso);
 		
+		/* Branch to the lambda target of the function with a sys jump to obtain the address */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(label)));
 		branch.optFlags.add(OPT_FLAG.SYS_JMP);
 		ref.instructions.add(branch);
 		
-		/* Reset R10 */
+		/* Reset R10 to 0, for possible addressing calculation optimizations */
 		ref.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 		
 		return ref;

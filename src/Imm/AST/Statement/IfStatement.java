@@ -72,14 +72,4 @@ public class IfStatement extends ConditionalCompoundStatement {
 			this.elseStatement.setContext(context);
 	}
 
-	public void releaseContext() {
-		super.releaseContext();
-		
-		if (this.condition != null) 
-			this.condition.releaseContext();
-		
-		if (this.elseStatement != null)
-			this.elseStatement.releaseContext();
-	}
-	
 }

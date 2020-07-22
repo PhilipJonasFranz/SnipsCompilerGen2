@@ -47,9 +47,4 @@ public class StructSelect extends Expression {
 		this.selection.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.selector.releaseContext();
-		this.selection.releaseContext();
-	}
-	
 }

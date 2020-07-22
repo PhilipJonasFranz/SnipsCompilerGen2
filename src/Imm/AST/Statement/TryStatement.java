@@ -59,13 +59,4 @@ public class TryStatement extends CompoundStatement {
 		}
 	}
 
-	public void releaseContext() {
-		for (Statement s : this.body) {
-			s.releaseContext();
-		}
-		for (WatchStatement w : this.watchpoints) {
-			w.releaseContext();
-		}
-	}
-	
 }

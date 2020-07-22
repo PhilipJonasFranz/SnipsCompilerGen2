@@ -52,8 +52,4 @@ public class StructureInit extends Expression {
 		}
 	}
 
-	public void releaseContext() {
-		
-	}
-	
 }

@@ -50,7 +50,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.AsNIdRef;
+import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNAssignment;
 import Imm.AsN.Statement.AsNComment;
 import Snips.CompilerDriver;
@@ -244,7 +244,7 @@ public class AsNBody extends AsNNode {
 					}
 					else {
 						/* Quick and dirty way to relay the generated instructions into a AsNNode */
-						AsNIdRef ref = new AsNIdRef();
+						AsNIDRef ref = new AsNIDRef();
 						AsNAssignment.copyStackSection(dec.getType().wordsize(), ref, st);
 						globalsInit.addAll(ref.instructions);
 					}

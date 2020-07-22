@@ -56,13 +56,4 @@ public class InstanceofExpression extends Expression {
 		this.expression.setContext(context);
 	}
 
-	public void releaseContext() {
-		if (this.instanceType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.instanceType;
-			p.releaseContext();
-		}
-		
-		this.expression.releaseContext();
-	}
-	
 }

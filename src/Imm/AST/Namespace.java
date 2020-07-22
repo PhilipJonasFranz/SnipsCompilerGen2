@@ -6,6 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -43,15 +44,12 @@ public class Namespace extends SyntaxElement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkNamespace(this);
+		/* This function should not be called since namespaces are flattened */
+		return new VOID();
 	}
 
 	public void setContext(List<TYPE> setContext) {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

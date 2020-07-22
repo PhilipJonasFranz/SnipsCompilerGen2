@@ -49,11 +49,4 @@ public class WatchStatement extends CompoundStatement {
 		}
 	}
 
-	public void releaseContext() {
-		this.watched.releaseContext();
-		for (Statement s : this.body) {
-			s.releaseContext();
-		}
-	}
-	
 }

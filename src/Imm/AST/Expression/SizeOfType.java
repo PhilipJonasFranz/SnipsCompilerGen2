@@ -55,11 +55,4 @@ public class SizeOfType extends Expression {
 		}
 	}
 
-	public void releaseContext() {
-		if (this.sizeType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.sizeType;
-			p.releaseContext();
-		}
-	}
-	
 }

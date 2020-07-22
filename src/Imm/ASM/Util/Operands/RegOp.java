@@ -62,7 +62,6 @@ public class RegOp extends Operand {
 		else if (reg.equals("lr")) return REG.LR;
 		else if (reg.equals("fp")) return REG.FP;
 		else if (reg.equals("pc")) return REG.PC;
-		else if (reg.equals("ex")) return REG.R12;
 		else {
 			if (reg.length() < 2) {
 				return null;

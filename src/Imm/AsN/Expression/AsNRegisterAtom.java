@@ -7,7 +7,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.RegisterAtom;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNRegisterAtom extends AsNExpression {
 
@@ -18,9 +17,7 @@ public class AsNRegisterAtom extends AsNExpression {
 		
 		r.free(0);
 		
-		/* Make sure only primitives can be in an atom */
-		assert(a.getType() instanceof PRIMITIVE);
-		
+		/* Simply move the requested register into R0 */
 		atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(a.reg)));
 		
 		return atom;

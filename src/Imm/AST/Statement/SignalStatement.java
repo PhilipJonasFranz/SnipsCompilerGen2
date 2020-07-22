@@ -55,8 +55,4 @@ public class SignalStatement extends Statement {
 			this.shadowRef.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.shadowRef.releaseContext();
-	}
-	
 }

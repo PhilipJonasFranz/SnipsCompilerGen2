@@ -64,12 +64,4 @@ public class DirectASMStatement extends Statement {
 			p.first.setContext(context);
 	}
 
-	public void releaseContext() {
-		for (Pair<Expression, REG> p : this.dataIn) 
-			p.first.releaseContext();
-		
-		for (Pair<Expression, REG> p : this.dataOut) 
-			p.first.releaseContext();
-	}
-	
 }

@@ -54,10 +54,4 @@ public class SwitchStatement extends Statement {
 		this.defaultStatement.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.condition.releaseContext();
-		for (CaseStatement c : this.cases) c.releaseContext();
-		this.defaultStatement.releaseContext();
-	}
-	
 }

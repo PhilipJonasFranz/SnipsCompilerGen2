@@ -116,8 +116,8 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		
 		/* Load both operands directley */
 		if (left instanceof IDRef && right instanceof IDRef) {
-			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
-			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
+			m.instructions.addAll(AsNIDRef.cast((IDRef) left, r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIDRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		/* Load the right operand, then the left directley */
 		else if (left instanceof IDRef) {
@@ -127,7 +127,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				r.copy(0, target1);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) left, r, map, st, target0).getInstructions());
+			m.instructions.addAll(AsNIDRef.cast((IDRef) left, r, map, st, target0).getInstructions());
 		}
 		/* Load the left operand, then the right directley */
 		else if (right instanceof IDRef) {
@@ -137,7 +137,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 				r.copy(0, target0);
 			}
 			
-			m.instructions.addAll(AsNIdRef.cast((IDRef) right, r, map, st, target1).getInstructions());
+			m.instructions.addAll(AsNIDRef.cast((IDRef) right, r, map, st, target1).getInstructions());
 		}
 		else {
 			r.free(0, 1, 2);
@@ -217,7 +217,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		/* Operand is ID Reference and can be loaded directley into the target register, 
 		 * 		no need for intermidiate result in R0 */
 		if (e instanceof IDRef) {
-			this.instructions.addAll(AsNIdRef.cast((IDRef) e, r, map, st, target).getInstructions());
+			this.instructions.addAll(AsNIDRef.cast((IDRef) e, r, map, st, target).getInstructions());
 		}
 		else {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());

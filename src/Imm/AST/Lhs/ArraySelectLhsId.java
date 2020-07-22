@@ -45,8 +45,4 @@ public class ArraySelectLhsId extends LhsId {
 		this.selection.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.selection.releaseContext();
-	}
-	
 }

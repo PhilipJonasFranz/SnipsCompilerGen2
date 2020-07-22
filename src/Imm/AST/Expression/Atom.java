@@ -44,8 +44,4 @@ public class Atom extends Expression {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

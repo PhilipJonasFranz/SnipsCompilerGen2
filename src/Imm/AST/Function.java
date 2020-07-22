@@ -124,23 +124,6 @@ public class Function extends CompoundStatement {
 		
 	}
 
-	public void releaseContext() {
-		this.manager.releaseContext();
-		
-		for (Declaration d : this.parameters) {
-			d.releaseContext();
-		}
-		
-		for (Statement s : this.body) {
-			s.releaseContext();
-		}
-		
-		if (this.returnType instanceof PROVISO) {
-			PROVISO ret = (PROVISO) this.returnType;
-			ret.releaseContext();
-		}
-	}
-	
 	/** 
 	 * Return the current context, or the actual type.
 	 */

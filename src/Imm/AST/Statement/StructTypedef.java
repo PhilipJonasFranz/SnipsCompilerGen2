@@ -85,11 +85,6 @@ public class StructTypedef extends SyntaxElement {
 		}
 	}
 
-	public void releaseContext() {
-		for (Declaration dec : this.fields) 
-			dec.releaseContext();
-	}
-	
 	public StructTypedef clone() {
 		List<TYPE> prov0 = new ArrayList();
 		for (TYPE t : this.proviso) prov0.add(t.clone());

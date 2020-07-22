@@ -30,10 +30,4 @@ public abstract class ConditionalCompoundStatement extends CompoundStatement {
 			this.condition.setContext(context);
 	}
 
-	public void releaseContext() {
-		super.releaseContext();
-		if (this.condition != null) 
-			this.condition.releaseContext();
-	}
-
 }

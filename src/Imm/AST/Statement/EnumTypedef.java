@@ -74,8 +74,4 @@ public class EnumTypedef extends SyntaxElement {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

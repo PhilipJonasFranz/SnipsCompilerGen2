@@ -17,6 +17,10 @@ public abstract class SyntaxElement {
 	/** The Tab width when pretty printing [NON-CRITICAL] */
 	protected int printDepthStep = 4;
 	
+	/**
+	 * The AsNNode that was casted from this syntax element.
+	 * Field is set once casting is begun/finished.
+	 */
 	public AsNNode castedNode;
 	
 	/**
@@ -55,15 +59,21 @@ public abstract class SyntaxElement {
 		return pad;
 	}
 	
+	/**
+	 * Applies given context to contained proviso types if available.
+	 * Also applies context recursiveley to the entire subtree.
+	 * @param context The provided Context.
+	 */
 	public abstract void setContext(List<TYPE> context) throws CTX_EXC;
-	
-	public abstract void releaseContext();
 	
 	/**
 	 * Visitor relay for context checking
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
 	
+	/**
+	 * Returns the source at which this syntax element was parsed.
+	 */
 	public Source getSource() {
 		return this.source;
 	}

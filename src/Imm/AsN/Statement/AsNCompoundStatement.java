@@ -84,12 +84,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			
 			/* Collect declarations from statements, ignore sub-compounds, they will do the same */
 			for (Statement s0 : s.body) {
-				if (s0 instanceof Declaration) {
+				if (s0 instanceof Declaration) 
 					declarations.add((Declaration) s0);
-				}
 			}
 			
-			/* Delete declaration out of the registers */
+			/* Delete declarations out of the registers */
 			for (Declaration d : declarations) {
 				if (r.declarationLoaded(d)) {
 					int loc = r.declarationRegLocation(d);
@@ -109,7 +108,8 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	}
 	
 	/**
-	 * Opens a new scope, inserts the body of the compound statement, closes the scope and resets the stack.
+	 * Opens a new scope, inserts the body of the compound statement, closes the scope 
+	 * and resets the stack if nessesary.
 	 */
 	protected void addBody(CompoundStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Open a new Scope in the stack */
@@ -129,6 +129,14 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		popDeclarationScope(this, a, r, st, true);
 	}
 	
+	/**
+	 * Casts given statement into this.instructions. If the given statement is a declaration,
+	 * the method checks with {@link #hasAddressReference(Statement, Declaration)} if the dec
+	 * has an address reference in the compound statement. If yes, the declaration needs to be
+	 * forced on the stack to make it addressable. This is done by just injecting a push instruction,
+	 * if the declaration will not be automatically loaded on the stack. If the statement is not
+	 * a declaration, the standard AsNStatement.cast() method is used for the injection cast.
+	 */
 	public void loadStatement(CompoundStatement a, Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		if (s instanceof Declaration) {
 			Declaration dec = (Declaration) s;

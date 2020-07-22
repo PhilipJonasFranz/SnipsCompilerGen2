@@ -56,8 +56,4 @@ public class FunctionRef extends Expression {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

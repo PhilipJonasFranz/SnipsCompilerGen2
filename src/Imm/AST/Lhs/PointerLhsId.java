@@ -60,10 +60,6 @@ public class PointerLhsId extends LhsId {
 		this.shadowDeref.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.shadowDeref.releaseContext();
-	}
-	
 	public Expression getShadowDeref() {
 		return this.shadowDeref;
 	}

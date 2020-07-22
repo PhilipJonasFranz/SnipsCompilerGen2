@@ -46,8 +46,4 @@ public class ReturnStatement extends Statement {
 			this.value.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.value.releaseContext();
-	}
-	
 }

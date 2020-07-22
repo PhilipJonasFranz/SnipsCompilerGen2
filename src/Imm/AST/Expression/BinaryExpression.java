@@ -60,11 +60,6 @@ public abstract class BinaryExpression extends Expression {
 		this.left.setContext(context);
 		this.right.setContext(context);
 	}
-
-	public void releaseContext() {
-		this.left.releaseContext();
-		this.right.releaseContext();
-	}
 	
 	public Expression getLeft() {
 		return this.left;

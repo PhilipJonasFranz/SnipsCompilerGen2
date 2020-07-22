@@ -44,8 +44,4 @@ public class AssignWriteback extends Statement {
 		this.reference.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.reference.releaseContext();
-	}
-	
 }

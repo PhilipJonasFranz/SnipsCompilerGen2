@@ -5,7 +5,6 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
 import Exc.CTX_EXC;
-import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -50,12 +49,4 @@ public class TypeCast extends Expression {
 		this.expression.setContext(context);
 	}
 
-	public void releaseContext() {
-		if (this.castType instanceof PROVISO) {
-			PROVISO pro = (PROVISO) this.castType;
-			pro.releaseContext();
-		}
-		this.expression.releaseContext();
-	}
-	
 }
