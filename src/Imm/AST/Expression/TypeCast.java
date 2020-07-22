@@ -44,7 +44,7 @@ public class TypeCast extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/** Apply context to cast type */
-		ProvisoManager.setContext(context, this.castType);
+		ProvisoManager.setContext(context, this.castType, this.getSource());
 		
 		this.expression.setContext(context);
 	}

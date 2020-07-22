@@ -78,7 +78,6 @@ import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -88,6 +87,7 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.CHAR;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.NULL;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
@@ -590,7 +590,7 @@ public class Parser {
 				return this.parseSignal();
 			}
 			else {
-				this.progress.abort();
+				if (this.progress != null) this.progress.abort();
 				throw new PARSE_EXC(current.source, current.type, 
 				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
 				TokenType.DO, TokenType.FOR, TokenType.BREAK, 

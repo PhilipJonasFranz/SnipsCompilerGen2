@@ -104,7 +104,7 @@ public class Function extends CompoundStatement {
 		this.manager.setContext(context);
 		
 		/* Apply to return type */
-		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType);
+		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType, this.getSource());
 		
 		/* Apply to parameters */
 		for (Declaration d : this.parameters) {

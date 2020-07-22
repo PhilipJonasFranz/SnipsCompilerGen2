@@ -1,0 +1,14 @@
+SOURCE
+#include <hash.sn>
+#include <hash_map.sn>
+
+int main() {
+	HashMap<int, int>* map = Map::create<int, int>(10, -1);
+	
+	Map::put<int, int>(map, 1, 12);
+	Map::put<int, int>(map, 2, 20);
+	
+	return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 2);
+}
+TESTCASES
+32

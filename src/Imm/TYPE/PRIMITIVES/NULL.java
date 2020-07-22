@@ -1,9 +1,10 @@
-package Imm.TYPE;
+package Imm.TYPE.PRIMITIVES;
 
 import Exc.SNIPS_EXC;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
 
-public class NULL extends TYPE<Object> {
+public class NULL extends PRIMITIVE<Object> {
 	
 			/* --- METHODS --- */
 	public void setValue(String value) {

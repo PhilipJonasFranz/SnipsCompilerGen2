@@ -1,8 +1,8 @@
 package Imm.TYPE.COMPOSIT;
 
-import Imm.TYPE.NULL;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;

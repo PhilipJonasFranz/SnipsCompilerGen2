@@ -11,7 +11,7 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.Atom;
 import Imm.AsN.AsNBody;
-import Imm.TYPE.NULL;
+import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Snips.CompilerDriver;
 

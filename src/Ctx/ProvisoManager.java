@@ -13,7 +13,6 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
-import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
 
@@ -122,7 +121,7 @@ public class ProvisoManager {
 		}
 	}
 	
-	public static void setContext(List<TYPE> context, TYPE type) throws CTX_EXC {
+	public static void setContext(List<TYPE> context, TYPE type, Source source) throws CTX_EXC {
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			for (TYPE t : context) {
@@ -138,7 +137,7 @@ public class ProvisoManager {
 				for (Declaration d : f.funcHead.parameters) 
 					d.setContext(context);
 				
-				setContext(context, f.funcHead.getReturnType());
+				setContext(context, f.funcHead.getReturnType(), source);
 			}
 		}
 		else if (type instanceof ARRAY) {
@@ -147,26 +146,26 @@ public class ProvisoManager {
 			if (arr.elementType instanceof STRUCT) {
 				STRUCT s = (STRUCT) arr.elementType;
 				
-				setContext(context, s);
+				setContext(context, s, source);
 			}
 			
-			setContext(context, arr.elementType);
+			setContext(context, arr.elementType, source);
 		}
 		else if (type instanceof POINTER) {
 			POINTER p = (POINTER) type;
-			setContext(context, p.targetType);
+			setContext(context, p.targetType, source);
 		}
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
-			mapContextTo(s.proviso, context);
+			mapContextTo(s.proviso, context, source);
 			
 			/* Map initialized proviso types to typedef provisos */
 			mapContextToStatic(s.typedef.proviso, s.proviso);
 			
 			/* Initialize capsuled proviso types */
 			for (int i = 0; i < s.typedef.proviso.size(); i++) 
-				s.typedef.proviso.set(i, setHiddenContext(s.typedef.proviso.get(i)));
+				s.typedef.proviso.set(i, setHiddenContext(s.typedef.proviso.get(i), source));
 			
 			/* Iterate over every field in the struct and apply the proviso */
 			for (Declaration d : s.typedef.fields) {
@@ -177,13 +176,13 @@ public class ProvisoManager {
 						STRUCT s0 = (STRUCT) d.getRawType();
 						
 						/* Map recieved context on the proviso types of the struct */
-						ProvisoManager.mapContextTo(s0.proviso, context);
+						ProvisoManager.mapContextTo(s0.proviso, context, source);
 						
 						/* Apply the previously initialized struct proviso to the fields */
-						s0 = (STRUCT) setHiddenContext(s0);
+						s0 = (STRUCT) setHiddenContext(s0, source);
 					}
 					
-					setContext(s.typedef.proviso, d.getRawType());
+					setContext(s.typedef.proviso, d.getRawType(), source);
 				}
 				else {
 					POINTER p = (POINTER) d.getRawType();
@@ -195,16 +194,16 @@ public class ProvisoManager {
 						// TODO ERROR HERE: PROVISOS OF STRUCT INIT TYPE ARE CHANGED WHEN CHECKING FIELDS
 						
 						/* Map recieved context on the proviso types of the struct */
-						mapContextTo(s1.proviso, context);
+						mapContextTo(s1.proviso, context, source);
 						
 						if (s1.typedef.path.build().equals(s.typedef.path.build())) 
 							/* Struct is recursive, set loop reference and return */
 							p.coreType = s1;
-						else setContext(s1.proviso, s1);
+						else setContext(s1.proviso, s1, source);
 					}
 					else 
 						/* Set the context of the target type, proviso can be capsuled inside of pointer */
-						setContext(context, p.targetType);
+						setContext(context, p.targetType, source);
 				}
 			}
 		}
@@ -212,14 +211,12 @@ public class ProvisoManager {
 	
 	/**
 	 * Maps the proviso types of the second argument to the first.
+	 * @throws CTX_EXC 
 	 */
-	public static void mapContextTo(List<TYPE> target, List<TYPE> source) {
+	public static void mapContextTo(List<TYPE> target, List<TYPE> source, Source s) throws CTX_EXC {
 		for (int i = 0; i < target.size(); i++) {
 			for (int a = 0; a < source.size(); a++) {
-				if (target.get(i) instanceof PROVISO && target.get(i).isEqual(source.get(a))) {
-					PROVISO p = (PROVISO) target.get(i);
-					p.setContext(source.get(a));
-				}
+				setContext(source, target.get(i), s);
 			}
 		}
 	}
@@ -234,37 +231,37 @@ public class ProvisoManager {
 		}
 	}
 	
-	public static TYPE setHiddenContext(TYPE type) throws CTX_EXC {
+	public static TYPE setHiddenContext(TYPE type, Source source) throws CTX_EXC {
 		if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;
 			
 			/* Initialize Capsuled Proviso type */
 			if (p.hasContext()) 
-				p.setContext(setHiddenContext(p.getContext()));
+				p.setContext(setHiddenContext(p.getContext(), source));
 			
 			return type;
 		}
 		else if (type instanceof ARRAY) {
 			ARRAY arr = (ARRAY) type;
-			arr.elementType = setHiddenContext(arr.elementType);
+			arr.elementType = setHiddenContext(arr.elementType, source);
 			return arr;
 		}
 		else if (type instanceof POINTER) {
 			POINTER p = (POINTER) type;
-			p.targetType = setHiddenContext(p.targetType);
+			p.targetType = setHiddenContext(p.targetType, source);
 			return p;
 		}
 		else if (type instanceof STRUCT) {
 			STRUCT s = (STRUCT) type;
 			
 			if (s.proviso.size() != s.typedef.proviso.size()) 
-				throw new CTX_EXC(CompilerDriver.nullSource, "Expected " + s.typedef.proviso.size() + " provisos but got " + s.proviso.size());
+				throw new CTX_EXC(source, "Expected " + s.typedef.proviso.size() + " provisos but got " + s.proviso.size());
 			
 			/* Map initialization proviso types to proviso head listing */
 			mapContextToStatic(s.typedef.proviso, s.proviso);
 			
 			/* Propagate initialized proviso mapping on the fields */
-			setContext(s.typedef.proviso, s);
+			setContext(s.typedef.proviso, s, source);
 			
 			return s;
 		}

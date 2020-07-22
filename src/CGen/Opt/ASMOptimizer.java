@@ -944,7 +944,7 @@ public class ASMOptimizer {
 						}
 					}
 					
-					if (clear) {
+					if (clear && branch != null) {
 						push.operands.remove(lr);
 						for (RegOp r : pop.operands) {
 							if (r.reg == REG.LR) {

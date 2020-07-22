@@ -62,7 +62,6 @@ import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.NULL;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -70,6 +69,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
@@ -335,8 +335,10 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
-		
-		ProvisoManager.setHiddenContext(e.structType);
+		if (!this.currentFunction.isEmpty()) {
+			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, e.getType(), e.getSource());
+		}
+		ProvisoManager.setHiddenContext(e.structType, e.getSource());
 		
 		if (e.elements.size() != e.structType.typedef.fields.size()) 
 			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.typedef.fields.size() + " but got " + e.elements.size());
@@ -394,7 +396,7 @@ public class ContextChecker {
 			throw new CTX_EXC(e.getSource(), "Can only select from struct type, actual " + type.typeString());
 		
 		STRUCT s0 = (STRUCT) type;
-		s0 = (STRUCT) ProvisoManager.setHiddenContext(s0);
+		s0 = (STRUCT) ProvisoManager.setHiddenContext(s0, e.getSource());
 		
 		Expression selection = e.selection;
 		
@@ -441,7 +443,7 @@ public class ContextChecker {
 								}
 							}
 							
-							type = ProvisoManager.setHiddenContext(type);
+							type = ProvisoManager.setHiddenContext(type, e.getSource());
 						}
 					}
 					else if (sel0.selector instanceof ArraySelect) {
@@ -494,7 +496,7 @@ public class ContextChecker {
 							}
 						}
 						
-						type0 = ProvisoManager.setHiddenContext(type0);
+						type0 = ProvisoManager.setHiddenContext(type0, e.getSource());
 						
 						if (type instanceof POINTER) type = new POINTER(type0);
 						else type = type0;
@@ -642,7 +644,11 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXC {
-		d.setType(ProvisoManager.setHiddenContext(d.getRawType()));
+		
+		if (!this.currentFunction.isEmpty()) {
+			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, d.getType(), d.getSource());
+		}
+		d.setType(ProvisoManager.setHiddenContext(d.getRawType(), d.getSource()));
 		
 		/* Set self as last, implicitly unused */
 		d.last = d;
@@ -1288,6 +1294,8 @@ public class ContextChecker {
 			throw new CTX_EXC(r.getSource(), "Predicates may not signal exceptions");
 		
 		/* Set context and add mapping */
+		if (!this.currentFunction.isEmpty()) 
+			ProvisoManager.mapContextTo(r.proviso, this.currentFunction.peek().manager.provisosTypes, r.getSource());
 		lambda.setContext(r.proviso);
 		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
 		
@@ -1345,7 +1353,11 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXC {
-		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType);
+		if (!this.currentFunction.isEmpty()) 
+			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, sot.sizeType, sot.getSource());
+		
+		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType, sot.getSource());
+		
 		sot.setType(new INT());
 		return sot.getType();
 	}
@@ -1394,7 +1406,7 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXC {
-		tc.castType = ProvisoManager.setHiddenContext(tc.castType);
+		tc.castType = ProvisoManager.setHiddenContext(tc.castType, tc.getSource());
 		
 		TYPE t = tc.expression.check(this);
 		

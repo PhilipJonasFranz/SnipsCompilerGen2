@@ -17,8 +17,8 @@ import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.TYPE.NULL;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.NULL;
 
 public class AsNCmp extends AsNBinaryExpression {
 

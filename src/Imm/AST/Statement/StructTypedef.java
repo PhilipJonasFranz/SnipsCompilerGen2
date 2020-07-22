@@ -73,15 +73,15 @@ public class StructTypedef extends SyntaxElement {
 		/* Apply context to internal proviso */
 		for (int i = 0; i < this.proviso.size(); i++) {
 			PROVISO p0 = (PROVISO) this.proviso.get(i);
-			ProvisoManager.setContext(context, p0);
+			ProvisoManager.setContext(context, p0, this.struct.typedef.getSource());
 		}
 		
 		for (int i = 0; i < context.size(); i++) 
-			context.set(i, ProvisoManager.setHiddenContext(context.get(i)));
+			context.set(i, ProvisoManager.setHiddenContext(context.get(i), this.struct.typedef.getSource()));
 		
 		/* Apply new internal proviso mapping to capsuled declarations */
 		for (Declaration dec : this.fields) {
-			ProvisoManager.setContext(context, dec.getType());
+			ProvisoManager.setContext(context, dec.getType(), this.struct.typedef.getSource());
 		}
 	}
 

@@ -46,7 +46,7 @@ public class StructureInit extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		ProvisoManager.setContext(context, this.structType);
+		ProvisoManager.setContext(context, this.structType, this.getSource());
 		for (Expression e : this.elements) {
 			e.setContext(context);
 		}
