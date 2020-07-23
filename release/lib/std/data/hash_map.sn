@@ -41,6 +41,24 @@ namespace Map {
 	}
 	
 	/*
+	 * Frees all capsuled objects in the map as well as all 
+	 * stored values, and the map itself.
+	 */
+	shared HashMap<void, void>* destroy(HashMap<void, void>* map) {
+		/* Destroy all the linked lists */
+		for (int i = 0; i < map->size; i++) {
+			LinkedList<void>* l = *(map->storage + i);
+			if (l != null) List::destroy(l);
+		}
+		
+		/* Free the default value */
+		free(map->defValue);
+		
+		/* Free the map itself */
+		free(map);
+	}
+	
+	/*
 	 * Stores given value at the hashed key location.
 	 */
 	shared void put<K, V>(HashMap<K, V>* map, K key, V value) {
@@ -51,7 +69,7 @@ namespace Map {
 
 		/* Initialize new list at index */
 		if (l == null) {
-			l = List::create<Tuple2<K, V>>(map->defValue);
+			l = List::create<Tuple2<K, V>>(*map->defValue);
 			*(map->storage + hash) = l;
 		}
 		
@@ -62,31 +80,31 @@ namespace Map {
 		List::add<Tuple2<K, V>>(l, new);
 	}
 	
+	/*
+	 * Returns the value corresponding to given key, or
+	 * the default value if the key does not exist.
+	 */
 	shared V get<K, V>(HashMap<K, V>* map, K key) {
 		/* Compute the hash of the key and limit it to the map size */
 		int hash = Hash::hash(&key, sizeof(K)) % map->size;
 		
 		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
 		
-		/* No list at location, return default value */
-		if (l == null) return map->defValue->second;
-		else {
-			/* Init tuple for searching, only deref key, dont care about the rest*/
-			Tuple2<K, V>* search = resv(sizeof(Tuple2<K, V>));
-			*search = Tuple2<K, V>::(key, map->defValue->second);
+		if (l != null) {
+			/* Init tuple for searching */
+			Tuple2<K, V> search = Tuple2<K, V>::(key, map->defValue->second);
 		
 			/* Search for tuple in list */
 			ListNode<Tuple2<K, V>>* node = List::find<Tuple2<K, V>>(l, tupleKeyMatcher<K, V>, search);
 			
-			if (node == null) {
-				/* Not found, return def value */
-				return map->defValue->second;
-			}
-			else {
+			if (node != null) {
 				/* Found, return value */
 				return node->value.second;
 			}
 		}
+
+		/* No value for key, return default value */
+		return map->defValue->second;
 	}
 	
 }

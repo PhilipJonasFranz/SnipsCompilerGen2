@@ -13,6 +13,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Util.Pair;
 import Util.Source;
 
@@ -215,9 +216,10 @@ public class ProvisoManager {
 	 */
 	public static void mapContextTo(List<TYPE> target, List<TYPE> source, Source s) throws CTX_EXC {
 		for (int i = 0; i < target.size(); i++) {
-			for (int a = 0; a < source.size(); a++) {
-				setContext(source, target.get(i), s);
-			}
+			/* Primitives may not have proviso types */
+			if (target.get(i) instanceof PRIMITIVE) continue;
+			
+			setContext(source, target.get(i), s);
 		}
 	}
 	
