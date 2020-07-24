@@ -29,7 +29,7 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
-	private STRUCT self;
+	protected STRUCT self;
 	
 	public int SID;
 	
@@ -103,8 +103,11 @@ public class StructTypedef extends SyntaxElement {
 		for (StructProvisoMapping m : this.registeredMappings) {
 			boolean equal = true;
 			for (int i = 0; i < m.providedHeadProvisos.size(); i++) 
-				/* 1 to 1 match */
-				equal &= m.providedHeadProvisos.get(i).isEqual(providedProvisos.get(i));
+				/* 
+				 * 1 to 1 match, match type string since we look for perfect 
+				 * match, void proviso types could disrupt that.
+				 */
+				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).toString());
 			
 			if (equal) return m;
 		}

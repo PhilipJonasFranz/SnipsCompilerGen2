@@ -5,6 +5,7 @@ import java.util.List;
 import Exc.SNIPS_EXC;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
@@ -63,6 +64,12 @@ public class ProvisoUtil {
 			
 			return map;
 		}
+		else if (target instanceof ARRAY) {
+			ARRAY a = (ARRAY) target;
+
+			/* Relay to array target type */
+			return map1To1Maybe(a.elementType, source);
+		}
 		
 		System.out.println("Cannot map " + source.typeString() + " -> " + target.typeString());
 		return false;
@@ -80,7 +87,7 @@ public class ProvisoUtil {
 			/* Successfully mapped proviso */
 			p.setContext(source);	
 		}
-		else throw new SNIPS_EXC("1 to 1 could not match " + target.typeString() + " -> " + source.typeString());
+		else throw new SNIPS_EXC("Cannot map " + source.typeString() + " -> " + target.typeString());
 	}
 	
 	/**

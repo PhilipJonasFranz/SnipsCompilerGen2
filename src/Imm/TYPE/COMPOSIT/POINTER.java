@@ -17,13 +17,7 @@ public class POINTER extends COMPOSIT {
 	public POINTER(TYPE targetType) {
 		super(null);
 		this.targetType = targetType;
-		
-		if (targetType instanceof PRIMITIVE) {
-			this.coreType = targetType;
-		}
-		else if (targetType instanceof COMPOSIT) {
-			this.coreType = ((COMPOSIT) targetType).getCoreType();
-		}
+		this.coreType = this.targetType.getCoreType();
 	}
 
 	public boolean isEqual(TYPE type) {

@@ -335,10 +335,10 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
+		e.setType(e.structType);
+		
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().manager.provisosTypes);
-		
-		
 		
 		if (e.elements.size() != e.structType.getTypedef().getFields().size()) 
 			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.getTypedef().getFields().size() + " but got " + e.elements.size());
@@ -352,8 +352,6 @@ public class ContextChecker {
 				throw new CTX_EXC(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
 			}
 		}
-		
-		e.setType(e.structType);
 		
 		/* Struct may have modifier restrictions */
 		this.checkModifier(e.structType.getTypedef().modifier, e.structType.getTypedef().path, e.getSource());

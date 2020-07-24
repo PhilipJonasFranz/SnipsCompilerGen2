@@ -78,7 +78,7 @@ public class CompilerDriver {
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = false,
-		includeProvisoInTypeString = true,
+		includeProvisoInTypeString = false,
 		printObjectIDs = false;
 	
 			/* --- FORMATTING --- */
@@ -704,7 +704,6 @@ public class CompilerDriver {
 		
 		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Message.Type.INFO));
 		
-		System.out.println();
 		List<Pair<Integer, String>> rmap = new ArrayList();
 		for (Entry<String, Integer> e : ins_p.entrySet()) {
 			if (rmap.isEmpty()) {
@@ -724,24 +723,28 @@ public class CompilerDriver {
 			}
 		}
 		
-		double stretch = 1.0;
-		
-		if (rmap.get(0).first > 75) {
-			stretch = 75.0 / rmap.get(0).first;
-		}
-		
-		for (int i = 0; i < rmap.size(); i++) {
-			System.out.print(f + "|");
-			for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
-				System.out.print("\u2588");
+		if (!rmap.isEmpty()) {
+			System.out.println();
+			
+			double stretch = 1.0;
+			
+			if (rmap.get(0).first > 75) {
+				stretch = 75.0 / rmap.get(0).first;
 			}
 			
-			String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+			for (int i = 0; i < rmap.size(); i++) {
+				System.out.print(f + "|");
+				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
+					System.out.print("\u2588");
+				}
+				
+				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+				
+				System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			}
 			
-			System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			System.out.println();
 		}
-		
-		System.out.println();
 		
 		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
 	}
