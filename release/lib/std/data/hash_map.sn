@@ -1,13 +1,30 @@
 #include<hash.sn>
 #include<linked_list.sn>
 
+/*
+ * This package contains the utility and definitions
+ * to create and maintain a hash-map of any type.
+ * Data can be stored and loaded from the hash map.
+ * The map has collision avoidance, so that if the hashed
+ * key already exists, the two values still can be stored
+ * and retrieved later with the correct key.
+ */
 namespace Map {
 	
+	/*
+	 * A tuple capsuling two different data types.
+	 */
 	restricted struct Tuple2<X, Y> {
 		X first;
 		Y second;
 	}
 	
+	/*
+	 * The hashmap itself, capsuling a storage array
+	 * out of linked lists with the size specified in the capsuled
+	 * size field, and a default value that is returned when a 
+	 * key is not found.
+	 */
 	restricted struct HashMap<K, V> {
 		LinkedList<Tuple2<K, V>>** storage;
 		int size;
@@ -19,7 +36,7 @@ namespace Map {
 		
 		/* Match the entire key to find correct tuple */
 		for (int i = 0; i < sizeof(K); i++) 
-			equal &&= *(t0 + i) == *(t1 + i);
+			equal &&= (int) *(t0 + i) == (int) *(t1 + i);
 		
 		return equal;
 	}
@@ -65,6 +82,7 @@ namespace Map {
 		/* Compute the hash of the key and limit it to the map size */
 		int hash = Hash::hash(&key, sizeof(K)) % map->size;
 		
+		/* Load the corresponding linked list */
 		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
 
 		/* Initialize new list at index */
@@ -88,6 +106,7 @@ namespace Map {
 		/* Compute the hash of the key and limit it to the map size */
 		int hash = Hash::hash(&key, sizeof(K)) % map->size;
 		
+		/* Load the corresponding linked list */
 		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
 		
 		if (l != null) {
