@@ -47,7 +47,7 @@ public class POINTER extends COMPOSIT {
 					}
 				}
 				
-				return s0.typedef.SID == s1.typedef.SID;
+				return s0.getTypedef().SID == s1.getTypedef().SID;
 			}
 			else if (pointer.getCoreType() instanceof STRUCT || this.getCoreType() instanceof STRUCT) {
 				/* Only one of both is struct, return false */
@@ -71,7 +71,7 @@ public class POINTER extends COMPOSIT {
 	public String typeString() {
 		if (this.targetType instanceof STRUCT) {
 			STRUCT s = (STRUCT) this.targetType;
-			String t = ((s.typedef != null)? s.typeString() : "?") + "*";
+			String t = ((s.getTypedef() != null)? s.typeString() : "?") + "*";
 			if (CompilerDriver.printProvisoTypes) t += s.getProvisoString();
 			if (CompilerDriver.printObjectIDs) t += " " + this.toString().split("@") [1];
 			return t;
@@ -101,7 +101,7 @@ public class POINTER extends COMPOSIT {
 			 * Cannot clone the struct pointer since it may be recursive, but can guarantee that
 			 * it can point to itself.
 			 */
-			return new POINTER(this.targetType);
+			return new POINTER(this.targetType.clone());
 		}
 		else {
 			POINTER p = new POINTER(this.targetType.clone());
@@ -124,6 +124,13 @@ public class POINTER extends COMPOSIT {
 			this.coreType = this.targetType.getCoreType();
 		}
 		return this.coreType;
+	}
+
+	public TYPE provisoFree() {
+		POINTER p = (POINTER) this.clone();
+		p.targetType = p.targetType.provisoFree();
+		p.coreType = p.coreType.provisoFree();
+		return p;
 	}
 
 }

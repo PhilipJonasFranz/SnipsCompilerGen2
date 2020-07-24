@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoManager;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -44,7 +44,7 @@ public class TypeCast extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/** Apply context to cast type */
-		ProvisoManager.setContext(context, this.castType, this.getSource());
+		ProvisoUtil.mapNTo1(this.castType, context);
 		
 		this.expression.setContext(context);
 	}

@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoManager;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -37,19 +37,15 @@ public class StructureInit extends Expression {
 		}
 	}
 	
-	public void createStructInstance() throws CTX_EXC {
-		this.structType = this.structType.typedef.constructStructType(this.structType.proviso);
-	}
-
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkStructureInit(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		ProvisoManager.setContext(context, this.structType, this.getSource());
-		for (Expression e : this.elements) {
+		ProvisoUtil.mapNTo1(this.structType, context);
+		
+		for (Expression e : this.elements) 
 			e.setContext(context);
-		}
 	}
 
 }

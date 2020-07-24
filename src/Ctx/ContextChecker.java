@@ -255,7 +255,7 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
 		/* Set the declarations in the struct type */
-		return e.struct;
+		return new VOID();
 	}
 	
 	public TYPE checkSignal(SignalStatement e) throws CTX_EXC {
@@ -335,27 +335,28 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
-		if (!this.currentFunction.isEmpty()) {
-			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, e.getType(), e.getSource());
-		}
-		ProvisoManager.setHiddenContext(e.structType, e.getSource());
+		if (!this.currentFunction.isEmpty()) 
+			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().manager.provisosTypes);
 		
-		if (e.elements.size() != e.structType.typedef.fields.size()) 
-			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.typedef.fields.size() + " but got " + e.elements.size());
+		
+		
+		if (e.elements.size() != e.structType.getTypedef().getFields().size()) 
+			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.getTypedef().getFields().size() + " but got " + e.elements.size());
 		
 		for (int i = 0; i < e.elements.size(); i++) {
-			TYPE t = e.elements.get(i).check(this);
-			if (!t.isEqual(e.structType.typedef.fields.get(i).getType())) {
-				if (t instanceof POINTER || e.structType.typedef.fields.get(i).getType() instanceof POINTER) 
+			TYPE valType = e.elements.get(i).check(this);
+			TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+			if (!valType.isEqual(strType)) {
+				if (valType instanceof POINTER || strType instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
-				throw new CTX_EXC(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + t.typeString() + " vs " + e.structType.typedef.fields.get(i).getType().typeString());
+				throw new CTX_EXC(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
 			}
 		}
 		
 		e.setType(e.structType);
 		
 		/* Struct may have modifier restrictions */
-		this.checkModifier(e.structType.typedef.modifier, e.structType.typedef.path, e.getSource());
+		this.checkModifier(e.structType.getTypedef().modifier, e.structType.getTypedef().path, e.getSource());
 		
 		return e.getType();
 	}
@@ -395,14 +396,7 @@ public class ContextChecker {
 		if (!(type instanceof STRUCT)) 
 			throw new CTX_EXC(e.getSource(), "Can only select from struct type, actual " + type.typeString());
 		
-		STRUCT s0 = (STRUCT) type;
-		s0 = (STRUCT) ProvisoManager.setHiddenContext(s0, e.getSource());
-		
 		Expression selection = e.selection;
-		
-		/* STRUCT, STRUCT PROVISOS */
-		Stack<Pair<STRUCT, List<TYPE>>> selectStack = new Stack();
-		selectStack.push(new Pair<STRUCT, List<TYPE>>(s0, s0.proviso));
 		
 		while (true) {
 			if (type instanceof STRUCT) {
@@ -425,33 +419,13 @@ public class ContextChecker {
 								type = p0.targetType;
 							}
 						}
-						
-						if (type instanceof STRUCT) {
-							STRUCT s1 = (STRUCT) type;
-							for (int i = selectStack.size() - 1; i >= 0; i--) {
-								/* Same Struct */
-								if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-									/* Check for Proviso Equality */
-									boolean equal = true;
-									for (int z = 0; z < s1.proviso.size(); z++) 
-										equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
-									
-									if (equal) {
-										type = selectStack.get(i).first;
-										while (selectStack.size() != i) selectStack.pop();
-									}
-								}
-							}
-							
-							type = ProvisoManager.setHiddenContext(type, e.getSource());
-						}
 					}
 					else if (sel0.selector instanceof ArraySelect) {
 						/* Push new scope to house the struct fields */
 						this.scopes.push(new Scope(this.scopes.peek()));
 						
 						/* Add declarations for struct */
-						for (Declaration dec : struct.typedef.fields) 
+						for (Declaration dec : struct.getTypedef().getFields()) 
 							/* 
 							 * Add the struct fields to the current scope, so that the select expresssion
 							 * from the array select can be checked and finds the field its selecting from.
@@ -480,28 +454,6 @@ public class ContextChecker {
 					if (type0 instanceof POINTER) 
 						type0 = ((POINTER) type0).targetType;
 					
-					if (type0 instanceof STRUCT) {
-						STRUCT s1 = (STRUCT) type0;
-						for (int i = selectStack.size() - 1; i >= 0; i--) {
-							if (selectStack.get(i).first.typedef.path.build().equals(s1.typedef.path.build())) {
-								/* Check for Proviso Equality */
-								boolean equal = true;
-								for (int z = 0; z < s1.proviso.size(); z++) 
-									equal &= s1.proviso.get(z).isEqual(selectStack.get(i).first.proviso.get(z));
-								
-								if (equal) {
-									type0 = selectStack.get(i).first;
-									while (selectStack.size() != i) selectStack.pop();
-								}
-							}
-						}
-						
-						type0 = ProvisoManager.setHiddenContext(type0, e.getSource());
-						
-						if (type instanceof POINTER) type = new POINTER(type0);
-						else type = type0;
-					}
-					
 					break;
 				}
 				else if (selection instanceof ArraySelect) {
@@ -509,7 +461,7 @@ public class ContextChecker {
 					this.scopes.push(new Scope(this.scopes.peek()));
 					
 					/* Add declarations for struct */
-					for (Declaration dec : struct.typedef.fields) 
+					for (Declaration dec : struct.getTypedef().getFields()) 
 						/* 
 						 * Add the struct fields to the current scope, so that the select expresssion
 						 * from the array select can be checked and finds the field its selecting from.
@@ -526,8 +478,6 @@ public class ContextChecker {
 					break;
 				}
 				else throw new CTX_EXC(selection.getSource(), selection.getClass().getName() + " cannot be a selector");
-				
-				selectStack.push(new Pair<STRUCT, List<TYPE>>(struct, struct.proviso));
 			}
 			else throw new CTX_EXC(e.getSource(), "Cannot select from non struct, actual " + type.typeString());
 			
@@ -645,10 +595,8 @@ public class ContextChecker {
 	
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXC {
 		
-		if (!this.currentFunction.isEmpty()) {
-			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, d.getType(), d.getSource());
-		}
-		d.setType(ProvisoManager.setHiddenContext(d.getRawType(), d.getSource()));
+		if (!this.currentFunction.isEmpty()) 
+			ProvisoUtil.mapNTo1(d.getType(), this.currentFunction.peek().manager.provisosTypes);
 		
 		/* Set self as last, implicitly unused */
 		d.last = d;
@@ -1080,10 +1028,9 @@ public class ContextChecker {
 			
 			/* Add signaled types */
 			if (f.signals) {
-				for (TYPE s : f.signalsTypes) {
+				for (TYPE s : f.signalsTypes) 
 					if (!this.signalStackContains(s)) 
 						this.signalStack.peek().add(s);
-				}
 			}
 			
 			if (!f.manager.provisosTypes.isEmpty()) {
@@ -1295,7 +1242,8 @@ public class ContextChecker {
 		
 		/* Set context and add mapping */
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoManager.mapContextTo(r.proviso, this.currentFunction.peek().manager.provisosTypes, r.getSource());
+			ProvisoUtil.mapNToNMaybe(r.proviso, this.currentFunction.peek().manager.provisosTypes);
+		
 		lambda.setContext(r.proviso);
 		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
 		
@@ -1354,9 +1302,7 @@ public class ContextChecker {
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXC {
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoManager.setContext(this.currentFunction.peek().manager.provisosTypes, sot.sizeType, sot.getSource());
-		
-		sot.sizeType = ProvisoManager.setHiddenContext(sot.sizeType, sot.getSource());
+			ProvisoUtil.mapNTo1(sot.sizeType, this.currentFunction.peek().manager.provisosTypes);
 		
 		sot.setType(new INT());
 		return sot.getType();
@@ -1406,8 +1352,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkTypeCast(TypeCast tc) throws CTX_EXC {
-		tc.castType = ProvisoManager.setHiddenContext(tc.castType, tc.getSource());
-		
 		TYPE t = tc.expression.check(this);
 		
 		if (tc.expression instanceof InlineCall) {

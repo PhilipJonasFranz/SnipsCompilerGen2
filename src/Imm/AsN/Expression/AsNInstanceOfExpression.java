@@ -55,7 +55,7 @@ public class AsNInstanceOfExpression extends AsNExpression {
 			s.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.SP)));
 		
 		/* Compare value in R0 agains SID */
-		s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.typedef.SID)));
+		s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SID)));
 		
 		/* Move 0 if check is false, in the other case a non-zero value is already in R0 */
 		s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.NE)));

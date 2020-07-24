@@ -24,8 +24,14 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.StructTypedef;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.PROVISO;
+import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
@@ -72,7 +78,7 @@ public class CompilerDriver {
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = false,
-		includeProvisoInTypeString = false,
+		includeProvisoInTypeString = true,
 		printObjectIDs = false;
 	
 			/* --- FORMATTING --- */
@@ -114,10 +120,95 @@ public class CompilerDriver {
 	
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
-													
+								
+	public static Declaration create(String name, TYPE type) {
+		List<String> path1 = new ArrayList();
+		path1.add(name);
+		NamespacePath pa1 = new NamespacePath(path1);
+		
+		Declaration dec = new Declaration(pa1, type, MODIFIER.SHARED, nullSource);
+		return dec;
+	}
 													
 			/* --- MAIN --- */
 	public static void main(String [] args) {
+
+		/* 
+		 * struct T<V> {
+		 * 	V xyz;
+		 * }
+		 * 
+		 * struct S<K> {
+		 * 	T<K> t0;
+		 *  K f0;
+		 *  int counter;
+		 * }
+		 */
+		
+				/* STRUCT T */
+		/* Struct fields */
+		List<Declaration> decs = new ArrayList();
+		decs.add(create("xyz", new PROVISO("V")));
+		
+		/* Struct provisos */
+		List<TYPE> provisos = new ArrayList();
+		provisos.add(new PROVISO("V"));
+		
+		StructTypedef def0 = new StructTypedef(new NamespacePath("T"), 2, provisos, decs, null, MODIFIER.SHARED, nullSource);
+		
+		def0.print(0, true);
+		
+		
+		/* Struct type provided with proviso from S */
+		List<TYPE> provided = new ArrayList();
+		provided.add(new PROVISO("K"));
+		
+		STRUCT t = new STRUCT(def0, provided);
+		
+				/* STRUCT S */
+		/* Struct fields */
+		List<Declaration> decs0 = new ArrayList();
+		decs0.add(create("t0", new POINTER(t)));
+		decs0.add(create("f0", new PROVISO("K")));
+		decs0.add(create("counter", new INT("0")));
+		
+		/* Struct provisos */
+		List<TYPE> provisos0 = new ArrayList();
+		provisos0.add(new PROVISO("K"));
+		
+		StructTypedef def = new StructTypedef(new NamespacePath("S"), 1, provisos0, decs0, null, MODIFIER.SHARED, nullSource);
+		
+		System.out.println();
+		def.print(0, true);
+		System.out.println(); 
+		
+		List<TYPE> provided0 = new ArrayList();
+		provided0.add(new BOOL("true"));
+		
+		STRUCT s = new STRUCT(def, provided0);
+
+		
+		/* Get fields */
+		Declaration dec0 = s.getField(new NamespacePath("f0"));
+		dec0.print(0, false);
+
+		Declaration dec1 = s.getField(new NamespacePath("counter"));
+		dec1.print(0, false);
+		
+		Declaration dec2 = s.getField(new NamespacePath("t0"));
+		dec2.print(0, false);
+		
+		POINTER p0 = (POINTER) dec2.getType();
+		System.out.println(p0.typeString());
+		
+		STRUCT st = (STRUCT) p0.targetType;
+		
+		Declaration dec3 = st.getField(new NamespacePath("xyz"));
+		dec3.print(0, false);
+		
+		System.exit(0);
+		
+		
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
 			System.out.println(new Message("No input file specified! See -help for argument information.", Message.Type.FAIL).getMessage());

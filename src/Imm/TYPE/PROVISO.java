@@ -104,4 +104,10 @@ public class PROVISO extends TYPE<Void> {
 		return p;
 	}
 
+	public TYPE provisoFree() {
+		if (this.hasContext())
+			return this.getContext().clone();
+		else throw new SNIPS_EXC("Cannot free contextless proviso: " + this.placeholderName);
+	}
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.ProvisoManager;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
@@ -104,7 +105,7 @@ public class Function extends CompoundStatement {
 		this.manager.setContext(context);
 		
 		/* Apply to return type */
-		ProvisoManager.setContext(this.manager.provisosTypes, this.returnType, this.getSource());
+		ProvisoUtil.mapNTo1(this.returnType, this.manager.provisosTypes);
 		
 		/* Apply to parameters */
 		for (Declaration d : this.parameters) {

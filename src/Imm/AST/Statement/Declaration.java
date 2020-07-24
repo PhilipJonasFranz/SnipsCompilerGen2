@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoManager;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode.MODIFIER;
@@ -72,7 +72,7 @@ public class Declaration extends Statement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* Apply to declaration type */
-		ProvisoManager.setContext(context, this.type, this.getSource());
+		ProvisoUtil.mapNTo1(this.type, context);
 		
 		/* Apply to value */
 		if (this.value != null) this.value.setContext(context);

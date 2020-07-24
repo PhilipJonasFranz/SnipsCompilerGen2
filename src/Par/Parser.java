@@ -122,9 +122,6 @@ public class Parser {
 	/* All active Provisos, like T, V */
 	List<String> activeProvisos = new ArrayList();
 	
-	/* All types that need to be cloned after parsing is complete */
-	List<Pair<TYPE, List<TYPE>>> toClone = new ArrayList();
-	
 	/* The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
@@ -218,18 +215,7 @@ public class Parser {
 	
 	public SyntaxElement parse() throws PARSE_EXC {
 		Program p = parseProgram();
-		
-		/* Clone all struct type instances that were parsed from the SSOT */
-		for (Pair<TYPE, List<TYPE>> p0 : this.toClone) {
-			if (p0.first instanceof STRUCT) {
-				STRUCT s = (STRUCT) p0.first;
-				
-				s.typedef = s.typedef.clone();
-			}
-		}
-		
 		if (this.progress != null) this.progress.incProgress(1);
-		
 		return p;
 	}
 	
@@ -332,18 +318,18 @@ public class Parser {
 			NamespacePath ext0 = this.parseNamespacePath();
 			ext = this.getStructTypedef(ext0, source);
 			
-			for (Declaration d : ext.fields) extendDecs.add(d.clone());
+			for (Declaration d : ext.getFields()) extendDecs.add(d.clone());
 		}
 		
 		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
-		def.fields.addAll(extendDecs);
+		def.getFields().addAll(extendDecs);
 		
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
-			def.fields.add(this.parseDeclaration(MODIFIER.SHARED, false, true));
+			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
 		}
 		accept(TokenType.RBRACE);
 		
@@ -1862,22 +1848,11 @@ public class Parser {
 		}
 		
 		if (def != null) {
-			/* 
-			 * Create a reference to the SSOT, since the SSOT may be still in parsing. Create 
-			 * copy at the end of parsing when SSOT is definetley finished. Add type to list toClone
-			 * for to indicate that this type needs cloning after parsing ends.
-			 */
-			type = def.struct;
-		
+			/* Parse the provided proviso */
 			List<TYPE> proviso = this.parseProviso();
 			
-			STRUCT s = def.struct.clone();
-			s.typedef = def;
-			s.proviso = proviso;
-		
-			type = s;
-			
-			this.toClone.add(new Pair<TYPE, List<TYPE>>(type, proviso));
+			/* Construct new Struct Instance with reference to SSOT */
+			type = new STRUCT(def, proviso);
 		}
 		else if (enu != null) {
 			/* Enum def was found, set reference to default enum field */

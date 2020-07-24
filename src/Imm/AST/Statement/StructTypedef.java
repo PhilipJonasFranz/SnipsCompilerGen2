@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoManager;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.NamespacePath;
@@ -24,15 +23,30 @@ public class StructTypedef extends SyntaxElement {
 	
 	public NamespacePath path;
 	
-	public STRUCT struct;
-	
 	public List<TYPE> proviso;
 	
-	public List<Declaration> fields;
+	private List<Declaration> fields;
 	
 	public StructTypedef extension = null;
 	
+	private STRUCT self;
+	
 	public int SID;
+	
+	public class StructProvisoMapping {
+		
+		public List<TYPE> providedHeadProvisos;
+		
+		public List<TYPE> effectiveFieldTypes;
+		
+		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
+			this.providedHeadProvisos = providedHeadProvisos;
+			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+	}
+	
+	public List<StructProvisoMapping> registeredMappings = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -51,12 +65,81 @@ public class StructTypedef extends SyntaxElement {
 		
 		this.modifier = modifier;
 		
-		/* Call with reference on itself, struct type will be built when context checking */
-		this.struct = new STRUCT(this, proviso);
+		this.self = new STRUCT(this, this.proviso);
 	}
 	
 	
 			/* --- METHODS --- */
+	/**
+	 * Request the declaration whiches name matches given path. Select the mapping
+	 * that corresponds to given proviso types. If no such mapping exists, a new one
+	 * is created.
+	 * @return the declaration or null if the path did not match.
+	 */
+	public Declaration requestField(NamespacePath path, List<TYPE> providedProvisos) {
+		StructProvisoMapping match = this.findMatch(providedProvisos);
+		
+		Declaration dec = null;
+		for (int i = 0; i < this.fields.size(); i++) {
+			if (this.fields.get(i).path.build().equals(path.build())) {
+				/* Copy field and apply field type */
+				dec = this.fields.get(i).clone();
+				dec.setType(match.effectiveFieldTypes.get(i).provisoFree());
+			}
+		}
+		
+		return dec;
+	}
+	
+	public List<Declaration> getFields() {
+		return this.fields;
+	}
+	
+	private StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
+		
+		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
+		assert(this.proviso.size() == providedProvisos.size());
+		
+		for (StructProvisoMapping m : this.registeredMappings) {
+			boolean equal = true;
+			for (int i = 0; i < m.providedHeadProvisos.size(); i++) 
+				/* 1 to 1 match */
+				equal &= m.providedHeadProvisos.get(i).isEqual(providedProvisos.get(i));
+			
+			if (equal) return m;
+		}
+		
+		/* No mapping found, create new and return it */
+		
+		/* Copy own provisos */
+		List<TYPE> clone = new ArrayList();
+		for (TYPE t : this.proviso) 
+			clone.add(t.clone());
+		
+		/* Map provided provisos to header */
+		ProvisoUtil.mapNToN(clone, providedProvisos);
+		
+		/* Clone Struct field types, decs stay same anyway */
+		List<TYPE> newActive = new ArrayList();
+		for (Declaration d : this.fields) newActive.add(d.getType().clone());
+		
+		/* Mapped cloned header proviso with mapped types to field types */
+		for (int i = 0; i < newActive.size(); i++) 
+			ProvisoUtil.mapNTo1(newActive.get(i), clone);
+		
+		/* Remove provisos from field types */
+		for (int i = 0; i < newActive.size(); i++) 
+			newActive.set(i, newActive.get(i).provisoFree());
+
+		//System.out.println(this.self.typeString() + " -> New Context registered");
+		
+		/* Create the new mapping and store it */
+		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
+		this.registeredMappings.add(newMapping);
+		
+		return newMapping;
+	}
+	
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
 		if (rec) {
@@ -70,49 +153,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		/* Apply context to internal proviso */
-		for (int i = 0; i < this.proviso.size(); i++) {
-			PROVISO p0 = (PROVISO) this.proviso.get(i);
-			ProvisoManager.setContext(context, p0, this.struct.typedef.getSource());
-		}
 		
-		for (int i = 0; i < context.size(); i++) 
-			context.set(i, ProvisoManager.setHiddenContext(context.get(i), this.struct.typedef.getSource()));
-		
-		/* Apply new internal proviso mapping to capsuled declarations */
-		for (Declaration dec : this.fields) {
-			ProvisoManager.setContext(context, dec.getType(), this.struct.typedef.getSource());
-		}
 	}
 
-	public StructTypedef clone() {
-		List<TYPE> prov0 = new ArrayList();
-		for (TYPE t : this.proviso) prov0.add(t.clone());
-		
-		List<Declaration> dec0 = new ArrayList();
-		for (Declaration dec : this.fields) 
-			dec0.add(dec.clone());
-		
-		StructTypedef clone = new StructTypedef(this.path, this.SID, prov0, dec0, this.extension, this.modifier, this.getSource());
-		
-		return clone;
-	}
-	
-	/** 
-	 * Construct a new Struct Type based on this template and set given proviso as context.
-	 */
-	public STRUCT constructStructType(List<TYPE> proviso) throws CTX_EXC {
-		/* Do not clone type, struct types and typedef are already cloned during parsing */
-		
-		if (this.proviso.size() != proviso.size()) 
-			throw new CTX_EXC(this.getSource(), "Missmatching number of provisos, expected " + this.proviso.size() + ", but got " + proviso.size());
-		
-		this.setContext(proviso);
-		
-		/* Assign proviso */
-		this.struct.proviso = proviso;
-		
-		return this.struct;
-	}
-	
 }
