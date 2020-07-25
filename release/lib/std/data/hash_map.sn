@@ -31,6 +31,10 @@ namespace Map {
 		Tuple2<K, V>* defValue;
 	}
 	
+	/*
+	 * Matches the entire memory section of the key. Returns true
+	 * if all values are equal.
+	 */
 	restricted bool tupleKeyMatcher<K, V>(Tuple2<K, V> t0, Tuple2<K, V> t1) {
 		void* p0 = &t0;
 		void* p1 = &t1;
@@ -134,6 +138,39 @@ namespace Map {
 
 		/* No value for key, return default value */
 		return map->defValue->second;
+	}
+	
+	
+	/*
+	 * Remove the key from the map. Return if it doesnt exist.
+	 */
+	shared void remove<K, V>(HashMap<K, V>* map, K key) {
+		/* Compute the hash of the key and limit it to the map size */
+		int hash = Hash::hash(&key, sizeof(K)) % map->size;
+		
+		/* Load the corresponding linked list */
+		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
+		
+		if (l != null) {
+			/* Init tuple for searching */
+			Tuple2<K, V> search = Tuple2<K, V>::(key, map->defValue->second);
+		
+			/* Get iterator to go through list */
+			ListNode<Tuple2<K, V>>* n = l->head;
+			int i = 0;
+			
+			/* Iterate through list, check for match, and remove */
+			while (n != null) {
+				if (tupleKeyMatcher<K, V>(n->value, search)) {
+					List::remove(l, i);
+					break;
+				}
+				else {
+					i++;
+					n = n->next;
+				}
+			}
+		}
 	}
 	
 }

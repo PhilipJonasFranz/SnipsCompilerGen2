@@ -1067,13 +1067,6 @@ public class ContextChecker {
 			for (int a = 0; a < f.parameters.size(); a++) {
 				TYPE paramType = i.parameters.get(a).check(this);
 				
-				if (paramType instanceof FUNC) {
-					FUNC f0 = (FUNC) paramType;
-					
-					if (f0.funcHead != null) 
-						f0.funcHead.isLambdaHead = true;
-				}
-				
 				TYPE functionParamType = f.parameters.get(a).getType();
 				
 				if (!paramType.isEqual(functionParamType)) {
@@ -1164,13 +1157,6 @@ public class ContextChecker {
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
 				TYPE paramType = i.parameters.get(a).check(this);
-				
-				if (paramType instanceof FUNC) {
-					FUNC f0 = (FUNC) paramType;
-					
-					if (f0.funcHead != null) 
-						f0.funcHead.isLambdaHead = true;
-				}
 				
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
