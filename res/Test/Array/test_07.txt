@@ -42,15 +42,17 @@ main:                                        /* Function: main */
     mov r2, #1
     stmfd sp!, {r0-r2}
     ldr r1, [fp, #-4]
-    add r6, r1, r3
+    add r0, r1, r3
     sub r1, fp, #28                          /* Start of structure in stack */
+    push { r0 }
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }
     bl foo                                   /* Call foo */
-    add r0, r6, r0
+    pop { r1 }
+    add r0, r1, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

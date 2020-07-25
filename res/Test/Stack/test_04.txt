@@ -28,19 +28,26 @@ sqsum:                                       /* Function: sqsum */
     mov r4, r1
     mov r5, r2
     bl sq                                    /* Call sq */
-    mov r6, r0
+    push { r0 }
     mov r0, r4                               /* Load parameters */
     bl sq                                    /* Call sq */
-    add r6, r6, r0
+    pop { r1 }
+    add r0, r1, r0
+    push { r0 }
     mov r0, r5                               /* Load parameters */
     bl sq                                    /* Call sq */
-    add r6, r6, r0
+    pop { r1 }
+    add r0, r1, r0
+    push { r0 }
     ldr r0, [fp, #24]                        /* Load parameters */
     bl sq                                    /* Call sq */
-    add r6, r6, r0
+    pop { r1 }
+    add r0, r1, r0
+    push { r0 }
     ldr r0, [fp, #20]                        /* Load parameters */
     bl sq                                    /* Call sq */
-    add r6, r6, r0
+    pop { r1 }
+    add r6, r1, r0
     mov r0, r6                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {r4-r6, fp, lr}

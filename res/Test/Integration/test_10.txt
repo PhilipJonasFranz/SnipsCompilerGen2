@@ -5,13 +5,17 @@ SOURCE
 int main() {
 	HashMap<int, int>* map = Map::create<int, int>(10, -1);
 	
+	/* Hash function will hash the same value here */
 	Map::put<int, int>(map, 1, 12);
-	Map::put<int, int>(map, 2, 20);
+	Map::put<int, int>(map, 11, 20);
 	
-	return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 2);
+	/* Different hash value */
+	Map::put<int, int>(map, 2, 30);
+	
+	return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 11) + Map::get<int, int>(map, 2);
 }
 TESTCASES
-32
+62
 OUTPUT
 /* --test_10.txt */
 .data
@@ -410,45 +414,57 @@ lambda_Map.tupleKeyMatcher_P6:               /* Function address getter for pred
     add r0, pc, #8
     mov pc, r10
 Map.tupleKeyMatcher_P6:                      /* Function: Map.tupleKeyMatcher, Provisos: INT, INT */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-    mov r4, r1
-    mov r5, #1
-/* Match the entire key to find correct tuple */
-    mov r6, #0
+    sub sp, sp, #20
+    stmea sp, {r3-r6, fp}
+    mov fp, sp
+    add r0, fp, #32                          /* Evaluate Expression */
+    lsr r3, r0, #2
+    add r0, fp, #20                          /* Evaluate Expression */
+    lsr r4, r0, #2
+    mov r5, #0
 Map.tupleKeyMatcher.L1: 
     mov r0, #1
     mov r1, #1
-    cmp r6, #1
+    cmp r5, #1
     bge Map.tupleKeyMatcher.L2
-    add r0, r3, r6
+    add r0, r3, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    add r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    add r0, r3, r5
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
-    add r0, r4, r6
+    add r0, r4, r5
     ldr r1, [r10, r0, lsl #2]                /* Load from address */
     pop { r0 }
     cmp r0, r1
     moveq r0, #1
     movne r0, #0
-    adds r0, r0, #0
-    movne r0, #1
-    cmp r5, #0
-    movne r5, r0
-    moveq r5, #0
-    add r6, r6, #1
+    cmp r0, #0
+    moveq r0, #1
+    movne r0, #0
+    cmp r0, #0
+    beq Map.tupleKeyMatcher.L4
+    mov r0, #0                               /* Evaluate Expression */
+    b Map.tupleKeyMatcher.L5
+Map.tupleKeyMatcher.L4: 
+    add r5, r5, #1
     b Map.tupleKeyMatcher.L1
 Map.tupleKeyMatcher.L2: 
-    mov r0, r5                               /* Evaluate Expression */
-    ldmfd sp!, {r3-r6}
+    mov r0, #1                               /* Evaluate Expression */
+Map.tupleKeyMatcher.L5: 
+    mov sp, fp
+    ldmfd sp!, {r3-r6, fp}
+    add sp, sp, #24
     bx lr
     
 /* Creates a new hash map with defined size and default value. */
 /* Also sets up the storage and initializes it. */
 Map.create_P0:                               /* Function: Map.create, Provisos: INT, INT */
     sub sp, sp, #20
-    stmea sp, {r3, r5-r7, lr}
+    stmea sp, {r3-r6, lr}
     mov r3, r0
+    mov r4, r1
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r6, #0
@@ -468,17 +484,20 @@ Map.create.L2:
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r6, r0
+    add r1, r0, #1
+    add r0, r1, #1
+    str r4, [r10, r0, lsl #2]
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r7, r0
+    mov r4, r0
     mov r0, #4
-    lsl r1, r7, #2
+    lsl r1, r4, #2
     str r0, [r1]
     str r5, [r1, #4]
     str r3, [r1, #8]
     str r6, [r1, #12]
-    mov r0, r7                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r5-r7, pc}
+    mov r0, r4                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r6, pc}
 .POOL6_L7_NULL: .word NULL
     
 /* Stores given value at the hashed key location. */
@@ -547,8 +566,8 @@ Map.put.L0:
 /* Returns the value corresponding to given key, or */
 /* the default value if the key does not exist. */
 Map.get_P4:                                  /* Function: Map.get, Provisos: INT, INT */
-    sub sp, sp, #16
-    stmea sp, {r3, r5, fp, lr}
+    sub sp, sp, #20
+    stmea sp, {r3-r5, fp, lr}
     mov fp, sp
     mov r3, r0
     push { r1 }                              /* Push declaration on stack, referenced by addressof. */
@@ -562,6 +581,7 @@ Map.get_P4:                                  /* Function: Map.get, Provisos: INT
     bl Hash.hash                             /* Call Hash.hash */
     pop { r1 }
     bl __op_mod                              /* Call __op_mod */
+    mov r4, r0
 /* Load the corresponding linked list */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
@@ -590,22 +610,25 @@ Map.get_P4:                                  /* Function: Map.get, Provisos: INT
     mov r1, r0
     mov r0, r5
     bl List.find_P5                          /* Call List.find */
-    mov r3, r0
+    mov r4, r0
     ldr r1, .POOL8_L7_NULL                   /* Load null address */
     cmp r0, r1
     beq Map.get.L2
 /* Found, return value */
-    lsl r1, r3, #2                           /* Convert to bytes */
+    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
     b Map.get.L4
 Map.get.L2: 
     add sp, sp, #12
 Map.get.L0: 
 /* No value for key, return default value */
-    mov r0, #25                              /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #12]
+    lsl r1, r1, #2
+    ldr r0, [r1, #8]                         /* Load field from struct */
 Map.get.L4: 
     mov sp, fp
-    ldmfd sp!, {r3, r5, fp, pc}
+    ldmfd sp!, {r3-r5, fp, pc}
 .POOL8_L7_NULL: .word NULL
     
 main:                                        /* Function: main */
@@ -614,6 +637,7 @@ main:                                        /* Function: main */
     mov r0, #10
     bl Map.create_P0                         /* Call Map.create */
     mov r3, r0
+/* Hash function will hash the same value here */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     mov r0, #1
@@ -623,6 +647,14 @@ main:                                        /* Function: main */
     bl Map.put_P1                            /* Call Map.put */
     mov r0, #20                              /* Load parameters */
     push { r0 }
+    mov r0, #11
+    push { r0 }
+    mov r0, r3
+    ldmfd sp!, {r1, r2}
+    bl Map.put_P1                            /* Call Map.put */
+/* Different hash value */
+    mov r0, #30                              /* Load parameters */
+    push { r0 }
     mov r0, #2
     push { r0 }
     mov r0, r3
@@ -631,10 +663,17 @@ main:                                        /* Function: main */
     mov r1, #1
     mov r0, r3
     bl Map.get_P4                            /* Call Map.get */
-    mov r4, r0
-    mov r1, #2
+    mov r1, #11
+    push { r0 }
     mov r0, r3
     bl Map.get_P4                            /* Call Map.get */
-    add r0, r4, r0
+    pop { r1 }
+    add r0, r1, r0
+    mov r1, #2
+    push { r0 }
+    mov r0, r3
+    bl Map.get_P4                            /* Call Map.get */
+    pop { r1 }
+    add r0, r1, r0
     pop { pc }
     

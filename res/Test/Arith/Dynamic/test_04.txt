@@ -30,8 +30,9 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { lr }
     bl foo                                   /* Evaluate Expression */
-    mov r3, r0
+    push { r0 }
     bl foo                                   /* Call foo */
-    add r0, r3, r0
+    pop { r1 }
+    add r0, r1, r0
     pop { pc }
     

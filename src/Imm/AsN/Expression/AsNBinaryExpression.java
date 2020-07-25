@@ -153,6 +153,9 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			 */
 			if (right instanceof InlineCall) free = r.findFree();
 			
+			/* TODO: Disable for now, can cause issues, see Integration\test_10.txt */
+			free = -1;
+			
 			if (free != -1) {
 				m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
 				r.getReg(free).setDeclaration(null);
