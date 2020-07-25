@@ -56,6 +56,14 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.requestField(path, this.proviso);
 	}
 	
+	public int getNumberOfFields() {
+		return this.typedef.getFields().size();
+	}
+	
+	public Declaration getFieldNumber(int i) {
+		return this.getField(this.typedef.getFields().get(i).path);
+	}
+	
 	public int getFieldByteOffset(NamespacePath path) {
 		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
 		

@@ -75,7 +75,8 @@ public class Declaration extends Statement {
 		ProvisoUtil.mapNTo1(this.type, context);
 		
 		/* Apply to value */
-		if (this.value != null) this.value.setContext(context);
+		if (this.value != null) 
+			this.value.setContext(context);
 	}
 
 	/** 

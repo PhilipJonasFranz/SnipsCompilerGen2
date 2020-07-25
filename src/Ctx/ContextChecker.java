@@ -140,7 +140,7 @@ public class ContextChecker {
 				
 				/* Check main function as entrypoint, if a function is called, context is provided
 				 * and then checked */
-				if (f.path.build().equals("main") && !f.manager.provisosTypes.isEmpty()) 
+				if (f.path.build().equals("main") && !f.provisosTypes.isEmpty()) 
 					throw new CTX_EXC(f.getSource(), "Function main cannot hold proviso types");
 				
 				/* Check for duplicate function name */
@@ -152,7 +152,7 @@ public class ContextChecker {
 				this.functions.add(f);
 				
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
-				if (f.manager.provisosTypes.isEmpty()) f.check(this);
+				if (f.provisosTypes.isEmpty()) f.check(this);
 			}
 			else if (s instanceof Declaration) s.check(this);
 			else if (s instanceof Namespace) {
@@ -337,15 +337,20 @@ public class ContextChecker {
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
 		e.setType(e.structType);
 		
+		//System.out.println(e.getSource().getSourceMarker());
+		//e.print(0, true);
+		
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().manager.provisosTypes);
+			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
 		if (e.elements.size() != e.structType.getTypedef().getFields().size()) 
 			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.getTypedef().getFields().size() + " but got " + e.elements.size());
 		
+		/* Make sure that all field types are equal to the expected types */
 		for (int i = 0; i < e.elements.size(); i++) {
 			TYPE valType = e.elements.get(i).check(this);
 			TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+			
 			if (!valType.isEqual(strType)) {
 				if (valType instanceof POINTER || strType instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
@@ -423,14 +428,14 @@ public class ContextChecker {
 						this.scopes.push(new Scope(this.scopes.peek()));
 						
 						/* Add declarations for struct */
-						for (Declaration dec : struct.getTypedef().getFields()) 
+						for (int i = 0; i < struct.getNumberOfFields(); i++) 
 							/* 
 							 * Add the struct fields to the current scope, so that the select expresssion
 							 * from the array select can be checked and finds the field its selecting from.
 							 * The fields are added without checking for duplicates. This is not a big problem,
 							 * since the same scope is instantly popped afterwards.
 							 */
-							this.scopes.peek().addDeclaration(dec, false);
+							this.scopes.peek().addDeclaration(struct.getFieldNumber(i), false);
 						
 						ArraySelect arr = (ArraySelect) sel0.selector;
 						type = arr.check(this);
@@ -457,16 +462,16 @@ public class ContextChecker {
 				else if (selection instanceof ArraySelect) {
 					/* Push new scope to house the struct fields */
 					this.scopes.push(new Scope(this.scopes.peek()));
-					
+
 					/* Add declarations for struct */
-					for (Declaration dec : struct.getTypedef().getFields()) 
+					for (int i = 0; i < struct.getNumberOfFields(); i++) 
 						/* 
 						 * Add the struct fields to the current scope, so that the select expresssion
 						 * from the array select can be checked and finds the field its selecting from.
 						 * The fields are added without checking for duplicates. This is not a big problem,
 						 * since the same scope is instantly popped afterwards.
 						 */
-						this.scopes.peek().addDeclaration(dec, false);
+						this.scopes.peek().addDeclaration(struct.getFieldNumber(i), false);
 					
 					ArraySelect arr = (ArraySelect) selection;
 					type = arr.check(this);
@@ -486,10 +491,12 @@ public class ContextChecker {
 	}
 	
 	private TYPE findField(STRUCT struct, IDRef ref0) throws CTX_EXC {
+		Declaration field = struct.getField(ref0.path);
+		
 		/* The ID the current selection targets */
-		if (struct.hasField(ref0.path)) {
+		if (field != null) {
 			/* Link manually, identifier is not part of current scope */
-			ref0.origin = struct.getField(ref0.path);
+			ref0.origin = field;
 			ref0.setType(ref0.origin.getType());
 			
 			/* Next type in chain */
@@ -594,7 +601,7 @@ public class ContextChecker {
 	public TYPE checkDeclaration(Declaration d) throws CTX_EXC {
 		
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoUtil.mapNTo1(d.getType(), this.currentFunction.peek().manager.provisosTypes);
+			ProvisoUtil.mapNTo1(d.getType(), this.currentFunction.peek().provisosTypes);
 		
 		/* Set self as last, implicitly unused */
 		d.last = d;
@@ -1031,11 +1038,11 @@ public class ContextChecker {
 						this.signalStack.peek().add(s);
 			}
 			
-			if (!f.manager.provisosTypes.isEmpty()) {
-				if (f.manager.containsMapping(i.proviso)) {
+			if (!f.provisosTypes.isEmpty()) {
+				if (f.containsMapping(i.proviso)) {
 					/* Mapping already exists, just return return type of this specific mapping */
 					f.setContext(i.proviso);
-					i.setType(f.manager.getMappingReturnType(i.proviso));
+					i.setType(f.getMappingReturnType(i.proviso));
 				}
 				else {
 					/* Create a new context, check function for this specific context */
@@ -1044,7 +1051,7 @@ public class ContextChecker {
 					this.scopes.push(new Scope(this.scopes.get(0)));
 					f.check(this);
 					this.scopes.pop();
-					i.setType(f.manager.getMappingReturnType(i.proviso));
+					i.setType(f.getMappingReturnType(i.proviso));
 				}
 			}
 			else 
@@ -1052,7 +1059,7 @@ public class ContextChecker {
 				 * Add default proviso mapping, so mapping is present,
 				 * function was called and will be compiled.
 				 */
-				f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+				f.addProvisoMapping(f.getReturnType(), new ArrayList());
 			
 			if (i.parameters.size() != f.parameters.size()) 
 				throw new CTX_EXC(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
@@ -1076,7 +1083,7 @@ public class ContextChecker {
 				}
 			}
 			
-			if (f.manager.provisosTypes.isEmpty() || !f.manager.containsMapping(i.proviso)) 
+			if (f.provisosTypes.isEmpty() || !f.containsMapping(i.proviso)) 
 				i.setType(f.getReturnType().clone());
 			
 			if (i.getType() instanceof VOID && !f.hasReturn) 
@@ -1134,8 +1141,8 @@ public class ContextChecker {
 				}
 			}
 			
-			if (!f.manager.provisosTypes.isEmpty()) {
-				if (!f.manager.containsMapping(i.proviso)) {
+			if (!f.provisosTypes.isEmpty()) {
+				if (!f.containsMapping(i.proviso)) {
 					/* Create new scope that points to the global scope */
 					f.setContext(i.proviso);
 					this.scopes.push(new Scope(this.scopes.get(0)));
@@ -1150,7 +1157,7 @@ public class ContextChecker {
 				 * Add default proviso mapping, so mapping is present,
 				 * function was called and will be compiled.
 				 */
-				f.manager.addProvisoMapping(f.getReturnType(), new ArrayList());
+				f.addProvisoMapping(f.getReturnType(), new ArrayList());
 			
 			if (i.parameters.size() != f.parameters.size()) 
 				throw new CTX_EXC(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
@@ -1231,8 +1238,8 @@ public class ContextChecker {
 			throw new CTX_EXC(r.getSource(), "Unknown predicate: " + r.path.build());
 		
 		/* Provided number of provisos does not match number of provisos of lambda */
-		if (lambda.manager.provisosTypes.size() != r.proviso.size()) 
-			throw new CTX_EXC(r.getSource(), "Missmatching number of provided provisos for predicate, expected " + lambda.manager.provisosTypes.size() + ", got " + r.proviso.size());
+		if (lambda.provisosTypes.size() != r.proviso.size()) 
+			throw new CTX_EXC(r.getSource(), "Missmatching number of provided provisos for predicate, expected " + lambda.provisosTypes.size() + ", got " + r.proviso.size());
 		
 		/* A lambda cannot signal exceptions, since it may become anonymous */
 		if (lambda.signals) 
@@ -1240,10 +1247,10 @@ public class ContextChecker {
 		
 		/* Set context and add mapping */
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoUtil.mapNToNMaybe(r.proviso, this.currentFunction.peek().manager.provisosTypes);
+			ProvisoUtil.mapNToNMaybe(r.proviso, this.currentFunction.peek().provisosTypes);
 		
 		lambda.setContext(r.proviso);
-		lambda.manager.addProvisoMapping(lambda.getReturnType(), r.proviso);
+		lambda.addProvisoMapping(lambda.getReturnType(), r.proviso);
 		
 		/* Make sure function is check, may only be called through anonymous predicate */
 		this.scopes.push(new Scope(this.scopes.get(0)));
@@ -1300,7 +1307,7 @@ public class ContextChecker {
 	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXC {
 		if (!this.currentFunction.isEmpty()) 
-			ProvisoUtil.mapNTo1(sot.sizeType, this.currentFunction.peek().manager.provisosTypes);
+			ProvisoUtil.mapNTo1(sot.sizeType, this.currentFunction.peek().provisosTypes);
 		
 		sot.setType(new INT());
 		return sot.getType();

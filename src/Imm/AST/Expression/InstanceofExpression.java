@@ -3,6 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -43,16 +44,9 @@ public class InstanceofExpression extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		if (this.instanceType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.instanceType;
-			for (TYPE t : context) {
-				if (t.isEqual(p)) {
-					p.setContext(t);
-					break;
-				}
-			}
-		}
-		
+		if (this.instanceType instanceof PROVISO) 
+			ProvisoUtil.mapNTo1(this.instanceType, context);
+			
 		this.expression.setContext(context);
 	}
 

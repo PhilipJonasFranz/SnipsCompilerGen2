@@ -80,6 +80,7 @@ public class StructTypedef extends SyntaxElement {
 		StructProvisoMapping match = this.findMatch(providedProvisos);
 		
 		Declaration dec = null;
+		
 		for (int i = 0; i < this.fields.size(); i++) {
 			if (this.fields.get(i).path.build().equals(path.build())) {
 				/* Copy field and apply field type */
@@ -102,17 +103,19 @@ public class StructTypedef extends SyntaxElement {
 		
 		for (StructProvisoMapping m : this.registeredMappings) {
 			boolean equal = true;
+			
 			for (int i = 0; i < m.providedHeadProvisos.size(); i++) 
 				/* 
 				 * 1 to 1 match, match type string since we look for perfect 
 				 * match, void proviso types could disrupt that.
 				 */
-				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).toString());
+				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).typeString());
 			
 			if (equal) return m;
 		}
 		
 		/* No mapping found, create new and return it */
+		//System.out.println(this.self.typeString() + " -> New Context registered");
 		
 		/* Copy own provisos */
 		List<TYPE> clone = new ArrayList();
@@ -122,6 +125,9 @@ public class StructTypedef extends SyntaxElement {
 		/* Map provided provisos to header */
 		ProvisoUtil.mapNToN(clone, providedProvisos);
 		
+		//System.out.println("New Context: ");
+		//clone.stream().forEach(x -> System.out.println(x.typeString()));
+		
 		/* Clone Struct field types, decs stay same anyway */
 		List<TYPE> newActive = new ArrayList();
 		for (Declaration d : this.fields) newActive.add(d.getType().clone());
@@ -130,12 +136,15 @@ public class StructTypedef extends SyntaxElement {
 		for (int i = 0; i < newActive.size(); i++) 
 			ProvisoUtil.mapNTo1(newActive.get(i), clone);
 		
+		
+		//System.out.println("Fields: ");
+		//newActive.stream().forEach(x -> System.out.println(x.typeString()));
+		//System.out.println();
+		
 		/* Remove provisos from field types */
 		for (int i = 0; i < newActive.size(); i++) 
 			newActive.set(i, newActive.get(i).provisoFree());
 
-		//System.out.println(this.self.typeString() + " -> New Context registered");
-		
 		/* Create the new mapping and store it */
 		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
 		this.registeredMappings.add(newMapping);

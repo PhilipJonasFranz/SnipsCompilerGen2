@@ -103,11 +103,11 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		
 		/* Some assertions for debug purposes */
 		if (b.getLeft() instanceof TypeCast) {
-			assert(b.getLeft().getType() instanceof PRIMITIVE);
+			assert(b.getLeft().getType().getCoreType() instanceof PRIMITIVE);
 		}
 		
 		if (b.getRight() instanceof TypeCast) {
-			assert(b.getRight().getType() instanceof PRIMITIVE);
+			assert(b.getRight().getType().getCoreType() instanceof PRIMITIVE);
 		}
 		
 		/* If operands are TypeCasts, unrwrap expression from type cast */

@@ -34,7 +34,13 @@ public class ProvisoUtil {
 			
 			/* Map to each predicate proviso */
 			for (int i = 0; i < f.proviso.size(); i++)
-				map &= ProvisoUtil.map1To1Maybe(f.proviso.get(i), source);
+				map &= map1To1Maybe(f.proviso.get(i), source);
+
+			if (f.funcHead != null) {
+				/* Map to each parameter type */
+				for (int i = 0; i < f.funcHead.parameters.size(); i++)
+					map &= map1To1Maybe(f.funcHead.parameters.get(i).getType(), source);
+			}
 			
 			return map;
 		}
@@ -60,7 +66,7 @@ public class ProvisoUtil {
 			
 			/* Map to each struct proviso */
 			for (int i = 0; i < s.proviso.size(); i++)
-				map &= ProvisoUtil.map1To1Maybe(s.proviso.get(i), source);
+				map &= map1To1Maybe(s.proviso.get(i), source);
 			
 			return map;
 		}
@@ -71,7 +77,13 @@ public class ProvisoUtil {
 			return map1To1Maybe(a.elementType, source);
 		}
 		
-		System.out.println("Cannot map " + source.typeString() + " -> " + target.typeString());
+		/* 
+		 * When using this mapping method, its possible that f.E PROVISO<K, ...> is 
+		 * attempted to be mapped to PROVISO<V>. This doesnt work of course, but this
+		 * does not indicate anything wrong. Just return false, so the callee knows
+		 * that this type was not matched.
+		 */
+		//System.out.println("Cannot map " + source.typeString() + " -> " + target.typeString() + " (" + CompilerDriver.inputFile.getPath() + ")");
 		return false;
 	}
 
@@ -81,11 +93,41 @@ public class ProvisoUtil {
 	 * @throws SNIPS_EXC if the types do not match
 	 */
 	public static void map1To1(TYPE target, TYPE source) throws SNIPS_EXC {
-		if (target instanceof PROVISO) {
+		if (target instanceof PRIMITIVE && !(target instanceof FUNC)) {
+			/* No need to apply */
+			return;
+		}
+		else if (target instanceof FUNC) {
+			FUNC f = (FUNC) target;
+
+			/* Map to each predicate proviso */
+			for (int i = 0; i < f.proviso.size(); i++)
+				map1To1(f.proviso.get(i), source);
+		}
+		else if (target instanceof PROVISO) {
 			PROVISO p = (PROVISO) target;
 			
 			/* Successfully mapped proviso */
 			p.setContext(source);	
+		}
+		else if (target instanceof POINTER) {
+			POINTER p = (POINTER) target;
+			
+			/* Relay to targeted type */
+			map1To1(p.targetType, source);
+		}
+		else if (target instanceof STRUCT) {
+			STRUCT s = (STRUCT) target;
+			
+			/* Map to each struct proviso */
+			for (int i = 0; i < s.proviso.size(); i++)
+				map1To1(s.proviso.get(i), source);
+		}
+		else if (target instanceof ARRAY) {
+			ARRAY a = (ARRAY) target;
+
+			/* Relay to array target type */
+			map1To1(a.elementType, source);
 		}
 		else throw new SNIPS_EXC("Cannot map " + source.typeString() + " -> " + target.typeString());
 	}
@@ -98,14 +140,14 @@ public class ProvisoUtil {
 	public static void mapNTo1(TYPE target, List<TYPE> source) {
 		/* Map the given source to the target, stop once a match was found */
 		for (int i = 0; i < source.size(); i++) 
-			if (map1To1Maybe(target, source.get(i))) break;
+			map1To1Maybe(target, source.get(i));
 	}
 	
 	public static void mapNToNMaybe(List<TYPE> target, List<TYPE> source) {
 		/* Map the given source to the target, stop once a match was found */
 		for (int i = 0; i < source.size(); i++) 
 			for (int a = 0; a < target.size(); a++)
-				if (map1To1Maybe(target.get(i), source.get(i))) break;
+				map1To1Maybe(target.get(i), source.get(i));
 	}
 	
 	/**
