@@ -45,7 +45,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		/* Convert to bytes */
 		id.instructions.add(new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R0), new ImmOp(2)));
 		
-		if (lhs.expressionType instanceof PRIMITIVE) {
+		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) {
 			id.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
 			
 			/* Create assign injector */

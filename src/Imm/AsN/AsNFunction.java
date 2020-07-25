@@ -362,7 +362,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(pop);
 			}
 			
-			int size = paramsWithRef * 4;
+			int size = 0;
 			for (Pair<Declaration, Integer> p  : func.getParameterMapping()) {
 				if (p.getSecond() == -1) {
 					/* Stack shrinks by parameter word size */
