@@ -2,7 +2,7 @@ SOURCE
 #include <hash.sn>
 #include <hash_map.sn>
 
-int main() {
+int main(bool add) {
 	HashMap<int, int>* map = Map::create<int, int>(10, -1);
 	
 	/* Hash function will hash the same value here */
@@ -12,10 +12,14 @@ int main() {
 	/* Different hash value */
 	Map::put<int, int>(map, 2, 30);
 	
-	return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 11) + Map::get<int, int>(map, 2);
+	if (add) 
+		return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 11) + Map::get<int, int>(map, 2);
+	else
+		return Map::get<int, int>(map, 1) + Map::get<int, int>(map, 11);
 }
 TESTCASES
-62
+1 62
+0 32
 OUTPUT
 /* --test_10.txt */
 .data
@@ -35,7 +39,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L8_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_main.L8_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -116,7 +120,7 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L8_HEAP_START: .word HEAP_START
+.POOL0_main.L8_HEAP_START: .word HEAP_START
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -254,8 +258,8 @@ List.create_P2:                              /* Function: List.create, Provisos:
     add r0, fp, #20
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL2_L7_NULL                   /* Load null address */
-    ldr r1, .POOL2_L7_NULL                   /* Load null address */
+    ldr r0, .POOL2_main.L7_NULL              /* Load null address */
+    ldr r1, .POOL2_main.L7_NULL              /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     lsl r1, r3, #2
@@ -275,7 +279,7 @@ List.create_P2:                              /* Function: List.create, Provisos:
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #12
     bx lr
-.POOL2_L7_NULL: .word NULL
+.POOL2_main.L7_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
 List.destroy:                                /* Function: List.destroy */
@@ -285,7 +289,7 @@ List.destroy:                                /* Function: List.destroy */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
 List.destroy.L1:                             /* Evaluate condition */
-    ldr r1, .POOL3_L7_NULL                   /* Load null address */
+    ldr r1, .POOL3_main.L7_NULL              /* Load null address */
     cmp r4, r1
     beq List.destroy.L2
     mov r0, r4                               /* Load parameters */
@@ -297,7 +301,7 @@ List.destroy.L2:
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
     ldmfd sp!, {r3, r4, pc}
-.POOL3_L7_NULL: .word NULL
+.POOL3_main.L7_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
@@ -313,7 +317,7 @@ List.add_P3:                                 /* Function: List.add, Provisos: Ma
     add r0, fp, #24
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL4_L7_NULL                   /* Load null address */
+    ldr r0, .POOL4_main.L7_NULL              /* Load null address */
     push { r0 }
     mov r0, #1
     lsl r1, r4, #2
@@ -328,7 +332,7 @@ List.add_P3:                                 /* Function: List.add, Provisos: Ma
     str r0, [r1, #16]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L7_NULL                   /* Load null address */
+    ldr r1, .POOL4_main.L7_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -350,7 +354,7 @@ List.add.L0:
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #12
     bx lr
-.POOL4_L7_NULL: .word NULL
+.POOL4_main.L7_NULL: .word NULL
     
 /* Finds the first node in the list that has given value. */
 /* Returns a pointer to this list node, or 0 in case the */
@@ -363,7 +367,7 @@ List.find_P5:                                /* Function: List.find, Provisos: M
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
 List.find.L1:                                /* Evaluate condition */
-    ldr r1, .POOL5_L7_NULL                   /* Load null address */
+    ldr r1, .POOL5_main.L7_NULL              /* Load null address */
     cmp r5, r1
     beq List.find.L2
 /* If the predicate matches given value, */
@@ -391,13 +395,13 @@ List.find.L4:
     b List.find.L1
 List.find.L2: 
 /* Not found */
-    ldr r0, .POOL5_L7_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL5_main.L7_NULL              /* Evaluate Expression */
 List.find.L5: 
     mov sp, fp
     ldmfd sp!, {r4, r5, fp, lr}
     add sp, sp, #12
     bx lr
-.POOL5_L7_NULL: .word NULL
+.POOL5_main.L7_NULL: .word NULL
     
 /* This package contains the utility and definitions */
 /* to create and maintain a hash-map of any type. */
@@ -471,7 +475,7 @@ Map.create_P0:                               /* Function: Map.create, Provisos: 
 Map.create.L1: 
     cmp r6, r3
     bge Map.create.L2
-    ldr r0, .POOL6_L7_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL6_main.L7_NULL              /* Evaluate Expression */
     push { r0 }
     add r0, r5, r6
     lsl r1, r0, #2
@@ -484,6 +488,7 @@ Map.create.L2:
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r6, r0
+/* Place default value after key */
     add r1, r0, #1
     add r0, r1, #1
     str r4, [r10, r0, lsl #2]
@@ -498,7 +503,7 @@ Map.create.L2:
     str r6, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
-.POOL6_L7_NULL: .word NULL
+.POOL6_main.L7_NULL: .word NULL
     
 /* Stores given value at the hashed key location. */
 Map.put_P1:                                  /* Function: Map.put, Provisos: INT, INT */
@@ -525,7 +530,7 @@ Map.put_P1:                                  /* Function: Map.put, Provisos: INT
     add r0, r1, r0
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
 /* Initialize new list at index */
-    ldr r1, .POOL7_L7_NULL                   /* Load null address */
+    ldr r1, .POOL7_main.L7_NULL              /* Load null address */
     cmp r6, r1
     bne Map.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -561,7 +566,7 @@ Map.put.L0:
     bl List.add_P3                           /* Call List.add */
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL7_L7_NULL: .word NULL
+.POOL7_main.L7_NULL: .word NULL
     
 /* Returns the value corresponding to given key, or */
 /* the default value if the key does not exist. */
@@ -587,7 +592,7 @@ Map.get_P4:                                  /* Function: Map.get, Provisos: INT
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r0
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL8_L7_NULL                   /* Load null address */
+    ldr r1, .POOL8_main.L7_NULL              /* Load null address */
     cmp r5, r1
     beq Map.get.L0
 /* Init tuple for searching */
@@ -611,7 +616,7 @@ Map.get_P4:                                  /* Function: Map.get, Provisos: INT
     mov r0, r5
     bl List.find_P5                          /* Call List.find */
     mov r4, r0
-    ldr r1, .POOL8_L7_NULL                   /* Load null address */
+    ldr r1, .POOL8_main.L7_NULL              /* Load null address */
     cmp r0, r1
     beq Map.get.L2
 /* Found, return value */
@@ -629,27 +634,28 @@ Map.get.L0:
 Map.get.L4: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL8_L7_NULL: .word NULL
+.POOL8_main.L7_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { lr }
+    mov r3, r0
     mvn r1, #0
     mov r0, #10
     bl Map.create_P0                         /* Call Map.create */
-    mov r3, r0
+    mov r4, r0
 /* Hash function will hash the same value here */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     mov r0, #1
     push { r0 }
-    mov r0, r3
+    mov r0, r4
     ldmfd sp!, {r1, r2}
     bl Map.put_P1                            /* Call Map.put */
     mov r0, #20                              /* Load parameters */
     push { r0 }
     mov r0, #11
     push { r0 }
-    mov r0, r3
+    mov r0, r4
     ldmfd sp!, {r1, r2}
     bl Map.put_P1                            /* Call Map.put */
 /* Different hash value */
@@ -657,23 +663,32 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #2
     push { r0 }
-    mov r0, r3
+    mov r0, r4
     ldmfd sp!, {r1, r2}
     bl Map.put_P1                            /* Call Map.put */
+    cmp r3, #0
+    beq main.L0
     mov r1, #1
-    mov r0, r3
+    mov r0, r4
     bl Map.get_P4                            /* Call Map.get */
+    mov r5, r0
     mov r1, #11
-    push { r0 }
-    mov r0, r3
+    mov r0, r4
     bl Map.get_P4                            /* Call Map.get */
-    pop { r1 }
-    add r0, r1, r0
+    add r5, r5, r0
     mov r1, #2
-    push { r0 }
-    mov r0, r3
+    mov r0, r4
     bl Map.get_P4                            /* Call Map.get */
-    pop { r1 }
-    add r0, r1, r0
+    add r0, r5, r0
+    pop { pc }
+main.L0: 
+    mov r1, #1
+    mov r0, r4
+    bl Map.get_P4                            /* Call Map.get */
+    mov r5, r0
+    mov r1, #11
+    mov r0, r4
+    bl Map.get_P4                            /* Call Map.get */
+    add r0, r5, r0
     pop { pc }
     

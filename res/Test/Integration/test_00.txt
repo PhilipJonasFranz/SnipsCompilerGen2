@@ -19,21 +19,21 @@ OUTPUT
 /* --test_00.txt */
     b main
 fib:                                         /* Function: fib */
-    push { r3, lr }
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
     mov r3, r0
     cmp r0, #3
     bge fib.L1
     mov r0, #1                               /* Evaluate Expression */
-    ldmfd sp!, {r3, pc}
+    ldmfd sp!, {r3, r4, pc}
 fib.L1: 
     sub r0, r3, #1
     bl fib                                   /* Call fib */
-    push { r0 }
+    mov r4, r0
     sub r0, r3, #2
     bl fib                                   /* Call fib */
-    pop { r1 }
-    add r0, r1, r0
-    ldmfd sp!, {r3, pc}
+    add r0, r4, r0
+    ldmfd sp!, {r3, r4, pc}
     
 main:                                        /* Function: main */
     b fib                                    /* Call fib */
