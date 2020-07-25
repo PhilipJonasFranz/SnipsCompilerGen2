@@ -6,16 +6,16 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.SyntaxElement;
 
 public abstract class AsNNode {
@@ -36,7 +36,7 @@ public abstract class AsNNode {
 	/**
 	 * Casts given syntax element based on the given reg set to a asm node. 
 	 */
-	public static AsNNode cast(SyntaxElement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNNode cast(SyntaxElement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		return null;
 	}
 	
@@ -59,12 +59,12 @@ public abstract class AsNNode {
 				int free = r.findFree();
 				
 				if (free == -1) {
-					this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOperand(reg), new RegOperand(REGISTER.SP), 
-						new PatchableImmOperand(PATCH_DIR.DOWN, -4)));
+					this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOp(reg), new RegOp(REG.SP), 
+						new PatchableImmOp(PATCH_DIR.DOWN, -4)));
 					st.push(r.getReg(reg).declaration);
 				}
 				else {
-					ASMMov mov = new ASMMov(new RegOperand(free), new RegOperand(reg));
+					ASMMov mov = new ASMMov(new RegOp(free), new RegOp(reg));
 					
 					/* Mark for optimizer to prevent double crossing optimization */
 					mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);

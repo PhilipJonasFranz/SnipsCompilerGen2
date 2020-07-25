@@ -1,10 +1,11 @@
 <Inf>
-	<Version>v.3.4.22</Version>
+	<Version>v.4.0.0</Version>
 	<Library>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
 		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
 		<Alias>stack.sn:lib/std/data/stack.sn</Alias>
 		<Alias>queue.sn:lib/std/data/queue.sn</Alias>
+		<Alias>hash_map.sn:lib/std/data/hash_map.sn</Alias>
 		
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
 		
@@ -19,6 +20,7 @@
 		<Alias>bits.sn:lib/std/util/bits.sn</Alias>
 		<Alias>color.sn:lib/std/util/color.sn</Alias>
 		<Alias>graphics.sn:lib/std/util/graphics.sn</Alias>
+		<Alias>hash.sn:lib/std/util/hash.sn</Alias>
 		
 		<Alias>sfloat.sn:lib/std/util/temp/sfloat.sn</Alias>
 	</Library>

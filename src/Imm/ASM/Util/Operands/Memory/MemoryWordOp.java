@@ -4,17 +4,17 @@ import Imm.ASM.Util.Operands.Operand;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 
-public class MemoryWordOperand extends MemoryOperand {
+public class MemoryWordOp extends MemoryOperand {
 
 	public Expression value;
 	
 	public int intValue;
 	
-	public MemoryWordOperand(Expression expr) {
+	public MemoryWordOp(Expression expr) {
 		this.value = expr;
 	}
 	
-	public MemoryWordOperand(int value) {
+	public MemoryWordOp(int value) {
 		this.intValue = value;
 	}
 	
@@ -44,7 +44,7 @@ public class MemoryWordOperand extends MemoryOperand {
 	}
 
 	public MemoryOperand clone() {
-		MemoryWordOperand clone = new MemoryWordOperand(this.value);
+		MemoryWordOp clone = new MemoryWordOp(this.value);
 		clone.intValue = this.intValue;
 		return clone;
 	}

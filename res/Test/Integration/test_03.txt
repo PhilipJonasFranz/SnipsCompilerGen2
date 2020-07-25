@@ -17,7 +17,7 @@ OUTPUT
     b main
 vecProd:                                     /* Function: vecProd */
     ldr r0, [sp, #12]
-    ldr r2, [sp, #0]
+    ldr r2, [sp]
     mul r1, r0, r2
     ldr r0, [sp, #16]
     ldr r2, [sp, #4]

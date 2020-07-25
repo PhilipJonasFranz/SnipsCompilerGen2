@@ -3,7 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -14,12 +14,12 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand;
-import Imm.ASM.Util.Operands.PatchableImmOperand.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -34,7 +34,7 @@ import Snips.CompilerDriver;
 public class AsNStructSelect extends AsNExpression {
 	
 			/* --- METHODS --- */
-	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructSelect sel = new AsNStructSelect();
 		s.castedNode = sel;
 		
@@ -48,11 +48,11 @@ public class AsNStructSelect extends AsNExpression {
 				AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
 				
 				/* Create dummy stack entries for newly copied struct on stack */
-				for (int i = 0; i < s.getType().wordsize(); i++) st.push(REGISTER.R0);
+				for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
 			}
 			else {
 				/* Load in register */
-				ASMLdr load = new ASMLdr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1));
+				ASMLdr load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
 				load.comment = new ASMComment("Load field from struct");
 				sel.instructions.add(load);
 			}
@@ -64,7 +64,7 @@ public class AsNStructSelect extends AsNExpression {
 	/**
 	 * Loads the address of the target of the selection into R1.
 	 */
-	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		
 		/* Load base address */
 		if (select.selector instanceof IDRef) {
@@ -77,11 +77,11 @@ public class AsNStructSelect extends AsNExpression {
 				 * can be the one in the location. So just move the value into R0 and return true that the
 				 * value was directley loaded. */
 				if (ref.getType() instanceof STRUCT) {
-					node.instructions.add(new ASMMov(new RegOperand(REGISTER.R0), new RegOperand(loc)));
+					node.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(loc)));
 					return true;
 				}
 				/* IDRef must point to a pointer, so move the pointer value into R1 */
-				else node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
+				else node.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(loc)));
 			}
 			else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 				/* In Local Stack */
@@ -89,13 +89,13 @@ public class AsNStructSelect extends AsNExpression {
 				offset += (ref.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
-				node.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+				node.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 			else if (st.getParameterByteOffset(ref.origin) != -1) {
 				/* In Parameter Stack */
 				int offset = st.getParameterByteOffset(ref.origin);
 				
-				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+				ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
 				start.comment = new ASMComment("Start of structure in stack");
 				node.instructions.add(start);
 			}
@@ -104,7 +104,7 @@ public class AsNStructSelect extends AsNExpression {
 				ASMDataLabel label = map.resolve(ref.origin);
 				
 				/* Load data label */
-				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), ref.origin));
+				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			}
 		}
 		else if (select.selector instanceof ArraySelect) {
@@ -118,7 +118,7 @@ public class AsNStructSelect extends AsNExpression {
 				int loc = r.declarationRegLocation(arr.idRef.origin);
 				
 				/* Just move in R1 */
-				node.instructions.add(new ASMMov(new RegOperand(REGISTER.R1), new RegOperand(loc)));
+				node.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(loc)));
 			}
 			/* In Local Stack */
 			else if (st.getDeclarationInStackByteOffset(arr.idRef.origin) != -1) {
@@ -126,13 +126,13 @@ public class AsNStructSelect extends AsNExpression {
 				offset += (arr.idRef.origin.getType().wordsize() - 1) * 4;
 				
 				/* Load offset of array in memory */
-				node.instructions.add(new ASMSub(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new ImmOperand(offset)));
+				node.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 			/* In Parameter Stack */
 			else if (st.getParameterByteOffset(arr.idRef.origin) != -1) {
 				int offset = st.getParameterByteOffset(arr.idRef.origin);
 				
-				ASMAdd start = new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.FP), new PatchableImmOperand(PATCH_DIR.UP, offset));
+				ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
 				start.comment = new ASMComment("Start of structure in stack");
 				node.instructions.add(start);
 			}
@@ -141,18 +141,18 @@ public class AsNStructSelect extends AsNExpression {
 				ASMDataLabel label = map.resolve(arr.idRef.origin);
 				
 				/* Load data label */
-				node.instructions.add(new ASMLdrLabel(new RegOperand(REGISTER.R1), new LabelOperand(label), arr.idRef.origin));
+				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), arr.idRef.origin));
 			}
 			
 			/* Already convert to bytes here, since loadSumR2 loads the offset in bytes */
 			if (select.deref) {
-				ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2));
+				ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2));
 				lsl.comment = new ASMComment("Convert to bytes");
 				node.instructions.add(lsl);
 			}
 			
 			/* Push current */
-			node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1)));
+			node.instructions.add(new ASMPushStack(new RegOp(REG.R1)));
 			
 			/* Load the struture offset in R2 */
 			if (arr.getType().wordsize() > 1)
@@ -160,10 +160,10 @@ public class AsNStructSelect extends AsNExpression {
 			else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
 			
 			/* Pop Current */
-			node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+			node.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 			
 			/* Add sum to current */
-			node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
 		}
 		
 		/* 
@@ -171,7 +171,7 @@ public class AsNStructSelect extends AsNExpression {
 		 * deref by itself. 
 		 */
 		if (select.deref && !(select.selector instanceof ArraySelect)) {
-			ASMLsl lsl = new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2));
+			ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2));
 			lsl.comment = new ASMComment("Convert to bytes");
 			node.instructions.add(lsl);
 		}
@@ -210,7 +210,7 @@ public class AsNStructSelect extends AsNExpression {
 					else if (sel1.selector instanceof ArraySelect) {
 						if (!CompilerDriver.disableStructSIDHeaders) {
 							/* Add offset for header */
-							node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+							node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(4)));
 						}
 						
 						injectArraySelect(node, (ArraySelect) sel1.selector, r, map, st);
@@ -225,7 +225,7 @@ public class AsNStructSelect extends AsNExpression {
 					ArraySelect arrSel = (ArraySelect) selection;
 					
 					int offset = struct.getFieldByteOffset(arrSel.idRef.path);
-					node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+					node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(offset)));
 					
 					injectArraySelect(node, arrSel, r, map, st);
 				}
@@ -236,8 +236,8 @@ public class AsNStructSelect extends AsNExpression {
 				StructSelect sel1 = (StructSelect) sel0.selection;
 				if (sel1.deref) {
 					/* Deref, just load current address */
-					node.instructions.add(new ASMLdr(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1)));
-					node.instructions.add(new ASMLsl(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(2)));
+					node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
+					node.instructions.add(new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2)));
 				}
 			}
 			
@@ -252,24 +252,24 @@ public class AsNStructSelect extends AsNExpression {
 		return false;
 	}
 	
-	private static void injectArraySelect(AsNNode node, ArraySelect arr, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	private static void injectArraySelect(AsNNode node, ArraySelect arr, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Push current on stack */
-		node.instructions.add(new ASMPushStack(new RegOperand(REGISTER.R1)));
+		node.instructions.add(new ASMPushStack(new RegOp(REG.R1)));
 		
 		/* Load the struture offset in R2 */
 		if (arr.getType().wordsize() > 1)
 			AsNArraySelect.loadSumR2(node, arr, r, map, st, true);
 		else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
 		
-		node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R1)));
+		node.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
 		/* Add sum to current */
-		node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+		node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
 	}
 	
 	private static void injectIDRef(AsNNode node, STRUCT struct, IDRef ref) {
 		int offset = struct.getFieldByteOffset(ref.path);
-		if (offset != 0) node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+		if (offset != 0) node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(offset)));
 	}
 	
 }

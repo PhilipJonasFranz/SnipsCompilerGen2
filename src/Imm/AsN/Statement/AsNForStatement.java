@@ -4,7 +4,7 @@ import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -13,10 +13,10 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
@@ -25,7 +25,7 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
-	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForStatement f = new AsNForStatement();
 		a.castedNode = f;
 		
@@ -69,17 +69,17 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.addAll(com.getInstructions());
 			
 			/* Condition was false, no else, skip body */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOperand(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(forEnd)));
 		}
 		else {
 			/* Default condition evaluation */
 			f.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			f.instructions.add(new ASMCmp(new RegOperand(REGISTER.R0), new ImmOperand(1)));
+			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
 			
 			/* Condition was false, jump to else */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOperand(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(forEnd)));
 		}
 		
 		
@@ -102,7 +102,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		
 		/* Branch to loop start */
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOperand(forStart));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(forStart));
 		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
 		f.instructions.add(branch);
 		
@@ -118,10 +118,11 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		else {
 			int add = st.closeScope(a, true);
 			if (add != 0) {
-				f.instructions.add(new ASMAdd(new RegOperand(REGISTER.SP), new RegOperand(REGISTER.SP), new ImmOperand(add)));
+				f.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(add)));
 			}
 		}
 		
+		f.freeDecs(r, a);
 		return f;
 	}
 	

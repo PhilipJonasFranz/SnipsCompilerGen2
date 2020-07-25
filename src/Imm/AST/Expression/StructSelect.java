@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -38,18 +38,13 @@ public class StructSelect extends Expression {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkStructSelect(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.selector.setContext(context);
 		this.selection.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.selector.releaseContext();
-		this.selection.releaseContext();
-	}
-	
 }

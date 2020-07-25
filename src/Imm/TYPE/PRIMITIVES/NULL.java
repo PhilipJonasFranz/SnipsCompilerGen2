@@ -1,9 +1,10 @@
-package Imm.TYPE;
+package Imm.TYPE.PRIMITIVES;
 
-import Exc.SNIPS_EXCEPTION;
+import Exc.SNIPS_EXC;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
 
-public class NULL extends TYPE<Object> {
+public class NULL extends PRIMITIVE<Object> {
 	
 			/* --- METHODS --- */
 	public void setValue(String value) {
@@ -19,7 +20,7 @@ public class NULL extends TYPE<Object> {
 	}
 	
 	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXCEPTION("Cannot get Source Code representation of null type.");
+		throw new SNIPS_EXC("Cannot get Source Code representation of null type.");
 	}
 	
 	public int wordsize() {

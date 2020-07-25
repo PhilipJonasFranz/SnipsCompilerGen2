@@ -50,7 +50,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     pop { r0 }
     sub r1, fp, #40                          /* Start of structure in stack */
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     mov r2, #0                               /* Evaluate Expression */

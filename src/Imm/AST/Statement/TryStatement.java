@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -46,11 +46,11 @@ public class TryStatement extends CompoundStatement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkTryStatement(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		for (Statement s : this.body) {
 			s.setContext(context);
 		}
@@ -59,13 +59,4 @@ public class TryStatement extends CompoundStatement {
 		}
 	}
 
-	public void releaseContext() {
-		for (Statement s : this.body) {
-			s.releaseContext();
-		}
-		for (WatchStatement w : this.watchpoints) {
-			w.releaseContext();
-		}
-	}
-	
 }

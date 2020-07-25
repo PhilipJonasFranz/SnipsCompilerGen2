@@ -1,0 +1,176 @@
+#include<hash.sn>
+#include<linked_list.sn>
+
+/*
+ * This package contains the utility and definitions
+ * to create and maintain a hash-map of any type.
+ * Data can be stored and loaded from the hash map.
+ * The map has collision avoidance, so that if the hashed
+ * key already exists, the two values still can be stored
+ * and retrieved later with the correct key.
+ */
+namespace Map {
+	
+	/*
+	 * A tuple capsuling two different data types.
+	 */
+	restricted struct Tuple2<X, Y> {
+		X first;
+		Y second;
+	}
+	
+	/*
+	 * The hashmap itself, capsuling a storage array
+	 * out of linked lists with the size specified in the capsuled
+	 * size field, and a default value that is returned when a 
+	 * key is not found.
+	 */
+	restricted struct HashMap<K, V> {
+		LinkedList<Tuple2<K, V>>** storage;
+		int size;
+		Tuple2<K, V>* defValue;
+	}
+	
+	/*
+	 * Matches the entire memory section of the key. Returns true
+	 * if all values are equal.
+	 */
+	restricted bool tupleKeyMatcher<K, V>(Tuple2<K, V> t0, Tuple2<K, V> t1) {
+		void* p0 = &t0;
+		void* p1 = &t1;
+		
+		for (int i = 0; i < sizeof(K); i++) {
+			int x = *(p0 + i);
+			int y = *(p1 + i);
+			
+			if (!(*(p0 + i) == *(p1 + i))) return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * Creates a new hash map with defined size and default value.
+	 * Also sets up the storage and initializes it.
+	 */
+	shared HashMap<K, V>* create<K, V>(int size, V defValue) {
+		LinkedList<Tuple2<K, V>>** storage = resv(size);
+		
+		for (int i = 0; i < size; i++)
+			*(storage + i) = null;
+			
+		/* Initialize default tuple */
+		Tuple2<K, V>* def = resv(sizeof(Tuple2<K, V>));
+		
+		/* Place default value after key */
+		*(def + sizeof(K) + (int) __EN_SID) = (void) defValue;
+		
+		HashMap<K, V>* map = resv(sizeof(HashMap<K, V>));
+		*map = HashMap<K, V>::(storage, size, def);
+		
+		return map;
+	}
+	
+	/*
+	 * Frees all capsuled objects in the map as well as all 
+	 * stored values, and the map itself.
+	 */
+	shared HashMap<void, void>* destroy(HashMap<void, void>* map) {
+		/* Destroy all the linked lists */
+		for (int i = 0; i < map->size; i++) {
+			LinkedList<void>* l = *(map->storage + i);
+			if (l != null) List::destroy(l);
+		}
+		
+		/* Free the default value */
+		free(map->defValue);
+		
+		/* Free the map itself */
+		free(map);
+	}
+	
+	/*
+	 * Stores given value at the hashed key location.
+	 */
+	shared void put<K, V>(HashMap<K, V>* map, K key, V value) {
+		/* Compute the hash of the key and limit it to the map size */
+		int hash = Hash::hash(&key, sizeof(K)) % map->size;
+		
+		/* Load the corresponding linked list */
+		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
+
+		/* Initialize new list at index */
+		if (l == null) {
+			l = List::create<Tuple2<K, V>>(*map->defValue);
+			*(map->storage + hash) = l;
+		}
+		
+		/* Initialize the new key/value tuple */
+		Tuple2<K, V> new = Tuple2<K, V>::(key, value);
+		
+		/* Store in the list */
+		List::add<Tuple2<K, V>>(l, new);
+	}
+	
+	/*
+	 * Returns the value corresponding to given key, or
+	 * the default value if the key does not exist.
+	 */
+	shared V get<K, V>(HashMap<K, V>* map, K key) {
+		/* Compute the hash of the key and limit it to the map size */
+		int hash = Hash::hash(&key, sizeof(K)) % map->size;
+		
+		/* Load the corresponding linked list */
+		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
+		
+		if (l != null) {
+			/* Init tuple for searching */
+			Tuple2<K, V> search = Tuple2<K, V>::(key, map->defValue->second);
+		
+			/* Search for tuple in list */
+			ListNode<Tuple2<K, V>>* node = List::find<Tuple2<K, V>>(l, tupleKeyMatcher<K, V>, search);
+			
+			if (node != null) {
+				/* Found, return value */
+				return node->value.second;
+			}
+		}
+
+		/* No value for key, return default value */
+		return map->defValue->second;
+	}
+	
+	
+	/*
+	 * Remove the key from the map. Return if it doesnt exist.
+	 */
+	shared void remove<K, V>(HashMap<K, V>* map, K key) {
+		/* Compute the hash of the key and limit it to the map size */
+		int hash = Hash::hash(&key, sizeof(K)) % map->size;
+		
+		/* Load the corresponding linked list */
+		LinkedList<Tuple2<K, V>>* l = *(map->storage + hash);
+		
+		if (l != null) {
+			/* Init tuple for searching */
+			Tuple2<K, V> search = Tuple2<K, V>::(key, map->defValue->second);
+		
+			/* Get iterator to go through list */
+			ListNode<Tuple2<K, V>>* n = l->head;
+			int i = 0;
+			
+			/* Iterate through list, check for match, and remove */
+			while (n != null) {
+				if (tupleKeyMatcher<K, V>(n->value, search)) {
+					List::remove(l, i);
+					break;
+				}
+				else {
+					i++;
+					n = n->next;
+				}
+			}
+		}
+	}
+	
+}

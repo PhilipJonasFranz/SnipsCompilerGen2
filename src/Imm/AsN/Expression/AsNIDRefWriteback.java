@@ -3,14 +3,14 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AsN.Statement.AsNAssignWriteback;
 
 public class AsNIDRefWriteback extends AsNExpression {
 
 			/* --- METHODS --- */
-	public static AsNIDRefWriteback cast(IDRefWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNIDRefWriteback cast(IDRefWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIDRefWriteback w = new AsNIDRefWriteback();
 		wb.castedNode = w;
 		

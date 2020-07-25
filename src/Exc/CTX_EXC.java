@@ -8,7 +8,7 @@ import Util.Logging.Message;
 /**
  * Thrown when the user input led to an illegal combination of components.
  */
-public class CTX_EXCEPTION extends Exception {
+public class CTX_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
@@ -16,7 +16,7 @@ public class CTX_EXCEPTION extends Exception {
 	
 	Source location;
 	
-	public CTX_EXCEPTION(Source source, String message) {
+	public CTX_EXC(Source source, String message) {
 		this.location = source;
 		this.message = message;
 		ContextChecker.progress.abort();

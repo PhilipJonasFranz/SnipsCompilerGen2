@@ -29,7 +29,7 @@ foo:                                         /* Function: foo */
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
-    ldr r0, [r1, #0]
+    ldr r0, [r1]
     push { r0 }
     bl bar                                   /* Call bar */
     mov sp, fp

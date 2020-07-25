@@ -133,8 +133,8 @@ resv.L18:
 /* the memory address, but the memory block will not be registered to be used anymore and */
 /* thus can be overwritten. */
 free:                                        /* Function: free */
-    sub sp, sp, #16
-    stmea sp, {r3, r4, r6, r7}
+    sub sp, sp, #12
+    stmea sp, {r3, r4, r6}
     mov r3, r0
 /* Jump to block head */
     sub r3, r0, #1
@@ -148,16 +148,16 @@ free.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r6, lsl #2]                /* Load from address */
     cmp r0, #0
     bge free.L2
-    ldr r7, [r10, r6, lsl #2]                /* Load from address */
+    ldr r4, [r10, r6, lsl #2]                /* Load from address */
 /* Add size to freed block */
     ldr r1, [r10, r3, lsl #2]                /* Load from address */
-    add r0, r1, r7
+    add r0, r1, r4
     str r0, [r10, r3, lsl #2]
 /* Shift pointer to next block */
-    sub r6, r6, r7
+    sub r6, r6, r4
     b free.L1
 free.L2: 
-    ldmfd sp!, {r3, r4, r6, r7}
+    ldmfd sp!, {r3, r4, r6}
     bx lr
     
 __op_mod:                                    /* Function: __op_mod */
@@ -165,33 +165,38 @@ __op_mod:                                    /* Function: __op_mod */
     stmea sp, {r3-r7}
     mov r3, r0
     mov r4, r1
+    cmp r0, #0
+    bne __op_mod.L0
+    mov r0, #0                               /* Evaluate Expression */
+    b __op_mod.L14
+__op_mod.L0: 
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
     cmp r3, #0
-    bge __op_mod.L0
+    bge __op_mod.L2
     mov r5, #1
     rsb r3, r3, #0
-__op_mod.L0: 
+__op_mod.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov r6, r4
-__op_mod.L3:                                 /* Evaluate condition */
+__op_mod.L5:                                 /* Evaluate condition */
     cmp r6, r3
-    bgt __op_mod.L4
+    bgt __op_mod.L6
     lsl r6, r6, #1
-    b __op_mod.L3
-__op_mod.L4: 
+    b __op_mod.L5
+__op_mod.L6: 
     mov r0, r3                               /* Evaluate Expression */
     mov r7, r3
-__op_mod.L6:                                 /* Evaluate condition */
+__op_mod.L8:                                 /* Evaluate condition */
     cmp r7, r4
-    blt __op_mod.L7
+    blt __op_mod.L9
     lsr r6, r6, #1
     cmp r6, r7
-    bgt __op_mod.L8
+    bgt __op_mod.L10
     sub r7, r7, r6
-__op_mod.L8: 
-    b __op_mod.L6
-__op_mod.L7: 
+__op_mod.L10: 
+    b __op_mod.L8
+__op_mod.L9: 
     cmp r7, #0
     movne r0, #1
     moveq r0, #0
@@ -201,10 +206,11 @@ __op_mod.L7:
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq __op_mod.L11
+    beq __op_mod.L13
     sub r7, r4, r7
-__op_mod.L11: 
+__op_mod.L13: 
     mov r0, r7                               /* Evaluate Expression */
+__op_mod.L14: 
     ldmfd sp!, {r3-r7}
     bx lr
     
@@ -245,7 +251,7 @@ Queue.create_P0:                             /* Function: Queue.create, Provisos
     stmfd sp!, {r0, r1}
     mov r0, #1
     lsl r1, r5, #2
-    str r0, [r1, #0]
+    str r0, [r1]
     str r4, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
@@ -323,7 +329,7 @@ Queue.enqueue.L0:
     add r0, r1, r4
     lsl r1, r0, #2
     pop { r0 }
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
 /* Increment head index */
@@ -362,7 +368,7 @@ Queue.dequeue_P2:                            /* Function: Queue.dequeue, Proviso
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1, #4]
-    ldr r2, [r1, #0]
+    ldr r2, [r1]
     stmfd sp!, {r0, r2}
     b Queue.dequeue.L4
 Queue.dequeue.L0: 
@@ -376,7 +382,7 @@ Queue.dequeue.L0:
     lsl r2, r0, #1
     add r0, r1, r2
     lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #0]
+    ldr r0, [r1]
     push { r0 }
     ldr r0, [r1, #4]
 /* Increment tail */

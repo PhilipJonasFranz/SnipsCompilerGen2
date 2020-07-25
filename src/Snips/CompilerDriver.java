@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Exc.CGEN_EXCEPTION;
-import Exc.CTX_EXCEPTION;
-import Exc.PARSE_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
+import Exc.PARSE_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
@@ -26,6 +26,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
@@ -44,10 +45,6 @@ import Util.Logging.ProgressMessage;
 
 public class CompilerDriver {
 
-			/* --- STATIC FIELDS --- */
-	/* The Input File */
-	public static File file;
-	
 	public static String [] logo = {
 		"	  _______  __    _  ___  _______  _______",
 		"	 |       ||  \\  | ||   ||       ||       |",
@@ -57,9 +54,8 @@ public class CompilerDriver {
 		"	  _____| || | \\   ||   ||   |     _____| |",
 		"	 |_______||_|  \\__||___||___|    |_______|"};
 	
-	public static List<Message> log = new ArrayList();
 	
-	/* Flags & Settings */
+			/* --- FLAGS & SETTINGS --- */
 	public static boolean 
 		logoPrinted = false, 
 		useTerminalColors = true, 
@@ -74,30 +70,43 @@ public class CompilerDriver {
 		includeMetaInformation = true,
 		printErrors = false;
 			
-	/* Debug */
+			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = false,
 		includeProvisoInTypeString = false,
 		printObjectIDs = false;
 	
-	public static String outputPath;
-
+			/* --- FORMATTING --- */
 	public static String printDepth = "    ";
 	public static int commentDistance = 45;
 	
+			/* --- STATS --- */
+	/* Documents the occurred compression rates */
 	public static List<Double> compressions = new ArrayList();
 	
+	/* Documents the minimum and maximum compression reached */
 	public static double c_min = 100, c_max = 0;
 	
+	/* Counts the amount of the different instructions */
 	public static HashMap<String, Integer> ins_p = new HashMap();
 	
+	/* Counts the total sum of all instructions */
 	public static int instructionsGenerated = 0;
 	
+	
+			/* --- ACCESSIBILITY --- */
+	public static List<Message> log = new ArrayList();
+	
+	public static File inputFile;
+	
+	public static String outputPath;
+
 	public static CompilerDriver driver;
 	
 	public static XMLNode sys_config;
 	
-	/* Reserved Declarations & Ressources */
+	
+			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
 	
@@ -106,7 +115,15 @@ public class CompilerDriver {
 	
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
-													
+								
+	public static Declaration create(String name, TYPE type) {
+		List<String> path1 = new ArrayList();
+		path1.add(name);
+		NamespacePath pa1 = new NamespacePath(path1);
+		
+		Declaration dec = new Declaration(pa1, type, MODIFIER.SHARED, nullSource);
+		return dec;
+	}
 													
 			/* --- MAIN --- */
 	public static void main(String [] args) {
@@ -140,10 +157,10 @@ public class CompilerDriver {
 		}
 		
 		/* Read code from input file... */
-		List<String> code = Util.readFile(file);
+		List<String> code = Util.readFile(inputFile);
 		
 		/* ...and compile! */
-		scd.compile(file, code);
+		scd.compile(inputFile, code);
 	}
 	
 	
@@ -177,16 +194,22 @@ public class CompilerDriver {
 		sys_config  = new XMLNode(conf);
 	}
 	
+	/**
+	 * Attempts to read from the .jar of the compiler, with
+	 * replative path to the CompilerDriver.class
+	 * @param path The path to the file in the jar relative to the class.
+	 * @return The contents of the given file or null.
+	 */
 	public List<String> readFromJar(String path) {
 		List<String> lines = new ArrayList();
 	    
 		try {
 			InputStream is = CompilerDriver.class.getResourceAsStream(path);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		    String line;
-		    while ((line = br.readLine()) != null)  {
-		    	lines.add(line);
-		    }
+
+			String line;
+		    while ((line = br.readLine()) != null) lines.add(line);
+
 		    br.close();
 		    is.close();
 		} catch (Exception e) {
@@ -202,13 +225,14 @@ public class CompilerDriver {
 		/* Setup & set settings */
 		List<String> output = null;
 		LabelGen.reset();
-		file = file0;
+		inputFile = file0;
 		printLogo();
 		log.clear();
 		
 		try {
+			/* Recieved no source code */
 			if (code == null) 
-				throw new SNIPS_EXCEPTION("SNIPS -> Input is null!");
+				throw new SNIPS_EXC("SNIPS -> Input is null!");
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
@@ -218,7 +242,7 @@ public class CompilerDriver {
 			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
 			
 					/* --- PRE-PROCESSING --- */
-			PreProcessor preProcess = new PreProcessor(code, file.getName());
+			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
 			List<LineObject> preCode = preProcess.getProcessed();
 			
 			
@@ -236,7 +260,7 @@ public class CompilerDriver {
 			
 					/* --- PROCESS IMPORTS --- */
 			Program p = (Program) AST;
-			p.fileName = file.getPath();
+			p.fileName = inputFile.getPath();
 			if (!referencedLibaries.isEmpty()) {
 				List<Program> dependencies = this.addDependencies();
 				
@@ -305,10 +329,14 @@ public class CompilerDriver {
 					/* --- OUTPUT BUILDING --- */
 			output = new ArrayList();
 			
+			/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
 			output = body.getInstructions().stream().filter(x -> ((x instanceof ASMComment)? enableComments : true)).map(x -> {
+				
+				/* Count instruction types */
 				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
 				else ins_p.put(x.getClass().getName(), 1);
 				
+				/* Build instruction with or without comment */
 				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
 			}).collect(Collectors.toList());
 		
@@ -326,7 +354,7 @@ public class CompilerDriver {
 			instructionsGenerated += output.size();
 		
 		} catch (Exception e) {
-			boolean customExc = (e instanceof CGEN_EXCEPTION) || (e instanceof CTX_EXCEPTION) || (e instanceof PARSE_EXCEPTION) || (e instanceof SNIPS_EXCEPTION);
+			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
 			
 			/* Exception is not ordinary and internal, print message and stack trace */
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
@@ -360,9 +388,9 @@ public class CompilerDriver {
 	 * Used to hot compile referenced libaries.
 	 * @param files The libary files to compile
 	 * @return A list of ASTs containing the contents of the files as AST.
-	 * @throws SNIPS_EXCEPTION 
+	 * @throws SNIPS_EXC 
 	 */
-	public List<Program> hotCompile(List<String> files) throws SNIPS_EXCEPTION {
+	public List<Program> hotCompile(List<String> files) throws SNIPS_EXC {
 		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
@@ -382,7 +410,7 @@ public class CompilerDriver {
 			
 			/* Libary was not found */
 			if (code == null) 
-				throw new SNIPS_EXCEPTION("SNIPS -> Failed to locate library " + filePath);
+				throw new SNIPS_EXC("SNIPS -> Failed to locate library " + filePath);
 			
 			Program AST = null;
 			
@@ -416,9 +444,9 @@ public class CompilerDriver {
 
 	/**
 	 * Import dependencies of dynamic imports
-	 * @throws SNIPS_EXCEPTION 
+	 * @throws SNIPS_EXC 
 	 */
-	public List<Program> addDependencies() throws SNIPS_EXCEPTION {
+	public List<Program> addDependencies() throws SNIPS_EXC {
 		List<Program> ASTs = new ArrayList();
 		
 		for (String s : this.referencedLibaries) {
@@ -473,7 +501,7 @@ public class CompilerDriver {
 			System.exit(0);
 		}
 		
-		file = new File(args [0]);
+		inputFile = new File(args [0]);
 		
 		if (args.length > 1) {
 			for (int i = 1; i < args.length; i++) {
@@ -594,7 +622,6 @@ public class CompilerDriver {
 		
 		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Message.Type.INFO));
 		
-		System.out.println();
 		List<Pair<Integer, String>> rmap = new ArrayList();
 		for (Entry<String, Integer> e : ins_p.entrySet()) {
 			if (rmap.isEmpty()) {
@@ -614,24 +641,28 @@ public class CompilerDriver {
 			}
 		}
 		
-		double stretch = 1.0;
-		
-		if (rmap.get(0).first > 75) {
-			stretch = 75.0 / rmap.get(0).first;
-		}
-		
-		for (int i = 0; i < rmap.size(); i++) {
-			System.out.print(f + "|");
-			for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
-				System.out.print("\u2588");
+		if (!rmap.isEmpty()) {
+			System.out.println();
+			
+			double stretch = 1.0;
+			
+			if (rmap.get(0).first > 75) {
+				stretch = 75.0 / rmap.get(0).first;
 			}
 			
-			String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+			for (int i = 0; i < rmap.size(); i++) {
+				System.out.print(f + "|");
+				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
+					System.out.print("\u2588");
+				}
+				
+				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+				
+				System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			}
 			
-			System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			System.out.println();
 		}
-		
-		System.out.println();
 		
 		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
 	}

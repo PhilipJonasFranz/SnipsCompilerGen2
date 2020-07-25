@@ -6,24 +6,24 @@ import java.util.stream.Collectors;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public class ASMPushStack extends ASMInstruction {
 
 			/* --- FIELDS --- */
 	/** The list of operands that are pushed in the order of the list. */
-	public List<RegOperand>operands;
+	public List<RegOp>operands;
 	
 	public ASMPopStack popCounterpart;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ASMPushStack(RegOperand...operands) {
+	public ASMPushStack(RegOp...operands) {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 	
-	public ASMPushStack(Cond cond, RegOperand...operands) {
+	public ASMPushStack(Cond cond, RegOp...operands) {
 		super(cond);
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}

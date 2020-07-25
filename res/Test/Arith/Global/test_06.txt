@@ -34,7 +34,7 @@ s0: .skip 24
     stmfd sp!, {r0, r1}
     mov r0, #1
     ldr r1, .POOL0_main.L0_s0                /* Load from .data section */
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }

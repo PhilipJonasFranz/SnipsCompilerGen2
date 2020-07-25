@@ -13,13 +13,9 @@ bool pred0(int x, int y) {
 
 int main() {
 	Y y0 = Y::(X::(10));
-	
 	X* p = &y0.x0;
-	
 	y0.x0.x = 20;
-	
 	int k = 12;
-	
 	return p->x;
 }
 TESTCASES
@@ -40,9 +36,7 @@ main:                                        /* Function: main */
     lsr r3, r0, #2
     mov r0, #20                              /* Evaluate Expression */
     str r0, [fp, #-4]                        /* Store value to struct field */
-    mov r4, #12
     lsl r1, r3, #2                           /* Convert to bytes */
-    push { r4 }                              /* Push declaration on stack, referenced by addressof. */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov sp, fp
     bx lr

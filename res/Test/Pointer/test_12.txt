@@ -26,7 +26,7 @@ set:                                         /* Function: set */
     stmfd sp!, {r0-r2}
     ldr r0, [fp, #8]
     lsl r1, r3, #2
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }

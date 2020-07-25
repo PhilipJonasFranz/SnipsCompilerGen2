@@ -3,8 +3,8 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
-import Exc.SNIPS_EXCEPTION;
+import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -12,10 +12,10 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.SignalStatement;
@@ -27,7 +27,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNSignalStatement extends AsNStatement {
 
-	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSignalStatement sig = new AsNSignalStatement();
 		
 		STRUCT excType = (STRUCT) s.exceptionInit.getType();
@@ -36,12 +36,12 @@ public class AsNSignalStatement extends AsNStatement {
 		sig.instructions.addAll(AsNStructureInit.cast(s.exceptionInit, r, map, st).getInstructions());
 	
 		/* Move Struct ID into R12 to signal a thrown exception */
-		ASMMov signal = new ASMMov(new RegOperand(REGISTER.R12), new ImmOperand(excType.typedef.SID));
+		ASMMov signal = new ASMMov(new RegOp(REG.R12), new ImmOp(excType.getTypedef().SID));
 		signal.comment = new ASMComment("Signal thrown exception");
 		sig.instructions.add(signal);
 		
 		/* Move word size of thrown exception into r0 to be used in the copy loop */
-		ASMMov mov = new ASMMov(new RegOperand(REGISTER.R0), new ImmOperand(s.exceptionInit.getType().wordsize() * 4));
+		ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(s.exceptionInit.getType().wordsize() * 4));
 		mov.optFlags.add(OPT_FLAG.WRITEBACK);
 		sig.instructions.add(mov);
 		
@@ -69,9 +69,9 @@ public class AsNSignalStatement extends AsNStatement {
 			/* Branch to try statement watchpoint */
 			escape = ((AsNTryStatement) ((TryStatement) watchpoint).castedNode).watchpointLabel;
 		}
-		else throw new SNIPS_EXCEPTION("Unknown watchpoint type " + watchpoint.getClass().getName() + ", " + watchpoint.getSource().getSourceMarker());
+		else throw new SNIPS_EXC("Unknown watchpoint type " + watchpoint.getClass().getName() + ", " + watchpoint.getSource().getSourceMarker());
 	
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, cond, new LabelOperand(escape));
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(escape));
 		branch.comment = new ASMComment("Exception thrown, branch to escape target");
 		
 		node.instructions.add(branch);

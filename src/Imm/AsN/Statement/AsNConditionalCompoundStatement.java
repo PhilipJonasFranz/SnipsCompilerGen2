@@ -3,7 +3,7 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.DoWhileStatement;
@@ -17,7 +17,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	
 	public ASMLabel continueJump;
 	
-	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNConditionalCompoundStatement node = null;
 		
@@ -33,7 +33,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 		else if (s instanceof ForStatement) {
 			node = AsNForStatement.cast((ForStatement) s, r, map, st);
 		}
-		else throw new CGEN_EXCEPTION(s.getSource(), "No injection cast available for " + s.getClass().getName());	
+		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 	
 		s.castedNode = node;
 		return node;

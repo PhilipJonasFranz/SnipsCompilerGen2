@@ -4,7 +4,7 @@ import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXCEPTION;
+import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMStr;
@@ -17,10 +17,10 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOperand;
-import Imm.ASM.Util.Operands.LabelOperand;
-import Imm.ASM.Util.Operands.RegOperand;
-import Imm.ASM.Util.Operands.RegOperand.REGISTER;
+import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.Assignment;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode;
@@ -29,7 +29,7 @@ import Imm.AsN.Statement.Lhs.AsNLhsId;
 
 public class AsNAssignment extends AsNStatement {
 
-	public static AsNAssignment cast(Assignment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXCEPTION {
+	public static AsNAssignment cast(Assignment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNAssignment assign = new AsNAssignment();
 		
 		/* Compute value */
@@ -39,6 +39,7 @@ public class AsNAssignment extends AsNStatement {
 		/* Store value at location specified by lhs */
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());
 		
+		assign.freeDecs(r, a);
 		return assign;
 	}
 	
@@ -46,17 +47,17 @@ public class AsNAssignment extends AsNStatement {
 	 * Assumes that the base address of the array or the start address of the memory section is located in R1.
 	 * Pops the word it copies of the stack.
 	 * @param size The amound of words to copy.
-	 * @throws CGEN_EXCEPTION 
+	 * @throws CGEN_EXC 
 	 */
-	public static void copyStackSection(int size, AsNNode node, StackSet st) throws CGEN_EXCEPTION {
+	public static void copyStackSection(int size, AsNNode node, StackSet st) throws CGEN_EXC {
 		/* Do it sequentially for 8 or less words to copy */
 		if (size <= 8) {
 			int offset = 0;
 			for (int a = 0; a < size; a++) {
 				/* Pop data from stack */
-				node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+				node.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
 				
-				node.instructions.add(new ASMStr(new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(offset)));
+				node.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1), new ImmOp(offset)));
 				
 				offset += 4;
 			}
@@ -64,14 +65,14 @@ public class AsNAssignment extends AsNStatement {
 		else {
 			if (size * 4 < 255) {
 				/* Move counter in R2 */
-				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1), new ImmOperand(size * 4)));
+				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(size * 4)));
 			}
 			else {
 				/* Load value via literal manager */
 				AsNBody.literalManager.loadValue(node, size * 4, 2);
 				
 				/* Move counter in R2 */
-				node.instructions.add(new ASMAdd(new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R2), new RegOperand(REGISTER.R1)));
+				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R1)));
 			}
 			
 			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
@@ -81,18 +82,18 @@ public class AsNAssignment extends AsNStatement {
 			ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
 			
 			/* Check if whole sub array was loaded */
-			node.instructions.add(new ASMCmp(new RegOperand(REGISTER.R1), new RegOperand(REGISTER.R2)));
+			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));
 			
 			/* Branch to loop end */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOperand(loopEnd)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
 			
 			/* Pop value from stack and store it at location */
-			node.instructions.add(new ASMPopStack(new RegOperand(REGISTER.R0)));
+			node.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
 			
-			node.instructions.add(new ASMStrStack(MEM_OP.POST_WRITEBACK, new RegOperand(REGISTER.R0), new RegOperand(REGISTER.R1), new ImmOperand(4)));
+			node.instructions.add(new ASMStrStack(MEM_OP.POST_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.R1), new ImmOp(4)));
 			
 			/* Branch to loop start */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOperand(loopStart)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(loopStart)));
 			
 			node.instructions.add(loopEnd);
 		}

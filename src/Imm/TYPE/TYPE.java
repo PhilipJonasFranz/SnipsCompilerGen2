@@ -64,4 +64,6 @@ public abstract class TYPE<T> {
 		return this.value;
 	}
 	
+	public abstract TYPE provisoFree();
+	
 }

@@ -15,6 +15,7 @@ public class NamespacePath {
 	public PATH_TERMINATION termination = PATH_TERMINATION.UNKNOWN;
 	
 	
+			/* --- CONSTRUCTORS --- */
 	public NamespacePath(List<String> path) {
 		this.path = path;
 	}
@@ -30,8 +31,6 @@ public class NamespacePath {
 		this.termination = termination;
 	}
 	
-	
-			/* --- CONSTRUCTORS --- */
 	public NamespacePath(String name) {
 		this.path = new ArrayList();
 		this.path.add(name);

@@ -3,7 +3,7 @@ package Imm.AST.Lhs;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
@@ -31,7 +31,7 @@ public class ArraySelectLhsId extends LhsId {
 		this.selection.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		TYPE t = ctx.checkArraySelect(this.selection);
 		this.origin = this.selection.idRef.origin;
 		return t;
@@ -41,12 +41,8 @@ public class ArraySelectLhsId extends LhsId {
 		return selection.idRef.path;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.selection.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.selection.releaseContext();
-	}
-	
 }

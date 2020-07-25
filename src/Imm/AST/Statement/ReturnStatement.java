@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -37,17 +37,13 @@ public class ReturnStatement extends Statement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkReturn(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (this.value != null) 
 			this.value.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.value.releaseContext();
-	}
-	
 }

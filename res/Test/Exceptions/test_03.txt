@@ -231,7 +231,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     pop { r0 }
     lsl r1, r4, #2
-    str r0, [r1, #0]
+    str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }

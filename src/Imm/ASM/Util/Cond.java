@@ -3,6 +3,9 @@ package Imm.ASM.Util;
 public class Cond {
 
 			/* --- NESTED --- */
+	/**
+	 * Condition mnemonics for the assembly instructions.
+	 */
 	public enum COND {
 		EQ, NE, CS, CC,
 		MI, PL, VS, VC,

@@ -3,10 +3,9 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
-import Imm.TYPE.PROVISO;
+import Ctx.ProvisoUtil;
+import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.Source;
 
 /**
@@ -35,31 +34,12 @@ public class SizeOfType extends Expression {
 		System.out.println(this.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkSizeOfType(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
-		if (this.sizeType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.sizeType;
-			for (TYPE t : context) {
-				if (t.isEqual(p)) {
-					p.setContext(t);
-					break;
-				}
-			}
-		}
-		else if (this.sizeType instanceof STRUCT) {
-			STRUCT s = (STRUCT) this.sizeType;
-			s.typedef.setContext(context);
-		}
+	public void setContext(List<TYPE> context) throws CTX_EXC {
+		ProvisoUtil.mapNTo1(this.sizeType, context);
 	}
 
-	public void releaseContext() {
-		if (this.sizeType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.sizeType;
-			p.releaseContext();
-		}
-	}
-	
 }

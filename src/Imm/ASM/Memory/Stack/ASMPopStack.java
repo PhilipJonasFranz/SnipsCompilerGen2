@@ -6,22 +6,22 @@ import java.util.stream.Collectors;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {
 
 			/* --- FIELDS --- */
 	/** The list of operands that are popped in the order of the list. */
-	public List<RegOperand> operands;
+	public List<RegOp> operands;
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ASMPopStack(RegOperand...operands) {
+	public ASMPopStack(RegOp...operands) {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 	
-	public ASMPopStack(Cond cond, RegOperand...operands) {
+	public ASMPopStack(Cond cond, RegOp...operands) {
 		super(cond);
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
@@ -42,7 +42,7 @@ public class ASMPopStack extends ASMInstruction {
 	
 	public ASMPopStack clone() {
 		ASMPopStack pop = new ASMPopStack();
-		for (RegOperand op : this.operands) pop.operands.add(op.clone());
+		for (RegOp op : this.operands) pop.operands.add(op.clone());
 		return pop;
 	}
 	

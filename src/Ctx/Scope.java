@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
@@ -23,6 +23,9 @@ public class Scope {
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
+	/** Set to true if scope is part of a loop */
+	boolean isLoopedScope = false;
+	
 	/** Stores all the declarations made in this scope. */
 	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
@@ -31,6 +34,11 @@ public class Scope {
 	/** Create a new scope and set the parent scope. */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;
+	}
+	
+	public Scope(Scope parentScope, boolean isLoopedScope) {
+		this.parentScope = parentScope;
+		this.isLoopedScope = isLoopedScope;
 	}
 	
 	/** Print out the current scope and all parent scopes and the stored declarations */
@@ -44,13 +52,13 @@ public class Scope {
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
-	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXCEPTION {
+	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXC {
 		if (checkDups) this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
-	public Message addDeclaration(Declaration dec) throws CTX_EXCEPTION {
+	public Message addDeclaration(Declaration dec) throws CTX_EXC {
 		Message m = this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
 		return m;
@@ -60,9 +68,9 @@ public class Scope {
 	 * Check if this scope or any of the parent scopes contains a declaration with the identifier
 	 * of the given declaration. Throws a CTX_EXCEPTION if this is the case.
 	 */
-	public Message checkDuplicate(Declaration dec) throws CTX_EXCEPTION {
+	public Message checkDuplicate(Declaration dec) throws CTX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
-			throw new CTX_EXCEPTION(dec.getSource(), "Duplicate field name: " + dec.path.build());
+			throw new CTX_EXC(dec.getSource(), "Duplicate field name: " + dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
@@ -78,7 +86,7 @@ public class Scope {
 		return null;
 	}
 	
-	private Declaration checkDuplicateRec(Declaration dec) throws CTX_EXCEPTION {
+	private Declaration checkDuplicateRec(Declaration dec) throws CTX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
 			return this.declarations.get(dec.path.build()).first;
 		}
@@ -93,9 +101,9 @@ public class Scope {
 	/** 
 	 * Returns the declaration with given field name from this scope or any of the parent scopes. 
 	 * Returns null if the field is not found.
-	 * @throws CTX_EXCEPTION 
+	 * @throws CTX_EXC 
 	 */
-	public Declaration getField(NamespacePath path, Source source) throws CTX_EXCEPTION {
+	public Declaration getField(NamespacePath path, Source source) throws CTX_EXC {
 		if (path != null && this.declarations.containsKey(path.build())) {
 			return this.declarations.get(path.build()).first;
 		}
@@ -120,17 +128,17 @@ public class Scope {
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
 					else if (decs.isEmpty()) {
-						throw new CTX_EXCEPTION(source, "Unknown variable: " + path.build());
+						throw new CTX_EXC(source, "Unknown variable: " + path.build());
 					}
 					else {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXCEPTION(source, "Multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+						throw new CTX_EXC(source, "Multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
 					}
 				}
 				else {
-					throw new CTX_EXCEPTION(source, "Unknown variable: " + path.build());
+					throw new CTX_EXC(source, "Unknown variable: " + path.build());
 				}
 			}
 		}

@@ -3,8 +3,8 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoManager;
-import Exc.CTX_EXCEPTION;
+import Ctx.ProvisoUtil;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
@@ -29,6 +29,8 @@ public class Declaration extends Statement {
 	
 	/** The initial value of this declaration. */
 	public Expression value;
+	
+	public Statement last = null;
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -64,22 +66,19 @@ public class Declaration extends Statement {
 			this.value.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkDeclaration(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* Apply to declaration type */
-		ProvisoManager.setContext(context, this.type);
+		ProvisoUtil.mapNTo1(this.type, context);
 		
 		/* Apply to value */
-		if (this.value != null) this.value.setContext(context);
+		if (this.value != null) 
+			this.value.setContext(context);
 	}
 
-	public void releaseContext() {
-		if (this.value != null) this.value.releaseContext();
-	}
-	
 	/** 
 	 * Return the current context, or the actual type.
 	 */

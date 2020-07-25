@@ -3,7 +3,7 @@ package Imm.ASM.Processing;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.RegOperand;
+import Imm.ASM.Util.Operands.RegOp;
 
 public abstract class ASMUnaryData extends ASMInstruction {
 
@@ -17,7 +17,7 @@ public abstract class ASMUnaryData extends ASMInstruction {
 	
 	
 			/* --- FIELDS --- */
-	public RegOperand target;
+	public RegOp target;
 	
 	public Operand op0;
 	
@@ -29,12 +29,12 @@ public abstract class ASMUnaryData extends ASMInstruction {
 	
 	
 			/* --- CONSTRUCTORS --- */
-	public ASMUnaryData(RegOperand target, Operand op0) {
+	public ASMUnaryData(RegOp target, Operand op0) {
 		this.target = target;
 		this.op0 = op0;
 	}
 	
-	public ASMUnaryData(RegOperand target, Operand op0, Cond cond) {
+	public ASMUnaryData(RegOp target, Operand op0, Cond cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

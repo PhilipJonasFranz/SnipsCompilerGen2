@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -58,11 +58,11 @@ public class IfStatement extends ConditionalCompoundStatement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkIfStatement(this);
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		super.setContext(context);
 		
 		if (this.condition != null) 
@@ -72,14 +72,4 @@ public class IfStatement extends ConditionalCompoundStatement {
 			this.elseStatement.setContext(context);
 	}
 
-	public void releaseContext() {
-		super.releaseContext();
-		
-		if (this.condition != null) 
-			this.condition.releaseContext();
-		
-		if (this.elseStatement != null)
-			this.elseStatement.releaseContext();
-	}
-	
 }

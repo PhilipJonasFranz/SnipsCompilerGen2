@@ -2,7 +2,7 @@ package Imm.ASM.Util.Operands;
 
 import Imm.ASM.Structural.Label.ASMLabel;
 
-public class LabelOperand extends Operand {
+public class LabelOp extends Operand {
 
 			/* --- FIELDS --- */
 	/**
@@ -15,14 +15,14 @@ public class LabelOperand extends Operand {
 	/**
 	 * Default Constructor. Needs patching via {@link #patch(ASMLabel)} to work properly.
 	 */
-	public LabelOperand() {
+	public LabelOp() {
 		
 	}
 	
 	/**
 	 * Create a new Label Operand that points to given label.
 	 */
-	public LabelOperand(ASMLabel label) {
+	public LabelOp(ASMLabel label) {
 		this.label = label;
 	}
 	
@@ -42,12 +42,12 @@ public class LabelOperand extends Operand {
 		return this.label.name;
 	}
 
-	public LabelOperand clone() {
-		return new LabelOperand(this.label);
+	public LabelOp clone() {
+		return new LabelOp(this.label);
 	}
 
 	public boolean equals(Operand operand) {
-		return operand instanceof LabelOperand && ((LabelOperand) operand).label.equals(this.label);
+		return operand instanceof LabelOp && ((LabelOp) operand).label.equals(this.label);
 	}
 	
 }

@@ -77,13 +77,13 @@ main:                                        /* Function: main */
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
-    ldr r0, [r1, #0]
+    ldr r0, [r1]
     sub r1, fp, #72                          /* Start of structure in stack */
     push { r0 }
     ldr r0, [r1, #8]
     ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
-    ldr r0, [r1, #0]
+    ldr r0, [r1]
     push { r0 }
     bl __vec_cross                           /* Call __vec_cross */
     mov sp, fp

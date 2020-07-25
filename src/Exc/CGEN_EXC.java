@@ -10,7 +10,7 @@ import Util.Logging.Message;
  * of components. Latteral should mostly not occur since invalid combinations are filtered by the context 
  * checker.
  */
-public class CGEN_EXCEPTION extends Exception {
+public class CGEN_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
@@ -18,14 +18,14 @@ public class CGEN_EXCEPTION extends Exception {
 	
 	Source location;
 	
-	public CGEN_EXCEPTION(Source source, String message) {
+	public CGEN_EXC(Source source, String message) {
 		this.location = source;
 		this.message = message;
 		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
-	public CGEN_EXCEPTION(String message) {
+	public CGEN_EXC(String message) {
 		this.message = message;
 		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));

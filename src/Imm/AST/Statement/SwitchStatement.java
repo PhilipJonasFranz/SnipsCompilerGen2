@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -44,20 +44,14 @@ public class SwitchStatement extends Statement {
 		this.defaultStatement.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkSwitchStatement(this);
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.condition.setContext(context);
 		for (CaseStatement c : this.cases) c.setContext(context);
 		this.defaultStatement.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.condition.releaseContext();
-		for (CaseStatement c : this.cases) c.releaseContext();
-		this.defaultStatement.releaseContext();
-	}
-	
 }

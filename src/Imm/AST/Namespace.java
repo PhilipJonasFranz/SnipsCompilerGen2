@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -42,16 +43,13 @@ public class Namespace extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
-		return ctx.checkNamespace(this);
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		/* This function should not be called since namespaces are flattened */
+		return new VOID();
 	}
 
 	public void setContext(List<TYPE> setContext) {
 		return;
 	}
 
-	public void releaseContext() {
-		return;
-	}
-	
 }

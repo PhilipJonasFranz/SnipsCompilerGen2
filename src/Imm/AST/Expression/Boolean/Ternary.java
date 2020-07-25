@@ -3,7 +3,7 @@ package Imm.AST.Expression.Boolean;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXCEPTION;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -35,20 +35,14 @@ public class Ternary extends Expression {
 		this.rightOperand.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXCEPTION {
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkTernary(this);
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXCEPTION {
+	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.condition.setContext(context);
 		this.leftOperand.setContext(context);
 		this.rightOperand.setContext(context);
 	}
 
-	public void releaseContext() {
-		this.condition.releaseContext();
-		this.leftOperand.releaseContext();
-		this.rightOperand.releaseContext();
-	}
-	
 }
