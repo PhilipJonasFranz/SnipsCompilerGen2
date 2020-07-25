@@ -11,14 +11,15 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
 main:                                        /* Function: main */
-    mov r3, r0
-    sub r0, sp, #4                           /* Evaluate Expression */
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    mov fp, sp
+    push { r0 }                              /* Push declaration on stack, referenced by addressof. */
+    sub r0, fp, #4                           /* Evaluate Expression */
     lsr r3, r0, #2
     lsl r1, r3, #2
     ldr r2, [r1]
     add r0, r2, #5
     str r0, [r1]
-    ldr r0, [sp]                             /* Evaluate Expression */
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
+    mov sp, fp
     bx lr
     

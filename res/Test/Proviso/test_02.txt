@@ -5,7 +5,7 @@ int toInt<K>(K k) {
 
 int main() {
 	bool v = true;
-	int x = (int) v;
+	int x = toInt<bool>(v);
 	return x;
 }
 TESTCASES
@@ -13,8 +13,10 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
+toInt_P0:                                    /* Function: toInt, Provisos: BOOL */
+    bx lr
     
 main:                                        /* Function: main */
     mov r0, #1                               /* Evaluate Expression */
-    bx lr
+    b toInt_P0                               /* Call toInt */
     

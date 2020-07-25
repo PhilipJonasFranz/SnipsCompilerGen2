@@ -185,7 +185,7 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		else {
 			/* Branch to function */
-			String target = f.path.build() + f.manager.getPostfix(provisos);
+			String target = f.path.build() + f.getPostfix(provisos);
 			
 			ASMLabel functionLabel = new ASMLabel(target);
 			

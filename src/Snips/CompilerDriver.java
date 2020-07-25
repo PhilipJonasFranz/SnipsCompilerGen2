@@ -26,6 +26,7 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Parser;
 import Par.Scanner;
@@ -114,7 +115,15 @@ public class CompilerDriver {
 	
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
-													
+								
+	public static Declaration create(String name, TYPE type) {
+		List<String> path1 = new ArrayList();
+		path1.add(name);
+		NamespacePath pa1 = new NamespacePath(path1);
+		
+		Declaration dec = new Declaration(pa1, type, MODIFIER.SHARED, nullSource);
+		return dec;
+	}
 													
 			/* --- MAIN --- */
 	public static void main(String [] args) {
@@ -613,7 +622,6 @@ public class CompilerDriver {
 		
 		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Message.Type.INFO));
 		
-		System.out.println();
 		List<Pair<Integer, String>> rmap = new ArrayList();
 		for (Entry<String, Integer> e : ins_p.entrySet()) {
 			if (rmap.isEmpty()) {
@@ -633,24 +641,28 @@ public class CompilerDriver {
 			}
 		}
 		
-		double stretch = 1.0;
-		
-		if (rmap.get(0).first > 75) {
-			stretch = 75.0 / rmap.get(0).first;
-		}
-		
-		for (int i = 0; i < rmap.size(); i++) {
-			System.out.print(f + "|");
-			for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
-				System.out.print("\u2588");
+		if (!rmap.isEmpty()) {
+			System.out.println();
+			
+			double stretch = 1.0;
+			
+			if (rmap.get(0).first > 75) {
+				stretch = 75.0 / rmap.get(0).first;
 			}
 			
-			String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+			for (int i = 0; i < rmap.size(); i++) {
+				System.out.print(f + "|");
+				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
+					System.out.print("\u2588");
+				}
+				
+				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
+				
+				System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			}
 			
-			System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+			System.out.println();
 		}
-		
-		System.out.println();
 		
 		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
 	}

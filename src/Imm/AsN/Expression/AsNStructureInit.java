@@ -33,7 +33,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		if (!CompilerDriver.disableStructSIDHeaders) {
 			/* Push SID header */
-			init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.typedef.SID)));
+			init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
 			init.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
 			
 			/* Push dummy for SID header */

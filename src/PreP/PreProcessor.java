@@ -80,6 +80,9 @@ public class PreProcessor {
 			}
 		}
 		
+		for (int i = 0; i < this.process.size(); i++) 
+			this.process.get(i).line = this.process.get(i).line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);
+		
 		return this.process;
 	}
 	

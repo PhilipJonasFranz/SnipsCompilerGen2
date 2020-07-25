@@ -109,4 +109,11 @@ public class ARRAY extends COMPOSIT {
 		return this.coreType;
 	}
 
+	public TYPE provisoFree() {
+		ARRAY arr = (ARRAY) this.clone();
+		arr.elementType = arr.elementType.provisoFree();
+		arr.coreType = arr.coreType.provisoFree();
+		return arr;
+	}
+
 }

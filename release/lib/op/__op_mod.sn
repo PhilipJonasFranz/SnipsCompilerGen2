@@ -1,4 +1,6 @@
 shared int __op_mod(int a, int b) {
+	if (a == 0) return 0;
+
 	bool neg = false;
 	if (a < 0) {
 		neg = true;

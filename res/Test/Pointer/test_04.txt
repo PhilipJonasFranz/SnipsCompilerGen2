@@ -21,8 +21,7 @@ forEach:                                     /* Function: forEach */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    push { r0 }                              /* Push declaration on stack, referenced by addressof. */
     mov r3, #10
     sub r0, fp, #4                           /* Evaluate Expression */
     lsr r1, r0, #2

@@ -1,0 +1,25 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility related to hashing.
+ */
+namespace Hash {
+
+	/*
+	 * Hashes given data to a 32 bit integer.
+	 * This implementation uses djb2 by Dan Bernstein.
+	 */
+	shared int hash(void* data, int dataSize) {
+		int hash = 5381;
+		
+		for (int i = 0; i < dataSize; i++) {
+			/* Load i-th dataword */
+			int dWord = *(data + i);
+			
+			hash = dWord + (hash << 6) + (hash << 16) - hash;
+		}
+		
+		return hash;
+	}
+
+}

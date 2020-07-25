@@ -36,7 +36,7 @@ public class AsNSignalStatement extends AsNStatement {
 		sig.instructions.addAll(AsNStructureInit.cast(s.exceptionInit, r, map, st).getInstructions());
 	
 		/* Move Struct ID into R12 to signal a thrown exception */
-		ASMMov signal = new ASMMov(new RegOp(REG.R12), new ImmOp(excType.typedef.SID));
+		ASMMov signal = new ASMMov(new RegOp(REG.R12), new ImmOp(excType.getTypedef().SID));
 		signal.comment = new ASMComment("Signal thrown exception");
 		sig.instructions.add(signal);
 		

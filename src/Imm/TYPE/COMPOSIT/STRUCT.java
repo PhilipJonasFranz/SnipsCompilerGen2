@@ -12,7 +12,7 @@ import Util.NamespacePath;
 
 public class STRUCT extends COMPOSIT {
 
-	public StructTypedef typedef;
+	private StructTypedef typedef;
 	
 	public List<TYPE> proviso;
 	
@@ -29,14 +29,15 @@ public class STRUCT extends COMPOSIT {
 	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof STRUCT) {
-			STRUCT struct = (STRUCT) type;
+		if (type.getCoreType() instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type.getCoreType();
 			
-			if (struct.typedef.fields.size() == this.typedef.fields.size()) {
+			if (struct.typedef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
 				boolean isEqual = true;
-				for (int i = 0; i < this.typedef.fields.size(); i++) {
-					isEqual &= this.typedef.fields.get(i).getType().isEqual(struct.typedef.fields.get(i).getType());
-				}
+				
+				/* Compare Provisos, rest of subtree must be equal */
+				for (int i = 0; i < this.proviso.size(); i++) 
+					isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
 				
 				return isEqual && struct.typedef.SID == this.typedef.SID;
 			}
@@ -46,19 +47,29 @@ public class STRUCT extends COMPOSIT {
 		return false;
 	}
 	
+	public StructTypedef getTypedef() {
+		return this.typedef;
+	}
+	
 	public Declaration getField(NamespacePath path) {
-		for (Declaration dec : this.typedef.fields) {
-			if (dec.path.build().equals(path.build())) {
-				return dec;
-			}
-		}
-		return null;
+		/* Relay to typedef requestField(), but use own proviso as key */
+		return this.typedef.requestField(path, this.proviso);
+	}
+	
+	public int getNumberOfFields() {
+		return this.typedef.getFields().size();
+	}
+	
+	public Declaration getFieldNumber(int i) {
+		return this.getField(this.typedef.getFields().get(i).path);
 	}
 	
 	public int getFieldByteOffset(NamespacePath path) {
 		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
 		
-		for (Declaration dec : this.typedef.fields) {
+		for (int i = 0; i < this.typedef.getFields().size(); i++) {
+			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
+			
 			if (dec.path.build().equals(path.build())) {
 				return offset * 4;
 			}
@@ -69,40 +80,25 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public boolean hasField(NamespacePath path) {
-		for (Declaration dec : this.typedef.fields) {
-			if (dec.path.build().equals(path.build())) {
-				return true;
-			}
-		}
+		for (Declaration dec : this.typedef.getFields()) 
+			if (dec.path.build().equals(path.build())) return true;
+		
 		return false;
 	}
 	
 	public String typeString() {
 		String s = this.typedef.path.build();
 		
-		if (this.typedef.fields.size() > 0) {
+		if (!this.proviso.isEmpty()) {
 			s += "<";
-			for (Declaration t : this.typedef.fields) {
-				/* Field is recursive type, cast to struct and print only name and proviso */
-				if (t.getType().getCoreType().isEqual(this) && !(t.getType().getCoreType() instanceof VOID)) {
-					STRUCT s0 = (STRUCT) t.getType().getCoreType();
-					
-					s += this.typedef.path.build();
-					
-					if (CompilerDriver.printProvisoTypes) s += s0.getProvisoString();
-					if (CompilerDriver.printObjectIDs) s += " " + s0.toString().split("@") [1];
-					s += ",";
-				}
-				else s += t.getType().typeString() + ",";
+			for (TYPE t : this.proviso) {
+				s += t.typeString() + ",";
 			}
 			s = s.substring(0, s.length() - 1);
 			s += ">";
 		}
 		
-		if (CompilerDriver.printProvisoTypes) s += this.getProvisoString();
-		
 		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
-		
 		return s;
 	}
 	
@@ -127,7 +123,8 @@ public class STRUCT extends COMPOSIT {
 
 	public int wordsize() {
 		int sum = 0;
-		for (Declaration dec : this.typedef.fields) {
+		for (int i = 0; i < this.typedef.getFields().size(); i++) { 
+			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
 			sum += dec.getType().wordsize();
 		}
 		
@@ -141,9 +138,17 @@ public class STRUCT extends COMPOSIT {
 
 	public STRUCT clone() {
 		List<TYPE> prov0 = new ArrayList();
-		for (TYPE t : this.proviso) prov0.add(t.clone());
 		
-		return new STRUCT(this.typedef.clone(), prov0);
+		for (TYPE t : this.proviso) 
+			prov0.add(t.clone());
+		
+		return new STRUCT(this.typedef, prov0);
+	}
+
+	public TYPE provisoFree() {
+		STRUCT s = (STRUCT) this.clone();
+		for (int i = 0; i < s.proviso.size(); i++) s.proviso.set(i, s.proviso.get(i).provisoFree());
+		return s;
 	}
 	
 }

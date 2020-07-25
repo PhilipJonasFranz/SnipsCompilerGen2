@@ -42,4 +42,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		return this;
 	}
 	
+	public TYPE provisoFree() {
+		return this.clone();
+	}
+	
 }

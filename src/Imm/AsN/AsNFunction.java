@@ -35,6 +35,7 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
@@ -66,8 +67,8 @@ public class AsNFunction extends AsNCompoundStatement {
 		 * and therefore maybe have no registered mapping.
 		 */
 		if (f.path.build().equals("__op_div") || f.path.build().equals("__op_mod")) {
-			if (!f.manager.containsMapping(new ArrayList())) {
-				f.manager.addProvisoMapping(new INT(), new ArrayList());
+			if (!f.containsMapping(new ArrayList())) {
+				f.addProvisoMapping(new INT(), new ArrayList());
 			}
 		}
 		
@@ -100,10 +101,10 @@ public class AsNFunction extends AsNCompoundStatement {
 		 * The name is set to the first occurrence of the similar mappings. Down below
 		 * the name is checked if its already in a list of translated mappings.
 		 */
-		for (int i = 0; i < f.manager.provisosCalls.size(); i++) {
-			Pair<String, Pair<TYPE, List<TYPE>>> call0 = f.manager.provisosCalls.get(i);
-			for (int a = i + 1; a < f.manager.provisosCalls.size(); a++) {
-				Pair<String, Pair<TYPE, List<TYPE>>> call1 = f.manager.provisosCalls.get(a);
+		for (int i = 0; i < f.provisosCalls.size(); i++) {
+			Pair<String, Pair<TYPE, List<TYPE>>> call0 = f.provisosCalls.get(i);
+			for (int a = i + 1; a < f.provisosCalls.size(); a++) {
+				Pair<String, Pair<TYPE, List<TYPE>>> call1 = f.provisosCalls.get(a);
 				
 				if (!call0.first.equals(call1.first)) {
 					boolean equal = true;
@@ -127,18 +128,18 @@ public class AsNFunction extends AsNCompoundStatement {
 		 */
 		List<String> translated = new ArrayList();
 		
-		for (int k = 0; k < f.manager.provisosCalls.size(); k++) {
+		for (int k = 0; k < f.provisosCalls.size(); k++) {
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (translated.contains(f.manager.provisosCalls.get(k).first)) continue;
-			else translated.add(f.manager.provisosCalls.get(k).first);
+			if (translated.contains(f.provisosCalls.get(k).first)) continue;
+			else translated.add(f.provisosCalls.get(k).first);
 			
 			/* Set the current proviso call scheme if its not the default scheme */
-			if (!f.manager.provisosCalls.get(k).first.equals("")) {
-				f.setContext(f.manager.provisosCalls.get(k).second.second);
+			if (!f.provisosCalls.get(k).first.equals("")) {
+				f.setContext(f.provisosCalls.get(k).second.second);
 			}
 			
 			/* Setup Parameter Mapping */
@@ -155,7 +156,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Create the function head label */
-			String funcLabel = func.source.path.build() + f.manager.provisosCalls.get(k).first;
+			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).first;
 			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {
@@ -174,22 +175,22 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
-			if (f.manager.provisosCalls.get(k).first.equals("")) {
+			if (f.provisosCalls.get(k).first.equals("")) {
 				com = "Function: " + f.path.build();
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.manager.provisosTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisosTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
-				for (int z = k; z < f.manager.provisosCalls.size(); z++) {
-					if (f.manager.provisosCalls.get(z).first.equals(f.manager.provisosCalls.get(k).first)) {
-						List<TYPE> types = f.manager.provisosCalls.get(z).second.second;
+				for (int z = k; z < f.provisosCalls.size(); z++) {
+					if (f.provisosCalls.get(z).first.equals(f.provisosCalls.get(k).first)) {
+						List<TYPE> types = f.provisosCalls.get(z).second.second;
 						for (int x = 0; x < types.size(); x++) {
 							com += types.get(x).typeString() + ", ";
 						}
 						com = com.trim().substring(0, com.trim().length() - 1);
 						
-						if (z < f.manager.provisosCalls.size() - 1) com += " | ";
+						if (z < f.provisosCalls.size() - 1) com += " | ";
 					}
 				}
 			}
@@ -208,8 +209,34 @@ public class AsNFunction extends AsNCompoundStatement {
 			ASMMov fpMovBack = null;
 			func.instructions.add(fpMov);
 			
-			/* Save parameters in register */
-			func.clearReg(r, st, 0, 1, 2);
+			int paramsWithRef = 0;
+			
+			/* Save parameters in register or stack if the have a address reference */
+			for (int i = 0; i < 3; i++) {
+				if (r.getReg(i).declaration != null) {
+					Declaration d = r.getReg(i).declaration;
+					
+					boolean hasRef = false;
+					for (Statement s : f.body) 
+						hasRef |= func.hasAddressReference(s, d);
+					
+					if (hasRef) {
+						ASMPushStack init = new ASMPushStack(new RegOp(i));
+						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
+						init.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+						
+						/* Only do it if variable was used */
+						if (d.last == null || !d.last.equals(d)) {
+							func.instructions.add(init);
+							paramsWithRef++;
+						}
+						
+						st.push(d);
+						r.free(i);
+					}
+					else func.clearReg(r, st, i);
+				}
+			}
 			
 			for (int i = 0; i < f.parameters.size(); i++) {
 				Declaration dec = f.parameters.get(i);
@@ -250,7 +277,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REG> used = func.getUsed();
 			
 			
-			if (!func.hasParamsInStack() && !f.signals && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
+			if (paramsWithRef == 0 && !func.hasParamsInStack() && !f.signals && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
 				func.instructions.remove(fpMov);
 				push.operands.remove(0);
 			}
@@ -300,7 +327,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			ASMPopStack pop = null;
 			
-			if (hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
+			if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
 				/* Add centralized stack reset and register restoring */
 				func.instructions.add(funcReturn);
 				
@@ -310,19 +337,19 @@ public class AsNFunction extends AsNCompoundStatement {
 				pop = new ASMPopStack();
 				for (REG reg : used) pop.operands.add(new RegOp(reg));
 				
-				if (hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
+				if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
 					/* Backup SP in R2 */
 					if (f.getReturnType().wordsize() > 1 || f.signals) 
 						func.instructions.add(new ASMMov(new RegOp(REG.R2), new RegOp(REG.SP)));
 					
-					if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
+					if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
 						fpMovBack = new ASMMov(new RegOp(REG.SP), new RegOp(REG.FP));
 						func.instructions.add(fpMovBack);
 					}
 				
-					if (hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
+					if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
 						/* Need to restore registers */
-						if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOp(REG.FP));
+						if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOp(REG.FP));
 						
 						/* Function has a call, must save LR */
 						if (hasCall) pop.operands.add(new RegOp(REG.LR));
@@ -398,17 +425,17 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.remove(pop);
 			}
 			
-			if (f.manager.provisosCalls.size() > 1 && k < f.manager.provisosCalls.size() - 1) {
+			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) {
 				func.instructions.add(new ASMSeperator());
 			}
 			
-			if (!f.manager.provisosTypes.isEmpty()) {
+			if (!f.provisosTypes.isEmpty()) {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
 		}
 		
-		if (!f.manager.provisosTypes.isEmpty()) func.instructions.addAll(all);
+		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
 	
 		return func;
 	}
