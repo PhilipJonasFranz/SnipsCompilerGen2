@@ -275,14 +275,6 @@ public class ASMOptimizer {
 			
 			if (!OPT_DONE) {
 				/**
-				 * Check if a bx lr statement is directley after the func clean pop. If the last
-				 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
-				 */
-				this.popReturnDirect(body);
-			}
-			
-			if (!OPT_DONE) {
-				/**
 				 * This operation is potentially dangerous and is still WIP. For the current
 				 * tests the operation works, but when using ASM Injection etc. the operation
 				 * could fail spectaculary.
@@ -320,6 +312,12 @@ public class ASMOptimizer {
 			
 		}
 
+		/**
+		 * Check if a bx lr statement is directley after the func clean pop. If the last
+		 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
+		 */
+		this.popReturnDirect(body);
+		
 		/* Finishing touches, no iteration required */
 		this.popPcSubstitution(body);
 		this.clearUnusedLabels(body);
