@@ -12,9 +12,6 @@ public class LabelGen {
 	/** Literal Pool number */
 	private static int p = 0;
 	
-	/** Counter that gives out SIDs */
-	private static int sid = 1;
-	
 	/** Current function prefix */
 	public static String funcPrefix = "";
 	
@@ -30,10 +27,6 @@ public class LabelGen {
 		return "_P" + c++;
 	}
 	
-	public static int getSID() {
-		return sid++;
-	}
-	
 	/**
 	 * Resets the label generator. Note that all labels created after resetting are not
 	 * guaranteed to be unique.
@@ -41,7 +34,6 @@ public class LabelGen {
 	public static void reset() {
 		c = 0;
 		p = 0;
-		sid = 1;
 	}
 	
 	/**

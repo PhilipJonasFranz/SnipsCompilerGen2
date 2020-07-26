@@ -25,31 +25,11 @@ public class POINTER extends COMPOSIT {
 		if (type.getCoreType() instanceof VOID || this.getCoreType() instanceof VOID) return true;
 		if (type instanceof POINTER) {
 			POINTER pointer = (POINTER) type;
-			if (pointer.getCoreType() instanceof STRUCT && this.getCoreType() instanceof STRUCT) {
-				/* Compare Struct Names and provided provisos */
-				STRUCT s0 = (STRUCT) this.getCoreType();
-				STRUCT s1 = (STRUCT) pointer.getCoreType();
-				
-				if (!s0.proviso.isEmpty()) {
-					if (s0.proviso.size() != s1.proviso.size()) return false;
-					else {
-						for (int i = 0; i < s0.proviso.size(); i++) {
-							if (!s0.proviso.get(i).isEqual(s1.proviso.get(i))) {
-								return false;
-							}
-						}
-					}
-				}
-				
-				return s0.getTypedef().SID == s1.getTypedef().SID;
+			if (pointer.targetType instanceof STRUCT && this.targetType instanceof STRUCT) {
+				STRUCT s = (STRUCT) this.targetType;
+				return s.isEqualExtended(type);
 			}
-			else if (pointer.getCoreType() instanceof STRUCT || this.getCoreType() instanceof STRUCT) {
-				/* Only one of both is struct, return false */
-				return false;
-			}
-			else {
-				return this.coreType.isEqual(pointer.coreType);
-			}
+			else return this.targetType.isEqual(pointer.targetType);
 		}
 		else if (type instanceof PROVISO) {
 			PROVISO p = (PROVISO) type;

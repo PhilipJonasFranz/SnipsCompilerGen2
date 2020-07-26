@@ -107,6 +107,9 @@ public class ContextChecker {
 	
 	List<Message> messages = new ArrayList();
 	
+	/* Contains the structs that have no extensions */
+	List<StructTypedef> tLStructs = new ArrayList();
+	
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = AST;
 		ContextChecker.progress = progress;
@@ -115,6 +118,24 @@ public class ContextChecker {
 	
 	public TYPE check() throws CTX_EXC {
 		this.checkProgram((Program) AST);
+		
+		if (!this.tLStructs.isEmpty()) {
+			int SIDStart = 1;
+			if (this.tLStructs.size() == 1) 
+				this.tLStructs.get(0).propagateSIDs(SIDStart, null);
+			else {
+				/* Apply to first n - 1 */
+				for (int i = 1; i < this.tLStructs.size(); i++) { 
+					SIDStart = this.tLStructs.get(i - 1).propagateSIDs(SIDStart, this.tLStructs.get(i));
+					
+					/* Set neighbour of n - 1 to n */
+					this.tLStructs.get(i - 1).SIDNeighbour = this.tLStructs.get(i);
+				}
+				
+				/* Apply to last */
+				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
+			}
+		}
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -254,6 +275,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
+		/* 
+		 * Add to topLevelStructExtenders, since this typedef is the root
+		 * of an extension tree, and is used to assign SIDs.
+		 */
+		if (e.extension == null)
+			this.tLStructs.add(e);
+		
 		/* Set the declarations in the struct type */
 		return new VOID();
 	}
@@ -337,9 +365,6 @@ public class ContextChecker {
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
 		e.setType(e.structType);
 		
-		//System.out.println(e.getSource().getSourceMarker());
-		//e.print(0, true);
-		
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
@@ -354,7 +379,7 @@ public class ContextChecker {
 			if (!valType.isEqual(strType)) {
 				if (valType instanceof POINTER || strType instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
-				throw new CTX_EXC(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
+				throw new CTX_EXC(e.getSource(), "Argument type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
 			}
 		}
 		
@@ -632,6 +657,10 @@ public class ContextChecker {
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
+				
+				if (this.checkPolymorphViolation(t, d.getType(), d.getSource())) 
+					throw new CTX_EXC(d.getSource(), "Polymorphism only via pointers, actual " + t.typeString() + " vs " + d.getType().typeString());
+				
 				throw new CTX_EXC(d.getSource(), "Expression type does not match the declaration type: " + t.typeString() + " vs " + d.getType().typeString());
 			}
 		}
@@ -671,6 +700,10 @@ public class ContextChecker {
 		if (!targetType.isEqual(t) || (targetType.wordsize() != t.wordsize() && a.lhsId instanceof SimpleLhsId)) {
 			if (targetType instanceof POINTER || t instanceof POINTER) 
 				CompilerDriver.printProvisoTypes = true;
+			
+			if (this.checkPolymorphViolation(t, targetType, a.getSource())) 
+				throw new CTX_EXC(a.getSource(), "Variable type does not match expression type, polymorphism only via pointers, actual " + t.typeString() + " vs " + targetType.typeString());
+			
 			throw new CTX_EXC(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		
@@ -1072,7 +1105,11 @@ public class ContextChecker {
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXC(i.parameters.get(a).getSource(), "Inline Call argument (" + (a + 1) + ") does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+					
+					if (this.checkPolymorphViolation(paramType, functionParamType, i.getSource()))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter, polymorphism only via pointers, actual " + paramType.typeString() + " vs " + functionParamType.typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter: " + paramType.typeString() + " vs " + functionParamType.typeString());
 				}
 			}
 			
@@ -1161,7 +1198,11 @@ public class ContextChecker {
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXC(i.parameters.get(a).getSource(), "Function call argument (" + (a + 1) + ") does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					
+					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType(), i.getSource()))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter, polymorphism only via pointers, actual " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 				}
 			}
 		}
@@ -1494,6 +1535,15 @@ public class ContextChecker {
 		}
 		
 		return new VOID();
+	}
+	
+	public boolean checkPolymorphViolation(TYPE child, TYPE target, Source source) throws CTX_EXC {
+		if (child.getCoreType() instanceof STRUCT) {
+			if (((STRUCT) child.getCoreType()).isPolymorphTo(target)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }

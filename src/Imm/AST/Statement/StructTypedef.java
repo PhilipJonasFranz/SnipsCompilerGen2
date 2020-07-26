@@ -29,9 +29,17 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	/* Contains all struct typedefs that extended from this struct */
+	public List<StructTypedef> extenders = new ArrayList();
+	
 	protected STRUCT self;
 	
+	/* 
+	 * SID is assigned during context checking, in order to allow for efficient instanceof expressions.
+	 */
 	public int SID;
+	
+	public StructTypedef SIDNeighbour;
 	
 	public class StructProvisoMapping {
 		
@@ -54,14 +62,18 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, int SID, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
-		this.SID = SID;
 		
 		this.proviso = proviso;
 		this.fields = declarations;
+		
 		this.extension = extension;
+		
+		/* Add this typedef to extenders of extension */
+		if (this.extension != null) 
+			this.extension.extenders.add(this);
 		
 		this.modifier = modifier;
 		
@@ -70,6 +82,35 @@ public class StructTypedef extends SyntaxElement {
 	
 	
 			/* --- METHODS --- */
+	/**
+	 * Assign SIDs and neighbours to the StructTypedefs based on the location
+	 * in the extension tree. SIDs are unique, as well as the neighbours.
+	 */
+	public int propagateSIDs(int start, StructTypedef neighbour) {
+		this.SID = start;
+		start++;
+		this.SIDNeighbour = neighbour;
+		
+		if (!this.extenders.isEmpty()) {
+			if (this.extenders.size() == 1) 
+				start = this.extenders.get(0).propagateSIDs(start, neighbour);
+			else {
+				/* Apply to first n - 1 */
+				for (int i = 1; i < this.extenders.size(); i++) { 
+					start = this.extenders.get(i - 1).propagateSIDs(start, this.extenders.get(i));
+					
+					/* Set neighbour of n - 1 to n */
+					this.extenders.get(i - 1).SIDNeighbour = this.extenders.get(i);
+				}
+				
+				/* Apply to last */
+				this.extenders.get(this.extenders.size() - 1).propagateSIDs(start, neighbour);
+			}
+		}
+		
+		return start;
+	}
+	
 	/**
 	 * Request the declaration whiches name matches given path. Select the mapping
 	 * that corresponds to given proviso types. If no such mapping exists, a new one
@@ -114,9 +155,6 @@ public class StructTypedef extends SyntaxElement {
 			if (equal) return m;
 		}
 		
-		/* No mapping found, create new and return it */
-		//System.out.println(this.self.typeString() + " -> New Context registered");
-		
 		/* Copy own provisos */
 		List<TYPE> clone = new ArrayList();
 		for (TYPE t : this.proviso) 
@@ -125,9 +163,6 @@ public class StructTypedef extends SyntaxElement {
 		/* Map provided provisos to header */
 		ProvisoUtil.mapNToN(clone, providedProvisos);
 		
-		//System.out.println("New Context: ");
-		//clone.stream().forEach(x -> System.out.println(x.typeString()));
-		
 		/* Clone Struct field types, decs stay same anyway */
 		List<TYPE> newActive = new ArrayList();
 		for (Declaration d : this.fields) newActive.add(d.getType().clone());
@@ -135,11 +170,6 @@ public class StructTypedef extends SyntaxElement {
 		/* Mapped cloned header proviso with mapped types to field types */
 		for (int i = 0; i < newActive.size(); i++) 
 			ProvisoUtil.mapNTo1(newActive.get(i), clone);
-		
-		
-		//System.out.println("Fields: ");
-		//newActive.stream().forEach(x -> System.out.println(x.typeString()));
-		//System.out.println();
 		
 		/* Remove provisos from field types */
 		for (int i = 0; i < newActive.size(); i++) 

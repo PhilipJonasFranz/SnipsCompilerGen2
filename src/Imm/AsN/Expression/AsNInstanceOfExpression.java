@@ -25,9 +25,14 @@ public class AsNInstanceOfExpression extends AsNExpression {
 		AsNInstanceOfExpression s = new AsNInstanceOfExpression();
 		iof.castedNode = s;
 		
-		s.clearReg(r, st, 0);
-		
 		STRUCT struct = (STRUCT) iof.instanceType;
+		
+		/* When no struct extended or this struct has the highest SID we only need R0 */
+		if (struct.getTypedef().extenders.isEmpty() || struct.getTypedef().SIDNeighbour == null) 
+			s.clearReg(r, st, 0);
+		/* Else we need to compare in a number range, so we need two regs */
+		else 
+			s.clearReg(r, st, 0, 1);
 		
 		/*
 		 * Make a backup of the sp, since the expression of the iof expression needs to be loaded and may end up on 
@@ -54,12 +59,37 @@ public class AsNInstanceOfExpression extends AsNExpression {
 		if (iof.expression.getType().wordsize() > 1) 
 			s.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.SP)));
 		
-		/* Compare value in R0 agains SID */
-		s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SID)));
-		
-		/* Move 0 if check is false, in the other case a non-zero value is already in R0 */
-		s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.NE)));
-		
+		/* No structs extended from this struct or SID is highest, a simple SID check is enough */
+		if (struct.getTypedef().extenders.isEmpty()) {
+			/* Compare value in R0 agains SID */
+			s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SID)));
+			
+			/* Move 0 if check is false, in the other case a non-zero value is already in R0 */
+			s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.NE)));
+		}
+		else {
+			if (struct.getTypedef().SIDNeighbour == null) {
+				/* Compare value in R0 agains SID */
+				s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SID)));
+				
+				/* Move 0 if check is false, in the other case a non-zero value is already in R0 */
+				s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.LT)));
+			}
+			else {
+				/* Compare the lower SID range end */
+				s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SID)));
+				
+				/* Increment counter if matched greater or equal */
+				s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.LT)));
+				
+				/* Compare the upper SID range end */
+				s.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(struct.getTypedef().SIDNeighbour.SID)));
+				
+				/* Increment counter if matched greater or equal */
+				s.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.GE)));
+			}
+		}
+
 		/* Only reset stack if expressions were loaded on the stack, meaning the core type wordsize is > 1 */
 		if (iof.expression.getType().getCoreType().wordsize() > 1) 
 			s.instructions.add(new ASMMov(new RegOp(REG.SP), new RegOp(REG.R10)));

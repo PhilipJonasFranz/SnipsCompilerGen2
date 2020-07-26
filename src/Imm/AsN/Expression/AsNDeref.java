@@ -45,9 +45,12 @@ public class AsNDeref extends AsNExpression {
 			
 			/* Sequentially push words on stack */
 			for (int i = 0; i < a.getType().wordsize(); i++) {
-				ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp(i * 4));
+				ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));
 				ref.instructions.add(load);
 				ref.instructions.add(new ASMPushStack(new RegOp(target)));
+				
+				/* Push dummy values on stack */
+				st.push(REG.R0);
 			}
 		}
 		

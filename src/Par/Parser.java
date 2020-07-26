@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import CGen.LabelGen;
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
@@ -310,29 +309,39 @@ public class Parser {
 		List<TYPE> proviso = this.parseProviso();
 		NamespacePath path = this.buildPath(id.spelling);
 		
-		/* Extend Struct */
+		
 		StructTypedef ext = null;
 		List<Declaration> extendDecs = new ArrayList();
+		
 		if (current.type == TokenType.COLON) {
 			accept();
 			NamespacePath ext0 = this.parseNamespacePath();
 			ext = this.getStructTypedef(ext0, source);
 			
-			for (Declaration d : ext.getFields()) extendDecs.add(d.clone());
+			/* Copy the extended fields */
+			for (Declaration d : ext.getFields()) 
+				extendDecs.add(d.clone());
 		}
 		
-		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
+		/*
+		 * Create Struct typedef here already, since struct may be linked and have a pointer
+		 * to another instance of this struct. The struct definition needs to exist before
+		 * such a declaration is parsed.
+		 */
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
+		/* Add the extended fields */
 		def.getFields().addAll(extendDecs);
 		
 		accept(TokenType.LBRACE);
 		
-		while (current.type != TokenType.RBRACE) {
+		/* Parse the regular struct fields */
+		while (current.type != TokenType.RBRACE) 
 			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
-		}
-		accept(TokenType.RBRACE);
 		
+		accept(TokenType.RBRACE);
+
 		return def;
 	}
 	

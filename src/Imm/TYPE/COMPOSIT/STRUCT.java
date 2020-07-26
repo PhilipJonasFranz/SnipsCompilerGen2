@@ -32,16 +32,68 @@ public class STRUCT extends COMPOSIT {
 		if (type.getCoreType() instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type.getCoreType();
 			
-			if (struct.typedef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
+			StructTypedef sDef = struct.typedef;
+			if (sDef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
 				boolean isEqual = true;
 				
 				/* Compare Provisos, rest of subtree must be equal */
 				for (int i = 0; i < this.proviso.size(); i++) 
 					isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
 				
-				return isEqual && struct.typedef.SID == this.typedef.SID;
+				return isEqual;
 			}
 			
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Check if the types are equal if struct extending is taken into consideration.
+	 */
+	public boolean isEqualExtended(TYPE type) {
+		if (type.getCoreType() instanceof VOID) return true;
+		if (type.getCoreType() instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type.getCoreType();
+			
+			StructTypedef sDef = struct.typedef;
+			while (!sDef.equals(this.typedef)) {
+				if (sDef.extension == null) 
+					return false;
+				else sDef = sDef.extension;
+			}
+			
+			if (sDef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
+				boolean isEqual = true;
+				
+				/* Compare Provisos, rest of subtree must be equal */
+				for (int i = 0; i < this.proviso.size(); i++) 
+					isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
+				
+				return isEqual;
+			}
+			
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Check if this type extends from given type. Returns only
+	 * true if given type is a struct and this struct extends from it.
+	 */
+	public boolean isPolymorphTo(TYPE t) {
+		if (t instanceof STRUCT) {
+			STRUCT s = (STRUCT) t;
+			
+			StructTypedef sDef = this.typedef;
+			while (!sDef.equals(s.getTypedef())) {
+				if (sDef.extension == null) 
+					return false;
+				else sDef = sDef.extension;
+			}
+			
+			return true;
 		}
 		
 		return false;

@@ -1,0 +1,38 @@
+SOURCE
+struct S {
+	int x;
+	int y;
+}
+
+int main() {
+	S s = S::(12, 4);
+	s = S::(15, 24);
+	
+	return s.x + s.y;
+}
+TESTCASES
+39
+OUTPUT
+/* --test_15.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    mov r1, #12
+    stmfd sp!, {r0, r1}
+    mov r0, #1
+    push { r0 }
+    mov r0, #24                              /* Evaluate Expression */
+    mov r1, #15
+    stmfd sp!, {r0, r1}
+    mov r0, #1
+    sub r1, fp, #12                          /* Start of structure in stack */
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    ldr r0, [fp, #-8]                        /* Load field from struct */
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    bx lr
+    

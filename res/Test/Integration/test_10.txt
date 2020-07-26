@@ -44,7 +44,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L9_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_main.L9_HEAP_START        /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -125,7 +125,7 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L9_HEAP_START: .word HEAP_START
+.POOL0_main.L9_HEAP_START: .word HEAP_START
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -261,8 +261,8 @@ List.create_P2:                              /* Function: List.create, Provisos:
     mov r4, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL2_L8_NULL                   /* Load null address */
-    ldr r1, .POOL2_L8_NULL                   /* Load null address */
+    ldr r0, .POOL2_main.L8_NULL              /* Load null address */
+    ldr r1, .POOL2_main.L8_NULL              /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     lsl r1, r4, #2
@@ -275,7 +275,7 @@ List.create_P2:                              /* Function: List.create, Provisos:
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4, pc}
-.POOL2_L8_NULL: .word NULL
+.POOL2_main.L8_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
 List.destroy:                                /* Function: List.destroy */
@@ -285,7 +285,7 @@ List.destroy:                                /* Function: List.destroy */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
 List.destroy.L1:                             /* Evaluate condition */
-    ldr r1, .POOL3_L8_NULL                   /* Load null address */
+    ldr r1, .POOL3_main.L8_NULL              /* Load null address */
     cmp r4, r1
     beq List.destroy.L2
     mov r0, r4                               /* Load parameters */
@@ -297,7 +297,7 @@ List.destroy.L2:
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
     ldmfd sp!, {r3, r4, pc}
-.POOL3_L8_NULL: .word NULL
+.POOL3_main.L8_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
@@ -315,7 +315,7 @@ List.add_P3:                                 /* Function: List.add, Provisos: Ma
     stmfd sp!, {r0-r2}
     ldr r0, [fp, #16]
     push { r0 }
-    ldr r0, .POOL4_L8_NULL                   /* Load null address */
+    ldr r0, .POOL4_main.L8_NULL              /* Load null address */
     push { r0 }
     mov r0, #1
     lsl r1, r4, #2
@@ -332,7 +332,7 @@ List.add_P3:                                 /* Function: List.add, Provisos: Ma
     str r0, [r1, #20]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L8_NULL                   /* Load null address */
+    ldr r1, .POOL4_main.L8_NULL              /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -354,7 +354,7 @@ List.add.L0:
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #16
     bx lr
-.POOL4_L8_NULL: .word NULL
+.POOL4_main.L8_NULL: .word NULL
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
@@ -373,7 +373,7 @@ List.remove.L0:
 /* Remove first element */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L8_NULL                   /* Load null address */
+    ldr r1, .POOL5_main.L8_NULL              /* Load null address */
     cmp r0, r1
     ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -389,7 +389,7 @@ List.remove.L0:
     ldr r0, [r1, #8]                         /* Load field from struct */
     cmp r0, r5
     bne List.remove.L6
-    ldr r0, .POOL5_L8_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL5_main.L8_NULL              /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
 List.remove.L6: 
@@ -407,7 +407,7 @@ List.remove.L9:                              /* Evaluate condition */
     ble List.remove.L10
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L8_NULL                   /* Load null address */
+    ldr r1, .POOL5_main.L8_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L12
     ldmfd sp!, {r3-r5, pc}
@@ -421,7 +421,7 @@ List.remove.L10:
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L8_NULL                   /* Load null address */
+    ldr r1, .POOL5_main.L8_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L14
     ldmfd sp!, {r3-r5, pc}
@@ -430,14 +430,14 @@ List.remove.L14:
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L8_NULL                   /* Load null address */
+    ldr r1, .POOL5_main.L8_NULL              /* Load null address */
     cmp r0, r1
     bne List.remove.L16
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    ldr r0, .POOL5_L8_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL5_main.L8_NULL              /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -457,7 +457,7 @@ List.remove.L16:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r3, [r1, #4]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL5_L8_NULL: .word NULL
+.POOL5_main.L8_NULL: .word NULL
     
 /* This package contains the utility and definitions */
 /* to create and maintain a hash-map of any type. */
@@ -525,7 +525,7 @@ Map.create_P0:                               /* Function: Map.create, Provisos: 
 Map.create.L1: 
     cmp r6, r3
     bge Map.create.L2
-    ldr r0, .POOL6_L8_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL6_main.L8_NULL              /* Evaluate Expression */
     push { r0 }
     add r0, r5, r6
     lsl r1, r0, #2
@@ -553,7 +553,7 @@ Map.create.L2:
     str r6, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
-.POOL6_L8_NULL: .word NULL
+.POOL6_main.L8_NULL: .word NULL
     
 /* Stores given value at the hashed key location. */
 Map.put_P1:                                  /* Function: Map.put, Provisos: INT, INT */
@@ -580,19 +580,19 @@ Map.put_P1:                                  /* Function: Map.put, Provisos: INT
     add r0, r1, r0
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
 /* Initialize new list at index */
-    ldr r1, .POOL7_L8_NULL                   /* Load null address */
+    ldr r1, .POOL7_main.L8_NULL              /* Load null address */
     cmp r6, r1
     bne Map.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1]
-    push { r0 }
-    ldr r0, [r1, #4]
+    ldr r0, [r1, #12]
     push { r0 }
     ldr r0, [r1, #8]
     push { r0 }
-    ldr r0, [r1, #12]
+    ldr r0, [r1, #4]
+    push { r0 }
+    ldr r0, [r1]
     push { r0 }
     bl List.create_P2                        /* Call List.create */
     mov r6, r0
@@ -603,6 +603,7 @@ Map.put_P1:                                  /* Function: Map.put, Provisos: INT
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
+    add sp, sp, #16
 Map.put.L0: 
 /* Initialize the new key/value tuple */
     mov r0, #4                               /* Evaluate Expression */
@@ -628,7 +629,7 @@ Map.put.L0:
     bl List.add_P3                           /* Call List.add */
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL7_L8_NULL: .word NULL
+.POOL7_main.L8_NULL: .word NULL
     
 /* If the given key is contained in the map, replace the */
 /* value stored under the key with the given value. */
@@ -655,7 +656,7 @@ Map.replace_P4:                              /* Function: Map.replace, Provisos:
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r0
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL8_L8_NULL                   /* Load null address */
+    ldr r1, .POOL8_main.L8_NULL              /* Load null address */
     cmp r6, r1
     beq Map.replace.L0
 /* Init tuple for searching */
@@ -677,7 +678,7 @@ Map.replace_P4:                              /* Function: Map.replace, Provisos:
     mov r5, #0
 /* Iterate through list, check for match */
 Map.replace.L3:                              /* Evaluate condition */
-    ldr r1, .POOL8_L8_NULL                   /* Load null address */
+    ldr r1, .POOL8_main.L8_NULL              /* Load null address */
     cmp r3, r1
     beq Map.replace.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -722,7 +723,7 @@ Map.replace.L4:
 Map.replace.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL8_L8_NULL: .word NULL
+.POOL8_main.L8_NULL: .word NULL
     
 /* Returns the value corresponding to given key, or */
 /* the default value if the key does not exist. */
@@ -748,7 +749,7 @@ Map.get_P7:                                  /* Function: Map.get, Provisos: INT
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r0
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL9_L8_NULL                   /* Load null address */
+    ldr r1, .POOL9_main.L8_NULL              /* Load null address */
     cmp r5, r1
     beq Map.get.L0
 /* Init tuple for searching */
@@ -770,7 +771,7 @@ Map.get_P7:                                  /* Function: Map.get, Provisos: INT
     mov r5, #0
 /* Iterate through list, check for match, and remove */
 Map.get.L3:                                  /* Evaluate condition */
-    ldr r1, .POOL9_L8_NULL                   /* Load null address */
+    ldr r1, .POOL9_main.L8_NULL              /* Load null address */
     cmp r4, r1
     beq Map.get.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -804,7 +805,7 @@ Map.get.L0:
 Map.get.L7: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL9_L8_NULL: .word NULL
+.POOL9_main.L8_NULL: .word NULL
     
 /* Remove the key from the map. Return if it doesnt exist. */
 Map.remove_P6:                               /* Function: Map.remove, Provisos: INT, INT */
@@ -829,7 +830,7 @@ Map.remove_P6:                               /* Function: Map.remove, Provisos: 
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r0
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL10_L8_NULL                  /* Load null address */
+    ldr r1, .POOL10_main.L8_NULL             /* Load null address */
     cmp r5, r1
     beq Map.remove.L0
 /* Init tuple for searching */
@@ -851,7 +852,7 @@ Map.remove_P6:                               /* Function: Map.remove, Provisos: 
     mov r4, #0
 /* Iterate through list, check for match, and remove */
 Map.remove.L3:                               /* Evaluate condition */
-    ldr r1, .POOL10_L8_NULL                  /* Load null address */
+    ldr r1, .POOL10_main.L8_NULL             /* Load null address */
     cmp r3, r1
     beq Map.remove.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -878,7 +879,7 @@ Map.remove.L4:
 Map.remove.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL10_L8_NULL: .word NULL
+.POOL10_main.L8_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { lr }
