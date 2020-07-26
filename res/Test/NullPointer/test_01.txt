@@ -28,22 +28,22 @@ NULL: .word 0
 get:                                         /* Function: get */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL0_main.L0_NULL              /* Load null address */
+    ldr r1, .POOL0_L0_NULL                   /* Load null address */
     cmp r0, r1
     moveq r0, #1
     movne r0, #0
     bx lr
-.POOL0_main.L0_NULL: .word NULL
+.POOL0_L0_NULL: .word NULL
     
 set:                                         /* Function: set */
     push { r3 }
     mov r3, r0
-    ldr r0, .POOL1_main.L0_NULL              /* Evaluate Expression */
+    ldr r0, .POOL1_L0_NULL                   /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
-.POOL1_main.L0_NULL: .word NULL
+.POOL1_L0_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { fp, lr }

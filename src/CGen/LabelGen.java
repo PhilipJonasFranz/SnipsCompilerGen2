@@ -34,6 +34,7 @@ public class LabelGen {
 	public static void reset() {
 		c = 0;
 		p = 0;
+		funcPrefix = "";
 	}
 	
 	/**
