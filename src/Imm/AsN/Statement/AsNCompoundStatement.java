@@ -159,6 +159,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
 	}
 	
+	/**
+	 * Checks if in the given statement, an address reference via address of
+	 * is made to a variable with given origin declaration. If so, return true.
+	 */
 	public boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXC {
 		if (s instanceof CompoundStatement) {
 			CompoundStatement cs = (CompoundStatement) s;
@@ -234,6 +238,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else throw new CGEN_EXC(s.getSource(), "Cannot check references for " + s.getClass().getName());
 	}
 	
+	/**
+	 * Checks if in the given expression, an address reference via address of
+	 * is made to a variable with given origin declaration. If so, return true.
+	 */
 	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXC {
 		if (e instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) e;

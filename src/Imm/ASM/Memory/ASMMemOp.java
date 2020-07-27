@@ -36,12 +36,18 @@ public abstract class ASMMemOp extends ASMInstruction {
 	
 	
 			/* --- METHODS --- */
+	/**
+	 * Builds assembly instruction corresponding to the memory operation.
+	 * @param operation The type of the operation f.E ldr/str.
+	 */
 	public String build(String operation) {
-		operation += " ";
-		String s = CompilerDriver.printDepth + operation + target.toString();
-		if (op1 != null) {
+		String s = CompilerDriver.printDepth + operation + " " + target.toString();
+		
+		/* Build with second operand */
+		if (op1 != null) 
 			s += ", [" + this.op0.toString() + ", " + ((this.subFromBase)? "-" : "") + this.op1.toString() + "]";
-		}
+		
+		/* Build with only one operand */
 		else s += ", [" + this.op0.toString() + "]";
 		
 		return s;

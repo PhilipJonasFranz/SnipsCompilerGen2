@@ -10,7 +10,9 @@ public class ASMBranch extends ASMInstruction {
 			/* --- NESTED --- */
 	/** The type of the branch. Corresponds to the notation of the assembly language. */
 	public enum BRANCH_TYPE {
+	
 		B, BL, BX
+	
 	}
 	
 	
@@ -43,10 +45,15 @@ public class ASMBranch extends ASMInstruction {
 	
 			/* --- METHODS --- */
 	public String build() {
-		return CompilerDriver.printDepth + 
-				this.type.toString().toLowerCase() + 
-				((this.cond != null)? this.cond.getCondPostfix() : "" ) + 
-				" " + this.target.toString();
+		return CompilerDriver.printDepth
+				/* Branch type */
+				+ this.type.toString().toLowerCase()
+				
+				/* Condition */
+				+ ((this.cond != null)? this.cond.getCondPostfix() : "" )
+				
+				/* Branch target */
+				+ " " + this.target.toString();
 	}
 
 }

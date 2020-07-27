@@ -26,6 +26,7 @@ public class MemoryMap {
 		
 		
 				/* --- CONSTRUCTORS --- */
+		/** Default constructor */
 		public MemoryCell(Declaration dec) {
 			this.declaration = dec;
 		}
@@ -37,6 +38,7 @@ public class MemoryMap {
 			return this.declaration.getType().wordsize();
 		}
 		
+		/** Returns the stored declaration */
 		public Declaration getDeclaration() {
 			return this.declaration;
 		}
