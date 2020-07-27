@@ -5,6 +5,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -27,19 +28,13 @@ public class AsNInstanceOfExpression extends AsNExpression {
 		
 		STRUCT struct = (STRUCT) iof.instanceType;
 		
-		/* When no struct extended or this struct has the highest SID we only need R0 */
-		if (struct.getTypedef().extenders.isEmpty() || struct.getTypedef().SIDNeighbour == null) 
-			s.clearReg(r, st, 0);
-		/* Else we need to compare in a number range, so we need two regs */
-		else 
-			s.clearReg(r, st, 0, 1);
+		r.free(0, 1);
 		
-		/*
-		 * Make a backup of the sp, since the expression of the iof expression needs to be loaded and may end up on 
-		 * the stack. R10 is then used to reset the stack afterwards.
+		/* 
+		 * Get size of stack in cells, so that if casting the expression puts something on the stack,
+		 * we know how much cells we have to remove in order to reset the stack.
 		 */
-		if (iof.expression.getType().wordsize() > 1) 
-			s.instructions.add(new ASMMov(new RegOp(REG.R10), new RegOp(REG.SP)));
+		int stackSize = st.getStack().size();
 		
 		/* Cast the expression */
 		s.instructions.addAll(AsNExpression.cast(iof.expression, r, map, st).getInstructions());
@@ -91,9 +86,12 @@ public class AsNInstanceOfExpression extends AsNExpression {
 		}
 
 		/* Only reset stack if expressions were loaded on the stack, meaning the core type wordsize is > 1 */
-		if (iof.expression.getType().getCoreType().wordsize() > 1) 
-			s.instructions.add(new ASMMov(new RegOp(REG.SP), new RegOp(REG.R10)));
+		if (iof.expression.getType().getCoreType().wordsize() > 1) {
+			int off = st.popXCells(st.getStack().size() - stackSize);
+			s.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(off)));
+		}
 		
+		r.free(0);
 		return s;
 	}
 	

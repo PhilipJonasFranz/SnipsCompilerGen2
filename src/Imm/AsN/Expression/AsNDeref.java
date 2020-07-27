@@ -7,11 +7,14 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMLsl;
+import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Deref;
+import Imm.TYPE.COMPOSIT.STRUCT;
+import Snips.CompilerDriver;
 
 public class AsNDeref extends AsNExpression {
 
@@ -45,8 +48,25 @@ public class AsNDeref extends AsNExpression {
 			
 			/* Sequentially push words on stack */
 			for (int i = 0; i < a.getType().wordsize(); i++) {
-				ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));
-				ref.instructions.add(load);
+				/*
+				 * If this is the last dataword that is loaded, or this is the dataword that would be the SID of a struct that is pushed on
+				 * the stack, override the data and push the registered SID of the struct. This is due to polymorphism, that a different SID
+				 * could be stored at this location. Since we load the struct, polymorphism is not available anymore, and thus we need to overwrite
+				 * the stored SID with the actual SID of the struct type.
+				 */
+				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType() instanceof STRUCT && !CompilerDriver.disableStructSIDHeaders) {
+					STRUCT s = (STRUCT) a.getType().getCoreType();
+					
+					ASMMov mov = new ASMMov(new RegOp(target), new ImmOp(s.getTypedef().SID));
+					mov.comment = new ASMComment("Override SID header");
+					
+					ref.instructions.add(mov);
+				}
+				else {
+					ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));
+					ref.instructions.add(load);
+				}
+				
 				ref.instructions.add(new ASMPushStack(new RegOp(target)));
 				
 				/* Push dummy values on stack */

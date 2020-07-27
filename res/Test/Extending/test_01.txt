@@ -23,10 +23,6 @@ struct Root2 {
 	int z;
 }
 
-int get(Root r) {
-	return r.x;
-}
-
 int main() {
 	A a = A::(10, true);
 	Root* r = &a;
@@ -40,8 +36,6 @@ TESTCASES
 11
 OUTPUT
 /* --test_01.txt */
-    b main
-    
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
@@ -54,14 +48,13 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
-    ldr r0, [r1]
+    mov r0, #1                               /* Override SID header */
     push { r0 }
     ldr r0, [r10, r3, lsl #2]
     cmp r0, #1
     movlt r0, #0
     cmp r0, #4
     movge r0, #0
-    mov sp, r10
     cmp r0, #0
     beq main.L0
     ldr r2, [fp, #-16]                       /* Load field from struct */

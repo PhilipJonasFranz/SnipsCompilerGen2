@@ -592,7 +592,7 @@ Map.put_P1:                                  /* Function: Map.put, Provisos: INT
     push { r0 }
     ldr r0, [r1, #4]
     push { r0 }
-    ldr r0, [r1]
+    mov r0, #3                               /* Override SID header */
     push { r0 }
     bl List.create_P2                        /* Call List.create */
     mov r6, r0

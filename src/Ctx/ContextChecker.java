@@ -159,8 +159,8 @@ public class ContextChecker {
 				
 				if (f.path.build().equals("main")) gotMain = true;
 				
-				/* Check main function as entrypoint, if a function is called, context is provided
-				 * and then checked */
+				/* Check main function as entrypoint, if a function is called, 
+				 * context is provided and then checked */
 				if (f.path.build().equals("main") && !f.provisosTypes.isEmpty()) 
 					throw new CTX_EXC(f.getSource(), "Function main cannot hold proviso types");
 				
@@ -390,10 +390,12 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructSelect(StructSelect e) throws CTX_EXC {
-		/* This method links origins and types manually. This is partially due to the fact
+		/* 
+		 * This method links origins and types manually. This is partially due to the fact
 		 * that for example, a field in a struct does not count as a field identifier in the
 		 * current scope when referencing it. If it was to the check() method, it would report
-		 * an duplicate identifier. */
+		 * an duplicate identifier. 
+		 */
 		
 		TYPE type = null;
 		
@@ -402,6 +404,14 @@ public class ContextChecker {
 			IDRef sel = (IDRef) e.selector;
 			/* Link automatically, identifier is local */
 			type = sel.check(this);
+		}
+		else if (e.selector instanceof TypeCast) {
+			TypeCast tc = (TypeCast) e.selector;
+			
+			if (!(tc.expression instanceof IDRef))
+				throw new CTX_EXC(e.getSource(), "Base must be variable reference");
+			
+			type = tc.check(this);
 		}
 		else if (e.selector instanceof ArraySelect) {
 			ArraySelect arr = (ArraySelect) e.selector;
