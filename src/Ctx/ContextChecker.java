@@ -630,10 +630,12 @@ public class ContextChecker {
 			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
 				throw new CTX_EXC(f.getSource(), "Pointer type does not match iterator type: " + p.targetType.typeString() + " vs " + itType.typeString());
 			
+			/* Construct expression to calculate address based on address of the shadowRef, counter and the size of the type */
 			Expression sof = new SizeOfType(itType.clone(), f.shadowRef.getSource());
 			Expression mul = new Mul(f.ref, sof, f.shadowRef.getSource());
 			Expression add = new Add(f.shadowRef, mul, f.shadowRef.getSource());
 			
+			/* Set as new shadowRef, will be casted during code generation */
 			f.shadowRef = new Deref(add, f.shadowRef.getSource());
 			f.shadowRef.check(this);
 		}
