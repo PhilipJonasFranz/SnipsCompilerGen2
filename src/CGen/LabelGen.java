@@ -12,6 +12,8 @@ public class LabelGen {
 	/** Literal Pool number */
 	private static int p = 0;
 	
+	private static int n = 0;
+	
 	/** Current function prefix */
 	public static String funcPrefix = "";
 	
@@ -27,6 +29,10 @@ public class LabelGen {
 		return "_P" + c++;
 	}
 	
+	public static int getSafeNum() {
+		return n++;
+	}
+	
 	/**
 	 * Resets the label generator. Note that all labels created after resetting are not
 	 * guaranteed to be unique.
@@ -35,6 +41,7 @@ public class LabelGen {
 		c = 0;
 		p = 0;
 		funcPrefix = "";
+		n = 0;
 	}
 	
 	/**

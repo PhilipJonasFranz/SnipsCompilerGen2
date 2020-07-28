@@ -1,0 +1,21 @@
+SOURCE
+#include<linked_list.sn>
+
+int main(int a) {
+    LinkedList<int>* l = List::create<int>(-1);
+    
+    List::add<int>(l, 12);
+    List::add<int>(l, 10);
+    List::add<int>(l, 2);
+    List::add<int>(l, 5);
+    
+    int s = 0;
+    
+	for (ListNode<int>* n = l->head; n != null; n = n->next) {
+		s += n->value;
+	}
+	
+	return s;
+}
+TESTCASES
+29

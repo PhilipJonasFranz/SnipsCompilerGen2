@@ -32,7 +32,9 @@ import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
+import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
@@ -51,6 +53,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -600,6 +603,57 @@ public class ContextChecker {
 			throw new CTX_EXC(f.getSource(), "Condition is not boolean");
 		
 		f.increment.check(this);
+		
+		for (Statement s : f.body) {
+			currentStatement = s;
+			s.check(this);
+		}
+		
+		this.scopes.pop();
+		this.scopes.pop();
+
+		this.compoundStack.pop();
+		return null;
+	}
+	
+	public TYPE checkForEachStatement(ForEachStatement f) throws CTX_EXC {
+		this.compoundStack.push(f);
+		
+		this.scopes.push(new Scope(this.scopes.peek(), true));
+		
+		TYPE itType = f.iterator.check(this);
+		TYPE refType = f.shadowRef.check(this);
+		
+		f.counter.check(this);
+		f.ref.check(this);
+		
+		if (refType instanceof POINTER) {
+			POINTER p = (POINTER) refType;
+			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
+				throw new CTX_EXC(f.getSource(), "Pointer type does not match iterator type: " + p.targetType.typeString() + " vs " + itType.typeString());
+			
+			Expression sof = new SizeOfType(itType.clone(), f.shadowRef.getSource());
+			Expression mul = new Mul(f.ref, sof, f.shadowRef.getSource());
+			Expression add = new Add(f.shadowRef, mul, f.shadowRef.getSource());
+			
+			f.shadowRef = new Deref(add, f.shadowRef.getSource());
+			f.shadowRef.check(this);
+		}
+		else if (refType instanceof ARRAY) {
+			ARRAY a = (ARRAY) refType;
+			if (!a.elementType.isEqual(itType))
+				throw new CTX_EXC(f.getSource(), "Array element type does not match iterator type: " + a.elementType.typeString() + " vs " + itType.typeString());
+			
+			/* Select first value from array */
+			List<Expression> select = new ArrayList();
+			select.add(f.ref);
+			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
+			
+			f.select.check(this);
+		}
+		else throw new CTX_EXC(f.getSource(), "Only available for pointers and arrays, actual " + refType.typeString());
+		
+		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
 		for (Statement s : f.body) {
 			currentStatement = s;

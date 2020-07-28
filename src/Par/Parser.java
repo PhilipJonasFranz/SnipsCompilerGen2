@@ -65,6 +65,7 @@ import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.EnumTypedef;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -858,14 +859,22 @@ public class Parser {
 		return new SignalStatement(ex0, source);
 	}
 	
-	protected ForStatement parseFor() throws PARSE_EXC {
+	protected Statement parseFor() throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Source source = accept(TokenType.FOR).getSource();
 		accept(TokenType.LPAREN);
 		
-		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED, true, true);
+		TYPE itType = this.parseType();
+		Token itId = accept(TokenType.IDENTIFIER);
+		
+		if (current.type == TokenType.COLON) 
+			return this.parseForEach(itType, itId);
+		
+		Expression value = this.parseExpression();
+		accept(TokenType.SEMICOLON);
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, value, MODIFIER.SHARED, itId.getSource());
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -880,6 +889,30 @@ public class Parser {
 		
 		this.scopes.pop();
 		return new ForStatement(iterator, condition, increment, body, source);
+	}
+	
+	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
+		this.scopes.push(new ArrayList());
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.getSource());
+		this.scopes.peek().add(iterator);
+		
+		accept(TokenType.COLON);
+		
+		Expression shadowRef = this.parseExpression();
+		
+		Expression range = null;
+		
+		if (current.type == TokenType.COMMA) {
+			accept();
+			range = this.parseExpression();
+		}
+		
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = this.parseCompoundStatement(false);
+		
+		return new ForEachStatement(iterator, shadowRef, range, body, itId.getSource());
 	}
 	
 	protected WhileStatement parseWhile() throws PARSE_EXC {

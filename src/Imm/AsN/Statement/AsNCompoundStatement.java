@@ -44,6 +44,7 @@ import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DirectASMStatement;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
@@ -64,6 +65,9 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (s instanceof TryStatement) {
 			node = AsNTryStatement.cast((TryStatement) s, r, map, st);
+		}
+		else if (s instanceof ForEachStatement) {
+			node = AsNForEachStatement.cast((ForEachStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 		
