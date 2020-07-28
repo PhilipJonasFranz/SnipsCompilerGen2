@@ -627,6 +627,7 @@ public class ContextChecker {
 		
 		if (refType instanceof POINTER) {
 			POINTER p = (POINTER) refType;
+			
 			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
 				throw new CTX_EXC(f.getSource(), "Pointer type does not match iterator type: " + p.targetType.typeString() + " vs " + itType.typeString());
 			
@@ -638,9 +639,15 @@ public class ContextChecker {
 			/* Set as new shadowRef, will be casted during code generation */
 			f.shadowRef = new Deref(add, f.shadowRef.getSource());
 			f.shadowRef.check(this);
+			
+			if (f.range == null)
+				throw new CTX_EXC(f.getSource(), "Cannot iterate over reference without range");
+			
+			f.range.check(this);
 		}
 		else if (refType instanceof ARRAY) {
 			ARRAY a = (ARRAY) refType;
+			
 			if (!a.elementType.isEqual(itType))
 				throw new CTX_EXC(f.getSource(), "Array element type does not match iterator type: " + a.elementType.typeString() + " vs " + itType.typeString());
 			

@@ -1,0 +1,64 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int main() {
+	A [2] [2] m = {{A::(12), A::(5)}, {A::(20), A::(25)}};
+	
+	int s = 0;
+	for (A a : &m, 4) s += a.x;
+	return s;
+}
+TESTCASES
+62
+OUTPUT
+/* --test_04.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #20
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #12
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r3, #0
+    mov r4, #0
+    sub sp, sp, #8                           /* Make space on stack for declaration a */
+main.L1: 
+    mov r0, #4
+    cmp r0, r4
+    beq main.L2
+    sub r0, fp, #32
+    lsr r0, r0, #2
+    lsl r2, r4, #1
+    add r0, r0, r2
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]
+    push { r0 }
+    mov r0, #1                               /* Override SID header */
+    sub r1, fp, #40
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    ldr r0, [fp, #-36]                       /* Load field from struct */
+    add r3, r3, r0
+    add sp, sp, #8
+    add r4, r4, #1
+    b main.L1
+main.L2: 
+    add sp, sp, #8                           /* Reset stack, remove iterator and counter */
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    bx lr
+    
