@@ -82,4 +82,4 @@ main:                                        /* Function: main */
     bl sarrus                                /* Call sarrus */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-     
+    

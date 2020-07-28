@@ -26,7 +26,6 @@ main:                                        /* Function: main */
 main.L1: 
     cmp r4, #5
     beq main.L2
-    beq main.L2
     lsl r2, r4, #2
     sub r0, fp, #20
     ldr r5, [r0, r2]
@@ -37,4 +36,4 @@ main.L2:
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     bx lr
-     
+    

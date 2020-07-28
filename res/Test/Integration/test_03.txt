@@ -50,4 +50,4 @@ main:                                        /* Function: main */
     bl vecProd                               /* Call vecProd */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-     
+    

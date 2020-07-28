@@ -16,4 +16,4 @@ OUTPUT
 main:                                        /* Function: main */
     eor r0, r0, r1
     bx lr
-     
+    

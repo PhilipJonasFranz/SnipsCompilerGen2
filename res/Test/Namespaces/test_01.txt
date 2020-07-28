@@ -37,4 +37,4 @@ main:                                        /* Function: main */
     bx lr
 .POOL0_L1_Bar.x: .word Bar.x
 .POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
-     
+    

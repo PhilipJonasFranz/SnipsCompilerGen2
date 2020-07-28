@@ -18,4 +18,4 @@ Test.foo:                                    /* Function: Test.foo */
 main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     b Test.foo                               /* Call Test.foo */
-     
+    

@@ -13,7 +13,9 @@ import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -23,7 +25,6 @@ import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNArraySelect;
@@ -42,7 +43,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
 		f.continueJump = continueJump;
 		
-		/* Open new scope for iterator */
+		/* Open new scope for counter and iterator */
 		st.openScope(a);
 		
 		/* Initialize counter */
@@ -64,31 +65,28 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		/* Set jump target for break statements */
 		f.breakJump = forEnd;
 		
-		/* Initialize counter */
-		f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
 		
+		/* Load counter */
+		f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
 		
 		/* Compare bounds, branch to end if bound reached */
 		if (a.shadowRef.getType() instanceof ARRAY) {
 			ARRAY arr = (ARRAY) a.shadowRef.getType();
-			
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(arr.length)));
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
 		}
 		else {
 			f.instructions.addAll(AsNExpression.cast(a.range, r, map, st).getInstructions());
-			
 			f.loadCounter(r, st, a, 1);
-			
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		
 		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
 		
+		/* Free the counter from the reg set */
+		r.free(0);
 		
 		/* Load value in iterator depending on counter */
 		if (r.declarationLoaded(a.iterator)) {
-			
 			/* In Reg Set */
 			int loc = r.declarationRegLocation(a.iterator);
 			
@@ -111,10 +109,20 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 				f.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
 			else {
-				/* TODO: Store selected section at iterator */
+				int offset = st.getDeclarationInStackByteOffset(a.iterator);
+				offset += (a.iterator.getType().wordsize() - 1) * 4;
+				
+				/* Load the start of the structure into R1 */
+				f.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
+				
+				/* Push dummy values for iterator on the stack top, copyStackSection will pop them */
+				for (int i = 0; i < a.iterator.getType().wordsize(); i++)
+					st.push(REG.R0);
+				
+				/* Pop the loaded words and store them to the iterator */
+				AsNAssignment.copyStackSection(a.iterator.getType().wordsize(), f, st);
 			}
 		}
-		
 		
 		/* Add body, dont use addBody() because of custom scope handling */
 		for (Statement s : a.body) 
@@ -153,26 +161,27 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		/* Add loop end */
 		f.instructions.add(forEnd);
 		
-		/* Free counter and iterator */
-		f.clearDec(r, st, a.iterator, a);
-		f.clearDec(r, st, a.counter, a);
+		/* Remove iterator from register or stack */
+		if (r.declarationLoaded(a.iterator)) {
+			int loc = r.declarationRegLocation(a.iterator);
+			r.getReg(loc).free();
+		}
+		
+		if (r.declarationLoaded(a.counter)) {
+			int loc = r.declarationRegLocation(a.counter);
+			r.getReg(loc).free();
+		}
+		
+		/* Reset stack from iterator and counter */
+		int add = st.closeScope(a, true);
+		if (add != 0) {
+			ASMAdd add0 = new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(add));
+			add0.comment = new ASMComment("Reset stack, remove iterator and counter");
+			f.instructions.add(add0);
+		}
 		
 		f.freeDecs(r, a);
 		return f;
-	}
-	
-	public void clearDec(RegSet r, StackSet st, Declaration d, ForEachStatement f) {
-		/* Remove iterator from register or stack */
-		if (r.declarationLoaded(d)) {
-			int loc = r.declarationRegLocation(d);
-			r.getReg(loc).free();
-		}
-		else {
-			int add = st.closeScope(f, true);
-			if (add != 0) {
-				this.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(add)));
-			}
-		}
 	}
 	
 	public void loadCounter(RegSet r, StackSet st, ForEachStatement f, int target) {

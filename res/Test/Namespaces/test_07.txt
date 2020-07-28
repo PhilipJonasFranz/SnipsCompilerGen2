@@ -42,4 +42,4 @@ main:                                        /* Function: main */
     add r0, r1, r2
     bx lr
 .POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
-     
+    

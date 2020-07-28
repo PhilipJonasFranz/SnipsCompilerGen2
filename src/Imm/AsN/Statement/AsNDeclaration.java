@@ -45,7 +45,10 @@ public class AsNDeclaration extends AsNStatement {
 				if (d.value != null) st.popXWords(d.getType().wordsize());
 				else {
 					/* Declaration has no value, just make space on the stack */
-					dec.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(d.getType().wordsize() * 4)));
+					ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(d.getType().wordsize() * 4));
+					sub.comment = new ASMComment("Make space on stack for declaration " + d.path.getLast());
+					
+					dec.instructions.add(sub);
 				}
 			}
 			

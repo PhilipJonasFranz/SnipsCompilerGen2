@@ -88,4 +88,4 @@ main:                                        /* Function: main */
     bl __vec_cross                           /* Call __vec_cross */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-     
+    

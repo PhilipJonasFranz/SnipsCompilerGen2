@@ -15,4 +15,4 @@ main:                                        /* Function: main */
     mul r0, r1, r2
     bx lr
 .POOL0_LIT_1024: .word 1024
-     
+    

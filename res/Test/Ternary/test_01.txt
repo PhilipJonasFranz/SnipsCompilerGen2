@@ -26,4 +26,4 @@ main.L0:
 main.L2: 
     mov r0, #10
     bx lr
-     
+    

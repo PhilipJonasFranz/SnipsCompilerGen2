@@ -59,4 +59,4 @@ main:                                        /* Function: main */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .POOL0_L1_Foo.Baz.x: .word Foo.Baz.x
-     
+    

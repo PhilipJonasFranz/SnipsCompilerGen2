@@ -49,4 +49,4 @@ main:                                        /* Function: main */
     b lambda_sortPred
     mov r10, #0
     b get                                    /* Call get */
-     
+    

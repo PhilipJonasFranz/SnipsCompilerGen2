@@ -35,4 +35,4 @@ main:                                        /* Function: main */
 .POOL0_L1_Foo.x: .word Foo.x
 .POOL0_L2_Foo.Bar.x: .word Foo.Bar.x
 .POOL0_L0_Foo.k: .word Foo.k
-     
+    

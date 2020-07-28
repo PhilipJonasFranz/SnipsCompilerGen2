@@ -53,7 +53,7 @@ public class AsNArraySelect extends AsNExpression {
 		
 		/* Array is parameter, load from parameter stack */
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-			if (s.getType() instanceof ARRAY) {
+			if (s.getType().wordsize() > 1) {
 				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
 			}
 			else {
@@ -62,7 +62,7 @@ public class AsNArraySelect extends AsNExpression {
 		}
 		else if (map.declarationLoaded(s.idRef.origin)) {
 			/* Data Memory */
-			if (s.getType() instanceof ARRAY) {
+			if (s.getType().wordsize() > 1) {
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
 			}
 			else {
@@ -70,7 +70,7 @@ public class AsNArraySelect extends AsNExpression {
 			}
 		}
 		else {
-			if (s.getType() instanceof ARRAY) {
+			if (s.getType().wordsize() > 1) {
 				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
 			}
 			else {
@@ -78,12 +78,11 @@ public class AsNArraySelect extends AsNExpression {
 			}
 		}
 		
-		if (s.getType() instanceof ARRAY) {
+		if (s.getType().wordsize() > 1) {
 			/* Loop through array word size and copy values */
-			subStructureCopy(select, ((ARRAY) s.getType()).wordsize());
+			subStructureCopy(select, s.getType().wordsize());
 		}
 		else {
-			/* Load */
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
 		

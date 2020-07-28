@@ -86,4 +86,4 @@ main:                                        /* Function: main */
     bl det                                   /* Call det */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-     
+    
