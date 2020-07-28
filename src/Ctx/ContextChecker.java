@@ -2,6 +2,7 @@ package Ctx;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
 import Exc.CTX_EXC;
@@ -62,6 +63,7 @@ import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -275,6 +277,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
+		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		if (opt.isPresent())
+			throw new CTX_EXC(e.getSource(), "Found non proviso type in proviso header: " + opt.get().typeString());
+		
+		if (e.extension != null && e.extension.proviso.size() != e.extProviso.size()) 
+			throw new CTX_EXC(e.getSource(), "Incorrect number of proviso for extension " + e.extension.self.typeString() + ", expected " + e.extension.proviso.size() + ", got " + e.extProviso.size());
+		
 		/* 
 		 * Add to topLevelStructExtenders, since this typedef is the root
 		 * of an extension tree, and is used to assign SIDs.
@@ -1548,8 +1557,9 @@ public class ContextChecker {
 	}
 	
 	public boolean checkPolymorphViolation(TYPE child, TYPE target, Source source) throws CTX_EXC {
+		if (!(target instanceof STRUCT)) return false;
 		if (child.getCoreType() instanceof STRUCT) {
-			if (((STRUCT) child.getCoreType()).isPolymorphTo(target)) {
+			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && !((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {
 				return true;
 			}
 		}

@@ -110,4 +110,10 @@ public class PROVISO extends TYPE<Void> {
 		else throw new SNIPS_EXC("Cannot free contextless proviso: " + this.placeholderName);
 	}
 
+	public TYPE remapProvisoName(String name, TYPE newType) {
+		if (this.placeholderName.equals(name)) 
+			return newType;
+		else return this;
+	}
+
 }

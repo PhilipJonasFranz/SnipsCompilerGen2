@@ -1,0 +1,43 @@
+DESCRIPTION
+Verifies the correct functionality of struct extending with provio types.
+SOURCE
+struct Base<Z> {
+	Z z;
+}
+
+struct Root<V> : Base<char> {
+	V x;
+}
+
+struct A<K, V, Z> : Root<V> {
+	int var;
+	K sp;
+}
+
+int main() {
+	A<int, bool, char> a = A<int, bool, char>::('A', true, 25, 2);
+	return (int) a.x + a.var + a.sp + (int) a.z;
+}
+TESTCASES
+93
+OUTPUT
+/* --test_03.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #2                               /* Evaluate Expression */
+    mov r1, #25
+    mov r2, #1
+    stmfd sp!, {r0-r2}
+    mov r0, #65
+    push { r0 }
+    mov r0, #3
+    push { r0 }
+    ldr r0, [fp, #-12]                       /* Load field from struct */
+    ldr r2, [fp, #-8]                        /* Load field from struct */
+    add r0, r0, r2
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    ldr r2, [fp, #-16]                       /* Load field from struct */
+    add r0, r0, r2
+    bx lr
+    

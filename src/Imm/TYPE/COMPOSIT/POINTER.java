@@ -107,4 +107,9 @@ public class POINTER extends COMPOSIT {
 		return p;
 	}
 
+	public TYPE remapProvisoName(String name, TYPE newType) {
+		this.targetType = this.targetType.remapProvisoName(name, newType);
+		return this;
+	}
+
 }

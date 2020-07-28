@@ -66,4 +66,6 @@ public abstract class TYPE<T> {
 	
 	public abstract TYPE provisoFree();
 	
+	public abstract TYPE remapProvisoName(String name, TYPE newType);
+	
 }

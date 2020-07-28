@@ -29,10 +29,12 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<TYPE> extProviso;
+	
 	/* Contains all struct typedefs that extended from this struct */
 	public List<StructTypedef> extenders = new ArrayList();
 	
-	protected STRUCT self;
+	public STRUCT self;
 	
 	/* 
 	 * SID is assigned during context checking, in order to allow for efficient instanceof expressions.
@@ -62,7 +64,7 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, List<TYPE> extProviso, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -70,6 +72,7 @@ public class StructTypedef extends SyntaxElement {
 		this.fields = declarations;
 		
 		this.extension = extension;
+		this.extProviso = extProviso;
 		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) 

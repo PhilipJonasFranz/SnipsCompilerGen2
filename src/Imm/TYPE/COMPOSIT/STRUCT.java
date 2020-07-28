@@ -202,5 +202,12 @@ public class STRUCT extends COMPOSIT {
 		for (int i = 0; i < s.proviso.size(); i++) s.proviso.set(i, s.proviso.get(i).provisoFree());
 		return s;
 	}
+
+	public TYPE remapProvisoName(String name, TYPE newType) {
+		for (int i = 0; i < this.proviso.size(); i++) { 
+			this.proviso.set(i, this.proviso.get(i).remapProvisoName(name, newType));
+		}
+		return this;
+	}
 	
 }

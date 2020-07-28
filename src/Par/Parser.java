@@ -309,18 +309,34 @@ public class Parser {
 		List<TYPE> proviso = this.parseProviso();
 		NamespacePath path = this.buildPath(id.spelling);
 		
-		
 		StructTypedef ext = null;
+		List<TYPE> extProviso = new ArrayList();
 		List<Declaration> extendDecs = new ArrayList();
 		
 		if (current.type == TokenType.COLON) {
 			accept();
+			
 			NamespacePath ext0 = this.parseNamespacePath();
 			ext = this.getStructTypedef(ext0, source);
 			
+			if (current.type == TokenType.CMPLT) 
+				extProviso.addAll(this.parseProviso());
+			
 			/* Copy the extended fields */
-			for (Declaration d : ext.getFields()) 
-				extendDecs.add(d.clone());
+			for (Declaration d : ext.getFields()) {
+				Declaration c = d.clone();
+				
+				/* If number of provisos are not equal an exception will be thrown in CTX anyway */
+				if (ext.proviso.size() == extProviso.size()) 
+					/* Remap type of declaration to provided provisos */
+					for (int i = 0; i < ext.proviso.size(); i++) {
+						if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
+						PROVISO prov = (PROVISO) ext.proviso.get(i);
+						c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
+					}
+				
+				extendDecs.add(c);
+			}
 		}
 		
 		/*
@@ -328,7 +344,7 @@ public class Parser {
 		 * to another instance of this struct. The struct definition needs to exist before
 		 * such a declaration is parsed.
 		 */
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, mod, source);
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
