@@ -13,4 +13,4 @@ public class ASMSeperator extends ASMInstruction {
 		return CompilerDriver.printDepth;
 	}
 	
-}
+} 

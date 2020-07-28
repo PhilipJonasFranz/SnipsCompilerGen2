@@ -28,4 +28,4 @@ public class AsNBitNot extends AsNUnaryExpression {
 		return not;
 	}
 	
-}
+} 

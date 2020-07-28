@@ -21,4 +21,4 @@ public class ASMMov extends ASMBinaryData {
 		return CompilerDriver.printDepth + "mov" + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op1.toString();
 	}
 
-}
+} 

@@ -122,4 +122,4 @@ public class AsNAssignWriteback extends AsNStatement {
 		if (partOfExpression) node.instructions.get(node.instructions.size() - 1).optFlags.add(OPT_FLAG.WRITEBACK);
 	}
 	
-}
+} 

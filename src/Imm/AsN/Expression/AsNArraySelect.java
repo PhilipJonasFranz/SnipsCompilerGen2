@@ -291,4 +291,4 @@ public class AsNArraySelect extends AsNExpression {
 		node.instructions.add(new ASMLsl(new RegOp(target), new RegOp(target), new ImmOp(2)));
 	}
 	
-}
+} 

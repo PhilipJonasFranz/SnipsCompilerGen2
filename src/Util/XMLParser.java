@@ -162,4 +162,4 @@ public class XMLParser {
 		this.root = new XMLNode(this.file);
 	};
 	
-}
+} 

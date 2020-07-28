@@ -36,4 +36,4 @@ log2.L1:
     
 main:                                        /* Function: main */
     b log2                                   /* Call log2 */
-    
+     

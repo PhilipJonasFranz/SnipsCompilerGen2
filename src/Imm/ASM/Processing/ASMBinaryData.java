@@ -66,4 +66,4 @@ public abstract class ASMBinaryData extends ASMInstruction {
 		return s;
 	}
 
-}
+} 

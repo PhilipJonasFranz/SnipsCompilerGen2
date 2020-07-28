@@ -74,4 +74,4 @@ public class LiteralManager {
 		return null;
 	}
 	
-}
+} 

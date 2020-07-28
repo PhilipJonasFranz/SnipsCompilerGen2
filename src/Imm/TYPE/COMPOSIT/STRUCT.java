@@ -210,4 +210,4 @@ public class STRUCT extends COMPOSIT {
 		return this;
 	}
 	
-}
+} 

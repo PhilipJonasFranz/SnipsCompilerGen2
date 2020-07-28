@@ -6,4 +6,4 @@ public abstract class MemoryOperand extends Operand {
 
 	public abstract MemoryOperand clone();
 	
-}
+} 

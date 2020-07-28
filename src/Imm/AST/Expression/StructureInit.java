@@ -48,4 +48,4 @@ public class StructureInit extends Expression {
 			e.setContext(context);
 	}
 
-}
+} 

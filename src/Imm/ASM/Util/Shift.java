@@ -32,4 +32,4 @@ public class Shift {
 		return new Shift(this.shift, this.distance.clone());
 	}
 	
-}
+} 

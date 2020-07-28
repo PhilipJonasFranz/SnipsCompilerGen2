@@ -21,4 +21,4 @@ public class ASMAnd extends ASMBinaryData {
 		return super.build("and");
 	}
 
-}
+} 

@@ -42,4 +42,4 @@ public class SizeOfType extends Expression {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
 	}
 
-}
+} 

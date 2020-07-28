@@ -871,6 +871,8 @@ public class Parser {
 		if (current.type == TokenType.COLON) 
 			return this.parseForEach(itType, itId);
 		
+		accept(TokenType.LET);
+		
 		Expression value = this.parseExpression();
 		accept(TokenType.SEMICOLON);
 		
@@ -2147,4 +2149,4 @@ public class Parser {
 		else return MODIFIER.EXCLUSIVE;
 	}
 	
-}
+} 

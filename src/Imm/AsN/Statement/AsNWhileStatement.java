@@ -110,4 +110,4 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		this.instructions.add(whileEnd);
 	}
 	
-}
+} 

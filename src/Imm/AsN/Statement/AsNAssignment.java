@@ -100,4 +100,4 @@ public class AsNAssignment extends AsNStatement {
 		st.popXWords(size);
 	}
 	
-}
+} 

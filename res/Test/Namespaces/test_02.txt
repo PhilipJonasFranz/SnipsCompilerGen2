@@ -30,4 +30,4 @@ main:                                        /* Function: main */
     bx lr
 .POOL0_L1_Foo.Bar.x: .word Foo.Bar.x
 .POOL0_L0_Foo.x: .word Foo.x
-    
+     

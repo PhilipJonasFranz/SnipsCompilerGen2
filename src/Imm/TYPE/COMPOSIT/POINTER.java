@@ -112,4 +112,4 @@ public class POINTER extends COMPOSIT {
 		return this;
 	}
 
-}
+} 

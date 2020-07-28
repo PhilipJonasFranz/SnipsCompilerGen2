@@ -18,4 +18,4 @@ public class UnaryMinus extends UnaryExpression {
 		super(operand, UnaryOperator.NEG, source);
 	}
 
-}
+} 

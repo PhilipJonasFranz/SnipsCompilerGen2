@@ -56,4 +56,4 @@ All instructions do support the condition field. If you compile your assembly co
 ## License & Copyright
  © Philip Jonas Franz
  
- Licensed under [Apache License 2.0](LICENSE).
+ Licensed under [Apache License 2.0](LICENSE). 

@@ -23,4 +23,4 @@ public class SimpleMessage extends Message {
 		return this.message;
 	}
 	
-}
+} 

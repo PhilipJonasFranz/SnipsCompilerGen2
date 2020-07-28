@@ -104,4 +104,4 @@ public class Declaration extends Statement {
 		return clone;
 	}
 	
-}
+} 

@@ -20,4 +20,4 @@ public class AsNArrayInit extends AsNExpression {
 		return init;
 	}
 	
-}
+} 

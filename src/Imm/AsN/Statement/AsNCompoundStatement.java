@@ -334,4 +334,4 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else throw new CGEN_EXC(e.getSource(), "Cannot check references for " + e.getClass().getName());
 	}
 	
-}
+} 

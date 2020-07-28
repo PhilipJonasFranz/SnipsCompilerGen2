@@ -58,4 +58,4 @@ public class AsNDeclaration extends AsNStatement {
 		return dec;
 	}
 	
-}
+} 

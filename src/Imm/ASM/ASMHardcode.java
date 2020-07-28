@@ -29,4 +29,4 @@ public class ASMHardcode extends ASMInstruction {
 		return CompilerDriver.printDepth + this.hardCode;
 	}
 	
-}
+} 

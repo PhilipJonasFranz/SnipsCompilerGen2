@@ -61,4 +61,4 @@ public class ENUM extends PRIMITIVE<String> {
 		return b;
 	}
 	
-}
+} 

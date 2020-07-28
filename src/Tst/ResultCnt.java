@@ -37,4 +37,4 @@ public class ResultCnt {
 		return this.timeout;
 	}
 	
-}
+} 

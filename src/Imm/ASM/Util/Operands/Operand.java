@@ -8,4 +8,4 @@ public abstract class Operand {
 	
 	public abstract boolean equals(Operand operand);
 	
-}
+} 

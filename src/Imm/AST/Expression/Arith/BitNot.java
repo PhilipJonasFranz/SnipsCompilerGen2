@@ -18,4 +18,4 @@ public class BitNot extends UnaryExpression {
 		super(operand, UnaryOperator.NOT, source);
 	}
 
-}
+} 

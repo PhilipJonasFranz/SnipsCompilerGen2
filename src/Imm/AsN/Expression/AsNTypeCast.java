@@ -22,4 +22,4 @@ public class AsNTypeCast extends AsNExpression {
 		return t;
 	}
 	
-}
+} 

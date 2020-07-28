@@ -46,4 +46,4 @@ public class BOOL extends PRIMITIVE<Boolean> {
 		return b;
 	}
 	
-}
+} 

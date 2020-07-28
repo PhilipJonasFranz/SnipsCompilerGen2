@@ -29,4 +29,4 @@ public class Cond {
 		return this.cond.toString().toLowerCase();
 	}
 	
-}
+} 

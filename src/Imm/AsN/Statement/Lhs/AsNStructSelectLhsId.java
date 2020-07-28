@@ -121,4 +121,4 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		st.popXWords(size);
 	}
 	
-}
+} 

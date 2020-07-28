@@ -35,4 +35,4 @@ public class NULL extends PRIMITIVE<Object> {
 		return new NULL();
 	}
 
-}
+} 

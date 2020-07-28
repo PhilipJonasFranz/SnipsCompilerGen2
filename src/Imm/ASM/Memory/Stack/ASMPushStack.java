@@ -42,4 +42,4 @@ public class ASMPushStack extends ASMInstruction {
 		return s;
 	}
 	
-}
+} 

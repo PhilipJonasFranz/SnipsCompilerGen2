@@ -35,4 +35,4 @@ public class CGEN_EXC extends Exception {
 		return message + ((this.location != null)? ", " + this.location.getSourceMarker() : "");
 	}
 	
-}
+} 

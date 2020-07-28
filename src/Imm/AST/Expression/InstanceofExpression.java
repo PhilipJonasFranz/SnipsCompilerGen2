@@ -50,4 +50,4 @@ public class InstanceofExpression extends Expression {
 		this.expression.setContext(context);
 	}
 
-}
+} 

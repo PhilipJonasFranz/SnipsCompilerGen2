@@ -181,4 +181,4 @@ public class AsNIDRef extends AsNExpression {
 		}
 	}
 	
-}
+} 

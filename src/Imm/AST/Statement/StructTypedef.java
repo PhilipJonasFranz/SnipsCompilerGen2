@@ -201,4 +201,4 @@ public class StructTypedef extends SyntaxElement {
 		
 	}
 
-}
+} 

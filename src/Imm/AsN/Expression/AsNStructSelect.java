@@ -278,4 +278,4 @@ public class AsNStructSelect extends AsNExpression {
 		if (offset != 0) node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(offset)));
 	}
 	
-}
+} 

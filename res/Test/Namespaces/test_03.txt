@@ -29,4 +29,4 @@ main:                                        /* Function: main */
     bx lr
 .POOL0_L1_Foo.y: .word Foo.y
 .POOL0_L0_Foo.x: .word Foo.x
-    
+     

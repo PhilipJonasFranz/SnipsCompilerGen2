@@ -90,4 +90,4 @@ public class ProgressMessage {
 			return "[" + ((this.messageType == Type.INFO)? "Info" : (this.messageType == Type.WARN)? "Warn" : "Fail") + "] : ";	
 	}
 	
-}
+} 

@@ -27,4 +27,4 @@ public abstract class BoolUnaryExpression extends UnaryExpression {
 		return ctx.checkBoolUnaryExpression(this);
 	}
 	
-}
+} 

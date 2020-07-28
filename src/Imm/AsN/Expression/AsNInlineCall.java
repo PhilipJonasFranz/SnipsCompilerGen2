@@ -44,4 +44,4 @@ public class AsNInlineCall extends AsNExpression {
 		return call;
 	}
 	
-}
+} 

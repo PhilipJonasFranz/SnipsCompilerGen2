@@ -23,4 +23,4 @@ public class ASMStrStack extends ASMStackOp {
 		return super.build("str");
 	}
 	
-}
+} 

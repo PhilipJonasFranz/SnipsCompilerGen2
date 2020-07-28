@@ -36,4 +36,4 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+     

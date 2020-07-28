@@ -44,4 +44,4 @@ BitwiseUnary := StructAccess | '~' Expression
 StructAccess := ElemSelect | '.' Expression
 ElemSelect := FunctionCall | Expression '[' Expression ']' ('[' Expression ']')*
 FunctionCall := Atom | fname '(' Expression* ')'
-Atom := vname | '(' Expression ')'
+Atom := vname | '(' Expression ')' 

@@ -88,7 +88,6 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		/* Load value in iterator depending on counter */
 		if (r.declarationLoaded(a.iterator)) {
-			a.shadowRef.print(0, true);
 			
 			/* In Reg Set */
 			int loc = r.declarationRegLocation(a.iterator);
@@ -192,4 +191,4 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		}
 	}
 	
-}
+} 
