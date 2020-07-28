@@ -196,11 +196,9 @@ public class ContextChecker {
 		
 		if (progress != null) progress.incProgress(1);
 		
-		for (Declaration d : toLink) {
-			if (d.last != null) {
+		for (Declaration d : toLink) 
+			if (d.last != null) 
 				d.last.free.add(d);
-			}
-		}
 		
 		return null;
 	}
