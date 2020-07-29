@@ -115,10 +115,6 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 				/* Load the start of the structure into R1 */
 				f.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
 				
-				/* Push dummy values for iterator on the stack top, copyStackSection will pop them */
-				for (int i = 0; i < a.iterator.getType().wordsize(); i++)
-					st.push(REG.R0);
-				
 				/* Pop the loaded words and store them to the iterator */
 				AsNAssignment.copyStackSection(a.iterator.getType().wordsize(), f, st);
 			}

@@ -53,36 +53,34 @@ public class AsNArraySelect extends AsNExpression {
 		
 		/* Array is parameter, load from parameter stack */
 		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-			if (s.getType().wordsize() > 1) {
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
-			}
 		}
 		else if (map.declarationLoaded(s.idRef.origin)) {
 			/* Data Memory */
-			if (s.getType().wordsize() > 1) {
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
-			}
 		}
 		else {
-			if (s.getType().wordsize() > 1) {
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
-			}
 		}
 		
 		if (s.getType().wordsize() > 1) {
 			/* Loop through array word size and copy values */
 			subStructureCopy(select, s.getType().wordsize());
+			
+			/* Push dummy values on the stack */
+			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
 		}
 		else {
+			/* Load single value into R0 */
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
 		
