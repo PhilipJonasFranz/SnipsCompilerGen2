@@ -21,7 +21,6 @@ import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
-import Imm.ASM.Processing.ASMBinaryData.SHIFT_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMLsr;
@@ -1286,17 +1285,19 @@ public class ASMOptimizer {
 					ASMAdd add = (ASMAdd) body.instructions.get(i - 1);
 					
 					dataTarget = add.target.reg;
-					op0 = add.op0;
-					op1 = add.op1;
+					op0 = add.op0.clone();
+					op1 = add.op1.clone();
+					
+					shift = add.shift;
 				}
 				else if (body.instructions.get(i - 1) instanceof ASMSub) {
 					ASMSub sub = (ASMSub) body.instructions.get(i - 1);
 					
 					dataTarget = sub.target.reg;
-					op0 = sub.op0;
+					op0 = sub.op0.clone();
 					
 					if (sub.op1 instanceof RegOp) {
-						op1 = sub.op1;
+						op1 = sub.op1.clone();
 						negate = true;
 					}
 					else if (sub.op1 instanceof ImmOp) {
@@ -1315,7 +1316,7 @@ public class ASMOptimizer {
 					ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
 					
 					dataTarget = lsl.target.reg;
-					op0 = lsl.op0.clone();
+					op0 = new RegOp(REG.R10);
 					
 					op1 = lsl.op0.clone();
 					shift = new Shift(SHIFT.LSL, lsl.op1.clone());
@@ -1351,10 +1352,13 @@ public class ASMOptimizer {
 				clear |= ldr.target.reg == dataTarget;
 				
 				if (clear) {
-					if (shift == null) {
+					if (shift == null || op1 != null) {
 						/* Substitute */
 						ldr.op0 = op0;
 						ldr.op1 = op1;
+						
+						if (ldr.op1 instanceof RegOp)
+							((RegOp) op1).shift = shift;
 					}
 					else {
 						/* Special treatment for shifts */
@@ -1614,7 +1618,7 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
 				
-				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp) {
+				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
 					RegOp op1 = (RegOp) add.op1;
 					add.op1 = mov.op1;
 					add.op0 = op1;
@@ -1631,12 +1635,11 @@ public class ASMOptimizer {
 				ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
 				
-				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp && add.op1 instanceof RegOp) {
+				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
 					RegOp op1 = (RegOp) add.op1;
 					add.op1 = lsl.op0;
 					
-					add.shiftType = SHIFT_TYPE.LSL;
-					add.shiftDist = ((ImmOp) lsl.op1).value;
+					add.shift = new Shift(SHIFT.LSL, lsl.op1);
 					
 					add.op0 = op1;
 					

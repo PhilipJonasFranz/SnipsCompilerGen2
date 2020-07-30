@@ -1,0 +1,83 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int smallest(A* arr, int count) {
+	int smallest = arr [0]->x;
+	for (int i = 0; i < count; i++) 
+		if (arr [i]->x < smallest) smallest = arr [i]->x;
+
+	return smallest;
+}
+
+int main() {
+	A [5] arr = {A::(5), A::(3), A::(7), A::(2), A::(4)};
+	return smallest(&arr, 5);
+}
+TESTCASES
+2
+OUTPUT
+/* --test_08.txt */
+    b main
+smallest:                                    /* Function: smallest */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    mov r6, #0
+smallest.L1: 
+    cmp r6, r4
+    bge smallest.L2
+    lsl r1, r3, #2                           /* Convert to bytes */
+    lsl r2, r6, #2
+    lsl r2, r2, #1
+    add r1, r1, r2
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    cmp r0, r5
+    bge smallest.L3
+    lsl r1, r3, #2                           /* Convert to bytes */
+    lsl r2, r6, #2
+    lsl r2, r2, #1
+    add r1, r1, r2
+    ldr r5, [r1, #4]                         /* Load field from struct */
+smallest.L3: 
+    add r6, r6, #1
+    b smallest.L1
+smallest.L2: 
+    mov r0, r5                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r6}
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #2
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #7
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #3
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r1, #5
+    sub r0, fp, #40
+    lsr r0, r0, #2
+    bl smallest                              /* Call smallest */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    
