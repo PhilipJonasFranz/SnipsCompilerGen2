@@ -1,0 +1,40 @@
+SOURCE
+int main() {
+	int [5] arr = {5, 2, 6, 3, 6};
+	
+	int s = 0;
+	for (int a : &arr, 5) s += a;
+	return s;
+}
+TESTCASES
+22
+OUTPUT
+/* --test_01.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #6                               /* Evaluate Expression */
+    mov r1, #3
+    mov r2, #6
+    stmfd sp!, {r0-r2}
+    mov r0, #2
+    mov r1, #5
+    stmfd sp!, {r0, r1}
+    mov r3, #0
+    mov r4, #0
+    mov r5, #0
+main.L1: 
+    mov r0, #5
+    cmp r0, r4
+    beq main.L2
+    sub r0, fp, #20
+    lsr r1, r0, #2
+    add r0, r1, r4
+    ldr r5, [r10, r0, lsl #2]                /* Load from address */
+    add r3, r3, r5
+    add r4, r4, #1
+    b main.L1
+main.L2: 
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    bx lr
+    

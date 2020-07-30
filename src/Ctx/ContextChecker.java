@@ -2,6 +2,7 @@ package Ctx;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
 import Exc.CTX_EXC;
@@ -31,7 +32,9 @@ import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
+import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
@@ -50,6 +53,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -62,6 +66,7 @@ import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -72,6 +77,8 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Par.Token;
+import Par.Token.TokenType;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
@@ -107,6 +114,9 @@ public class ContextChecker {
 	
 	List<Message> messages = new ArrayList();
 	
+	/* Contains the structs that have no extensions */
+	List<StructTypedef> tLStructs = new ArrayList();
+	
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = AST;
 		ContextChecker.progress = progress;
@@ -115,6 +125,24 @@ public class ContextChecker {
 	
 	public TYPE check() throws CTX_EXC {
 		this.checkProgram((Program) AST);
+		
+		if (!this.tLStructs.isEmpty()) {
+			int SIDStart = 1;
+			if (this.tLStructs.size() == 1) 
+				this.tLStructs.get(0).propagateSIDs(SIDStart, null);
+			else {
+				/* Apply to first n - 1 */
+				for (int i = 1; i < this.tLStructs.size(); i++) { 
+					SIDStart = this.tLStructs.get(i - 1).propagateSIDs(SIDStart, this.tLStructs.get(i));
+					
+					/* Set neighbour of n - 1 to n */
+					this.tLStructs.get(i - 1).SIDNeighbour = this.tLStructs.get(i);
+				}
+				
+				/* Apply to last */
+				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
+			}
+		}
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -138,8 +166,8 @@ public class ContextChecker {
 				
 				if (f.path.build().equals("main")) gotMain = true;
 				
-				/* Check main function as entrypoint, if a function is called, context is provided
-				 * and then checked */
+				/* Check main function as entrypoint, if a function is called, 
+				 * context is provided and then checked */
 				if (f.path.build().equals("main") && !f.provisosTypes.isEmpty()) 
 					throw new CTX_EXC(f.getSource(), "Function main cannot hold proviso types");
 				
@@ -170,11 +198,9 @@ public class ContextChecker {
 		
 		if (progress != null) progress.incProgress(1);
 		
-		for (Declaration d : toLink) {
-			if (d.last != null) {
+		for (Declaration d : toLink) 
+			if (d.last != null) 
 				d.last.free.add(d);
-			}
-		}
 		
 		return null;
 	}
@@ -254,6 +280,20 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
+		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		if (opt.isPresent())
+			throw new CTX_EXC(e.getSource(), "Found non proviso type in proviso header: " + opt.get().typeString());
+		
+		if (e.extension != null && e.extension.proviso.size() != e.extProviso.size()) 
+			throw new CTX_EXC(e.getSource(), "Incorrect number of proviso for extension " + e.extension.self.typeString() + ", expected " + e.extension.proviso.size() + ", got " + e.extProviso.size());
+		
+		/* 
+		 * Add to topLevelStructExtenders, since this typedef is the root
+		 * of an extension tree, and is used to assign SIDs.
+		 */
+		if (e.extension == null)
+			this.tLStructs.add(e);
+		
 		/* Set the declarations in the struct type */
 		return new VOID();
 	}
@@ -337,9 +377,6 @@ public class ContextChecker {
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
 		e.setType(e.structType);
 		
-		//System.out.println(e.getSource().getSourceMarker());
-		//e.print(0, true);
-		
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
@@ -354,7 +391,7 @@ public class ContextChecker {
 			if (!valType.isEqual(strType)) {
 				if (valType instanceof POINTER || strType instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
-				throw new CTX_EXC(e.getSource(), "Parameter type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
+				throw new CTX_EXC(e.getSource(), "Argument type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
 			}
 		}
 		
@@ -365,10 +402,12 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructSelect(StructSelect e) throws CTX_EXC {
-		/* This method links origins and types manually. This is partially due to the fact
+		/* 
+		 * This method links origins and types manually. This is partially due to the fact
 		 * that for example, a field in a struct does not count as a field identifier in the
 		 * current scope when referencing it. If it was to the check() method, it would report
-		 * an duplicate identifier. */
+		 * an duplicate identifier. 
+		 */
 		
 		TYPE type = null;
 		
@@ -377,6 +416,14 @@ public class ContextChecker {
 			IDRef sel = (IDRef) e.selector;
 			/* Link automatically, identifier is local */
 			type = sel.check(this);
+		}
+		else if (e.selector instanceof TypeCast) {
+			TypeCast tc = (TypeCast) e.selector;
+			
+			if (!(tc.expression instanceof IDRef))
+				throw new CTX_EXC(e.getSource(), "Base must be variable reference");
+			
+			type = tc.check(this);
 		}
 		else if (e.selector instanceof ArraySelect) {
 			ArraySelect arr = (ArraySelect) e.selector;
@@ -569,6 +616,65 @@ public class ContextChecker {
 		return null;
 	}
 	
+	public TYPE checkForEachStatement(ForEachStatement f) throws CTX_EXC {
+		this.compoundStack.push(f);
+		
+		this.scopes.push(new Scope(this.scopes.peek(), true));
+		
+		TYPE itType = f.iterator.check(this);
+		TYPE refType = f.shadowRef.check(this);
+		
+		f.counter.check(this);
+		f.ref.check(this);
+		
+		if (refType instanceof POINTER) {
+			POINTER p = (POINTER) refType;
+			
+			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
+				throw new CTX_EXC(f.getSource(), "Pointer type does not match iterator type: " + p.targetType.typeString() + " vs " + itType.typeString());
+			
+			/* Construct expression to calculate address based on address of the shadowRef, counter and the size of the type */
+			Expression add = new Add(f.shadowRef, f.ref, f.shadowRef.getSource());
+			
+			/* Set as new shadowRef, will be casted during code generation */
+			f.shadowRef = new Deref(add, f.shadowRef.getSource());
+			f.shadowRef.check(this);
+			
+			if (f.range == null)
+				throw new CTX_EXC(f.getSource(), "Cannot iterate over reference without range");
+			
+			f.range = new Mul(f.range, new Atom(new INT("" + itType.wordsize()), new Token(TokenType.INTLIT, null, ""), f.shadowRef.getSource()), f.range.getSource());
+			f.range.check(this);
+		}
+		else if (refType instanceof ARRAY) {
+			ARRAY a = (ARRAY) refType;
+			
+			if (!a.elementType.isEqual(itType))
+				throw new CTX_EXC(f.getSource(), "Array element type does not match iterator type: " + a.elementType.typeString() + " vs " + itType.typeString());
+			
+			/* Select first value from array */
+			List<Expression> select = new ArrayList();
+			select.add(f.ref);
+			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
+			
+			f.select.check(this);
+		}
+		else throw new CTX_EXC(f.getSource(), "Only available for pointers and arrays, actual " + refType.typeString());
+		
+		this.scopes.push(new Scope(this.scopes.peek(), true));
+		
+		for (Statement s : f.body) {
+			currentStatement = s;
+			s.check(this);
+		}
+		
+		this.scopes.pop();
+		this.scopes.pop();
+
+		this.compoundStack.pop();
+		return null;
+	}
+	
 	public TYPE checkIfStatement(IfStatement i) throws CTX_EXC {
 		/* Since else statement is directley checked, we need to set this explicitly here */
 		this.currentStatement = i;
@@ -632,6 +738,10 @@ public class ContextChecker {
 			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
+				
+				if (this.checkPolymorphViolation(t, d.getType(), d.getSource())) 
+					throw new CTX_EXC(d.getSource(), "Polymorphism only via pointers, actual " + t.typeString() + " vs " + d.getType().typeString());
+				
 				throw new CTX_EXC(d.getSource(), "Expression type does not match the declaration type: " + t.typeString() + " vs " + d.getType().typeString());
 			}
 		}
@@ -671,6 +781,10 @@ public class ContextChecker {
 		if (!targetType.isEqual(t) || (targetType.wordsize() != t.wordsize() && a.lhsId instanceof SimpleLhsId)) {
 			if (targetType instanceof POINTER || t instanceof POINTER) 
 				CompilerDriver.printProvisoTypes = true;
+			
+			if (this.checkPolymorphViolation(t, targetType, a.getSource())) 
+				throw new CTX_EXC(a.getSource(), "Variable type does not match expression type, polymorphism only via pointers, actual " + t.typeString() + " vs " + targetType.typeString());
+			
 			throw new CTX_EXC(a.getSource(), "Variable type does not match expression type: " + targetType.typeString() + " vs. " + t.typeString());
 		}
 		
@@ -1072,7 +1186,11 @@ public class ContextChecker {
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXC(i.parameters.get(a).getSource(), "Inline Call argument (" + (a + 1) + ") does not match function argument: " + paramType.typeString() + " vs " + functionParamType.typeString());
+					
+					if (this.checkPolymorphViolation(paramType, functionParamType, i.getSource()))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter, polymorphism only via pointers, actual " + paramType.typeString() + " vs " + functionParamType.typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter: " + paramType.typeString() + " vs " + functionParamType.typeString());
 				}
 			}
 			
@@ -1161,7 +1279,11 @@ public class ContextChecker {
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
-					throw new CTX_EXC(i.parameters.get(a).getSource(), "Function call argument (" + (a + 1) + ") does not match function parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					
+					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType(), i.getSource()))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter, polymorphism only via pointers, actual " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), "Argument (" + (a + 1) + ") does not match parameter type: " + paramType.typeString() + " vs " + f.parameters.get(a).getType().typeString());
 				}
 			}
 		}
@@ -1429,9 +1551,10 @@ public class ContextChecker {
 				if (!(stype instanceof INT)) 
 					throw new CTX_EXC(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
 				else {
-					if (!(chain instanceof ARRAY)) 
+					/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
+					if (!(chain instanceof ARRAY || (i == 0 && type0 instanceof POINTER))) 
 						throw new CTX_EXC(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
-					else {
+					else if (chain instanceof ARRAY) {
 						ARRAY arr = (ARRAY) chain;
 						
 						if (select.selection.get(i) instanceof Atom) {
@@ -1441,7 +1564,11 @@ public class ContextChecker {
 								throw new CTX_EXC(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + chain.typeString());
 						}
 						
-						chain = ((ARRAY) chain).elementType;
+						chain = arr.elementType;
+					}
+					else {
+						POINTER p = (POINTER) type0;
+						chain = p.targetType;
 					}
 				}
 			}
@@ -1496,4 +1623,14 @@ public class ContextChecker {
 		return new VOID();
 	}
 	
-}
+	public boolean checkPolymorphViolation(TYPE child, TYPE target, Source source) throws CTX_EXC {
+		if (!(target instanceof STRUCT)) return false;
+		if (child.getCoreType() instanceof STRUCT) {
+			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && !((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+} 

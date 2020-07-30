@@ -27,4 +27,4 @@ public abstract class BoolBinaryExpression extends BinaryExpression {
 		return ctx.checkBoolBinaryExpression(this);
 	}
 	
-}
+} 

@@ -10,4 +10,4 @@ public class And extends BoolBinaryExpression {
 		super(left, right, Operator.AND, source);
 	}
 
-}
+} 

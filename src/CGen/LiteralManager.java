@@ -13,6 +13,13 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
 import Imm.AsN.AsNNode;
 
+/**
+ * The literal manager is responsible for managing large literals.
+ * If a literal exceeds the maximum size (255), the literal has to
+ * be loaded via a data label. The LiteralManager creates and re-uses
+ * these data labels dynamically. These Data Labels are then injected
+ * during the casting of the body of the program.
+ */
 public class LiteralManager {
 
 			/* --- FIELDS --- */
@@ -27,10 +34,12 @@ public class LiteralManager {
 	 * ones and return the new label.
 	 */
 	public ASMDataLabel requestLabel(int value) {
+		/* Literal was already loaded, use the data label from the storage */
 		if (this.storedLiterals.containsKey(value)) {
 			return this.storedLiterals.get(value);
 		}
 		else {
+			/* Literal wasnt loaded before, create new one, store it and return it */
 			ASMDataLabel newLabel = new ASMDataLabel("LIT_" + value, new MemoryWordOp(value));
 			this.storedLiterals.put(value, newLabel);
 			return newLabel;
@@ -55,7 +64,8 @@ public class LiteralManager {
 	}
 	
 	/**
-	 * Returns the data label where the data label name matches the name of the given label.
+	 * Returns the data label where the data label name matches the name of the given label,
+	 * or null if the label is not found.
 	 */
 	public ASMDataLabel getValue(LabelOp l) {
 		for (Entry<Integer, ASMDataLabel> entry : this.storedLiterals.entrySet()) 
@@ -64,4 +74,4 @@ public class LiteralManager {
 		return null;
 	}
 	
-}
+} 

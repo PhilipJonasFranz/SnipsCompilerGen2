@@ -39,4 +39,4 @@ public class Compare extends BinaryExpression {
 		return ctx.checkCompare(this);
 	}
 	
-}
+} 

@@ -96,6 +96,18 @@ public class StackSet {
 		this.stack.pop();
 	}
 	
+	public int popXCells(int x) {
+		int bytes = 0;
+		for (int i = 0; i < x; i++) {
+			StackCell c = this.stack.pop();
+			
+			if (c.type == CONTENT_TYPE.REGISTER) bytes += 4;
+			else bytes += c.declaration.getType().wordsize();
+		}
+		
+		return bytes;
+	}
+	
 	/** 
 	 * Pop given amount of words from the stack. Throws an CGEN_EXCEPTION if not exactly x words can be popped.
 	 * This will mostly be caused by an internal compilation logic error.
@@ -103,31 +115,30 @@ public class StackSet {
 	public void popXWords(int x) throws CGEN_EXC {
 		int words = 0;
 		while (words < x) {
-			if (this.stack.peek().type == CONTENT_TYPE.REGISTER) {
-				words++;
-			}
-			else {
-				words += this.stack.peek().declaration.getType().wordsize();
-			}
+			if (this.stack.peek().type == CONTENT_TYPE.REGISTER) words++;
+			else words += this.stack.peek().declaration.getType().wordsize();
+			
 			this.stack.pop();
 		}
 		
-		if (words != x) {
+		if (words != x) 
 			throw new CGEN_EXC("Unable to pop " + x + " Words from the stack, could only pop " + words);
-		}
 	}
 	
 	/** Prints out the stack layout and the contents of the stack cells. */
 	public void print() {
 		System.out.println("\n---- STACK TOP ----");
+		
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
+			
 			System.out.println(x.type.toString() + ": ");
-			if (x.type == CONTENT_TYPE.DECLARATION) {
+			
+			if (x.type == CONTENT_TYPE.DECLARATION) 
 				x.declaration.print(4, true);
-			}
 			else System.out.println("    " + x.reg.toString());
 		}
+		
 		System.out.println("---- STACK BASE ----\n");
 	}
 	
@@ -164,11 +175,9 @@ public class StackSet {
 		boolean regs = false;
 		
 		/* Check if LR or FP regs were pushed */
-		for (int i = 0; i < stack.size(); i++) {
-			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) {
+		for (int i = 0; i < stack.size(); i++) 
+			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) 
 				regs = true;
-			}
-		}
 		
 		boolean hook = false;
 		for (int i = 0; i < stack.size(); i++) {
@@ -208,9 +217,7 @@ public class StackSet {
 	public int closeScope(CompoundStatement cs, boolean close) {
 		int target = this.stack.size();
 		
-		if (close) {
-			target = this.scopes.pop().getFirst();
-		}
+		if (close) target = this.scopes.pop().getFirst();
 		else {
 			for (int i = this.scopes.size() - 1; i >= 0; i--) {
 				target = this.scopes.get(i).getFirst();
@@ -235,28 +242,32 @@ public class StackSet {
 				st0.push(c);
 			}
 			
-			while (!st0.isEmpty()) {
+			while (!st0.isEmpty()) 
 				this.stack.push(st0.pop());
-			}
 		}
 		
 		return add * 4;
 	}
 	
+	/**
+	 * Returns the distance in bytes from the FP/LR base to the newest pushed
+	 * SP register. Used for try/watch construct. Returns the distance in bytes or -1.
+	 */
 	public int getHighestSPBackupOffset() {
 		int off = 4;
 		List<Integer> occurences = new ArrayList();
+		
 		for (int i = 0; i < stack.size(); i++) {
 			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
 				if (stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) off = 4;
 				else if (stack.get(i).reg == REG.SP) occurences.add(off);
 				else off += 4;
-			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
+			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) 
 				off += (stack.get(i).declaration.getType().wordsize() * 4);
-			}
 		}
 		
-		return occurences.get(occurences.size() - 1);
+		if (occurences.isEmpty()) return -1;
+		else return occurences.get(occurences.size() - 1);
 	}
 	
 	/**
@@ -266,9 +277,7 @@ public class StackSet {
 		int off = 0;
 		for (StackCell c : this.stack) {
 			if (c.getType() == CONTENT_TYPE.REGISTER) {
-				if (c.getReg() == REG.LR || c.getReg() == REG.FP) {
-					off = 0;
-				}
+				if (c.getReg() == REG.LR || c.getReg() == REG.FP) off = 0;
 				else off += 4;
 			}
 			else off += c.getDeclaration().getType().wordsize();
@@ -281,4 +290,4 @@ public class StackSet {
 		return this.stack;
 	}
 	
-}
+} 

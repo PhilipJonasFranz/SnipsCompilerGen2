@@ -30,9 +30,9 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #2
-    push { r0 }
     mov r0, #3
+    push { r0 }
+    mov r0, #2
     push { r0 }
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r2, #20

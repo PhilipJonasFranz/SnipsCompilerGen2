@@ -1,0 +1,98 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int main() {
+	A [2] [2] m = {{A::(12), A::(5)}, {A::(20), A::(25)}};
+	
+	int s = 0;
+	for (A [2] a0 : m) {
+		for (A a1 : a0) {
+			s += a1.x;
+		}
+	}
+	return s;
+}
+TESTCASES
+62
+OUTPUT
+/* --test_03.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #20
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #12
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r3, #0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r4, #0
+    sub sp, sp, #16                          /* Make space on stack for declaration a0 */
+main.L1: 
+    cmp r4, #2
+    beq main.L2
+    mov r2, #0                               /* Calculate offset of sub structure */
+    lsl r0, r4, #4
+    add r2, r2, r0
+    sub r1, fp, #32                          /* Start of structure in stack */
+    add r1, r1, r2                           /* Start of sub structure in stack */
+    ldr r0, [r1, #12]
+    ldr r2, [r1, #8]
+    stmfd sp!, {r0, r2}
+    ldr r0, [r1, #4]
+    ldr r2, [r1]
+    stmfd sp!, {r0, r2}
+    pop { r0 }
+    sub r1, fp, #48
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+    sub sp, sp, #8                           /* Make space on stack for declaration a1 */
+main.L4: 
+    cmp r5, #2
+    beq main.L5
+    mov r2, #0                               /* Calculate offset of sub structure */
+    lsl r0, r5, #3
+    add r2, r2, r0
+    sub r1, fp, #48                          /* Start of structure in stack */
+    add r1, r1, r2                           /* Start of sub structure in stack */
+    ldr r0, [r1, #4]
+    ldr r2, [r1]
+    stmfd sp!, {r0, r2}
+    pop { r0 }
+    sub r1, fp, #56
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    ldr r0, [fp, #-52]                       /* Load field from struct */
+    add r3, r3, r0
+    add r5, r5, #1
+    b main.L4
+main.L5: 
+    add sp, sp, #8                           /* Reset stack, remove iterator and counter */
+    add r4, r4, #1
+    b main.L1
+main.L2: 
+    add sp, sp, #16                          /* Reset stack, remove iterator and counter */
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    bx lr
+    

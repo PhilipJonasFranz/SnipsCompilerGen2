@@ -12,8 +12,7 @@ public class LabelGen {
 	/** Literal Pool number */
 	private static int p = 0;
 	
-	/** Counter that gives out SIDs */
-	private static int sid = 1;
+	private static int n = 0;
 	
 	/** Current function prefix */
 	public static String funcPrefix = "";
@@ -30,8 +29,8 @@ public class LabelGen {
 		return "_P" + c++;
 	}
 	
-	public static int getSID() {
-		return sid++;
+	public static int getSafeNum() {
+		return n++;
 	}
 	
 	/**
@@ -41,7 +40,8 @@ public class LabelGen {
 	public static void reset() {
 		c = 0;
 		p = 0;
-		sid = 1;
+		funcPrefix = "";
+		n = 0;
 	}
 	
 	/**
@@ -55,4 +55,4 @@ public class LabelGen {
 		return ".POOL" + p++ + "_";
 	}
 	
-}
+} 

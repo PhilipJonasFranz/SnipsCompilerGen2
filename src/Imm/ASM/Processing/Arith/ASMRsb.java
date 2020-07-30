@@ -21,4 +21,4 @@ public class ASMRsb extends ASMBinaryData {
 		return super.build("rsb");
 	}
 
-}
+} 

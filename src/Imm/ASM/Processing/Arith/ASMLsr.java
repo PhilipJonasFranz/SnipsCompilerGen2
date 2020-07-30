@@ -21,4 +21,4 @@ public class ASMLsr extends ASMBinaryData {
 		return super.build("lsr");
 	}
 
-}
+} 

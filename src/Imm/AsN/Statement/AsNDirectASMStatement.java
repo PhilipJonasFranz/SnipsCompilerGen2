@@ -76,4 +76,4 @@ public class AsNDirectASMStatement extends AsNStatement {
 		return asm;
 	}
 	
-}
+} 

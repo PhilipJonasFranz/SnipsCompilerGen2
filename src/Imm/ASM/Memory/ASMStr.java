@@ -22,4 +22,4 @@ public class ASMStr extends ASMMemOp {
 		return super.build("str");
 	}
 	
-}
+} 

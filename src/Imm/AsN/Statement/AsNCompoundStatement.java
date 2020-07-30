@@ -44,6 +44,7 @@ import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DirectASMStatement;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
@@ -64,6 +65,9 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (s instanceof TryStatement) {
 			node = AsNTryStatement.cast((TryStatement) s, r, map, st);
+		}
+		else if (s instanceof ForEachStatement) {
+			node = AsNForEachStatement.cast((ForEachStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());	
 		
@@ -159,6 +163,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
 	}
 	
+	/**
+	 * Checks if in the given statement, an address reference via address of
+	 * is made to a variable with given origin declaration. If so, return true.
+	 */
 	public boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXC {
 		if (s instanceof CompoundStatement) {
 			CompoundStatement cs = (CompoundStatement) s;
@@ -234,6 +242,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else throw new CGEN_EXC(s.getSource(), "Cannot check references for " + s.getClass().getName());
 	}
 	
+	/**
+	 * Checks if in the given expression, an address reference via address of
+	 * is made to a variable with given origin declaration. If so, return true.
+	 */
 	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXC {
 		if (e instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) e;
@@ -322,4 +334,4 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else throw new CGEN_EXC(e.getSource(), "Cannot check references for " + e.getClass().getName());
 	}
 	
-}
+} 

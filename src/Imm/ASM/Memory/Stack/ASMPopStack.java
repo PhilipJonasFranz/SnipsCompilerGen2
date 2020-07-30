@@ -46,4 +46,4 @@ public class ASMPopStack extends ASMInstruction {
 		return pop;
 	}
 	
-}
+} 

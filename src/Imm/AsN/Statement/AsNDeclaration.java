@@ -6,7 +6,9 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.StructureInit;
@@ -21,7 +23,7 @@ public class AsNDeclaration extends AsNStatement {
 		AsNDeclaration dec = new AsNDeclaration();
 		
 		/* Load value, either in R0 or on the stack */
-		dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
+		if (d.value != null) dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
 		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
@@ -40,7 +42,14 @@ public class AsNDeclaration extends AsNStatement {
 				/* Pop R0 placeholders pushed by structure init from stack set, but dont add the assembly code 
 				 * to do so, this is so that below the correct declaration can be pushed and lines up with 
 				 * the values on the stack */
-				st.popXWords(d.getType().wordsize());
+				if (d.value != null) st.popXWords(d.getType().wordsize());
+				else {
+					/* Declaration has no value, just make space on the stack */
+					ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(d.getType().wordsize() * 4));
+					sub.comment = new ASMComment("Make space on stack for declaration " + d.path.getLast());
+					
+					dec.instructions.add(sub);
+				}
 			}
 			
 			/* Push the declaration that covers the popped area */
@@ -52,4 +61,4 @@ public class AsNDeclaration extends AsNStatement {
 		return dec;
 	}
 	
-}
+} 

@@ -94,4 +94,4 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		}
 	}
 	
-}
+} 

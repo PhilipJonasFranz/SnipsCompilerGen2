@@ -23,4 +23,4 @@ public class AsNRegisterAtom extends AsNExpression {
 		return atom;
 	}
 	
-}
+} 

@@ -65,4 +65,4 @@ public class NamespacePath {
 		return this.path;
 	}
 	
-}
+} 

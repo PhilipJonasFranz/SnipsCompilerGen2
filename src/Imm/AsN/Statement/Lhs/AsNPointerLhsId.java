@@ -64,4 +64,4 @@ public class AsNPointerLhsId extends AsNLhsId {
 		return id;
 	}
 	
-}
+} 

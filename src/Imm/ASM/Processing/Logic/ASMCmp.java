@@ -27,4 +27,4 @@ public class ASMCmp extends ASMInstruction {
 		return CompilerDriver.printDepth + "cmp" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.op0.toString() + ", " + this.op1.toString();
 	}
 
-}
+} 

@@ -52,4 +52,4 @@ public class Namespace extends SyntaxElement {
 		return;
 	}
 
-}
+} 

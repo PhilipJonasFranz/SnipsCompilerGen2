@@ -30,4 +30,4 @@ public class ASMMult extends ASMInstruction {
 		return CompilerDriver.printDepth + "mul" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
 	}
 
-}
+} 

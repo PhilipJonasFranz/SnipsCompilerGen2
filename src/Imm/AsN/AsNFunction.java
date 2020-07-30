@@ -568,4 +568,4 @@ public class AsNFunction extends AsNCompoundStatement {
 		return mapping;
 	}
 	
-}
+} 

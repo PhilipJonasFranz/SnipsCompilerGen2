@@ -116,4 +116,9 @@ public class ARRAY extends COMPOSIT {
 		return arr;
 	}
 
-}
+	public TYPE remapProvisoName(String name, TYPE newType) {
+		this.elementType = this.elementType.remapProvisoName(name, newType);
+		return this;
+	}
+
+} 

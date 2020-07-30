@@ -18,4 +18,4 @@ public class Lsl extends BinaryExpression {
 		super(left, right, Operator.LSL, source);
 	}
 
-}
+} 

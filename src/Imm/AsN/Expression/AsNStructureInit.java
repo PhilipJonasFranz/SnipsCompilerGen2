@@ -106,4 +106,4 @@ public class AsNStructureInit extends AsNExpression {
 		}
 	}
 	
-}
+} 

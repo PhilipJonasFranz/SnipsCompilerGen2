@@ -110,12 +110,10 @@ public class AsNAssignWriteback extends AsNStatement {
 	}
 	
 	private static void injectWriteback(AsNNode node, WRITEBACK wb, int target, boolean partOfExpression) {
-		if (wb == WRITEBACK.INCR) {
+		if (wb == WRITEBACK.INCR) 
 			node.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
-		}
-		else {
+		else 
 			node.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
-		}
 		
 		/* 
 		 * Add opt flag for optimizer, but only if this writeback is part of an expression, meaning that the result
@@ -124,4 +122,4 @@ public class AsNAssignWriteback extends AsNStatement {
 		if (partOfExpression) node.instructions.get(node.instructions.size() - 1).optFlags.add(OPT_FLAG.WRITEBACK);
 	}
 	
-}
+} 

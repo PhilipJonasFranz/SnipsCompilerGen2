@@ -245,4 +245,65 @@ namespace Map {
 		return false;
 	}
 	
-}
+	/*
+	 * Retrieves all entries from the HashMap sorted by hash value ascending,
+	 * and adds them into a single linked list and returns that list.
+	 */
+	shared LinkedList<MapEntry<K, V>*>* getEntries<K, V>(HashMap<K, V>* map) {
+		/* Create new list to collect */
+		LinkedList<MapEntry<K, V>*>* list = List::create<MapEntry<K, V>*>(map->defValue);
+		
+		/* Iterate over storage lists */
+		int s = map->size;
+		for (int i = 0; i < s; i++) {
+			/* Get list from storage */
+			LinkedList<MapEntry<K, V>*>* l0 = *(map->storage + i);
+			
+			if (l0 != null) {
+				/* Get iterator to go through list */
+				ListNode<MapEntry<K, V>>* n = l0->head;
+				int i = 0;
+				
+				/* Iterate through list, add elements into list */
+				while (n != null) {
+					List::add<MapEntry<K, V>*>(list, n->value);
+					n = n->next;
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	
+	/*
+	 * Retrieves all stored values from the HashMap sorted by hash value ascending,
+	 * and adds them into a single linked list and returns that list.
+	 */
+	shared LinkedList<V>* getValues<K, V>(HashMap<K, V>* map) {
+		/* Create new list to collect */
+		LinkedList<V>* list = List::create<V>(map->defValue->value);
+		
+		/* Iterate over storage lists */
+		int s = map->size;
+		for (int i = 0; i < s; i++) {
+			/* Get list from storage */
+			LinkedList<MapEntry<K, V>*>* l0 = *(map->storage + i);
+			
+			if (l0 != null) {
+				/* Get iterator to go through list */
+				ListNode<MapEntry<K, V>>* n = l0->head;
+				int i = 0;
+				
+				/* Iterate through list, add elements into list */
+				while (n != null) {
+					List::add<V>(list, n->value->value);
+					n = n->next;
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+} 

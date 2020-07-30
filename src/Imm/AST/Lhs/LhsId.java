@@ -40,4 +40,4 @@ public abstract class LhsId extends SyntaxElement {
 	
 	public abstract NamespacePath getFieldName();
 	
-}
+} 

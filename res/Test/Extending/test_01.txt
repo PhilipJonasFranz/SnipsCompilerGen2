@@ -1,0 +1,68 @@
+SOURCE
+struct Root {
+	int x;
+}
+
+struct A : Root {
+	bool var;
+}
+
+struct B : Root {
+	int y;
+}
+
+struct D : B {
+	int k;
+}
+
+struct C : A {
+	bool var2;
+}
+
+struct Root2 {
+	int z;
+}
+
+int main() {
+	A a = A::(10, true);
+	Root* r = &a;
+	
+	Root r0 = *r;
+	
+	if (r instanceof Root) return 1 + r0.x;
+	else return r0.x;
+}
+TESTCASES
+11
+OUTPUT
+/* --test_01.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #1                               /* Evaluate Expression */
+    mov r1, #10
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    push { r0 }
+    sub r0, fp, #12                          /* Evaluate Expression */
+    lsr r3, r0, #2
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]
+    push { r0 }
+    mov r0, #1                               /* Override SID header */
+    push { r0 }
+    ldr r0, [r10, r3, lsl #2]
+    cmp r0, #1
+    movlt r0, #0
+    cmp r0, #4
+    movge r0, #0
+    cmp r0, #0
+    beq main.L0
+    ldr r2, [fp, #-16]                       /* Load field from struct */
+    add r0, r2, #1
+    b main.L2
+main.L0: 
+    ldr r0, [fp, #-16]                       /* Load field from struct */
+main.L2: 
+    mov sp, fp
+    bx lr
+    

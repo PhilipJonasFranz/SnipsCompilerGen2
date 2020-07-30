@@ -24,6 +24,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.TypeCast;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -66,9 +67,14 @@ public class AsNStructSelect extends AsNExpression {
 	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		
+		Expression base = select.selector;
+		if (base instanceof TypeCast) {
+			base = ((TypeCast) base).expression;
+		}
+		
 		/* Load base address */
-		if (select.selector instanceof IDRef) {
-			IDRef ref = (IDRef) select.selector;
+		if (base instanceof IDRef) {
+			IDRef ref = (IDRef) base;
 			
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
@@ -107,8 +113,8 @@ public class AsNStructSelect extends AsNExpression {
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			}
 		}
-		else if (select.selector instanceof ArraySelect) {
-			ArraySelect arr = (ArraySelect) select.selector;
+		else if (base instanceof ArraySelect) {
+			ArraySelect arr = (ArraySelect) base;
 			
 			/*
 			 * This case can only happen if the object that is selected from is a heaped array.
@@ -170,7 +176,7 @@ public class AsNStructSelect extends AsNExpression {
 		 * Only convert to bytes if select does deref and selector is not a array select since array select will
 		 * deref by itself. 
 		 */
-		if (select.deref && !(select.selector instanceof ArraySelect)) {
+		if (select.deref && !(base instanceof ArraySelect)) {
 			ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2));
 			lsl.comment = new ASMComment("Convert to bytes");
 			node.instructions.add(lsl);
@@ -272,4 +278,4 @@ public class AsNStructSelect extends AsNExpression {
 		if (offset != 0) node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(offset)));
 	}
 	
-}
+} 

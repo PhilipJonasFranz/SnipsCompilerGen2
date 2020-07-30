@@ -8,4 +8,4 @@ shared int hsize(void* p) {
 
 	/* Load Block Size and return */
 	return *p - 1;
-}
+} 

@@ -25,4 +25,4 @@ public class ASMSectionAnnotation extends ASMInstruction {
 		return "." + this.section.toString().toLowerCase() + ((this.postfix != null)? " " + this.postfix : "");
 	}
 	
-}
+} 

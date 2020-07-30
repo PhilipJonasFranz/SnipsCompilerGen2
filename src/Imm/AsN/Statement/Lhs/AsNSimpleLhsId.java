@@ -28,6 +28,8 @@ import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Statement.AsNAssignment;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNSimpleLhsId extends AsNLhsId {
@@ -77,7 +79,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		}
 		/* Store to stack */
 		else {
-			if (ref.origin.getType() instanceof PRIMITIVE) {
+			if (ref.origin.getType() instanceof PRIMITIVE || ref.origin.getType() instanceof POINTER) {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
 				
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
@@ -92,8 +94,9 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
 					new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
-			else if (ref.origin.getType() instanceof ARRAY) {
-				/* Use light variations of the addressing injector from AsNElementSelect, since we 
+			else if (ref.origin.getType() instanceof ARRAY || ref.origin.getType() instanceof STRUCT) {
+				/* 
+				 * Use light variations of the addressing injector from AsNElementSelect, since we 
 				 * dont have to add the sum to the sub structure.
 				 */
 				
@@ -124,7 +127,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				}
 				
 				/* Copy array */
-				AsNAssignment.copyStackSection(((ARRAY) lhs.origin.getType()).wordsize(), id, st);
+				AsNAssignment.copyStackSection((lhs.origin.getType()).wordsize(), id, st);
 			}
 		}
 		
@@ -133,4 +136,4 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		return id;
 	}
 	
-}
+} 

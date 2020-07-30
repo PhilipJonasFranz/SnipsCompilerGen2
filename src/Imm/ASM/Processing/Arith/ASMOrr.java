@@ -21,4 +21,4 @@ public class ASMOrr extends ASMBinaryData {
 		return super.build("orr");
 	}
 
-}
+} 

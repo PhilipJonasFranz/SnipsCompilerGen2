@@ -2,6 +2,7 @@ package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
@@ -16,11 +17,6 @@ public abstract class ASMBinaryData extends ASMInstruction {
 		public int solve(int x, int y);
 	}
 	
-	/** Used ot describe the type of the operand shift */
-	public enum SHIFT_TYPE {
-		LSL, LSR, ASR, ROR;
-	}
-	
 	
 			/* --- FIELDS --- */
 	public RegOp target;
@@ -32,11 +28,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	/** The solver for the implementation */
 	public BinarySolver solver;
 	
-	/** The shift type. If set to null, no shift is applied. */
-	public SHIFT_TYPE shiftType;
-	
-	/** The amount of shift that is applied. */
-	public int shiftDist;
+	public Shift shift;
 	
 	/** Wether to update the condition field when executing this instruction. */
 	public boolean updateConditionField = false;
@@ -60,10 +52,12 @@ public abstract class ASMBinaryData extends ASMInstruction {
 			/* --- METHODS --- */
 	public String build(String operation) {
 		String s = CompilerDriver.printDepth + operation + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
-		if (this.shiftType != null) {
-			s += ", " + this.shiftType.toString().toLowerCase() + " #" + this.shiftDist;
-		}
+		
+		/* Append shift for op1 */
+		if (this.shift != null) 
+			s += this.shift.getShiftPostfix();
+		
 		return s;
 	}
 
-}
+} 

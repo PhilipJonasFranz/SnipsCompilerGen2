@@ -34,4 +34,4 @@ public class ASMMla extends ASMInstruction {
 		return CompilerDriver.printDepth + "mla" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString() + ", " + this.op2.toString();
 	}
 
-}
+} 

@@ -22,10 +22,10 @@ Test.var: .word 14
 .text
     b main
 Test.getter:                                 /* Function: Test.getter */
-    ldr r0, .POOL0_main.L0_Test.var          /* Evaluate Expression */
+    ldr r0, .POOL0_L0_Test.var               /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_main.L0_Test.var: .word Test.var
+.POOL0_L0_Test.var: .word Test.var
     
 main:                                        /* Function: main */
     b Test.getter                            /* Evaluate Expression */

@@ -236,4 +236,4 @@ public class AsNFunctionCall extends AsNStatement {
 		if (parameters.size() > 0) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}
 	
-}
+} 

@@ -18,4 +18,4 @@ public class BitAnd extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
-}
+} 

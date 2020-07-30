@@ -44,4 +44,4 @@ public abstract class ASMUnaryData extends ASMInstruction {
 			/* --- METHODS --- */
 	public abstract String build();
 
-}
+} 

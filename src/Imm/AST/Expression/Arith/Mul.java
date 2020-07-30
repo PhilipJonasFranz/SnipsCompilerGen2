@@ -18,4 +18,4 @@ public class Mul extends BinaryExpression {
 		super(left, right, Operator.MUL, source);
 	}
 
-}
+} 

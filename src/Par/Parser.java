@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import CGen.LabelGen;
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
@@ -66,6 +65,7 @@ import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.EnumTypedef;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -310,29 +310,55 @@ public class Parser {
 		List<TYPE> proviso = this.parseProviso();
 		NamespacePath path = this.buildPath(id.spelling);
 		
-		/* Extend Struct */
 		StructTypedef ext = null;
+		List<TYPE> extProviso = new ArrayList();
 		List<Declaration> extendDecs = new ArrayList();
+		
 		if (current.type == TokenType.COLON) {
 			accept();
+			
 			NamespacePath ext0 = this.parseNamespacePath();
 			ext = this.getStructTypedef(ext0, source);
 			
-			for (Declaration d : ext.getFields()) extendDecs.add(d.clone());
+			if (current.type == TokenType.CMPLT) 
+				extProviso.addAll(this.parseProviso());
+			
+			/* Copy the extended fields */
+			for (Declaration d : ext.getFields()) {
+				Declaration c = d.clone();
+				
+				/* If number of provisos are not equal an exception will be thrown in CTX anyway */
+				if (ext.proviso.size() == extProviso.size()) 
+					/* Remap type of declaration to provided provisos */
+					for (int i = 0; i < ext.proviso.size(); i++) {
+						if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
+						PROVISO prov = (PROVISO) ext.proviso.get(i);
+						c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
+					}
+				
+				extendDecs.add(c);
+			}
 		}
 		
-		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
+		/*
+		 * Create Struct typedef here already, since struct may be linked and have a pointer
+		 * to another instance of this struct. The struct definition needs to exist before
+		 * such a declaration is parsed.
+		 */
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
+		/* Add the extended fields */
 		def.getFields().addAll(extendDecs);
 		
 		accept(TokenType.LBRACE);
 		
-		while (current.type != TokenType.RBRACE) {
+		/* Parse the regular struct fields */
+		while (current.type != TokenType.RBRACE) 
 			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
-		}
-		accept(TokenType.RBRACE);
 		
+		accept(TokenType.RBRACE);
+
 		return def;
 	}
 	
@@ -833,14 +859,24 @@ public class Parser {
 		return new SignalStatement(ex0, source);
 	}
 	
-	protected ForStatement parseFor() throws PARSE_EXC {
+	protected Statement parseFor() throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Source source = accept(TokenType.FOR).getSource();
 		accept(TokenType.LPAREN);
 		
-		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED, true, true);
+		TYPE itType = this.parseType();
+		Token itId = accept(TokenType.IDENTIFIER);
+		
+		if (current.type == TokenType.COLON) 
+			return this.parseForEach(itType, itId);
+		
+		accept(TokenType.LET);
+		
+		Expression value = this.parseExpression();
+		accept(TokenType.SEMICOLON);
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, value, MODIFIER.SHARED, itId.getSource());
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -855,6 +891,30 @@ public class Parser {
 		
 		this.scopes.pop();
 		return new ForStatement(iterator, condition, increment, body, source);
+	}
+	
+	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
+		this.scopes.push(new ArrayList());
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.getSource());
+		this.scopes.peek().add(iterator);
+		
+		accept(TokenType.COLON);
+		
+		Expression shadowRef = this.parseExpression();
+		
+		Expression range = null;
+		
+		if (current.type == TokenType.COMMA) {
+			accept();
+			range = this.parseExpression();
+		}
+		
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = this.parseCompoundStatement(false);
+		
+		return new ForEachStatement(iterator, shadowRef, range, body, itId.getSource());
 	}
 	
 	protected WhileStatement parseWhile() throws PARSE_EXC {
@@ -2089,4 +2149,4 @@ public class Parser {
 		else return MODIFIER.EXCLUSIVE;
 	}
 	
-}
+} 

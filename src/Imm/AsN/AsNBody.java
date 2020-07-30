@@ -196,7 +196,7 @@ public class AsNBody extends AsNNode {
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, st).getInstructions();
 				
 				/* Ensure that stack was emptied, so no stack shift at compile time occurred */
-				assert(st.getStack().isEmpty());
+				assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
 				
 				if (!ins.isEmpty()) {
 					/* Patch Branch to Main Function */
@@ -420,4 +420,4 @@ public class AsNBody extends AsNNode {
 		return routine;
 	}
 	
-}
+} 
