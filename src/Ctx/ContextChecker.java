@@ -1552,7 +1552,7 @@ public class ContextChecker {
 					throw new CTX_EXC(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.typeString());
 				else {
 					/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
-					if (!(chain instanceof ARRAY || (i == 0 && type0 instanceof POINTER))) 
+					if (!(chain instanceof ARRAY || (i == 0 && (type0 instanceof POINTER || chain instanceof VOID)))) 
 						throw new CTX_EXC(select.selection.get(i).getSource(), "Cannot select from type " + type0.typeString());
 					else if (chain instanceof ARRAY) {
 						ARRAY arr = (ARRAY) chain;
@@ -1567,8 +1567,18 @@ public class ContextChecker {
 						chain = arr.elementType;
 					}
 					else {
-						POINTER p = (POINTER) type0;
-						chain = p.targetType;
+						if (type0 instanceof POINTER) {
+							POINTER p = (POINTER) type0;
+							chain = p.targetType;
+						}
+						else {
+							/* When selecting from void, type will stay void */
+							VOID v = (VOID) chain;
+							chain = v;
+						}
+						
+						if (select.selection.size() > 1) 
+							throw new CTX_EXC(select.getShadowRef().getSource(), "Can only select once from pointer or void type");
 					}
 				}
 			}
