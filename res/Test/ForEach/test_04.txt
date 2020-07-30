@@ -41,13 +41,12 @@ main:                                        /* Function: main */
     mov r4, #0
     sub sp, sp, #8                           /* Make space on stack for declaration a */
 main.L1: 
-    mov r0, #4
+    mov r0, #8
     cmp r0, r4
     beq main.L2
     sub r0, fp, #32
-    lsr r0, r0, #2
-    lsl r2, r4, #1
-    add r0, r0, r2
+    lsr r1, r0, #2
+    add r0, r1, r4
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
@@ -58,7 +57,7 @@ main.L1:
     str r0, [r1, #4]
     ldr r0, [fp, #-36]                       /* Load field from struct */
     add r3, r3, r0
-    add r4, r4, #1
+    add r4, r4, #2
     b main.L1
 main.L2: 
     add sp, sp, #8                           /* Reset stack, remove iterator and counter */

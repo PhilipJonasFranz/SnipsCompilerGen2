@@ -21,12 +21,15 @@ import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.AST.Expression.Deref;
 import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNArraySelect;
 import Imm.AsN.Expression.AsNDeref;
 import Imm.AsN.Expression.AsNExpression;
@@ -70,13 +73,16 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
 		
 		/* Compare bounds, branch to end if bound reached */
-		if (a.shadowRef.getType() instanceof ARRAY) {
+		if (a.select != null) {
 			ARRAY arr = (ARRAY) a.shadowRef.getType();
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(arr.length)));
 		}
 		else {
+			/* Load the range, automatically calculates range * iterator word size */
 			f.instructions.addAll(AsNExpression.cast(a.range, r, map, st).getInstructions());
+			
 			f.loadCounter(r, st, a, 1);
+			
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		
@@ -90,7 +96,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* In Reg Set */
 			int loc = r.declarationRegLocation(a.iterator);
 			
-			if (a.shadowRef.getType() instanceof ARRAY) 
+			if (a.select != null) 
 				f.instructions.addAll(AsNArraySelect.cast(a.select, r, map, st).getInstructions());
 			else 
 				f.instructions.addAll(AsNDeref.cast(a.shadowRef, r, map, st).getInstructions());
@@ -99,7 +105,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		}
 		else {
 			/* In Stack */
-			if (a.shadowRef.getType() instanceof ARRAY) 
+			if (a.select != null) 
 				f.instructions.addAll(AsNArraySelect.cast(a.select, r, map, st).getInstructions());
 			else 
 				f.instructions.addAll(AsNDeref.cast(a.shadowRef, r, map, st).getInstructions());
@@ -132,19 +138,32 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		popDeclarationScope(f, a, r, st, true);
 		
 		
-		/* Increment Counter */
+		/* Operand will hold the value to increment the counter with */
+		Operand incrOp = new ImmOp(1);
+		
+		/* 
+		 * If the shadow ref is a deref, the counter incrmenets by the word size of the iterator,
+		 * and thus we need to load the word size for the counter increment.
+		 */
+		boolean isDeref = a.shadowRef instanceof Deref;
+		if (isDeref) {
+			AsNBody.literalManager.loadValue(f, a.iterator.getType().wordsize(), 0);
+			incrOp = new RegOp(REG.R0);
+		}
+		
 		if (r.declarationLoaded(a.counter)) {
 			/* In Reg Set */
 			int loc = r.declarationRegLocation(a.counter);
-			f.instructions.add(new ASMAdd(new RegOp(loc), new RegOp(loc), new ImmOp(1)));
+			f.instructions.add(new ASMAdd(new RegOp(loc), new RegOp(loc), incrOp));
 		}
 		else {
 			/* On Stack */
 			int off = st.getDeclarationInStackByteOffset(a.counter);
 		
-			f.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
-			f.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(1)));
-			f.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
+			/* Load counter, increment and store */
+			f.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
+			f.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), incrOp));
+			f.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 		}
 		
 		
@@ -157,12 +176,13 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		/* Add loop end */
 		f.instructions.add(forEnd);
 		
-		/* Remove iterator from register or stack */
+		/* Remove iterator from reg set */
 		if (r.declarationLoaded(a.iterator)) {
 			int loc = r.declarationRegLocation(a.iterator);
 			r.getReg(loc).free();
 		}
 		
+		/* Remove counter from reg set */
 		if (r.declarationLoaded(a.counter)) {
 			int loc = r.declarationRegLocation(a.counter);
 			r.getReg(loc).free();

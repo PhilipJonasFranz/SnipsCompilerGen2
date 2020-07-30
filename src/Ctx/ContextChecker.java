@@ -77,6 +77,8 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Par.Token;
+import Par.Token.TokenType;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
@@ -632,9 +634,7 @@ public class ContextChecker {
 				throw new CTX_EXC(f.getSource(), "Pointer type does not match iterator type: " + p.targetType.typeString() + " vs " + itType.typeString());
 			
 			/* Construct expression to calculate address based on address of the shadowRef, counter and the size of the type */
-			Expression sof = new SizeOfType(itType.clone(), f.shadowRef.getSource());
-			Expression mul = new Mul(f.ref, sof, f.shadowRef.getSource());
-			Expression add = new Add(f.shadowRef, mul, f.shadowRef.getSource());
+			Expression add = new Add(f.shadowRef, f.ref, f.shadowRef.getSource());
 			
 			/* Set as new shadowRef, will be casted during code generation */
 			f.shadowRef = new Deref(add, f.shadowRef.getSource());
@@ -643,6 +643,7 @@ public class ContextChecker {
 			if (f.range == null)
 				throw new CTX_EXC(f.getSource(), "Cannot iterate over reference without range");
 			
+			f.range = new Mul(f.range, new Atom(new INT("" + itType.wordsize()), new Token(TokenType.INTLIT, null, ""), f.shadowRef.getSource()), f.range.getSource());
 			f.range.check(this);
 		}
 		else if (refType instanceof ARRAY) {

@@ -24,6 +24,7 @@ import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.ASMBinaryData.SHIFT_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
+import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Processing.Arith.ASMMla;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
@@ -224,6 +225,13 @@ public class ASMOptimizer {
 			this.multPrecalc(body);
 			
 			this.removeMovId(body);
+			
+			/**
+			 * lsl r0, r1, #0
+			 * Replace with:
+			 * mov r0, r1
+			 */
+			this.shiftBy0IsMov(body);
 			
 			if (!OPT_DONE) {
 				/**
@@ -1547,6 +1555,32 @@ public class ASMOptimizer {
 					body.instructions.remove(i);
 					i--;
 					markOpt();
+				}
+			}
+		}
+	}
+	
+	private void shiftBy0IsMov(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			ASMInstruction ins = body.instructions.get(i);
+			if (ins instanceof ASMLsl) {
+				ASMLsl lsl = (ASMLsl) ins;
+				if (lsl.op1 != null && lsl.op1 instanceof ImmOp) {
+					ImmOp imm = (ImmOp) lsl.op1;
+					if (imm.value == 0) {
+						body.instructions.set(i, new ASMMov(lsl.target, lsl.op0, lsl.cond));
+						markOpt();
+					}
+				}
+			}
+			else if (ins instanceof ASMLsr) {
+				ASMLsr lsr = (ASMLsr) ins;
+				if (lsr.op1 != null && lsr.op1 instanceof ImmOp) {
+					ImmOp imm = (ImmOp) lsr.op1;
+					if (imm.value == 0) {
+						body.instructions.set(i, new ASMMov(lsr.target, lsr.op0, lsr.cond));
+						markOpt();
+					}
 				}
 			}
 		}
