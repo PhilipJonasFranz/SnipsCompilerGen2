@@ -69,11 +69,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		f.breakJump = forEnd;
 		
 		
-		/* Load counter */
-		f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
-		
 		/* Compare bounds, branch to end if bound reached */
 		if (a.select != null) {
+			/* Load counter */
+			f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
+			
 			ARRAY arr = (ARRAY) a.shadowRef.getType();
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(arr.length)));
 		}

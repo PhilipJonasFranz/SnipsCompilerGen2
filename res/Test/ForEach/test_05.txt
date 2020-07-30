@@ -25,7 +25,6 @@ smallest:                                    /* Function: smallest */
     mov r6, #0
     mov r7, #0
 smallest.L1: 
-    mov r0, r6
     cmp r4, r6
     beq smallest.L2
     add r0, r3, r6
