@@ -388,9 +388,15 @@ public class ContextChecker {
 			TYPE valType = e.elements.get(i).check(this);
 			TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
 			
-			if (!valType.isEqual(strType)) {
+			if (e.elements.get(i) instanceof StructureInit) {
+				StructureInit init = (StructureInit) e.elements.get(i);
+				init.isTopLevelExpression = false;
+			}
+			
+			if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof Atom && ((Atom) e.elements.get(i)).isPlaceholder)) {
 				if (valType instanceof POINTER || strType instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
+				
 				throw new CTX_EXC(e.getSource(), "Argument type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
 			}
 		}

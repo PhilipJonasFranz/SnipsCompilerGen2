@@ -17,6 +17,8 @@ public class Atom extends Expression {
 	/* Type information and potential value */
 	public String spelling;
 	
+	public boolean isPlaceholder = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

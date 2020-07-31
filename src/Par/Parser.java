@@ -1609,7 +1609,9 @@ public class Parser {
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			return new Atom(new NULL(), id, id.getSource());
+			Atom a = new Atom(new NULL(), id, id.getSource());
+			if (this.parsePlaceholder()) a.isPlaceholder = true;
+			return a;
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
@@ -1676,7 +1678,9 @@ public class Parser {
 					throw new SNIPS_EXC("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
 				}
 				
-				return new Atom(def.getEnumField(value.spelling, source), value, source);
+				Atom a = new Atom(def.getEnumField(value.spelling, source), value, source);
+				if (this.parsePlaceholder()) a.isPlaceholder = true;
+				return a;
 			}
 			else {
 				/* Find the function that may match this path and act as a predicate */
@@ -1714,11 +1718,15 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
-			return new Atom(new INT(token.spelling), token, token.source);
+			Atom a = new Atom(new INT(token.spelling), token, token.source);
+			if (this.parsePlaceholder()) a.isPlaceholder = true;
+			return a;
 		}
 		else if (current.type == TokenType.CHARLIT) {
 			Token token = accept();
-			return new Atom(new CHAR(token.spelling), token, token.source);
+			Atom a = new Atom(new CHAR(token.spelling), token, token.source);
+			if (this.parsePlaceholder()) a.isPlaceholder = true;
+			return a;
 		}
 		else if (current.type == TokenType.STRINGLIT) {
 			Token token = accept();
@@ -1732,7 +1740,9 @@ public class Parser {
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
-			return new Atom(new BOOL(token.spelling), token, token.source);
+			Atom a = new Atom(new BOOL(token.spelling), token, token.source);
+			if (this.parsePlaceholder()) a.isPlaceholder = true;
+			return a;
 		}
 		else {
 			/* 
@@ -1758,6 +1768,16 @@ public class Parser {
 				}
 			}
 		}
+	}
+	
+	public boolean parsePlaceholder() {
+		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+			accept();
+			accept();
+			accept();
+			return true;
+		}
+		else return false;
 	}
 	
 	public Function findFunction(NamespacePath path) {

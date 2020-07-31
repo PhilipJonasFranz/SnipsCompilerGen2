@@ -507,9 +507,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     mov r1, #1
-    stmfd sp!, {r0, r1}
-    mov r0, #5
-    push { r0 }
+    mov r2, #5
+    stmfd sp!, {r0-r2}
     mov r0, #5
     push { r0 }
     ldr r0, [fp, #-24]                       /* Load field from struct */

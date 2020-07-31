@@ -29,16 +29,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		structureInit(init, s.elements, r, map, st);
-		
-		if (!CompilerDriver.disableStructSIDHeaders) {
-			/* Push SID header */
-			init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
-			init.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
-			
-			/* Push dummy for SID header */
-			st.push(REG.R0);
-		}
+		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, r, map, st);
 		
 		return init;
 	}
@@ -52,7 +43,7 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -60,17 +51,25 @@ public class AsNStructureInit extends AsNExpression {
 			if (elements.get(i) instanceof Atom) {
 				Atom atom = (Atom) elements.get(i);
 				
-				/* Load atom directley in destination */
-				node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
-				regs++;
+				/* 
+				 * If the atom is a placeholder, get the wordsize of the i-th field of the struct and 
+				 * load value of this amount of times.
+				 */
+				int range = (atom.isPlaceholder)? struct.getFieldNumber(i).getType().wordsize() : 1;
 				
-				/* If group size is 3, push them on the stack */
-				if (regs == 3) {
-					flush(regs, node);
-					regs = 0;
+				for (int a = 0; a < range; a++) {
+					/* Load atom directley in destination */
+					node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
+					regs++;
+					
+					/* If group size is 3, push them on the stack */
+					if (regs == 3) {
+						flush(regs, node);
+						regs = 0;
+					}
+					
+					st.push(REG.R0);
 				}
-				
-				st.push(REG.R0);
 			}
 			else {
 				/* Flush all atoms to clear regs */
@@ -85,6 +84,26 @@ public class AsNStructureInit extends AsNExpression {
 					st.push(REG.R0);
 				}
 			}
+		}
+		
+		/* 
+		 * When optimizing, the last push statement can be removed. This results in a 
+		 * performance improvement, but bigger file size. When this piece of code is 
+		 * not executed, its possible that the SID is part of one push. This means that
+		 * it can not be optimized for performance as well, but the file size is smaller.
+		 */
+		if (isTopLevel && !CompilerDriver.optimizeFileSize) {
+			flush(regs, node);
+			regs = 0;
+		}
+		
+		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
+			/* Load SID header */
+			node.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(struct.getTypedef().SID)));
+			
+			/* Push dummy for SID header */
+			st.push(REG.R0);
+			regs++;
 		}
 		
 		/* Flush remaining atoms */
