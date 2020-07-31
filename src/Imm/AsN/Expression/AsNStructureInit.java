@@ -9,6 +9,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -18,6 +19,7 @@ import Imm.AST.Expression.StructureInit;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
 
 public class AsNStructureInit extends AsNExpression {
@@ -28,6 +30,34 @@ public class AsNStructureInit extends AsNExpression {
 		s.castedNode = init;
 		
 		r.free(0, 1, 2);
+		
+		/* Check for special case, where entire struct is initialized with absolute placeholder */
+		if (s.elements.size() == 1 && s.elements.get(0) instanceof Atom) {
+			Atom a = (Atom) s.elements.get(0);
+			if (a.getType() instanceof VOID && a.isPlaceholder) {
+				/* Absolute placeholder */
+				int size = s.structType.wordsize();
+				
+				if (!CompilerDriver.disableStructSIDHeaders)
+					size--;
+				
+				init.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
+				
+				for (int i = 0; i < size; i++)
+					st.push(REG.R0);
+				
+				if (!CompilerDriver.disableStructSIDHeaders) {
+					/* Load SID header */
+					init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
+					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+					
+					/* Push dummy for SID header */
+					st.push(REG.R0);
+				}
+				
+				return init;
+			}
+		}
 		
 		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, r, map, st);
 		
@@ -51,24 +81,39 @@ public class AsNStructureInit extends AsNExpression {
 			if (elements.get(i) instanceof Atom) {
 				Atom atom = (Atom) elements.get(i);
 				
-				/* 
-				 * If the atom is a placeholder, get the wordsize of the i-th field of the struct and 
-				 * load value of this amount of times.
-				 */
-				int range = (atom.isPlaceholder)? struct.getFieldNumber(i).getType().wordsize() : 1;
-				
-				for (int a = 0; a < range; a++) {
-					/* Load atom directley in destination */
-					node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
-					regs++;
+				if (atom.isPlaceholder && atom.getType() instanceof VOID) {
+					/* Flush regs for safety */
+					flush(regs, node);
+					regs = 0;
 					
-					/* If group size is 3, push them on the stack */
-					if (regs == 3) {
-						flush(regs, node);
-						regs = 0;
+					/* Absolute placeholder */
+					int size = struct.getFieldNumber(i).getType().wordsize();
+					
+					node.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
+					
+					for (int a = 0; a < size; a++)
+						st.push(REG.R0);
+				}
+				else {
+					/* 
+					 * If the atom is a placeholder, get the wordsize of the i-th field of the struct and 
+					 * load value of this amount of times.
+					 */
+					int range = (atom.isPlaceholder)? struct.getFieldNumber(i).getType().wordsize() : 1;
+					
+					for (int a = 0; a < range; a++) {
+						/* Load atom directley in destination */
+						node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
+						regs++;
+						
+						/* If group size is 3, push them on the stack */
+						if (regs == 3) {
+							flush(regs, node);
+							regs = 0;
+						}
+						
+						st.push(REG.R0);
 					}
-					
-					st.push(REG.R0);
 				}
 			}
 			else {

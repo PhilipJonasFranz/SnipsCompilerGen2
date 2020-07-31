@@ -380,24 +380,36 @@ public class ContextChecker {
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
-		if (e.elements.size() != e.structType.getTypedef().getFields().size()) 
+		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1) {
 			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.getTypedef().getFields().size() + " but got " + e.elements.size());
+		}
 		
-		/* Make sure that all field types are equal to the expected types */
-		for (int i = 0; i < e.elements.size(); i++) {
-			TYPE valType = e.elements.get(i).check(this);
-			TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof Atom) {
+			/* Absolute placeholder case */
+			Atom a = (Atom) e.elements.get(0);
 			
-			if (e.elements.get(i) instanceof StructureInit) {
-				StructureInit init = (StructureInit) e.elements.get(i);
-				init.isTopLevelExpression = false;
-			}
+			TYPE valType = a.check(this);
 			
-			if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof Atom && ((Atom) e.elements.get(i)).isPlaceholder)) {
-				if (valType instanceof POINTER || strType instanceof POINTER) 
-					CompilerDriver.printProvisoTypes = true;
+			if (!(valType instanceof VOID))
+				throw new CTX_EXC(e.getSource(), "Expected VOID type for absolute placeholder, but got " + valType.typeString());
+		}
+		else {
+			/* Make sure that all field types are equal to the expected types */
+			for (int i = 0; i < e.elements.size(); i++) {
+				TYPE valType = e.elements.get(i).check(this);
+				TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
 				
-				throw new CTX_EXC(e.getSource(), "Argument type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
+				if (e.elements.get(i) instanceof StructureInit) {
+					StructureInit init = (StructureInit) e.elements.get(i);
+					init.isTopLevelExpression = false;
+				}
+				
+				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof Atom && ((Atom) e.elements.get(i)).isPlaceholder)) {
+					if (valType instanceof POINTER || strType instanceof POINTER) 
+						CompilerDriver.printProvisoTypes = true;
+					
+					throw new CTX_EXC(e.getSource(), "Argument type does not match struct field (" + (i + 1) + ") type: " + valType.typeString() + " vs " + strType.typeString());
+				}
 			}
 		}
 		

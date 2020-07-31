@@ -88,6 +88,7 @@ import Imm.TYPE.PRIMITIVES.CHAR;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
@@ -1742,6 +1743,14 @@ public class Parser {
 			Token token = accept();
 			Atom a = new Atom(new BOOL(token.spelling), token, token.source);
 			if (this.parsePlaceholder()) a.isPlaceholder = true;
+			return a;
+		}
+		else if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+			/* Pure placeholder token */
+			Token token = current;
+			this.parsePlaceholder();
+			Atom a = new Atom(new VOID(null), token, token.source);
+			a.isPlaceholder = true;
 			return a;
 		}
 		else {
