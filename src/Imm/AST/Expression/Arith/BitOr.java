@@ -18,4 +18,4 @@ public class BitOr extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
-}
+} 

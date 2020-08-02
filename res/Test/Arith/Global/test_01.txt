@@ -19,13 +19,13 @@ y: .word 5
 .text
 main:                                        /* Function: main */
     mov r1, r0                               /* Evaluate Expression */
-    ldr r2, .POOL0_main.L0_x                 /* Load from .data section */
+    ldr r2, .POOL0_L0_x                      /* Load from .data section */
     ldr r2, [r2]
     mul r1, r1, r2
-    ldr r2, .POOL0_main.L1_y                 /* Load from .data section */
+    ldr r2, .POOL0_L1_y                      /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL0_main.L1_y: .word y
-.POOL0_main.L0_x: .word x
+.POOL0_L1_y: .word y
+.POOL0_L0_x: .word x
     

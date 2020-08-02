@@ -1,0 +1,60 @@
+SOURCE
+int smallest(int* arr, int count) {
+	int smallest = *arr;
+	for (int i : arr, count) 
+		if (i < smallest) smallest = i;
+
+	return smallest;
+}
+
+int main() {
+	int [5] arr = {5, 3, 7, 2, 4};
+	return smallest(&arr, 5);
+}
+TESTCASES
+2
+OUTPUT
+/* --test_05.txt */
+    b main
+smallest:                                    /* Function: smallest */
+    sub sp, sp, #20
+    stmea sp, {r3-r7}
+    mov r3, r0
+    mov r4, r1
+    ldr r5, [r10, r3, lsl #2]                /* Load from address */
+    mov r6, #0
+    mov r7, #0
+smallest.L1: 
+    cmp r4, r6
+    beq smallest.L2
+    add r0, r3, r6
+    ldr r7, [r10, r0, lsl #2]                /* Load from address */
+    cmp r7, r5
+    bge smallest.L3
+    mov r0, r7                               /* Evaluate Expression */
+    mov r5, r7
+smallest.L3: 
+    add r6, r6, #1
+    b smallest.L1
+smallest.L2: 
+    mov r0, r5                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7}
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    mov r1, #2
+    mov r2, #7
+    stmfd sp!, {r0-r2}
+    mov r0, #3
+    mov r1, #5
+    stmfd sp!, {r0, r1}
+    mov r1, #5
+    sub r0, fp, #20
+    lsr r0, r0, #2
+    bl smallest                              /* Call smallest */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

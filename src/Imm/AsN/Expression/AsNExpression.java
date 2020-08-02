@@ -21,6 +21,7 @@ import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -70,6 +71,9 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof Atom) {
 			node = AsNAtom.cast((Atom) e, r, map, st, 0); 
 		}
+		else if (e instanceof TempAtom) {
+			node = AsNTempAtom.cast((TempAtom) e, r, map, st, 0); 
+		}
 		else if (e instanceof RegisterAtom) {
 			node = AsNRegisterAtom.cast((RegisterAtom) e, r, map, st, 0); 
 		}
@@ -97,4 +101,4 @@ public abstract class AsNExpression extends AsNNode {
 		return node;
 	}
 	
-}
+} 

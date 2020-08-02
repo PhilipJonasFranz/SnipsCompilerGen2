@@ -28,15 +28,15 @@ main.L1:
     cmp r4, r3
     bge main.L2
     add r0, r4, #1
-    ldr r1, .POOL0_main.L0_s
+    ldr r1, .POOL0_L0_s
     ldr r2, [r1]
     add r0, r2, r0
     str r0, [r1]
     add r4, r4, #1
     b main.L1
 main.L2: 
-    ldr r0, .POOL0_main.L0_s                 /* Evaluate Expression */
+    ldr r0, .POOL0_L0_s                      /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_main.L0_s: .word s
+.POOL0_L0_s: .word s
     

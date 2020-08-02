@@ -40,8 +40,7 @@ public class Atom extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		return;
+		
 	}
 
-}
+} 

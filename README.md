@@ -1,14 +1,14 @@
-# Snips Compiler Gen.2 v.4.0.0-RELEASE
+# Snips Compiler Gen.2 v.4.2.1-RELEASE
 ## Some words in advance
  This project was started and still is for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results procuded by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
 ## What is Snips?
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
- the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, templating, heap functionality, namespaces, exception handling, predicates and inline assembly are supported.
+ the table, like functions, conditionals, loops, arrays, pointers, global variables and a wide roster of built in operators, as well as support for functionality like recursion. Also, more advanced features like imports, structs, struct polymorphism via pointers, templating, heap functionality, namespaces, exception handling, predicates and inline assembly are supported.
  
- Currently supported data types are Integers and Booleans, Chars and Strings, Enums, Predicates as well as multi-dimensional arrays of said types. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
+ Currently supported data types are Integers and Booleans, Chars and Strings, Enums, Predicates as well as multi-dimensional arrays of said types. Also, the Void Type can be used as a type wildcard. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
  
- Currently supported statement structures are if, if-else, else, while, do-while, for, switch, break, continue, try/watch, signal and return.
+ Currently supported statement structures are if, if-else, else, while, do-while, for, for each, switch, break, continue, try/watch, signal and return.
  
  You can find more information on the language and the libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 ### The compiler
@@ -56,4 +56,4 @@ All instructions do support the condition field. If you compile your assembly co
 ## License & Copyright
  © Philip Jonas Franz
  
- Licensed under [Apache License 2.0](LICENSE).
+ Licensed under [Apache License 2.0](LICENSE). 

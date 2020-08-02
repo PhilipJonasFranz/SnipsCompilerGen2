@@ -38,6 +38,7 @@ public class AsNArraySelect extends AsNExpression {
 
 			/* --- NESTED --- */
 	public enum SELECT_TYPE {
+		REG_SINGLE, REG_SUB,
 		LOCAL_SINGLE, LOCAL_SUB,
 		PARAM_SINGLE, PARAM_SUB,
 		GLOBAL_SINGLE, GLOBAL_SUB;
@@ -51,39 +52,42 @@ public class AsNArraySelect extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		/* Array is parameter, load from parameter stack */
-		if (st.getParameterByteOffset(s.idRef.origin) != -1) {
-			if (s.getType() instanceof ARRAY) {
+		if (r.declarationLoaded(s.idRef.origin)) {
+			if (s.getType().wordsize() > 1) 
+				injectAddressLoader(SELECT_TYPE.REG_SUB, select, s, r, map, st);
+			else 
+				injectAddressLoader(SELECT_TYPE.REG_SINGLE, select, s, r, map, st);
+		}
+		else if (st.getParameterByteOffset(s.idRef.origin) != -1) {
+			/* Array is parameter, load from parameter stack */
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.PARAM_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.PARAM_SINGLE, select, s, r, map, st);
-			}
 		}
 		else if (map.declarationLoaded(s.idRef.origin)) {
 			/* Data Memory */
-			if (s.getType() instanceof ARRAY) {
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.GLOBAL_SINGLE, select, s, r, map, st);
-			}
 		}
 		else {
-			if (s.getType() instanceof ARRAY) {
+			if (s.getType().wordsize() > 1) 
 				injectAddressLoader(SELECT_TYPE.LOCAL_SUB, select, s, r, map, st);
-			}
-			else {
+			else 
 				injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, select, s, r, map, st);
-			}
 		}
 		
-		if (s.getType() instanceof ARRAY) {
+		if (s.getType().wordsize() > 1) {
 			/* Loop through array word size and copy values */
-			subStructureCopy(select, ((ARRAY) s.getType()).wordsize());
+			subStructureCopy(select, s.getType().wordsize());
+			
+			/* Push dummy values on the stack */
+			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
 		}
 		else {
-			/* Load */
+			/* Load single value into R0 */
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
 		
@@ -216,7 +220,30 @@ public class AsNArraySelect extends AsNExpression {
 		}
 		else offset = st.getParameterByteOffset(s.idRef.origin);
 		
-		if (selectType == SELECT_TYPE.LOCAL_SINGLE) {
+		if (selectType == SELECT_TYPE.REG_SINGLE) {
+			/* Load offset of target in array */
+			loadSumR2(node, s, r, map, st, false);
+			
+			int loc = r.declarationRegLocation(s.idRef.origin);
+			node.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(loc), new ImmOp(2)));
+			
+			/* Location - block offset */
+			node.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R2)));
+		}
+		else if (selectType == SELECT_TYPE.REG_SUB) {
+			/* Load block offset */
+			loadSumR2(node, s, r, map, st, true);
+			
+			int loc = r.declarationRegLocation(s.idRef.origin);
+			
+			node.instructions.add(new ASMLsl(new RegOp(REG.R1), new RegOp(loc), new ImmOp(2)));
+			
+			/* Sub the offset to the start of the sub structure from the start in R1 */
+			ASMAdd block = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2));
+			block.comment = new ASMComment("Start of sub structure in stack");
+			node.instructions.add(block);
+		}
+		else if (selectType == SELECT_TYPE.LOCAL_SINGLE) {
 			/* Load offset of target in array */
 			loadSumR2(node, s, r, map, st, false);
 			
@@ -291,4 +318,4 @@ public class AsNArraySelect extends AsNExpression {
 		node.instructions.add(new ASMLsl(new RegOp(target), new RegOp(target), new ImmOp(2)));
 	}
 	
-}
+} 

@@ -45,6 +45,7 @@ import Util.Logging.ProgressMessage;
 
 public class CompilerDriver {
 
+	
 	public static String [] logo = {
 		"	  _______  __    _  ___  _______  _______",
 		"	 |       ||  \\  | ||   ||       ||       |",
@@ -55,30 +56,34 @@ public class CompilerDriver {
 		"	 |_______||_|  \\__||___||___|    |_______|"};
 	
 	
+	
 			/* --- FLAGS & SETTINGS --- */
 	public static boolean 
-		logoPrinted = false, 
-		useTerminalColors = true, 
-		silenced = true,
-		imm = false,
-		enableComments = true,
-		disableModifiers = false,
-		disableOptimizer = false,
-		optimizeFileSize = false,
-		disableWarnings = false,
-		disableStructSIDHeaders = false,
-		includeMetaInformation = true,
-		printErrors = false;
+		logoPrinted = 					false, 
+		useTerminalColors = 			true, 
+		silenced = 						true,
+		imm = 							false,
+		enableComments = 				true,
+		disableModifiers = 				false,
+		disableOptimizer = 				false,
+		optimizeFileSize = 				false,
+		disableWarnings = 				false,
+		disableStructSIDHeaders = 		false,
+		includeMetaInformation = 		true,
+		printErrors = 					false;
 			
+	
 			/* --- DEBUG --- */
 	public static boolean
-		printProvisoTypes = false,
-		includeProvisoInTypeString = false,
-		printObjectIDs = false;
+		printProvisoTypes = 			false,
+		includeProvisoInTypeString = 	false,
+		printObjectIDs = 				false;
+	
 	
 			/* --- FORMATTING --- */
 	public static String printDepth = "    ";
 	public static int commentDistance = 45;
+	
 	
 			/* --- STATS --- */
 	/* Documents the occurred compression rates */
@@ -673,4 +678,4 @@ public class CompilerDriver {
 		null_referenced = false;
 	}
 	
-}
+} 

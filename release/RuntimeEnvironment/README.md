@@ -15,4 +15,4 @@ compile the given file. Or you can insert your file path in the config and enter
 -c and the full path to the config file. The argument -auto will start the execution of the
 compiled program automatically. If you dont enter the -auto argument, you can single-step forward
 by pressing Enter, or you can start/stop the execution by pressing s. You can browse the machines
-memory with arrow left and right.
+memory with arrow left and right. 

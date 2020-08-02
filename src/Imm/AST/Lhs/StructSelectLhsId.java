@@ -62,4 +62,4 @@ public class StructSelectLhsId extends LhsId {
 		this.select.setContext(context);
 	}
 
-}
+} 

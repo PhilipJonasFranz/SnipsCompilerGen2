@@ -21,4 +21,4 @@ public class ASMEor extends ASMBinaryData {
 		return super.build("eor");
 	}
 
-}
+} 

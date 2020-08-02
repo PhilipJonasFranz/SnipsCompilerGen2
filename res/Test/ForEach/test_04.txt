@@ -1,0 +1,73 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int main() {
+	A [2] [2] m = {{A::(12), A::(5)}, {A::(20), A::(25)}};
+	
+	int s = 0;
+	for (A a : &m, 4) s += a.x;
+	
+	/* Push value on stack, check for stack-shift */
+	int a = 124;
+	int* p = &a;
+	
+	return s + *p;
+}
+TESTCASES
+186
+OUTPUT
+/* --test_04.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #20
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #12
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r3, #0
+    mov r4, #0
+    sub sp, sp, #8                           /* Make space on stack for declaration a */
+main.L1: 
+    mov r0, #8
+    cmp r0, r4
+    beq main.L2
+    sub r0, fp, #32
+    lsr r1, r0, #2
+    add r0, r1, r4
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]
+    push { r0 }
+    mov r0, #1                               /* Override SID header */
+    sub r1, fp, #40
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    ldr r0, [fp, #-36]                       /* Load field from struct */
+    add r3, r3, r0
+    add r4, r4, #2
+    b main.L1
+main.L2: 
+    add sp, sp, #8                           /* Reset stack, remove iterator and counter */
+/* Push value on stack, check for stack-shift */
+    mov r4, #124
+    sub r0, fp, #36                          /* Evaluate Expression */
+    push { r4 }                              /* Push declaration on stack, referenced by addressof. */
+    lsr r4, r0, #2
+    ldr r2, [r10, r4, lsl #2]                /* Load from address */
+    add r0, r3, r2
+    mov sp, fp
+    bx lr
+    

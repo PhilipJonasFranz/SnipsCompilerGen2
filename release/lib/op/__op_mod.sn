@@ -21,4 +21,4 @@ shared int __op_mod(int a, int b) {
 	
 	if (r != 0 && neg) r = b - r;
 	return r;
-}
+} 

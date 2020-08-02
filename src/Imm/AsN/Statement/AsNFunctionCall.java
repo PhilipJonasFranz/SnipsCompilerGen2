@@ -29,6 +29,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
@@ -71,9 +72,7 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Pair<Expression, Integer>> mapping = new ArrayList();
 		
 		for (Expression e : params) {
-			//dec.print(0, true);
-			int wordSize = e.getType().wordsize();
-			if (wordSize == 1 && r < 3) {
+			if (e.getType().wordsize() == 1 && r < 3) {
 				/* Load in register */
 				mapping.add(new Pair(e, r));
 				r++;
@@ -124,10 +123,15 @@ public class AsNFunctionCall extends AsNStatement {
 				
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
-				/* Push Parameter in R0 on the stack */
-				if (parameters.get(i).getType().wordsize() == 1) {
-					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				boolean placeholder = false;
+				if (parameters.get(i) instanceof TempAtom) {
+					TempAtom a = (TempAtom) parameters.get(i);
+					if (a.getType().wordsize() > 1) placeholder = true;
 				}
+				
+				/* Push Parameter in R0 on the stack, but only if parameter is not an atom placeholder that pushes itself on the stack */
+				if (parameters.get(i).getType().wordsize() == 1 && !placeholder) 
+					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				
 				while (st.getStack().size() != s) st.pop();
 				r.getReg(0).free();
@@ -236,4 +240,4 @@ public class AsNFunctionCall extends AsNStatement {
 		if (parameters.size() > 0) call.instructions.get(0).comment = new ASMComment("Load parameters");
 	}
 	
-}
+} 

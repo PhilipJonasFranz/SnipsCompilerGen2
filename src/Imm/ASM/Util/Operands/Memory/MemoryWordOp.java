@@ -53,4 +53,4 @@ public class MemoryWordOp extends MemoryOperand {
 		return false;
 	}
 	
-}
+} 

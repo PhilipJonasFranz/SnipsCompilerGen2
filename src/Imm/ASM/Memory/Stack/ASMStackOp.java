@@ -76,4 +76,4 @@ public abstract class ASMStackOp extends ASMInstruction {
 		}
 	}
 	
-}
+} 

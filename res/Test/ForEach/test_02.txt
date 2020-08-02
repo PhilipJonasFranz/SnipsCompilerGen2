@@ -1,0 +1,60 @@
+SOURCE
+struct A {
+	int x;
+}
+
+int main() {
+	A [3] arr = {A::(12), A::(5), A::(20)};
+	
+	int s = 0;
+	for (A a : arr) s += a.x;
+	return s;
+}
+TESTCASES
+37
+OUTPUT
+/* --test_02.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #20                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #12
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r3, #0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r4, #0
+    sub sp, sp, #8                           /* Make space on stack for declaration a */
+main.L1: 
+    cmp r4, #3
+    beq main.L2
+    mov r2, #0                               /* Calculate offset of sub structure */
+    lsl r0, r4, #3
+    add r2, r2, r0
+    sub r1, fp, #24                          /* Start of structure in stack */
+    add r1, r1, r2                           /* Start of sub structure in stack */
+    ldr r0, [r1, #4]
+    ldr r2, [r1]
+    stmfd sp!, {r0, r2}
+    pop { r0 }
+    sub r1, fp, #32
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    ldr r0, [fp, #-28]                       /* Load field from struct */
+    add r3, r3, r0
+    add r4, r4, #1
+    b main.L1
+main.L2: 
+    add sp, sp, #8                           /* Reset stack, remove iterator and counter */
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    bx lr
+    

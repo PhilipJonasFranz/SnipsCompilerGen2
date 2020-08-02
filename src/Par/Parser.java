@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import CGen.LabelGen;
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
@@ -31,6 +30,7 @@ import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
@@ -66,6 +66,7 @@ import Imm.AST.Statement.DefaultStatement;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.EnumTypedef;
+import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
@@ -310,29 +311,55 @@ public class Parser {
 		List<TYPE> proviso = this.parseProviso();
 		NamespacePath path = this.buildPath(id.spelling);
 		
-		/* Extend Struct */
 		StructTypedef ext = null;
+		List<TYPE> extProviso = new ArrayList();
 		List<Declaration> extendDecs = new ArrayList();
+		
 		if (current.type == TokenType.COLON) {
 			accept();
+			
 			NamespacePath ext0 = this.parseNamespacePath();
 			ext = this.getStructTypedef(ext0, source);
 			
-			for (Declaration d : ext.getFields()) extendDecs.add(d.clone());
+			if (current.type == TokenType.CMPLT) 
+				extProviso.addAll(this.parseProviso());
+			
+			/* Copy the extended fields */
+			for (Declaration d : ext.getFields()) {
+				Declaration c = d.clone();
+				
+				/* If number of provisos are not equal an exception will be thrown in CTX anyway */
+				if (ext.proviso.size() == extProviso.size()) 
+					/* Remap type of declaration to provided provisos */
+					for (int i = 0; i < ext.proviso.size(); i++) {
+						if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
+						PROVISO prov = (PROVISO) ext.proviso.get(i);
+						c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
+					}
+				
+				extendDecs.add(c);
+			}
 		}
 		
-		StructTypedef def = new StructTypedef(path, LabelGen.getSID(), proviso, new ArrayList(), ext, mod, source);
+		/*
+		 * Create Struct typedef here already, since struct may be linked and have a pointer
+		 * to another instance of this struct. The struct definition needs to exist before
+		 * such a declaration is parsed.
+		 */
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
+		/* Add the extended fields */
 		def.getFields().addAll(extendDecs);
 		
 		accept(TokenType.LBRACE);
 		
-		while (current.type != TokenType.RBRACE) {
+		/* Parse the regular struct fields */
+		while (current.type != TokenType.RBRACE) 
 			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
-		}
-		accept(TokenType.RBRACE);
 		
+		accept(TokenType.RBRACE);
+
 		return def;
 	}
 	
@@ -833,14 +860,24 @@ public class Parser {
 		return new SignalStatement(ex0, source);
 	}
 	
-	protected ForStatement parseFor() throws PARSE_EXC {
+	protected Statement parseFor() throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Source source = accept(TokenType.FOR).getSource();
 		accept(TokenType.LPAREN);
 		
-		/* Accepts semicolon */
-		Declaration iterator = this.parseDeclaration(MODIFIER.SHARED, true, true);
+		TYPE itType = this.parseType();
+		Token itId = accept(TokenType.IDENTIFIER);
+		
+		if (current.type == TokenType.COLON) 
+			return this.parseForEach(itType, itId);
+		
+		accept(TokenType.LET);
+		
+		Expression value = this.parseExpression();
+		accept(TokenType.SEMICOLON);
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, value, MODIFIER.SHARED, itId.getSource());
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -855,6 +892,30 @@ public class Parser {
 		
 		this.scopes.pop();
 		return new ForStatement(iterator, condition, increment, body, source);
+	}
+	
+	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
+		this.scopes.push(new ArrayList());
+		
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.getSource());
+		this.scopes.peek().add(iterator);
+		
+		accept(TokenType.COLON);
+		
+		Expression shadowRef = this.parseExpression();
+		
+		Expression range = null;
+		
+		if (current.type == TokenType.COMMA) {
+			accept();
+			range = this.parseExpression();
+		}
+		
+		accept(TokenType.RPAREN);
+		
+		List<Statement> body = this.parseCompoundStatement(false);
+		
+		return new ForEachStatement(iterator, shadowRef, range, body, itId.getSource());
 	}
 	
 	protected WhileStatement parseWhile() throws PARSE_EXC {
@@ -1316,8 +1377,6 @@ public class Parser {
 				params.add(left);
 				params.add(this.parseSizeOf());
 				
-				
-				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
 				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
@@ -1544,12 +1603,12 @@ public class Parser {
 			accept();
 			Expression expression = this.parseExpression();
 			accept(TokenType.RPAREN);
-			return expression;
+			return this.wrapPlaceholder(expression);
 		}
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			return new Atom(new NULL(), id, id.getSource());
+			return this.wrapPlaceholder(new Atom(new NULL(), id, id.getSource()));
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
@@ -1562,9 +1621,8 @@ public class Parser {
 			}
 			
 			/* Convert next token */
-			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
+			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
-			}
 			
 			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
 				List<TYPE> proviso = this.parseProviso();
@@ -1594,7 +1652,7 @@ public class Parser {
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
 					}
 					
-					return new InlineCall(path, proviso, parameters, source);
+					return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
 				}
 			}
 			else if (current.type == TokenType.DOT && (tokenStream.get(0).type == TokenType.ENUMLIT || path.termination == PATH_TERMINATION.ENUM)) {
@@ -1616,7 +1674,7 @@ public class Parser {
 					throw new SNIPS_EXC("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
 				}
 				
-				return new Atom(def.getEnumField(value.spelling, source), value, source);
+				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
 			}
 			else {
 				/* Find the function that may match this path and act as a predicate */
@@ -1638,11 +1696,11 @@ public class Parser {
 				
 				if (lambda != null) {
 					/* Predicate without proviso */
-					return new FunctionRef(new ArrayList(), lambda, source);
+					return this.wrapPlaceholder(new FunctionRef(new ArrayList(), lambda, source));
 				}
 				else {
 					/* Identifier Reference */
-					return new IDRef(path, source);
+					return this.wrapPlaceholder(new IDRef(path, source));
 				}
 			}
 		}
@@ -1654,11 +1712,11 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
-			return new Atom(new INT(token.spelling), token, token.source);
+			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token, token.source));
 		}
 		else if (current.type == TokenType.CHARLIT) {
 			Token token = accept();
-			return new Atom(new CHAR(token.spelling), token, token.source);
+			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token, token.source));
 		}
 		else if (current.type == TokenType.STRINGLIT) {
 			Token token = accept();
@@ -1672,7 +1730,17 @@ public class Parser {
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
-			return new Atom(new BOOL(token.spelling), token, token.source);
+			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token, token.source));
+		}
+		else if (this.checkPlaceholder()) {
+			/* Pure placeholder token */
+			Token token = current;
+			
+			accept();
+			accept();
+			accept();
+			
+			return new TempAtom(null, token.getSource());
 		}
 		else {
 			/* 
@@ -1698,6 +1766,26 @@ public class Parser {
 				}
 			}
 		}
+	}
+	
+	public Expression wrapPlaceholder(Expression base) {
+		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+			Source source = current.getSource();
+			
+			accept();
+			accept();
+			accept();
+			
+			return new TempAtom(base, source);
+		}
+		else return base;
+	}
+	
+	public boolean checkPlaceholder() {
+		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+			return true;
+		}
+		else return false;
 	}
 	
 	public Function findFunction(NamespacePath path) {
@@ -2089,4 +2177,4 @@ public class Parser {
 		else return MODIFIER.EXCLUSIVE;
 	}
 	
-}
+} 

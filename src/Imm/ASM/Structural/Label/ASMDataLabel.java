@@ -22,4 +22,4 @@ public class ASMDataLabel extends ASMLabel {
 		return new ASMDataLabel(this.name, this.memoryOperand.clone());
 	}
 	
-}
+} 

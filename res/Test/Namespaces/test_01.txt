@@ -24,17 +24,17 @@ Bar.x: .word 15
     
 .text
 main:                                        /* Function: main */
-    ldr r0, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
+    ldr r0, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     ldr r0, [r0]
     add r1, r0, #1
-    ldr r2, .POOL0_main.L0_Foo.Baz.x         /* Load from .data section */
+    ldr r2, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     str r1, [r2]
-    ldr r1, .POOL0_main.L0_Foo.Baz.x         /* Evaluate Expression */
+    ldr r1, .POOL0_L0_Foo.Baz.x              /* Evaluate Expression */
     ldr r1, [r1]
-    ldr r2, .POOL0_main.L1_Bar.x             /* Load from .data section */
+    ldr r2, .POOL0_L1_Bar.x                  /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL0_main.L1_Bar.x: .word Bar.x
-.POOL0_main.L0_Foo.Baz.x: .word Foo.Baz.x
+.POOL0_L1_Bar.x: .word Bar.x
+.POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
     

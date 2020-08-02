@@ -3,4 +3,4 @@ int main(){
 	char*s=resv(88);
 	*s="#include<display.sn>\nint main(){\n\tchar*s=resv(88);\n\t*s=\"%s\";\n\tprintf(s,&s);\n}";
 	printf(s,&s);
-}
+} 

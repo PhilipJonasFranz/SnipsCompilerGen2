@@ -60,4 +60,4 @@ shared void* resv(int size) {
 	/* End reached, create new block */
 	*mem_loc = size;
 	return (void*) (mem_loc + 1);
-}
+} 

@@ -119,4 +119,4 @@ public class ASMMemBlock extends ASMInstruction {
 		return (CompilerDriver.printDepth + op).toLowerCase();
 	}
 	
-}
+} 

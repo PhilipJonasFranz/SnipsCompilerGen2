@@ -21,4 +21,4 @@ public class ASMLabel extends ASMInstruction {
 		return this.name + ": ";
 	}
 	
-}
+} 

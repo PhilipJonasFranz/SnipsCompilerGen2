@@ -26,4 +26,4 @@ public class SNIPS_EXC extends RuntimeException {
 		return this.errorMessage;
 	}
 	
-}
+} 

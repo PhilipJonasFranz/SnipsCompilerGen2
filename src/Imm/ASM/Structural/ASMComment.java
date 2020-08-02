@@ -21,4 +21,4 @@ public class ASMComment extends ASMInstruction {
 		return s + "/* " + this.comment + " */";
 	}
 	
-}
+} 

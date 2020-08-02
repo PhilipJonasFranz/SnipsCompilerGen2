@@ -14,4 +14,4 @@ int mult(int [2] [2] m, int [2] [2] n, int x, int y) {
 	}
 
 	return r [x] [y];
-}
+} 

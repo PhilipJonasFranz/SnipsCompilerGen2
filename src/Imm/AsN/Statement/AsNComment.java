@@ -17,4 +17,4 @@ public class AsNComment extends AsNStatement {
 		return com;
 	}
 	
-}
+} 

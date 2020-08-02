@@ -16,6 +16,8 @@ public class StructureInit extends Expression {
 	
 	public List<Expression> elements;
 	
+	public boolean isTopLevelExpression = true;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**
@@ -48,4 +50,4 @@ public class StructureInit extends Expression {
 			e.setContext(context);
 	}
 
-}
+} 

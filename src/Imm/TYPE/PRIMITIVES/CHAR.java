@@ -50,4 +50,4 @@ public class CHAR extends PRIMITIVE<Character> {
 		return b;
 	}
 	
-}
+} 

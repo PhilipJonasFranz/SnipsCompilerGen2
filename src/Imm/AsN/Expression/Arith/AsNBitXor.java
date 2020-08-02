@@ -21,4 +21,4 @@ public class AsNBitXor extends AsNBinaryExpression {
 		return xor;
 	}
 	
-}
+} 

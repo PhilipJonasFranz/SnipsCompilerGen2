@@ -104,4 +104,4 @@ public class FUNC extends PRIMITIVE<Function> {
 		throw new SNIPS_EXC("Cannot set value of FUNC type.");
 	}
 	
-}
+} 

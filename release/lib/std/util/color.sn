@@ -50,4 +50,4 @@ namespace Colors {
 		return c->rgba & hxff;
 	}
 
-}
+} 

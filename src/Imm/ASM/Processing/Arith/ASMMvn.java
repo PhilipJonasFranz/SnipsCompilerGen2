@@ -20,4 +20,4 @@ public class ASMMvn extends ASMBinaryData {
 		return CompilerDriver.printDepth + "mvn" + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op1.toString();
 	}
 
-}
+} 

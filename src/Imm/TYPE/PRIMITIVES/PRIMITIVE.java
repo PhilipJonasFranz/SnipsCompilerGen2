@@ -46,4 +46,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		return this.clone();
 	}
 	
-}
+	public TYPE remapProvisoName(String name, TYPE newType) {
+		return this;
+	}
+	
+} 

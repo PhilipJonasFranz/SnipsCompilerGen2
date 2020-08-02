@@ -9,12 +9,14 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -29,16 +31,35 @@ public class AsNStructureInit extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		structureInit(init, s.elements, r, map, st);
-		
-		if (!CompilerDriver.disableStructSIDHeaders) {
-			/* Push SID header */
-			init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
-			init.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
-			
-			/* Push dummy for SID header */
-			st.push(REG.R0);
+		/* Check for special case, where entire struct is initialized with absolute placeholder */
+		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
+			TempAtom a = (TempAtom) s.elements.get(0);
+			if (a.base == null) {
+				/* Absolute placeholder */
+				int size = s.structType.wordsize();
+				
+				if (!CompilerDriver.disableStructSIDHeaders)
+					size--;
+				
+				init.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
+				
+				for (int i = 0; i < size; i++)
+					st.push(REG.R0);
+				
+				if (!CompilerDriver.disableStructSIDHeaders) {
+					/* Load SID header */
+					init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
+					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+					
+					/* Push dummy for SID header */
+					st.push(REG.R0);
+				}
+				
+				return init;
+			}
 		}
+		
+		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, r, map, st);
 		
 		return init;
 	}
@@ -52,7 +73,7 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -72,6 +93,18 @@ public class AsNStructureInit extends AsNExpression {
 				
 				st.push(REG.R0);
 			}
+			else if (elements.get(i) instanceof TempAtom) {
+				TempAtom atom = (TempAtom) elements.get(i);
+				
+				if (atom.getType().wordsize() > 1) {
+					flush(regs, node);
+					regs = 0;
+				}
+				
+				node.instructions.addAll(AsNTempAtom.cast(atom, r, map, st, regs).getInstructions());
+				
+				if (atom.getType().wordsize() == 1) regs++;
+			}
 			else {
 				/* Flush all atoms to clear regs */
 				flush(regs, node);
@@ -85,6 +118,26 @@ public class AsNStructureInit extends AsNExpression {
 					st.push(REG.R0);
 				}
 			}
+		}
+		
+		/* 
+		 * When optimizing, the last push statement can be removed. This results in a 
+		 * performance improvement, but bigger file size. When this piece of code is 
+		 * not executed, its possible that the SID is part of one push. This means that
+		 * it can not be optimized for performance as well, but the file size is smaller.
+		 */
+		if (isTopLevel && !CompilerDriver.optimizeFileSize) {
+			flush(regs, node);
+			regs = 0;
+		}
+		
+		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
+			/* Load SID header */
+			node.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(struct.getTypedef().SID)));
+			
+			/* Push dummy for SID header */
+			st.push(REG.R0);
+			regs++;
 		}
 		
 		/* Flush remaining atoms */
@@ -106,4 +159,4 @@ public class AsNStructureInit extends AsNExpression {
 		}
 	}
 	
-}
+} 

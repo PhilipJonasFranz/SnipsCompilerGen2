@@ -21,9 +21,9 @@ import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
-import Imm.ASM.Processing.ASMBinaryData.SHIFT_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
+import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Processing.Arith.ASMMla;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
@@ -225,6 +225,13 @@ public class ASMOptimizer {
 			
 			this.removeMovId(body);
 			
+			/**
+			 * lsl r0, r1, #0
+			 * Replace with:
+			 * mov r0, r1
+			 */
+			this.shiftBy0IsMov(body);
+			
 			if (!OPT_DONE) {
 				/**
 				 * add r0, fp, #4
@@ -275,14 +282,6 @@ public class ASMOptimizer {
 			
 			if (!OPT_DONE) {
 				/**
-				 * Check if a bx lr statement is directley after the func clean pop. If the last
-				 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
-				 */
-				this.popReturnDirect(body);
-			}
-			
-			if (!OPT_DONE) {
-				/**
 				 * This operation is potentially dangerous and is still WIP. For the current
 				 * tests the operation works, but when using ASM Injection etc. the operation
 				 * could fail spectaculary.
@@ -320,6 +319,12 @@ public class ASMOptimizer {
 			
 		}
 
+		/**
+		 * Check if a bx lr statement is directley after the func clean pop. If the last
+		 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
+		 */
+		this.popReturnDirect(body);
+		
 		/* Finishing touches, no iteration required */
 		this.popPcSubstitution(body);
 		this.clearUnusedLabels(body);
@@ -1280,17 +1285,19 @@ public class ASMOptimizer {
 					ASMAdd add = (ASMAdd) body.instructions.get(i - 1);
 					
 					dataTarget = add.target.reg;
-					op0 = add.op0;
-					op1 = add.op1;
+					op0 = add.op0.clone();
+					op1 = add.op1.clone();
+					
+					shift = add.shift;
 				}
 				else if (body.instructions.get(i - 1) instanceof ASMSub) {
 					ASMSub sub = (ASMSub) body.instructions.get(i - 1);
 					
 					dataTarget = sub.target.reg;
-					op0 = sub.op0;
+					op0 = sub.op0.clone();
 					
 					if (sub.op1 instanceof RegOp) {
-						op1 = sub.op1;
+						op1 = sub.op1.clone();
 						negate = true;
 					}
 					else if (sub.op1 instanceof ImmOp) {
@@ -1309,7 +1316,7 @@ public class ASMOptimizer {
 					ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
 					
 					dataTarget = lsl.target.reg;
-					op0 = lsl.op0.clone();
+					op0 = new RegOp(REG.R10);
 					
 					op1 = lsl.op0.clone();
 					shift = new Shift(SHIFT.LSL, lsl.op1.clone());
@@ -1345,10 +1352,13 @@ public class ASMOptimizer {
 				clear |= ldr.target.reg == dataTarget;
 				
 				if (clear) {
-					if (shift == null) {
+					if (shift == null || op1 != null) {
 						/* Substitute */
 						ldr.op0 = op0;
 						ldr.op1 = op1;
+						
+						if (ldr.op1 instanceof RegOp)
+							((RegOp) op1).shift = shift;
 					}
 					else {
 						/* Special treatment for shifts */
@@ -1554,6 +1564,32 @@ public class ASMOptimizer {
 		}
 	}
 	
+	private void shiftBy0IsMov(AsNBody body) {
+		for (int i = 0; i < body.instructions.size(); i++) {
+			ASMInstruction ins = body.instructions.get(i);
+			if (ins instanceof ASMLsl) {
+				ASMLsl lsl = (ASMLsl) ins;
+				if (lsl.op1 != null && lsl.op1 instanceof ImmOp) {
+					ImmOp imm = (ImmOp) lsl.op1;
+					if (imm.value == 0) {
+						body.instructions.set(i, new ASMMov(lsl.target, lsl.op0, lsl.cond));
+						markOpt();
+					}
+				}
+			}
+			else if (ins instanceof ASMLsr) {
+				ASMLsr lsr = (ASMLsr) ins;
+				if (lsr.op1 != null && lsr.op1 instanceof ImmOp) {
+					ImmOp imm = (ImmOp) lsr.op1;
+					if (imm.value == 0) {
+						body.instructions.set(i, new ASMMov(lsr.target, lsr.op0, lsr.cond));
+						markOpt();
+					}
+				}
+			}
+		}
+	}
+	
 	private void defragmentDeltas(AsNBody body) {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMSub) {
@@ -1582,7 +1618,7 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) body.instructions.get(i - 1);
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
 				
-				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp) {
+				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
 					RegOp op1 = (RegOp) add.op1;
 					add.op1 = mov.op1;
 					add.op0 = op1;
@@ -1599,12 +1635,11 @@ public class ASMOptimizer {
 				ASMLsl lsl = (ASMLsl) body.instructions.get(i - 1);
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
 				
-				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp && add.op1 instanceof RegOp) {
+				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
 					RegOp op1 = (RegOp) add.op1;
 					add.op1 = lsl.op0;
 					
-					add.shiftType = SHIFT_TYPE.LSL;
-					add.shiftDist = ((ImmOp) lsl.op1).value;
+					add.shift = new Shift(SHIFT.LSL, lsl.op1);
 					
 					add.op0 = op1;
 					
@@ -2410,4 +2445,4 @@ public class ASMOptimizer {
 		}
 	}
 	
-}
+} 
