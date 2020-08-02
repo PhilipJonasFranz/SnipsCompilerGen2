@@ -2047,7 +2047,7 @@ public class ASMOptimizer {
 									remove = true;
 								}
 								
-								if (remove && a < 3) {
+								if (remove && a < 3 && !mov.optFlags.contains(OPT_FLAG.WRITEBACK)) {
 									body.instructions.remove(i - 1);
 									i--;
 								}
@@ -2200,6 +2200,12 @@ public class ASMOptimizer {
 						}
 						else if (body.instructions.get(a) instanceof ASMBinaryData) {
 							ASMBinaryData dataP = (ASMBinaryData) body.instructions.get(a);
+							
+							if (dataP.optFlags.contains(OPT_FLAG.WRITEBACK)) {
+								clear = false;
+								break;
+							}
+							
 							if (dataP.op1 instanceof RegOp && ((RegOp) dataP.op1).reg == target) {
 								dataP.op1 = new ImmOp(val);
 								markOpt();

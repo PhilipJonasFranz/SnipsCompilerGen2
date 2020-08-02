@@ -382,7 +382,7 @@ String.substring.L2:
     bl List.size                             /* Call List.size */
     mov r8, r0
 /* Substring only consists out of null char */
-    cmp r0, #1
+    cmp r8, #1
     moveq r0, #1
     movne r0, #0
     mov r1, #0

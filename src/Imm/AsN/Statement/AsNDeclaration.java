@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
@@ -29,7 +30,10 @@ public class AsNDeclaration extends AsNStatement {
 		int free = r.findFree();
 		if (free != -1 && (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER)) {
 			/* Free Register exists and declaration fits into a register */
-			dec.instructions.add(new ASMMov(new RegOp(free), new RegOp(0)));
+			ASMMov mov = new ASMMov(new RegOp(free), new RegOp(0));
+			mov.optFlags.add(OPT_FLAG.WRITEBACK);
+			dec.instructions.add(mov);
+			
 			r.getReg(free).setDeclaration(d);
 		}
 		else {

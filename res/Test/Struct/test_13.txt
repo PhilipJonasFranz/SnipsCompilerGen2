@@ -242,6 +242,7 @@ main:                                        /* Function: main */
     bl Tree.create_P0                        /* Call Tree.create */
     mov r6, r0
     mov r1, #5
+    mov r0, r6
     bl Tree.insert_P1                        /* Call Tree.insert */
     mov r1, #12
     mov r0, r6

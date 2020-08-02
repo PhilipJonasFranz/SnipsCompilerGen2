@@ -297,6 +297,7 @@ main:                                        /* Function: main */
     bl List.create_P0                        /* Call List.create */
     mov r4, r0
     mov r1, #10
+    mov r0, r4
     bl List.add_P1                           /* Call List.add */
     mov r1, #5
     mov r0, r4

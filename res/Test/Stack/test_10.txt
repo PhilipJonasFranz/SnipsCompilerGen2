@@ -96,6 +96,7 @@ main:                                        /* Function: main */
     ldr r0, [fp, #8]
     pop { r1 }
     bl foo                                   /* Call foo */
+    mov r5, r0
     ldr r2, [fp, #-8]
     add r1, r3, r2
     add r1, r1, r8
@@ -105,7 +106,7 @@ main:                                        /* Function: main */
     add r1, r1, r7
     add r1, r1, r4
     add r1, r1, r6
-    add r0, r1, r0
+    add r0, r1, r5
     mov sp, fp
     ldmfd sp!, {fp, pc}
     
