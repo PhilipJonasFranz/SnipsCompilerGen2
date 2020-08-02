@@ -1,0 +1,38 @@
+SOURCE
+struct Test {
+	int [4] x;
+	bool k;
+}
+
+int main(int k) {
+	Test t = Test::(({1, 2})...);
+	
+	t.x [1] = 5;
+	t.k = true;
+	
+	return t.x [1] + (int) t.k;
+}
+TESTCASES
+6
+OUTPUT
+/* --test_27.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #2                               /* Evaluate Expression */
+    mov r1, #1
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    mov r1, #1
+    stmfd sp!, {r0, r1}
+    mov r0, #1
+    push { r0 }
+    mov r0, #5                               /* Evaluate Expression */
+    str r0, [fp, #-28]                       /* Store value to struct field */
+    mov r0, #1                               /* Evaluate Expression */
+    str r0, [fp, #-16]                       /* Store value to struct field */
+    ldr r0, [fp, #-28]                       /* Load field from struct */
+    ldr r2, [fp, #-16]                       /* Load field from struct */
+    add r0, r0, r2
+    mov sp, fp
+    bx lr
+    

@@ -16,10 +16,10 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
 
 public class AsNStructureInit extends AsNExpression {
@@ -32,9 +32,9 @@ public class AsNStructureInit extends AsNExpression {
 		r.free(0, 1, 2);
 		
 		/* Check for special case, where entire struct is initialized with absolute placeholder */
-		if (s.elements.size() == 1 && s.elements.get(0) instanceof Atom) {
-			Atom a = (Atom) s.elements.get(0);
-			if (a.getType() instanceof VOID && a.isPlaceholder) {
+		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
+			TempAtom a = (TempAtom) s.elements.get(0);
+			if (a.base == null) {
 				/* Absolute placeholder */
 				int size = s.structType.wordsize();
 				
@@ -81,40 +81,29 @@ public class AsNStructureInit extends AsNExpression {
 			if (elements.get(i) instanceof Atom) {
 				Atom atom = (Atom) elements.get(i);
 				
-				if (atom.isPlaceholder && atom.getType() instanceof VOID) {
-					/* Flush regs for safety */
+				/* Load atom directley in destination */
+				node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
+				regs++;
+				
+				/* If group size is 3, push them on the stack */
+				if (regs == 3) {
 					flush(regs, node);
 					regs = 0;
-					
-					/* Absolute placeholder */
-					int size = struct.getFieldNumber(i).getType().wordsize();
-					
-					node.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
-					
-					for (int a = 0; a < size; a++)
-						st.push(REG.R0);
 				}
-				else {
-					/* 
-					 * If the atom is a placeholder, get the wordsize of the i-th field of the struct and 
-					 * load value of this amount of times.
-					 */
-					int range = (atom.isPlaceholder)? struct.getFieldNumber(i).getType().wordsize() : 1;
-					
-					for (int a = 0; a < range; a++) {
-						/* Load atom directley in destination */
-						node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
-						regs++;
-						
-						/* If group size is 3, push them on the stack */
-						if (regs == 3) {
-							flush(regs, node);
-							regs = 0;
-						}
-						
-						st.push(REG.R0);
-					}
+				
+				st.push(REG.R0);
+			}
+			else if (elements.get(i) instanceof TempAtom) {
+				TempAtom atom = (TempAtom) elements.get(i);
+				
+				if (atom.getType().wordsize() > 1) {
+					flush(regs, node);
+					regs = 0;
 				}
+				
+				node.instructions.addAll(AsNTempAtom.cast(atom, r, map, st, regs).getInstructions());
+				
+				if (atom.getType().wordsize() == 1) regs++;
 			}
 			else {
 				/* Flush all atoms to clear regs */

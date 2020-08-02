@@ -30,6 +30,7 @@ import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.Add;
@@ -384,27 +385,32 @@ public class ContextChecker {
 			throw new CTX_EXC(e.getSource(), "Missmatching argument count: Expected " + e.structType.getTypedef().getFields().size() + " but got " + e.elements.size());
 		}
 		
-		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof Atom) {
-			/* Absolute placeholder case */
-			Atom a = (Atom) e.elements.get(0);
-			
-			TYPE valType = a.check(this);
-			
-			if (!(valType instanceof VOID))
-				throw new CTX_EXC(e.getSource(), "Expected VOID type for absolute placeholder, but got " + valType.typeString());
+		/* Absolute placeholder case */
+		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof TempAtom && ((TempAtom) e.elements.get(0)).base == null) {
+			TempAtom a = (TempAtom) e.elements.get(0);
+			a.inheritType = e.structType;
+			a.check(this);
 		}
 		else {
 			/* Make sure that all field types are equal to the expected types */
 			for (int i = 0; i < e.elements.size(); i++) {
-				TYPE valType = e.elements.get(i).check(this);
+				
 				TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+				
+				/* Single placeholder case */
+				if (e.elements.get(i) instanceof TempAtom) {
+					TempAtom a = (TempAtom) e.elements.get(i);
+					a.inheritType = strType;
+				}
+				
+				TYPE valType = e.elements.get(i).check(this);
 				
 				if (e.elements.get(i) instanceof StructureInit) {
 					StructureInit init = (StructureInit) e.elements.get(i);
 					init.isTopLevelExpression = false;
 				}
 				
-				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof Atom && ((Atom) e.elements.get(i)).isPlaceholder)) {
+				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof TempAtom)) {
 					if (valType instanceof POINTER || strType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
@@ -731,14 +737,13 @@ public class ContextChecker {
 		d.last = d;
 		
 		if (d.value != null) {
-			TYPE t = d.value.check(this);
-			
 			/* Apply parameter type if atom is placeholder */
-			if (d.value instanceof Atom && ((Atom) d.value).isPlaceholder) {
-				Atom atom = (Atom) d.value;
-				atom.placeholderType = d.getType();
-				t = d.getType();
+			if (d.value instanceof TempAtom) {
+				TempAtom a = (TempAtom) d.value;
+				a.inheritType = d.getType();
 			}
+			
+			TYPE t = d.value.check(this);
 			
 			if (t instanceof FUNC) {
 				FUNC d0 = (FUNC) d.getType();
@@ -798,6 +803,12 @@ public class ContextChecker {
 		Declaration dec = null;
 		if (path != null) scopes.peek().getField(path, a.getSource());
 		a.origin = dec;
+		
+		/* Override for placeholder atom */
+		if (a.value instanceof TempAtom) {
+			TempAtom atom = (TempAtom) a.value;
+			atom.inheritType = targetType;
+		}
 		
 		TYPE t = a.value.check(this);
 		TYPE ctype = t;
@@ -1204,16 +1215,15 @@ public class ContextChecker {
 				throw new CTX_EXC(i.getSource(), "Missmatching argument number in inline call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
-				TYPE paramType = i.parameters.get(a).check(this);
-				
 				TYPE functionParamType = f.parameters.get(a).getType();
 				
 				/* Apply parameter type if atom is placeholder */
-				if (i.parameters.get(a) instanceof Atom && ((Atom) i.parameters.get(a)).isPlaceholder) {
-					Atom atom = (Atom) i.parameters.get(a);
-					atom.placeholderType = functionParamType;
-					paramType = functionParamType;
+				if (i.parameters.get(a) instanceof TempAtom) {
+					TempAtom atom = (TempAtom) i.parameters.get(a);
+					atom.inheritType = functionParamType;
 				}
+				
+				TYPE paramType = i.parameters.get(a).check(this);
 				
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
@@ -1306,14 +1316,14 @@ public class ContextChecker {
 				throw new CTX_EXC(i.getSource(), "Missmatching argument number in function call: Expected " + f.parameters.size() + " but got " + i.parameters.size());
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
-				TYPE paramType = i.parameters.get(a).check(this);
 				
 				/* Apply parameter type if atom is placeholder */
-				if (i.parameters.get(a) instanceof Atom && ((Atom) i.parameters.get(a)).isPlaceholder) {
-					Atom atom = (Atom) i.parameters.get(a);
-					atom.placeholderType = f.parameters.get(a).getType();
-					paramType = f.parameters.get(a).getType();
+				if (i.parameters.get(a) instanceof TempAtom) {
+					TempAtom atom = (TempAtom) i.parameters.get(a);
+					atom.inheritType = f.parameters.get(a).getType();
 				}
+				
+				TYPE paramType = i.parameters.get(a).check(this);
 				
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
@@ -1631,6 +1641,24 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkAtom(Atom a) throws CTX_EXC {
+		return a.getType();
+	}
+	
+	public TYPE checkPlaceholderAtom(TempAtom a) throws CTX_EXC {
+		
+		/* Override the type type of the base */
+		a.setType(a.inheritType);
+		
+		if (a.base != null) {
+			TYPE t = a.base.check(this);
+			
+			if (a.inheritType.wordsize() % t.wordsize() != 0) 
+				throw new CTX_EXC(a.getSource(), t.typeString() + " cannot be aligned to " + a.inheritType.typeString());
+			
+			if (t.wordsize() > a.inheritType.wordsize())
+				throw new CTX_EXC(a.getSource(), "Expression word size is larger than inherited type: " + t.typeString() + " vs " + a.inheritType.typeString());
+		}
+		
 		return a.getType();
 	}
 	

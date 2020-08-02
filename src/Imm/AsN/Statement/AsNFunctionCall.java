@@ -27,9 +27,9 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AsN.AsNFunction;
@@ -124,9 +124,9 @@ public class AsNFunctionCall extends AsNStatement {
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
 				boolean placeholder = false;
-				if (parameters.get(i) instanceof Atom) {
-					Atom a = (Atom) parameters.get(i);
-					if (a.isPlaceholder && a.placeholderType != null && a.placeholderType.wordsize() > 1) placeholder = true;
+				if (parameters.get(i) instanceof TempAtom) {
+					TempAtom a = (TempAtom) parameters.get(i);
+					if (a.getType().wordsize() > 1) placeholder = true;
 				}
 				
 				/* Push Parameter in R0 on the stack, but only if parameter is not an atom placeholder that pushes itself on the stack */

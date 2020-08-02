@@ -31,6 +31,7 @@ import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -327,6 +328,11 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 				ref |= this.hasAddressReference(e0, dec);
 			}
 			return ref;
+		}
+		else if (e instanceof TempAtom) {
+			TempAtom a = (TempAtom) e;
+			if (a.base == null) return false;
+			else return this.hasAddressReference(a.base, dec);
 		}
 		else if (e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;

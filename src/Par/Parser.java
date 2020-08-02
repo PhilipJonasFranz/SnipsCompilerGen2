@@ -30,6 +30,7 @@ import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
@@ -88,7 +89,6 @@ import Imm.TYPE.PRIMITIVES.CHAR;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Snips.CompilerDriver;
@@ -1603,14 +1603,12 @@ public class Parser {
 			accept();
 			Expression expression = this.parseExpression();
 			accept(TokenType.RPAREN);
-			return expression;
+			return this.wrapPlaceholder(expression);
 		}
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			Atom a = new Atom(new NULL(), id, id.getSource());
-			if (this.parsePlaceholder()) a.isPlaceholder = true;
-			return a;
+			return this.wrapPlaceholder(new Atom(new NULL(), id, id.getSource()));
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.getSource();
@@ -1623,9 +1621,8 @@ public class Parser {
 			}
 			
 			/* Convert next token */
-			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
+			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
-			}
 			
 			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
 				List<TYPE> proviso = this.parseProviso();
@@ -1655,7 +1652,7 @@ public class Parser {
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
 					}
 					
-					return new InlineCall(path, proviso, parameters, source);
+					return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
 				}
 			}
 			else if (current.type == TokenType.DOT && (tokenStream.get(0).type == TokenType.ENUMLIT || path.termination == PATH_TERMINATION.ENUM)) {
@@ -1677,9 +1674,7 @@ public class Parser {
 					throw new SNIPS_EXC("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
 				}
 				
-				Atom a = new Atom(def.getEnumField(value.spelling, source), value, source);
-				if (this.parsePlaceholder()) a.isPlaceholder = true;
-				return a;
+				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
 			}
 			else {
 				/* Find the function that may match this path and act as a predicate */
@@ -1701,11 +1696,11 @@ public class Parser {
 				
 				if (lambda != null) {
 					/* Predicate without proviso */
-					return new FunctionRef(new ArrayList(), lambda, source);
+					return this.wrapPlaceholder(new FunctionRef(new ArrayList(), lambda, source));
 				}
 				else {
 					/* Identifier Reference */
-					return new IDRef(path, source);
+					return this.wrapPlaceholder(new IDRef(path, source));
 				}
 			}
 		}
@@ -1717,15 +1712,11 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
-			Atom a = new Atom(new INT(token.spelling), token, token.source);
-			if (this.parsePlaceholder()) a.isPlaceholder = true;
-			return a;
+			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token, token.source));
 		}
 		else if (current.type == TokenType.CHARLIT) {
 			Token token = accept();
-			Atom a = new Atom(new CHAR(token.spelling), token, token.source);
-			if (this.parsePlaceholder()) a.isPlaceholder = true;
-			return a;
+			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token, token.source));
 		}
 		else if (current.type == TokenType.STRINGLIT) {
 			Token token = accept();
@@ -1739,17 +1730,17 @@ public class Parser {
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
-			Atom a = new Atom(new BOOL(token.spelling), token, token.source);
-			if (this.parsePlaceholder()) a.isPlaceholder = true;
-			return a;
+			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token, token.source));
 		}
-		else if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+		else if (this.checkPlaceholder()) {
 			/* Pure placeholder token */
 			Token token = current;
-			this.parsePlaceholder();
-			Atom a = new Atom(new VOID(null), token, token.source);
-			a.isPlaceholder = true;
-			return a;
+			
+			accept();
+			accept();
+			accept();
+			
+			return new TempAtom(null, token.getSource());
 		}
 		else {
 			/* 
@@ -1777,11 +1768,21 @@ public class Parser {
 		}
 	}
 	
-	public boolean parsePlaceholder() {
+	public Expression wrapPlaceholder(Expression base) {
 		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+			Source source = current.getSource();
+			
 			accept();
 			accept();
 			accept();
+			
+			return new TempAtom(base, source);
+		}
+		else return base;
+	}
+	
+	public boolean checkPlaceholder() {
+		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
 			return true;
 		}
 		else return false;
