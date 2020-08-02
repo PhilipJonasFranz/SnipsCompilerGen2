@@ -3,6 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Par.Token;
@@ -18,6 +19,8 @@ public class Atom extends Expression {
 	public String spelling;
 	
 	public boolean isPlaceholder = false;
+	
+	public TYPE placeholderType;
 	
 	
 			/* --- CONSTRUCTORS --- */
@@ -42,8 +45,8 @@ public class Atom extends Expression {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		//System.out.println("Applied Context: " + this.getClass().getName());
-		return;
+		if (this.placeholderType != null)
+			ProvisoUtil.mapNTo1(this.placeholderType, context);
 	}
 
 } 

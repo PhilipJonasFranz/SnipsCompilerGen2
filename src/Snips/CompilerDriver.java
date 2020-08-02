@@ -59,25 +59,25 @@ public class CompilerDriver {
 	
 			/* --- FLAGS & SETTINGS --- */
 	public static boolean 
-		logoPrinted = false, 
-		useTerminalColors = true, 
-		silenced = true,
-		imm = false,
-		enableComments = true,
-		disableModifiers = false,
-		disableOptimizer = false,
-		optimizeFileSize = false,
-		disableWarnings = false,
-		disableStructSIDHeaders = false,
-		includeMetaInformation = true,
-		printErrors = false;
+		logoPrinted = 					false, 
+		useTerminalColors = 			true, 
+		silenced = 						true,
+		imm = 							false,
+		enableComments = 				true,
+		disableModifiers = 				false,
+		disableOptimizer = 				false,
+		optimizeFileSize = 				false,
+		disableWarnings = 				false,
+		disableStructSIDHeaders = 		false,
+		includeMetaInformation = 		true,
+		printErrors = 					false;
 			
 	
 			/* --- DEBUG --- */
 	public static boolean
-		printProvisoTypes = false,
-		includeProvisoInTypeString = false,
-		printObjectIDs = false;
+		printProvisoTypes = 			false,
+		includeProvisoInTypeString = 	false,
+		printObjectIDs = 				false;
 	
 	
 			/* --- FORMATTING --- */

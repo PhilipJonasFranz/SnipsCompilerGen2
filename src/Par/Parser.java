@@ -1377,8 +1377,6 @@ public class Parser {
 				params.add(left);
 				params.add(this.parseSizeOf());
 				
-				
-				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
 				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");

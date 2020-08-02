@@ -733,6 +733,13 @@ public class ContextChecker {
 		if (d.value != null) {
 			TYPE t = d.value.check(this);
 			
+			/* Apply parameter type if atom is placeholder */
+			if (d.value instanceof Atom && ((Atom) d.value).isPlaceholder) {
+				Atom atom = (Atom) d.value;
+				atom.placeholderType = d.getType();
+				t = d.getType();
+			}
+			
 			if (t instanceof FUNC) {
 				FUNC d0 = (FUNC) d.getType();
 				FUNC t0 = (FUNC) t;
@@ -1201,6 +1208,13 @@ public class ContextChecker {
 				
 				TYPE functionParamType = f.parameters.get(a).getType();
 				
+				/* Apply parameter type if atom is placeholder */
+				if (i.parameters.get(a) instanceof Atom && ((Atom) i.parameters.get(a)).isPlaceholder) {
+					Atom atom = (Atom) i.parameters.get(a);
+					atom.placeholderType = functionParamType;
+					paramType = functionParamType;
+				}
+				
 				if (!paramType.isEqual(functionParamType)) {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
@@ -1293,6 +1307,13 @@ public class ContextChecker {
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
 				TYPE paramType = i.parameters.get(a).check(this);
+				
+				/* Apply parameter type if atom is placeholder */
+				if (i.parameters.get(a) instanceof Atom && ((Atom) i.parameters.get(a)).isPlaceholder) {
+					Atom atom = (Atom) i.parameters.get(a);
+					atom.placeholderType = f.parameters.get(a).getType();
+					paramType = f.parameters.get(a).getType();
+				}
 				
 				if (!paramType.isEqual(f.parameters.get(a).getType())) {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
