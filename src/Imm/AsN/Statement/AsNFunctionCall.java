@@ -72,9 +72,7 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Pair<Expression, Integer>> mapping = new ArrayList();
 		
 		for (Expression e : params) {
-			//dec.print(0, true);
-			int wordSize = e.getType().wordsize();
-			if (wordSize == 1 && r < 3) {
+			if (e.getType().wordsize() == 1 && r < 3) {
 				/* Load in register */
 				mapping.add(new Pair(e, r));
 				r++;

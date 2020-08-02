@@ -62,7 +62,7 @@ namespace Map {
 		MapEntry<K, V>* def = resv(sizeof(MapEntry<K, V>));
 		
 		/* Place default value, skip key and padding */
-		*(def + sizeof(K) + (int) __EN_SID + 1) = (void) defValue;
+		*((void) def + sizeof(K) + (int) __EN_SID + 1) = defValue;
 		
 		HashMap<K, V>* map = resv(sizeof(HashMap<K, V>));
 		*map = HashMap<K, V>::(storage, size, def);
@@ -129,7 +129,6 @@ namespace Map {
 		
 			/* Get iterator to go through list */
 			ListNode<MapEntry<K, V>*>* n = l->head;
-			int i = 0;
 			
 			/* Iterate through list, check for match */
 			while (n != null) {
@@ -141,7 +140,6 @@ namespace Map {
 					break;
 				}
 				else {
-					i++;
 					n = n->next;
 				}
 			}
@@ -165,14 +163,12 @@ namespace Map {
 		
 			/* Get iterator to go through list */
 			ListNode<MapEntry<K, V>*>* n = l->head;
-			int i = 0;
 			
 			/* Iterate through list, check for match, and remove */
 			while (n != null) {
 				if (tupleKeyMatcher<K, V>(n->value, &search)) 
 					return n->value->value;
 				else {
-					i++;
 					n = n->next;
 				}
 			}
@@ -230,13 +226,11 @@ namespace Map {
 		
 			/* Get iterator to go through list */
 			ListNode<MapEntry<K, V>>* n = l->head;
-			int i = 0;
 			
 			/* Iterate through list, check for match */
 			while (n != null) {
 				if (tupleKeyMatcher<K, V>(n->value, search)) return true;
 				else {
-					i++;
 					n = n->next;
 				}
 			}
@@ -262,7 +256,6 @@ namespace Map {
 			if (l0 != null) {
 				/* Get iterator to go through list */
 				ListNode<MapEntry<K, V>>* n = l0->head;
-				int i = 0;
 				
 				/* Iterate through list, add elements into list */
 				while (n != null) {
@@ -293,7 +286,6 @@ namespace Map {
 			if (l0 != null) {
 				/* Get iterator to go through list */
 				ListNode<MapEntry<K, V>>* n = l0->head;
-				int i = 0;
 				
 				/* Iterate through list, add elements into list */
 				while (n != null) {

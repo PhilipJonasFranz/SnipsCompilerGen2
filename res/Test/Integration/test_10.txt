@@ -674,8 +674,6 @@ Map.replace_P4:                              /* Function: Map.replace, Provisos:
 /* Get iterator to go through list */
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r3, [r1, #4]                         /* Load field from struct */
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
 /* Iterate through list, check for match */
 Map.replace.L3:                              /* Evaluate condition */
     ldr r1, .POOL8_L8_NULL                   /* Load null address */
@@ -693,14 +691,14 @@ Map.replace.L3:                              /* Evaluate condition */
 /* Reassign value with new tuple */
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r6, r0
+    mov r5, r0
     push { r4 }
     mov r0, #0
     push { r0 }
     ldr r0, [fp, #-4]
     push { r0 }
     mov r0, #3
-    lsl r1, r6, #2
+    lsl r1, r5, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -708,13 +706,11 @@ Map.replace.L3:                              /* Evaluate condition */
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    mov r0, r6                               /* Evaluate Expression */
+    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r6, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     b Map.replace.L4
 Map.replace.L5: 
-    mov r0, r5
-    add r5, r5, #1
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r3, [r1, #4]                         /* Load field from struct */
     b Map.replace.L3
@@ -767,8 +763,6 @@ Map.get_P7:                                  /* Function: Map.get, Provisos: INT
 /* Get iterator to go through list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
 /* Iterate through list, check for match, and remove */
 Map.get.L3:                                  /* Evaluate condition */
     ldr r1, .POOL9_L8_NULL                   /* Load null address */
@@ -789,8 +783,6 @@ Map.get.L3:                                  /* Evaluate condition */
     ldr r0, [r1, #12]                        /* Load field from struct */
     b Map.get.L7
 Map.get.L5: 
-    mov r0, r5
-    add r5, r5, #1
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
     b Map.get.L3
