@@ -10,7 +10,7 @@ int main(int k) {
 TESTCASES
 3
 OUTPUT
-/* --test_23.txt */
+/* --test_00.txt */
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #3                               /* Evaluate Expression */

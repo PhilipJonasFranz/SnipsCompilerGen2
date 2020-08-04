@@ -41,7 +41,7 @@ namespace Map {
 	 */
 	restricted bool tupleKeyMatcher<K, V>(MapEntry<K, V>* t0, MapEntry<K, V>* t1) {
 		for (int i = 0; i < sizeof(K) + 1; i++) {
-			if (!(*((void*) t0 + i) == *((void*) t1 + i))) return false;
+			if (*((void*) t0 + i) != *((void*) t1 + i)) return false;
 		}
 		
 		return true;

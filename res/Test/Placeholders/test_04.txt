@@ -15,7 +15,7 @@ int main(int k) {
 TESTCASES
 6
 OUTPUT
-/* --test_27.txt */
+/* --test_04.txt */
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #2                               /* Evaluate Expression */

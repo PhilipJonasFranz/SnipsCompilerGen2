@@ -23,7 +23,7 @@ TESTCASES
 8 1
 9 0
 OUTPUT
-/* --test_30.txt */
+/* --test_07.txt */
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
