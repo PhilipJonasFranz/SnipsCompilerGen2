@@ -9,6 +9,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -134,7 +135,8 @@ public class AsNFunctionCall extends AsNStatement {
 					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				
 				while (st.getStack().size() != s) st.pop();
-				r.getReg(0).free();
+				
+				r.free(0);
 			}
 		}
 		
@@ -146,20 +148,24 @@ public class AsNFunctionCall extends AsNStatement {
 				
 				/* Leave First Parameter directley in R0 */
 				if (sMap.get(i) > 0) {
-					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+					ASMPushStack push = new ASMPushStack(new RegOp(REG.R0));
+					
+					/* Add Opt flag so optimizer does not clear it */
+					push.optFlags.add(OPT_FLAG.STRUCT_INIT);
+					
+					call.instructions.add(push);
 				}
-				r.getReg(0).free();
+				
+				r.free(0);
 			}
 		}
 		
 		/* Pop Parameters on the stack into the correct registers, 
 		 * 		Parameter for R0 is already located in reg */
-		if (regMapping >= 3) {
+		if (regMapping >= 3) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1), new RegOp(REG.R2)));
-		}
-		else if (regMapping == 2) {
+		else if (regMapping == 2) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
-		}
 		
 		if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {

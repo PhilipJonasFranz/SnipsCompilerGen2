@@ -560,8 +560,8 @@ Map.put_P1:                                  /* Function: Map.put, Provisos: INT
 /* Compute the hash of the key and limit it to the map size */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    mov r1, #1
     push { r0 }
+    mov r1, #1
     sub r0, fp, #4
     lsr r0, r0, #2
     bl Hash.hash                             /* Call Hash.hash */
@@ -637,8 +637,8 @@ Map.replace_P4:                              /* Function: Map.replace, Provisos:
 /* Compute the hash of the key and limit it to the map size */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    mov r1, #1
     push { r0 }
+    mov r1, #1
     sub r0, fp, #4
     lsr r0, r0, #2
     bl Hash.hash                             /* Call Hash.hash */
@@ -675,8 +675,8 @@ Map.replace.L3:                              /* Evaluate condition */
     beq Map.replace.L4
     sub r0, fp, #20                          /* Load parameters */
     lsr r0, r0, #2
-    lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     bl Map.tupleKeyMatcher_P5                /* Call Map.tupleKeyMatcher */
@@ -726,8 +726,8 @@ Map.get_P7:                                  /* Function: Map.get, Provisos: INT
 /* Compute the hash of the key and limit it to the map size */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    mov r1, #1
     push { r0 }
+    mov r1, #1
     sub r0, fp, #4
     lsr r0, r0, #2
     bl Hash.hash                             /* Call Hash.hash */
@@ -764,8 +764,8 @@ Map.get.L3:                                  /* Evaluate condition */
     beq Map.get.L4
     sub r0, fp, #20                          /* Load parameters */
     lsr r0, r0, #2
-    lsl r1, r4, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     bl Map.tupleKeyMatcher_P5                /* Call Map.tupleKeyMatcher */
@@ -803,8 +803,8 @@ Map.remove_P6:                               /* Function: Map.remove, Provisos: 
 /* Compute the hash of the key and limit it to the map size */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    mov r1, #1
     push { r0 }
+    mov r1, #1
     sub r0, fp, #4
     lsr r0, r0, #2
     bl Hash.hash                             /* Call Hash.hash */
@@ -843,8 +843,8 @@ Map.remove.L3:                               /* Evaluate condition */
     beq Map.remove.L4
     sub r0, fp, #20                          /* Load parameters */
     lsr r0, r0, #2
-    lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     bl Map.tupleKeyMatcher_P5                /* Call Map.tupleKeyMatcher */

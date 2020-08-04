@@ -189,6 +189,9 @@ public class Scanner {
 			if (progress != null) progress.incProgress((double) i / input.size());
 		}
 		
+		/* Possibly badly formed code syntax, for example not closed comment would result in comment finish state */
+		if (sFSM.state != ACC_STATE.NONE) throw new SNIPS_EXC("Bad Syntax, Lexer finished in state: " + sFSM.state.toString());
+		
 		if (progress != null) progress.incProgress(1);
 		
 		LinkedList<Token> tokens = sFSM.tokens;

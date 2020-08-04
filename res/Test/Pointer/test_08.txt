@@ -43,9 +43,9 @@ main:                                        /* Function: main */
     mov r0, #2
     mov r1, #1
     stmfd sp!, {r0, r1}
-    mov r0, #5
     push { r4 }
     push { r3 }
+    mov r0, #5
     push { r0 }
     sub r0, fp, #16
     lsr r0, r0, #2

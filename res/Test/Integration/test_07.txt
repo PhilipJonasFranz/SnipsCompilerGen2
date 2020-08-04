@@ -266,8 +266,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #3
     push { r0 }
-    mov r0, r4
     push { r5 }
+    mov r0, r4
     ldmfd sp!, {r1, r2}
     bl __mat_mult                            /* Call __mat_mult */
     add r0, r0, r3

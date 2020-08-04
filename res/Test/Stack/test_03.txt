@@ -41,8 +41,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #12]
     push { r0 }
-    mov r0, r3
     push { r5 }
+    mov r0, r3
     ldmfd sp!, {r1, r2}
     bl foo                                   /* Call foo */
     add r0, r4, r0

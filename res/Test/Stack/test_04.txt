@@ -57,9 +57,9 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #8]
     push { r0 }
-    mov r0, r3
     push { r5 }
     push { r4 }
+    mov r0, r3
     ldmfd sp!, {r1, r2}
     bl sqsum                                 /* Call sqsum */
     mov sp, fp

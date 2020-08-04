@@ -335,8 +335,8 @@ Queue.enqueue.L0:
 /* Increment head index */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #20]                        /* Load field from struct */
     add r0, r1, #1
     pop { r1 }
@@ -389,8 +389,8 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
     ldr r0, [r1, #16]                        /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #24]                        /* Load field from struct */
     add r0, r1, #1
     pop { r1 }

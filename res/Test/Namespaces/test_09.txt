@@ -2,10 +2,21 @@ SOURCE
 #include<linked_list.sn>
 #include<binary_tree.sn>
 
+int relation(int x, int y) {
+	return (x == y)? 0 : ((x < y)? -1 : 1);
+}
+
 int main() {
 	LinkedList<int>* list = List::create<int>(0);
 	
 	add<int>(list, 10);
+	
+	TreeNode<int>* root = Tree::create<int>(10);
+	
+	Tree::insert<int>(root, relation, 5);
+	Tree::insert<int>(root, relation, 12);
+	
+	Tree::delete<int>(root, relation, 12);
 	
 	return get<int>(list, 0);
 }
@@ -31,7 +42,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L4_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L7_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -112,7 +123,7 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L4_HEAP_START: .word HEAP_START
+.POOL0_L7_HEAP_START: .word HEAP_START
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -163,8 +174,8 @@ List.create_P0:                              /* Function: List.create, Provisos:
     mov r4, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL1_L3_NULL                   /* Load null address */
-    ldr r1, .POOL1_L3_NULL                   /* Load null address */
+    ldr r0, .POOL1_L6_NULL                   /* Load null address */
+    ldr r1, .POOL1_L6_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     lsl r1, r4, #2
@@ -177,7 +188,7 @@ List.create_P0:                              /* Function: List.create, Provisos:
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4, pc}
-.POOL1_L3_NULL: .word NULL
+.POOL1_L6_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
@@ -191,7 +202,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL2_L3_NULL                   /* Load null address */
+    ldr r0, .POOL2_L6_NULL                   /* Load null address */
     push { r0 }
     mov r0, #1
     lsl r1, r5, #2
@@ -202,7 +213,7 @@ List.add_P1:                                 /* Function: List.add, Provisos: IN
     str r0, [r1, #8]
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L3_NULL                   /* Load null address */
+    ldr r1, .POOL2_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -220,11 +231,11 @@ List.add.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL2_L3_NULL: .word NULL
+.POOL2_L6_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
-List.get_P2:                                 /* Function: List.get, Provisos: INT */
+List.get_P5:                                 /* Function: List.get, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
@@ -242,7 +253,7 @@ List.get.L3:                                 /* Evaluate condition */
     beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L3_NULL                   /* Load null address */
+    ldr r1, .POOL3_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -261,7 +272,303 @@ List.get.L4:
 List.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL3_L3_NULL: .word NULL
+.POOL3_L6_NULL: .word NULL
+    
+/* [BASE-PACKAGE] */
+/*  */
+/* This package contains the utility to create a binary */
+/* search tree. */
+/* A tree node that has a left and right child and holds a value. */
+/* Create a new Tree, initialize both childs to 0, set root value */
+/* to given value. Return a pointer to the root. */
+Tree.create_P2:                              /* Function: Tree.create, Provisos: INT */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
+    mov r3, r0
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r4, r0
+/* Initialize the root with null pointers and the given value */
+    push { r3 }
+    ldr r0, .POOL4_L6_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
+    stmfd sp!, {r0, r1}
+    mov r0, #3
+    lsl r1, r4, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, r4                               /* Evaluate Expression */
+    ldmfd sp!, {r3, r4, pc}
+.POOL4_L6_NULL: .word NULL
+    
+Tree.insert_P3:                              /* Function: Tree.insert, Provisos: INT */
+    sub sp, sp, #24
+    stmea sp, {r3-r7, lr}
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r6, r0
+/* Initialize new node with null pointers and given value */
+    push { r5 }
+    ldr r0, .POOL5_L6_NULL                   /* Load null address */
+    ldr r1, .POOL5_L6_NULL                   /* Load null address */
+    stmfd sp!, {r0, r1}
+    mov r0, #3
+    lsl r1, r6, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, r3                               /* Evaluate Expression */
+    mov r7, r3
+Tree.insert.L1:                              /* Evaluate condition */
+    ldr r1, .POOL5_L6_NULL                   /* Load null address */
+    cmp r7, r1
+    beq Tree.insert.L2
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    mov r1, r5
+    add lr, pc, #8
+    mov pc, r4
+    cmp r0, #1
+    bne Tree.insert.L4
+/* Left leaf is 0, insert here */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL5_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    bne Tree.insert.L6
+    lsl r1, r7, #2                           /* Convert to bytes */
+    str r6, [r1, #4]                         /* Store value to struct field */
+    mov r0, r6                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+Tree.insert.L6: 
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r7, [r1, #4]                         /* Load field from struct */
+    b Tree.insert.L3
+Tree.insert.L4: 
+/* Right leaf is 0, insert here */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldr r1, .POOL5_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    bne Tree.insert.L8
+    lsl r1, r7, #2                           /* Convert to bytes */
+    str r6, [r1, #8]                         /* Store value to struct field */
+    mov r0, r6                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+Tree.insert.L8: 
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r7, [r1, #8]                         /* Load field from struct */
+Tree.insert.L3: 
+    b Tree.insert.L1
+Tree.insert.L2: 
+    ldr r0, .POOL5_L6_NULL                   /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+.POOL5_L6_NULL: .word NULL
+    
+Tree.delete_P4:                              /* Function: Tree.delete, Provisos: INT */
+    sub sp, sp, #24
+    stmea sp, {r3-r7, lr}
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+/* Found leaf */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    bne Tree.delete.L1
+    ldr r0, .POOL6_L6_NULL                   /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+Tree.delete.L1: 
+/* Found value to delete */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    mov r1, r5
+    add lr, pc, #8
+    mov pc, r4
+    cmp r0, #0
+    bne Tree.delete.L3
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    moveq r0, #1
+    movne r0, #0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    moveq r0, #1
+    movne r0, #0
+    mov r1, r0
+    pop { r0 }
+    adds r1, r1, #0
+    movne r1, #1
+    cmp r0, #0
+    movne r0, r1
+    moveq r0, #0
+    cmp r0, #0
+    beq Tree.delete.L4
+    ldr r0, .POOL6_L6_NULL                   /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+Tree.delete.L4: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    movne r0, #1
+    moveq r0, #0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    moveq r0, #1
+    movne r0, #0
+    mov r1, r0
+    pop { r0 }
+    adds r1, r1, #0
+    movne r1, #1
+    cmp r0, #0
+    movne r0, r1
+    moveq r0, #0
+    cmp r0, #0
+    beq Tree.delete.L6
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldmfd sp!, {r3-r7, pc}
+Tree.delete.L6: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    moveq r0, #1
+    movne r0, #0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    movne r0, #1
+    moveq r0, #0
+    mov r1, r0
+    pop { r0 }
+    adds r1, r1, #0
+    movne r1, #1
+    cmp r0, #0
+    movne r0, r1
+    moveq r0, #0
+    cmp r0, #0
+    beq Tree.delete.L7
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldmfd sp!, {r3-r7, pc}
+Tree.delete.L7: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r6, [r1, #12]                        /* Load field from struct */
+    mov r7, r3
+Tree.delete.L9:                              /* Evaluate condition */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL6_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    beq Tree.delete.L10
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]
+    lsl r1, r1, #2
+    ldr r6, [r1, #12]                        /* Load field from struct */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r7, [r1, #4]                         /* Load field from struct */
+    b Tree.delete.L9
+Tree.delete.L10: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    str r6, [r10, r0, lsl #2]
+    push { r5 }
+    push { r4 }
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldmfd sp!, {r1, r2}
+    bl Tree.delete_P4                        /* Call Tree.delete */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    ldmfd sp!, {r3-r7, pc}
+Tree.delete.L3: 
+/* Value to delete is further down in subtree */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    mov r1, r5
+    add lr, pc, #8
+    mov pc, r4
+    cmp r0, #1
+    bne Tree.delete.L12
+    push { r5 }
+    push { r4 }
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldmfd sp!, {r1, r2}
+    bl Tree.delete_P4                        /* Call Tree.delete */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    b Tree.delete.L11
+Tree.delete.L12: 
+    push { r5 }
+    push { r4 }
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldmfd sp!, {r1, r2}
+    bl Tree.delete_P4                        /* Call Tree.delete */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    push { r0 }
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+Tree.delete.L11: 
+    mov r0, r3                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+.POOL6_L6_NULL: .word NULL
+    
+lambda_relation:                             /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+relation:                                    /* Function: relation */
+    push { r3, r4 }
+    mov r3, r0
+    mov r4, r1
+    cmp r0, r1
+    bne relation.L0
+    mov r0, #0
+    b relation.L3
+relation.L0: 
+    cmp r3, r4
+    bge relation.L2
+    mvn r0, #0
+    b relation.L3
+relation.L2: 
+    mov r0, #1
+relation.L3: 
+    ldmfd sp!, {r3, r4}
+    bx lr
     
 main:                                        /* Function: main */
     push { lr }
@@ -271,8 +578,38 @@ main:                                        /* Function: main */
     mov r1, #10
     mov r0, r3
     bl List.add_P1                           /* Call List.add */
+    mov r0, #10                              /* Evaluate Expression */
+    bl Tree.create_P2                        /* Call Tree.create */
+    mov r4, r0
+    mov r0, #5                               /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
+    mov r0, r4
+    ldmfd sp!, {r1, r2}
+    bl Tree.insert_P3                        /* Call Tree.insert */
+    mov r0, #12                              /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
+    mov r0, r4
+    ldmfd sp!, {r1, r2}
+    bl Tree.insert_P3                        /* Call Tree.insert */
+    mov r0, #12                              /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
+    mov r0, r4
+    ldmfd sp!, {r1, r2}
+    bl Tree.delete_P4                        /* Call Tree.delete */
     mov r1, #0
     mov r0, r3
-    bl List.get_P2                           /* Call List.get */
+    bl List.get_P5                           /* Call List.get */
     pop { pc }
     

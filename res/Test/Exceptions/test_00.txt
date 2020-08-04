@@ -88,9 +88,9 @@ main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     push { sp }
     push { r0 }
+    push { r3 }
     sub r0, fp, #12
     lsr r0, r0, #2
-    push { r3 }
     ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     cmp r12, #0

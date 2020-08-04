@@ -268,7 +268,6 @@ namespace Map {
 		return list;
 	}
 	
-	
 	/*
 	 * Retrieves all stored values from the HashMap sorted by hash value ascending,
 	 * and adds them into a single linked list and returns that list.

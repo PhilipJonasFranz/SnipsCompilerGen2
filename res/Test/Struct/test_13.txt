@@ -1,14 +1,18 @@
 SOURCE
 #include<binary_tree.sn>
 
+int relation(int x, int y) {
+	return (x == y)? 0 : ((x < y)? -1 : 1);
+}
+
 int main(int r, int d0, int d1) {
 	TreeNode<int>* root = create<int>(10);
-	insert<int>(root, 5);
-	insert<int>(root, 12);
-	insert<int>(root, 11);
-	insert<int>(root, 15);
-	insert<int>(root, 7);
-	insert<int>(root, 2);
+	insert<int>(root, relation, 5);
+	insert<int>(root, relation, 12);
+	insert<int>(root, relation, 11);
+	insert<int>(root, relation, 15);
+	insert<int>(root, relation, 7);
+	insert<int>(root, relation, 2);
 
 	if (r == 1) return root->value;
 	else {

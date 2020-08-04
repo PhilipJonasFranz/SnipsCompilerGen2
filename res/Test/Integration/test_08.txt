@@ -529,8 +529,8 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-36]                       /* Load field from struct */
     push { r0 }
     mov r0, #1
-    lsl r1, r4, #2                           /* Convert to bytes */
     push { r0 }
+    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     ldmfd sp!, {r1, r2}
     bl GameObject.Items.set                  /* Call GameObject.Items.set */

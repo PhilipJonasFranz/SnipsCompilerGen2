@@ -26,7 +26,7 @@ namespace Tree {
 		return tree;
 	}
 	
-	shared TreeNode<T>* insert<T>(TreeNode<T>* root, T value) {
+	shared TreeNode<T>* insert<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
 		TreeNode<T>* new = resv(sizeof(TreeNode<T>));
 		
 		/* Initialize new node with null pointers and given value */
@@ -34,7 +34,7 @@ namespace Tree {
 	
 		TreeNode<T>* head = root;
 		while (head != null) {
-			if (head->value > value) {
+			if (pred(head->value, value) == 1) {
 				/* Left leaf is 0, insert here */
 				if (head->left == null) {
 					head->left = new;
@@ -54,4 +54,57 @@ namespace Tree {
 		
 		return null;
 	}
+	
+	shared bool contains<T>(TreeNode<T>* n, func (T, T) -> int pred, T value) {
+		if (n == null) return false;
+		else {
+			if (pred(n->value, value) == 0) return true;
+			else {
+				if (pred(n->value, value) == 1) 
+					return contains<T>(n->left, pred, value);
+				else 
+					return contains<T>(n->right, pred, value);
+			}
+		}
+	}
+	
+	shared TreeNode<T>* delete<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
+		/* Found leaf */
+		if (root == null) return null;
+		else {
+			/* Found value to delete */
+			if (pred(root->value, value) == 0) {
+				if (root->left == null && root->right == null) 
+					return null;
+				else if (root->left != null && root->right == null) {
+					return root->left;
+				}
+				else if (root->left == null && root->right != null) {
+					return root->right;
+				}
+				else {
+					T min = root->value;
+					
+					TreeNode<T>* n = root;
+					while (n->left != null) {
+						min = n->left->value;
+						n = n->left;
+					}
+					
+					*root->value = min;
+					*root->right = delete<T>(root->right, pred, value);
+				}
+			}
+			else {
+				/* Value to delete is further down in subtree */
+				if (pred(root->value, value) == 1) 
+					*root->left = delete<T>(root->left, pred, value);
+				else 
+					*root->right = delete<T>(root->right, pred, value);
+					
+				return root;
+			}
+		}
+	}
+	
 } 
