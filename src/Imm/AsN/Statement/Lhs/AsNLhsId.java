@@ -37,6 +37,7 @@ import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Statement.AsNStatement;
+import Res.Const;
 
 public class AsNLhsId extends AsNStatement {
 
@@ -60,7 +61,7 @@ public class AsNLhsId extends AsNStatement {
 		else if (lhs instanceof StructSelectLhsId) {
 			id = AsNStructSelectLhsId.cast((StructSelectLhsId) lhs, r, map, st);
 		}
-		else throw new CGEN_EXC(lhs.getSource(), "No injection cast available for " + lhs.getClass().getName());
+		else throw new CGEN_EXC(lhs.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, lhs.getClass().getName());
 	
 		lhs.castedNode = id;
 		return id;

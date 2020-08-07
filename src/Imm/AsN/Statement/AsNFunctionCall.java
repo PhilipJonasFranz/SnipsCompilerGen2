@@ -37,6 +37,7 @@ import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.TYPE;
+import Res.Const;
 import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
@@ -46,15 +47,13 @@ public class AsNFunctionCall extends AsNStatement {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
 		
-		if (fc.anonTarget == null) {
+		if (fc.anonTarget == null) 
 			/* 
 			 * When a function has provisos, the order cannot be checked.
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
-			if (fc.calledFunction.castedNode == null) {
-				throw new SNIPS_EXC("Function " + fc.calledFunction.path.build() + " is undefined at this point, " + fc.getSource().getSourceMarker());
-			}
-		}
+			if (fc.calledFunction.castedNode == null) 
+				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path.build(), fc.getSource().getSourceMarker());
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
@@ -178,7 +177,7 @@ public class AsNFunctionCall extends AsNStatement {
 					/* Move address of function into pc */
 					call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(loc)));
 				}
-				else throw new SNIPS_EXC("Anon call loader not implemented");
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			}
 			else {
 				if (r.declarationLoaded(f.lambdaDeclaration)) {
@@ -190,7 +189,7 @@ public class AsNFunctionCall extends AsNStatement {
 					/* Move address of function into pc */
 					call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(loc)));
 				}
-				else throw new SNIPS_EXC("Lambda Declaration loader not implemented");
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			}
 		}
 		else {

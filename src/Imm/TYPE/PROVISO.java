@@ -1,6 +1,7 @@
 package Imm.TYPE;
 
 import Exc.SNIPS_EXC;
+import Res.Const;
 import Snips.CompilerDriver;
 
 public class PROVISO extends TYPE<Void> {
@@ -84,7 +85,7 @@ public class PROVISO extends TYPE<Void> {
 	public int wordsize() {
 		if (this.context != null) return this.context.wordsize();
 		else {
-			throw new SNIPS_EXC("INTERNAL : Attempted to get word size of PROVISO " + this.placeholderName + " without context!");
+			throw new SNIPS_EXC(Const.ATTEMPTED_TO_GET_WORDSIZE_OF_PROVISO_WITHOUT_CONTEXT, this.placeholderName);
 		}
 	}
 	
@@ -101,7 +102,7 @@ public class PROVISO extends TYPE<Void> {
 	public TYPE provisoFree() {
 		if (this.hasContext())
 			return this.getContext().clone();
-		else throw new SNIPS_EXC("Cannot free contextless proviso: " + this.placeholderName);
+		else throw new SNIPS_EXC(Const.CANNOT_FREE_CONTEXTLESS_PROVISO, this.placeholderName);
 	}
 
 	public TYPE remapProvisoName(String name, TYPE newType) {

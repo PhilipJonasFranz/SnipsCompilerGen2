@@ -11,6 +11,7 @@ import Imm.AST.Expression.Boolean.Not;
 import Imm.AsN.Expression.Arith.AsNBitNot;
 import Imm.AsN.Expression.Arith.AsNUnaryMinus;
 import Imm.AsN.Expression.Boolean.AsNNot;
+import Res.Const;
 
 public abstract class AsNUnaryExpression extends AsNExpression {
 
@@ -27,7 +28,7 @@ public abstract class AsNUnaryExpression extends AsNExpression {
 		else if (u instanceof BitNot) {
 			node = AsNBitNot.cast((BitNot) u, r, map, st);
 		}
-		else throw new CGEN_EXC(u.getSource(), "No injection cast available for " + u.getClass().getName());
+		else throw new CGEN_EXC(u.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, u.getClass().getName());
 		
 		u.castedNode = node;
 		return node;

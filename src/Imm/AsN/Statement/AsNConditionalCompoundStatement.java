@@ -10,6 +10,7 @@ import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.WhileStatement;
+import Res.Const;
 
 public abstract class AsNConditionalCompoundStatement extends AsNCompoundStatement {
 
@@ -33,7 +34,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 		else if (s instanceof ForStatement) {
 			node = AsNForStatement.cast((ForStatement) s, r, map, st);
 		}
-		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());	
+		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());	
 	
 		s.castedNode = node;
 		return node;

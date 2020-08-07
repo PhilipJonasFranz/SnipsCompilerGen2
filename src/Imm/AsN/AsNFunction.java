@@ -41,6 +41,7 @@ import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Res.Const;
 import Util.Pair;
 
 public class AsNFunction extends AsNCompoundStatement {
@@ -478,7 +479,7 @@ public class AsNFunction extends AsNCompoundStatement {
 							stackOp.op1 = new ImmOp(op.patchedValue, op);
 						}
 					}
-					else throw new CGEN_EXC(this.source.getSource(), "Cannot patch non-patchable imm operand!");
+					else throw new CGEN_EXC(this.source.getSource(), Const.CANNOT_PATCH_NON_PATCHABLE_IMM_OP);
 				}
 			}
 			else if (ins instanceof ASMBinaryData) {

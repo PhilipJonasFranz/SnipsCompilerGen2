@@ -41,6 +41,7 @@ import Imm.AsN.Expression.Boolean.AsNCmp;
 import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Res.Const;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
@@ -91,7 +92,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		else if (e instanceof BitXor) {
 			node = AsNBitXor.cast((BitXor) e, r, map, st);
 		}
-		else throw new CGEN_EXC(e.getSource(), "No injection cast available for " + e.getClass().getName());
+		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
 	
 		e.castedNode = node;
 		return node;

@@ -5,6 +5,7 @@ import java.util.List;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Par.Token;
 import Par.Token.TokenType;
+import Res.Const;
 import Util.Logging.Message;
 
 public abstract class TYPE<T> {
@@ -51,7 +52,7 @@ public abstract class TYPE<T> {
 			
 			if (t == null) {
 				t = new PROVISO(token.spelling);
-				buffered.add(new Message("Unknown Type '" + token.spelling + "', creating Proviso", Message.Type.WARN, true));
+				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling), Message.Type.WARN, true));
 			}
 			
 			return t;

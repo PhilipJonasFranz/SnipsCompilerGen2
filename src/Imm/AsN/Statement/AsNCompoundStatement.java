@@ -53,6 +53,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
+import Res.Const;
 import Util.Pair;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
@@ -70,7 +71,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (s instanceof ForEachStatement) {
 			node = AsNForEachStatement.cast((ForEachStatement) s, r, map, st);
 		}
-		else throw new CGEN_EXC(s.getSource(), "No injection cast available for " + s.getClass().getName());	
+		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());	
 		
 		s.castedNode = node;
 		return node;
@@ -240,7 +241,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
 			return false;
 		}
-		else throw new CGEN_EXC(s.getSource(), "Cannot check references for " + s.getClass().getName());
+		else throw new CGEN_EXC(s.getSource(), Const.CANNOT_CHECK_REFERENCES, s.getClass().getName());
 	}
 	
 	/**
@@ -337,7 +338,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
 		}
-		else throw new CGEN_EXC(e.getSource(), "Cannot check references for " + e.getClass().getName());
+		else throw new CGEN_EXC(e.getSource(), Const.CANNOT_CHECK_REFERENCES, e.getClass().getName());
 	}
 	
 } 

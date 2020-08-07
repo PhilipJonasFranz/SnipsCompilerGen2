@@ -14,6 +14,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.InlineCall;
 import Imm.AsN.Statement.AsNFunctionCall;
 import Imm.AsN.Statement.AsNSignalStatement;
+import Res.Const;
 
 public class AsNInlineCall extends AsNExpression {
 
@@ -29,7 +30,7 @@ public class AsNInlineCall extends AsNExpression {
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
 			if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead) {
-				throw new SNIPS_EXC("Function " + ic.calledFunction.path.build() + " is undefined at this point, " + ic.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, ic.calledFunction.path.build(), ic.getSource().getSourceMarker());
 			}
 		}
 		
