@@ -273,10 +273,10 @@ public class ContextChecker {
 		
 		/* Exception types are not watched or signaled */
 		if (!this.signalStack.peek().isEmpty()) {
-			String unwatched = "Unwatched exceptions for function " + f.path.build() + ": ";
+			String unwatched = "";
 			for (TYPE t : this.signalStack.peek()) unwatched += t.provisoFree().typeString() + ", ";
 			unwatched = unwatched.substring(0, unwatched.length() - 2);
-			throw new CTX_EXC(f.getSource(), unwatched);
+			throw new CTX_EXC(f.getSource(), Const.UNWATCHED_EXCEPTIONS_FOR_FUNCTION, f.path.build(), unwatched);
 		}
 		
 		this.exceptionEscapeStack.pop();
@@ -879,7 +879,7 @@ public class ContextChecker {
 			throw new CTX_EXC(s.condition.getSource(), "Switch Condition type " + type.provisoFree().typeString() + " has to be a primitive type");
 		
 		if (s.defaultStatement == null) 
-			throw new CTX_EXC(s.getSource(), "Missing default statement");
+			throw new CTX_EXC(s.getSource(), Const.MISSING_DEFAULT_STATEMENT);
 		
 		for (CaseStatement c : s.cases) c.check(this);
 		s.defaultStatement.check(this);
@@ -944,16 +944,16 @@ public class ContextChecker {
 			throw new CTX_EXC(t.condition.getSource(), "Ternary condition has to be of type BOOL, actual " + type.provisoFree().typeString());
 		
 		if (t.condition instanceof ArrayInit) 
-			throw new CTX_EXC(t.condition.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(t.condition.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		TYPE t0 = t.leftOperand.check(this);
 		TYPE t1 = t.rightOperand.check(this);
 		
 		if (t.leftOperand instanceof ArrayInit) 
-			throw new CTX_EXC(t.leftOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(t.leftOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (t.rightOperand instanceof ArrayInit) 
-			throw new CTX_EXC(t.rightOperand.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(t.rightOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (!t0.isEqual(t1)) 
 			throw new CTX_EXC(t.condition.getSource(), "Both results of ternary operation have to be of the same type, " + t0.provisoFree().typeString() + " vs " + t1.provisoFree().typeString());
@@ -967,16 +967,16 @@ public class ContextChecker {
 		TYPE right = b.getRight().check(this);
 		
 		if (left instanceof NULL) 
-			throw new CTX_EXC(b.left.getSource(), "Cannot perform arithmetic on null");
+			throw new CTX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (right instanceof NULL) 
-			throw new CTX_EXC(b.right.getSource(), "Cannot perform arithmetic on null");
+			throw new CTX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (b.left instanceof ArrayInit) 
-			throw new CTX_EXC(b.left.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(b.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (b.right instanceof ArrayInit) 
-			throw new CTX_EXC(b.right.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(b.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (left.wordsize() > 1) 
 			throw new CTX_EXC(b.left.getSource(), "Can only apply to primitive or pointer, actual " + left.provisoFree().typeString());
@@ -987,13 +987,13 @@ public class ContextChecker {
 		
 		if (left instanceof POINTER) {
 			if (!(right.getCoreType() instanceof INT)) 
-				throw new CTX_EXC(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + right.provisoFree().typeString());
+				throw new CTX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), right.provisoFree().typeString());
 			
 			b.setType(left);
 		}
 		else if (right instanceof POINTER) {
 			if (!(left.getCoreType() instanceof INT)) 
-				throw new CTX_EXC(b.getSource(), "Pointer arithmetic is only supported for " + new INT().typeString() + ", actual " + left.provisoFree().typeString());
+				throw new CTX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), left.provisoFree().typeString());
 			
 			b.setType(left);
 		}
@@ -1014,10 +1014,10 @@ public class ContextChecker {
 		TYPE right = b.getRight().check(this);
 		
 		if (!(left instanceof BOOL)) 
-			throw new CTX_EXC(b.left.getSource(), "Expected " + new BOOL().typeString() + ", actual " + left.provisoFree().typeString());
+			throw new CTX_EXC(b.left.getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), left.provisoFree().typeString());
 		
 		if (!(right instanceof BOOL)) 
-			throw new CTX_EXC(b.right.getSource(), "Expected " + new BOOL().typeString() + ", actual " + right.provisoFree().typeString());
+			throw new CTX_EXC(b.right.getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), right.provisoFree().typeString());
 		
 		b.setType(left);
 		return b.getType();
@@ -1032,7 +1032,7 @@ public class ContextChecker {
 		TYPE t = b.getOperand().check(this);
 		
 		if (!(t instanceof BOOL)) 
-			throw new CTX_EXC(b.getOperand().getSource(), "Expected bool, actual " + t.provisoFree().typeString());
+			throw new CTX_EXC(b.getOperand().getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), t.provisoFree().typeString());
 		
 		b.setType(t);
 		return b.getType();
@@ -1042,10 +1042,10 @@ public class ContextChecker {
 		TYPE op = u.getOperand().check(this);
 		
 		if (op instanceof NULL) 
-			throw new CTX_EXC(u.getOperand().getSource(), "Cannot perform arithmetic on null");
+			throw new CTX_EXC(u.getOperand().getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (u.getOperand() instanceof ArrayInit) 
-			throw new CTX_EXC(u.getOperand().getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(u.getOperand().getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (u instanceof BitNot && op instanceof PRIMITIVE) {
 			u.setType(op);
@@ -1055,7 +1055,7 @@ public class ContextChecker {
 			u.setType(op);
 			return u.getType();
 		}
-		else throw new CTX_EXC(u.getSource(), "Unknown Expression: " + u.getClass().getName());
+		else throw new CTX_EXC(u.getSource(), Const.UNKNOWN_EXPRESSION, u.getClass().getName());
 	}
 	
 	public TYPE checkCompare(Compare c) throws CTX_EXC {
@@ -1063,10 +1063,10 @@ public class ContextChecker {
 		TYPE right = c.getRight().check(this);
 		
 		if (c.left instanceof ArrayInit) 
-			throw new CTX_EXC(c.left.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(c.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (c.right instanceof ArrayInit) 
-			throw new CTX_EXC(c.right.getSource(), "Structure Init can only be a sub expression of structure init");
+			throw new CTX_EXC(c.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (left.isEqual(right)) {
 			c.setType(new BOOL());
@@ -1273,7 +1273,7 @@ public class ContextChecker {
 		else {
 			for (int a = 0; a < i.parameters.size(); a++) {
 				if (i.parameters.get(a) instanceof ArrayInit) 
-					throw new CTX_EXC(i.getSource(), "Structure Init can only be a sub expression of structure init");
+					throw new CTX_EXC(i.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 				
 				i.parameters.get(a).check(this);
 			}
@@ -1318,7 +1318,7 @@ public class ContextChecker {
 			
 			return i.getType();
 		}
-		else throw new CTX_EXC(i.getSource(), "Unknown variable: " + i.path.build());
+		else throw new CTX_EXC(i.getSource(), Const.UNKNOWN_VARIABLE, i.path.build());
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXC {
@@ -1326,7 +1326,7 @@ public class ContextChecker {
 		/* If not already linked, find referenced function */
 		Function lambda = (r.origin != null)? r.origin : this.findFunction(r.path, r.getSource(), true);
 		if (lambda == null) 
-			throw new CTX_EXC(r.getSource(), "Unknown predicate: " + r.path.build());
+			throw new CTX_EXC(r.getSource(), Const.UNKNOWN_PREDICATE, r.path.build());
 		
 		/* Provided number of provisos does not match number of provisos of lambda */
 		if (lambda.provisosTypes.size() != r.proviso.size()) 
@@ -1602,7 +1602,7 @@ public class ContextChecker {
 		REG reg0 = RegOp.convertStringToReg(reg);
 		
 		if (reg0 == null) 
-			throw new CTX_EXC(a.getSource(), "Unknown register: " + reg);
+			throw new CTX_EXC(a.getSource(), Const.UNKNOWN_REGISTER, reg);
 		else a.reg = reg0;
 		
 		return a.getType();
@@ -1667,14 +1667,14 @@ public class ContextChecker {
 					else {
 						if (!mapped.typeString().equals(map0.typeString())) 
 							/* Found two possible types for proviso, abort */
-							throw new CTX_EXC(source, "Multiple auto-maps for proviso '" + prov.placeholderName + "': " + mapped.provisoFree().typeString() + ", provided by arg " + (ind + 1) + " vs " + map0.provisoFree().typeString() + ", provided by arg " + (a + 1));
+							throw new CTX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree().typeString(), ind + 1, map0.provisoFree().typeString(), a + 1);
 					}
 				}
 			}
 			
 			if (mapped == null) 
 				/* None of the types held the searched proviso, proviso cannot be auto-ed, abort. */
-				throw new CTX_EXC(source, "Cannot auto-map proviso '" + prov.provisoFree().typeString() + "', not used by parameter");
+				throw new CTX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov.provisoFree().typeString());
 			
 			foundMapping.add(mapped.provisoFree().clone());
 		}
@@ -1726,18 +1726,18 @@ public class ContextChecker {
 			if (!currentPath.startsWith(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message("Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build() + " at " + source.getSourceMarker(), Message.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), Message.Type.WARN, true));
 				}
-				else throw new CTX_EXC(source, "Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build());
+				else throw new CTX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
 			}
 		}
 		else if (mod == MODIFIER.EXCLUSIVE) {
 			if (!currentPath.equals(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message("Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build() + " at " + source.getSourceMarker(), Message.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), Message.Type.WARN, true));
 				}
-				else throw new CTX_EXC(source, "Modifier violation: " + path.build() + " from " + this.currentFunction.peek().path.build());
+				else throw new CTX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
 			}
 		}
 	}
@@ -1833,7 +1833,7 @@ public class ContextChecker {
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
 				
-				throw new CTX_EXC(source, "Multiple matches for " + ((isPredicate)? "predicate" : "function") + " '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+				throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path.build(), s);
 			}
 		}
 		else throw new CTX_EXC(source, "Unknown " + ((isPredicate)? "predicate" : "function") + " '" + path.build() + "'");
@@ -1898,7 +1898,7 @@ public class ContextChecker {
 		
 		/* Neither regular function or predicate was found, undefined */
 		if (f == null && anonTarget == null) 
-			throw new CTX_EXC(source, "Undefined function or predicate '" + path.build() + "'");
+			throw new CTX_EXC(source, Const.UNDEFINED_FUNCTION_OR_PREDICATE, path.build() + "'");
 		
 		/* Write back anon target and provisos */
 		if (i instanceof InlineCall) {

@@ -91,6 +91,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
@@ -137,7 +138,7 @@ public class Parser {
 	public Parser(List tokens, ProgressMessage progress) throws SNIPS_EXC {
 		if (tokens == null) {
 			this.progress.abort();
-			throw new SNIPS_EXC("SNIPS_PARSE -> Tokens are null!");
+			throw new SNIPS_EXC(Const.TOKENS_ARE_NULL);
 		}
 		tokenStream = tokens;
 		
@@ -1098,7 +1099,7 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			this.progress.abort();
-			throw new SNIPS_EXC("Got '" + current.spelling + "', check for misspelled types or tokens, " + current.getSource().getSourceMarker());
+			throw new SNIPS_EXC(Const.CHECK_FOR_MISSPELLED_TYPES, current.spelling , current.getSource().getSourceMarker());
 		}
 		else {
 			this.progress.abort();
@@ -1193,7 +1194,7 @@ public class Parser {
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
 				this.progress.abort();
-				throw new SNIPS_EXC(new CTX_EXC(source, "Expected STRUCT type, got " + type.typeString()).getMessage());
+				throw new SNIPS_EXC(new CTX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type.typeString()).getMessage());
 			}
 			
 			accept(TokenType.COLON);
@@ -1664,7 +1665,7 @@ public class Parser {
 				
 				if (current.type != TokenType.ENUMLIT) {
 					this.progress.abort();
-					throw new SNIPS_EXC("The expression '" + current.spelling + "' is not a known field of the enum " + path.build() + ", " + source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path.build(), source.getSourceMarker());
 				}
 				
 				/* Actual enum field value */
@@ -1675,7 +1676,7 @@ public class Parser {
 				
 				if (def == null) {
 					this.progress.abort();
-					throw new SNIPS_EXC("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
 				}
 				
 				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
@@ -1845,7 +1846,7 @@ public class Parser {
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC("Multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
 	
@@ -1872,7 +1873,7 @@ public class Parser {
 			for (EnumTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC("Multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
 	
@@ -1935,7 +1936,7 @@ public class Parser {
 			/* Nothing found, error */
 			if (enu == null && def == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC("Unknown struct or enum type '" + path.build() + "', " + token.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM, path.build(), token.getSource().getSourceMarker());
 			}
 		}
 		

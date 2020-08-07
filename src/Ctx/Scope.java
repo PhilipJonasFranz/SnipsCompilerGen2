@@ -135,7 +135,7 @@ public class Scope {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_FIELD, path.build(), s);
+						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
 					}
 				}
 				else {

@@ -8,6 +8,7 @@ import java.util.List;
 import Exc.SNIPS_EXC;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
+import Res.Const;
 import Util.Source;
 import Util.Logging.ProgressMessage;
 
@@ -190,7 +191,7 @@ public class Scanner {
 		}
 		
 		/* Possibly badly formed code syntax, for example not closed comment would result in comment finish state */
-		if (sFSM.state != ACC_STATE.NONE) throw new SNIPS_EXC("Bad Syntax, Lexer finished in state: " + sFSM.state.toString());
+		if (sFSM.state != ACC_STATE.NONE) throw new SNIPS_EXC(Const.BAD_END_STATE, sFSM.state.toString());
 		
 		if (progress != null) progress.incProgress(1);
 		
@@ -432,7 +433,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXC("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC(Const.BAD_HEX_LITERAL, new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 16)));
@@ -445,7 +446,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXC("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC(Const.BAD_BIN_LITERAL, new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 2)));

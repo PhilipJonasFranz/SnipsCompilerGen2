@@ -37,6 +37,10 @@ public class CGEN_EXC extends Exception {
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
+	public String getExcFieldName() {
+		return Util.Util.getExceptionFieldName(this.message);
+	}
+	
 	public String getMessage() {
 		return String.format(message, this.format) + ((this.location != null)? ", " + this.location.getSourceMarker() : "");
 	}

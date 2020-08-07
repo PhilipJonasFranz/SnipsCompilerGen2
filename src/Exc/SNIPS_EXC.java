@@ -12,21 +12,25 @@ public class SNIPS_EXC extends RuntimeException {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
-	String errorMessage;
+	String message;
 	
 	Object [] format;
 	
 	public SNIPS_EXC(String errorMessage, Object...format) {
-		this.errorMessage = errorMessage;
+		this.message = errorMessage;
 		this.format = format;
 		
 		if (AsNBody.progress != null) AsNBody.progress.abort();
 		
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
+
+	public String getExcFieldName() {
+		return Util.Util.getExceptionFieldName(this.message);
+	}
 	
 	public String getMessage() {
-		return String.format(this.errorMessage, format);
+		return String.format(this.message, format);
 	}
 	
 } 

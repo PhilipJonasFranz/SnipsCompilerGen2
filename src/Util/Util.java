@@ -3,11 +3,14 @@ package Util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import Res.Const;
 
 public class Util {
 
@@ -43,6 +46,30 @@ public class Util {
 			if (c % 3 == 0 && i > 0) r = "." + r;
 		}
 		return r;
+	}
+	
+	/**
+	 * Attempts to find the Constant field in Const.java that has given excMessage as value.
+	 * If found, the name of the field is returned. Returns 'UNKNOWN_FIELD' otherwise. 
+	 * @param excMessage The message that should be the value of the field.
+	 * @return The field name or the unknown field string.
+	 */
+	public static String getExceptionFieldName(String excMessage) {
+		Field [] declaredFields = Const.class.getDeclaredFields();
+		
+		for (Field field : declaredFields) {
+		    if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+		        try {
+		        	if (field.get(null).toString().equals(excMessage)) 
+						return field.getName();
+				} catch (Exception e) {
+					
+				}
+		    }
+		}
+		
+		/* Field not found, or not externalized */
+		return "UNKNOWN_FIELD";
 	}
     
 } 
