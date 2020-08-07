@@ -8,6 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Res.Const;
 import Util.Pair;
 
 public class StackSet {
@@ -122,7 +123,7 @@ public class StackSet {
 		}
 		
 		if (words != x) 
-			throw new CGEN_EXC("Unable to pop " + x + " Words from the stack, could only pop " + words);
+			throw new CGEN_EXC(Const.UNABLE_TO_POP_X_WORDS, x, words);
 	}
 	
 	/** Prints out the stack layout and the contents of the stack cells. */

@@ -5,6 +5,7 @@ import java.util.List;
 
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
@@ -116,6 +117,10 @@ public class STRUCT extends COMPOSIT {
 		return this.getField(this.typedef.getFields().get(i).path);
 	}
 	
+	public Declaration getFieldNumberDirect(int i) {
+		return this.typedef.getFields().get(i).clone();
+	}
+	
 	public int getFieldByteOffset(NamespacePath path) {
 		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
 		
@@ -208,6 +213,23 @@ public class STRUCT extends COMPOSIT {
 			this.proviso.set(i, this.proviso.get(i).remapProvisoName(name, newType));
 		}
 		return this;
+	}
+
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		if (mapType instanceof STRUCT) {
+			STRUCT s = (STRUCT) mapType;
+			if (s.getTypedef().SID == this.getTypedef().SID) {
+				for (int i = 0; i < this.proviso.size(); i++) {
+					PROVISO prov = (PROVISO) this.proviso.get(i);
+					if (prov.placeholderName.equals(searchedProviso)) {
+						return s.proviso.get(i);
+					}
+						
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 } 

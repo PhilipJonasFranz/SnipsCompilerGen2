@@ -45,6 +45,7 @@ public class StructSelectWriteback extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.shadowSelect.setContext(context);
+		this.select.setContext(context);
 	}
 
 	public Expression getShadowSelect() {

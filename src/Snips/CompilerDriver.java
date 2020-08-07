@@ -76,7 +76,6 @@ public class CompilerDriver {
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = 			false,
-		includeProvisoInTypeString = 	false,
 		printObjectIDs = 				false;
 	
 	
@@ -454,7 +453,10 @@ public class CompilerDriver {
 	public List<Program> addDependencies() throws SNIPS_EXC {
 		List<Program> ASTs = new ArrayList();
 		
-		for (String s : this.referencedLibaries) {
+		/* Create a copy of all referenced libraries, all transitive dependencies are already included. */
+		String [] referenced = this.referencedLibaries.stream().toArray(String []::new);
+		
+		for (String s : referenced) {
 			List<String> file0 = new ArrayList();
 			file0.add(s);
 			

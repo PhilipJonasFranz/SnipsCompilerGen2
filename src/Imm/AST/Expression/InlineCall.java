@@ -22,7 +22,7 @@ public class InlineCall extends Expression {
 	/** Reference to the AST node of the called function */
 	public Function calledFunction;
 	
-	/** List of the provisos types this function is templated with */
+	/** List of the provisos types this call is templated with */
 	public List<TYPE> proviso;
 	
 	/** The Expressions used as parameters */
@@ -30,6 +30,8 @@ public class InlineCall extends Expression {
 	
 	/** Anonymous target. Recieves value during ctx if call is calling a predicate that could not be linked. */
 	public Declaration anonTarget;
+	
+	public boolean hasAutoProviso = false;
 	
 	
 			/* --- CONSTRUCTORS --- */

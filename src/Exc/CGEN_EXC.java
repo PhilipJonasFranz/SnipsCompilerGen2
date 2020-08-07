@@ -18,21 +18,27 @@ public class CGEN_EXC extends Exception {
 	
 	Source location;
 	
-	public CGEN_EXC(Source source, String message) {
+	Object [] format;
+	
+	public CGEN_EXC(Source source, String message, Object...format) {
 		this.location = source;
 		this.message = message;
+		this.format = format;
+		
 		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
-	public CGEN_EXC(String message) {
+	public CGEN_EXC(String message, Object...format) {
 		this.message = message;
+		this.format = format;
+		
 		AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
 	public String getMessage() {
-		return message + ((this.location != null)? ", " + this.location.getSourceMarker() : "");
+		return String.format(message, this.format) + ((this.location != null)? ", " + this.location.getSourceMarker() : "");
 	}
 	
 } 

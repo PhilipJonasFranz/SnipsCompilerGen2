@@ -143,7 +143,7 @@ public class StructTypedef extends SyntaxElement {
 	private StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
-		assert(this.proviso.size() == providedProvisos.size());
+		assert this.proviso.size() == providedProvisos.size() : "Expected " + this.proviso.size() + " proviso types, but got " + providedProvisos.size();
 		
 		for (StructProvisoMapping m : this.registeredMappings) {
 			boolean equal = true;

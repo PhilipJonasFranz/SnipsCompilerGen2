@@ -66,21 +66,15 @@ public class PROVISO extends TYPE<Void> {
 	
 	public String typeString() {
 		String s = "";
-		if (this.context == null || CompilerDriver.includeProvisoInTypeString) {
-			s += "PROVISO<";
-			s += this.placeholderName;
-			if (this.context != null) s += ", " + this.context.typeString();
-			s += ">";
+		
+		s += "PROVISO<";
+		s += this.placeholderName;
+		if (this.context != null) s += ", " + this.context.typeString();
+		s += ">";
 			
-			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
+		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 			
-			return s;
-		}
-		else {
-			s = this.context.typeString();
-			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
-			return s;
-		}
+		return s;
 	}
 	
 	public String sourceCodeRepresentation() {
@@ -114,6 +108,11 @@ public class PROVISO extends TYPE<Void> {
 		if (this.placeholderName.equals(name)) 
 			return newType;
 		else return this;
+	}
+
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		/* Base case, map type maps directley to proviso */
+		return (searchedProviso.equals(this.placeholderName))? mapType : null;
 	}
 
 } 

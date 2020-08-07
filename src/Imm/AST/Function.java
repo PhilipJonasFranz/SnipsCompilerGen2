@@ -13,10 +13,9 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Res.Const;
 import Util.NamespacePath;
-import Util.Pair;
 import Util.Source;
 
 /**
@@ -24,22 +23,46 @@ import Util.Source;
  */
 public class Function extends CompoundStatement {
 
+			/* --- NESTED --- */
+	public class ProvisoMapping {
+		
+		public String provisoPostfix;
+		
+		public TYPE returnType;
+		
+		public List<TYPE> provisoMapping;
+		
+		public ProvisoMapping(String provisoPostfix, TYPE returnType, List<TYPE> provisoMapping) {
+			this.provisoPostfix = provisoPostfix;
+			this.returnType = returnType;
+			this.provisoMapping = provisoMapping;
+		}
+		
+	}
+	
 			/* --- FIELDS --- */
+	/**
+	 * The flattened namespace path of this function.
+	 */
+	public NamespacePath path;
+	
 	/** List of the provisos types this function is templated with */
 	public List<TYPE> provisosTypes;
 	
-	/** A list that contains the combinations of types this function was templated with */
-	public List<Pair<String, Pair<TYPE, List<TYPE>>>> provisosCalls = new ArrayList();
+	/** 
+	 * A list that contains the combinations of types this function was templated with. 
+	 * Stores Label Gen Proviso Postfix, Return Type and proviso types.
+	 */
+	public List<ProvisoMapping> provisosCalls = new ArrayList();
 	
+	/**
+	 * The visibility modifier specified in the function declaration.
+	 */
 	public MODIFIER modifier = MODIFIER.SHARED;
 	
 	private TYPE returnType;
 	
-	public NamespacePath path;
-	
 	public List<Declaration> parameters;
-	
-	public boolean signals;
 	
 	public List<TYPE> signalsTypes;
 	
@@ -62,7 +85,6 @@ public class Function extends CompoundStatement {
 		this.path = path;
 		this.parameters = parameters;
 		
-		this.signals = signals;
 		this.signalsTypes = signalsTypes;
 		
 		this.modifier = modifier;
@@ -117,6 +139,22 @@ public class Function extends CompoundStatement {
 		return ctx.checkFunction(this);
 	}
 
+	/** 
+	 * Returns the current return type, proviso-free.
+	 */
+	public TYPE getReturnType() {
+		return this.returnType.provisoFree();
+	}
+	
+	/**
+	 * Return wether this function signals exceptions or not.
+	 */
+	public boolean signals() {
+		return !this.signalsTypes.isEmpty();
+	}
+
+	
+			/* --- PROVISO RELATED --- */
 	/**
 	 * Set given context to the function, including parameters, return type and body.
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
@@ -124,16 +162,13 @@ public class Function extends CompoundStatement {
 	 */
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (context.size() != this.provisosTypes.size()) 
-			throw new CTX_EXC(this.getSource(), "Missmatching number of provided provisos, expected " + this.provisosTypes.size() + ", got " + context.size());
+			throw new CTX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
 		
 		ProvisoUtil.mapNToN(this.provisosTypes, context);
 
 		/* Copy proviso types with applied context */
 		List<TYPE> clone = new ArrayList();
 		for (TYPE t : this.provisosTypes) clone.add(t.clone());
-		
-		//System.out.println("Context");
-		//clone.stream().forEach(x -> System.out.println(x.typeString()));
 		
 		ProvisoUtil.mapNTo1(this.returnType, clone);
 		
@@ -149,10 +184,6 @@ public class Function extends CompoundStatement {
 		for (Statement s : this.body) 
 			s.setContext(clone);
 		
-		//this.print(0, true);
-		//System.out.println();
-		
-		
 		/* Get proviso free of header provisos and return type copy */
 		for (int i = 0; i < clone.size(); i++)
 			clone.set(i, clone.get(i).provisoFree());
@@ -162,94 +193,58 @@ public class Function extends CompoundStatement {
 		if (!this.containsMapping(clone)) 
 			this.addProvisoMapping(ret, context);
 	}
-
-	/** 
-	 * Return the current context, or the actual type.
+	
+	/**
+	 * Checks if given proviso mapping is already registered.
+	 * @param map The proviso mapping to be checked against.
+	 * @return True if an equal mapping is already registered, false if not.
 	 */
-	public TYPE getReturnType() {
-		if (this.returnType instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.returnType;
-			if (p.hasContext()) return p.getContext();
-			else return p;
-		}
-		else return this.returnType;
-	}
-	
-	public void setReturnType(TYPE type) {
-		this.returnType = type;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-	public void printContexts() {
-		System.out.println("Mappings: ");
-		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			System.out.print(this.provisosCalls.get(i).second.first.typeString() + " : ");
-			List<TYPE> map = this.provisosCalls.get(i).second.second;
-			for (TYPE t : map) System.out.print(t.typeString() + ", ");
-			System.out.println();
-		}
-	}
-	
-	public boolean isActiveContext(List<TYPE> context) {
-		return this.mappingIsEqual(context, this.provisosTypes);
-	}
-	
 	public boolean containsMapping(List<TYPE> map) {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
+			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (map0.size() != map.size()) throw new SNIPS_EXC("Recieved proviso mapping length is not equal to expected length, expected " + map0.size() + ", but got " + map.size());
+			if (map0.size() != map.size()) 
+				throw new SNIPS_EXC(Const.RECIEVED_MAPPING_LENGTH_NOT_EQUAL, map0.size(), map.size());
 			
-			if (this.mappingIsEqual(map0, map)) return true;
+			if (ProvisoUtil.mappingIsEqual(map0, map)) return true;
 		}
 		
 		return false;
 	}
 	
-	public boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
-		boolean isEqual = true;
-		for (int a = 0; a < map0.size(); a++) 
-			isEqual &= map0.get(a).typeString().equals(map1.get(a).typeString());
-		
-		return isEqual;
-	}
-	
-	public String getPostfix(List<TYPE> map) {
+	/**
+	 * Returns the proviso postfix that corresponds to the given mapping.
+	 * This postfix has the form of _Px, where x is a number.
+	 * @param map The proviso map which is matched to the registered proviso maps to get the postfix from.
+	 * @return The postfix as a string or null if the mapping is not found.
+	 */
+	public String getProvisoPostfix(List<TYPE> map) {
 		/* Search for postfix, if match is found return postfix */
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
-			if (this.mappingIsEqual(map0, map)) 
-				return this.provisosCalls.get(i).first;
+			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
+			
+			if (ProvisoUtil.mappingIsEqual(map0, map)) 
+				return this.provisosCalls.get(i).provisoPostfix;
 		}
 		
 		return null;
 	}
 	
+	/**
+	 * Returns the return type that corresponds to the given mapping.
+	 * @param map The proviso map which is matched to the registered proviso maps to get the return type from.
+	 * @return The return type.
+	 * @throws SNIPS_EXC If no registered mapping is equal to the given mapping.
+	 */
 	public TYPE getMappingReturnType(List<TYPE> map) {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).second.second;
+			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (this.mappingIsEqual(map0, map))
-				return this.provisosCalls.get(i).second.first;
+			if (ProvisoUtil.mappingIsEqual(map0, map))
+				return this.provisosCalls.get(i).returnType;
 		}
 		
-		throw new SNIPS_EXC("No mapping!");
+		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
 	}
 	
 	public void addProvisoMapping(TYPE type, List<TYPE> context) {
@@ -258,7 +253,7 @@ public class Function extends CompoundStatement {
 		else {
 			/* Add proviso mapping, create new proviso postfix for mapping */
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
-			this.provisosCalls.add(new Pair<String, Pair<TYPE, List<TYPE>>>(postfix, new Pair<TYPE, List<TYPE>>(type, context)));
+			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
 		}
 	}
 	

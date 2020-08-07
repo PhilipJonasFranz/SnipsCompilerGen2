@@ -171,20 +171,21 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
 .POOL1_L2_NULL: .word NULL
     
 Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
-    sub sp, sp, #20
-    stmea sp, {r3-r6, lr}
+    sub sp, sp, #24
+    stmea sp, {r3-r7, lr}
     mov r3, r0
     mov r4, r1
+    mov r5, r2
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r5, r0
+    mov r6, r0
 /* Initialize new node with null pointers and given value */
-    push { r4 }
+    push { r5 }
     ldr r0, .POOL2_L2_NULL                   /* Load null address */
     ldr r1, .POOL2_L2_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #1
-    lsl r1, r5, #2
+    lsl r1, r6, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -193,49 +194,74 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     pop { r0 }
     str r0, [r1, #12]
     mov r0, r3                               /* Evaluate Expression */
-    mov r6, r3
+    mov r7, r3
 Tree.insert.L1:                              /* Evaluate condition */
     ldr r1, .POOL2_L2_NULL                   /* Load null address */
-    cmp r6, r1
+    cmp r7, r1
     beq Tree.insert.L2
-    lsl r1, r6, #2                           /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    cmp r0, r4
-    ble Tree.insert.L4
+    mov r1, r5
+    add lr, pc, #8
+    mov pc, r4
+    cmp r0, #1
+    bne Tree.insert.L4
 /* Left leaf is 0, insert here */
-    lsl r1, r6, #2                           /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL2_L2_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.insert.L6
-    lsl r1, r6, #2                           /* Convert to bytes */
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    ldmfd sp!, {r3-r6, pc}
+    lsl r1, r7, #2                           /* Convert to bytes */
+    str r6, [r1, #4]                         /* Store value to struct field */
+    mov r0, r6                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
 Tree.insert.L6: 
-    lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r6, [r1, #4]                         /* Load field from struct */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r7, [r1, #4]                         /* Load field from struct */
     b Tree.insert.L3
 Tree.insert.L4: 
 /* Right leaf is 0, insert here */
-    lsl r1, r6, #2                           /* Convert to bytes */
+    lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     ldr r1, .POOL2_L2_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.insert.L8
-    lsl r1, r6, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    ldmfd sp!, {r3-r6, pc}
+    lsl r1, r7, #2                           /* Convert to bytes */
+    str r6, [r1, #8]                         /* Store value to struct field */
+    mov r0, r6                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
 Tree.insert.L8: 
-    lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r6, [r1, #8]                         /* Load field from struct */
+    lsl r1, r7, #2                           /* Convert to bytes */
+    ldr r7, [r1, #8]                         /* Load field from struct */
 Tree.insert.L3: 
     b Tree.insert.L1
 Tree.insert.L2: 
     ldr r0, .POOL2_L2_NULL                   /* Evaluate Expression */
-    ldmfd sp!, {r3-r6, pc}
+    ldmfd sp!, {r3-r7, pc}
 .POOL2_L2_NULL: .word NULL
+    
+lambda_relation:                             /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+relation:                                    /* Function: relation */
+    push { r3, r4 }
+    mov r3, r0
+    mov r4, r1
+    cmp r0, r1
+    bne relation.L0
+    mov r0, #0
+    b relation.L3
+relation.L0: 
+    cmp r3, r4
+    bge relation.L2
+    mvn r0, #0
+    b relation.L3
+relation.L2: 
+    mov r0, #1
+relation.L3: 
+    ldmfd sp!, {r3, r4}
+    bx lr
     
 main:                                        /* Function: main */
     push { lr }
@@ -245,23 +271,59 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl Tree.create_P0                        /* Call Tree.create */
     mov r6, r0
-    mov r1, #5
+    mov r0, #5                               /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
-    mov r1, #12
+    mov r0, #12                              /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
-    mov r1, #11
+    mov r0, #11                              /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
-    mov r1, #15
+    mov r0, #15                              /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
-    mov r1, #7
+    mov r0, #7                               /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
-    mov r1, #2
+    mov r0, #2                               /* Load parameters */
+    push { r0 }
+    add r10, pc, #8
+    b lambda_relation
+    mov r10, #0
+    push { r0 }
     mov r0, r6
+    ldmfd sp!, {r1, r2}
     bl Tree.insert_P1                        /* Call Tree.insert */
     cmp r3, #1
     bne main.L1

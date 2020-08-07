@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
@@ -70,14 +71,14 @@ public class Scope {
 	 */
 	public Message checkDuplicate(Declaration dec) throws CTX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
-			throw new CTX_EXC(dec.getSource(), "Duplicate field name: " + dec.path.build());
+			throw new CTX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
 				Declaration dec0 = null;
 				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
 					if (!CompilerDriver.disableWarnings) {
-						return new Message("Variable '" + dec0.path.build() + "' at " + dec0.getSource().getSourceMarker() + " shadowed by '" + dec.path.build() + "' at " + dec.getSource().getSourceMarker(), Message.Type.WARN, true);
+						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path.build(), dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), Message.Type.WARN, true);
 					}
 				}
 			}
@@ -128,17 +129,17 @@ public class Scope {
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
 					else if (decs.isEmpty()) {
-						throw new CTX_EXC(source, "Unknown variable: " + path.build());
+						throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 					}
 					else {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXC(source, "Multiple matches for field '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct");
+						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_FIELD, path.build(), s);
 					}
 				}
 				else {
-					throw new CTX_EXC(source, "Unknown variable: " + path.build());
+					throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 				}
 			}
 		}

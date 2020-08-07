@@ -29,6 +29,8 @@ public class FunctionCall extends Statement {
 	/** Anonymous target. Recieves value during ctx if call is calling a predicate that could not be linked. */
 	public Declaration anonTarget;
 	
+	public boolean hasAutoProviso = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

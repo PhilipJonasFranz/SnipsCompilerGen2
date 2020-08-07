@@ -1624,7 +1624,7 @@ public class Parser {
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
 			
-			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
+			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
 				List<TYPE> proviso = this.parseProviso();
 				
 				/* Predicate with proviso */
@@ -1647,6 +1647,10 @@ public class Parser {
 					if (path.getPath().get(0).equals("resv")) {
 						CompilerDriver.heap_referenced = true;
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+					}
+					else if (path.getPath().get(0).equals("init")) {
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
 					}
 					else if (path.getPath().get(0).equals("hsize")) {
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");

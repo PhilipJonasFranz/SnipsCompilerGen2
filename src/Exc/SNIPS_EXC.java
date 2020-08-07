@@ -14,8 +14,11 @@ public class SNIPS_EXC extends RuntimeException {
 
 	String errorMessage;
 	
-	public SNIPS_EXC(String errorMessage) {
+	Object [] format;
+	
+	public SNIPS_EXC(String errorMessage, Object...format) {
 		this.errorMessage = errorMessage;
+		this.format = format;
 		
 		if (AsNBody.progress != null) AsNBody.progress.abort();
 		
@@ -23,7 +26,7 @@ public class SNIPS_EXC extends RuntimeException {
 	}
 	
 	public String getMessage() {
-		return this.errorMessage;
+		return String.format(this.errorMessage, format);
 	}
 	
 } 

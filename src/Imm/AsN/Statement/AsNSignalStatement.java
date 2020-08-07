@@ -59,7 +59,7 @@ public class AsNSignalStatement extends AsNStatement {
 			Function f = (Function) watchpoint;
 			
 			/* Function does not signal, meaning all exceptions must be caught */
-			if (!f.signals) return;
+			if (!f.signals()) return;
 			else {
 				/* Branch directley to function end, exception is not watched */
 				escape = ((AsNFunction) f.castedNode).copyLoopEscape;

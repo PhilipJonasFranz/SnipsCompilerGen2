@@ -112,4 +112,12 @@ public class POINTER extends COMPOSIT {
 		return this;
 	}
 
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		if (mapType instanceof POINTER) {
+			POINTER p = (POINTER) mapType;
+			return this.targetType.mappable(p.targetType, searchedProviso);
+		}
+		else return null;
+	}
+
 } 

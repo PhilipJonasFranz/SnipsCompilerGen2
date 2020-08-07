@@ -58,7 +58,7 @@ public class AsNFunctionCall extends AsNStatement {
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
-		if (fc.anonTarget == null && fc.calledFunction.signals) {
+		if (fc.anonTarget == null && fc.calledFunction.signals()) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
 			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
@@ -195,7 +195,7 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		else {
 			/* Branch to function */
-			String target = f.path.build() + f.getPostfix(provisos);
+			String target = f.path.build() + f.getProvisoPostfix(provisos);
 			
 			ASMLabel functionLabel = new ASMLabel(target);
 			

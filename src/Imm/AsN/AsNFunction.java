@@ -34,6 +34,7 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
+import Imm.AST.Function.ProvisoMapping;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
@@ -75,7 +76,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		LabelGen.reset();
 		LabelGen.funcPrefix = f.path.build();
 		
-		if (f.signals) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
+		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
 		
 		List<ASMInstruction> all = new ArrayList();
 		
@@ -102,21 +103,26 @@ public class AsNFunction extends AsNCompoundStatement {
 		 * the name is checked if its already in a list of translated mappings.
 		 */
 		for (int i = 0; i < f.provisosCalls.size(); i++) {
-			Pair<String, Pair<TYPE, List<TYPE>>> call0 = f.provisosCalls.get(i);
+			ProvisoMapping call0 = f.provisosCalls.get(i);
 			for (int a = i + 1; a < f.provisosCalls.size(); a++) {
-				Pair<String, Pair<TYPE, List<TYPE>>> call1 = f.provisosCalls.get(a);
+				ProvisoMapping call1 = f.provisosCalls.get(a);
 				
-				if (!call0.first.equals(call1.first)) {
+				if (!call0.provisoPostfix.equals(call1.provisoPostfix)) {
 					boolean equal = true;
-					equal &= call0.second.first.wordsize() == call1.second.first.wordsize();
-					for (int k = 0; k < call0.second.second.size(); k++) {
-						equal &= call0.second.second.get(k).wordsize() == call1.second.second.get(k).wordsize();
-					}
 					
-					/* Mappings are of equal types, let one point to the other */
-					if (equal) {
-						call1.first = call0.first;
-					}
+					/* Check for equal return type */
+					equal &= call0.returnType.wordsize() == call1.returnType.wordsize();
+					
+					/* Check for equal parameter types */
+					for (int k = 0; k < call0.provisoMapping.size(); k++) 
+						equal &= call0.provisoMapping.get(k).wordsize() == call1.provisoMapping.get(k).wordsize();
+					
+					/* 
+					 * Mappings are of equal types, set label gen postfix of 
+					 * this one to the other equal one 
+					 */
+					if (equal) 
+						call1.provisoPostfix = call0.provisoPostfix;
 				}
 			}
 		}
@@ -134,13 +140,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (translated.contains(f.provisosCalls.get(k).first)) continue;
-			else translated.add(f.provisosCalls.get(k).first);
+			if (translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
+			else translated.add(f.provisosCalls.get(k).provisoPostfix);
 			
 			/* Set the current proviso call scheme if its not the default scheme */
-			if (!f.provisosCalls.get(k).first.equals("")) {
-				f.setContext(f.provisosCalls.get(k).second.second);
-			}
+			if (!f.provisosCalls.get(k).provisoPostfix.equals("")) 
+				f.setContext(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Setup Parameter Mapping */
 			func.parameterMapping = func.getParameterMapping();
@@ -156,7 +161,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Create the function head label */
-			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).first;
+			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).provisoPostfix;
 			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {
@@ -175,7 +180,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
-			if (f.provisosCalls.get(k).first.equals("")) {
+			if (f.provisosCalls.get(k).provisoPostfix.equals("")) {
 				com = "Function: " + f.path.build();
 			}
 			else {
@@ -183,11 +188,12 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
-					if (f.provisosCalls.get(z).first.equals(f.provisosCalls.get(k).first)) {
-						List<TYPE> types = f.provisosCalls.get(z).second.second;
-						for (int x = 0; x < types.size(); x++) {
-							com += types.get(x).typeString() + ", ";
-						}
+					if (f.provisosCalls.get(z).provisoPostfix.equals(f.provisosCalls.get(k).provisoPostfix)) {
+						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
+						
+						for (int x = 0; x < types.size(); x++) 
+							com += types.get(x).provisoFree().typeString() + ", ";
+						
 						com = com.trim().substring(0, com.trim().length() - 1);
 						
 						if (z < f.provisosCalls.size() - 1) com += " | ";
@@ -277,12 +283,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			List<REG> used = func.getUsed();
 			
 			
-			if (paramsWithRef == 0 && !func.hasParamsInStack() && !f.signals && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
+			if (paramsWithRef == 0 && !func.hasParamsInStack() && !f.signals() && !st.newDecsOnStack && f.getReturnType().wordsize() == 1 && !fpInteraction) {
 				func.instructions.remove(fpMov);
 				push.operands.remove(0);
 			}
 			
-			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals) {
+			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals()) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
 				else {
@@ -298,7 +304,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				push.operands.clear();
 				used.stream().forEach(x -> push.operands.add(new RegOp(x)));
 				
-				if (func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) push.operands.add(new RegOp(REG.FP));
+				if (func.hasParamsInStack() || f.signals() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) push.operands.add(new RegOp(REG.FP));
 				
 				if (hasCall) push.operands.add(new RegOp(REG.LR));
 				
@@ -322,34 +328,34 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Patch offset based on amount of pushed registers excluding LR and FP */
 			func.patchFramePointerAddressing(push.operands.size() * 4);
 			
-			/* If function signals exceptions, add escape target for exceptions to jump to */
-			if (f.signals) func.instructions.add(func.copyLoopEscape);
+			/* If function signals() exceptions, add escape target for exceptions to jump to */
+			if (f.signals()) func.instructions.add(func.copyLoopEscape);
 			
 			ASMPopStack pop = null;
 			
-			if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
+			if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || !used.isEmpty() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals()) {
 				/* Add centralized stack reset and register restoring */
 				func.instructions.add(funcReturn);
 				
 				/* Check if exception was thrown */
-				if (f.signals) func.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
+				if (f.signals()) func.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
 				
 				pop = new ASMPopStack();
 				for (REG reg : used) pop.operands.add(new RegOp(reg));
 				
-				if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals) {
+				if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || f.signals()) {
 					/* Backup SP in R2 */
-					if (f.getReturnType().wordsize() > 1 || f.signals) 
+					if (f.getReturnType().wordsize() > 1 || f.signals()) 
 						func.instructions.add(new ASMMov(new RegOp(REG.R2), new RegOp(REG.SP)));
 					
-					if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
+					if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) {
 						fpMovBack = new ASMMov(new RegOp(REG.SP), new RegOp(REG.FP));
 						func.instructions.add(fpMovBack);
 					}
 				
-					if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals) {
+					if (paramsWithRef > 0 || hasCall || func.hasParamsInStack() || f.getReturnType().wordsize() > 1 || f.signals()) {
 						/* Need to restore registers */
-						if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOp(REG.FP));
+						if (paramsWithRef > 0 || func.hasParamsInStack() || f.signals() || st.newDecsOnStack || f.getReturnType().wordsize() > 1 || fpInteraction) pop.operands.add(new RegOp(REG.FP));
 						
 						/* Function has a call, must save LR */
 						if (hasCall) pop.operands.add(new RegOp(REG.LR));
@@ -375,12 +381,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			ASMLabel singleWordSkip = new ASMLabel(LabelGen.getLabel());
-			if (f.getReturnType().wordsize() == 1 && f.signals) {
+			if (f.getReturnType().wordsize() == 1 && f.signals()) {
 				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
 			}
 			
-			if (f.getReturnType().wordsize() > 1 || f.signals) {
-				if (f.signals && f.getReturnType().wordsize() > 1) {
+			if (f.getReturnType().wordsize() > 1 || f.signals()) {
+				if (f.signals() && f.getReturnType().wordsize() > 1) {
 					/* 
 					 * No exception, move word size of return type in R0, if execption 
 					 * were thrown, the word size would already be in R0 
@@ -403,7 +409,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				AsNBody.branchToCopyRoutine(func);
 			}
 			
-			if (f.getReturnType().wordsize() == 1 && f.signals) {
+			if (f.getReturnType().wordsize() == 1 && f.signals()) {
 				func.instructions.add(singleWordSkip);
 			}
 			
