@@ -1,5 +1,5 @@
-#include<res\Test\Directives\exclude_import3.sn>
-#include<res\Test\Directives\exclude_mult.sn>
+#include<res\Test\Value\Directives\exclude_import3.sn>
+#include<res\Test\Value\Directives\exclude_mult.sn>
 
 int mult(int [2] [2] m, int [2] [2] n, int x, int y) {
 	int [2] [2] r = {{0, 0}, {0, 0}};

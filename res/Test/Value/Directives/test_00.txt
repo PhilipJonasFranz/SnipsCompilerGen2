@@ -1,5 +1,5 @@
 SOURCE
-#include <res\Test\Directives\exclude_import.sn>
+#include <res\Test\Value\Directives\exclude_import.sn>
 
 int main(int a) {
 	if (a == 2) a = 3;

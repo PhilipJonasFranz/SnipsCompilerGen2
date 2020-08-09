@@ -1,5 +1,5 @@
 SOURCE
-#include<res\Test\Namespaces\exclude_import.sn>
+#include<res\Test\Value\Namespaces\exclude_import.sn>
 
 int main() {
 	int k = 10;

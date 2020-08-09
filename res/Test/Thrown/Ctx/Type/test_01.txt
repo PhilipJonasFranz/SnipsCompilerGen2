@@ -1,0 +1,7 @@
+SOURCE
+int main() {
+	bool x = true;
+	return x;
+}
+THROWN
+RETURN_TYPE_DOES_NOT_MATCH

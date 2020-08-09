@@ -70,7 +70,8 @@ public class CompilerDriver {
 		disableWarnings = 				false,
 		disableStructSIDHeaders = 		false,
 		includeMetaInformation = 		true,
-		printErrors = 					false;
+		printErrors = 					false,
+		expectError =					false;
 			
 	
 			/* --- DEBUG --- */
@@ -108,6 +109,8 @@ public class CompilerDriver {
 	public static CompilerDriver driver;
 	
 	public static XMLNode sys_config;
+	
+	public Exception thrownException = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
@@ -221,6 +224,10 @@ public class CompilerDriver {
 		}
 	    
 	    return lines;
+	}
+	
+	public Exception getException() {
+		return this.thrownException;
 	}
 	
 	public List<String> compile(File file0, List<String> code) {
@@ -355,7 +362,9 @@ public class CompilerDriver {
 				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			instructionsGenerated += output.size();
+			/* Error test generated instructions are not counted, since they duplicate many times. */
+			if (!expectError)
+				instructionsGenerated += output.size();
 		
 		} catch (Exception e) {
 			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
@@ -364,6 +373,10 @@ public class CompilerDriver {
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
 			if (printErrors || !customExc) e.printStackTrace();
 			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
+		
+			this.thrownException = e;
+			
+			if (expectError) return null;
 		}
 		
 		/* Report Status */
@@ -678,6 +691,7 @@ public class CompilerDriver {
 	public static void reset() {
 		heap_referenced = false;
 		null_referenced = false;
+		expectError = false;
 	}
 	
 } 
