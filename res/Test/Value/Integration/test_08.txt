@@ -91,7 +91,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L5_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L7_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -172,7 +172,56 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L5_HEAP_START: .word HEAP_START
+.POOL0_L7_HEAP_START: .word HEAP_START
+    
+/* Reserves a memory section using resv, assigns the given value */
+/* to this memory section, and returns a pointer to the new memory */
+/* section. */
+init_P1:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #24
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #12]
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #16
+    bx lr
+    
+init_P3:                                     /* Provisos: List.ListNode<INT> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #20
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #12
+    bx lr
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -215,54 +264,37 @@ free.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P0:                              /* Function: List.create, Provisos: INT */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
+    push { r3, lr }
     mov r3, r0
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r4, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL1_L4_NULL                   /* Load null address */
-    ldr r1, .POOL1_L4_NULL                   /* Load null address */
+    ldr r0, .POOL1_L6_NULL                   /* Load null address */
+    ldr r1, .POOL1_L6_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
-    lsl r1, r4, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    mov r0, r4                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
-.POOL1_L4_NULL: .word NULL
+    push { r0 }
+    bl init_P1                               /* Call init */
+    ldmfd sp!, {r3, pc}
+.POOL1_L6_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-List.add_P1:                                 /* Function: List.add, Provisos: INT */
+List.add_P2:                                 /* Function: List.add, Provisos: INT */
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0
     mov r4, r1
-    mov r0, #3                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r5, r0
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL2_L4_NULL                   /* Load null address */
+    ldr r0, .POOL2_L6_NULL                   /* Load null address */
     push { r0 }
     mov r0, #1
-    lsl r1, r5, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
+    push { r0 }
+    bl init_P3                               /* Call init */
+    mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L4_NULL                   /* Load null address */
+    ldr r1, .POOL2_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -280,11 +312,11 @@ List.add.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL2_L4_NULL: .word NULL
+.POOL2_L6_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
-List.get_P2:                                 /* Function: List.get, Provisos: INT */
+List.get_P4:                                 /* Function: List.get, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
@@ -302,7 +334,7 @@ List.get.L3:                                 /* Evaluate condition */
     beq List.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L4_NULL                   /* Load null address */
+    ldr r1, .POOL3_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -321,7 +353,7 @@ List.get.L4:
 List.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL3_L4_NULL: .word NULL
+.POOL3_L6_NULL: .word NULL
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
@@ -340,7 +372,7 @@ List.remove.L0:
 /* Remove first element */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L4_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
     cmp r0, r1
     ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -356,7 +388,7 @@ List.remove.L0:
     ldr r0, [r1, #8]                         /* Load field from struct */
     cmp r0, r5
     bne List.remove.L6
-    ldr r0, .POOL4_L4_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL4_L6_NULL                   /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
 List.remove.L6: 
@@ -374,7 +406,7 @@ List.remove.L9:                              /* Evaluate condition */
     ble List.remove.L10
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L4_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.remove.L12
     ldmfd sp!, {r3-r5, pc}
@@ -388,7 +420,7 @@ List.remove.L10:
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L4_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.remove.L14
     ldmfd sp!, {r3-r5, pc}
@@ -397,14 +429,14 @@ List.remove.L14:
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L4_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.remove.L16
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    ldr r0, .POOL4_L4_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL4_L6_NULL                   /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -424,7 +456,7 @@ List.remove.L16:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r3, [r1, #4]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL4_L4_NULL: .word NULL
+.POOL4_L6_NULL: .word NULL
     
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
     push { r4, r6 }
@@ -454,7 +486,7 @@ main_init:
     mov r1, #5
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL5_L3_arr                    /* Load from .data section */
+    ldr r1, .POOL5_L5_arr                    /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -480,10 +512,10 @@ main:                                        /* Function: main */
     bl resv                                  /* Call resv */
     mov r4, r0
     push { r3 }
-    ldr r0, .POOL5_L3_arr                    /* Load data section address */
+    ldr r0, .POOL5_L5_arr                    /* Load data section address */
     ldr r0, [r0, #4]
     push { r0 }
-    ldr r0, .POOL5_L3_arr                    /* Load data section address */
+    ldr r0, .POOL5_L5_arr                    /* Load data section address */
     ldr r0, [r0]
     push { r0 }
     mov r0, #4
@@ -539,10 +571,10 @@ main:                                        /* Function: main */
     mov r3, r0
     ldr r1, [fp, #-8]                        /* Load field from struct */
     mov r0, r3
-    bl List.add_P1                           /* Call List.add */
+    bl List.add_P2                           /* Call List.add */
     ldr r1, [fp, #-4]                        /* Load field from struct */
     mov r0, r3
-    bl List.add_P1                           /* Call List.add */
+    bl List.add_P2                           /* Call List.add */
     mov r1, #0
     mov r0, r3
     bl List.remove                           /* Call List.remove */
@@ -556,11 +588,11 @@ main:                                        /* Function: main */
     mov r4, r0
     mov r1, #0
     mov r0, r3
-    bl List.get_P2                           /* Call List.get */
+    bl List.get_P4                           /* Call List.get */
     add r0, r4, r0
     ldr r2, [fp, #-44]                       /* Load field from struct */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL5_L3_arr: .word arr
+.POOL5_L5_arr: .word arr
     

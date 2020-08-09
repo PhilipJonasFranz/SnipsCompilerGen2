@@ -55,7 +55,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L3_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L4_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -136,7 +136,35 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L3_HEAP_START: .word HEAP_START
+.POOL0_L4_HEAP_START: .word HEAP_START
+    
+/* Reserves a memory section using resv, assigns the given value */
+/* to this memory section, and returns a pointer to the new memory */
+/* section. */
+init_P2:                                     /* Function: init, Provisos: Tree.TreeNode<INT> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #24
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #12]
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #16
+    bx lr
     
 /* [BASE-PACKAGE] */
 /*  */
@@ -154,8 +182,8 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     mov r4, r0
 /* Initialize the root with null pointers and the given value */
     push { r3 }
-    ldr r0, .POOL1_L2_NULL                   /* Load null address */
-    ldr r1, .POOL1_L2_NULL                   /* Load null address */
+    ldr r0, .POOL1_L3_NULL                   /* Load null address */
+    ldr r1, .POOL1_L3_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #1
     lsl r1, r4, #2
@@ -168,7 +196,7 @@ Tree.create_P0:                              /* Function: Tree.create, Provisos:
     str r0, [r1, #12]
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4, pc}
-.POOL1_L2_NULL: .word NULL
+.POOL1_L3_NULL: .word NULL
     
 Tree.insert_P1:                              /* Function: Tree.insert, Provisos: INT */
     sub sp, sp, #24
@@ -176,27 +204,19 @@ Tree.insert_P1:                              /* Function: Tree.insert, Provisos:
     mov r3, r0
     mov r4, r1
     mov r5, r2
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r6, r0
 /* Initialize new node with null pointers and given value */
     push { r5 }
-    ldr r0, .POOL2_L2_NULL                   /* Load null address */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r0, .POOL2_L3_NULL                   /* Load null address */
+    ldr r1, .POOL2_L3_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #1
-    lsl r1, r6, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
+    push { r0 }
+    bl init_P2                               /* Call init */
+    mov r6, r0
     mov r0, r3                               /* Evaluate Expression */
     mov r7, r3
 Tree.insert.L1:                              /* Evaluate condition */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL2_L3_NULL                   /* Load null address */
     cmp r7, r1
     beq Tree.insert.L2
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -209,7 +229,7 @@ Tree.insert.L1:                              /* Evaluate condition */
 /* Left leaf is 0, insert here */
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL2_L3_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.insert.L6
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -224,7 +244,7 @@ Tree.insert.L4:
 /* Right leaf is 0, insert here */
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL2_L3_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.insert.L8
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -237,9 +257,9 @@ Tree.insert.L8:
 Tree.insert.L3: 
     b Tree.insert.L1
 Tree.insert.L2: 
-    ldr r0, .POOL2_L2_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL2_L3_NULL                   /* Evaluate Expression */
     ldmfd sp!, {r3-r7, pc}
-.POOL2_L2_NULL: .word NULL
+.POOL2_L3_NULL: .word NULL
     
 lambda_relation:                             /* Function address getter for predication */
     add r0, pc, #8

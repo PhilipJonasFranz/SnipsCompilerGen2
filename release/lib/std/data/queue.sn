@@ -31,11 +31,8 @@ namespace Queue {
 		/* Allocate memory for storage of given size */
 		T* storage = resv(sizeof(T) * size);
 		
-		/* Allocate memory for queue */
-		CyclicQueue<T>* queue = resv(sizeof(CyclicQueue<T>));
-		
 		/* Initialize, set start values */
-		*queue = CyclicQueue<T>::(storage, defValue, size, 0, 0, true);
+		CyclicQueue<T>* queue = init<>(CyclicQueue<T>::(storage, defValue, size, 0, 0, true));
 		
 		return queue;
 	}

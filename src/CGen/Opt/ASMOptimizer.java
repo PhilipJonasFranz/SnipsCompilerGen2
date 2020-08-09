@@ -921,6 +921,9 @@ public class ASMOptimizer {
 					break;
 				}
 				
+				/* Only do opt for push operations with only lr left */
+				if (push.operands.size() > 1) continue;
+				
 				if (push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && lr != null) {
 					ASMPopStack pop = push.popCounterpart;
 					

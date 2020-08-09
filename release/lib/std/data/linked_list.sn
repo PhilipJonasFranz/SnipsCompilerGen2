@@ -29,10 +29,8 @@ namespace List {
 	 * Creates a new List Object and initializes the head an tail to null.
 	 */
 	shared LinkedList<T>* create<T>(T defValue) {
-		LinkedList<T>* lp = resv(sizeof(LinkedList<T>));
-	
 		/* Initialize list, set pointers to null */
-		*lp = LinkedList<T>::(null, null, defValue);
+		LinkedList<T>* lp = init<>(LinkedList<T>::(null, null, defValue));
 	
 		return lp;
 	}
@@ -54,10 +52,8 @@ namespace List {
 	 * end of the list.
 	 */
 	shared void add<T>(LinkedList<T>* lp, T x) {
-		ListNode<T>* n = resv(sizeof(ListNode<T>));
-	
 		/* Initialize the new List Node, set the next pointer to null */
-		*n = ListNode<T>::(null, x);
+		ListNode<T>* n = init<>(ListNode<T>::(null, x));
 	
 		if (lp->head == null) {
 			lp->head = n;

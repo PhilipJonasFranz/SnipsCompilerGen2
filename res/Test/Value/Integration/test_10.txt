@@ -44,7 +44,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L11_HEAP_START            /* Evaluate Expression */
+    ldr r0, .POOL0_L13_HEAP_START            /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -125,7 +125,71 @@ resv.L2:
 resv.L18: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L11_HEAP_START: .word HEAP_START
+.POOL0_L13_HEAP_START: .word HEAP_START
+    
+/* Reserves a memory section using resv, assigns the given value */
+/* to this memory section, and returns a pointer to the new memory */
+/* section. */
+init_P1:                                     /* Function: init, Provisos: Map.HashMap<INT,INT> | List.LinkedList<Map.MapEntry<INT,INT>*> | Map.MapEntry<INT,INT> |  */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #24
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #12]
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #16
+    bx lr
+    
+init_P7:                                     /* Provisos: List.ListNode<Map.MapEntry<INT,INT>> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #6                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #32
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    add r0, fp, #20
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #24
+    bx lr
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -156,34 +220,6 @@ free.L1:                                     /* Evaluate condition */
     b free.L1
 free.L2: 
     ldmfd sp!, {r3, r4, r6}
-    bx lr
-    
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P1:                                     /* Function: init, Provisos: Map.HashMap<INT,INT> | Map.MapEntry<INT,INT> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #24
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    ldr r0, [fp, #12]
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #16
     bx lr
     
 __op_mod:                                    /* Function: __op_mod */
@@ -281,29 +317,18 @@ Hash.hash.L2:
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
 List.create_P3:                              /* Function: List.create, Provisos: Map.MapEntry<INT,INT>* */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
+    push { r3, lr }
     mov r3, r0
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r4, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL2_L10_NULL                  /* Load null address */
-    ldr r1, .POOL2_L10_NULL                  /* Load null address */
+    ldr r0, .POOL2_L12_NULL                  /* Load null address */
+    ldr r1, .POOL2_L12_NULL                  /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
-    lsl r1, r4, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    mov r0, r4                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
-.POOL2_L10_NULL: .word NULL
+    push { r0 }
+    bl init_P1                               /* Call init */
+    ldmfd sp!, {r3, pc}
+.POOL2_L12_NULL: .word NULL
     
 /* Free the list by freeing all contained list nodes, and the list itself. */
 List.destroy:                                /* Function: List.destroy */
@@ -313,7 +338,7 @@ List.destroy:                                /* Function: List.destroy */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
 List.destroy.L1:                             /* Evaluate condition */
-    ldr r1, .POOL3_L10_NULL                  /* Load null address */
+    ldr r1, .POOL3_L12_NULL                  /* Load null address */
     cmp r4, r1
     beq List.destroy.L2
     mov r0, r4                               /* Load parameters */
@@ -325,42 +350,30 @@ List.destroy.L2:
     mov r0, r3                               /* Load parameters */
     bl free                                  /* Call free */
     ldmfd sp!, {r3, r4, pc}
-.POOL3_L10_NULL: .word NULL
+.POOL3_L12_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-List.add_P5:                                 /* Function: List.add, Provisos: Map.MapEntry<INT,INT> */
+List.add_P6:                                 /* Function: List.add, Provisos: Map.MapEntry<INT,INT> */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
     mov r3, r0
-    mov r0, #6                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r4, r0
 /* Initialize the new List Node, set the next pointer to null */
     add r0, fp, #28
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
     ldr r0, [fp, #16]
     push { r0 }
-    ldr r0, .POOL4_L10_NULL                  /* Load null address */
+    ldr r0, .POOL4_L12_NULL                  /* Load null address */
     push { r0 }
     mov r0, #1
-    lsl r1, r4, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    pop { r0 }
-    str r0, [r1, #16]
-    pop { r0 }
-    str r0, [r1, #20]
+    push { r0 }
+    bl init_P7                               /* Call init */
+    mov r4, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+    ldr r1, .POOL4_L12_NULL                  /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -382,7 +395,7 @@ List.add.L0:
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #16
     bx lr
-.POOL4_L10_NULL: .word NULL
+.POOL4_L12_NULL: .word NULL
     
 /* Removes the index at given index. */
 /* If the index is out of bounds nothing is removed. */
@@ -401,7 +414,7 @@ List.remove.L0:
 /* Remove first element */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_L12_NULL                  /* Load null address */
     cmp r0, r1
     ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -417,7 +430,7 @@ List.remove.L0:
     ldr r0, [r1, #8]                         /* Load field from struct */
     cmp r0, r5
     bne List.remove.L6
-    ldr r0, .POOL5_L10_NULL                  /* Evaluate Expression */
+    ldr r0, .POOL5_L12_NULL                  /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
 List.remove.L6: 
@@ -435,7 +448,7 @@ List.remove.L9:                              /* Evaluate condition */
     ble List.remove.L10
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_L12_NULL                  /* Load null address */
     cmp r0, r1
     bne List.remove.L12
     ldmfd sp!, {r3-r5, pc}
@@ -449,7 +462,7 @@ List.remove.L10:
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_L12_NULL                  /* Load null address */
     cmp r0, r1
     bne List.remove.L14
     ldmfd sp!, {r3-r5, pc}
@@ -458,14 +471,14 @@ List.remove.L14:
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_L12_NULL                  /* Load null address */
     cmp r0, r1
     bne List.remove.L16
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    ldr r0, .POOL5_L10_NULL                  /* Evaluate Expression */
+    ldr r0, .POOL5_L12_NULL                  /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -485,7 +498,7 @@ List.remove.L16:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r3, [r1, #4]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL5_L10_NULL: .word NULL
+.POOL5_L12_NULL: .word NULL
     
 /* This package contains the utility and definitions */
 /* to create and maintain a hash-map of any type. */
@@ -503,7 +516,7 @@ List.remove.L16:
 /* key is not found. */
 /* Matches the entire memory section of the key. Returns true */
 /* if all values are equal. */
-Map.tupleKeyMatcher_P7:                      /* Function: Map.tupleKeyMatcher, Provisos: INT, INT */
+Map.tupleKeyMatcher_P9:                      /* Function: Map.tupleKeyMatcher, Provisos: INT, INT */
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
@@ -547,7 +560,7 @@ Map.create_P0:                               /* Function: Map.create, Provisos: 
 Map.create.L1: 
     cmp r6, r3
     bge Map.create.L2
-    ldr r0, .POOL6_L10_NULL                  /* Evaluate Expression */
+    ldr r0, .POOL6_L12_NULL                  /* Evaluate Expression */
     push { r0 }
     add r0, r5, r6
     lsl r1, r0, #2
@@ -572,7 +585,7 @@ Map.create.L2:
     push { r0 }
     bl init_P1                               /* Call init */
     ldmfd sp!, {r3-r6, pc}
-.POOL6_L10_NULL: .word NULL
+.POOL6_L12_NULL: .word NULL
     
 /* Stores given value at the hashed key location. */
 Map.put_P2:                                  /* Function: Map.put, Provisos: INT, INT */
@@ -599,7 +612,7 @@ Map.put_P2:                                  /* Function: Map.put, Provisos: INT
     add r0, r1, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
 /* Initialize new list at index */
-    ldr r1, .POOL7_L10_NULL                  /* Load null address */
+    ldr r1, .POOL7_L12_NULL                  /* Load null address */
     cmp r6, r1
     bne Map.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -637,14 +650,14 @@ Map.put.L0:
 /* Store in the list */
     mov r0, r6
     push { r3 }
-    bl List.add_P5                           /* Call List.add */
+    bl List.add_P6                           /* Call List.add */
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL7_L10_NULL: .word NULL
+.POOL7_L12_NULL: .word NULL
     
 /* If the given key is contained in the map, replace the */
 /* value stored under the key with the given value. */
-Map.replace_P6:                              /* Function: Map.replace, Provisos: INT, INT */
+Map.replace_P8:                              /* Function: Map.replace, Provisos: INT, INT */
     sub sp, sp, #24
     stmea sp, {r3-r6, fp, lr}
     mov fp, sp
@@ -667,7 +680,7 @@ Map.replace_P6:                              /* Function: Map.replace, Provisos:
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL8_L10_NULL                  /* Load null address */
+    ldr r1, .POOL8_L12_NULL                  /* Load null address */
     cmp r6, r1
     beq Map.replace.L0
 /* Init tuple for searching */
@@ -687,7 +700,7 @@ Map.replace_P6:                              /* Function: Map.replace, Provisos:
     ldr r3, [r1, #4]                         /* Load field from struct */
 /* Iterate through list, check for match */
 Map.replace.L3:                              /* Evaluate condition */
-    ldr r1, .POOL8_L10_NULL                  /* Load null address */
+    ldr r1, .POOL8_L12_NULL                  /* Load null address */
     cmp r3, r1
     beq Map.replace.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -696,7 +709,7 @@ Map.replace.L3:                              /* Evaluate condition */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
-    bl Map.tupleKeyMatcher_P7                /* Call Map.tupleKeyMatcher */
+    bl Map.tupleKeyMatcher_P9                /* Call Map.tupleKeyMatcher */
     cmp r0, #0
     beq Map.replace.L5
 /* Reassign value with new tuple */
@@ -721,11 +734,11 @@ Map.replace.L4:
 Map.replace.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL8_L10_NULL: .word NULL
+.POOL8_L12_NULL: .word NULL
     
 /* Returns the value corresponding to given key, or */
 /* the default value if the key does not exist. */
-Map.get_P9:                                  /* Function: Map.get, Provisos: INT, INT */
+Map.get_P11:                                 /* Function: Map.get, Provisos: INT, INT */
     sub sp, sp, #20
     stmea sp, {r3-r5, fp, lr}
     mov fp, sp
@@ -747,7 +760,7 @@ Map.get_P9:                                  /* Function: Map.get, Provisos: INT
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL9_L10_NULL                  /* Load null address */
+    ldr r1, .POOL9_L12_NULL                  /* Load null address */
     cmp r5, r1
     beq Map.get.L0
 /* Init tuple for searching */
@@ -767,7 +780,7 @@ Map.get_P9:                                  /* Function: Map.get, Provisos: INT
     ldr r4, [r1, #4]                         /* Load field from struct */
 /* Iterate through list, check for match, and remove */
 Map.get.L3:                                  /* Evaluate condition */
-    ldr r1, .POOL9_L10_NULL                  /* Load null address */
+    ldr r1, .POOL9_L12_NULL                  /* Load null address */
     cmp r4, r1
     beq Map.get.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -776,7 +789,7 @@ Map.get.L3:                                  /* Evaluate condition */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
-    bl Map.tupleKeyMatcher_P7                /* Call Map.tupleKeyMatcher */
+    bl Map.tupleKeyMatcher_P9                /* Call Map.tupleKeyMatcher */
     cmp r0, #0
     beq Map.get.L5
     lsl r1, r4, #2                           /* Convert to bytes */
@@ -799,10 +812,10 @@ Map.get.L0:
 Map.get.L7: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL9_L10_NULL: .word NULL
+.POOL9_L12_NULL: .word NULL
     
 /* Remove the key from the map. Return if it doesnt exist. */
-Map.remove_P8:                               /* Function: Map.remove, Provisos: INT, INT */
+Map.remove_P10:                              /* Function: Map.remove, Provisos: INT, INT */
     sub sp, sp, #20
     stmea sp, {r3-r5, fp, lr}
     mov fp, sp
@@ -824,7 +837,7 @@ Map.remove_P8:                               /* Function: Map.remove, Provisos: 
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL10_L10_NULL                 /* Load null address */
+    ldr r1, .POOL10_L12_NULL                 /* Load null address */
     cmp r5, r1
     beq Map.remove.L0
 /* Init tuple for searching */
@@ -846,7 +859,7 @@ Map.remove_P8:                               /* Function: Map.remove, Provisos: 
     mov r4, #0
 /* Iterate through list, check for match, and remove */
 Map.remove.L3:                               /* Evaluate condition */
-    ldr r1, .POOL10_L10_NULL                 /* Load null address */
+    ldr r1, .POOL10_L12_NULL                 /* Load null address */
     cmp r3, r1
     beq Map.remove.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -855,7 +868,7 @@ Map.remove.L3:                               /* Evaluate condition */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
-    bl Map.tupleKeyMatcher_P7                /* Call Map.tupleKeyMatcher */
+    bl Map.tupleKeyMatcher_P9                /* Call Map.tupleKeyMatcher */
     cmp r0, #0
     beq Map.remove.L5
     mov r0, r5
@@ -873,7 +886,7 @@ Map.remove.L4:
 Map.remove.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL10_L10_NULL: .word NULL
+.POOL10_L12_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { lr }
@@ -911,34 +924,34 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Map.replace_P6                        /* Call Map.replace */
+    bl Map.replace_P8                        /* Call Map.replace */
 /* Remove key 1 from map, results in -1 value */
     mov r1, #1
     mov r0, r4
-    bl Map.remove_P8                         /* Call Map.remove */
+    bl Map.remove_P10                        /* Call Map.remove */
     cmp r3, #0
     beq main.L0
     mov r1, #1
     mov r0, r4
-    bl Map.get_P9                            /* Call Map.get */
+    bl Map.get_P11                           /* Call Map.get */
     mov r5, r0
     mov r1, #11
     mov r0, r4
-    bl Map.get_P9                            /* Call Map.get */
+    bl Map.get_P11                           /* Call Map.get */
     add r5, r5, r0
     mov r1, #2
     mov r0, r4
-    bl Map.get_P9                            /* Call Map.get */
+    bl Map.get_P11                           /* Call Map.get */
     add r0, r5, r0
     pop { pc }
 main.L0: 
     mov r1, #1
     mov r0, r4
-    bl Map.get_P9                            /* Call Map.get */
+    bl Map.get_P11                           /* Call Map.get */
     mov r5, r0
     mov r1, #11
     mov r0, r4
-    bl Map.get_P9                            /* Call Map.get */
+    bl Map.get_P11                           /* Call Map.get */
     add r0, r5, r0
     pop { pc }
     

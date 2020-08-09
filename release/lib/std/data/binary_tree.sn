@@ -27,11 +27,9 @@ namespace Tree {
 	}
 	
 	shared TreeNode<T>* insert<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
-		TreeNode<T>* new = resv(sizeof(TreeNode<T>));
-		
 		/* Initialize new node with null pointers and given value */
-		*new = TreeNode<T>::(null, null, value);
-	
+		TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
+		
 		TreeNode<T>* head = root;
 		while (head != null) {
 			if (pred(head->value, value) == 1) {
