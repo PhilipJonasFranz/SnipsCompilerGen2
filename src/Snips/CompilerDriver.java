@@ -328,10 +328,13 @@ public class CompilerDriver {
 				aopt_progress.incProgress(1);
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-				compressions.add(rate);
 				
-				if (rate < c_min) c_min = rate;
-				if (rate > c_max) c_max = rate;
+				if (!expectError) {
+					compressions.add(rate);
+				
+					if (rate < c_min) c_min = rate;
+					if (rate > c_max) c_max = rate;
+				}
 				
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}

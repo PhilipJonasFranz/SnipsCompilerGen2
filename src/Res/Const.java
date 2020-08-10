@@ -84,9 +84,13 @@ public class Const {
 	
 	public static final String RETURN_TYPE_DOES_NOT_MATCH = "Return type does not match stated return type: %s vs %s";
 	
+	public static final String VARIABLE_DOES_NOT_MATCH_EXPRESSION_POLY = "Variable type does not match expression type, polymorphism only via pointers, actual %s vs %s";
+	
 	public static final String ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE = "Argument type does not match struct field (%d) type: %s vs %s";
 	
 	public static final String BASE_MUST_BE_VARIABLE_REFERENCE = "Base must be variable reference";
+	
+	public static final String SWITCH_COND_MUST_BE_VARIABLE = "Switch Condition has to be variable reference";
 	
 	public static final String CANNOT_DETERMINE_TYPE = "Cannot determine type";
 	
@@ -94,15 +98,29 @@ public class Const {
 	
 	public static final String CANNOT_SELECT_FROM_NON_STRUCT = "Cannot select from non struct type, actual %s";
 	
+	public static final String CANNOT_SELECT_FROM_TYPE = "Cannot select from type %s";
+	
 	public static final String CANNOT_PERFORM_ARITH_ON_NULL = "Cannot perform arithmetic on null";
 	
 	public static final String CANNOT_CAST_TO = "Cannot cast %s to %s";
+	
+	public static final String CANNOT_DEREF_TYPE = "Cannot deref type %s";
+	
+	public static final String OPERAND_IS_NOT_A_POINTER = "Operand is not a pointer, may cause unexpected behaviour, %s";
 	
 	public static final String POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE = "Pointer arithmetic is only supported for %s, actual %s";
 	
 	public static final String CLASS_CANNOT_BE_SELECTOR = "%s cannot be a selector";
 	
 	public static final String CONDITION_NOT_BOOLEAN = "Condition is not boolean";
+	
+	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_BOOL = "Expression type %s is not applicable for boolean assign operator";
+	
+	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_ASSIGN_OP = "Expression type %s is not applicable for assign operator";
+	
+	public static final String ONLY_APPLICABLE_FOR_ONE_WORD_TYPE = "Only applicable for 1-Word types";
+	
+	public static final String ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL = "Only applicable for 1-Word types, got %s";
 	
 	public static final String ITERATOR_MUST_HAVE_INITIAL_VALUE = "Iterator must have initial value";
 	
@@ -115,6 +133,22 @@ public class Const {
 	public static final String CANNOT_ITERATE_WITHOUT_RANGE = "Cannot iterate over reference without range";
 	
 	public static final String STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT = "Structure Init can only be a sub expression of structure init";
+	
+	public static final String ARRAY_INIT_MUST_HAVE_ONE_FIELD = "Array init must have at least one element";
+	
+	public static final String ARRAY_SELECT_MUST_HAVE_SELECTION = "Element select must have at least one element (how did we even get here?)";
+	
+	public static final String ARRAY_SELECTION_HAS_TO_BE_OF_TYPE = "Selection has to be of type INT, actual %s";
+	
+	public static final String ARRAY_ELEMENTS_MUST_HAVE_SAME_TYPE = "Structure init elements have to have same type: %s vs %s";
+	
+	public static final String ARRAY_OUT_OF_BOUNDS = "Array out of bounds: %s, type: %s";
+	
+	public static final String CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID = "Can only select once from pointer or void type";
+	
+	public static final String CAN_ONLY_SELECT_FROM_VARIABLE_REF = "Can only select from variable reference";
+	
+	public static final String EXPECTED_IDREF_ACTUAL = "Expected IDRef, got %s";
 	
 	public static final String MULTIPLE_ELSE_STATEMENTS = "If Statement can only have one else statement";
 	
@@ -129,6 +163,12 @@ public class Const {
 	public static final String PREDICATE_IS_ANONYMOUS = "Unsafe operation, predicate '%s' is anonymous, %s";
 	
 	public static final String USING_IMPLICIT_ANONYMOUS_TYPE = "Using implicit anonymous type %s, %s";
+	
+	public static final String CAN_ONLY_GET_ADDRESS_OF_VARIABLE_REF_OR_ARRAY_SELECT = "Can only get address of variable reference or array select";
+	
+	public static final String TYPE_CANNOT_BE_ALIGNED_TO =  "%s cannot be aligned to %s";
+	
+	public static final String DIRECT_ASM_HAS_NO_OUTPUTS = "Direct ASM Operation has no explicit outputs, %s";
 	
 	
 			/* --- PROVISO RELATED --- */

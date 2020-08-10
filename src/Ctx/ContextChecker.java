@@ -833,22 +833,22 @@ public class ContextChecker {
 				CompilerDriver.printProvisoTypes = true;
 			
 			if (this.checkPolymorphViolation(t, targetType)) 
-				throw new CTX_EXC(a.getSource(), "Variable type does not match expression type, polymorphism only via pointers, actual " + t.provisoFree().typeString() + " vs " + targetType.provisoFree().typeString());
+				throw new CTX_EXC(a.getSource(), Const.VARIABLE_DOES_NOT_MATCH_EXPRESSION_POLY, t.provisoFree().typeString(), targetType.provisoFree().typeString());
 			
 			throw new CTX_EXC(a.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE, t.provisoFree().typeString(), targetType.provisoFree().typeString());
 		}
 		
 		if (a.assignArith != ASSIGN_ARITH.NONE) {
 			if (t.wordsize() > 1) 
-				throw new CTX_EXC(a.getSource(), "Assign arith operation is only applicable for 1-Word types");
+				throw new CTX_EXC(a.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE);
 			
 			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
 				if (!(ctype instanceof BOOL)) 
-					throw new CTX_EXC(a.getSource(), "Expression type " + t.provisoFree().typeString() + " is not applicable for boolean assign operator");
+					throw new CTX_EXC(a.getSource(), Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_BOOL, t.provisoFree().typeString());
 			}
 			else if (a.assignArith != ASSIGN_ARITH.NONE) {
 				if (!(ctype instanceof INT)) 
-					throw new CTX_EXC(a.getSource(), "Expression type " + t.provisoFree().typeString() + " is not applicable for assign operator");
+					throw new CTX_EXC(a.getSource(), Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_ASSIGN_OP, t.provisoFree().typeString());
 			}
 		}
 		
@@ -872,11 +872,11 @@ public class ContextChecker {
 	
 	public TYPE checkSwitchStatement(SwitchStatement s) throws CTX_EXC {
 		if (!(s.condition instanceof IDRef)) 
-			throw new CTX_EXC(s.condition.getSource(), "Switch Condition has to be variable reference");
+			throw new CTX_EXC(s.condition.getSource(), Const.SWITCH_COND_MUST_BE_VARIABLE);
 		
 		TYPE type = s.condition.check(this);
 		if (!(type instanceof PRIMITIVE)) 
-			throw new CTX_EXC(s.condition.getSource(), "Switch Condition type " + type.provisoFree().typeString() + " has to be a primitive type");
+			throw new CTX_EXC(s.condition.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 		
 		if (s.defaultStatement == null) 
 			throw new CTX_EXC(s.getSource(), Const.MISSING_DEFAULT_STATEMENT);
@@ -890,7 +890,7 @@ public class ContextChecker {
 		TYPE type = c.condition.check(this);
 		
 		if (!type.isEqual(c.superStatement.condition.getType())) 
-			throw new CTX_EXC(c.condition.getSource(), "Condition type " + type.provisoFree().typeString() + " does not switch condition type " + c.superStatement.condition.getType().provisoFree().typeString());
+			throw new CTX_EXC(c.condition.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE, type.provisoFree().typeString(), c.superStatement.condition.getType().provisoFree().typeString());
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : c.body) {
@@ -1360,7 +1360,7 @@ public class ContextChecker {
 	public TYPE checkArrayInit(ArrayInit init) throws CTX_EXC {
 		/* Array must at least contain one element */
 		if (init.elements.isEmpty()) 
-			throw new CTX_EXC(init.getSource(), "Structure init must have at least one element");
+			throw new CTX_EXC(init.getSource(), Const.ARRAY_INIT_MUST_HAVE_ONE_FIELD);
 		
 		TYPE type0 = init.elements.get(0).check(this);
 		
@@ -1374,7 +1374,7 @@ public class ContextChecker {
 					dontCareSize += typeX.wordsize();
 				else {
 					if (!typeX.isEqual(type0)) 
-						throw new CTX_EXC(init.getSource(), "Structure init elements have to have same type: " + type0.provisoFree().typeString() + " vs " + typeX.provisoFree().typeString());
+						throw new CTX_EXC(init.getSource(), Const.ARRAY_ELEMENTS_MUST_HAVE_SAME_TYPE, type0.provisoFree().typeString(), typeX.provisoFree().typeString());
 				}
 			}
 		}
@@ -1414,7 +1414,7 @@ public class ContextChecker {
 		TYPE t = aof.expression.check(this);
 		
 		if (!(aof.expression instanceof IDRef || aof.expression instanceof ArraySelect || aof.expression instanceof StructSelect)) 
-			throw new CTX_EXC(aof.getSource(), "Can only get address of variable reference or array select");
+			throw new CTX_EXC(aof.getSource(), Const.CAN_ONLY_GET_ADDRESS_OF_VARIABLE_REF_OR_ARRAY_SELECT);
 		
 		aof.setType(new POINTER(t.getCoreType()));
 		
@@ -1436,12 +1436,12 @@ public class ContextChecker {
 			POINTER p = (POINTER) t;
 			deref.setType(p.targetType);
 		}
-		else throw new CTX_EXC(deref.expression.getSource(), "Cannot dereference type " + t.provisoFree().typeString());
+		else throw new CTX_EXC(deref.expression.getSource(), Const.CANNOT_DEREF_TYPE, t.provisoFree().typeString());
 		
 		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
 		if (t instanceof PRIMITIVE) {
 			if (!CompilerDriver.disableWarnings) 
-				this.messages.add(new Message("Operand is not a pointer, may cause unexpected behaviour, " + deref.getSource().getSourceMarker(), Message.Type.WARN, true));
+				this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, deref.getSource().getSourceMarker()), Message.Type.WARN, true));
 		}
 		
 		return deref.getType();
@@ -1517,7 +1517,7 @@ public class ContextChecker {
 	 */
 	public TYPE checkArraySelect(ArraySelect select) throws CTX_EXC {
 		if (select.selection.isEmpty()) 
-			throw new CTX_EXC(select.getSource(), "Element select must have at least one element (how did we even get here?)");
+			throw new CTX_EXC(select.getSource(), Const.ARRAY_SELECT_MUST_HAVE_SELECTION);
 		
 		if (select.getShadowRef() instanceof IDRef) {
 			IDRef ref = (IDRef) select.getShadowRef();
@@ -1532,11 +1532,11 @@ public class ContextChecker {
 			for (int i = 0; i < select.selection.size(); i++) {
 				TYPE stype = select.selection.get(i).check(this);
 				if (!(stype instanceof INT)) 
-					throw new CTX_EXC(select.selection.get(i).getSource(), "Selection has to be of type " + new INT().typeString() + ", actual " + stype.provisoFree().typeString());
+					throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree().typeString());
 				else {
 					/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
 					if (!(chain instanceof ARRAY || (i == 0 && (type0 instanceof POINTER || chain instanceof VOID)))) 
-						throw new CTX_EXC(select.selection.get(i).getSource(), "Cannot select from type " + type0.provisoFree().typeString());
+						throw new CTX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
 					else if (chain instanceof ARRAY) {
 						ARRAY arr = (ARRAY) chain;
 						
@@ -1544,7 +1544,7 @@ public class ContextChecker {
 							Atom a = (Atom) select.selection.get(i);
 							int value = (int) a.getType().getValue();
 							if (value < 0 || value >= arr.getLength()) 
-								throw new CTX_EXC(select.selection.get(i).getSource(), "Array out of bounds: " + value + ", type: " + chain.provisoFree().typeString());
+								throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree().typeString());
 						}
 						
 						chain = arr.elementType;
@@ -1561,7 +1561,7 @@ public class ContextChecker {
 						}
 						
 						if (select.selection.size() > 1) 
-							throw new CTX_EXC(select.getShadowRef().getSource(), "Can only select once from pointer or void type");
+							throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
 					}
 				}
 			}
@@ -1571,7 +1571,7 @@ public class ContextChecker {
 			select.setType(chain);
 			return select.getType();
 		}
-		else throw new CTX_EXC(select.getShadowRef().getSource(), "Can only select from variable reference");
+		else throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_FROM_VARIABLE_REF);
 	}
 	
 	public TYPE checkAtom(Atom a) throws CTX_EXC {
@@ -1586,11 +1586,8 @@ public class ContextChecker {
 		if (a.base != null) {
 			TYPE t = a.base.check(this);
 			
-			if (a.inheritType.wordsize() % t.wordsize() != 0) 
-				throw new CTX_EXC(a.getSource(), t.provisoFree().typeString() + " cannot be aligned to " + a.inheritType.provisoFree().typeString());
-			
-			if (t.wordsize() > a.inheritType.wordsize())
-				throw new CTX_EXC(a.getSource(), "Expression word size is larger than inherited type: " + t.provisoFree().typeString() + " vs " + a.inheritType.provisoFree().typeString());
+			if (a.inheritType.wordsize() % t.wordsize() != 0 || t.wordsize() > a.inheritType.wordsize()) 
+				throw new CTX_EXC(a.getSource(), Const.TYPE_CANNOT_BE_ALIGNED_TO, t.provisoFree().typeString(), a.inheritType.provisoFree().typeString());
 		}
 		
 		return a.getType();
@@ -1613,22 +1610,22 @@ public class ContextChecker {
 			TYPE t = p.first.check(this);
 			
 			if (t.wordsize() > 1) 
-				throw new CTX_EXC(p.first.getSource(), "All data typs of direct asm must be 1 data word large, got " + t.provisoFree().typeString());
+				throw new CTX_EXC(p.first.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree().typeString());
 		}
 		
 		for (Pair<Expression, REG> p : d.dataOut) {
 			TYPE t = p.first.check(this);
 			
 			if (!(p.first instanceof IDRef)) 
-				throw new CTX_EXC(p.first.getSource(), "Expected IDRef, got " + p.first.getClass().getName());
+				throw new CTX_EXC(p.first.getSource(), Const.EXPECTED_IDREF_ACTUAL, p.first.getClass().getName());
 			
 			if (t.wordsize() > 1) 
-				throw new CTX_EXC(p.first.getSource(), "All data typs of direct asm must be 1 data word large, got " + t.provisoFree().typeString());
+				throw new CTX_EXC(p.first.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree().typeString());
 		}
 		
 		if (d.dataOut.isEmpty()) {
 			if (!CompilerDriver.disableWarnings) 
-				messages.add(new Message("Direct ASM Operation has no explicit outputs, " + d.getSource().getSourceMarker(), Message.Type.WARN, true));
+				messages.add(new Message(String.format(Const.DIRECT_ASM_HAS_NO_OUTPUTS, d.getSource().getSourceMarker()), Message.Type.WARN, true));
 		}
 		
 		return new VOID();
