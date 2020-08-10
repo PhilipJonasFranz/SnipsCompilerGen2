@@ -26,10 +26,8 @@ namespace Graphics {
 	 * Creates a new 2D Graphics Object that holds given color.
 	 */
 	shared Graphics2D* create(void* base, int w, int h, Color* c) {
-		Graphics2D* g = resv(sizeof(Graphics2D));
-		
 		/* Initialize graphics object with given color */
-		*g = Graphics2D::(c, base, w, h);
+		Graphics2D* g = init<>(Graphics2D::(c, base, w, h));
 		return g;
 	}
 	

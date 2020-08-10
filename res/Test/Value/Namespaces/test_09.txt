@@ -318,31 +318,20 @@ List.get.L7:
 /* Create a new Tree, initialize both childs to 0, set root value */
 /* to given value. Return a pointer to the root. */
 Tree.create_P4:                              /* Function: Tree.create, Provisos: INT */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
+    push { r3, lr }
     mov r3, r0
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r4, r0
 /* Initialize the root with null pointers and the given value */
     push { r3 }
     ldr r0, .POOL4_L9_NULL                   /* Load null address */
     ldr r1, .POOL4_L9_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #3
-    lsl r1, r4, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    mov r0, r4                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
+    push { r0 }
+    bl init_P1                               /* Call init */
+    ldmfd sp!, {r3, pc}
 .POOL4_L9_NULL: .word NULL
     
-Tree.insert_P5:                              /* Function: Tree.insert, Provisos: INT */
+Tree.insert_P6:                              /* Function: Tree.insert, Provisos: INT */
     sub sp, sp, #24
     stmea sp, {r3-r7, lr}
     mov r3, r0
@@ -617,7 +606,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Tree.insert_P5                        /* Call Tree.insert */
+    bl Tree.insert_P6                        /* Call Tree.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     add r10, pc, #8
@@ -626,7 +615,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Tree.insert_P5                        /* Call Tree.insert */
+    bl Tree.insert_P6                        /* Call Tree.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     add r10, pc, #8

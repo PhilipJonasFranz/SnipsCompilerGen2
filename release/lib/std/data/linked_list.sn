@@ -31,7 +31,6 @@ namespace List {
 	shared LinkedList<T>* create<T>(T defValue) {
 		/* Initialize list, set pointers to null */
 		LinkedList<T>* lp = init<>(LinkedList<T>::(null, null, defValue));
-	
 		return lp;
 	}
 	

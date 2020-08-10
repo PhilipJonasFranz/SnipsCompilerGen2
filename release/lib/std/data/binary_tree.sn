@@ -19,10 +19,8 @@ namespace Tree {
 	 * to given value. Return a pointer to the root.
 	 */
 	shared TreeNode<T>* create<T>(T value) {
-		TreeNode<T>* tree = resv(sizeof(TreeNode<T>));
-		
 		/* Initialize the root with null pointers and the given value */
-		*tree = TreeNode<T>::(null, null, value);
+		TreeNode<T>* tree = init<>(TreeNode<T>::(null, null, value));
 		return tree;
 	}
 	

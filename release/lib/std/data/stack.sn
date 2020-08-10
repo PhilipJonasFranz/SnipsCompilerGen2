@@ -19,11 +19,8 @@ namespace Stack {
 		/* Allocate a new linked list for the stack */
 		LinkedList<T>* list = List::create<T>(defValue);
 		
-		/* Allocate the stack */
-		StackedList<T>* stack = resv(sizeof(StackedList<T>));
-		
 		/* Initialize the stack with the list */
-		*stack = StackedList<T>::(list);
+		StackedList<T>* stack = init<>(StackedList<T>::(list));
 		
 		return stack;
 	}

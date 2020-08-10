@@ -36,9 +36,7 @@ namespace Float {
 	}
 	
 	shared SFloat* create(int n, int f) {
-		SFloat* f0 = resv(sizeof(SFloat));
-		
-		*f0 = SFloat::(n, f);
+		SFloat* f0 = init<>(SFloat::(n, f));
 		return f0;
 	}
 	
