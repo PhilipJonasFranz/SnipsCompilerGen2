@@ -27,8 +27,7 @@ namespace Graphics {
 	 */
 	shared Graphics2D* create(void* base, int w, int h, Color* c) {
 		/* Initialize graphics object with given color */
-		Graphics2D* g = init<>(Graphics2D::(c, base, w, h));
-		return g;
+		return init<>(Graphics2D::(c, base, w, h));
 	}
 	
 	/*

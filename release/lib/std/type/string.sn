@@ -31,21 +31,21 @@ namespace String {
 	 * but result may not be as expected.
 	 */
 	shared char* substring(char* str, int begin, int end) {
-		LinkedList<char>* sub = List::create<char>((char) 0);
+		LinkedList<char>* sub = List::create<>((char) 0);
 		
 		/* Iterate over String and collect characters in range */
 		int c = 0;
 		while (((int) *(str + c)) != 0) {
 			if (c >= begin && c < end) 
-				List::add<char>(sub, *(str + c));
+				List::add<>(sub, *(str + c));
 			c++;
 		}
 
 		int size = List::size(sub);
 
 		/* Substring only consists out of null char */
-		if (size == 1 && (int) List::get<char>(sub, 0) == 0) {
-			char* str0 = (char*) resv(1);
+		if (size == 1 && (int) List::get<>(sub, 0) == 0) {
+			char* str0 = resv(1);
 			*str = (char) 0;
 			
 			/* Cleanup and return result */
@@ -54,10 +54,11 @@ namespace String {
 		}
 		else {
 			/* Collect chars in list in string and insert 0 char */
-			char* str0 = (char*) resv(size + 1);
-			for (int i = 0; i < size; i++) {
-				*(str0 + i) = List::get<char>(sub, i);
-			}
+			char* str0 = resv(size + 1);
+			
+			for (int i = 0; i < size; i++) 
+				*(str0 + i) = List::get<>(sub, i);
+			
 			*(str0 + size) = (char) 0;
 		
 			/* Cleanup and return result */
