@@ -65,9 +65,7 @@ namespace Map {
 		*((void) def + sizeof(K) + (int) __EN_SID + 1) = defValue;
 		
 		/* Create the hash map and initialize it */
-		HashMap<K, V>* map = init<>(HashMap<K, V>::(storage, size, def));
-		
-		return map;
+		return init<>(HashMap<K, V>::(storage, size, def));
 	}
 	
 	/*

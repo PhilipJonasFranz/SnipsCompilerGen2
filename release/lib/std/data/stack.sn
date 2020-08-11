@@ -20,9 +20,7 @@ namespace Stack {
 		LinkedList<T>* list = List::create<T>(defValue);
 		
 		/* Initialize the stack with the list */
-		StackedList<T>* stack = init<>(StackedList<T>::(list));
-		
-		return stack;
+		return init<>(StackedList<T>::(list));
 	}
 	
 	/*
@@ -62,13 +60,8 @@ namespace Stack {
 	 * remove it. Returns the default value if the stack is empty.
 	 */
 	shared T peek<T>(StackedList<T>* stack) {
-		if (Stack::isEmpty(stack)) {
-			return stack->list->defValue;
-		}
-		else {
-			int size = List::size(stack->list);
-			return List::get<T>(stack->list, size - 1);
-		}
+		if (Stack::isEmpty(stack)) return stack->list->defValue;
+		else return List::get<T>(stack->list, List::size(stack->list) - 1);
 	}
 	
 	/*

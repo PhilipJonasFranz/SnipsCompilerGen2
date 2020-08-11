@@ -490,8 +490,8 @@ String.length.L1:                            /* Evaluate condition */
     add r4, r4, #1
     b String.length.L1
 String.length.L2: 
-    add r4, r4, #1
-    mov r0, r4                               /* Evaluate Expression */
+/* Add 0 char */
+    add r0, r4, #1
     ldmfd sp!, {r3, r4}
     bx lr
     

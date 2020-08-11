@@ -30,8 +30,7 @@ namespace List {
 	 */
 	shared LinkedList<T>* create<T>(T defValue) {
 		/* Initialize list, set pointers to null */
-		LinkedList<T>* lp = init<>(LinkedList<T>::(null, null, defValue));
-		return lp;
+		return init<>(LinkedList<T>::(null, null, defValue));
 	}
 	
 	/*
@@ -110,10 +109,10 @@ namespace List {
 		ListNode<T>* n = lp->head;
 		while (true) {
 			if (n == null) return false;
-			if (pred(x, n->value)) {
-				/* Value found */
-				return true;
-			}
+			
+			/* Value found */
+			if (pred(x, n->value)) return true;
+			
 			/* Jump to next */
 			n = n->next;
 		}
@@ -131,13 +130,12 @@ namespace List {
 			 * If the predicate matches given value, 
 			 * the searched value was found.
 			 */
-			if (pred(x, n->value)) {
-				return n;
-			}
+			if (pred(x, n->value)) return n;
 			
 			/* Jump to next */
 			n = n->next;
 		}
+
 		/* Not found */
 		return null;
 	}
@@ -194,9 +192,7 @@ namespace List {
 				lp->head = lp->head->next;
 				
 				/* Only one element in list */
-				if (lp->tail == n) {
-					lp->tail = null;
-				}
+				if (lp->tail == n) lp->tail = null;
 				
 				free(n);
 			}

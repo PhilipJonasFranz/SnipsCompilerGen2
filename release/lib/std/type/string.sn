@@ -7,22 +7,22 @@ namespace String {
 
 	/*
 	 * Compares the two given strings. Checks if all chars are equal and returns the
-     * boolean result.
-     */
-    shared bool equals(char* str0, char* str1) {
-    	bool equal = true;
-    	int c = 0;
-    	while (true) {
-    		char c0 = *(str0 + c);
-    		char c1 = *(str1 + c);
+	 * boolean result.
+	 */
+	shared bool equals(char* str0, char* str1) {
+		bool equal = true;
+		int c = 0;
+		while (true) {
+			char c0 = *(str0 + c);
+			char c1 = *(str1 + c);
     		
-    		equal &&= c0 == c1;
-    		if ((int) c0 == 0 || (int) c1 == 0) break;
-    		c++;
-    	}
+			equal &&= c0 == c1;
+			if ((int) c0 == 0 || (int) c1 == 0) break;
+			c++;
+		}
     	
-    	return equal;
-    }
+		return equal;
+	}
 
 	/*
 	 * Collects all chars in the string whiches index is greater or equal to begin and less than end.
@@ -36,9 +36,8 @@ namespace String {
 		/* Iterate over String and collect characters in range */
 		int c = 0;
 		while (((int) *(str + c)) != 0) {
-			if (c >= begin && c < end) {
+			if (c >= begin && c < end) 
 				List::add<char>(sub, *(str + c));
-			}
 			c++;
 		}
 
@@ -73,11 +72,20 @@ namespace String {
 	 */
 	shared int length(char* str) {
 		int size = 0;
-		while (((int) *(str + size)) != 0) {
-			size++;
-		}
-		size++;
-		return size;
+		
+		while (((int) *(str + size)) != 0) size++;
+		
+		/* Add 0 char */
+		return size + 1;
+	}
+
+	/*
+	 * Returns the char at the given index in the string.
+	 * Returns the 0-char if the given index is out of bounds.
+	 */
+	shared char charAt(char* str, int i) {
+		if (i >= String::length(str) || i < 0) return (char) 0;
+		else return *(str + i);
 	}
 	
 	/* 
@@ -92,14 +100,12 @@ namespace String {
 		char* r = (char*) resv(s0 + s1);
 		
 		/* Copy first part of string */
-		for (int i = 0; i < s0; i++) {
+		for (int i = 0; i < s0; i++) 
 			*(r + i) = *(str0 + i);
-		}
 		
 		/* Copy second part with 0 char */
-		for (int i = 0; i < s1; i++) {
+		for (int i = 0; i < s1; i++) 
 			*(r + i + s0) = *(str1 + i);
-		}
 		
 		return r;
 	}

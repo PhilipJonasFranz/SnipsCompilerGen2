@@ -32,9 +32,7 @@ namespace Queue {
 		T* storage = resv(sizeof(T) * size);
 		
 		/* Initialize, set start values */
-		CyclicQueue<T>* queue = init<>(CyclicQueue<T>::(storage, defValue, size, 0, 0, true));
-		
-		return queue;
+		return init<>(CyclicQueue<T>::(storage, defValue, size, 0, 0, true));
 	}
 	
 	/*

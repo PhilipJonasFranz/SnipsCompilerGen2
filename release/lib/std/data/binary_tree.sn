@@ -20,35 +20,49 @@ namespace Tree {
 	 */
 	shared TreeNode<T>* create<T>(T value) {
 		/* Initialize the root with null pointers and the given value */
-		TreeNode<T>* tree = init<>(TreeNode<T>::(null, null, value));
-		return tree;
+		return init<>(TreeNode<T>::(null, null, value));
 	}
 	
+	/*
+	 * Inserts given value into the tree. The given predicate is used to place
+	 * the given value at the correct position. The predicate should sort the values
+	 * in a total order. Returns the resulting root node. 
+	 */
 	shared TreeNode<T>* insert<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
 		/* Initialize new node with null pointers and given value */
 		TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
 		
-		TreeNode<T>* head = root;
-		while (head != null) {
-			if (pred(head->value, value) == 1) {
-				/* Left leaf is 0, insert here */
-				if (head->left == null) {
-					head->left = new;
-					return new;
+		if (root == null) {
+			/* Tree is empty */
+			return new;
+		}
+		else {
+			TreeNode<T>* head = root;
+			while (head != null) {
+				int cmp = pred(head->value, value);
+				
+				if (cmp == 0) {
+					/* Value already in tree. */
+					return root;
 				}
-				else head = head->left;
-			}
-			else {
-				/* Right leaf is 0, insert here */
-				if (head->right == null) {
-					head->right = new;
-					return new;
+				else if (cmp == 1) {
+					/* Left leaf is null, insert here */
+					if (head->left == null) {
+						head->left = new;
+						return root;
+					}
+					else head = head->left;
 				}
-				else head = head->right;
+				else {
+					/* Right leaf is null, insert here */
+					if (head->right == null) {
+						head->right = new;
+						return root;
+					}
+					else head = head->right;
+				}
 			}
 		}
-		
-		return null;
 	}
 	
 	shared bool contains<T>(TreeNode<T>* n, func (T, T) -> int pred, T value) {
@@ -64,6 +78,11 @@ namespace Tree {
 		}
 	}
 	
+	/*
+	 * Delete given value from the given tree. The given predicate determines 
+	 * wheter the current value matches the searched value (predicate returns 0).
+	 * Returns the new root. May be null when the resulting tree is empty.
+	 */
 	shared TreeNode<T>* delete<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
 		/* Found leaf */
 		if (root == null) return null;
