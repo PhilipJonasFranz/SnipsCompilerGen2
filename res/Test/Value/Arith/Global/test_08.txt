@@ -1,36 +1,45 @@
-DESCRIPTION
-This test verifies global array/struct initialization.
 SOURCE
 #include<linked_list.sn>
 
-LinkedList<int>* list0 = List::create<int>(0);
-
-bool pred0(int x, int y) {
-	return x == y;
+enum Type {
+	REQ, RES, DAT;
 }
+
+struct X<T> {
+	Type type;
+	T payload;
+}
+
+/* Message queue that temporarily hold incoming messages */
+LinkedList<X<int>>* buffer = List::create<X<int>>(0...);
 
 int main() {
-	add<int>(list0, 12);
-	
-	clear(list0);
-	
-	func pred = (func) ((int) add<int>);
-	
-	pred(list0, 30);
-	
-	return get<int>(list0, 0);
+	List::add<>(buffer, X<int>::(Type.REQ, 20));
+	X<int> x = List::get<>(buffer, 0);
+	return x.payload;
 }
 TESTCASES
-30
+20
 OUTPUT
-/* --test_07.txt */
+/* --test_08.txt */
 .data
-list0: .skip 4
+buffer: .skip 4
 NULL: .word 0
 HEAP_START: .word 0
     
 .text
     b main_init
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
 /* Reseve a memory block with given size + 1. The block size has to be increased */
 /* by one to accomodate the block metadata. The function returns a void pointer to */
 /* the start of the reserved memory section + 1. This means the pointer points to */
@@ -128,36 +137,16 @@ resv.L18:
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
 /* section. */
-init_P1:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
+init_P1:                                     /* Function: init, Provisos: List.LinkedList<X<INT>> |  */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
+    mov r0, #6                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
-    add r0, fp, #24
+    add r0, fp, #32
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, [fp, #12]
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #16
-    bx lr
-    
-init_P3:                                     /* Provisos: List.ListNode<INT> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
     add r0, fp, #20
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
@@ -168,10 +157,44 @@ init_P3:                                     /* Provisos: List.ListNode<INT> */
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #12
+    add sp, sp, #24
+    bx lr
+    
+init_P3:                                     /* Provisos: List.ListNode<X<INT>> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #5                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #28
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #16]
+    ldr r1, [fp, #12]
+    stmfd sp!, {r0, r1}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #20
     bx lr
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
@@ -214,71 +237,85 @@ free.L2:
 /* and a value. */
 /* Wraps the list head and tail. */
 /* Creates a new List Object and initializes the head an tail to null. */
-List.create_P0:                              /* Function: List.create, Provisos: INT */
-    push { r3, lr }
-    mov r3, r0
+List.create_P0:                              /* Function: List.create, Provisos: X<INT> */
+    push { fp, lr }
+    mov fp, sp
 /* Initialize list, set pointers to null */
-    push { r3 }
+    add r0, fp, #16
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     ldr r0, .POOL1_L6_NULL                   /* Load null address */
     ldr r1, .POOL1_L6_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     bl init_P1                               /* Call init */
-    ldmfd sp!, {r3, pc}
+    mov sp, fp
+    ldmfd sp!, {fp, lr}
+    add sp, sp, #12
+    bx lr
 .POOL1_L6_NULL: .word NULL
     
 /* Creates a new list node for given value x and adds the node at the */
 /* end of the list. */
-lambda_List.add_P2:                          /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
-List.add_P2:                                 /* Function: List.add, Provisos: INT */
+List.add_P2:                                 /* Function: List.add, Provisos: X<INT> */
     sub sp, sp, #16
-    stmea sp, {r3-r5, lr}
+    stmea sp, {r3, r4, fp, lr}
+    mov fp, sp
     mov r3, r0
-    mov r4, r1
 /* Initialize the new List Node, set the next pointer to null */
-    push { r4 }
+    add r0, fp, #24
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
     ldr r0, .POOL2_L6_NULL                   /* Load null address */
     push { r0 }
     mov r0, #1
     push { r0 }
     bl init_P3                               /* Call init */
-    mov r5, r0
+    mov r4, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL2_L6_NULL                   /* Load null address */
     cmp r0, r1
     bne List.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    mov r0, r4                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
+    str r4, [r1, #8]                         /* Store value to struct field */
+    b List.add.L0
 List.add.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    mov r0, r4                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
+    str r4, [r1, #8]                         /* Store value to struct field */
+List.add.L0: 
+    mov sp, fp
+    ldmfd sp!, {r3, r4, fp, lr}
+    add sp, sp, #12
+    bx lr
 .POOL2_L6_NULL: .word NULL
     
 /* Returns the value of the node at the given index. Returns */
 /* the default value if the index is invalid. */
-List.get_P4:                                 /* Function: List.get, Provisos: INT */
-    sub sp, sp, #12
-    stmea sp, {r3-r5}
+List.get_P4:                                 /* Function: List.get, Provisos: X<INT> */
+    sub sp, sp, #16
+    stmea sp, {r3-r5, fp}
+    mov fp, sp
     mov r3, r0
     mov r4, r1
     cmp r1, #0
     bge List.get.L0
     lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
+    add r1, r1, #12
+    ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
+    stmfd sp!, {r0, r2}
+    ldr r0, [r1]
+    push { r0 }
     b List.get.L7
 List.get.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -292,7 +329,12 @@ List.get.L3:                                 /* Evaluate condition */
     cmp r0, r1
     bne List.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
+    add r1, r1, #12
+    ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
+    stmfd sp!, {r0, r2}
+    ldr r0, [r1]
+    push { r0 }
     b List.get.L7
 List.get.L5: 
 /* Jump to next */
@@ -303,72 +345,54 @@ List.get.L5:
     b List.get.L3
 List.get.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
+    add r1, r1, #8
+    ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
+    stmfd sp!, {r0, r2}
+    ldr r0, [r1]
+    push { r0 }
 List.get.L7: 
-    ldmfd sp!, {r3-r5}
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r3-r5, fp}
+    mov r0, #12
+    add r1, r2, #12
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
     bx lr
 .POOL3_L6_NULL: .word NULL
-    
-/* Removes all elements from the list */
-List.clear:                                  /* Function: List.clear */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
-    mov r3, r0
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-List.clear.L1:                               /* Evaluate condition */
-    ldr r1, .POOL4_L6_NULL                   /* Load null address */
-    cmp r4, r1
-    beq List.clear.L2
-    mov r0, r4                               /* Load parameters */
-    bl free                                  /* Call free */
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    b List.clear.L1
-List.clear.L2: 
-    ldr r0, .POOL4_L6_NULL                   /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    ldr r0, .POOL4_L6_NULL                   /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3, r4, pc}
-.POOL4_L6_NULL: .word NULL
     
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #20
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
+    mov r1, #0
+    mov r2, #3
+    stmfd sp!, {r0-r2}
     bl List.create_P0                        /* Call List.create */
-    ldr r1, .POOL5_L5_list0                  /* Load from .data section */
+    ldr r1, .POOL4_L5_buffer                 /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
+/* Message queue that temporarily hold incoming messages */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r1, #12
-    ldr r0, .POOL5_L5_list0                  /* Load from .data section */
+    mov r0, #20                              /* Load parameters */
+    mov r1, #0
+    stmfd sp!, {r0, r1}
+    mov r0, #3
+    push { r0 }
+    ldr r0, .POOL4_L5_buffer                 /* Load from .data section */
     ldr r0, [r0]
     bl List.add_P2                           /* Call List.add */
-    ldr r0, .POOL5_L5_list0                  /* Load parameters */
-    ldr r0, [r0]
-    bl List.clear                            /* Call List.clear */
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_List.add_P2
-    mov r10, #0
-    mov r3, r0
-    mov r1, #30
-    ldr r0, .POOL5_L5_list0                  /* Load from .data section */
-    ldr r0, [r0]
-    add lr, pc, #8
-    mov pc, r3
-    mov sp, fp                               /* Reset the stack after anonymous call */
     mov r1, #0
-    ldr r0, .POOL5_L5_list0                  /* Load from .data section */
+    ldr r0, .POOL4_L5_buffer                 /* Load from .data section */
     ldr r0, [r0]
     bl List.get_P4                           /* Call List.get */
+    ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL5_L5_list0: .word list0
+.POOL4_L5_buffer: .word buffer
     

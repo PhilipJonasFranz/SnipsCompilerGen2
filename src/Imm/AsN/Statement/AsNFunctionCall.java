@@ -234,11 +234,19 @@ public class AsNFunctionCall extends AsNStatement {
 				}
 			}
 			else {
-				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
-				ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.FP), new ImmOp(st.getFrameSize() * 4));
-				sub.comment = new ASMComment("Reset the stack after anonymous call");
+				int off = st.getFrameSize() * 4;
 				
-				call.instructions.add(sub);
+				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
+				if (off != 0) {
+					ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.FP), new ImmOp(off));
+					sub.comment = new ASMComment("Reset the stack after anonymous call");
+					call.instructions.add(sub);
+				}
+				else {
+					ASMMov mov = new ASMMov(new RegOp(REG.SP), new RegOp(REG.FP));
+					mov.comment = new ASMComment("Reset the stack after anonymous call");
+					call.instructions.add(mov);
+				}
 			}
 		}
 		
