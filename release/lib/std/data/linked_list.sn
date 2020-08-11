@@ -251,5 +251,12 @@ namespace List {
 		
 		return;
 	}
+
+	/*
+	 * Returns if the list is empty.
+	 */
+	shared bool isEmpty(LinkedList<void>* lp) {
+		return lp->head == null;
+	}
 	
 } 
