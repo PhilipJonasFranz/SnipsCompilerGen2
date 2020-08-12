@@ -98,7 +98,7 @@ namespace String {
 		int s1 = length(str1);
 		
 		/* Result length is equal to both strings length minus one 0 char. */
-		char* r = (char*) resv(s0 + s1);
+		char* r = resv(s0 + s1);
 		
 		/* Copy first part of string */
 		for (int i = 0; i < s0; i++) 

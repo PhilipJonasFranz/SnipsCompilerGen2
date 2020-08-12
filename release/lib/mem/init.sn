@@ -3,7 +3,7 @@
  * to this memory section, and returns a pointer to the new memory
  * section.
  */
-shared T* init<T>(T value) {
+shared void* init<T>(T value) {
 	void* p = resv(sizeof(T));
 	*p = value;
 	return p;
