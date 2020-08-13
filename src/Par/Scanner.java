@@ -164,11 +164,9 @@ public class Scanner {
 			staticScannables = this.scannables;
 			
 			/* Setup scanable map */
-			for (ScannableToken t : this.scannables) {
-				for (String reset : t.resetTokens) {
+			for (ScannableToken t : this.scannables) 
+				for (String reset : t.resetTokens) 
 					scannableMap.put(t.base + reset, t);
-				}
-			}
 		}
 		
 	}
@@ -352,9 +350,8 @@ public class Scanner {
 			else {
 				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) {
+					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
 						this.state = ACC_STATE.ID;
-					}
 				}
 				
 				if (this.buffer.matches(int_match)) 
@@ -368,9 +365,7 @@ public class Scanner {
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
-					if (this.buffer.trim().isEmpty()) {
-						return false;
-					}
+					if (this.buffer.trim().isEmpty()) return false;
 					
 					String id = this.buffer.substring(0, this.buffer.length() - 1);
 				
@@ -417,9 +412,7 @@ public class Scanner {
 					return true;
 				}
 				/* Invalid Char lit */
-				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) {
-					this.state = ACC_STATE.NONE;
-				}
+				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) this.state = ACC_STATE.NONE;
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches(int_match)) && this.state == ACC_STATE.INT) {
 					String lit = this.buffer.substring(0, this.buffer.length() - 1);
@@ -465,9 +458,10 @@ public class Scanner {
 		public String convertBase10(String lit, int fromBase) {
 			String [] sp = lit.split("");
 			int s = 0;
-			for (int k = 0; k < sp.length; k++) {
+			
+			for (int k = 0; k < sp.length; k++) 
 				s += Math.pow(fromBase, sp.length - k - 1) * Character.digit(sp [k].charAt(0), fromBase);
-			}
+			
 			lit = s + "";
 			return lit;
 		}
