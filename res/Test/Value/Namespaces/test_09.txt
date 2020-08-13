@@ -170,8 +170,6 @@ init_P3:                                     /* Provisos: List.ListNode<INT> |  
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}

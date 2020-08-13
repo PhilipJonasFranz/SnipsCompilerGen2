@@ -161,6 +161,8 @@ init_P1:                                     /* Function: init, Provisos: List.L
     str r0, [r1, #12]
     pop { r0 }
     str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}

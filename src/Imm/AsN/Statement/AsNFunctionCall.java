@@ -37,6 +37,7 @@ import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
 import Util.Pair;
 
@@ -72,7 +73,7 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Pair<Expression, Integer>> mapping = new ArrayList();
 		
 		for (Expression e : params) {
-			if (e.getType().wordsize() == 1 && r < 3) {
+			if (e.getType().wordsize() == 1 && r < 3 && !(e.getType() instanceof STRUCT)) {
 				/* Load in register */
 				mapping.add(new Pair(e, r));
 				r++;
@@ -130,7 +131,7 @@ public class AsNFunctionCall extends AsNStatement {
 				}
 				
 				/* Push Parameter in R0 on the stack, but only if parameter is not an atom placeholder that pushes itself on the stack */
-				if (parameters.get(i).getType().wordsize() == 1 && !placeholder) 
+				if (parameters.get(i).getType().wordsize() == 1 && !placeholder && !(parameters.get(i).getType() instanceof STRUCT)) 
 					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				
 				while (st.getStack().size() != s) st.pop();
