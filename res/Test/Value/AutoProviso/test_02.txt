@@ -572,8 +572,7 @@ Map.create.L2:
     bl resv                                  /* Call resv */
     mov r6, r0
 /* Place default value, skip key and padding */
-    add r1, r6, #2
-    add r0, r1, #1
+    add r0, r6, #3
     str r4, [r10, r0, lsl #2]
 /* Create the hash map and initialize it */
     push { r6 }

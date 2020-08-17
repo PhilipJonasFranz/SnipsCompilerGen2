@@ -78,10 +78,10 @@ public class ASMOptimizer {
 			OPT_DONE = false;
 			
 			/**
-			 * add r0, r0, #2
-			 * add r0, r0, #4
+			 * add rx, ry, #2
+			 * add r0, rx, #4
 			 * Replace with:
-			 * add r0, r0, #6
+			 * add r0, ry, #6
 			 */
 			this.defragmentAdditions(body);
 			
@@ -1560,6 +1560,26 @@ public class ASMOptimizer {
 					
 					op0.value += op1.value;
 					body.instructions.remove(i);
+					i--;
+					markOpt();
+				}
+			}
+		}
+		
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMAdd) {
+				ASMAdd add0 = (ASMAdd) body.instructions.get(i - 1);
+				ASMAdd add1 = (ASMAdd) body.instructions.get(i);
+				
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp) {
+					ImmOp op0 = (ImmOp) add0.op1;
+					ImmOp op1 = (ImmOp) add1.op1;
+					
+					op1.value = op0.value + op1.value;
+					add1.op0.reg = add0.op0.reg;
+					
+					op0.value += op1.value;
+					body.instructions.remove(i - 1);
 					i--;
 					markOpt();
 				}
