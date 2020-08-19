@@ -1,0 +1,60 @@
+SOURCE
+namespace Storage {
+
+	struct X<T> {
+		
+		T value;
+		
+		void set<T>(X<T>* x, int v) {
+			x->value = v;
+		}
+		
+		T get<T>(X<T>* x) {
+			return x->value;
+		}
+		
+	}
+
+}
+
+int main() {
+	X<int> x = Storage::X<>::(12);
+	x.set<int>(&x, 8);
+	return x.get<int>(&x);
+}
+TESTCASES
+8
+OUTPUT
+/* --test_04.txt */
+    b main
+Storage.X.set_P0:                            /* Function: Storage.X.set, Provisos: INT */
+    push { r3 }
+    mov r3, r0
+    mov r0, r1                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    pop { r3 }
+    bx lr
+    
+Storage.X.get_P1:                            /* Function: Storage.X.get, Provisos: INT */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #12                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r1, #8
+    sub r0, fp, #8
+    lsr r0, r0, #2
+    bl Storage.X.set_P0                      /* Call Storage.X.set */
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r0, r0, #2
+    bl Storage.X.get_P1                      /* Call Storage.X.get */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

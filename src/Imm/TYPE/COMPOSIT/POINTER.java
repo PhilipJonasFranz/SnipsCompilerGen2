@@ -27,7 +27,7 @@ public class POINTER extends COMPOSIT {
 			POINTER pointer = (POINTER) type;
 			if (pointer.targetType instanceof STRUCT && this.targetType instanceof STRUCT) {
 				STRUCT s = (STRUCT) this.targetType;
-				return s.isEqualExtended(type);
+				return s.isEqualExtended(pointer.targetType);
 			}
 			else return this.targetType.isEqual(pointer.targetType);
 		}

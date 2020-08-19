@@ -30,8 +30,8 @@ public class STRUCT extends COMPOSIT {
 	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
-		if (type.getCoreType() instanceof STRUCT) {
-			STRUCT struct = (STRUCT) type.getCoreType();
+		if (type instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
 			if (sDef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
@@ -54,8 +54,8 @@ public class STRUCT extends COMPOSIT {
 	 */
 	public boolean isEqualExtended(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
-		if (type.getCoreType() instanceof STRUCT) {
-			STRUCT struct = (STRUCT) type.getCoreType();
+		if (type instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
 			while (!sDef.equals(this.typedef)) {
@@ -69,7 +69,7 @@ public class STRUCT extends COMPOSIT {
 				
 				/* Compare Provisos, rest of subtree must be equal */
 				for (int i = 0; i < this.proviso.size(); i++) 
-					isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
+					isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
 				
 				return isEqual;
 			}

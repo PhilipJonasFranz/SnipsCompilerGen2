@@ -614,15 +614,6 @@ Map.put_P4:                                  /* Function: Map.put, Provisos: CHA
     bne Map.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]
-    push { r0 }
-    ldr r0, [r1, #8]
-    push { r0 }
-    ldr r0, [r1, #4]
-    push { r0 }
-    mov r0, #3                               /* Override SID header */
-    push { r0 }
     bl List.create_P5                        /* Call List.create */
     mov r6, r0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -632,7 +623,6 @@ Map.put_P4:                                  /* Function: Map.put, Provisos: CHA
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
-    add sp, sp, #16
 Map.put.L0: 
 /* Initialize the new key/value tuple */
     push { r4 }

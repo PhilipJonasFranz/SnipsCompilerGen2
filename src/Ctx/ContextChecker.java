@@ -1117,8 +1117,6 @@ public class ContextChecker {
 		/* Find the called function */
 		Function f = this.linkFunction(i.path, i, i.getSource());
 		
-		
-		
 		i.calledFunction = f;
 		
 		if (!this.exceptionEscapeStack.isEmpty()) i.watchpoint = this.exceptionEscapeStack.peek();
@@ -1165,7 +1163,8 @@ public class ContextChecker {
 				if (f.containsMapping(i.proviso)) {
 					/* Mapping already exists, just return return type of this specific mapping */
 					f.setContext(i.proviso);
-					i.setType(f.getMappingReturnType(i.proviso));
+					
+					i.setType(f.getReturnType());
 				}
 				else {
 					/* Create a new context, check function for this specific context */
@@ -1174,7 +1173,7 @@ public class ContextChecker {
 					this.scopes.push(new Scope(this.scopes.get(0)));
 					f.check(this);
 					this.scopes.pop();
-					i.setType(f.getMappingReturnType(i.proviso));
+					i.setType(f.getReturnType());
 				}
 			}
 			else 
@@ -1732,7 +1731,7 @@ public class ContextChecker {
 			
 			if (mapped == null) 
 				/* None of the types held the searched proviso, proviso cannot be auto-ed, abort. */
-				throw new CTX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov.provisoFree().typeString());
+				throw new CTX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov.typeString());
 			
 			foundMapping.add(mapped.provisoFree().clone());
 		}

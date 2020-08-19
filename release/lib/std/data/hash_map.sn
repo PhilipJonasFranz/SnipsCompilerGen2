@@ -98,7 +98,7 @@ namespace Map {
 
 		/* Initialize new list at index */
 		if (l == null) {
-			l = List::create<MapEntry<K, V>*>(*map->defValue);
+			l = List::create<MapEntry<K, V>*>(map->defValue);
 			*(map->storage + hash) = l;
 		}
 		
