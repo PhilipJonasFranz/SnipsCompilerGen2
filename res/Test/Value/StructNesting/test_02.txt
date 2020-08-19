@@ -1,0 +1,40 @@
+SOURCE
+namespace K {
+	struct X<T> {
+		T value;
+		
+		/* Getter for field value */
+		T getValue<T>(X<T> x) {
+			return x.value;
+		}
+	}
+}
+
+int main() {
+	K::X<int> x = K::X<int>::(10);
+	return x.getValue<int>(x);
+}
+TESTCASES
+10
+OUTPUT
+/* --test_02.txt */
+    b main
+K.X.getValue_P0:                             /* Function: K.X.getValue, Provisos: INT */
+    ldr r0, [sp, #4]                         /* Load field from struct */
+    add sp, sp, #8
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
+    ldr r1, [fp, #-8]
+    stmfd sp!, {r0, r1}
+    bl K.X.getValue_P0                       /* Call K.X.getValue */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

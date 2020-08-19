@@ -88,6 +88,10 @@ public class Const {
 	
 	public static final String ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE = "Argument type does not match struct field (%d) type: %s vs %s";
 	
+	public static final String FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE = "Function '%s' is not part of struct type %s";
+	
+	public static final String NESTED_CALL_BASE_IS_NOT_A_STRUCT = "Nested call base is not a STRUCT, actual %s";
+	
 	public static final String BASE_MUST_BE_VARIABLE_REFERENCE = "Base must be variable reference";
 	
 	public static final String SWITCH_COND_MUST_BE_VARIABLE = "Switch Condition has to be variable reference";

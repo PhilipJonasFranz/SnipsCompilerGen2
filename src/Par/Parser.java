@@ -347,7 +347,7 @@ public class Parser {
 		 * to another instance of this struct. The struct definition needs to exist before
 		 * such a declaration is parsed.
 		 */
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, extProviso, mod, source);
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
@@ -356,8 +356,39 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		/* Parse the regular struct fields */
-		while (current.type != TokenType.RBRACE) 
-			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
+		while (current.type != TokenType.RBRACE) {
+			if (current.type == TokenType.COMMENT) {
+				accept();
+				continue;
+			}
+			
+			boolean field = false;
+			for (int i = 1; i < this.tokenStream.size(); i++) {
+				if (this.tokenStream.get(i - 1).type == TokenType.IDENTIFIER && this.tokenStream.get(i).type == TokenType.SEMICOLON) {
+					field = true;
+				}
+				else if (this.tokenStream.get(i - 1).type == TokenType.LBRACE) {
+					break;
+				}
+			}
+			
+			if (field) 
+				/* Declaration */
+				def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
+			else {
+				/* Nested function */
+				MODIFIER m = this.parseModifier();
+				
+				TYPE type = this.parseType();
+				
+				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m);
+				
+				/* Insert Struct Name */
+				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+				
+				def.functions.add(f);
+			}
+		}
 		
 		accept(TokenType.RBRACE);
 
@@ -1015,13 +1046,38 @@ public class Parser {
 				return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
 			}
 			
-			/*
-			 * Normal behaviour.
-			 */
 			ASSIGN_ARITH arith = this.parseAssignOperator();
-			Expression value = this.parseExpression();
-			if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			return new Assignment(arith, target, value, target.getSource());
+			
+			if (arith == null) {
+				/*
+				 * Struct Nesting Call.
+				 * 
+				 * If the arith is null at this location, this means we have a nested struct call. The inline call
+				 * is parsed into the LhsId. So we need to extract the inline call from the lhs, convert it to an
+				 * Function Call, accept a semicolon and return the function call.
+				 * 
+				 * The Syntax where this occurs could be:
+				 * 
+				 * x.getValue(x);
+				 * 
+				 * where x is a struct variable, and getValue a function defined in the struct type definition.
+				 * 
+				 */
+				StructSelect select = ((StructSelectLhsId) target).select;
+				InlineCall ic = (InlineCall) select.selection;
+				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
+				fc.baseRef = select.selector;
+				accept(TokenType.SEMICOLON);
+				return fc;
+			}
+			else {
+				/*
+				 * Normal behaviour.
+				 */
+				Expression value = this.parseExpression();
+				if (acceptSemicolon) accept(TokenType.SEMICOLON);
+				return new Assignment(arith, target, value, target.getSource());
+			}
 		}
 	}
 	
@@ -1101,10 +1157,7 @@ public class Parser {
 			this.progress.abort();
 			throw new SNIPS_EXC(Const.CHECK_FOR_MISSPELLED_TYPES, current.spelling , current.getSource().getSourceMarker());
 		}
-		else {
-			this.progress.abort();
-			throw new PARSE_EXC(current.source, current.type, TokenType.LET);
-		}
+		else return null;
 	}
 	
 	protected LhsId parseLhsIdentifer() throws PARSE_EXC {

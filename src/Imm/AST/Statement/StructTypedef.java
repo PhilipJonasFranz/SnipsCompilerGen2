@@ -6,6 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
+import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
@@ -26,6 +27,8 @@ public class StructTypedef extends SyntaxElement {
 	public List<TYPE> proviso;
 	
 	private List<Declaration> fields;
+	
+	public List<Function> functions;
 	
 	public StructTypedef extension = null;
 	
@@ -64,12 +67,13 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, StructTypedef extension, List<TYPE> extProviso, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<TYPE> extProviso, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
 		this.proviso = proviso;
 		this.fields = declarations;
+		this.functions = functions;
 		
 		this.extension = extension;
 		this.extProviso = extProviso;

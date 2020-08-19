@@ -189,7 +189,6 @@ public class ContextChecker {
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisosTypes.isEmpty()) f.check(this);
 			}
-			else if (s instanceof Declaration) s.check(this);
 			else if (s instanceof Namespace) {
 				p.namespaces.add((Namespace) s);
 				s.check(this);
@@ -287,7 +286,13 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
+		for (Function f : e.functions) {
+			if (f.provisosTypes.isEmpty()) f.check(this);
+			this.functions.add(f);
+		}
+		
 		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		
 		if (opt.isPresent())
 			throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
 		
@@ -486,10 +491,35 @@ public class ContextChecker {
 			else throw new CTX_EXC(e.selector.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree().typeString());
 		}
 		
-		if (!(type instanceof STRUCT)) 
+		Expression selection = e.selection;
+		
+		if (!(type instanceof STRUCT) && !(selection instanceof InlineCall)) 
 			throw new CTX_EXC(e.getSource(), Const.CANNOT_SELECT_FROM_NON_STRUCT, type.provisoFree().typeString());
 		
-		Expression selection = e.selection;
+		/* Selection can only come after id ref */
+		if (selection instanceof InlineCall) {
+			if (!(e.selector instanceof IDRef)) 
+				throw new CTX_EXC(selection.getSource(), Const.BASE_MUST_BE_VARIABLE_REFERENCE);
+			
+			STRUCT s = (STRUCT) type.getCoreType();
+			
+			type = selection.check(this);
+			
+			Function f = ((InlineCall) selection).calledFunction;
+			
+			boolean found = false;
+			for (Function f0 : s.getTypedef().functions) {
+				if (f0.path.build().equals(f.path.build())) {
+					found = true;
+					break;
+				}
+			}
+		
+			if (!found)
+				throw new CTX_EXC(e.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.typeString());
+			
+			return type;
+		}
 		
 		while (true) {
 			selection.setType(type.clone());
@@ -577,6 +607,14 @@ public class ContextChecker {
 					this.scopes.pop();
 					
 					arr.setType(type.clone());
+					
+					break;
+				}
+				else if (selection instanceof InlineCall) {
+					if (!(type.getCoreType() instanceof STRUCT)) 
+						throw new CTX_EXC(selection.getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, type.getCoreType().typeString());
+					
+					type = selection.check(this);
 					
 					break;
 				}
@@ -1079,6 +1117,8 @@ public class ContextChecker {
 		/* Find the called function */
 		Function f = this.linkFunction(i.path, i, i.getSource());
 		
+		
+		
 		i.calledFunction = f;
 		
 		if (!this.exceptionEscapeStack.isEmpty()) i.watchpoint = this.exceptionEscapeStack.peek();
@@ -1193,6 +1233,27 @@ public class ContextChecker {
 		i.watchpoint = this.exceptionEscapeStack.peek();
 		
 		if (f != null) {
+			
+			if (i.baseRef != null) {
+				TYPE t = i.baseRef.check(this);
+				
+				if (!(t.getCoreType() instanceof STRUCT)) 
+					throw new CTX_EXC(i.getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
+				
+				STRUCT s = (STRUCT) t.getCoreType();
+				
+				boolean found = false;
+				for (Function f0 : s.getTypedef().functions) {
+					if (f0.path.build().equals(f.path.build())) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found)
+					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.typeString());
+			}
+			
 			checkModifier(f.modifier, f.path, i.getSource());
 			
 			/* Add signaled types */
@@ -1895,7 +1956,7 @@ public class ContextChecker {
 		
 		/* Neither regular function or predicate was found, undefined */
 		if (f == null && anonTarget == null) 
-			throw new CTX_EXC(source, Const.UNDEFINED_FUNCTION_OR_PREDICATE, path.build() + "'");
+			throw new CTX_EXC(source, Const.UNDEFINED_FUNCTION_OR_PREDICATE, path.build());
 		
 		/* Write back anon target and provisos */
 		if (i instanceof InlineCall) {
