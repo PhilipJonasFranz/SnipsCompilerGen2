@@ -493,40 +493,12 @@ public class ContextChecker {
 		
 		Expression selection = e.selection;
 		
-		if (!(type instanceof STRUCT) && !(selection instanceof InlineCall)) 
-			throw new CTX_EXC(e.getSource(), Const.CANNOT_SELECT_FROM_NON_STRUCT, type.provisoFree().typeString());
-		
-		/* Selection can only come after id ref */
-		if (selection instanceof InlineCall) {
-			if (!(e.selector instanceof IDRef)) 
-				throw new CTX_EXC(selection.getSource(), Const.BASE_MUST_BE_VARIABLE_REFERENCE);
-			
-			STRUCT s = (STRUCT) type.getCoreType();
-			
-			type = selection.check(this);
-			
-			Function f = ((InlineCall) selection).calledFunction;
-			
-			boolean found = false;
-			for (Function f0 : s.getTypedef().functions) {
-				if (f0.path.build().equals(f.path.build())) {
-					found = true;
-					break;
-				}
-			}
-		
-			if (!found)
-				throw new CTX_EXC(e.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.typeString());
-			
-			return type;
-		}
-		
 		while (true) {
 			selection.setType(type.clone());
 			
 			if (type instanceof STRUCT) {
 				STRUCT struct = (STRUCT) type;
-				
+					
 				if (selection instanceof StructSelect) {
 					StructSelect sel0 = (StructSelect) selection;
 					
@@ -610,15 +582,7 @@ public class ContextChecker {
 					
 					break;
 				}
-				else if (selection instanceof InlineCall) {
-					if (!(type.getCoreType() instanceof STRUCT)) 
-						throw new CTX_EXC(selection.getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, type.getCoreType().typeString());
-					
-					type = selection.check(this);
-					
-					break;
-				}
-				else throw new CTX_EXC(selection.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, selection.getClass().getName());
+				else throw new CTX_EXC(e.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, selection.getClass().getName());
 			}
 			else throw new CTX_EXC(e.getSource(), Const.CANNOT_SELECT_FROM_NON_STRUCT, type.provisoFree().typeString());
 			

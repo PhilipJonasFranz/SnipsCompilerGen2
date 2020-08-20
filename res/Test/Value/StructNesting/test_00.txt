@@ -3,14 +3,14 @@ struct X<T> {
 	T value;
 	
 	/* Getter for field value */
-	T getValue<T>(X<T> x) {
-		return x.value;
+	T getValue<T>() {
+		return self->value;
 	}
 }
 
 int main() {
 	X<int> x = X<int>::(10);
-	return x.getValue<int>(x);
+	return x.getValue<int>();
 }
 TESTCASES
 10
@@ -18,8 +18,8 @@ OUTPUT
 /* --test_00.txt */
     b main
 X.getValue_P0:                               /* Function: X.getValue, Provisos: INT */
-    ldr r0, [sp, #4]                         /* Load field from struct */
-    add sp, sp, #8
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
 main:                                        /* Function: main */
@@ -29,9 +29,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    ldr r0, [fp, #-4]                        /* Evaluate Expression */
-    ldr r1, [fp, #-8]
-    stmfd sp!, {r0, r1}
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r0, r0, #2
     bl X.getValue_P0                         /* Call X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}

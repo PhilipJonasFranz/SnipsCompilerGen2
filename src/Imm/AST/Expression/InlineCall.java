@@ -59,7 +59,8 @@ public class InlineCall extends Expression {
 			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
 			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
 		}
-		for (Expression e : this.parameters) {
+		
+		if (rec) for (Expression e : this.parameters) {
 			e.print(d + this.printDepthStep, rec);
 		}
 	}

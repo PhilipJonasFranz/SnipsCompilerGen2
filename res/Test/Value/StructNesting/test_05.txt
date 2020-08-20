@@ -1,0 +1,75 @@
+SOURCE
+namespace Storage {
+
+	struct X<T> {
+		
+		T value;
+		
+		void set<T>(T v) {
+			self->value = v;
+		}
+		
+		T get<T>() {
+			return self->value;
+		}
+		
+		X<T>* id<T>() {
+			return self;
+		}
+		
+	}
+
+}
+
+int main() {
+	X<int> x0 = Storage::X<>::(12);
+	X<int>* x = &x0;
+	
+	x->set<>(8);
+	
+	x = x->id<int>();
+	
+	return x->id<int>()->id<int>()->get<int>();
+}
+TESTCASES
+8
+OUTPUT
+/* --test_05.txt */
+    b main
+Storage.X.set_P0:                            /* Function: Storage.X.set, Provisos: INT */
+    push { r3 }
+    mov r3, r0
+    mov r0, r1                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    pop { r3 }
+    bx lr
+    
+Storage.X.get_P2:                            /* Function: Storage.X.get, Provisos: INT */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+Storage.X.id_P1:                             /* Function: Storage.X.id, Provisos: INT */
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #12                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r3, r0, #2
+    mov r1, #8
+    mov r0, r3
+    bl Storage.X.set_P0                      /* Call Storage.X.set */
+    mov r0, r3                               /* Evaluate Expression */
+    bl Storage.X.id_P1                       /* Call Storage.X.id */
+    bl Storage.X.id_P1                       /* Call Storage.X.id */
+    bl Storage.X.id_P1                       /* Call Storage.X.id */
+    bl Storage.X.get_P2                      /* Call Storage.X.get */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

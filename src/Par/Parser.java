@@ -386,6 +386,10 @@ public class Parser {
 				/* Insert Struct Name */
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
 				
+				/* Inject Self Reference */
+				Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+				f.parameters.add(0, self);
+				
 				def.functions.add(f);
 			}
 		}
@@ -1024,59 +1028,70 @@ public class Parser {
 			}
 		}
 		else {
-			LhsId target = this.parseLhsIdentifer();
+			SyntaxElement expr = this.parseLhsIdentifer();
 			
-			/*
-			 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
-			 * operation, needs to be handeled like this. This occurs for example in an assignment:
-			 * 
-			 * x [0].value++;
-			 * 
-			 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
-			 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
-			 * with a StructSelectWriteback as payload.
-			 */
-			if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
-				StructSelectLhsId lhs = (StructSelectLhsId) target;
+			if (expr instanceof InlineCall) {
+				InlineCall ic = (InlineCall) expr;
 				
-				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
-				accept();
-				if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			
-				return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
-			}
-			
-			ASSIGN_ARITH arith = this.parseAssignOperator();
-			
-			if (arith == null) {
-				/*
-				 * Struct Nesting Call.
-				 * 
-				 * If the arith is null at this location, this means we have a nested struct call. The inline call
-				 * is parsed into the LhsId. So we need to extract the inline call from the lhs, convert it to an
-				 * Function Call, accept a semicolon and return the function call.
-				 * 
-				 * The Syntax where this occurs could be:
-				 * 
-				 * x.getValue(x);
-				 * 
-				 * where x is a struct variable, and getValue a function defined in the struct type definition.
-				 * 
-				 */
-				StructSelect select = ((StructSelectLhsId) target).select;
-				InlineCall ic = (InlineCall) select.selection;
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
-				fc.baseRef = select.selector;
 				accept(TokenType.SEMICOLON);
 				return fc;
 			}
 			else {
+				LhsId target = (LhsId) expr;
+				
 				/*
-				 * Normal behaviour.
+				 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
+				 * operation, needs to be handeled like this. This occurs for example in an assignment:
+				 * 
+				 * x [0].value++;
+				 * 
+				 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
+				 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
+				 * with a StructSelectWriteback as payload.
 				 */
-				Expression value = this.parseExpression();
-				if (acceptSemicolon) accept(TokenType.SEMICOLON);
-				return new Assignment(arith, target, value, target.getSource());
+				if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+					StructSelectLhsId lhs = (StructSelectLhsId) target;
+					
+					WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
+					accept();
+					if (acceptSemicolon) accept(TokenType.SEMICOLON);
+				
+					return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
+				}
+				
+				ASSIGN_ARITH arith = this.parseAssignOperator();
+				
+				if (arith == null) {
+					/*
+					 * Struct Nesting Call.
+					 * 
+					 * If the arith is null at this location, this means we have a nested struct call. The inline call
+					 * is parsed into the LhsId. So we need to extract the inline call from the lhs, convert it to an
+					 * Function Call, accept a semicolon and return the function call.
+					 * 
+					 * The Syntax where this occurs could be:
+					 * 
+					 * x.getValue(x);
+					 * 
+					 * where x is a struct variable, and getValue a function defined in the struct type definition.
+					 * 
+					 */
+					StructSelect select = ((StructSelectLhsId) target).select;
+					InlineCall ic = (InlineCall) select.selection;
+					FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
+					fc.baseRef = select.selector;
+					accept(TokenType.SEMICOLON);
+					return fc;
+				}
+				else {
+					/*
+					 * Normal behaviour.
+					 */
+					Expression value = this.parseExpression();
+					if (acceptSemicolon) accept(TokenType.SEMICOLON);
+					return new Assignment(arith, target, value, target.getSource());
+				}
 			}
 		}
 	}
@@ -1160,7 +1175,7 @@ public class Parser {
 		else return null;
 	}
 	
-	protected LhsId parseLhsIdentifer() throws PARSE_EXC {
+	protected SyntaxElement parseLhsIdentifer() throws PARSE_EXC {
 		if (current.type == TokenType.MUL) {
 			Source source = current.getSource();
 			return new PointerLhsId(this.parseDeref(), source);
@@ -1176,6 +1191,8 @@ public class Parser {
 			else if (target instanceof StructSelect) {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
+			else if (target instanceof InlineCall) 
+				return target;
 			else {
 				this.progress.abort();
 				throw new PARSE_EXC(current.source, current.type, TokenType.IDENTIFIER);
@@ -1624,13 +1641,59 @@ public class Parser {
 	protected Expression parseStructSelect() throws PARSE_EXC {
 		Expression ref = this.parseArraySelect();
 		
+		boolean dot = false;
+		
 		if (current.type == TokenType.DOT) {
+			dot = true;
 			accept();
 			ref = new StructSelect(ref, this.parseStructSelect(), false, ref.getSource());
 		}
 		else if (current.type == TokenType.UNION_ACCESS) {
 			accept();
 			ref = new StructSelect(ref, this.parseStructSelect(), true, ref.getSource());
+		}
+		
+		if (ref instanceof StructSelect) {
+			StructSelect select = (StructSelect) ref;
+			
+			/* Nested call, transform AST by nesting the chained calls within each other */
+			if (select.selector instanceof IDRef && select.selection instanceof InlineCall) {
+				/* Single call */
+				InlineCall call = (InlineCall) select.selection;
+				
+				if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+				else call.parameters.add(0, select.selector);
+				
+				ref = call;
+			}
+			else if (select.selector instanceof IDRef && select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
+				/* Chained nested call */
+				StructSelect nested = (StructSelect) select.selection;
+				
+				InlineCall call = (InlineCall) nested.selector;
+
+				if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+				else call.parameters.add(0, select.selector);
+				
+				nested = (StructSelect) (((StructSelect) select.selection).selection);
+				
+				while (nested instanceof StructSelect) {
+					InlineCall call0 = (InlineCall) nested.selector;
+					call0.parameters.add(0, call);
+					
+					call = call0;
+					
+					if (nested.selection instanceof StructSelect) 
+						nested = (StructSelect) nested.selection;
+					else break;
+				}
+				
+				InlineCall end = (InlineCall) nested.selection;
+				end.parameters.add(0, call);
+				
+				call = end;
+				ref = call;
+			}
 		}
 		
 		return ref;
