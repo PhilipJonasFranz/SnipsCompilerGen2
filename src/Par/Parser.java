@@ -626,7 +626,7 @@ public class Parser {
 			else if (current.type == TokenType.SWITCH) {
 				return this.parseSwitch();
 			}
-			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
+			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.LPAREN) {
 				return this.parseAssignment(true);
 			}
 			else if (current.type == TokenType.IF) {
