@@ -4,14 +4,14 @@ SOURCE
 int main() {
 	CyclicQueue<int[2]>* q = Queue::create<int[2]>(3, {0, 0});
 	
-	enqueue<int [2]>(q, {3, 4});
-	enqueue<int [2]>(q, {9, 3});
+	q->enqueue<int [2]>({3, 4});
+	q->enqueue<int [2]>({9, 3});
 		
-	dequeue<int [2]>(q);
+	q->dequeue<int [2]>();
 	
-	int [2] r = dequeue<int [2]>(q);
+	int [2] r = q->dequeue<int [2]>();
 	
-	destroy(q);
+	q->destroy();
 	
 	return r [0] + r [1];
 }
@@ -34,142 +34,6 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
-resv:                                        /* Function: resv */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-/* Add block header to size */
-    add r3, r0, #1
-/* Get reference to heap start */
-    ldr r0, .POOL0_L4_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-/* Defragment Heap */
-resv.L6:                                     /* Evaluate condition */
-    mov r0, #1
-    cmp r0, #1
-    bne resv.L7
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L11
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-/* All structures to end are free */
-    b resv.L7
-resv.L11: 
-    add r5, r5, r6
-/* Add to current size */
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-/* Memory location is free, check size */
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-/* Fits */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L18
-resv.L15: 
-    cmp r5, r3
-    ble resv.L17
-/* Rest, subtract size, store at offset */
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L18
-resv.L17: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-/* Memory section is allocated, skip */
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-/* End reached, create new block */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L18: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL0_L4_HEAP_START: .word HEAP_START
-    
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P1:                                     /* Function: init, Provisos: Queue.CyclicQueue<INT[2]> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #8                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #40
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    add r0, fp, #28
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    ldr r0, [fp, #16]
-    ldr r1, [fp, #12]
-    stmfd sp!, {r0, r1}
-    pop { r0 }
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    pop { r0 }
-    str r0, [r1, #16]
-    pop { r0 }
-    str r0, [r1, #20]
-    pop { r0 }
-    str r0, [r1, #24]
-    pop { r0 }
-    str r0, [r1, #28]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #32
-    bx lr
     
 /* Frees the memory block the given pointer points to. The pointer object will keep */
 /* the memory address, but the memory block will not be registered to be used anymore and */
@@ -256,6 +120,142 @@ __op_mod.L14:
     ldmfd sp!, {r3-r7}
     bx lr
     
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+/* Add block header to size */
+    add r3, r0, #1
+/* Get reference to heap start */
+    ldr r0, .POOL0_L5_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+/* Defragment Heap */
+resv.L6:                                     /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne resv.L7
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L11
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b resv.L7
+resv.L11: 
+    add r5, r5, r6
+/* Add to current size */
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+/* Write defragmented size to heap */
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+/* Memory location is free, check size */
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+/* Fits */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L18
+resv.L15: 
+    cmp r5, r3
+    ble resv.L17
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L18
+resv.L17: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+/* End reached, create new block */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L18: 
+    ldmfd sp!, {r3-r6}
+    bx lr
+.POOL0_L5_HEAP_START: .word HEAP_START
+    
+/* Reserves a memory section using resv, assigns the given value */
+/* to this memory section, and returns a pointer to the new memory */
+/* section. */
+init_P1:                                     /* Function: init, Provisos: Queue.CyclicQueue<INT[2]> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #8                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #40
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    add r0, fp, #28
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #16]
+    ldr r1, [fp, #12]
+    stmfd sp!, {r0, r1}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
+    pop { r0 }
+    str r0, [r1, #24]
+    pop { r0 }
+    str r0, [r1, #28]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #32
+    bx lr
+    
 /* [BASE-PACKAGE] */
 /*  */
 /* This package contains the utility to create and use */
@@ -265,40 +265,7 @@ __op_mod.L14:
 /* maximum size of the queue. Finally the queue has a isEmpty flag, */
 /* that is used to determine wether the queue is full or empty when */
 /* the head index is the same as the tail index. */
-/* Allocates a new queue and initializes it. */
-/* The passed size will be set as the maximum amount of elements */
-/* in the queue. */
-Queue.create_P0:                             /* Function: Queue.create, Provisos: INT[2] */
-    sub sp, sp, #16
-    stmea sp, {r3, r4, fp, lr}
-    mov fp, sp
-    mov r3, r0
-/* Allocate memory for storage of given size */
-    mov r0, #2                               /* Evaluate Expression */
-    mul r0, r0, r3
-    bl resv                                  /* Call resv */
-    mov r4, r0
-/* Initialize, set start values */
-    mov r0, #1                               /* Evaluate Expression */
-    mov r1, #0
-    mov r2, #0
-    stmfd sp!, {r0-r2}
-    push { r3 }
-    ldr r0, [fp, #20]
-    ldr r1, [fp, #16]
-    stmfd sp!, {r0, r1}
-    push { r4 }
-    mov r0, #1
-    push { r0 }
-    bl init_P1                               /* Call init */
-    mov sp, fp
-    ldmfd sp!, {r3, r4, fp, lr}
-    add sp, sp, #8
-    bx lr
-    
-/* Frees the allocated storage of the queue, */
-/* as well as the queue itself. */
-Queue.destroy:                               /* Function: Queue.destroy */
+Queue.CyclicQueue.destroy_P4:                /* Function: Queue.CyclicQueue.destroy, Provisos: INT[2] */
     push { r3, lr }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -308,9 +275,7 @@ Queue.destroy:                               /* Function: Queue.destroy */
     bl free                                  /* Call free */
     ldmfd sp!, {r3, pc}
     
-/* Enqueue a new value. The value is only enqueued if the */
-/* queue is not full. */
-Queue.enqueue_P2:                            /* Function: Queue.enqueue, Provisos: INT[2] */
+Queue.CyclicQueue.enqueue_P2:                /* Function: Queue.CyclicQueue.enqueue, Provisos: INT[2] */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -336,10 +301,10 @@ Queue.enqueue_P2:                            /* Function: Queue.enqueue, Proviso
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq Queue.enqueue.L0
+    beq Queue.CyclicQueue.enqueue.L0
 /* Queue is full */
-    b Queue.enqueue.L2
-Queue.enqueue.L0: 
+    b Queue.CyclicQueue.enqueue.L2
+Queue.CyclicQueue.enqueue.L0: 
 /* Calculate word offset to the storage location based on the */
 /* Size of the proviso type and the head index */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -372,15 +337,13 @@ Queue.enqueue.L0:
     mov r0, #0                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #28]                        /* Store value to struct field */
-Queue.enqueue.L2: 
+Queue.CyclicQueue.enqueue.L2: 
     mov sp, fp
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #8
     bx lr
     
-/* Dequeues a value and removes it from the queue. Returns */
-/* the default value if the queue is empty. */
-Queue.dequeue_P3:                            /* Function: Queue.dequeue, Provisos: INT[2] */
+Queue.CyclicQueue.dequeue_P3:                /* Function: Queue.CyclicQueue.dequeue, Provisos: INT[2] */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -388,15 +351,15 @@ Queue.dequeue_P3:                            /* Function: Queue.dequeue, Proviso
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #28]                        /* Load field from struct */
     cmp r0, #0
-    beq Queue.dequeue.L0
+    beq Queue.CyclicQueue.dequeue.L0
 /* Queue is empty, return a default value. */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1, #4]
     ldr r2, [r1]
     stmfd sp!, {r0, r2}
-    b Queue.dequeue.L4
-Queue.dequeue.L0: 
+    b Queue.CyclicQueue.dequeue.L4
+Queue.CyclicQueue.dequeue.L0: 
 /* Read value from tail */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -428,15 +391,15 @@ Queue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #20]                        /* Load field from struct */
     cmp r0, r1
-    bne Queue.dequeue.L2
+    bne Queue.CyclicQueue.dequeue.L2
     mov r0, #1                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #28]                        /* Store value to struct field */
-Queue.dequeue.L2: 
+Queue.CyclicQueue.dequeue.L2: 
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     stmfd sp!, {r0, r1}
-Queue.dequeue.L4: 
+Queue.CyclicQueue.dequeue.L4: 
     mov r2, sp
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}
@@ -445,6 +408,37 @@ Queue.dequeue.L4:
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
+    bx lr
+    
+/* Allocates a new queue and initializes it. */
+/* The passed size will be set as the maximum amount of elements */
+/* in the queue. */
+Queue.create_P0:                             /* Function: Queue.create, Provisos: INT[2] */
+    sub sp, sp, #16
+    stmea sp, {r3, r4, fp, lr}
+    mov fp, sp
+    mov r3, r0
+/* Allocate memory for storage of given size */
+    mov r0, #2                               /* Evaluate Expression */
+    mul r0, r0, r3
+    bl resv                                  /* Call resv */
+    mov r4, r0
+/* Initialize, set start values */
+    mov r0, #1                               /* Evaluate Expression */
+    mov r1, #0
+    mov r2, #0
+    stmfd sp!, {r0-r2}
+    push { r3 }
+    ldr r0, [fp, #20]
+    ldr r1, [fp, #16]
+    stmfd sp!, {r0, r1}
+    push { r4 }
+    mov r0, #1
+    push { r0 }
+    bl init_P1                               /* Call init */
+    mov sp, fp
+    ldmfd sp!, {r3, r4, fp, lr}
+    add sp, sp, #8
     bx lr
     
 main:                                        /* Function: main */
@@ -460,19 +454,19 @@ main:                                        /* Function: main */
     mov r1, #3
     stmfd sp!, {r0, r1}
     mov r0, r3
-    bl Queue.enqueue_P2                      /* Call Queue.enqueue */
+    bl Queue.CyclicQueue.enqueue_P2          /* Call Queue.CyclicQueue.enqueue */
     mov r0, #3                               /* Load parameters */
     mov r1, #9
     stmfd sp!, {r0, r1}
     mov r0, r3
-    bl Queue.enqueue_P2                      /* Call Queue.enqueue */
+    bl Queue.CyclicQueue.enqueue_P2          /* Call Queue.CyclicQueue.enqueue */
     mov r0, r3                               /* Load parameters */
-    bl Queue.dequeue_P3                      /* Call Queue.dequeue */
+    bl Queue.CyclicQueue.dequeue_P3          /* Call Queue.CyclicQueue.dequeue */
     add sp, sp, #8
     mov r0, r3                               /* Evaluate Expression */
-    bl Queue.dequeue_P3                      /* Call Queue.dequeue */
+    bl Queue.CyclicQueue.dequeue_P3          /* Call Queue.CyclicQueue.dequeue */
     mov r0, r3                               /* Load parameters */
-    bl Queue.destroy                         /* Call Queue.destroy */
+    bl Queue.CyclicQueue.destroy_P4          /* Call Queue.CyclicQueue.destroy */
     ldr r0, [fp, #-8]
     ldr r2, [fp, #-4]
     add r0, r0, r2

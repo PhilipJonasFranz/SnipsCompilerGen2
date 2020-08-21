@@ -99,16 +99,16 @@ namespace Tree {
 							n = n->left;
 						}
 						
-						*self->value = min;
-						*self->right = delete<T>(self->right, pred, value);
+						self->value = min;
+						self->right = (self->right)->delete<T>(pred, value);
 					}
 				}
 				else {
 					/* Value to delete is further down in subtree */
 					if (pred(self->value, value) == 1) 
-						*self->left = delete<T>(self->left, pred, value);
+						self->left = (self->left)->delete<T>(pred, value);
 					else 
-						*self->right = delete<T>(self->right, pred, value);
+						self->right = (self->right)->delete<T>(pred, value);
 						
 					return self;
 				}

@@ -23,6 +23,8 @@ public class FunctionRef extends Expression {
 	/** List of the provisos types this function is templated with */
 	public List<TYPE> proviso;
 	
+	public IDRef base = null;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

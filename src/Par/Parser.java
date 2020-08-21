@@ -1034,6 +1034,8 @@ public class Parser {
 				InlineCall ic = (InlineCall) expr;
 				
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
+				fc.isNestedCall = true;
+				
 				accept(TokenType.SEMICOLON);
 				return fc;
 			}
@@ -1668,18 +1670,25 @@ public class Parser {
 				if (select.selection instanceof InlineCall) {
 					/* Single call */
 					InlineCall call = (InlineCall) select.selection;
+					call.isNestedCall = true;
 					
 					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
 					else call.parameters.add(0, select.selector);
 					
 					ref = call;
 				}
+				else if (select.selection instanceof FunctionRef && select.selector instanceof IDRef) {
+					FunctionRef base = (FunctionRef) select.selection;
+					base.base = (IDRef) select.selector;
+					ref = base;
+				}
 				else if (select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
 					/* Chained nested call */
 					StructSelect nested = (StructSelect) select.selection;
 					
 					InlineCall call = (InlineCall) nested.selector;
-	
+					call.isNestedCall = true;
+					
 					/* Nest based on the chain head an address of of the head or just the head in the call parameters */
 					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
 					else call.parameters.add(0, select.selector);
@@ -1692,6 +1701,8 @@ public class Parser {
 							
 							/* Nest the previous call as parameter in the next call */
 							InlineCall call0 = (InlineCall) nested.selector;
+							call0.isNestedCall = true;
+							
 							call0.parameters.add(0, call);
 							
 							call = call0;
@@ -1704,6 +1715,8 @@ public class Parser {
 					
 					/* Final call in chain, nest the current call as parameter in the final call */
 					InlineCall end = (InlineCall) nested.selection;
+					end.isNestedCall = true;
+					
 					end.parameters.add(0, call);
 					
 					call = end;
@@ -2212,6 +2225,19 @@ public class Parser {
 			
 			while (current.type != TokenType.CMPGT) {
 				TYPE type = this.parseType();
+				
+				if (current.type == TokenType.COLON) {
+					accept();
+					
+					TYPE def = this.parseType();
+					
+					if (!(type instanceof PROVISO)) 
+						throw new SNIPS_EXC("Cannot parse a default proviso at this location, " + current.getSource().getSourceMarker() + " (" + CompilerDriver.inputFile.getPath() + ")");
+				
+					PROVISO prov = (PROVISO) type;
+					prov.defaultContext = def;
+				}
+				
 				pro.add(type);
 				if (current.type == TokenType.COMMA) 
 					accept();

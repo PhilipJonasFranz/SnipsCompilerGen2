@@ -33,6 +33,8 @@ public class InlineCall extends Expression {
 	
 	public boolean hasAutoProviso = false;
 	
+	public boolean isNestedCall = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

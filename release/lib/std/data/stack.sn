@@ -14,9 +14,9 @@ namespace Stack {
 		/*
 		 * Destroys the stack and the capsuled list.
 		 */
-		shared void destroy<T>() {
+		shared void destroy<T:void>() {
 			/* Destroy the capsuled list */
-			(self->list)->destroy<T>();
+			(self->list)->destroy();
 			
 			/* Free the stack itself */
 			free(self);
@@ -32,15 +32,15 @@ namespace Stack {
 		/*
 		 * Returns true if no elements are currently in the stack.
 		 */
-		shared bool isEmpty<T>() {
-			return (self->list)->size<T>() == 0;
+		shared bool isEmpty<T:void>() {
+			return (self->list)->size() == 0;
 		}
 		
 		/*
 		 * Returns the amount of elements stored in the stack.
 		 */
-		shared int size<T>() {
-			return (self->list)->size<T>();
+		shared int size<T:void>() {
+			return (self->list)->size();
 		}
 		
 		/*

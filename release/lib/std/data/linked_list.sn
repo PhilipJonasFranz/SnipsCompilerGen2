@@ -70,8 +70,8 @@ namespace List {
 		/*
 		 * Free the list by freeing all contained list nodes, and the list itself.
 		 */
-		shared void destroy<T>() {
-			ListNode<T>* n = self->head;
+		shared void destroy<T:void>() {
+			ListNode<void>* n = self->head;
 			while (n != null) {
 				free(n);
 				n = n->next;
@@ -121,8 +121,8 @@ namespace List {
 		/*
 		 * Returns the amount of elements stored in the list.
 		 */
-		shared int size<T>() {
-			ListNode<T>* n = self->head;
+		shared int size<T:void>() {
+			ListNode<void>* n = self->head;
 			int size = 0;
 			while (n != null) {
 				n = n->next;
@@ -134,9 +134,9 @@ namespace List {
 		/*
 		 * Returns the index of given node in the list.
 		 */
-		shared int indexOf<T>(ListNode<T>* n) {
+		shared int indexOf<T:void>(ListNode<void>* n) {
 			/* Start iterating at head of list */
-			ListNode<T>* n0 = self->head;
+			ListNode<void>* n0 = self->head;
 			
 			/* Current index */
 			int i = 0;
@@ -159,14 +159,14 @@ namespace List {
 		 * Removes the index at given index.
 		 * If the index is out of bounds nothing is removed.
 		 */
-		shared void remove<T>(int i) {
+		shared void remove<T:void>(int i) {
 			/* Out of bounds */
 			if (i < 0) return;
 			
 			if (i == 0) {
 				/* Remove first element */
 				if (self->head != null) {
-					ListNode<T>* n = self->head;
+					ListNode<void>* n = self->head;
 					self->head = self->head->next;
 					
 					/* Only one element in list */
@@ -201,7 +201,7 @@ namespace List {
 					}
 					else {
 						/* Cut out element and set next pointers */
-						ListNode<T>* next = n->next->next;
+						ListNode<void>* next = n->next->next;
 						free(n->next);
 						n->next = next;
 					}
@@ -213,8 +213,8 @@ namespace List {
 		/*
 		 * Removes all elements from the list
 		 */
-		shared void clear<T>() {
-			ListNode<T>* n = self->head;
+		shared void clear<T:void>() {
+			ListNode<void>* n = self->head;
 			while (n != null) {
 				free(n);
 				n = n->next;
@@ -229,7 +229,7 @@ namespace List {
 		/*
 		 * Returns if the list is empty.
 		 */
-		shared bool isEmpty<T>() {
+		shared bool isEmpty<T:void>() {
 			return self->head == null;
 		}
 	

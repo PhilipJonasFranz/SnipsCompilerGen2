@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import Exc.CTX_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -288,7 +289,6 @@ public class ContextChecker {
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
 		for (Function f : e.functions) {
 			if (f.provisosTypes.isEmpty()) f.check(this);
-			this.functions.add(f);
 		}
 		
 		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
@@ -1078,8 +1078,19 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXC {
-		/* Find the called function */
+		List<Function> backup = this.functions;
+		
+		if (i.isNestedCall) {
+			this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
+			
+			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+			this.functions.addAll(s.getTypedef().functions);
+		}
+		
 		Function f = this.linkFunction(i.path, i, i.getSource());
+		
+		if (i.isNestedCall)
+			this.functions = backup;
 		
 		i.calledFunction = f;
 		
@@ -1190,7 +1201,19 @@ public class ContextChecker {
 	}	
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXC {
+		List<Function> backup = this.functions;
+		
+		if (i.isNestedCall) {
+			this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
+			
+			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+			this.functions.addAll(s.getTypedef().functions);
+		}
+		
 		Function f = this.linkFunction(i.path, i, i.getSource());
+		
+		if (i.isNestedCall)
+			this.functions = backup;
 		
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
@@ -1347,8 +1370,30 @@ public class ContextChecker {
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXC {
 		
+		if (r.base != null) {
+			
+		}
+		
 		/* If not already linked, find referenced function */
-		Function lambda = (r.origin != null)? r.origin : this.findFunction(r.path, r.getSource(), true);
+		Function lambda = null;
+		
+		if (r.origin != null)
+			lambda = r.origin;
+		else {
+			List<Function> backup = this.functions;
+			
+			if (r.base != null) {
+				this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
+					
+				STRUCT s = (STRUCT) r.base.check(this).getCoreType();
+				this.functions.addAll(s.getTypedef().functions);
+			}
+			
+			lambda = this.findFunction(r.path, r.getSource(), true);
+			
+			this.functions = backup;
+		}
+		
 		if (lambda == null) 
 			throw new CTX_EXC(r.getSource(), Const.UNKNOWN_PREDICATE, r.path.build());
 		
@@ -1934,6 +1979,11 @@ public class ContextChecker {
 		}
 		
 		return f;
+	}
+	
+	public boolean functionWhitelist(NamespacePath path) {
+		String p = path.build();
+		return p.equals("init") || p.equals("resv") || p.equals("hsize") || p.equals("free") || p.equals("__op_mod") || p.equals("__op_div");
 	}
 	
 } 

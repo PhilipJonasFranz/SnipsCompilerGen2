@@ -31,7 +31,7 @@ namespace Queue {
 		 * Frees the allocated storage of the queue,
 		 * as well as the queue itself.
 		 */
-		shared void destroy<T>() {
+		shared void destroy<T:void>() {
 			free(self->storage);
 			free(self);
 		}
@@ -39,7 +39,7 @@ namespace Queue {
 		/*
 		 * Returns true if currently no elements are in the queue.
 		 */
-		shared bool isEmpty<T>() {
+		shared bool isEmpty<T:void>() {
 			return self->isEmpty;
 		}
 		
@@ -47,7 +47,7 @@ namespace Queue {
 		 * Returns true if the amount of elements in the queue is
 		 * equal to the specified size when the queue was created.
 		 */
-		shared bool isFull<T>() {
+		shared bool isFull<T:void>() {
 			return self->head == self->tail && !self->isEmpty;
 		}
 		
@@ -106,7 +106,7 @@ namespace Queue {
 		 * Clears all elements in the queue by resetting the
 		 * head and tail indexes, and setting the isEmpty flag to true.
 		 */
-		shared void clear<T>() {
+		shared void clear<T:void>() {
 			self->head = 0;
 			self->tail = 0;
 			self->isEmpty = true;
@@ -117,7 +117,7 @@ namespace Queue {
 		 * Returns the amount of elements that are currently 
 		 * stored in the queue.
 		 */
-		shared int size<T>() {
+		shared int size<T:void>() {
 			/* Queue is full */
 			if (self->head == self->tail && !(self->isEmpty)) 
 				return self->size;

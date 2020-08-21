@@ -11,6 +11,8 @@ public class PROVISO extends TYPE<Void> {
 	
 	protected TYPE context;
 	
+	public TYPE defaultContext = null;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	public PROVISO(String placeholderName) {
@@ -35,11 +37,15 @@ public class PROVISO extends TYPE<Void> {
 			if (p.hasContext()) return p.getContext();
 			else return p;
 		}
-		else return this.context;
+		else {
+			if (this.context != null)
+				return this.context;
+			else return this.defaultContext;
+		}
 	}
 	
 	public boolean hasContext() {
-		return this.context != null;
+		return this.context != null || this.defaultContext != null;
 	}
 	
 	public void releaseContext() {
@@ -48,6 +54,7 @@ public class PROVISO extends TYPE<Void> {
 	
 	public void setValue(String value) {
 		if (this.context != null) this.context.setValue(value);
+		else this.defaultContext.setValue(value);
 	}
 	
 	public boolean isEqual(TYPE type) {
@@ -56,13 +63,18 @@ public class PROVISO extends TYPE<Void> {
 			return p.placeholderName.equals(this.placeholderName);
 		}
 		else {
-			if (this.context == null) return false;
+			if (this.context == null) {
+				if (this.defaultContext != null)
+					return this.defaultContext.isEqual(type);
+				else return false;
+			}
 			else return this.context.isEqual(type);
 		}
 	}
 	
 	public boolean hasValue() {
-		return (this.context != null)? this.context.hasValue() : false;
+		if (this.context != null && this.context.hasValue()) return true;
+		else return this.defaultContext.hasValue();
 	}
 	
 	public String typeString() {
@@ -71,6 +83,7 @@ public class PROVISO extends TYPE<Void> {
 		s += "PROVISO<";
 		s += this.placeholderName;
 		if (this.context != null) s += ", " + this.context.typeString();
+		if (this.defaultContext != null) s += " : " + this.defaultContext.typeString();
 		s += ">";
 			
 		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
@@ -79,23 +92,27 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public String sourceCodeRepresentation() {
-		return (this.context != null)? this.context.sourceCodeRepresentation() : null;
+		if (this.context != null) return this.context.sourceCodeRepresentation();
+		else if (this.defaultContext != null) return this.defaultContext.sourceCodeRepresentation();
+		else return null;
 	}
 	
 	public int wordsize() {
 		if (this.context != null) return this.context.wordsize();
+		else if (this.defaultContext != null) return this.defaultContext.wordsize();
 		else {
 			throw new SNIPS_EXC(Const.ATTEMPTED_TO_GET_WORDSIZE_OF_PROVISO_WITHOUT_CONTEXT, this.placeholderName);
 		}
 	}
 	
 	public TYPE getCoreType() {
-		return (this.hasContext())? this.context.getCoreType() : this;
+		return (this.context != null)? this.context.getCoreType() : ((this.defaultContext != null)? this.defaultContext : this);
 	}
 
 	public PROVISO clone() {
 		PROVISO p = new PROVISO(this.placeholderName);
 		if (this.context != null) p.context = this.context.clone();
+		if (this.defaultContext != null) p.defaultContext = this.defaultContext.clone();
 		return p;
 	}
 
