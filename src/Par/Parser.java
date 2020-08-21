@@ -1675,17 +1675,20 @@ public class Parser {
 				if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
 				else call.parameters.add(0, select.selector);
 				
-				nested = (StructSelect) (((StructSelect) select.selection).selection);
-				
-				while (nested instanceof StructSelect) {
-					InlineCall call0 = (InlineCall) nested.selector;
-					call0.parameters.add(0, call);
+				/* Multiple chains */
+				if (((StructSelect) select.selection).selection instanceof StructSelect) {
+					nested = (StructSelect) (((StructSelect) select.selection).selection);
 					
-					call = call0;
-					
-					if (nested.selection instanceof StructSelect) 
-						nested = (StructSelect) nested.selection;
-					else break;
+					while (nested instanceof StructSelect) {
+						InlineCall call0 = (InlineCall) nested.selector;
+						call0.parameters.add(0, call);
+						
+						call = call0;
+						
+						if (nested.selection instanceof StructSelect) 
+							nested = (StructSelect) nested.selection;
+						else break;
+					}
 				}
 				
 				InlineCall end = (InlineCall) nested.selection;
