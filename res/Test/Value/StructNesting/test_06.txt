@@ -1,0 +1,52 @@
+SOURCE
+namespace Storage {
+
+	struct X<T> {
+		
+		T value;
+		
+		T get<T>() {
+			return self->value;
+		}
+		
+	}
+
+}
+
+int main() {
+	X<int> [2] x0 = {Storage::X<>::(12), Storage::X<>::(25)};
+	
+	return (&(x0 [0]))->get<int>() + x0 [1].get<int>();
+}
+TESTCASES
+37
+OUTPUT
+/* --test_06.txt */
+    b main
+Storage.X.get_P0:                            /* Function: Storage.X.get, Provisos: INT */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #12
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #16
+    lsr r0, r0, #2
+    bl Storage.X.get_P0                      /* Call Storage.X.get */
+    mov r3, r0
+    sub r0, fp, #8
+    lsr r0, r0, #2
+    bl Storage.X.get_P0                      /* Call Storage.X.get */
+    add r0, r3, r0
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

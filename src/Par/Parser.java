@@ -1656,46 +1656,55 @@ public class Parser {
 		if (ref instanceof StructSelect) {
 			StructSelect select = (StructSelect) ref;
 			
-			/* Nested call, transform AST by nesting the chained calls within each other */
-			if (select.selector instanceof IDRef && select.selection instanceof InlineCall) {
-				/* Single call */
-				InlineCall call = (InlineCall) select.selection;
-				
-				if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
-				else call.parameters.add(0, select.selector);
-				
-				ref = call;
-			}
-			else if (select.selector instanceof IDRef && select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
-				/* Chained nested call */
-				StructSelect nested = (StructSelect) select.selection;
-				
-				InlineCall call = (InlineCall) nested.selector;
-
-				if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
-				else call.parameters.add(0, select.selector);
-				
-				/* Multiple chains */
-				if (((StructSelect) select.selection).selection instanceof StructSelect) {
-					nested = (StructSelect) (((StructSelect) select.selection).selection);
+			/* 
+			 * Nested call, transform AST by nesting the chained calls within each other.
+			 * Only do the transformation if the head of the select is not an inline call,
+			 * because if this is the case, this means we are currently recursiveley in the
+			 * middle of the chain. We need a head to start the chain, which was already
+			 * parsed, but not attatched. Just return, a previous recursice call will transform
+			 * the AST eventually.
+			 */
+			if (!(select.selector instanceof InlineCall)) {
+				if (select.selection instanceof InlineCall) {
+					/* Single call */
+					InlineCall call = (InlineCall) select.selection;
 					
-					while (nested instanceof StructSelect) {
-						InlineCall call0 = (InlineCall) nested.selector;
-						call0.parameters.add(0, call);
-						
-						call = call0;
-						
-						if (nested.selection instanceof StructSelect) 
-							nested = (StructSelect) nested.selection;
-						else break;
-					}
+					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+					else call.parameters.add(0, select.selector);
+					
+					ref = call;
 				}
-				
-				InlineCall end = (InlineCall) nested.selection;
-				end.parameters.add(0, call);
-				
-				call = end;
-				ref = call;
+				else if (select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
+					/* Chained nested call */
+					StructSelect nested = (StructSelect) select.selection;
+					
+					InlineCall call = (InlineCall) nested.selector;
+	
+					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+					else call.parameters.add(0, select.selector);
+					
+					/* Multiple chains */
+					if (((StructSelect) select.selection).selection instanceof StructSelect) {
+						nested = (StructSelect) (((StructSelect) select.selection).selection);
+						
+						while (nested instanceof StructSelect) {
+							InlineCall call0 = (InlineCall) nested.selector;
+							call0.parameters.add(0, call);
+							
+							call = call0;
+							
+							if (nested.selection instanceof StructSelect) 
+								nested = (StructSelect) nested.selection;
+							else break;
+						}
+					}
+					
+					InlineCall end = (InlineCall) nested.selection;
+					end.parameters.add(0, call);
+					
+					call = end;
+					ref = call;
+				}
 			}
 		}
 		
