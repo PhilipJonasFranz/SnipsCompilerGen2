@@ -20,9 +20,219 @@ namespace List {
 	 * Wraps the list head and tail.
 	 */
 	restricted struct LinkedList<T> {
+		
+		/* Points to the head of the list or is null. */
 		ListNode<T>* head;
+		
+		/* Points to the last element of the list or is null. */
 		ListNode<T>* tail;
+		
+		/* The default value that can be returned */
 		T defValue;
+		
+		/*
+		 * Creates a new list node for given value x and adds the node at the
+		 * end of the list.
+		 */
+		shared void add<T>(T x) {
+			/* Initialize the new List Node, set the next pointer to null */
+			ListNode<T>* n = init<>(ListNode<T>::(null, x));
+		
+			if (self->head == null) {
+				self->head = n;
+				self->tail = n;
+			}
+			else {
+				self->tail->next = n;
+				self->tail = n;
+			}	
+		}
+		
+		/*
+		 * Returns the value of the node at the given index. Returns
+		 * the default value if the index is invalid.
+		 */
+		shared T get<T>(int i) {
+			if (i < 0) return self->defValue;
+		
+			ListNode<T>* n = self->head;
+			while (i != 0) {
+				if (n->next == null) return self->defValue;
+				
+				/* Jump to next */
+				n = n->next;
+				i--;
+			}
+			
+			return n->value;	
+		}
+		
+		/*
+		 * Free the list by freeing all contained list nodes, and the list itself.
+		 */
+		shared void destroy<T>() {
+			ListNode<T>* n = self->head;
+			while (n != null) {
+				free(n);
+				n = n->next;
+			}
+			free(self);
+		}
+		
+		/*
+		 * Check if given list contains given value. If the current value matches
+		 * the searched value determines the predicate.
+		 */
+		shared bool contains<T>(func (T, T) -> bool pred, T x) {
+			ListNode<T>* n = self->head;
+			while (true) {
+				if (n == null) return false;
+				
+				/* Value found */
+				if (pred(x, n->value)) return true;
+				
+				/* Jump to next */
+				n = n->next;
+			}
+		}
+		
+		/*
+		 * Finds the first node in the list that has given value.
+		 * Returns a pointer to this list node, or 0 in case the
+		 * value wasnt found.
+		 */
+		shared ListNode<T>* find<T>(func (T, T) -> bool pred, T x) {
+			ListNode<T>* n = self->head;
+			while (n != null) {
+				/* 
+				 * If the predicate matches given value, 
+				 * the searched value was found.
+				 */
+				if (pred(x, n->value)) return n;
+				
+				/* Jump to next */
+				n = n->next;
+			}
+
+			/* Not found */
+			return null;
+		}
+		
+		/*
+		 * Returns the amount of elements stored in the list.
+		 */
+		shared int size<T>() {
+			ListNode<T>* n = self->head;
+			int size = 0;
+			while (n != null) {
+				n = n->next;
+				size++;
+			}
+			return size;
+		}
+		
+		/*
+		 * Returns the index of given node in the list.
+		 */
+		shared int indexOf<T>(ListNode<T>* n) {
+			/* Start iterating at head of list */
+			ListNode<T>* n0 = self->head;
+			
+			/* Current index */
+			int i = 0;
+			
+			while (n0 != null) {
+				/* Addresses match, node found, return current index */
+				if (n0 == n) return i;
+				else {
+					/* Jump to next node */
+					n0 = n0->next;
+					i++;
+				}
+			}
+			
+			/* Node is not part of the list. */
+			return -1;
+		}
+		
+		/*
+		 * Removes the index at given index.
+		 * If the index is out of bounds nothing is removed.
+		 */
+		shared void remove<T>(int i) {
+			/* Out of bounds */
+			if (i < 0) return;
+			
+			if (i == 0) {
+				/* Remove first element */
+				if (self->head != null) {
+					ListNode<T>* n = self->head;
+					self->head = self->head->next;
+					
+					/* Only one element in list */
+					if (self->tail == n) self->tail = null;
+					
+					free(n);
+				}
+				
+				return;
+			}
+			else {
+				ListNode<T>* n = self->head;
+				i--;
+				
+				/* Jump to element before element to remove */
+				while (i > 0) {
+					if (n->next == null) return;
+					else {
+						n = n->next;
+						i--;
+					}
+				}
+				
+				/* Out of bounds */
+				if (n->next == null) return;
+				else {
+					if (n->next->next == null) {
+						/* Element to remove is last element in list */
+						free(n->next);
+						n->next = null;
+						self->tail = n;
+					}
+					else {
+						/* Cut out element and set next pointers */
+						ListNode<T>* next = n->next->next;
+						free(n->next);
+						n->next = next;
+					}
+					return;
+				}
+			}
+		}
+		
+		/*
+		 * Removes all elements from the list
+		 */
+		shared void clear<T>() {
+			ListNode<T>* n = self->head;
+			while (n != null) {
+				free(n);
+				n = n->next;
+			}
+			
+			self->head = null;
+			self->tail = null;
+			
+			return;
+		}
+
+		/*
+		 * Returns if the list is empty.
+		 */
+		shared bool isEmpty<T>() {
+			return self->head == null;
+		}
+	
 	}
 	
 	/*
@@ -31,228 +241,6 @@ namespace List {
 	shared LinkedList<T>* create<T>(T defValue) {
 		/* Initialize list, set pointers to null */
 		return init<>(LinkedList<T>::(null, null, defValue));
-	}
-	
-	/*
-	 * Free the list by freeing all contained list nodes, and the list itself.
-	 */
-	shared void destroy(LinkedList<void>* l) {
-		ListNode<void>* n = l->head;
-		while (n != null) {
-			free(n);
-			n = n->next;
-		}
-		free(l);
-	}
-	
-	/*
-	 * Creates a new list node for given value x and adds the node at the
-	 * end of the list.
-	 */
-	shared void add<T>(LinkedList<T>* lp, T x) {
-		/* Initialize the new List Node, set the next pointer to null */
-		ListNode<T>* n = init<>(ListNode<T>::(null, x));
-	
-		if (lp->head == null) {
-			lp->head = n;
-			lp->tail = n;
-		}
-		else {
-			lp->tail->next = n;
-			lp->tail = n;
-		}	
-	}
-	
-	/*
-	 * Returns the value of the node at the given index. Returns
-	 * the default value if the index is invalid.
-	 */
-	shared T get<T>(LinkedList<T>* lp, int i) {
-		if (i < 0) return lp->defValue;
-	
-		ListNode<T>* n = lp->head;
-		while (i != 0) {
-			if (n->next == null) return lp->defValue;
-			
-			/* Jump to next */
-			n = n->next;
-			i--;
-		}
-		
-		return n->value;	
-	}
-
-	/*
-	 * Returns the the node at the given index. Returns
-	 * null if the index is invalid.
-	 */
-	shared ListNode<T>* getNode<T>(LinkedList<T>* lp, int i) {
-		if (i < 0) return null;
-	
-		ListNode<T>* n = lp->head;
-		while (i != 0) {
-			if (n->next == null) return null;
-			
-			/* Jump to next */
-			n = n->next;
-			i--;
-		}
-		
-		return n;	
-	}
-	
-	/*
-	 * Check if given list contains given value. If the current value matches
-	 * the searched value determines the predicate.
-	 */
-	shared bool contains<T>(LinkedList<T>* lp, func (T, T) -> bool pred, T x) {
-		ListNode<T>* n = lp->head;
-		while (true) {
-			if (n == null) return false;
-			
-			/* Value found */
-			if (pred(x, n->value)) return true;
-			
-			/* Jump to next */
-			n = n->next;
-		}
-	}
-	
-	/*
-	 * Finds the first node in the list that has given value.
-	 * Returns a pointer to this list node, or 0 in case the
-	 * value wasnt found.
-	 */
-	shared ListNode<T>* find<T>(LinkedList<T>* lp, func (T, T) -> bool pred, T x) {
-		ListNode<T>* n = lp->head;
-		while (n != null) {
-			/* 
-			 * If the predicate matches given value, 
-			 * the searched value was found.
-			 */
-			if (pred(x, n->value)) return n;
-			
-			/* Jump to next */
-			n = n->next;
-		}
-
-		/* Not found */
-		return null;
-	}
-	
-	/*
-	 * Returns the amount of elements stored in the list.
-	 */
-	shared int size(LinkedList<void>* lp) {
-		ListNode<void>* n = lp->head;
-		int size = 0;
-		while (n != null) {
-			n = n->next;
-			size++;
-		}
-		return size;
-	}
-	
-	/*
-	 * Returns the index of given node in the list.
-	 */
-	shared int indexOf(LinkedList<void>* lp, ListNode<void>* n) {
-		/* Start iterating at head of list */
-		ListNode<void>* n0 = lp->head;
-		
-		/* Current index */
-		int i = 0;
-		
-		while (n0 != null) {
-			/* Addresses match, node found, return current index */
-			if (n0 == n) return i;
-			else {
-				/* Jump to next node */
-				n0 = n0->next;
-				i++;
-			}
-		}
-		
-		/* Node is not part of the list. */
-		return -1;
-	}
-	
-	/*
-	 * Removes the index at given index.
-	 * If the index is out of bounds nothing is removed.
-	 */
-	shared void remove(LinkedList<void>* lp, int i) {
-		/* Out of bounds */
-		if (i < 0) return;
-		
-		if (i == 0) {
-			/* Remove first element */
-			if (lp->head != null) {
-				ListNode<void>* n = lp->head;
-				lp->head = lp->head->next;
-				
-				/* Only one element in list */
-				if (lp->tail == n) lp->tail = null;
-				
-				free(n);
-			}
-			
-			return;
-		}
-		else {
-			ListNode<void>* n = lp->head;
-			i--;
-			
-			/* Jump to element before element to remove */
-			while (i > 0) {
-				if (n->next == null) return;
-				else {
-					n = n->next;
-					i--;
-				}
-			}
-			
-			/* Out of bounds */
-			if (n->next == null) return;
-			else {
-				if (n->next->next == null) {
-					/* Element to remove is last element in list */
-					free(n->next);
-					n->next = null;
-					lp->tail = n;
-				}
-				else {
-					/* Cut out element and set next pointers */
-					ListNode<void>* next = n->next->next;
-					free(n->next);
-					n->next = next;
-				}
-				return;
-			}
-		}
-	}
-	
-	/*
-	 * Removes all elements from the list
-	 */
-	shared void clear(LinkedList<void>* lp) {
-		ListNode<void>* n = lp->head;
-		while (n != null) {
-			free(n);
-			n = n->next;
-		}
-		
-		lp->head = null;
-		lp->tail = null;
-		
-		return;
-	}
-
-	/*
-	 * Returns if the list is empty.
-	 */
-	shared bool isEmpty(LinkedList<void>* lp) {
-		return lp->head == null;
 	}
 	
 } 

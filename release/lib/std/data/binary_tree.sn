@@ -9,9 +9,112 @@ namespace Tree {
 	 * A tree node that has a left and right child and holds a value.
 	 */
 	restricted struct TreeNode<T> {
+	
 		TreeNode<T>* left;
+		
 		TreeNode<T>* right;
+		
 		T value;
+	
+		/*
+		 * Inserts given value into the tree. The given predicate is used to place
+		 * the given value at the correct position. The predicate should sort the values
+		 * in a total order. Returns the resulting root node. 
+		 */
+		shared TreeNode<T>* insert<T>(func (T, T) -> int pred, T value) {
+			/* Initialize new node with null pointers and given value */
+			TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
+			
+			if (self == null) {
+				/* Tree is empty */
+				return new;
+			}
+			else {
+				TreeNode<T>* head = self;
+				while (head != null) {
+					int cmp = pred(head->value, value);
+					
+					if (cmp == 0) {
+						/* Value already in tree. */
+						return self;
+					}
+					else if (cmp == 1) {
+						/* Left leaf is null, insert here */
+						if (head->left == null) {
+							head->left = new;
+							return self;
+						}
+						else head = head->left;
+					}
+					else {
+						/* Right leaf is null, insert here */
+						if (head->right == null) {
+							head->right = new;
+							return self;
+						}
+						else head = head->right;
+					}
+				}
+			}
+		}
+		
+		shared bool contains<T>(func (T, T) -> int pred, T value) {
+			if (self == null) return false;
+			else {
+				if (pred(self->value, value) == 0) return true;
+				else {
+					if (pred(self->value, value) == 1) 
+						return contains<T>(self->left, pred, value);
+					else 
+						return contains<T>(self->right, pred, value);
+				}
+			}
+		}
+		
+		/*
+		 * Delete given value from the given tree. The given predicate determines 
+		 * wheter the current value matches the searched value (predicate returns 0).
+		 * Returns the new root. May be null when the resulting tree is empty.
+		 */
+		shared TreeNode<T>* delete<T>(func (T, T) -> int pred, T value) {
+			/* Found leaf */
+			if (self == null) return null;
+			else {
+				/* Found value to delete */
+				if (pred(self->value, value) == 0) {
+					if (self->left == null && self->right == null) 
+						return null;
+					else if (self->left != null && self->right == null) {
+						return self->left;
+					}
+					else if (self->left == null && self->right != null) {
+						return self->right;
+					}
+					else {
+						T min = self->value;
+						
+						TreeNode<T>* n = self;
+						while (n->left != null) {
+							min = n->left->value;
+							n = n->left;
+						}
+						
+						*self->value = min;
+						*self->right = delete<T>(self->right, pred, value);
+					}
+				}
+				else {
+					/* Value to delete is further down in subtree */
+					if (pred(self->value, value) == 1) 
+						*self->left = delete<T>(self->left, pred, value);
+					else 
+						*self->right = delete<T>(self->right, pred, value);
+						
+					return self;
+				}
+			}
+		}
+		
 	}
 	
 	/*
@@ -21,105 +124,6 @@ namespace Tree {
 	shared TreeNode<T>* create<T>(T value) {
 		/* Initialize the root with null pointers and the given value */
 		return init<>(TreeNode<T>::(null, null, value));
-	}
-	
-	/*
-	 * Inserts given value into the tree. The given predicate is used to place
-	 * the given value at the correct position. The predicate should sort the values
-	 * in a total order. Returns the resulting root node. 
-	 */
-	shared TreeNode<T>* insert<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
-		/* Initialize new node with null pointers and given value */
-		TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
-		
-		if (root == null) {
-			/* Tree is empty */
-			return new;
-		}
-		else {
-			TreeNode<T>* head = root;
-			while (head != null) {
-				int cmp = pred(head->value, value);
-				
-				if (cmp == 0) {
-					/* Value already in tree. */
-					return root;
-				}
-				else if (cmp == 1) {
-					/* Left leaf is null, insert here */
-					if (head->left == null) {
-						head->left = new;
-						return root;
-					}
-					else head = head->left;
-				}
-				else {
-					/* Right leaf is null, insert here */
-					if (head->right == null) {
-						head->right = new;
-						return root;
-					}
-					else head = head->right;
-				}
-			}
-		}
-	}
-	
-	shared bool contains<T>(TreeNode<T>* n, func (T, T) -> int pred, T value) {
-		if (n == null) return false;
-		else {
-			if (pred(n->value, value) == 0) return true;
-			else {
-				if (pred(n->value, value) == 1) 
-					return contains<T>(n->left, pred, value);
-				else 
-					return contains<T>(n->right, pred, value);
-			}
-		}
-	}
-	
-	/*
-	 * Delete given value from the given tree. The given predicate determines 
-	 * wheter the current value matches the searched value (predicate returns 0).
-	 * Returns the new root. May be null when the resulting tree is empty.
-	 */
-	shared TreeNode<T>* delete<T>(TreeNode<T>* root, func (T, T) -> int pred, T value) {
-		/* Found leaf */
-		if (root == null) return null;
-		else {
-			/* Found value to delete */
-			if (pred(root->value, value) == 0) {
-				if (root->left == null && root->right == null) 
-					return null;
-				else if (root->left != null && root->right == null) {
-					return root->left;
-				}
-				else if (root->left == null && root->right != null) {
-					return root->right;
-				}
-				else {
-					T min = root->value;
-					
-					TreeNode<T>* n = root;
-					while (n->left != null) {
-						min = n->left->value;
-						n = n->left;
-					}
-					
-					*root->value = min;
-					*root->right = delete<T>(root->right, pred, value);
-				}
-			}
-			else {
-				/* Value to delete is further down in subtree */
-				if (pred(root->value, value) == 1) 
-					*root->left = delete<T>(root->left, pred, value);
-				else 
-					*root->right = delete<T>(root->right, pred, value);
-					
-				return root;
-			}
-		}
 	}
 	
 } 

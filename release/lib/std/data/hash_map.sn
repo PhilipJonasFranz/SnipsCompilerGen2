@@ -76,7 +76,7 @@ namespace Map {
 		/* Destroy all the linked lists */
 		for (int i = 0; i < map->size; i++) {
 			LinkedList<void>* l = *(map->storage + i);
-			if (l != null) List::destroy(l);
+			if (l != null) l->destroy<void>();
 		}
 		
 		/* Free the default value */
@@ -106,7 +106,7 @@ namespace Map {
 		MapEntry<K, V>* new = init<>(MapEntry<K, V>::(key, 0, value));
 		
 		/* Store in the list */
-		List::add<MapEntry<K, V>>(l, new);
+		l->add<MapEntry<K, V>>(new);
 	}
 	
 	/*
@@ -195,7 +195,7 @@ namespace Map {
 			/* Iterate through list, check for match, and remove */
 			while (n != null) {
 				if (tupleKeyMatcher<K, V>(n->value, &search)) {
-					List::remove(l, i);
+					l->remove<void>(i);
 					break;
 				}
 				else {
@@ -255,7 +255,7 @@ namespace Map {
 				
 				/* Iterate through list, add elements into list */
 				while (n != null) {
-					List::add<MapEntry<K, V>*>(list, n->value);
+					l->add<MapEntry<K, V>*>(n->value);
 					n = n->next;
 				}
 			}
@@ -284,7 +284,7 @@ namespace Map {
 				
 				/* Iterate through list, add elements into list */
 				while (n != null) {
-					List::add<V>(list, n->value->value);
+					l->add<V>(n->value->value);
 					n = n->next;
 				}
 			}
