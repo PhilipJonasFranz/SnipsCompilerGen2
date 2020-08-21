@@ -1680,6 +1680,7 @@ public class Parser {
 					
 					InlineCall call = (InlineCall) nested.selector;
 	
+					/* Nest based on the chain head an address of of the head or just the head in the call parameters */
 					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
 					else call.parameters.add(0, select.selector);
 					
@@ -1688,6 +1689,8 @@ public class Parser {
 						nested = (StructSelect) (((StructSelect) select.selection).selection);
 						
 						while (nested instanceof StructSelect) {
+							
+							/* Nest the previous call as parameter in the next call */
 							InlineCall call0 = (InlineCall) nested.selector;
 							call0.parameters.add(0, call);
 							
@@ -1699,6 +1702,7 @@ public class Parser {
 						}
 					}
 					
+					/* Final call in chain, nest the current call as parameter in the final call */
 					InlineCall end = (InlineCall) nested.selection;
 					end.parameters.add(0, call);
 					
