@@ -37,14 +37,14 @@ namespace String {
 		int c = 0;
 		while (((int) *(str + c)) != 0) {
 			if (c >= begin && c < end) 
-				List::add<>(sub, *(str + c));
+				sub->add<>(*(str + c));
 			c++;
 		}
 
-		int size = List::size(sub);
+		int size = sub->size();
 
 		/* Substring only consists out of null char */
-		if (size == 1 && (int) List::get<>(sub, 0) == 0) {
+		if (size == 1 && (int) sub->get<>(0) == 0) {
 			char* str0 = resv(1);
 			*str = (char) 0;
 			
@@ -57,7 +57,7 @@ namespace String {
 			char* str0 = resv(size + 1);
 			
 			for (int i = 0; i < size; i++) 
-				*(str0 + i) = List::get<>(sub, i);
+				*(str0 + i) = sub->get<>(i);
 			
 			*(str0 + size) = (char) 0;
 		

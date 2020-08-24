@@ -52,26 +52,26 @@ namespace Integer {
 		
 		do {
 			int c = num % 10;
-			List::add<int>(list, c);
+			list->add<int>(c);
 			num = num / 10;
 		} while (num > 0);
 		
 		/* Add Sign */
-		if (neg) List::add<>(list, -3);
+		if (neg) list->add<>(-3);
 		
 		/* Get size of list */
-		int size = List::size(list);
+		int size = list->size();
 		char* str = resv(size + 1);
 		
 		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
-			int c = List::get<>(list, i) + 48;
+			int c = list->get<>(i) + 48;
 			*(str + c0++) = (char) c;
 		}
 
 		*(str + size) = (char) 0;
 		
-		List::destroy(list);
+		list->destroy();
 		
 		return str;
 	}

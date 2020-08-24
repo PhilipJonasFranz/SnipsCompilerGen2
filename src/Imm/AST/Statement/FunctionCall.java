@@ -31,6 +31,8 @@ public class FunctionCall extends Statement {
 	
 	public boolean hasAutoProviso = false;
 	
+	public boolean isNestedCall = false;
+	
 	/** 
 	 * This field is only set when this function call is a struct nested call. In this case, 
 	 * this field will contain the id ref to the base variable. This field is set automatically
