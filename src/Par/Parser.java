@@ -158,9 +158,8 @@ public class Parser {
 	 */
 	protected Token accept(TokenType tokenType) throws PARSE_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
 		
 		if (current.type() == tokenType) return accept();
 		else {
@@ -177,9 +176,9 @@ public class Parser {
 	 */
 	protected Token accept(TokenGroup group) throws PARSE_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
+		
 		if (current.type().group == group)return accept();
 		else {
 			this.progress.abort();
@@ -195,9 +194,8 @@ public class Parser {
 	 */
 	protected Token accept() {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
 		
 		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
 		
@@ -626,6 +624,12 @@ public class Parser {
 			else if (current.type == TokenType.SWITCH) {
 				return this.parseSwitch();
 			}
+			/*
+			 * LPAREN in case of statement like
+			 * 
+			 * (ll->lp)->size();
+			 * 
+			 */
 			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.LPAREN) {
 				return this.parseAssignment(true);
 			}
