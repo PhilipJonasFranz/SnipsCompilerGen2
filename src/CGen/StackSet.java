@@ -89,7 +89,11 @@ public class StackSet {
 	 * The first given register will end up on the bottom of the newly pushed stack section.
 	 */
 	public void push(REG...reg) {
-		for (REG reg0 : reg) this.stack.push(new StackCell(reg0));
+		for (REG reg0 : reg) {
+			this.stack.push(new StackCell(reg0));
+			if (reg0 == REG.RX)
+				this.newDecsOnStack = true;
+		}
 	}
 	
 	/** Pop a stack cell from the stack top. */

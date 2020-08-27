@@ -1515,7 +1515,11 @@ public class Parser {
 		Expression addr = null;
 		while (current.type == TokenType.ADDROF) {
 			Source source = accept().getSource();
-			addr = new AddressOf(this.parseDeref(), source);
+			
+			if (current.type == TokenType.TYPE || current.type == TokenType.STRUCTID || current.type == TokenType.NAMESPACE_IDENTIFIER)
+				addr = new AddressOf(this.parseExpression(), source);
+			else 
+				addr = new AddressOf(this.parseDeref(), source);
 		}
 		
 		if (addr == null) addr = this.parseDeref();
