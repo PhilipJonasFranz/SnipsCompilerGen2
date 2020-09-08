@@ -454,6 +454,17 @@ public class Parser {
 	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
+		/* Check if a function name is a reserved identifier */
+		String name = identifier.spelling;
+		if (
+				/* Name is a reserved identifier */
+				(name.equals("resv") || name.equals("init") || name.equals("hsize") || name.equals("free")) 
+				/* Currently not parsing any of the libraries that define these reserved function names */
+				&& !identifier.getSource().sourceFile.equals(name + ".sn")) {
+			this.progress.abort();
+			throw new SNIPS_EXC(Const.USED_RESERVED_NAME, name, identifier.getSource().getSourceMarker());
+		}
+		
 		List<TYPE> proviso = this.parseProviso();
 		
 		for (TYPE t : proviso) {

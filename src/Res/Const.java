@@ -34,6 +34,8 @@ public class Const {
 	
 	public static final String DUPLICATE_FUNCTION_NAME = "Duplicate function name: %s";
 	
+	public static final String USED_RESERVED_NAME = "The identifier '%s' is reserved, %s";
+	
 	public static final String DUPLICATE_FIELD_NAME = "Duplicate field name: %s";
 	
 	public static final String UNCHECKED_TYPE_VOID = "Unchecked type %s, %s";

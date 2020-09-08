@@ -62,7 +62,7 @@ public class ProgressMessage {
 	 */
 	public void incProgress(double progress) {
 		if (!CompilerDriver.silenced) {
-			while (this.maxProgress * progress > printed) {
+			while (this.maxProgress * progress > printed && !isDone) {
 				System.out.print(".");
 				printed++;
 			}

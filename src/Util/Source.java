@@ -3,7 +3,7 @@ package Util;
 public class Source {
 
 			/* --- FIELDS --- */
-	private String sourceFile;
+	public String sourceFile;
 	
 	public int row, col;
 	

@@ -1714,6 +1714,9 @@ public class ContextChecker {
 	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source) throws CTX_EXC {
 		List<TYPE> foundMapping = new ArrayList();
 		
+		if (expectedTypes.size() != providedTypes.size())
+			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, expectedTypes.size(), providedTypes.size());
+			
 		for (int i = 0; i < targetProviso.size(); i++) {
 			PROVISO prov = (PROVISO) targetProviso.get(i);
 			prov.releaseContext();

@@ -261,12 +261,14 @@ public class CompilerDriver {
 			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, Message.Type.INFO);
 			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
+			scan_progress.incProgress(1);
 			
 			
 					/* --- PARSING --- */
 			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, Message.Type.INFO);
 			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
+			parse_progress.incProgress(1);
 			
 			
 					/* --- PROCESS IMPORTS --- */
@@ -300,6 +302,7 @@ public class CompilerDriver {
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
 		
+			ctx_progress.incProgress(1);
 			if (imm) AST.print(4, true);
 			
 			
@@ -315,6 +318,8 @@ public class CompilerDriver {
 					if (i < 1) i = 1;
 				}
 			}
+			
+			cgen_progress.incProgress(1);
 			
 			
 					/* --- OPTIMIZING --- */
