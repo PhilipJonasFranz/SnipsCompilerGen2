@@ -1,0 +1,44 @@
+SOURCE
+struct X<T> {
+	T t;
+}
+
+void* addr(X<void>* x) {
+	return &x->t;
+}
+
+int main() {
+	X<int> x = X<int>::(12);
+	void* a = addr(&x);
+	return a;
+}
+TESTCASES
+4093
+OUTPUT
+/* --test_22.txt */
+    b main
+addr:                                        /* Function: addr */
+    push { fp }
+    mov fp, sp
+    push { r0 }                              /* Push declaration on stack, referenced by addressof. */
+    ldr r1, [fp, #-4]
+    lsl r1, r1, #2                           /* Convert to bytes */
+    add r0, r1, #4
+    lsr r0, r0, #2
+    mov sp, fp
+    pop { fp }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #12                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r0, r0, #2
+    bl addr                                  /* Call addr */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

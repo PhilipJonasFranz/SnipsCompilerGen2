@@ -98,7 +98,7 @@ public class AsNAssignWriteback extends AsNStatement {
 			StructSelectWriteback sel = (StructSelectWriteback) reference;
 			
 			/* Load the address of the target in R1 */
-			AsNStructSelect.injectAddressLoader(node, sel.select, r, map, st);
+			AsNStructSelect.injectAddressLoader(node, sel.select, r, map, st, false);
 			
 			node.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			

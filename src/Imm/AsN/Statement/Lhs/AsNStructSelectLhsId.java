@@ -44,7 +44,7 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		}
 		
 		/* Inject the address loader, loads address into R1 */
-		AsNStructSelect.injectAddressLoader(id, lhs.select, r, map, st);
+		AsNStructSelect.injectAddressLoader(id, lhs.select, r, map, st, false);
 		
 		if (lhs.select.getType().wordsize() > 1) {
 			/* Copy memory section */

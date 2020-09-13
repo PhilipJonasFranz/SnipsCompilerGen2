@@ -106,7 +106,7 @@ public class AsNAddressOf extends AsNExpression {
 		else if (a.expression instanceof StructSelect) {
 			StructSelect select = (StructSelect) a.expression;
 			
-			AsNStructSelect.injectAddressLoader(aof, select, r, map, st);
+			AsNStructSelect.injectAddressLoader(aof, select, r, map, st, true);
 			
 			aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}

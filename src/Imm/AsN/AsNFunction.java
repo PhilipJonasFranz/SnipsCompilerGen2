@@ -246,22 +246,6 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			
-			for (int i = 0; i < f.parameters.size(); i++) {
-				Declaration dec = f.parameters.get(i);
-				if (r.declarationLoaded(dec)) {
-					if (func.hasAddressReference(f, dec)) {
-						int location = r.declarationRegLocation(dec);
-						
-						ASMPushStack push0 = new ASMPushStack(new RegOp(location));
-						push0.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
-						func.instructions.add(push0);
-						
-						st.push(dec);
-						r.free(location);
-					}
-				}
-			}
-			
 			/* Cast all statements and add all instructions */
 			for (int i = 0; i < f.body.size(); i++) 
 				func.loadStatement(f, f.body.get(i), r, map, st);
@@ -290,7 +274,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				push.operands.remove(0);
 			}
 			
-			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals()) {
+			if (!hasCall && !func.hasParamsInStack() && f.getReturnType().wordsize() == 1 && !f.signals() && paramsWithRef == 0) {
 				if (used.isEmpty()) 
 					func.instructions.remove(push);
 				else {
