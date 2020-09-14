@@ -146,6 +146,13 @@ public class Function extends CompoundStatement {
 		return this.returnType.provisoFree();
 	}
 	
+	/** 
+	 * Returns the current return type, without freeing it of provisos.
+	 */
+	public TYPE getReturnTypeDirect() {
+		return this.returnType;
+	}
+	
 	/**
 	 * Return wether this function signals exceptions or not.
 	 */

@@ -41,6 +41,8 @@ public class ProvisoUtil {
 				/* Map to each parameter type */
 				for (int i = 0; i < f.funcHead.parameters.size(); i++)
 					map &= map1To1Maybe(f.funcHead.parameters.get(i).getType(), source);
+			
+				map &= map1To1Maybe(f.funcHead.getReturnTypeDirect(), source);
 			}
 			
 			return map;
