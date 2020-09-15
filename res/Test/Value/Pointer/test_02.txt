@@ -1,0 +1,60 @@
+SOURCE
+int get(int* p, int x, int y) {
+	return *(p + (3 * x) + y);
+}
+
+int main(int x, int y) {
+	int [3] [3] v = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+	return get(&v, x, y);
+}
+TESTCASES
+0 0 1
+0 1 2
+0 2 3
+1 0 4
+1 1 5
+1 2 6
+2 0 7
+2 1 8
+2 2 9
+OUTPUT
+/* --test_02.txt */
+    b main
+get:                                         /* Function: get */
+    push { r4, r5 }
+    mov r4, r1
+    mov r5, r2
+    mov r1, #3
+    mul r2, r1, r4
+    add r1, r0, r2
+    add r0, r1, r5
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    ldmfd sp!, {r4, r5}
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, #9                               /* Evaluate Expression */
+    mov r1, #8
+    mov r2, #7
+    stmfd sp!, {r0-r2}
+    mov r0, #6
+    mov r1, #5
+    mov r2, #4
+    stmfd sp!, {r0-r2}
+    mov r0, #3
+    mov r1, #2
+    mov r2, #1
+    stmfd sp!, {r0-r2}
+    push { r4 }
+    push { r3 }
+    sub r0, fp, #36
+    lsr r0, r0, #2
+    ldmfd sp!, {r1, r2}
+    bl get                                   /* Call get */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

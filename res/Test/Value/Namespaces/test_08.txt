@@ -1,0 +1,21 @@
+SOURCE
+#include<res\Test\Value\Namespaces\exclude_import.sn>
+
+int main() {
+	int k = 10;
+	return Test::foo(k);
+}
+
+TESTCASES
+40
+OUTPUT
+/* --test_08.txt */
+    b main
+Test.foo:                                    /* Function: Test.foo */
+    lsl r0, r0, #2
+    bx lr
+    
+main:                                        /* Function: main */
+    mov r0, #10                              /* Evaluate Expression */
+    b Test.foo                               /* Call Test.foo */
+    

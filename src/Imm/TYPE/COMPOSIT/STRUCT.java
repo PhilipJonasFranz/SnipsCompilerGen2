@@ -5,6 +5,7 @@ import java.util.List;
 
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
+import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
@@ -29,8 +30,8 @@ public class STRUCT extends COMPOSIT {
 	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
-		if (type.getCoreType() instanceof STRUCT) {
-			STRUCT struct = (STRUCT) type.getCoreType();
+		if (type instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
 			if (sDef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
@@ -53,8 +54,8 @@ public class STRUCT extends COMPOSIT {
 	 */
 	public boolean isEqualExtended(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
-		if (type.getCoreType() instanceof STRUCT) {
-			STRUCT struct = (STRUCT) type.getCoreType();
+		if (type instanceof STRUCT) {
+			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
 			while (!sDef.equals(this.typedef)) {
@@ -68,7 +69,7 @@ public class STRUCT extends COMPOSIT {
 				
 				/* Compare Provisos, rest of subtree must be equal */
 				for (int i = 0; i < this.proviso.size(); i++) 
-					isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
+					isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
 				
 				return isEqual;
 			}
@@ -114,6 +115,10 @@ public class STRUCT extends COMPOSIT {
 	
 	public Declaration getFieldNumber(int i) {
 		return this.getField(this.typedef.getFields().get(i).path);
+	}
+	
+	public Declaration getFieldNumberDirect(int i) {
+		return this.typedef.getFields().get(i).clone();
 	}
 	
 	public int getFieldByteOffset(NamespacePath path) {
@@ -208,6 +213,23 @@ public class STRUCT extends COMPOSIT {
 			this.proviso.set(i, this.proviso.get(i).remapProvisoName(name, newType));
 		}
 		return this;
+	}
+
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		if (mapType instanceof STRUCT) {
+			STRUCT s = (STRUCT) mapType;
+			if (s.getTypedef().SID == this.getTypedef().SID) {
+				for (int i = 0; i < this.proviso.size(); i++) {
+					PROVISO prov = (PROVISO) this.proviso.get(i);
+					if (prov.placeholderName.equals(searchedProviso)) {
+						return s.proviso.get(i);
+					}
+						
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 } 

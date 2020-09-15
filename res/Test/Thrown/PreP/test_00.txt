@@ -1,0 +1,8 @@
+SOURCE
+#include<faulty_link.sn>
+
+int main() {
+	return 20;
+}
+THROWN
+CANNOT_RESOLVE_IMPORT

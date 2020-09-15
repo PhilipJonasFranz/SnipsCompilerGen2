@@ -23,9 +23,11 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.TypeCast;
 import Imm.AsN.AsNNode;
+import Imm.AsN.Statement.AsNFunctionCall;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -39,23 +41,30 @@ public class AsNStructSelect extends AsNExpression {
 		AsNStructSelect sel = new AsNStructSelect();
 		s.castedNode = sel;
 		
-		/* Create a address loader that points to the first word of the target */
-		boolean directLoad = injectAddressLoader(sel, s, r, map, st);
-		
-		if (!directLoad) {
-			/* Copy result on the stack, push dummy values on stack set */
-			if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
-				/* Copy memory section */
-				AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
-				
-				/* Create dummy stack entries for newly copied struct on stack */
-				for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
-			}
-			else {
-				/* Load in register */
-				ASMLdr load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
-				load.comment = new ASMComment("Load field from struct");
-				sel.instructions.add(load);
+		if (s.selection instanceof InlineCall) {
+			/* Struct Select is nested struct call, simply extract called function and call it */
+			InlineCall ic = (InlineCall) s.selection;
+			AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, ic.proviso, ic.parameters, ic, sel, r, map, st);
+		}
+		else {
+			/* Create a address loader that points to the first word of the target */
+			boolean directLoad = injectAddressLoader(sel, s, r, map, st, false);
+			
+			if (!directLoad) {
+				/* Copy result on the stack, push dummy values on stack set */
+				if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
+					/* Copy memory section */
+					AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
+					
+					/* Create dummy stack entries for newly copied struct on stack */
+					for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
+				}
+				else {
+					/* Load in register */
+					ASMLdr load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
+					load.comment = new ASMComment("Load field from struct");
+					sel.instructions.add(load);
+				}
 			}
 		}
 		
@@ -65,7 +74,7 @@ public class AsNStructSelect extends AsNExpression {
 	/**
 	 * Loads the address of the target of the selection into R1.
 	 */
-	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st, boolean addressLoader) throws CGEN_EXC {
 		
 		Expression base = select.selector;
 		if (base instanceof TypeCast) {
@@ -112,6 +121,15 @@ public class AsNStructSelect extends AsNExpression {
 				/* Load data label */
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			}
+			
+			/*
+			 * When loading the address of a pointer substructure, we are interested in the address 
+			 * of the substructure. If the IDRef is a pointer, with the code above, we just loaded the location
+			 * of the pointer in the stack. We need to load the value from the stack to recieve the 
+			 * base address of the structure. The offsets are added in the following code.
+			 */
+			if (addressLoader && ref.getType() instanceof POINTER) 
+				node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
 		}
 		else if (base instanceof ArraySelect) {
 			ArraySelect arr = (ArraySelect) base;

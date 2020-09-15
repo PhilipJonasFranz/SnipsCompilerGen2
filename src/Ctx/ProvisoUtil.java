@@ -10,6 +10,7 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Res.Const;
 
 /**
  * Contains Utility to map proviso contexts to types.
@@ -40,6 +41,8 @@ public class ProvisoUtil {
 				/* Map to each parameter type */
 				for (int i = 0; i < f.funcHead.parameters.size(); i++)
 					map &= map1To1Maybe(f.funcHead.parameters.get(i).getType(), source);
+			
+				map &= map1To1Maybe(f.funcHead.getReturnTypeDirect(), source);
 			}
 			
 			return map;
@@ -129,7 +132,7 @@ public class ProvisoUtil {
 			/* Relay to array target type */
 			map1To1(a.elementType, source);
 		}
-		else throw new SNIPS_EXC("Cannot map " + source.typeString() + " -> " + target.typeString());
+		else throw new SNIPS_EXC(Const.CANNOT_MAP_TYPE_TO_PROVISO, source.typeString(), target.typeString());
 	}
 	
 	/**
@@ -161,5 +164,22 @@ public class ProvisoUtil {
 		for (int i = 0; i < source.size(); i++) 
 			map1To1(target.get(i), source.get(i));
 	}
+	
+
+	/**
+	 * Checks if two given mappings are equal. This means that they have to be of equal length, and 
+	 * for every two types, the proviso-free type string has to be equal.
+	 * @param map0 The first proviso map.
+	 * @param map1 The second proviso map.
+	 * @return True if the maps are equal, false if not.
+	 */
+	public static boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
+		boolean isEqual = true;
+		for (int a = 0; a < map0.size(); a++) 
+			isEqual &= map0.get(a).provisoFree().typeString().equals(map1.get(a).provisoFree().typeString());
+		
+		return isEqual;
+	}
+	
 	
 } 

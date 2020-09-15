@@ -11,6 +11,10 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
+import Exc.PARSE_EXC;
+import Exc.SNIPS_EXC;
 import REv.CPU.ProcessorUnit;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -62,6 +66,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	/** Store/Update asm results in the tested file */
 	public boolean writebackResults = false;
 	
 	/** The Result Stack used to propagate package test results back up */
@@ -228,17 +233,65 @@ public class TestDriver {
 			}
 			else i = 1;
 			
+			boolean errorTest = false;
+			
 			while (true) {
-				if (content.get(i).equals("TESTCASES")) {
+				if (content.get(i).equals("TESTCASES") || content.get(i).equals("THROWN")) {
+					if (content.get(i).equals("THROWN"))
+						errorTest = true;
+					
 					i++;
 					break;
 				}
+				
 				code.add(content.get(i));
 				i++;
 			}
-			while (i < content.size() && !content.get(i).equals("OUTPUT")) {
-				testcases.add(content.get(i));
+			
+			List<Pair<String, List<String>>> thrown = null;
+			
+			if (errorTest) {
+				thrown = new ArrayList();
+				
+				List<String> copy = code.stream().collect(Collectors.toList());
+				thrown.add(new Pair<String, List<String>>(content.get(i), copy));
 				i++;
+				
+				code.clear();
+				
+				String exc = null;
+				
+				while (i < content.size() && !content.get(i).equals("OUTPUT")) {
+					if (content.get(i).equals("SOURCE") && !code.isEmpty() && exc != null) {
+						List<String> cp = code.stream().collect(Collectors.toList());
+						thrown.add(new Pair<String, List<String>>(exc, cp));
+						code.clear();
+						exc = null;
+					}
+					else if (content.get(i).equals("SOURCE")) {
+						i++;
+					}
+					else {
+						if (content.get(i).equals("THROWN")) {
+							exc = content.get(i + 1);
+							i += 3;
+						}
+						else {
+							code.add(content.get(i));
+							i++;
+						}
+					}
+				}
+				
+				if (!code.isEmpty() && exc != null) {
+					thrown.add(new Pair<String, List<String>>(exc, code));
+				}
+			}
+			else {
+				while (i < content.size() && !content.get(i).equals("OUTPUT")) {
+					testcases.add(content.get(i));
+					i++;
+				}
 			}
 			
 			for (int a = 0; a < content.size(); a++) {
@@ -251,7 +304,7 @@ public class TestDriver {
 			buffer.add(new Message("Testing file " + file, Message.Type.INFO, buffered));
 			
 			/* Run test */
-			Result res = this.test(file, code, testcases, buffer, writeback);
+			Result res = this.test(file, code, testcases, thrown, buffer, writeback);
 			
 			/* Evaluate result */
 			if (res.fail > 0) resCnt.peek().failed++;
@@ -270,124 +323,176 @@ public class TestDriver {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public Result test(String path, List<String> code, List<String> cases, List<Message> buffer, List<String> content) throws InterruptedException {
+	public Result test(String path, List<String> code, List<String> cases, List<Pair<String, List<String>>> thrown, List<Message> buffer, List<String> content) throws InterruptedException {
 		CompilerDriver.reset();
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
 		
-		cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
-		
-		File file = new File(path);
-		List<String> compile = cd.compile(new File(path), code);
-		
-		cd.setBurstMode(false, false);
-		
-		if (compile == null) {
-			buffer.add(new Message("-> A crash occured during compilation.", Message.Type.FAIL, true));
-			if (this.printResult) buffer.add(new Message("-> Tested code:", Message.Type.FAIL, true));
-			cd.compile(file, code);
-			return new Result(RET_TYPE.CRASH, 0, 0);
-		}
-		else {
-			/* Write output */
-			if (writebackResults) {
-				content.add("OUTPUT");
-				content.addAll(compile);
-				Util.writeInFile(content, path);
-			}
-		}
-		
-		boolean printedOutput = this.printResult;
-		
-		if (this.printResult) {
-			compile.stream().forEach(x -> System.out.println(x));
-			printedOutput = true;
-		}
-		
 		int succ = 0;
 		int fail = 0;
 		
-		/* Setup Runtime Environment */
-		for (int i = 0; i < cases.size(); i++) {
-			String [] sp = cases.get(i).split(" ");
+		if (thrown != null) {
+			CompilerDriver.expectError = true;
 			
-			boolean assemblyMessages = false;
-			XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
-			ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
-			
-			/* Setup parameters in registers and stack */
-			if (sp.length > 1) {
-				int r = 0;
-				int st = 0;
-				for (int a = 0; a < sp.length - 1; a++) {
-					if (r < 3) pcu.regs [a] = pcu.toBinary(Integer.parseInt(sp [a]));
-					else {
-						int n = pcu.memoryBlocks.length - 1;
-						pcu.memoryBlocks [n][pcu.memoryBlocks [n].length - (st + 1)] = pcu.toBinary(Integer.parseInt(sp [a]));
-						pcu.regs [13] = pcu.toBinary(pcu.toDecimal(pcu.regs [13]) - 4);
-						st++;
-					}
-					r++;
-				}
-			}
-			
-			/* Execute Program */
-			pcu.debug = 0;
-			pcu.step = 1;
-			
-			Thread runThread = new Thread(new Runnable() {
-				public void run() {
-					pcu.execute();
-				}
-			});
-			
-			runThread.start();
-			long start = System.currentTimeMillis();
-			while (runThread.isAlive()) {
-				if (System.currentTimeMillis() - start > ttl) {
-					runThread.interrupt();
-					runThread.stop();
-					runThread = null;
-					buffer.add(new Message("The compiled program timed out!", Message.Type.FAIL, true));
-					if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+			for (int i = 0; i < thrown.size(); i++) {
+				cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
+				
+				/* Each exception test has own source code */
+				cd.compile(new File(path), thrown.get(i).second);
+				
+				cd.setBurstMode(false, false);
+				
+				Exception e = cd.getException();
+				
+				if (e == null) {
+					/* No exception was thrown, but an exception was expected */
+					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+					buffer.add(new Message("-> Expected Exception '" + thrown.get(i).first + "', but got none.", Message.Type.FAIL, true));
 					fail++;
-					if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
-					printedOutput = true;
+				}
+				else {
+					String msg = null;
+					
+					/* Figure out exception field value */
+					if (e instanceof SNIPS_EXC) 
+						msg = ((SNIPS_EXC) e).getExcFieldName();
+					else if (e instanceof CTX_EXC) 
+						msg = ((CTX_EXC) e).getExcFieldName();
+					else if (e instanceof PARSE_EXC) 
+						msg = ((PARSE_EXC) e).getExcFieldName();
+					else if (e instanceof CGEN_EXC) 
+						msg = ((CGEN_EXC) e).getExcFieldName();
+					else {
+						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), Message.Type.FAIL).getMessage());
+						System.exit(0);
+					}
+					
+					if (thrown.get(i).first.equals(msg)) {
+						/* Thrown exception matches expected one */
+						succ++;
+					}
+					else {
+						/* Exceptions do not match */
+						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+						buffer.add(new Message("-> Thrown Exception: " + e, Message.Type.FAIL, true));
+						buffer.add(new Message("-> Thrown Exception does not match expected: " + msg + " vs " + thrown.get(i).first, Message.Type.FAIL, true));
+						fail++;
+					}
 				}
 			}
+		}
+		else {
+			cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 			
-			int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
-			this.totalCPUCycles += pcu.cycles;
+			File file = new File(path);
+			List<String> compile = cd.compile(new File(path), code);
+
+			cd.setBurstMode(false, false);
 			
-			if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
-				/* Output does match expected value */
-				succ++;
+			if (compile == null) {
+				buffer.add(new Message("-> A crash occured during compilation.", Message.Type.FAIL, true));
+				if (this.printResult) buffer.add(new Message("-> Tested code:", Message.Type.FAIL, true));
+				cd.compile(file, code);
+				return new Result(RET_TYPE.CRASH, 0, 0);
 			}
 			else {
-				/* Wrong output */
-				if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
-				buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL, true));
+				/* Write output */
+				if (writebackResults) {
+					content.add("OUTPUT");
+					content.addAll(compile);
+					Util.writeInFile(content, path);
+				}
+			}
+			
+			boolean printedOutput = this.printResult;
+			
+			if (this.printResult) {
+				compile.stream().forEach(x -> System.out.println(x));
+				printedOutput = true;
+			}
+			
+			/* Setup Runtime Environment */
+			for (int i = 0; i < cases.size(); i++) {
+				String [] sp = cases.get(i).split(" ");
 				
-				/* Print inputted parameters */
-				String params = "-> Params: ";
-				if (sp.length == 1) params += "-";
-				else {
+				boolean assemblyMessages = false;
+				XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
+				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+				
+				/* Setup parameters in registers and stack */
+				if (sp.length > 1) {
+					int r = 0;
+					int st = 0;
 					for (int a = 0; a < sp.length - 1; a++) {
-						params += sp [a];
-						if (a < sp.length - 2) {
-							params += ", ";
+						if (r < 3) pcu.regs [a] = pcu.toBinary(Integer.parseInt(sp [a]));
+						else {
+							int n = pcu.memoryBlocks.length - 1;
+							pcu.memoryBlocks [n][pcu.memoryBlocks [n].length - (st + 1)] = pcu.toBinary(Integer.parseInt(sp [a]));
+							pcu.regs [13] = pcu.toBinary(pcu.toDecimal(pcu.regs [13]) - 4);
+							st++;
 						}
+						r++;
 					}
 				}
-				buffer.add(new Message(params, Message.Type.FAIL, true));
 				
-				if (!printedOutput) {
-					buffer.add(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL, true));
-					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+				/* Execute Program */
+				pcu.debug = 0;
+				pcu.step = 1;
+				
+				Thread runThread = new Thread(new Runnable() {
+					public void run() {
+						pcu.execute();
+					}
+				});
+				
+				runThread.start();
+				long start = System.currentTimeMillis();
+				while (runThread.isAlive()) {
+					if (System.currentTimeMillis() - start > ttl) {
+						runThread.interrupt();
+						runThread.stop();
+						runThread = null;
+						buffer.add(new Message("The compiled program timed out!", Message.Type.FAIL, true));
+						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+						fail++;
+						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+						printedOutput = true;
+					}
 				}
-				printedOutput = true;
 				
-				fail++;
+				int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
+				this.totalCPUCycles += pcu.cycles;
+				
+				if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
+					/* Output does match expected value */
+					succ++;
+				}
+				else {
+					/* Wrong output */
+					if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL, true));
+					
+					/* Print inputted parameters */
+					String params = "-> Params: ";
+					if (sp.length == 1) params += "-";
+					else {
+						for (int a = 0; a < sp.length - 1; a++) {
+							params += sp [a];
+							if (a < sp.length - 2) {
+								params += ", ";
+							}
+						}
+					}
+					buffer.add(new Message(params, Message.Type.FAIL, true));
+					
+					if (!printedOutput) {
+						buffer.add(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL, true));
+						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					}
+					printedOutput = true;
+					
+					fail++;
+				}
 			}
 		}
 		

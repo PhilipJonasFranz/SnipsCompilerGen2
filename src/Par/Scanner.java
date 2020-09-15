@@ -8,6 +8,7 @@ import java.util.List;
 import Exc.SNIPS_EXC;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
+import Res.Const;
 import Util.Source;
 import Util.Logging.ProgressMessage;
 
@@ -101,11 +102,11 @@ public class Scanner {
 			new ScannableToken("true",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
 			new ScannableToken("false",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
 			new ScannableToken("else",		TokenType.ELSE,			ACC_STATE.NONE,			""),
-			new ScannableToken("void",		TokenType.VOID,			ACC_STATE.NONE,			""),
-			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			""),
-			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			""),
-			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			""),
-			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			""),
+			new ScannableToken("void",		TokenType.VOID,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("return",	TokenType.RETURN,		ACC_STATE.NONE,			" ", ";"),
 			new ScannableToken("asm",		TokenType.ASM,			ACC_STATE.NONE,			" ", "(", "{"),
 			new ScannableToken("break",		TokenType.BREAK,		ACC_STATE.NONE,			" ", ";"),
@@ -163,11 +164,9 @@ public class Scanner {
 			staticScannables = this.scannables;
 			
 			/* Setup scanable map */
-			for (ScannableToken t : this.scannables) {
-				for (String reset : t.resetTokens) {
+			for (ScannableToken t : this.scannables) 
+				for (String reset : t.resetTokens) 
 					scannableMap.put(t.base + reset, t);
-				}
-			}
 		}
 		
 	}
@@ -188,6 +187,9 @@ public class Scanner {
 			/* Increase progress based on read input lines */
 			if (progress != null) progress.incProgress((double) i / input.size());
 		}
+		
+		/* Possibly badly formed code syntax, for example not closed comment would result in comment finish state */
+		if (sFSM.state != ACC_STATE.NONE) throw new SNIPS_EXC(Const.BAD_END_STATE, sFSM.state.toString());
 		
 		if (progress != null) progress.incProgress(1);
 		
@@ -348,9 +350,8 @@ public class Scanner {
 			else {
 				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) {
+					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
 						this.state = ACC_STATE.ID;
-					}
 				}
 				
 				if (this.buffer.matches(int_match)) 
@@ -364,9 +365,7 @@ public class Scanner {
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
-					if (this.buffer.trim().isEmpty()) {
-						return false;
-					}
+					if (this.buffer.trim().isEmpty()) return false;
 					
 					String id = this.buffer.substring(0, this.buffer.length() - 1);
 				
@@ -413,9 +412,7 @@ public class Scanner {
 					return true;
 				}
 				/* Invalid Char lit */
-				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) {
-					this.state = ACC_STATE.NONE;
-				}
+				else if (this.buffer.startsWith("'") && this.buffer.length() > 3) this.state = ACC_STATE.NONE;
 				
 				if ((this.buffer.endsWith(" ") || !this.buffer.matches(int_match)) && this.state == ACC_STATE.INT) {
 					String lit = this.buffer.substring(0, this.buffer.length() - 1);
@@ -429,7 +426,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXC("Bad HEX literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC(Const.BAD_HEX_LITERAL, new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 16)));
@@ -442,7 +439,7 @@ public class Scanner {
 					
 					if (lit.length() < 3) {
 						this.progress.abort();
-						throw new SNIPS_EXC("Bad BIN literal, " + new Source(fileName, i, a).getSourceMarker());
+						throw new SNIPS_EXC(Const.BAD_BIN_LITERAL, new Source(fileName, i, a).getSourceMarker());
 					}
 					
 					tokens.add(new Token(TokenType.INTLIT, new Source(fileName, i, a), convertBase10(lit.substring(2), 2)));
@@ -461,9 +458,10 @@ public class Scanner {
 		public String convertBase10(String lit, int fromBase) {
 			String [] sp = lit.split("");
 			int s = 0;
-			for (int k = 0; k < sp.length; k++) {
+			
+			for (int k = 0; k < sp.length; k++) 
 				s += Math.pow(fromBase, sp.length - k - 1) * Character.digit(sp [k].charAt(0), fromBase);
-			}
+			
 			lit = s + "";
 			return lit;
 		}

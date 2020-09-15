@@ -124,7 +124,7 @@ namespace Display {
 		
 		shared char* scanf() {
 			/* Create a list where the input is temporarily stored */
-			LinkedList<char>* input = List::create<char>((char) 0);
+			LinkedList<char>* input = List::create<>((char) 0);
 			
 			while (true) {
 				char c = Display::getChar();
@@ -135,7 +135,7 @@ namespace Display {
 				
 				/* Input is a new character, add to input */
 				if ((int) c != 0) {
-					List::add<char>(input, c);
+					input->add<>(c);
 					putChar(c);
 				}
 			}
@@ -143,17 +143,17 @@ namespace Display {
 			println();
 			
 			/* Read all the characters from the list and place them in the output string */
-			int size = List::size(input);
-			char* arr = (char*) resv(size + 1);
-			for (int i = 0; i < size; i++) {
-				*(arr + i) = List::get<char>(input, i);
-			}
+			int size = input->size();
+			char* arr = resv(size + 1);
+			
+			for (int i = 0; i < size; i++) 
+				*(arr + i) = input->get<>(i);
 
 			/* Insert 0 char termination */
 			*(arr + size) = (char) 0;
 			
 			/* Free the list and return the string pointer */
-			List::destroy(input);
+			input->destroy();
 			return arr;
 		}
 		

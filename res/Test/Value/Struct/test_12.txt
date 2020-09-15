@@ -1,0 +1,346 @@
+SOURCE
+#include<linked_list.sn>
+
+int main(int x) {
+	LinkedList<int>* l = create<int>(0);
+	
+	l->add<int>(10);
+	l->add<int>(5);
+	l->add<int>(12);
+	
+	int r = l->get<int>(x);
+	
+	l->destroy();
+	
+	return r;
+}
+TESTCASES
+0 10
+1 5
+2 12
+OUTPUT
+/* --test_12.txt */
+.data
+NULL: .word 0
+HEAP_START: .word 0
+    
+.text
+    b main
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+/* Add block header to size */
+    add r3, r0, #1
+/* Get reference to heap start */
+    ldr r0, .POOL0_L7_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+/* Defragment Heap */
+resv.L6:                                     /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne resv.L7
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L11
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b resv.L7
+resv.L11: 
+    add r5, r5, r6
+/* Add to current size */
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+/* Write defragmented size to heap */
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+/* Memory location is free, check size */
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+/* Fits */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L18
+resv.L15: 
+    cmp r5, r3
+    ble resv.L17
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L18
+resv.L17: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+/* End reached, create new block */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L18: 
+    ldmfd sp!, {r3-r6}
+    bx lr
+.POOL0_L7_HEAP_START: .word HEAP_START
+    
+/* Reserves a memory section using resv, assigns the given value */
+/* to this memory section, and returns a pointer to the new memory */
+/* section. */
+init_P1:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #24
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #12]
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #16
+    bx lr
+    
+init_P3:                                     /* Provisos: List.ListNode<INT> */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #3                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #20
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #12
+    bx lr
+    
+/* Frees the memory block the given pointer points to. The pointer object will keep */
+/* the memory address, but the memory block will not be registered to be used anymore and */
+/* thus can be overwritten. */
+free:                                        /* Function: free */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, r6}
+    mov r3, r0
+/* Jump to block head */
+    sub r3, r0, #1
+/* Load Block Size */
+    ldr r4, [r10, r3, lsl #2]                /* Load from address */
+/* Store negated block size */
+    rsb r0, r4, #0
+    str r0, [r10, r3, lsl #2]
+    add r6, r3, r4
+free.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r6, lsl #2]                /* Load from address */
+    cmp r0, #0
+    bge free.L2
+    ldr r4, [r10, r6, lsl #2]                /* Load from address */
+/* Add size to freed block */
+    ldr r1, [r10, r3, lsl #2]                /* Load from address */
+    add r0, r1, r4
+    str r0, [r10, r3, lsl #2]
+/* Shift pointer to next block */
+    sub r6, r6, r4
+    b free.L1
+free.L2: 
+    ldmfd sp!, {r3, r4, r6}
+    bx lr
+    
+/* [BASE-PACKAGE] */
+/*  */
+/* This package contains the utility to create a linked-list, */
+/* insert and remove values from it, as well as some functions */
+/* that give information about the state of the list. */
+/* A single list entry, contains a pointer to the next node */
+/* and a value. */
+/* Wraps the list head and tail. */
+List.LinkedList.add_P2:                      /* Function: List.LinkedList.add, Provisos: INT */
+    sub sp, sp, #16
+    stmea sp, {r3-r5, lr}
+    mov r3, r0
+    mov r4, r1
+/* Initialize the new List Node, set the next pointer to null */
+    push { r4 }
+    ldr r0, .POOL1_L6_NULL                   /* Load null address */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    bl init_P3                               /* Call init */
+    mov r5, r0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL1_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.add.L1
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #4]                         /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #8]                         /* Store value to struct field */
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.add.L1: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #8]
+    lsl r1, r1, #2
+    str r5, [r1, #4]                         /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #8]                         /* Store value to struct field */
+    ldmfd sp!, {r3-r5, pc}
+.POOL1_L6_NULL: .word NULL
+    
+List.LinkedList.get_P4:                      /* Function: List.LinkedList.get, Provisos: INT */
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
+    mov r3, r0
+    mov r4, r1
+    cmp r1, #0
+    bge List.LinkedList.get.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    b List.LinkedList.get.L7
+List.LinkedList.get.L0: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+List.LinkedList.get.L3:                      /* Evaluate condition */
+    cmp r4, #0
+    beq List.LinkedList.get.L4
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL2_L6_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.get.L5
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #12]                        /* Load field from struct */
+    b List.LinkedList.get.L7
+List.LinkedList.get.L5: 
+/* Jump to next */
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    mov r0, r4
+    sub r4, r4, #1
+    b List.LinkedList.get.L3
+List.LinkedList.get.L4: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+List.LinkedList.get.L7: 
+    ldmfd sp!, {r3-r5}
+    bx lr
+.POOL2_L6_NULL: .word NULL
+    
+List.LinkedList.destroy_P5:                  /* Function: List.LinkedList.destroy, Provisos: INT */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
+    mov r3, r0
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r4, [r1, #4]                         /* Load field from struct */
+List.LinkedList.destroy.L1:                  /* Evaluate condition */
+    ldr r1, .POOL3_L6_NULL                   /* Load null address */
+    cmp r4, r1
+    beq List.LinkedList.destroy.L2
+    mov r0, r4                               /* Load parameters */
+    bl free                                  /* Call free */
+    lsl r1, r4, #2                           /* Convert to bytes */
+    ldr r4, [r1, #4]                         /* Load field from struct */
+    b List.LinkedList.destroy.L1
+List.LinkedList.destroy.L2: 
+    mov r0, r3                               /* Load parameters */
+    bl free                                  /* Call free */
+    ldmfd sp!, {r3, r4, pc}
+.POOL3_L6_NULL: .word NULL
+    
+/* Creates a new List Object and initializes the head an tail to null. */
+List.create_P0:                              /* Function: List.create, Provisos: INT */
+    push { r3, lr }
+    mov r3, r0
+/* Initialize list, set pointers to null */
+    push { r3 }
+    ldr r0, .POOL4_L6_NULL                   /* Load null address */
+    ldr r1, .POOL4_L6_NULL                   /* Load null address */
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    push { r0 }
+    bl init_P1                               /* Call init */
+    ldmfd sp!, {r3, pc}
+.POOL4_L6_NULL: .word NULL
+    
+main:                                        /* Function: main */
+    push { lr }
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    bl List.create_P0                        /* Call List.create */
+    mov r4, r0
+    mov r1, #10
+    mov r0, r4
+    bl List.LinkedList.add_P2                /* Call List.LinkedList.add */
+    mov r1, #5
+    mov r0, r4
+    bl List.LinkedList.add_P2                /* Call List.LinkedList.add */
+    mov r1, #12
+    mov r0, r4
+    bl List.LinkedList.add_P2                /* Call List.LinkedList.add */
+    mov r0, r4
+    mov r1, r3
+    bl List.LinkedList.get_P4                /* Call List.LinkedList.get */
+    mov r5, r0
+    mov r0, r4                               /* Load parameters */
+    bl List.LinkedList.destroy_P5            /* Call List.LinkedList.destroy */
+    mov r0, r5                               /* Evaluate Expression */
+    pop { pc }
+    

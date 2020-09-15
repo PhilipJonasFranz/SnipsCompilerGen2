@@ -1,0 +1,51 @@
+DESCRIPTION
+This Test aims to verify the correct functionality of inline calls that pass parameters
+through the stack and registers.
+SOURCE
+int foo(int a, int c, int d, int e) {
+	return (a * e) + (d * c);
+}
+
+int main(int a, int b, int c, int d, int e) {
+	return b + foo(a, c, d, e);
+}
+TESTCASES
+1 2 3 4 5 19
+1 0 1 0 1 1
+OUTPUT
+/* --test_03.txt */
+    b main
+foo:                                         /* Function: foo */
+    sub sp, sp, #12
+    stmea sp, {r4, r5, fp}
+    mov fp, sp
+    mov r4, r1
+    mov r5, r2
+    mov r1, r0                               /* Evaluate Expression */
+    ldr r2, [fp, #12]
+    mul r0, r1, r2
+    mul r2, r5, r4
+    add r0, r0, r2
+    mov sp, fp
+    ldmfd sp!, {r4, r5, fp}
+    add sp, sp, #4
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    ldr r0, [fp, #8]                         /* Evaluate Expression */
+    push { r0 }
+    ldr r0, [fp, #12]
+    push { r0 }
+    push { r5 }
+    mov r0, r3
+    ldmfd sp!, {r1, r2}
+    bl foo                                   /* Call foo */
+    add r0, r4, r0
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

@@ -60,7 +60,7 @@ public class AsNIDRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			if (i.origin.getType() instanceof PRIMITIVE) {
+			if (i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER) {
 				/* Load value from memory */
 				
 				ASMDataLabel label = map.resolve(i.origin);

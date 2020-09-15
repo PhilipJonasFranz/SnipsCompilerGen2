@@ -70,13 +70,13 @@ public class CompilerDriver {
 		disableWarnings = 				false,
 		disableStructSIDHeaders = 		false,
 		includeMetaInformation = 		true,
-		printErrors = 					false;
+		printErrors = 					false,
+		expectError =					false;
 			
 	
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = 			false,
-		includeProvisoInTypeString = 	false,
 		printObjectIDs = 				false;
 	
 	
@@ -109,6 +109,8 @@ public class CompilerDriver {
 	public static CompilerDriver driver;
 	
 	public static XMLNode sys_config;
+	
+	public Exception thrownException = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
@@ -224,6 +226,10 @@ public class CompilerDriver {
 	    return lines;
 	}
 	
+	public Exception getException() {
+		return this.thrownException;
+	}
+	
 	public List<String> compile(File file0, List<String> code) {
 		long start = System.currentTimeMillis();
 		
@@ -255,12 +261,14 @@ public class CompilerDriver {
 			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, Message.Type.INFO);
 			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
+			scan_progress.incProgress(1);
 			
 			
 					/* --- PARSING --- */
 			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, Message.Type.INFO);
 			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
+			parse_progress.incProgress(1);
 			
 			
 					/* --- PROCESS IMPORTS --- */
@@ -294,6 +302,7 @@ public class CompilerDriver {
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
 		
+			ctx_progress.incProgress(1);
 			if (imm) AST.print(4, true);
 			
 			
@@ -310,6 +319,8 @@ public class CompilerDriver {
 				}
 			}
 			
+			cgen_progress.incProgress(1);
+			
 			
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
@@ -322,10 +333,13 @@ public class CompilerDriver {
 				aopt_progress.incProgress(1);
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-				compressions.add(rate);
 				
-				if (rate < c_min) c_min = rate;
-				if (rate > c_max) c_max = rate;
+				if (!expectError) {
+					compressions.add(rate);
+				
+					if (rate < c_min) c_min = rate;
+					if (rate > c_max) c_max = rate;
+				}
 				
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
 			}
@@ -356,7 +370,9 @@ public class CompilerDriver {
 				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			instructionsGenerated += output.size();
+			/* Error test generated instructions are not counted, since they duplicate many times. */
+			if (!expectError)
+				instructionsGenerated += output.size();
 		
 		} catch (Exception e) {
 			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
@@ -365,6 +381,10 @@ public class CompilerDriver {
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
 			if (printErrors || !customExc) e.printStackTrace();
 			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
+		
+			this.thrownException = e;
+			
+			if (expectError) return null;
 		}
 		
 		/* Report Status */
@@ -454,7 +474,10 @@ public class CompilerDriver {
 	public List<Program> addDependencies() throws SNIPS_EXC {
 		List<Program> ASTs = new ArrayList();
 		
-		for (String s : this.referencedLibaries) {
+		/* Create a copy of all referenced libraries, all transitive dependencies are already included. */
+		String [] referenced = this.referencedLibaries.stream().toArray(String []::new);
+		
+		for (String s : referenced) {
 			List<String> file0 = new ArrayList();
 			file0.add(s);
 			
@@ -676,6 +699,7 @@ public class CompilerDriver {
 	public static void reset() {
 		heap_referenced = false;
 		null_referenced = false;
+		expectError = false;
 	}
 	
 } 

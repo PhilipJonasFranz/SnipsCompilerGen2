@@ -5,6 +5,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Processing.Arith.ASMMov;
@@ -21,8 +22,10 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNAddressOf extends AsNExpression {
 
@@ -103,9 +106,32 @@ public class AsNAddressOf extends AsNExpression {
 		else if (a.expression instanceof StructSelect) {
 			StructSelect select = (StructSelect) a.expression;
 			
-			AsNStructSelect.injectAddressLoader(aof, select, r, map, st);
+			AsNStructSelect.injectAddressLoader(aof, select, r, map, st, true);
 			
 			aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.R1)));
+		}
+		else if (a.expression instanceof StructureInit) {
+			/* Cast the structure init */
+			aof.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
+			
+			if (a.expression.getType().wordsize() > 1 || a.expression.getType() instanceof STRUCT) {
+				/* Swap R0 dummys with unbound data regs. */
+				st.popXWords(a.expression.getType().wordsize());
+				for (int i = 0; i < a.expression.getType().wordsize(); i++) st.push(REG.RX);
+				
+				/* Move SP in R0, since it is head of structure */
+				aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
+			}
+			else {
+				/* In Reg Set, push value on stack */
+				aof.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				
+				/* Push RX to mark unbound data on stack */
+				st.push(REG.RX);
+				
+				/* Move SP in R0, since it is head of structure */
+				aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
+			}
 		}
 		
 		/* Convert to words for pointer arithmetic */

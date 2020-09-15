@@ -1,0 +1,41 @@
+SOURCE
+struct Foo<V> {
+	V value;
+}
+
+struct Nib<T> {
+	Foo<T> val;
+}
+
+struct Data<T> {
+	Nib<T> n0;
+	Nib<T> n1;
+}
+
+int main() {
+	Data<int> data = Data::(Nib::(Foo::(5)), Nib::(Foo::(10)));
+	return data.n0.val.value + data.n1.val.value;
+}
+TESTCASES
+15
+OUTPUT
+/* --test_03.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #10                              /* Evaluate Expression */
+    mov r1, #1
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    push { r0 }
+    mov r0, #5
+    mov r1, #1
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    push { r0 }
+    mov r0, #3
+    push { r0 }
+    ldr r0, [fp, #-16]                       /* Load field from struct */
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    bx lr
+    

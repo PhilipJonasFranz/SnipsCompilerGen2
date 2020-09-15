@@ -91,6 +91,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
@@ -137,7 +138,7 @@ public class Parser {
 	public Parser(List tokens, ProgressMessage progress) throws SNIPS_EXC {
 		if (tokens == null) {
 			this.progress.abort();
-			throw new SNIPS_EXC("SNIPS_PARSE -> Tokens are null!");
+			throw new SNIPS_EXC(Const.TOKENS_ARE_NULL);
 		}
 		tokenStream = tokens;
 		
@@ -157,9 +158,8 @@ public class Parser {
 	 */
 	protected Token accept(TokenType tokenType) throws PARSE_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
 		
 		if (current.type() == tokenType) return accept();
 		else {
@@ -176,9 +176,9 @@ public class Parser {
 	 */
 	protected Token accept(TokenGroup group) throws PARSE_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
+		
 		if (current.type().group == group)return accept();
 		else {
 			this.progress.abort();
@@ -194,9 +194,8 @@ public class Parser {
 	 */
 	protected Token accept() {
 		/* Convert tokens dynamically based on the currently active provisos */
-		if (this.activeProvisos.contains(current.spelling)) {
+		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		}
 		
 		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
 		
@@ -346,7 +345,7 @@ public class Parser {
 		 * to another instance of this struct. The struct definition needs to exist before
 		 * such a declaration is parsed.
 		 */
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), ext, extProviso, mod, source);
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
@@ -355,8 +354,43 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		/* Parse the regular struct fields */
-		while (current.type != TokenType.RBRACE) 
-			def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
+		while (current.type != TokenType.RBRACE) {
+			if (current.type == TokenType.COMMENT) {
+				accept();
+				continue;
+			}
+			
+			boolean field = false;
+			for (int i = 1; i < this.tokenStream.size(); i++) {
+				if (this.tokenStream.get(i - 1).type == TokenType.IDENTIFIER && this.tokenStream.get(i).type == TokenType.SEMICOLON) {
+					field = true;
+				}
+				else if (this.tokenStream.get(i - 1).type == TokenType.LBRACE) {
+					break;
+				}
+			}
+			
+			if (field) 
+				/* Declaration */
+				def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
+			else {
+				/* Nested function */
+				MODIFIER m = this.parseModifier();
+				
+				TYPE type = this.parseType();
+				
+				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m);
+				
+				/* Insert Struct Name */
+				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+				
+				/* Inject Self Reference */
+				Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+				f.parameters.add(0, self);
+				
+				def.functions.add(f);
+			}
+		}
 		
 		accept(TokenType.RBRACE);
 
@@ -419,6 +453,17 @@ public class Parser {
 	
 	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
+		
+		/* Check if a function name is a reserved identifier */
+		String name = identifier.spelling;
+		if (
+				/* Name is a reserved identifier */
+				(name.equals("resv") || name.equals("init") || name.equals("hsize") || name.equals("free")) 
+				/* Currently not parsing any of the libraries that define these reserved function names */
+				&& !identifier.getSource().sourceFile.equals(name + ".sn")) {
+			this.progress.abort();
+			throw new SNIPS_EXC(Const.USED_RESERVED_NAME, name, identifier.getSource().getSourceMarker());
+		}
 		
 		List<TYPE> proviso = this.parseProviso();
 		
@@ -590,7 +635,13 @@ public class Parser {
 			else if (current.type == TokenType.SWITCH) {
 				return this.parseSwitch();
 			}
-			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER) {
+			/*
+			 * LPAREN in case of statement like
+			 * 
+			 * (ll->lp)->size();
+			 * 
+			 */
+			else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.MUL || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.LPAREN) {
 				return this.parseAssignment(true);
 			}
 			else if (current.type == TokenType.IF) {
@@ -992,35 +1043,73 @@ public class Parser {
 			}
 		}
 		else {
-			LhsId target = this.parseLhsIdentifer();
+			SyntaxElement expr = this.parseLhsIdentifer();
 			
-			/*
-			 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
-			 * operation, needs to be handeled like this. This occurs for example in an assignment:
-			 * 
-			 * x [0].value++;
-			 * 
-			 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
-			 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
-			 * with a StructSelectWriteback as payload.
-			 */
-			if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
-				StructSelectLhsId lhs = (StructSelectLhsId) target;
+			if (expr instanceof InlineCall) {
+				InlineCall ic = (InlineCall) expr;
 				
-				WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
-				accept();
-				if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			
-				return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
+				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
+				fc.isNestedCall = true;
+				
+				accept(TokenType.SEMICOLON);
+				return fc;
 			}
-			
-			/*
-			 * Normal behaviour.
-			 */
-			ASSIGN_ARITH arith = this.parseAssignOperator();
-			Expression value = this.parseExpression();
-			if (acceptSemicolon) accept(TokenType.SEMICOLON);
-			return new Assignment(arith, target, value, target.getSource());
+			else {
+				LhsId target = (LhsId) expr;
+				
+				/*
+				 * Special case where it is impossible to determine that this is in fact a INCR/DECR writeback
+				 * operation, needs to be handeled like this. This occurs for example in an assignment:
+				 * 
+				 * x [0].value++;
+				 * 
+				 * because of the array select the lookahead cant determine what lies ahead. This is handeled by
+				 * extracting the struct select from the target lhs and reformatting into an AssignWriteback
+				 * with a StructSelectWriteback as payload.
+				 */
+				if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+					StructSelectLhsId lhs = (StructSelectLhsId) target;
+					
+					WRITEBACK idWb = (current.type == TokenType.INCR)? WRITEBACK.INCR : WRITEBACK.DECR;
+					accept();
+					if (acceptSemicolon) accept(TokenType.SEMICOLON);
+				
+					return new AssignWriteback(new StructSelectWriteback(idWb, lhs.select, source), source);
+				}
+				
+				ASSIGN_ARITH arith = this.parseAssignOperator();
+				
+				if (arith == null) {
+					/*
+					 * Struct Nesting Call.
+					 * 
+					 * If the arith is null at this location, this means we have a nested struct call. The inline call
+					 * is parsed into the LhsId. So we need to extract the inline call from the lhs, convert it to an
+					 * Function Call, accept a semicolon and return the function call.
+					 * 
+					 * The Syntax where this occurs could be:
+					 * 
+					 * x.getValue(x);
+					 * 
+					 * where x is a struct variable, and getValue a function defined in the struct type definition.
+					 * 
+					 */
+					StructSelect select = ((StructSelectLhsId) target).select;
+					InlineCall ic = (InlineCall) select.selection;
+					FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
+					fc.baseRef = select.selector;
+					accept(TokenType.SEMICOLON);
+					return fc;
+				}
+				else {
+					/*
+					 * Normal behaviour.
+					 */
+					Expression value = this.parseExpression();
+					if (acceptSemicolon) accept(TokenType.SEMICOLON);
+					return new Assignment(arith, target, value, target.getSource());
+				}
+			}
 		}
 	}
 	
@@ -1098,15 +1187,12 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			this.progress.abort();
-			throw new SNIPS_EXC("Got '" + current.spelling + "', check for misspelled types or tokens, " + current.getSource().getSourceMarker());
+			throw new SNIPS_EXC(Const.CHECK_FOR_MISSPELLED_TYPES, current.spelling , current.getSource().getSourceMarker());
 		}
-		else {
-			this.progress.abort();
-			throw new PARSE_EXC(current.source, current.type, TokenType.LET);
-		}
+		else return null;
 	}
 	
-	protected LhsId parseLhsIdentifer() throws PARSE_EXC {
+	protected SyntaxElement parseLhsIdentifer() throws PARSE_EXC {
 		if (current.type == TokenType.MUL) {
 			Source source = current.getSource();
 			return new PointerLhsId(this.parseDeref(), source);
@@ -1122,6 +1208,8 @@ public class Parser {
 			else if (target instanceof StructSelect) {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
+			else if (target instanceof InlineCall) 
+				return target;
 			else {
 				this.progress.abort();
 				throw new PARSE_EXC(current.source, current.type, TokenType.IDENTIFIER);
@@ -1193,7 +1281,7 @@ public class Parser {
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
 				this.progress.abort();
-				throw new SNIPS_EXC(new CTX_EXC(source, "Expected STRUCT type, got " + type.typeString()).getMessage());
+				throw new SNIPS_EXC(new CTX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type.typeString()).getMessage());
 			}
 			
 			accept(TokenType.COLON);
@@ -1438,7 +1526,11 @@ public class Parser {
 		Expression addr = null;
 		while (current.type == TokenType.ADDROF) {
 			Source source = accept().getSource();
-			addr = new AddressOf(this.parseDeref(), source);
+			
+			if (current.type == TokenType.TYPE || current.type == TokenType.STRUCTID || current.type == TokenType.NAMESPACE_IDENTIFIER)
+				addr = new AddressOf(this.parseExpression(), source);
+			else 
+				addr = new AddressOf(this.parseDeref(), source);
 		}
 		
 		if (addr == null) addr = this.parseDeref();
@@ -1570,13 +1662,86 @@ public class Parser {
 	protected Expression parseStructSelect() throws PARSE_EXC {
 		Expression ref = this.parseArraySelect();
 		
+		boolean dot = false;
+		
 		if (current.type == TokenType.DOT) {
+			dot = true;
 			accept();
 			ref = new StructSelect(ref, this.parseStructSelect(), false, ref.getSource());
 		}
 		else if (current.type == TokenType.UNION_ACCESS) {
 			accept();
 			ref = new StructSelect(ref, this.parseStructSelect(), true, ref.getSource());
+		}
+		
+		if (ref instanceof StructSelect) {
+			StructSelect select = (StructSelect) ref;
+			
+			/* 
+			 * Nested call, transform AST by nesting the chained calls within each other.
+			 * Only do the transformation if the head of the select is not an inline call,
+			 * because if this is the case, this means we are currently recursiveley in the
+			 * middle of the chain. We need a head to start the chain, which was already
+			 * parsed, but not attatched. Just return, a previous recursice call will transform
+			 * the AST eventually.
+			 */
+			if (!(select.selector instanceof InlineCall)) {
+				if (select.selection instanceof InlineCall) {
+					/* Single call */
+					InlineCall call = (InlineCall) select.selection;
+					call.isNestedCall = true;
+					
+					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+					else call.parameters.add(0, select.selector);
+					
+					ref = call;
+				}
+				else if (select.selection instanceof FunctionRef && select.selector instanceof IDRef) {
+					FunctionRef base = (FunctionRef) select.selection;
+					base.base = (IDRef) select.selector;
+					ref = base;
+				}
+				else if (select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
+					/* Chained nested call */
+					StructSelect nested = (StructSelect) select.selection;
+					
+					InlineCall call = (InlineCall) nested.selector;
+					call.isNestedCall = true;
+					
+					/* Nest based on the chain head an address of of the head or just the head in the call parameters */
+					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
+					else call.parameters.add(0, select.selector);
+					
+					/* Multiple chains */
+					if (((StructSelect) select.selection).selection instanceof StructSelect) {
+						nested = (StructSelect) (((StructSelect) select.selection).selection);
+						
+						while (nested instanceof StructSelect) {
+							
+							/* Nest the previous call as parameter in the next call */
+							InlineCall call0 = (InlineCall) nested.selector;
+							call0.isNestedCall = true;
+							
+							call0.parameters.add(0, call);
+							
+							call = call0;
+							
+							if (nested.selection instanceof StructSelect) 
+								nested = (StructSelect) nested.selection;
+							else break;
+						}
+					}
+					
+					/* Final call in chain, nest the current call as parameter in the final call */
+					InlineCall end = (InlineCall) nested.selection;
+					end.isNestedCall = true;
+					
+					end.parameters.add(0, call);
+					
+					call = end;
+					ref = call;
+				}
+			}
 		}
 		
 		return ref;
@@ -1624,7 +1789,7 @@ public class Parser {
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
 			
-			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && tokenStream.get(0).type.group == TokenGroup.TYPE)) {
+			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
 				List<TYPE> proviso = this.parseProviso();
 				
 				/* Predicate with proviso */
@@ -1648,6 +1813,10 @@ public class Parser {
 						CompilerDriver.heap_referenced = true;
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 					}
+					else if (path.getPath().get(0).equals("init")) {
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+						CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+					}
 					else if (path.getPath().get(0).equals("hsize")) {
 						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
 					}
@@ -1660,7 +1829,7 @@ public class Parser {
 				
 				if (current.type != TokenType.ENUMLIT) {
 					this.progress.abort();
-					throw new SNIPS_EXC("The expression '" + current.spelling + "' is not a known field of the enum " + path.build() + ", " + source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path.build(), source.getSourceMarker());
 				}
 				
 				/* Actual enum field value */
@@ -1671,7 +1840,7 @@ public class Parser {
 				
 				if (def == null) {
 					this.progress.abort();
-					throw new SNIPS_EXC("Unknown enum type: " + path.build() + ", " + source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
 				}
 				
 				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
@@ -1841,7 +2010,7 @@ public class Parser {
 			for (StructTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC("Multiple matches for struct type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
 	
@@ -1868,7 +2037,7 @@ public class Parser {
 			for (EnumTypedef def : defs) s += def.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC("Multiple matches for enum type '" + path.build() + "': " + s + ". Ensure namespace path is explicit and correct, " + source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
 	
@@ -1931,7 +2100,7 @@ public class Parser {
 			/* Nothing found, error */
 			if (enu == null && def == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC("Unknown struct or enum type '" + path.build() + "', " + token.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM, path.build(), token.getSource().getSourceMarker());
 			}
 		}
 		
@@ -2075,6 +2244,19 @@ public class Parser {
 			
 			while (current.type != TokenType.CMPGT) {
 				TYPE type = this.parseType();
+				
+				if (current.type == TokenType.COLON) {
+					accept();
+					
+					TYPE def = this.parseType();
+					
+					if (!(type instanceof PROVISO)) 
+						throw new SNIPS_EXC("Cannot parse a default proviso at this location, " + current.getSource().getSourceMarker() + " (" + CompilerDriver.inputFile.getPath() + ")");
+				
+					PROVISO prov = (PROVISO) type;
+					prov.defaultContext = def;
+				}
+				
 				pro.add(type);
 				if (current.type == TokenType.COMMA) 
 					accept();

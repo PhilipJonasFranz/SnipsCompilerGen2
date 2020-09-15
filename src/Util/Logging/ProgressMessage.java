@@ -39,13 +39,30 @@ public class ProgressMessage {
 		if (!CompilerDriver.silenced && !buffered) System.out.print(this.getMessage());
 	}
 	
-	public boolean isDone = false;;
+	/**
+	 * Set to true when a progress value has been seen
+	 * with the value 1.
+	 */
+	public boolean isDone = false;
 	
+	/**
+	 * How many dots have been printed out already.
+	 */
 	protected int printed = 0;
 	
+	/**
+	 * Sets the progress to given value. Range: [0-1].
+	 * Also prints out progress dots (...) based on the value.
+	 * When calling this function multiple times, the passed
+	 * param values should be ascending, so x0 <= x1 <= x2.
+	 * If this is not the case, no dots will be printed, since a
+	 * previous higher value already printed the dots.
+	 * 
+	 * Prints a 'DONE!' message if the given value is 1.
+	 */
 	public void incProgress(double progress) {
 		if (!CompilerDriver.silenced) {
-			while (this.maxProgress * progress > printed) {
+			while (this.maxProgress * progress > printed && !isDone) {
 				System.out.print(".");
 				printed++;
 			}
@@ -57,6 +74,9 @@ public class ProgressMessage {
 		}
 	}
 	
+	/**
+	 * Prints out a single dot.
+	 */
 	public void incProgressSingle() {
 		if (!CompilerDriver.silenced) {
 			System.out.print(".");
@@ -64,12 +84,16 @@ public class ProgressMessage {
 		}
 	}
 	
+	/**
+	 * Prints out all remaining dots and a 'ERROR!' message at the end.
+	 */
 	public void abort() {
 		if (!CompilerDriver.silenced) {
 			while (printed < this.maxProgress) {
 				System.out.print(".");
 				printed++;
 			}
+			
 			System.out.println("ERROR!");
 		}
 	}

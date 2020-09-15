@@ -1,0 +1,7 @@
+SOURCE
+int main() {
+	int x = 2 + true;
+	return x;
+}
+THROWN
+OPERAND_TYPES_DO_NOT_MATCH

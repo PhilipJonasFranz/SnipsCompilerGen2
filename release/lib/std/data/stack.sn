@@ -8,7 +8,66 @@
 namespace Stack {
 	
 	restricted struct StackedList<T> {
+		
 		LinkedList<T>* list;
+		
+		/*
+		 * Destroys the stack and the capsuled list.
+		 */
+		shared void destroy<T:void>() {
+			/* Destroy the capsuled list */
+			(self->list)->destroy();
+			
+			/* Free the stack itself */
+			free(self);
+		}
+		
+		/*
+		 * Pushes given element on top of the stack.
+		 */
+		shared void push<T>(T value) {
+			(self->list)->add<T>(value);
+		}
+		
+		/*
+		 * Returns true if no elements are currently in the stack.
+		 */
+		shared bool isEmpty<T:void>() {
+			return (self->list)->size() == 0;
+		}
+		
+		/*
+		 * Returns the amount of elements stored in the stack.
+		 */
+		shared int size<T:void>() {
+			return (self->list)->size();
+		}
+		
+		/*
+		 * Returns the element on the top of the stack, but doesnt
+		 * remove it. Returns the default value if the stack is empty.
+		 */
+		shared T peek<T>() {
+			if (self->isEmpty<T>()) return self->list->defValue;
+			else return (self->list)->get<T>((self->list)->size<T>() - 1);
+		}
+		
+		/*
+		 * Returns the element on the top of the stack, and 
+		 * removes it. Returns the default value if the stack is empty.
+		 */
+		shared T pop<T>() {
+			if (self->isEmpty<T>()) {
+				return self->list->defValue;
+			}
+			else {
+				int size = (self->list)->size();
+				T value = (self->list)->get<T>(size - 1);
+				(self->list)->remove<T>(size - 1);
+				return value;
+			}
+		}
+		
 	}
 	
 	/*
@@ -19,75 +78,8 @@ namespace Stack {
 		/* Allocate a new linked list for the stack */
 		LinkedList<T>* list = List::create<T>(defValue);
 		
-		/* Allocate the stack */
-		StackedList<T>* stack = resv(sizeof(StackedList<T>));
-		
 		/* Initialize the stack with the list */
-		*stack = StackedList<T>::(list);
-		
-		return stack;
-	}
-	
-	/*
-	 * Destroys the stack and the capsuled list.
-	 */
-	shared void destroy(StackedList<void>* stack) {
-		/* Destroy the capsuled list */
-		List::destroy(stack->list);
-		
-		/* Free the stack itself */
-		free(stack);
-	}
-	
-	/*
-	 * Pushes given element on top of the stack.
-	 */
-	shared void push<T>(StackedList<T>* stack, T value) {
-		List::add<T>(stack->list, value);
-	}
-	
-	/*
-	 * Returns true if no elements are currently in the stack.
-	 */
-	shared bool isEmpty(StackedList<void>* stack) {
-		return List::size(stack->list) == 0;
-	}
-	
-	/*
-	 * Returns the amount of elements stored in the stack.
-	 */
-	shared int size(StackedList<void>* stack) {
-		return List::size(stack->list);
-	}
-	
-	/*
-	 * Returns the element on the top of the stack, but doesnt
-	 * remove it. Returns the default value if the stack is empty.
-	 */
-	shared T peek<T>(StackedList<T>* stack) {
-		if (Stack::isEmpty(stack)) {
-			return stack->list->defValue;
-		}
-		else {
-			int size = List::size(stack->list);
-			return List::get<T>(stack->list, size - 1);
-		}
-	}
-	
-	/*
-	 * Returns the element on the top of the stack, and 
-	 * removes it. Returns the default value if the stack is empty.
-	 */
-	shared T pop<T>(StackedList<T>* stack) {
-		if (Stack::isEmpty(stack)) {
-			return stack->list->defValue;
-		}
-		else {
-			int size = List::size(stack->list);
-			T value = List::get<T>(stack->list, size - 1);
-			List::remove(stack->list, size - 1);
-			return value;
-		}
+		return init<>(StackedList<T>::(list));
 	}
 	
 } 

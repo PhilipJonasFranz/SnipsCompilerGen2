@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Exc.SNIPS_EXC;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
@@ -67,7 +68,7 @@ public class PreProcessor {
 							new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
 							this.imported.add(path);
 						} catch (NullPointerException e) {
-							throw new SNIPS_EXC("PRE0 -> Cannot resolve import " + path + ", " + new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
+							throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
 						}
 					}
 					

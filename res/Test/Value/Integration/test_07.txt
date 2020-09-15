@@ -1,0 +1,276 @@
+SOURCE
+/*
+ * Multiplicate the given matricies. Both matricies have to have the given
+ * dimension. Returns a pointer to the resulting matrix.
+ */
+int* __mat_mult(int* m, int* n, int dimX, int dimY) {
+	int* r = (int*) resv(dimX * dimY);
+	for (int i = 0; i < dimX; i++) {
+		for (int j = 0; j < dimY; j++) {
+			int sum = 0;
+			for (int k = 0; k < dimY; k++) {
+				sum += *(m + (i * dimY) + k) * *(n + (k * dimY) + j);
+			}
+			*(r + (i * dimY) + j) = sum;
+		}
+	}
+
+	return r;
+}
+
+int* allocMatrix(int w, int h) {
+	int* p = (int*) resv(w * h);
+	for (int i = 0; i < h; i++) {
+		for (int a = 0; a < w; a++) {
+			*(p + (i * h) + a) = (i * h) + a;
+		}
+	}
+	return p;
+}
+
+int main(int x) {
+	int* p = allocMatrix(3, 3);
+	int* q = allocMatrix(3, 3);
+	int* mul = __mat_mult(p, q, 3, 3);
+	return *(mul + x);
+}
+TESTCASES
+0 15
+1 18
+2 21
+3 42
+4 54
+5 66
+6 69
+7 90
+8 111
+OUTPUT
+/* --test_07.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+/* Add block header to size */
+    add r3, r0, #1
+/* Get reference to heap start */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+/* Defragment Heap */
+resv.L6:                                     /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #1
+    bne resv.L7
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L11
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b resv.L7
+resv.L11: 
+    add r5, r5, r6
+/* Add to current size */
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+/* Write defragmented size to heap */
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+/* Memory location is free, check size */
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+/* Fits */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L18
+resv.L15: 
+    cmp r5, r3
+    ble resv.L17
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L18
+resv.L17: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+/* End reached, create new block */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L18: 
+    ldmfd sp!, {r3-r6}
+    bx lr
+.POOL0_L0_HEAP_START: .word HEAP_START
+    
+/* Multiplicate the given matricies. Both matricies have to have the given */
+/* dimension. Returns a pointer to the resulting matrix. */
+__mat_mult:                                  /* Function: __mat_mult */
+    sub sp, sp, #36
+    stmea sp, {r3-r9, fp, lr}
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    mov r1, r2                               /* Evaluate Expression */
+    ldr r2, [fp, #36]
+    mul r0, r1, r2
+    bl resv                                  /* Call resv */
+    mov r6, r0
+    mov r7, #0
+__mat_mult.L1: 
+    cmp r7, r5
+    bge __mat_mult.L2
+    mov r8, #0
+__mat_mult.L4: 
+    mov r0, r8
+    ldr r1, [fp, #36]
+    cmp r8, r1
+    bge __mat_mult.L5
+    mov r9, #0
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+__mat_mult.L7: 
+    ldr r0, [fp, #-4]
+    ldr r1, [fp, #36]
+    cmp r0, r1
+    bge __mat_mult.L8
+    mov r1, r7                               /* Evaluate Expression */
+    ldr r2, [fp, #36]
+    mul r2, r1, r2
+    add r1, r3, r2
+    ldr r2, [fp, #-4]
+    add r0, r1, r2
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    push { r0 }
+    ldr r1, [fp, #-4]
+    ldr r2, [fp, #36]
+    mul r2, r1, r2
+    add r1, r4, r2
+    add r0, r1, r8
+    pop { r1 }
+    ldr r2, [r10, r0, lsl #2]                /* Load from address */
+    mul r0, r1, r2
+    add r9, r9, r0
+    ldr r0, [fp, #-4]
+    add r1, r0, #1
+    str r1, [fp, #-4]
+    b __mat_mult.L7
+__mat_mult.L8: 
+    add sp, sp, #4
+    mov r1, r7
+    ldr r2, [fp, #36]
+    mul r2, r1, r2
+    add r1, r6, r2
+    add r0, r1, r8
+    str r9, [r10, r0, lsl #2]
+    add r8, r8, #1
+    b __mat_mult.L4
+__mat_mult.L5: 
+    add r7, r7, #1
+    b __mat_mult.L1
+__mat_mult.L2: 
+    mov r0, r6                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3-r9, fp, lr}
+    add sp, sp, #4
+    bx lr
+    
+allocMatrix:                                 /* Function: allocMatrix */
+    sub sp, sp, #24
+    stmea sp, {r3-r7, lr}
+    mov r3, r0
+    mov r4, r1
+    mul r0, r0, r1
+    bl resv                                  /* Call resv */
+    mov r5, r0
+    mov r6, #0
+allocMatrix.L1: 
+    cmp r6, r4
+    bge allocMatrix.L2
+    mov r7, #0
+allocMatrix.L4: 
+    cmp r7, r3
+    bge allocMatrix.L5
+    mla r0, r6, r4, r7
+    mul r2, r6, r4
+    add r1, r5, r2
+    push { r0 }
+    add r0, r1, r7
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r7, r7, #1
+    b allocMatrix.L4
+allocMatrix.L5: 
+    add r6, r6, #1
+    b allocMatrix.L1
+allocMatrix.L2: 
+    mov r0, r5                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r7, pc}
+    
+main:                                        /* Function: main */
+    push { lr }
+    mov r3, r0
+    mov r1, #3
+    mov r0, #3
+    bl allocMatrix                           /* Call allocMatrix */
+    mov r4, r0
+    mov r1, #3
+    mov r0, #3
+    bl allocMatrix                           /* Call allocMatrix */
+    mov r5, r0
+    mov r0, #3                               /* Evaluate Expression */
+    push { r0 }
+    mov r0, #3
+    push { r0 }
+    push { r5 }
+    mov r0, r4
+    ldmfd sp!, {r1, r2}
+    bl __mat_mult                            /* Call __mat_mult */
+    add r0, r0, r3
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    pop { pc }
+    

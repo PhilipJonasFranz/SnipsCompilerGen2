@@ -1,5 +1,0 @@
-#include <res\Test\Directives\exclude_import3.sn>
-
-int foo(int a) {
-	return 2 * bar(a);
-} 

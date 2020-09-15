@@ -16,15 +16,23 @@ public class CTX_EXC extends Exception {
 	
 	Source location;
 	
-	public CTX_EXC(Source source, String message) {
+	Object [] format;
+	
+	public CTX_EXC(Source source, String message, Object...format) {
 		this.location = source;
 		this.message = message;
+		this.format = format;
+		
 		ContextChecker.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
 	
+	public String getExcFieldName() {
+		return Util.Util.getExceptionFieldName(this.message);
+	}
+	
 	public String getMessage() {
-		return message + ", " + this.location.getSourceMarker();
+		return String.format(message, format) + ", " + this.location.getSourceMarker();
 	}
 	
 } 

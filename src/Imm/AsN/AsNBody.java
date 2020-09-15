@@ -49,6 +49,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.StructTypedef;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNAssignment;
@@ -192,6 +193,8 @@ public class AsNBody extends AsNNode {
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
+				/* Cast a single function */
+				
 				st = new StackSet();
 				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, st).getInstructions();
 				
@@ -208,16 +211,38 @@ public class AsNBody extends AsNNode {
 				
 				body.instructions.addAll(ins);
 				body.instructions.add(new ASMSeperator());
+			}
+			else if (s instanceof StructTypedef) {
+				/* Cast all functions defined in the struct typedef */
+				StructTypedef def = (StructTypedef) s;
 				
-				done++;
-				progress.incProgress((double) done / p.programElements.size());
+				for (Function f : def.functions) {
+					st = new StackSet();
+					List<ASMInstruction> ins = AsNFunction.cast(f, new RegSet(), map, st).getInstructions();
+					
+					/* Ensure that stack was emptied, so no stack shift at compile time occurred */
+					assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
+					
+					if (!ins.isEmpty()) {
+						/* Patch Branch to Main Function */
+						if (f.path.build().equals("main")) {
+							((LabelOp) branch.target).patch((ASMLabel) ins.get(0));
+							mainLabel = (ASMLabel) ins.get(0);
+						}
+					}
+					
+					body.instructions.addAll(ins);
+					body.instructions.add(new ASMSeperator());
+				}
 			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
 			
-				done++;
-				progress.incProgress((double) done / p.programElements.size());
+				
 			}
+			
+			done++;
+			progress.incProgress((double) done / p.programElements.size());
 		}
 		
 		for (int i = 0; i < p.programElements.size(); i++) {

@@ -50,4 +50,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		return this;
 	}
 	
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		return null;
+	}
+	
 } 

@@ -121,4 +121,12 @@ public class ARRAY extends COMPOSIT {
 		return this;
 	}
 
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		if (mapType instanceof ARRAY) {
+			ARRAY arr = (ARRAY) mapType;
+			return this.elementType.mappable(arr.elementType, searchedProviso);
+		}
+		else return null;
+	}
+
 } 

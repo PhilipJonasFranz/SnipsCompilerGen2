@@ -1,0 +1,67 @@
+SOURCE
+int sq(int n) {
+	return n * n;
+}
+
+int sqsum(int a, int b, int c, int d, int e) {
+	int r = sq(a) + sq(b) + sq(c) + sq(d) + sq(e);
+	return r;
+}
+
+int main(int a, int b, int c, int d, int e) {
+	return sqsum(a, b, c, d, e);
+}
+TESTCASES
+1 2 3 4 5 55
+2 2 2 2 2 20
+OUTPUT
+/* --test_04.txt */
+    b main
+sq:                                          /* Function: sq */
+    mul r0, r0, r0
+    bx lr
+    
+sqsum:                                       /* Function: sqsum */
+    sub sp, sp, #20
+    stmea sp, {r4-r6, fp, lr}
+    mov fp, sp
+    mov r4, r1
+    mov r5, r2
+    bl sq                                    /* Call sq */
+    mov r6, r0
+    mov r0, r4                               /* Load parameters */
+    bl sq                                    /* Call sq */
+    add r6, r6, r0
+    mov r0, r5                               /* Load parameters */
+    bl sq                                    /* Call sq */
+    add r6, r6, r0
+    ldr r0, [fp, #24]                        /* Load parameters */
+    bl sq                                    /* Call sq */
+    add r6, r6, r0
+    ldr r0, [fp, #20]                        /* Load parameters */
+    bl sq                                    /* Call sq */
+    add r6, r6, r0
+    mov r0, r6                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r4-r6, fp, lr}
+    add sp, sp, #8
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    ldr r0, [fp, #12]                        /* Evaluate Expression */
+    push { r0 }
+    ldr r0, [fp, #8]
+    push { r0 }
+    push { r5 }
+    push { r4 }
+    mov r0, r3
+    ldmfd sp!, {r1, r2}
+    bl sqsum                                 /* Call sqsum */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

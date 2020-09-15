@@ -1,0 +1,30 @@
+SOURCE
+int main(int k) {
+	int x = 1;
+	int [4] arr = (x++)...;
+	return arr [k] + x;
+}
+TESTCASES
+0 3
+1 3
+2 3
+3 3
+OUTPUT
+/* --test_06.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r3, r0
+    mov r4, #1
+    mov r0, #1                               /* Evaluate Expression */
+    add r4, r0, #1
+    mov r1, r0
+    mov r2, r0
+    stmfd sp!, {r0-r2}
+    push { r0 }
+    lsl r2, r3, #2
+    sub r0, fp, #16
+    ldr r1, [r0, r2]
+    add r0, r1, r4
+    mov sp, fp
+    bx lr
+    

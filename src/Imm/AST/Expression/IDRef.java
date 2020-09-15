@@ -3,6 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
@@ -45,7 +46,9 @@ public class IDRef extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (this.origin != null) 
-			this.setType(this.origin.getType());
+			this.setType(this.origin.getType().clone());
+		
+		ProvisoUtil.mapNTo1(this.getType(), context);
 	}
 
 } 

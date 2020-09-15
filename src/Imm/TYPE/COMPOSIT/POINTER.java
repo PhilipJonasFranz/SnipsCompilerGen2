@@ -27,7 +27,7 @@ public class POINTER extends COMPOSIT {
 			POINTER pointer = (POINTER) type;
 			if (pointer.targetType instanceof STRUCT && this.targetType instanceof STRUCT) {
 				STRUCT s = (STRUCT) this.targetType;
-				return s.isEqualExtended(type);
+				return s.isEqualExtended(pointer.targetType);
 			}
 			else return this.targetType.isEqual(pointer.targetType);
 		}
@@ -110,6 +110,14 @@ public class POINTER extends COMPOSIT {
 	public TYPE remapProvisoName(String name, TYPE newType) {
 		this.targetType = this.targetType.remapProvisoName(name, newType);
 		return this;
+	}
+
+	public TYPE mappable(TYPE mapType, String searchedProviso) {
+		if (mapType instanceof POINTER) {
+			POINTER p = (POINTER) mapType;
+			return this.targetType.mappable(p.targetType, searchedProviso);
+		}
+		else return null;
 	}
 
 } 

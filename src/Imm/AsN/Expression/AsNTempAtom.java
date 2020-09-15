@@ -1,13 +1,25 @@
 package Imm.AsN.Expression;
 
+import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Imm.ASM.Branch.ASMBranch;
+import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.TempAtom;
@@ -59,11 +71,46 @@ public class AsNTempAtom extends AsNExpression {
 			if (a.base.getType().wordsize() > 1) {
 				int range = a.inheritType.wordsize() / a.base.getType().wordsize();
 				
-				for (int i = 0; i < range; i++) 
-					atom.instructions.addAll(AsNExpression.cast(a.base, r, map, st).getInstructions());
+				atom.instructions.addAll(AsNExpression.cast(a.base, r, map, st).getInstructions());
 				
-				for (int i = 0; i < a.getType().wordsize(); i++)
-					st.push(REG.R0);
+				ASMLabel start = null;
+				
+				ASMLabel end = null;
+				
+				if (range - 1 > 1) {
+					ASMMov mov = new ASMMov(new RegOp(REG.R1), new ImmOp(0));
+					mov.comment = new ASMComment("Copy substructure with loop " + (range - 1) + " times");
+					atom.instructions.add(mov);
+					
+					start = new ASMLabel(LabelGen.getLabel());
+					
+					end = new ASMLabel(LabelGen.getLabel());
+					
+					atom.instructions.add(start);
+					
+					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(range - 1)));
+					
+					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(end)));
+				}
+				
+				for (int k = 0; k < a.base.getType().wordsize(); k++) {
+					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp(k * 4)));
+					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp((k - a.base.getType().wordsize()) * 4)));
+				}
+				
+				atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(a.base.getType().wordsize() * 4)));
+				
+				if (range - 1 > 1) {
+					atom.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(1)));
+					
+					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(start)));
+					
+					atom.instructions.add(end);
+				}
+				
+				for (int i = 0; i < range - 1; i++)
+					for (int k = 0; k < a.base.getType().wordsize(); k++) 
+						st.push(REG.R0);
 			}
 			else {
 				/* Cast the base expression */

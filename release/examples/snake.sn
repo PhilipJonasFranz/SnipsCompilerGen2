@@ -101,7 +101,7 @@ namespace Graphics {
 			}
 			
 			/* Draw first part of snake */
-			int pos = get<int>(p, size - 1);
+			int pos = p->get<int>(size - 1);
 			int* addr = toScreeenAddressByPos(pos);
 			*addr = 88;
 		}
@@ -131,7 +131,7 @@ namespace GameLogic {
 
 	void movePlayer(LinkedList<int>* p) {
 		/* Get Position of head */
-		int pos = get<int>(p, size - 1);
+		int pos = p->get<int>(size - 1);
 		
 		int nx = getX(pos);
 		int ny = getY(pos);
@@ -186,13 +186,13 @@ namespace GameLogic {
 		
 		/* Add new position to head of snake */
 		if (gameState == 0) {
-			add<int>(p, flattenXY(nx, ny));
+			p->add<int>(flattenXY(nx, ny));
 		}
 		
 		/* Remove tail if nothing was eaten */
 		if (removePos) {
-			clearPos = get<int>(p, 0);
-			remove(p, 0);
+			clearPos = p->get<int>(0);
+			p->remove(0);
 		}
 		
 		return;
@@ -267,7 +267,8 @@ int main() {
 	
 	/* List storing the positions of the snake */
 	LinkedList<int>* p = List::create<int>(0);
-	add<int>(p, flattenXY(35, 25));
+	
+	p->add<int>(flattenXY(35, 25));
 
 	/* Game loop while game is in normal state */
 	while (gameState == 0) {

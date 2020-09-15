@@ -1,0 +1,61 @@
+SOURCE
+void set(int* p, int v, int x, int y) {
+	*(p + (2 * x) + y) = v;
+	return;
+}
+
+int main(int x, int y) {
+	int [2] [2] v = {{1, 2}, {3, 4}};
+	set(&v, 5, x, y);
+	return v [1] [y];
+}
+TESTCASES
+0 0 3
+0 1 4
+1 0 5
+1 1 5
+OUTPUT
+/* --test_08.txt */
+    b main
+set:                                         /* Function: set */
+    push { r4, fp }
+    mov fp, sp
+    mov r4, r1
+    mov r1, #2
+    mul r2, r1, r2
+    add r1, r0, r2
+    ldr r2, [fp, #8]
+    add r0, r1, r2
+    str r4, [r10, r0, lsl #2]
+    mov sp, fp
+    ldmfd sp!, {r4, fp}
+    add sp, sp, #4
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r0, #4                               /* Evaluate Expression */
+    mov r1, #3
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    mov r1, #1
+    stmfd sp!, {r0, r1}
+    push { r4 }
+    push { r3 }
+    mov r0, #5
+    push { r0 }
+    sub r0, fp, #16
+    lsr r0, r0, #2
+    ldmfd sp!, {r1, r2}
+    bl set                                   /* Call set */
+    mov r2, #8
+    lsl r0, r4, #2
+    add r2, r2, r0
+    sub r0, fp, #16
+    ldr r0, [r0, r2]
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

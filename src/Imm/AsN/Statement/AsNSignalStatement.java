@@ -24,6 +24,7 @@ import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNStructureInit;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Res.Const;
 
 public class AsNSignalStatement extends AsNStatement {
 
@@ -59,7 +60,7 @@ public class AsNSignalStatement extends AsNStatement {
 			Function f = (Function) watchpoint;
 			
 			/* Function does not signal, meaning all exceptions must be caught */
-			if (!f.signals) return;
+			if (!f.signals()) return;
 			else {
 				/* Branch directley to function end, exception is not watched */
 				escape = ((AsNFunction) f.castedNode).copyLoopEscape;
@@ -69,7 +70,7 @@ public class AsNSignalStatement extends AsNStatement {
 			/* Branch to try statement watchpoint */
 			escape = ((AsNTryStatement) ((TryStatement) watchpoint).castedNode).watchpointLabel;
 		}
-		else throw new SNIPS_EXC("Unknown watchpoint type " + watchpoint.getClass().getName() + ", " + watchpoint.getSource().getSourceMarker());
+		else throw new SNIPS_EXC(Const.UNKNOWN_WATCHPOINT_TYPE, watchpoint.getClass().getName(), watchpoint.getSource().getSourceMarker());
 	
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(escape));
 		branch.comment = new ASMComment("Exception thrown, branch to escape target");

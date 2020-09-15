@@ -9,6 +9,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Res.Const;
 import Util.Source;
 
 public class FUNC extends PRIMITIVE<Function> {
@@ -56,16 +57,16 @@ public class FUNC extends PRIMITIVE<Function> {
 	
 	public CTX_EXC getInequality(FUNC func, Source source) {
 
-		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXC(source, "Missmatching argument number in predicate: Expected " + this.funcHead.parameters.size() + ", but got " + func.funcHead.parameters.size());
+		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXC(source, Const.MISSMATCHING_ARGUMENT_NUMBER, this.funcHead.parameters.size(), func.funcHead.parameters.size());
 		else {
 			for (int i = 0; i < this.funcHead.parameters.size(); i++) {
 				if (!func.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType())) {
-					return new CTX_EXC(source, "Predicate parameter type does not match stated parameter type: " + func.funcHead.parameters.get(i).getType().typeString() + " vs " + this.funcHead.parameters.get(i).getType().typeString());
+					return new CTX_EXC(source, Const.PARAMETER_TYPE_DOES_NOT_MATCH, func.funcHead.parameters.get(i).getType().typeString(), this.funcHead.parameters.get(i).getType().typeString());
 				}
 				
 			}
 			
-			return new CTX_EXC(source, "Predicate return type does not match stated return type: " + func.funcHead.getReturnType().typeString() + " vs " + this.funcHead.getReturnType().typeString());
+			return new CTX_EXC(source, Const.RETURN_TYPE_DOES_NOT_MATCH, func.funcHead.getReturnType().typeString(), this.funcHead.getReturnType().typeString());
 		}
 	}
 	
@@ -91,7 +92,7 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXC("Cannot get source code representation of FUNC type.");
+		throw new SNIPS_EXC(Const.CANNOT_GET_SOURCE_CODE_REPRESENTATION, this.typeString());
 	}
 
 	public TYPE clone() {
@@ -101,7 +102,7 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public void setValue(String value) {
-		throw new SNIPS_EXC("Cannot set value of FUNC type.");
+		throw new SNIPS_EXC(Const.CANNOT_SET_VALUE_OF_TYPE, this.typeString());
 	}
 	
 } 

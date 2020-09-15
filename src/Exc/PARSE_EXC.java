@@ -25,6 +25,10 @@ public class PARSE_EXC extends Exception {
 		this.expected = expected;
 		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
 	}
+
+	public String getExcFieldName() {
+		return "UNKNOWN_FIELD";
+	}
 	
 	public String getMessage() {
 		String message = "Got " + this.actual + ", expected ";

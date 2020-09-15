@@ -1,0 +1,7 @@
+SOURCE
+int main() {
+	int x = true;
+	return x;
+}
+THROWN
+EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION

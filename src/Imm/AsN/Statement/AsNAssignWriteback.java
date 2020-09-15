@@ -30,6 +30,7 @@ import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
+import Res.Const;
 
 public class AsNAssignWriteback extends AsNStatement {
 
@@ -97,7 +98,7 @@ public class AsNAssignWriteback extends AsNStatement {
 			StructSelectWriteback sel = (StructSelectWriteback) reference;
 			
 			/* Load the address of the target in R1 */
-			AsNStructSelect.injectAddressLoader(node, sel.select, r, map, st);
+			AsNStructSelect.injectAddressLoader(node, sel.select, r, map, st, false);
 			
 			node.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			
@@ -106,7 +107,7 @@ public class AsNAssignWriteback extends AsNStatement {
 			
 			node.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
-		else throw new SNIPS_EXC("Assign writeback not implemented for expression " + reference.getClass().getName());
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED, reference.getClass().getName(), reference.getSource().getSourceMarker());
 	}
 	
 	private static void injectWriteback(AsNNode node, WRITEBACK wb, int target, boolean partOfExpression) {

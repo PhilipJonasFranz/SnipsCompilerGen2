@@ -17,9 +17,7 @@ namespace Colors {
 	 */
 	shared Color* create(int r, int g, int b, int a) {
 		int rgba = (r << 24) + (g << 16) + (b << 8) + a;
-		Color* c = (Color*) resv(sizeof(Color));
-		*c = Color::(rgba);
-		return c;
+		return init<>(Color::(rgba));
 	}
 	
 	/*

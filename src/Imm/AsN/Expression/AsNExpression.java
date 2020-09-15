@@ -27,6 +27,7 @@ import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.Boolean.AsNTernary;
+import Res.Const;
 
 public abstract class AsNExpression extends AsNNode {
 
@@ -95,7 +96,7 @@ public abstract class AsNExpression extends AsNNode {
 		else if (e instanceof TypeCast) {
 			node = AsNTypeCast.cast((TypeCast) e, r, map, st); 
 		}
-		else throw new CGEN_EXC(e.getSource(), "No injection cast available for " + e.getClass().getName());
+		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
 	
 		e.castedNode = node;
 		return node;

@@ -19,9 +19,7 @@ namespace Integer {
 			int s = (int) *(c + c0);
 			
 			/* Check if character is a - */
-			if (s == 45) {
-				neg = !neg;
-			}
+			if (s == 45) neg = !neg;
 			else {
 				/* Subtract 48 to convert to number between [0-9]. */
 				s -= 48;
@@ -44,7 +42,7 @@ namespace Integer {
 	 * Converts given int to a String representation.
 	 */
 	shared char* toString(int num) {
-		LinkedList<int>* list = List::create<int>(0);
+		LinkedList<int>* list = List::create<>(0);
 	
 		bool neg = false;
 		if (num < 0) {
@@ -54,28 +52,26 @@ namespace Integer {
 		
 		do {
 			int c = num % 10;
-			List::add<int>(list, c);
+			list->add<int>(c);
 			num = num / 10;
 		} while (num > 0);
 		
 		/* Add Sign */
-		if (neg) {
-			List::add<int>(list, -3);
-		}
+		if (neg) list->add<>(-3);
 		
 		/* Get size of list */
-		int size = List::size(list);
-		char* str = (char*) resv(size + 1);
+		int size = list->size();
+		char* str = resv(size + 1);
 		
 		int c0 = 0;
 		for (int i = size - 1; i >= 0; i--) {
-			int c = List::get<int>(list, i) + 48;
+			int c = list->get<>(i) + 48;
 			*(str + c0++) = (char) c;
 		}
 
 		*(str + size) = (char) 0;
 		
-		List::destroy(list);
+		list->destroy();
 		
 		return str;
 	}

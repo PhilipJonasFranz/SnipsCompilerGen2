@@ -13,6 +13,7 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.EnumTypedef;
 import Imm.AST.Statement.StructTypedef;
+import Res.Const;
 
 /**
  * The namespace processor is responsible to merge namespaces with the same name,
@@ -84,7 +85,7 @@ public class NamespaceProcessor {
 				else if (s instanceof Comment) {
 					/* Dont do anything */
 				}
-				else throw new SNIPS_EXC("Cannot flatten " + s.getClass().getName());
+				else throw new SNIPS_EXC(Const.CANNOT_FLATTEN, s.getClass().getName());
 				
 				target.add(s);
 			}

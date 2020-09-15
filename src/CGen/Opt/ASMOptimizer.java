@@ -78,10 +78,10 @@ public class ASMOptimizer {
 			OPT_DONE = false;
 			
 			/**
-			 * add r0, r0, #2
-			 * add r0, r0, #4
+			 * add rx, ry, #2
+			 * add r0, rx, #4
 			 * Replace with:
-			 * add r0, r0, #6
+			 * add r0, ry, #6
 			 */
 			this.defragmentAdditions(body);
 			
@@ -921,6 +921,9 @@ public class ASMOptimizer {
 					break;
 				}
 				
+				/* Only do opt for push operations with only lr left */
+				if (push.operands.size() > 1) continue;
+				
 				if (push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && lr != null) {
 					ASMPopStack pop = push.popCounterpart;
 					
@@ -1562,6 +1565,26 @@ public class ASMOptimizer {
 				}
 			}
 		}
+		
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMAdd && body.instructions.get(i - 1) instanceof ASMAdd) {
+				ASMAdd add0 = (ASMAdd) body.instructions.get(i - 1);
+				ASMAdd add1 = (ASMAdd) body.instructions.get(i);
+				
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp) {
+					ImmOp op0 = (ImmOp) add0.op1;
+					ImmOp op1 = (ImmOp) add1.op1;
+					
+					op1.value = op0.value + op1.value;
+					add1.op0.reg = add0.op0.reg;
+					
+					op0.value += op1.value;
+					body.instructions.remove(i - 1);
+					i--;
+					markOpt();
+				}
+			}
+		}
 	}
 	
 	private void shiftBy0IsMov(AsNBody body) {
@@ -2047,7 +2070,7 @@ public class ASMOptimizer {
 									remove = true;
 								}
 								
-								if (remove && a < 3) {
+								if (remove && a < 3 && !mov.optFlags.contains(OPT_FLAG.WRITEBACK)) {
 									body.instructions.remove(i - 1);
 									i--;
 								}
@@ -2200,6 +2223,12 @@ public class ASMOptimizer {
 						}
 						else if (body.instructions.get(a) instanceof ASMBinaryData) {
 							ASMBinaryData dataP = (ASMBinaryData) body.instructions.get(a);
+							
+							if (dataP.optFlags.contains(OPT_FLAG.WRITEBACK)) {
+								clear = false;
+								break;
+							}
+							
 							if (dataP.op1 instanceof RegOp && ((RegOp) dataP.op1).reg == target) {
 								dataP.op1 = new ImmOp(val);
 								markOpt();

@@ -45,7 +45,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		/* Convert to bytes */
 		id.instructions.add(new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R0), new ImmOp(2)));
 		
-		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) {
+		if (lhs.assign.value.getType() instanceof PRIMITIVE || lhs.assign.value.getType() instanceof POINTER) {
 			id.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
 			
 			/* Create assign injector */
@@ -59,7 +59,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 			
 			id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
-		else AsNAssignment.copyStackSection(lhs.expressionType.wordsize(), id, st);
+		else AsNAssignment.copyStackSection(lhs.assign.value.getType().wordsize(), id, st);
 		
 		return id;
 	}

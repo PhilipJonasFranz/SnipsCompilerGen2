@@ -8,6 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Res.Const;
 import Util.Pair;
 
 public class StackSet {
@@ -88,7 +89,11 @@ public class StackSet {
 	 * The first given register will end up on the bottom of the newly pushed stack section.
 	 */
 	public void push(REG...reg) {
-		for (REG reg0 : reg) this.stack.push(new StackCell(reg0));
+		for (REG reg0 : reg) {
+			this.stack.push(new StackCell(reg0));
+			if (reg0 == REG.RX)
+				this.newDecsOnStack = true;
+		}
 	}
 	
 	/** Pop a stack cell from the stack top. */
@@ -122,7 +127,7 @@ public class StackSet {
 		}
 		
 		if (words != x) 
-			throw new CGEN_EXC("Unable to pop " + x + " Words from the stack, could only pop " + words);
+			throw new CGEN_EXC(Const.UNABLE_TO_POP_X_WORDS, x, words);
 	}
 	
 	/** Prints out the stack layout and the contents of the stack cells. */
