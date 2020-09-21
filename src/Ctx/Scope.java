@@ -1,17 +1,13 @@
 package Ctx;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Res.Const;
 import Snips.CompilerDriver;
-import Util.NamespacePath;
-import Util.Pair;
-import Util.Source;
+import Util.*;
 import Util.Logging.Message;
 
 /**

@@ -1,3 +1,5 @@
+DESCRIPTION
+Tests that inherited struct nested functions can be called correctly.
 SOURCE
 namespace C {
 
@@ -20,7 +22,6 @@ namespace C {
 			*self->r = pred(*self->r);
 		}
 	}
-
 }
 
 namespace Predicates {
@@ -32,14 +33,11 @@ namespace Predicates {
 	int mul(int x, int y) {
 		return x * y;
 	}
-
 }
 
 void set(A<int>* a, int x) {
 	int* p = resv(1);
-
 	a->r = p;
-
 	*a->r = x;
 }
 
@@ -54,6 +52,7 @@ int main() {
 	func pred = Predicates::mul;
 	*a->r = pred(*a->r, a->k);
 
+	/* Call from B inherited nested function */
 	a->incr();
 	
 	return a->k + *a->r;

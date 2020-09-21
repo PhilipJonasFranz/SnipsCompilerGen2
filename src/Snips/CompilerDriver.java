@@ -1,47 +1,30 @@
 package Snips;
 
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
 import Ctx.ContextChecker;
-import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
-import Exc.PARSE_EXC;
-import Exc.SNIPS_EXC;
-import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Structural.ASMSeperator;
-import Imm.AST.Program;
-import Imm.AST.SyntaxElement;
+import Exc.*;
+import Imm.ASM.Structural.*;
+import Imm.AST.*;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
-import Par.Parser;
+import Par.*;
 import Par.Scanner;
-import Par.Token;
 import Par.Token.TokenType;
-import PreP.NamespaceProcessor;
-import PreP.PreProcessor;
+import PreP.*;
 import PreP.PreProcessor.LineObject;
-import Util.NamespacePath;
-import Util.Pair;
-import Util.Source;
-import Util.Util;
+import Util.*;
 import Util.XMLParser.XMLNode;
-import Util.Logging.Message;
-import Util.Logging.ProgressMessage;
+import Util.Logging.*;
 
 public class CompilerDriver {
 
@@ -54,7 +37,6 @@ public class CompilerDriver {
 		"	 |_____  ||  _    ||   ||    ___||_____  |",
 		"	  _____| || | \\   ||   ||   |     _____| |",
 		"	 |_______||_|  \\__||___||___|    |_______|"};
-	
 	
 	
 			/* --- FLAGS & SETTINGS --- */

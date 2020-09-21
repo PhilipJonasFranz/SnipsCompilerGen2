@@ -7,9 +7,7 @@ public class RegSet {
 			/* --- NESTED --- */
 	/** Used to identify the state of a register */
 	public enum STATUS {
-	
 		USED, FREE, RESERVED;
-	
 	}
 	
 	/**

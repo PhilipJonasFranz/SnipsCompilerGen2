@@ -50,7 +50,7 @@ public class ForEachStatement extends CompoundStatement {
 		
 		this.range = range;
 		
-		String name = "__it_cnt" + LabelGen.getSafeNum();
+		String name = "__it_cnt" + LabelGen.getUID();
 		
 		/* Initialize internal Counter and reference to it */
 		counter = new Declaration(new NamespacePath(name), new INT("0"), new Atom(new INT("0"), new Token(TokenType.INTLIT, this.shadowRef.getSource(), "0"), this.shadowRef.getSource()), MODIFIER.SHARED, this.shadowRef.getSource());

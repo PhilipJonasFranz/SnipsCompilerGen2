@@ -82,6 +82,10 @@ public class StructTypedef extends SyntaxElement {
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
 			
+			/* 
+			 * For every function in the extension, copy the function, 
+			 * adjust the path and add to own functions 
+			 */
 			for (Function f : this.extension.functions) {
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
@@ -92,7 +96,6 @@ public class StructTypedef extends SyntaxElement {
 		}
 		
 		this.modifier = modifier;
-		
 		this.self = new STRUCT(this, this.proviso);
 	}
 	
@@ -200,10 +203,9 @@ public class StructTypedef extends SyntaxElement {
 	
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
-		if (rec) {
+		if (rec) 
 			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -211,7 +213,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		
+		return;
 	}
 
 } 

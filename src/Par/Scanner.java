@@ -1,9 +1,6 @@
 package Par;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import Exc.SNIPS_EXC;
 import Par.Token.TokenType;

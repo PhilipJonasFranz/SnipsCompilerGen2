@@ -244,6 +244,8 @@ public class Const {
 			/* --- CODE GENERATION --- */
 	public static final String UNABLE_TO_POP_X_WORDS = "Unable to pop %d Words from the stack, could only pop %d";
 	
+	public static final String UNABLE_TO_POP_X_CELLS = "Unable to pop %d Cells from the stack, could only pop %d";
+	
 	public static final String CANNOT_PATCH_NON_PATCHABLE_IMM_OP = "Cannot patch non-patchable imm operand!";
 	
 	public static final String NO_INJECTION_CAST_AVAILABLE = "No injection cast available for %s";

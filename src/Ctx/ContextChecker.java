@@ -1,92 +1,28 @@
 package Ctx;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 import Exc.CTX_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Function;
-import Imm.AST.Namespace;
-import Imm.AST.Program;
-import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ArrayInit;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.BinaryExpression;
-import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.FunctionRef;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.InstanceofExpression;
-import Imm.AST.Expression.RegisterAtom;
-import Imm.AST.Expression.SizeOfExpression;
-import Imm.AST.Expression.SizeOfType;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.StructSelectWriteback;
-import Imm.AST.Expression.StructureInit;
-import Imm.AST.Expression.TempAtom;
-import Imm.AST.Expression.TypeCast;
-import Imm.AST.Expression.UnaryExpression;
-import Imm.AST.Expression.Arith.Add;
-import Imm.AST.Expression.Arith.BitNot;
-import Imm.AST.Expression.Arith.Mul;
-import Imm.AST.Expression.Arith.UnaryMinus;
-import Imm.AST.Expression.Boolean.BoolBinaryExpression;
-import Imm.AST.Expression.Boolean.BoolUnaryExpression;
-import Imm.AST.Expression.Boolean.Compare;
-import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.*;
+import Imm.AST.Expression.*;
+import Imm.AST.Expression.Arith.*;
+import Imm.AST.Expression.Boolean.*;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
-import Imm.AST.Statement.AssignWriteback;
-import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.*;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AST.Statement.BreakStatement;
-import Imm.AST.Statement.CaseStatement;
-import Imm.AST.Statement.CompoundStatement;
-import Imm.AST.Statement.ContinueStatement;
-import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.DefaultStatement;
-import Imm.AST.Statement.DirectASMStatement;
-import Imm.AST.Statement.DoWhileStatement;
-import Imm.AST.Statement.ForEachStatement;
-import Imm.AST.Statement.ForStatement;
-import Imm.AST.Statement.FunctionCall;
-import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.ReturnStatement;
-import Imm.AST.Statement.SignalStatement;
-import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.StructTypedef;
-import Imm.AST.Statement.SwitchStatement;
-import Imm.AST.Statement.TryStatement;
-import Imm.AST.Statement.WatchStatement;
-import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.PROVISO;
-import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.BOOL;
-import Imm.TYPE.PRIMITIVES.FUNC;
-import Imm.TYPE.PRIMITIVES.INT;
-import Imm.TYPE.PRIMITIVES.NULL;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Imm.TYPE.PRIMITIVES.VOID;
+import Imm.TYPE.*;
+import Imm.TYPE.COMPOSIT.*;
+import Imm.TYPE.PRIMITIVES.*;
 import Par.Token;
 import Par.Token.TokenType;
 import Res.Const;
 import Snips.CompilerDriver;
-import Util.NamespacePath;
-import Util.Pair;
-import Util.Source;
-import Util.Logging.Message;
-import Util.Logging.ProgressMessage;
+import Util.*;
+import Util.Logging.*;
 
 public class ContextChecker {
 
@@ -1856,11 +1792,14 @@ public class ContextChecker {
 	 */
 	public boolean checkPolymorphViolation(TYPE child, TYPE target) {
 		if (!(target instanceof STRUCT)) return false;
+		
 		if (child.getCoreType() instanceof STRUCT) {
-			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && !((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {
+			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && 
+				!((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
@@ -1889,21 +1828,12 @@ public class ContextChecker {
 	 * @throws CTX_EXC Thrown if no or multiple matches for the function are found.
 	 */
 	public Function findFunction(NamespacePath path, Source source, boolean isPredicate, String prefix) throws CTX_EXC {
-		Function f = null;
-		
 		/* Search through registered functions, match entire path */
-		for (Function f0 : this.functions) {
-			if (f0.path.build().equals(path.build())) {
-				f = f0;
-				break;
-			}
-		}
+		for (Function f0 : this.functions) 
+			if (f0.path.build().equals(path.build())) 
+				return f0;
 		
-		
-		if (f != null) 
-			/* Match found, function declarations have priority over predicates, return match */
-			return f;
-		else if (path.path.size() == 1) {
+		if (path.path.size() == 1) {
 			List<Function> funcs = new ArrayList();
 			
 			/* Search through the registered function declarations, but only match the end of the namespace path */
@@ -1934,10 +1864,10 @@ public class ContextChecker {
 				/* Multiple results, cannot determine correct one, return null */
 				String s = "";
 				
-				for (Function f0 : funcs) {
+				/* Check for match with prefix */
+				for (Function f0 : funcs) 
 					if (f0.path.build().equals(prefix + "." + path.build()))
 						return f0;
-				}
 				
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
@@ -2022,11 +1952,6 @@ public class ContextChecker {
 		}
 		
 		return f;
-	}
-	
-	public boolean functionWhitelist(NamespacePath path) {
-		String p = path.build();
-		return p.equals("init") || p.equals("resv") || p.equals("hsize") || p.equals("free") || p.equals("__op_mod") || p.equals("__op_div");
 	}
 	
 } 

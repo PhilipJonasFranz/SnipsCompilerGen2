@@ -55,12 +55,15 @@ public class LiteralManager {
 		if (value > 255) {
 			ASMDataLabel label = requestLabel(value);
 			
+			/* Create the new LDR statement, that loads the value stored at the label in the target reg */
 			ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null);
 			ldr.comment = new ASMComment("Literal is too large, load from literal pool");
 			
 			node.instructions.add(ldr);
 		}
-		else node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+		else 
+			/* Load the value directley, fits in value range */
+			node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
 	}
 	
 	/**
@@ -69,7 +72,8 @@ public class LiteralManager {
 	 */
 	public ASMDataLabel getValue(LabelOp l) {
 		for (Entry<Integer, ASMDataLabel> entry : this.storedLiterals.entrySet()) 
-			if (entry.getValue().name.equals(l.label.name)) return entry.getValue();
+			if (entry.getValue().name.equals(l.label.name)) 
+				return entry.getValue();
 		
 		return null;
 	}
