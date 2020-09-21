@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import Exc.CTX_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -97,6 +96,8 @@ public class ContextChecker {
 	List<Function> functions = new ArrayList();
 	
 	Stack<Function> currentFunction = new Stack();
+	
+	List<Function> nestedFunctions = new ArrayList();
 	
 	SyntaxElement AST;
 	
@@ -288,6 +289,9 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
 		for (Function f : e.functions) {
+			this.nestedFunctions.add(f);
+			this.functions.add(f);
+			
 			if (f.provisosTypes.isEmpty()) f.check(this);
 		}
 		
@@ -781,7 +785,7 @@ public class ContextChecker {
 				d.last = null;
 			}
 			
-			if (!d.getType().isEqual(t) || d.getType().wordsize() != t.wordsize()) {
+			if (!t.isEqual(d.getType()) || d.getType().wordsize() != t.wordsize()) {
 				if (t instanceof POINTER || d.getType() instanceof POINTER) 
 					CompilerDriver.printProvisoTypes = true;
 				
@@ -1078,19 +1082,33 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXC {
-		List<Function> backup = this.functions;
+		String prefix = "";
 		
 		if (i.isNestedCall) {
-			this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
-			
 			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-			this.functions.addAll(s.getTypedef().functions);
+			prefix = s.getTypedef().path.build();
 		}
 		
-		Function f = this.linkFunction(i.path, i, i.getSource());
+		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
 		
-		if (i.isNestedCall)
-			this.functions = backup;
+		if (i.isNestedCall) {
+			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+			
+			boolean found = false;
+			for (Function nested : s.getTypedef().functions) {
+				if (nested.equals(f)) {
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found)
+				throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+		}
+		else {
+			if (this.nestedFunctions.contains(f))
+				throw new CTX_EXC(i.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
+		}
 		
 		i.calledFunction = f;
 		
@@ -1198,22 +1216,36 @@ public class ContextChecker {
 		}
 		
 		return i.getType();
-	}	
+	}
 	
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXC {
-		List<Function> backup = this.functions;
+		String prefix = "";
 		
 		if (i.isNestedCall) {
-			this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
-			
 			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-			this.functions.addAll(s.getTypedef().functions);
+			prefix = s.getTypedef().path.build();
 		}
 		
-		Function f = this.linkFunction(i.path, i, i.getSource());
+		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
 		
-		if (i.isNestedCall)
-			this.functions = backup;
+		if (i.isNestedCall) {
+			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+			
+			boolean found = false;
+			for (Function nested : s.getTypedef().functions) {
+				if (nested.equals(f)) {
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found)
+				throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+		}
+		else {
+			if (this.nestedFunctions.contains(f))
+				throw new CTX_EXC(i.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
+		}
 		
 		i.calledFunction = f;
 		i.watchpoint = this.exceptionEscapeStack.peek();
@@ -1369,29 +1401,32 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXC {
-		
-		if (r.base != null) {
-			
-		}
-		
 		/* If not already linked, find referenced function */
 		Function lambda = null;
-		
 		if (r.origin != null)
 			lambda = r.origin;
 		else {
-			List<Function> backup = this.functions;
+			lambda = this.findFunction(r.path, r.getSource(), true, "");
 			
 			if (r.base != null) {
-				this.functions = this.functions.stream().filter(x -> this.functionWhitelist(x.path)).collect(Collectors.toList());
-					
 				STRUCT s = (STRUCT) r.base.check(this).getCoreType();
-				this.functions.addAll(s.getTypedef().functions);
+				
+				boolean found = false;
+				for (Function nested : s.getTypedef().functions) {
+					if (nested.equals(lambda)) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found)
+					throw new CTX_EXC(r.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, lambda.path.build(), s.getTypedef().path.build());
 			}
+			else {
+				if (this.nestedFunctions.contains(lambda))
+					throw new CTX_EXC(r.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, lambda.path.build());
 			
-			lambda = this.findFunction(r.path, r.getSource(), true);
-			
-			this.functions = backup;
+			}
 		}
 		
 		if (lambda == null) 
@@ -1853,7 +1888,7 @@ public class ContextChecker {
 	 * @return The found function.
 	 * @throws CTX_EXC Thrown if no or multiple matches for the function are found.
 	 */
-	public Function findFunction(NamespacePath path, Source source, boolean isPredicate) throws CTX_EXC {
+	public Function findFunction(NamespacePath path, Source source, boolean isPredicate, String prefix) throws CTX_EXC {
 		Function f = null;
 		
 		/* Search through registered functions, match entire path */
@@ -1899,6 +1934,11 @@ public class ContextChecker {
 				/* Multiple results, cannot determine correct one, return null */
 				String s = "";
 				
+				for (Function f0 : funcs) {
+					if (f0.path.build().equals(prefix + "." + path.build()))
+						return f0;
+				}
+				
 				for (Function f0 : funcs) s += f0.path.build() + ", ";
 				s = s.substring(0, s.length() - 2);
 				
@@ -1919,7 +1959,7 @@ public class ContextChecker {
 	 * @return The found function.
 	 * @throws CTX_EXC Thrown if the callee has provisos in a predicate call, or if the function cannot be found.
 	 */
-	public Function linkFunction(NamespacePath path, SyntaxElement i, Source source) throws CTX_EXC {
+	public Function linkFunction(NamespacePath path, SyntaxElement i, Source source, String prefix) throws CTX_EXC {
 		List<TYPE> proviso = null;
 		
 		assert i instanceof InlineCall || i instanceof FunctionCall : "Given SyntaxElement is neither an InlineCall or FunctionCall!";
@@ -1935,7 +1975,7 @@ public class ContextChecker {
 		}
 		
 		/* Find the called function */
-		Function f = this.findFunction(path, source, false);
+		Function f = this.findFunction(path, source, false, prefix);
 		
 		Declaration anonTarget = null;
 		

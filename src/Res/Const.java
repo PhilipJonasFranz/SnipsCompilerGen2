@@ -92,6 +92,8 @@ public class Const {
 	
 	public static final String FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE = "Function '%s' is not part of struct type %s";
 	
+	public static final String NESTED_FUNCTION_CANNOT_BE_ACCESSED = "Nested Function '%s' cannot be accessed";
+	
 	public static final String NESTED_CALL_BASE_IS_NOT_A_STRUCT = "Nested call base is not a STRUCT, actual %s";
 	
 	public static final String BASE_MUST_BE_VARIABLE_REFERENCE = "Base must be variable reference";

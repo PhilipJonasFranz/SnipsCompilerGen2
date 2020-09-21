@@ -36,6 +36,10 @@ public class NamespacePath {
 		this.path.add(name);
 	}
 	
+	public NamespacePath() {
+		this.path = new ArrayList();
+	}
+	
 	
 			/* --- METHODS --- */
 	public String getLast() {
@@ -63,6 +67,13 @@ public class NamespacePath {
 	
 	public List<String> getPath() {
 		return this.path;
+	}
+	
+	public NamespacePath clone() {
+		NamespacePath clone = new NamespacePath();
+		clone.termination = this.termination;
+		for (String s : this.path) clone.path.add(s);
+		return clone;
 	}
 	
 } 

@@ -79,8 +79,17 @@ public class StructTypedef extends SyntaxElement {
 		this.extProviso = extProviso;
 		
 		/* Add this typedef to extenders of extension */
-		if (this.extension != null) 
+		if (this.extension != null) {
 			this.extension.extenders.add(this);
+			
+			for (Function f : this.extension.functions) {
+				NamespacePath base = this.path.clone();
+				base.path.add(f.path.getLast());
+				
+				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
+				this.functions.add(f0);
+			}
+		}
 		
 		this.modifier = modifier;
 		
