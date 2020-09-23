@@ -75,6 +75,13 @@ public class ProgressMessage {
 	}
 	
 	/**
+	 * Equivalent to {@linkplain #incProgress(1)}.
+	 */
+	public void finish() {
+		this.incProgress(1);
+	}
+	
+	/**
 	 * Prints out a single dot.
 	 */
 	public void incProgressSingle() {

@@ -30,6 +30,7 @@ public class Declaration extends Statement {
 	/** The initial value of this declaration. */
 	public Expression value;
 	
+	/** The last statement that accessed this Declaration. */
 	public Statement last = null;
 	
 	

@@ -27,41 +27,118 @@ import Util.Logging.*;
 public class ContextChecker {
 
 			/* --- FIELDS --- */
-	Program head;
-	
-	List<Function> functions = new ArrayList();
-	
-	Stack<Function> currentFunction = new Stack();
-	
-	List<Function> nestedFunctions = new ArrayList();
-	
-	SyntaxElement AST;
-	
-	Stack<CompoundStatement> compoundStack = new Stack();
-	
-	Stack<Scope> scopes = new Stack();
-	
-	Stack<List<TYPE>> signalStack = new Stack();
-	
-	Stack<SyntaxElement> exceptionEscapeStack = new Stack();
-	
-	public Statement currentStatement = null;
-	
-	public List<Declaration> toLink = new ArrayList();
-	
+	/**
+	 * Set to the current Context Checker instance.
+	 */
 	public static ContextChecker checker;
 	
+	/**
+	 * Set to the current progress message instance for 
+	 * the context checking process.
+	 */
 	public static ProgressMessage progress;
 	
-	List<Message> messages = new ArrayList();
+	/**
+	 * The Root AST Syntax Element.
+	 */
+	protected Program AST;
 	
-	/* Contains the structs that have no extensions */
-	List<StructTypedef> tLStructs = new ArrayList();
+	/**
+	 * Contains all functions in the AST, as well as
+	 * struct nested functions. During the context checking
+	 * process, this list is filled. This way the total 
+	 * dependency order of the functions can be ensured.
+	 */
+	protected List<Function> functions = new ArrayList();
+	
+	/**
+	 * This stack is filled with functions when a program
+	 * is checked recursiveley. A new function is pushed on
+	 * the stack either if a new function is checked or, within
+	 * this function, a function is called. In this case, this
+	 * function is pushed. Since then this function is checked,
+	 * the cycle may continue.
+	 */
+	protected Stack<Function> currentFunction = new Stack();
+	
+	/**
+	 * This list contains all struct nested functions. The list is used,
+	 * when a function is called, to determine wether the function is a nested
+	 * function or not, and thus can be accessed or not.
+	 */
+	protected List<Function> nestedFunctions = new ArrayList();
+	
+	/**
+	 * This stack is filled with compound statements when
+	 * a program structure is recursiveley checked. The
+	 * stack is used to determine the next highest super-loop
+	 * when checking break and continue statements.
+	 */
+	protected Stack<CompoundStatement> compoundStack = new Stack();
+	
+	/**
+	 * This stack is filled with scopes when a program is
+	 * recursiveley checked. Each scope will contain program
+	 * variables that are defined in the current scope. The
+	 * stack is used to localize the highest scoped variable
+	 * at any point, to link origins and to check for duplicate
+	 * variable names.
+	 */
+	protected Stack<Scope> scopes = new Stack();
+	
+	/**
+	 * This stack is filled with exception type lists when
+	 * a program is recursiveley checked. Each list corresponds
+	 * to an exception scope. This is either a function scope
+	 * or a scope opened by a try statement. The stack is used
+	 * to determine where which exception types can be signaled
+	 * and to ensure the correct 'signals' annotations are present.
+	 * This is done by adding non-watched exceptions in a higher scope
+	 * to the next scope until the base scope is reached. Each
+	 * of the remaining exception types needs to be signaled in
+	 * the function header.
+	 */
+	protected Stack<List<TYPE>> signalStack = new Stack();
+	
+	/**
+	 * This stack is filled with syntax elements when a program
+	 * is recursiveley checked. Each syntax element is either a
+	 * function or a try-statement. The stack is used to determine
+	 * the highest scoped watchpoint. When checking inline or function
+	 * calls or a signal statement, the watchpoint is set to the 
+	 * highest scoped watchpoint.
+	 */
+	protected Stack<SyntaxElement> watchpointStack = new Stack();
+	
+	/**
+	 * This statement is always set to the statement that is 
+	 * currently being checked. When checking IDRefs, the last
+	 * statement may be determined, so that during ASM casting,
+	 * at one point where the IDRef is not being used anymore, 
+	 * the register can be freed.
+	 */
+	protected Statement currentStatement = null;
+	
+	/**
+	 * Contains a collection of all declarations in the AST.
+	 */
+	protected List<Declaration> declarations = new ArrayList();
+	
+	/**
+	 * All generated (WARN) messages. These messages will
+	 * be flushed after the context checking process is over.
+	 */
+	protected List<Message> messages = new ArrayList();
+	
+	/**
+	 *  Contains the structs that have no extensions.
+	 */
+	protected List<StructTypedef> tLStructs = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
-		this.AST = AST;
+		this.AST = (Program) AST;
 		ContextChecker.progress = progress;
 		checker = this;
 	}
@@ -71,23 +148,8 @@ public class ContextChecker {
 	public TYPE check() throws CTX_EXC {
 		this.checkProgram((Program) AST);
 		
-		if (!this.tLStructs.isEmpty()) {
-			int SIDStart = 1;
-			if (this.tLStructs.size() == 1) 
-				this.tLStructs.get(0).propagateSIDs(SIDStart, null);
-			else {
-				/* Apply to first n - 1 */
-				for (int i = 1; i < this.tLStructs.size(); i++) { 
-					SIDStart = this.tLStructs.get(i - 1).propagateSIDs(SIDStart, this.tLStructs.get(i));
-					
-					/* Set neighbour of n - 1 to n */
-					this.tLStructs.get(i - 1).SIDNeighbour = this.tLStructs.get(i);
-				}
-				
-				/* Apply to last */
-				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
-			}
-		}
+		/* Assigns each struct typedef a unique SID */
+		this.setupSIDs();
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -95,7 +157,7 @@ public class ContextChecker {
 		return null;
 	}
 	
-	public TYPE checkProgram(Program p) throws CTX_EXC {
+	public void checkProgram(Program p) throws CTX_EXC {
 		scopes.push(new Scope(null));
 		
 		/* Add global reserved declarations */
@@ -103,7 +165,6 @@ public class ContextChecker {
 		
 		boolean gotMain = false;
 		
-		this.head = p;
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Function) {
@@ -117,11 +178,15 @@ public class ContextChecker {
 					throw new CTX_EXC(f.getSource(), Const.MAIN_CANNOT_HOLD_PROVISOS);
 				
 				/* Check for duplicate function name */
-				for (Function f0 : head.functions) {
+				for (Function f0 : p.functions) {
 					if (f0.path.build().equals(f.path.build())) 
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 				
+				/* 
+				 * Add the function to the function pool here already, 
+				 * since through recursion the same function may be called. 
+				 */
 				this.functions.add(f);
 				
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
@@ -137,16 +202,17 @@ public class ContextChecker {
 				progress.incProgress((double) i / p.programElements.size());
 		}
 		
+		/* Did not find a function that matches main signature */
 		if (!gotMain) 
 			throw new CTX_EXC(p.getSource(), Const.MISSING_MAIN_FUNCTION);
 		
-		if (progress != null) progress.incProgress(1);
-		
-		for (Declaration d : toLink) 
+		if (progress != null) 
+			progress.finish();
+
+		/* If the declarations is not used, add itself to the free list. */
+		for (Declaration d : declarations) 
 			if (d.last != null) 
 				d.last.free.add(d);
-		
-		return null;
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXC {
@@ -155,7 +221,7 @@ public class ContextChecker {
 		scopes.push(new Scope(scopes.peek()));
 		
 		this.signalStack.push(new ArrayList());
-		this.exceptionEscapeStack.push(f);
+		this.watchpointStack.push(f);
 		
 		if (f.path.build().equals(Const.MAIN) && f.signals()) 
 			throw new CTX_EXC(f.getSource(), Const.MAIN_CANNOT_SIGNAL);
@@ -180,7 +246,6 @@ public class ContextChecker {
 			throw new CTX_EXC(f.getSource(), Const.MUST_SIGNAL_AT_LEAST_ONE_TYPE);
 		
 		/* Check body */
-		head.functions.add(f);
 		this.currentFunction.push(f);
 		for (Statement s : f.body) {
 			currentStatement = s;
@@ -216,7 +281,7 @@ public class ContextChecker {
 			throw new CTX_EXC(f.getSource(), Const.UNWATCHED_EXCEPTIONS_FOR_FUNCTION, f.path.build(), unwatched);
 		}
 		
-		this.exceptionEscapeStack.pop();
+		this.watchpointStack.pop();
 		this.signalStack.pop();
 		scopes.pop();
 		
@@ -225,7 +290,19 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
 		for (Function f : e.functions) {
+			/* Add to a pool of nested functions */
 			this.nestedFunctions.add(f);
+			
+			/* Check for duplicate function name */
+			for (Function f0 : this.functions) {
+				if (f0.path.build().equals(f.path.build()))
+					throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+			}
+			
+			/* 
+			 * Add the function to the function pool here already, 
+			 * since through recursion the same function may be called. 
+			 */
 			this.functions.add(f);
 			
 			if (f.provisosTypes.isEmpty()) f.check(this);
@@ -252,7 +329,7 @@ public class ContextChecker {
 	
 	public TYPE checkSignal(SignalStatement e) throws CTX_EXC {
 		TYPE exc = e.exceptionInit.check(this);
-		e.watchpoint = this.exceptionEscapeStack.peek();
+		e.watchpoint = this.watchpointStack.peek();
 		
 		/* Add to signal stack */
 		if (!this.signalStackContains(exc)) 
@@ -266,10 +343,10 @@ public class ContextChecker {
 		this.signalStack.push(new ArrayList());
 		
 		/* If exception is thrown that is not watched by this statement, relay to this watchpoint */
-		e.watchpoint = this.exceptionEscapeStack.peek();
+		e.watchpoint = this.watchpointStack.peek();
 		
 		/* Setup new watchpoint target */
-		this.exceptionEscapeStack.push(e);
+		this.watchpointStack.push(e);
 		
 		for (Statement s : e.body) {
 			currentStatement = s;
@@ -284,7 +361,7 @@ public class ContextChecker {
 		}
 		
 		this.scopes.pop();
-		this.exceptionEscapeStack.pop();
+		this.watchpointStack.pop();
 		
 		for (WatchStatement w : e.watchpoints) {
 			w.check(this);
@@ -743,7 +820,7 @@ public class ContextChecker {
 		Message m = scopes.peek().addDeclaration(d);
 		if (m != null) this.messages.add(m);
 		
-		this.toLink.add(d);
+		this.declarations.add(d);
 		
 		/* No need to set type here, is done while parsing */
 		return d.getType();
@@ -1048,7 +1125,7 @@ public class ContextChecker {
 		
 		i.calledFunction = f;
 		
-		if (!this.exceptionEscapeStack.isEmpty()) i.watchpoint = this.exceptionEscapeStack.peek();
+		if (!this.watchpointStack.isEmpty()) i.watchpoint = this.watchpointStack.peek();
 		
 		if (f != null) {
 			/* Inline calls made during global setup may not signal, since exception cannot be watched */
@@ -1184,7 +1261,7 @@ public class ContextChecker {
 		}
 		
 		i.calledFunction = f;
-		i.watchpoint = this.exceptionEscapeStack.peek();
+		i.watchpoint = this.watchpointStack.peek();
 		
 		if (f != null) {
 			
@@ -1326,10 +1403,11 @@ public class ContextChecker {
 				}
 			}
 			
-			if (contains && !(i.origin.getType() instanceof FUNC)) {
+			if (contains && !(i.origin.getType() instanceof FUNC)) 
+				/* Set where the last statement accesses the IDRef. */
 				i.origin.last = currentStatement;
-			}
-			else i.origin.last = null;
+			else 
+				i.origin.last = null;
 			
 			return i.getType();
 		}
@@ -1952,6 +2030,31 @@ public class ContextChecker {
 		}
 		
 		return f;
+	}
+	
+	/* 
+	 * Initiates the SID propagation process. This process will
+	 * assign each struct typedef a unique ID, in a way that makes
+	 * it easy to check if a struct type is a child of another one.
+	 */
+	public void setupSIDs() {
+		if (!this.tLStructs.isEmpty()) {
+			int SIDStart = 1;
+			if (this.tLStructs.size() == 1) 
+				this.tLStructs.get(0).propagateSIDs(SIDStart, null);
+			else {
+				/* Apply to first n - 1 */
+				for (int i = 1; i < this.tLStructs.size(); i++) { 
+					SIDStart = this.tLStructs.get(i - 1).propagateSIDs(SIDStart, this.tLStructs.get(i));
+					
+					/* Set neighbour of n - 1 to n */
+					this.tLStructs.get(i - 1).SIDNeighbour = this.tLStructs.get(i);
+				}
+				
+				/* Apply to last */
+				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
+			}
+		}
 	}
 	
 } 
