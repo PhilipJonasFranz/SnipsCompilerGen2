@@ -243,14 +243,14 @@ public class CompilerDriver {
 			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, Message.Type.INFO);
 			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
-			scan_progress.incProgress(1);
+			scan_progress.finish();
 			
 			
 					/* --- PARSING --- */
 			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, Message.Type.INFO);
 			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
-			parse_progress.incProgress(1);
+			parse_progress.finish();
 			
 			
 					/* --- PROCESS IMPORTS --- */
@@ -284,7 +284,7 @@ public class CompilerDriver {
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
 		
-			ctx_progress.incProgress(1);
+			ctx_progress.finish();
 			if (imm) AST.print(4, true);
 			
 			
@@ -301,7 +301,7 @@ public class CompilerDriver {
 				}
 			}
 			
-			cgen_progress.incProgress(1);
+			cgen_progress.finish();
 			
 			
 					/* --- OPTIMIZING --- */
@@ -312,7 +312,7 @@ public class CompilerDriver {
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
 			
-				aopt_progress.incProgress(1);
+				aopt_progress.finish();
 				
 				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
 				
