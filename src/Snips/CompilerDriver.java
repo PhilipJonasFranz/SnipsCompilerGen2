@@ -41,30 +41,30 @@ public class CompilerDriver {
 	
 			/* --- FLAGS & SETTINGS --- */
 	public static boolean 
-		logoPrinted = 					false, 
-		useTerminalColors = 			true, 
-		silenced = 						true,
-		imm = 							false,
-		enableComments = 				true,
-		disableModifiers = 				false,
-		disableOptimizer = 				false,
-		optimizeFileSize = 				false,
-		disableWarnings = 				false,
-		disableStructSIDHeaders = 		false,
-		includeMetaInformation = 		true,
-		printErrors = 					false,
-		expectError =					false;
+		logoPrinted = 					false, 	/* Set to true when the logo was printed once. 					*/
+		useTerminalColors = 			true, 	/* ANSI-Escape codes are used in the console. 					*/
+		silenced = 						true,	/* Less or no messages are printed to the console. 				*/
+		imm = 							false,	/* Immediates like the AST are printed.							*/
+		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
+		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
+		disableOptimizer = 				false,	/* The optimizer module is skipped in the pipeline.				*/
+		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
+		disableWarnings = 				false,	/* No warnings are printed.										*/
+		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
+		includeMetaInformation = 		true;	/* Add compilation date, version and settings to output.		*/
 			
 	
 			/* --- DEBUG --- */
 	public static boolean
-		printProvisoTypes = 			false,
-		printObjectIDs = 				false;
+		printProvisoTypes = 			false,	/* Print out proviso types when generating type string.			*/
+		printObjectIDs = 				false,	/* Print object IDs when generating type strings.				*/
+		printErrors = 					false,	/* Print stacktraces, used for debug. 							*/
+		expectError =					false;	/* Expect an error during compilation, used for debug. 			*/
 	
 	
 			/* --- FORMATTING --- */
-	public static String printDepth = "    ";
-	public static int commentDistance = 45;
+	public static String printDepth = "    ";	/* Inserted in front of every ASM instruction in output.		*/
+	public static int commentDistance = 45;		/* How far comments are formated into the output form the left.	*/
 	
 	
 			/* --- STATS --- */
