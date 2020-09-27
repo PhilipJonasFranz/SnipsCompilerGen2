@@ -239,7 +239,7 @@ public class ContextChecker {
 		for (Declaration d : f.parameters) {
 			d.check(this);
 			if (d.getType().getCoreType() instanceof VOID && !CompilerDriver.disableWarnings) 
-				messages.add(new Message(String.format(Const.UNCHECKED_TYPE_VOID, new VOID().typeString(), d.getSource().getSourceMarker()), Message.Type.WARN, true));
+				messages.add(new Message(String.format(Const.UNCHECKED_TYPE_VOID, new VOID().typeString(), d.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		if (f.signals() && f.signalsTypes.isEmpty()) 
@@ -260,7 +260,7 @@ public class ContextChecker {
 				contains |= this.signalStack.peek().get(i).isEqual(t);
 			
 			if (!contains) 
-				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree().typeString(), f.path.build(), f.getSource().getSourceMarker()), Message.Type.WARN, true));
+				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree().typeString(), f.path.build(), f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		/* Remove function signaled exceptions */
@@ -375,7 +375,7 @@ public class ContextChecker {
 			}
 			
 			if (!w.hasTarget) 
-				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_TRY, w.watched.getType().provisoFree().typeString(), e.getSource().getSourceMarker()), Message.Type.WARN, true));
+				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_TRY, w.watched.getType().provisoFree().typeString(), e.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		/* Add all unwatched to the previous signal level */
@@ -1559,7 +1559,7 @@ public class ContextChecker {
 		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
 		if (t instanceof PRIMITIVE) {
 			if (!CompilerDriver.disableWarnings) 
-				this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, deref.getSource().getSourceMarker()), Message.Type.WARN, true));
+				this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, deref.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		return deref.getType();
@@ -1576,7 +1576,7 @@ public class ContextChecker {
 				t = tc.castType;
 				
 				if (!CompilerDriver.disableWarnings) 
-					messages.add(new Message(String.format(Const.USING_IMPLICIT_ANONYMOUS_TYPE, tc.castType.provisoFree().typeString(), tc.getSource().getSourceMarker()), Message.Type.WARN, true));
+					messages.add(new Message(String.format(Const.USING_IMPLICIT_ANONYMOUS_TYPE, tc.castType.provisoFree().typeString(), tc.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 			}
 		}
 		
@@ -1743,7 +1743,7 @@ public class ContextChecker {
 		
 		if (d.dataOut.isEmpty()) {
 			if (!CompilerDriver.disableWarnings) 
-				messages.add(new Message(String.format(Const.DIRECT_ASM_HAS_NO_OUTPUTS, d.getSource().getSourceMarker()), Message.Type.WARN, true));
+				messages.add(new Message(String.format(Const.DIRECT_ASM_HAS_NO_OUTPUTS, d.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		return new VOID();
@@ -1844,7 +1844,7 @@ public class ContextChecker {
 			if (!currentPath.startsWith(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), Message.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
 				}
 				else throw new CTX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
 			}
@@ -1853,7 +1853,7 @@ public class ContextChecker {
 			if (!currentPath.equals(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), Message.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
 				}
 				else throw new CTX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
 			}
@@ -2008,7 +2008,7 @@ public class ContextChecker {
 				if (f == null) {
 					/* Anonymous function head */
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.PREDICATE_IS_ANONYMOUS, path.build(), source.getSourceMarker()), Message.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.PREDICATE_IS_ANONYMOUS, path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
 				}
 			}
 		}

@@ -14,7 +14,7 @@ import Res.Const;
 
 public class Util {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/** Reads the contents of given file and returns a list containing each line as a string. */
 	public static List<String> readFile(File file) {
 		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {

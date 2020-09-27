@@ -118,7 +118,7 @@ public class CompilerDriver {
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
-			System.out.println(new Message("No input file specified! See -help for argument information.", Message.Type.FAIL).getMessage());
+			System.out.println(new Message("No input file specified! See -help for argument information.", LogPoint.Type.FAIL).getMessage());
 			System.exit(0);
 		}
 		
@@ -139,7 +139,7 @@ public class CompilerDriver {
 		
 		/* Errors occurred due to faulty parameters, abort */
 		if (!log.isEmpty()) {
-			log.add(new Message("Aborting.", Message.Type.FAIL));
+			log.add(new Message("Aborting.", LogPoint.Type.FAIL));
 			log.stream().forEach(x -> System.out.println(x.getMessage()));
 			log.clear();
 			System.exit(0);
@@ -228,11 +228,11 @@ public class CompilerDriver {
 				throw new SNIPS_EXC("SNIPS -> Input is null!");
 			
 			if (imm) {
-				log.add(new Message("SNIPS -> Recieved Code:", Message.Type.INFO));
+				log.add(new Message("SNIPS -> Recieved Code:", LogPoint.Type.INFO));
 				code.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			log.add(new Message("SNIPS -> Starting compilation.", Message.Type.INFO));
+			log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
 			
 					/* --- PRE-PROCESSING --- */
 			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
@@ -240,14 +240,14 @@ public class CompilerDriver {
 			
 			
 					/* --- SCANNING --- */
-			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, Message.Type.INFO);
+			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
 			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
 			scan_progress.finish();
 			
 			
 					/* --- PARSING --- */
-			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, Message.Type.INFO);
+			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
 			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
 			parse_progress.finish();
@@ -261,7 +261,7 @@ public class CompilerDriver {
 				
 				/* Print out imported libaries */
 				for (SyntaxElement s : dependencies) 
-					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, Message.Type.INFO));
+					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
 				
 				/* Add libaries to AST, duplicates were already filtered */
 				int c = 0;
@@ -280,7 +280,7 @@ public class CompilerDriver {
 			
 			
 					/* --- CONTEXT CHECKING --- */
-			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, Message.Type.INFO);
+			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
 		
@@ -289,7 +289,7 @@ public class CompilerDriver {
 			
 			
 					/* --- CODE GENERATION --- */
-			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, Message.Type.INFO);
+			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
 			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
 
 			/* Remove comments left over by removed functions */
@@ -307,7 +307,7 @@ public class CompilerDriver {
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
 				double before = body.getInstructions().size();
-				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, Message.Type.INFO);
+				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
 				
 				ASMOptimizer opt = new ASMOptimizer();
 				opt.optimize(body);
@@ -323,7 +323,7 @@ public class CompilerDriver {
 					if (rate > c_max) c_max = rate;
 				}
 				
-				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", Message.Type.INFO));
+				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
 			}
 			
 			
@@ -348,7 +348,7 @@ public class CompilerDriver {
 			}
 			
 			if (imm) {
-				log.add(new Message("SNIPS -> Outputted Code:", Message.Type.INFO));
+				log.add(new Message("SNIPS -> Outputted Code:", LogPoint.Type.INFO));
 				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
@@ -360,9 +360,9 @@ public class CompilerDriver {
 			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
 			
 			/* Exception is not ordinary and internal, print message and stack trace */
-			if (!customExc) log.add(new Message("An unexpected error has occurred:", Message.Type.FAIL));
+			if (!customExc) log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
 			if (printErrors || !customExc) e.printStackTrace();
-			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", Message.Type.FAIL));
+			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
 		
 			this.thrownException = e;
 			
@@ -370,8 +370,8 @@ public class CompilerDriver {
 		}
 		
 		/* Report Status */
-		int err = this.getMessageTypeNumber(Message.Type.FAIL);
-		int warn = this.getMessageTypeNumber(Message.Type.WARN);
+		int err = this.getMessageTypeNumber(LogPoint.Type.FAIL);
+		int warn = this.getMessageTypeNumber(LogPoint.Type.WARN);
 		
 		/* Compilation finished ... */
 		if (err > 0) silenced = false;
@@ -379,13 +379,13 @@ public class CompilerDriver {
 				/* ... successfully */
 				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
 				/* ... with errors */
-				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? Message.Type.INFO : Message.Type.FAIL));		
+				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL));		
 		
 		log.clear();
 		
 		if (outputPath != null && output != null) {
 			Util.writeInFile(output, outputPath);
-			log.add(new Message("SNIPS -> Saved to file: " + outputPath, Message.Type.INFO));
+			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
 		}
 		
 		return output;
@@ -439,7 +439,7 @@ public class CompilerDriver {
 				
 			} catch (Exception e) {
 				if (printErrors) e.printStackTrace();
-				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", Message.Type.FAIL));
+				log.add(new Message("SNIPS -> Failed to import library " + filePath + ".", LogPoint.Type.FAIL));
 			}
 			
 			ASTs.add(AST);
@@ -483,7 +483,7 @@ public class CompilerDriver {
 		}
 	}
 	
-	public int getMessageTypeNumber(Message.Type type) {
+	public int getMessageTypeNumber(LogPoint.Type type) {
 		return (int) log.stream().filter(x -> x.messageType == type).count();
 	}
 	
@@ -528,7 +528,7 @@ public class CompilerDriver {
 					silenced = false;
 				}
 				else if (args [i].equals("-o")) outputPath = args [i++ + 1];
-				else log.add(new Message("Unknown Parameter: " + args [i], Message.Type.FAIL));
+				else log.add(new Message("Unknown Parameter: " + args [i], LogPoint.Type.FAIL));
 			}
 		}
 		
@@ -538,7 +538,7 @@ public class CompilerDriver {
 			/* --- CONSOLE INFORMATION --- */
 	public void printHelp() {
 		silenced = false;
-		new Message("Arguments: ", Message.Type.INFO);
+		new Message("Arguments: ", LogPoint.Type.INFO);
 		
 		String [] params = {
 				"-info     : Print Version Compiler Version and information",
@@ -560,7 +560,7 @@ public class CompilerDriver {
 	
 	public void printInfo() {
 		silenced = false;
-		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), Message.Type.INFO);
+		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), LogPoint.Type.INFO);
 	}
 	
 	
@@ -580,7 +580,7 @@ public class CompilerDriver {
 		String f = "  ";
 		
 		if (!disableOptimizer) {
-			log.add(new Message("SNIPS_OPT1 -> Compression Statistics: ", Message.Type.INFO));
+			log.add(new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO));
 			
 			/* Plot compression statistics */		
 			System.out.println();
@@ -627,10 +627,10 @@ public class CompilerDriver {
 			
 			System.out.println(s + "\n");
 			
-			log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + c_min + "%, max: " + c_max + "%", Message.Type.INFO));
+			log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + c_min + "%, max: " + c_max + "%", LogPoint.Type.INFO));
 		}
 		
-		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", LogPoint.Type.INFO));
 		
 		List<Pair<Integer, String>> rmap = new ArrayList();
 		for (Entry<String, Integer> e : ins_p.entrySet()) {
@@ -674,7 +674,7 @@ public class CompilerDriver {
 			System.out.println();
 		}
 		
-		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), Message.Type.INFO));
+		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), LogPoint.Type.INFO));
 	}
 	
 	/** Resets flags during burst compilation */

@@ -10,6 +10,7 @@ import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 public class PreProcessor {
@@ -65,7 +66,7 @@ public class PreProcessor {
 							for (int a = 0; a < lines.size(); a++) 
 								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
 							
-							new Message("PRE0 -> Resolved import " + path, Message.Type.INFO);
+							new Message("PRE0 -> Resolved import " + path, LogPoint.Type.INFO);
 							this.imported.add(path);
 						} catch (NullPointerException e) {
 							throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
@@ -75,8 +76,8 @@ public class PreProcessor {
 					i--;
 				} 
 				else {
-					new Message("PRE0 -> Found line: " + line + ", but cannot resolve! Ensure correct syntax, " + new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker(), Message.Type.WARN);
-					new Message("PRE0 -> Import Manager may be able to resolve import. Verify output.", Message.Type.WARN);
+					new Message("PRE0 -> Found line: " + line + ", but cannot resolve! Ensure correct syntax, " + new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker(), LogPoint.Type.WARN);
+					new Message("PRE0 -> Import Manager may be able to resolve import. Verify output.", LogPoint.Type.WARN);
 				}
 			}
 		}

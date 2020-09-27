@@ -3,6 +3,7 @@ package Exc;
 import Par.Token.TokenType;
 import Snips.CompilerDriver;
 import Util.Source;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 /**
@@ -23,7 +24,7 @@ public class PARSE_EXC extends Exception {
 		this.location = source;
 		this.actual = actual;
 		this.expected = expected;
-		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
+		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
 
 	public String getExcFieldName() {

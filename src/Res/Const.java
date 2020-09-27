@@ -5,7 +5,7 @@ package Res;
  */
 public class Const {
 
-			/* --- CONTEXT CHECKING --- */
+			/* ---< CONTEXT CHECKING >--- */
 	public static final String MAIN = "main";
 	
 	public static final String MISSING_MAIN_FUNCTION = "Missing main function";
@@ -179,7 +179,7 @@ public class Const {
 	public static final String DIRECT_ASM_HAS_NO_OUTPUTS = "Direct ASM Operation has no explicit outputs, %s";
 	
 	
-			/* --- PROVISO RELATED --- */
+			/* ---< PROVISO RELATED >--- */
 	public static final String NO_MAPPING_EQUAL_TO_GIVEN_MAPPING = "No mapping is equal to the given mapping!";
 
 	public static final String RECIEVED_MAPPING_LENGTH_NOT_EQUAL = "Recieved proviso mapping length is not equal to expected length, expected %d, but got %d";
@@ -209,7 +209,7 @@ public class Const {
 	public static final String PROVISO_ARE_PROVIDED_BY_PREDICATE = "Proviso for inline call are provided by predicate '%s', cannot provide proviso at this location";
 			
 	
-			/* --- SCANNING --- */
+			/* ---< SCANNING >--- */
 	public static final String BAD_END_STATE = "Bad Syntax, Lexer finished in state: %s";
 	
 	public static final String BAD_HEX_LITERAL = "Bad HEX literal, %s";
@@ -217,7 +217,7 @@ public class Const {
 	public static final String BAD_BIN_LITERAL = "Bad BIN literal, %s";
 	
 	
-			/* --- PARSING --- */
+			/* ---< PARSING >--- */
 	public static final String TOKENS_ARE_NULL = "SNIPS_PARSE -> Tokens are null!";
 	
 	public static final String CHECK_FOR_MISSPELLED_TYPES = "Got '%s', check for misspelled types or tokens, %s";
@@ -235,13 +235,13 @@ public class Const {
 	public static final String MULTIPLE_MATCHES_FOR_ENUM_TYPE = "Multiple matches for enum type '%s': %s. Ensure namespace path is explicit and correct, %s";
 	
 	
-			/* --- PRE-PROCESSING --- */
+			/* ---< PRE-PROCESSING >--- */
 	public static final String CANNOT_FLATTEN = "Cannot flatten %s";
 	
 	public static final String CANNOT_RESOLVE_IMPORT = "PRE0 -> Cannot resolve import %s, %s";
 	
 	
-			/* --- CODE GENERATION --- */
+			/* ---< CODE GENERATION >--- */
 	public static final String UNABLE_TO_POP_X_WORDS = "Unable to pop %d Words from the stack, could only pop %d";
 	
 	public static final String UNABLE_TO_POP_X_CELLS = "Unable to pop %d Cells from the stack, could only pop %d";
@@ -261,7 +261,7 @@ public class Const {
 	public static final String UNKNOWN_WATCHPOINT_TYPE = "Unknown watchpoint type %s, %s";
 	
 	
-			/* --- INTERNAL --- */
+			/* ---< INTERNAL >--- */
 	public static final String UNKNOWN_TYPE = "Unknown Type '%s', creating Proviso";
 	
 	public static final String CANNOT_GET_SOURCE_CODE_REPRESENTATION = "Cannot get source code representation of type %s";

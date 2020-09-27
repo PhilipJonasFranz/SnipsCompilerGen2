@@ -3,6 +3,7 @@ package Exc;
 import Ctx.ContextChecker;
 import Snips.CompilerDriver;
 import Util.Source;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 /**
@@ -24,7 +25,7 @@ public class CTX_EXC extends Exception {
 		this.format = format;
 		
 		ContextChecker.progress.abort();
-		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
+		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
 	
 	public String getExcFieldName() {

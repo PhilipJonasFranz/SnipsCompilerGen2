@@ -21,6 +21,7 @@ import Util.Pair;
 import Util.Util;
 import Util.XMLParser;
 import Util.XMLParser.XMLNode;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
 
@@ -108,15 +109,15 @@ public class TestDriver {
 		
 		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
-			new Message("Could not find any tests, make sure the path starts from the res/ folder.", Message.Type.WARN);
-			new Message("Make sure the test files are .txt files.", Message.Type.WARN);
+			new Message("Could not find any tests, make sure the path starts from the res/ folder.", LogPoint.Type.WARN);
+			new Message("Make sure the test files are .txt files.", LogPoint.Type.WARN);
 			System.exit(0);
 		}
 		
 		/* Setup Test Node Tree */
-		new Message("Starting run, found " + Util.formatNum(paths.size()) + " test" + ((paths.size() == 1)? "" : "s") + ".", Message.Type.INFO);
+		new Message("Starting run, found " + Util.formatNum(paths.size()) + " test" + ((paths.size() == 1)? "" : "s") + ".", LogPoint.Type.INFO);
 		TestNode head = new TestNode(paths);
-		new Message("Successfully built package tree.", Message.Type.INFO);
+		new Message("Successfully built package tree.", LogPoint.Type.INFO);
 		
 		start = System.currentTimeMillis();
 		firstStart = start;
@@ -138,15 +139,15 @@ public class TestDriver {
 				Util.formatNum((System.currentTimeMillis() - firstStart)) + " Millis" : ", " + res.getFailed() + " test(s) failed" + 
 				((res.getCrashed() > 0)? ", " + res.getCrashed() + " tests(s) crashed" : "")) + 
 				((res.getTimeout()> 0)? ", " + res.getTimeout() + " tests(s) timed out" : "") + ".", 
-				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? Message.Type.INFO : Message.Type.FAIL);
+				(res.getFailed() == 0 && res.getCrashed() == 0 && res.getTimeout() == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL);
 		
-		new Message("Total CPU Cycles: " + Util.formatNum(totalCPUCycles), Message.Type.INFO);
+		new Message("Total CPU Cycles: " + Util.formatNum(totalCPUCycles), LogPoint.Type.INFO);
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
-			new Message("[BUILD] Successful.", Message.Type.INFO);
+			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}
-		else new Message("[BUILD] Failed.", Message.Type.FAIL);
+		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);
 	}
 	
 	
@@ -162,7 +163,7 @@ public class TestDriver {
 	public void testPackage(TestNode node) {
 		boolean buffered = (!detailedCompilerMessages && !displayCompilerImmediateRepresentations && !printResult) || node.tests.isEmpty();
 		
-		Message headMessage = new Message("Testing Package " + node.getPackagePath(), Message.Type.INFO, buffered);
+		Message headMessage = new Message("Testing Package " + node.getPackagePath(), LogPoint.Type.INFO, buffered);
 		boolean printedHead = false;
 		
 		/* Push summary for package */
@@ -199,10 +200,10 @@ public class TestDriver {
 		/* Get package results */
 		ResultCnt res = resCnt.pop();
 		if ((res.getTimeout() > 0 || res.getCrashed() > 0 || res.getFailed() > 0) && !node.tests.isEmpty()) 
-			new Message("Package Tests failed: " + node.getPackagePath(), Message.Type.FAIL);
+			new Message("Package Tests failed: " + node.getPackagePath(), LogPoint.Type.FAIL);
 		
 		if (System.currentTimeMillis() - start > progressIndicatorSpeed) {
-			new Message("Progress: " + Util.formatNum(progress) + "/" + Util.formatNum(amount) + " test(s), total time: " + Util.formatNum((System.currentTimeMillis() - firstStart)) + " ms", Message.Type.INFO);
+			new Message("Progress: " + Util.formatNum(progress) + "/" + Util.formatNum(amount) + " test(s), total time: " + Util.formatNum((System.currentTimeMillis() - firstStart)) + " ms", LogPoint.Type.INFO);
 			start = System.currentTimeMillis();
 		}
 		
@@ -301,7 +302,7 @@ public class TestDriver {
 				else writeback.add(content.get(a));
 			}
 		
-			buffer.add(new Message("Testing file " + file, Message.Type.INFO, buffered));
+			buffer.add(new Message("Testing file " + file, LogPoint.Type.INFO, buffered));
 			
 			/* Run test */
 			Result res = this.test(file, code, testcases, thrown, buffer, writeback);
@@ -310,11 +311,11 @@ public class TestDriver {
 			if (res.fail > 0) resCnt.peek().failed++;
 			else if (res.res == RET_TYPE.CRASH) resCnt.peek().crashed++;
 			else if (res.res == RET_TYPE.TIMEOUT) resCnt.peek().timeout++;
-			else buffer.add(new Message("Test finished successfully.", Message.Type.INFO, true));
+			else buffer.add(new Message("Test finished successfully.", LogPoint.Type.INFO, true));
 		
 		} catch (Exception e) {
 			/* Test crashed */
-			buffer.add(new Message("-> Test " + file + " ran into an error!", Message.Type.FAIL, true));
+			buffer.add(new Message("-> Test " + file + " ran into an error!", LogPoint.Type.FAIL, true));
 			resCnt.peek().crashed++;
 			e.printStackTrace();
 		}
@@ -346,8 +347,8 @@ public class TestDriver {
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
-					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
-					buffer.add(new Message("-> Expected Exception '" + thrown.get(i).first + "', but got none.", Message.Type.FAIL, true));
+					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+					buffer.add(new Message("-> Expected Exception '" + thrown.get(i).first + "', but got none.", LogPoint.Type.FAIL, true));
 					fail++;
 				}
 				else {
@@ -363,7 +364,7 @@ public class TestDriver {
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
 					else {
-						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), Message.Type.FAIL).getMessage());
+						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
 						System.exit(0);
 					}
 					
@@ -373,9 +374,9 @@ public class TestDriver {
 					}
 					else {
 						/* Exceptions do not match */
-						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
-						buffer.add(new Message("-> Thrown Exception: " + e, Message.Type.FAIL, true));
-						buffer.add(new Message("-> Thrown Exception does not match expected: " + msg + " vs " + thrown.get(i).first, Message.Type.FAIL, true));
+						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+						buffer.add(new Message("-> Thrown Exception: " + e, LogPoint.Type.FAIL, true));
+						buffer.add(new Message("-> Thrown Exception does not match expected: " + msg + " vs " + thrown.get(i).first, LogPoint.Type.FAIL, true));
 						fail++;
 					}
 				}
@@ -390,8 +391,8 @@ public class TestDriver {
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
-				buffer.add(new Message("-> A crash occured during compilation.", Message.Type.FAIL, true));
-				if (this.printResult) buffer.add(new Message("-> Tested code:", Message.Type.FAIL, true));
+				buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
+				if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
 				cd.compile(file, code);
 				return new Result(RET_TYPE.CRASH, 0, 0);
 			}
@@ -452,8 +453,8 @@ public class TestDriver {
 						runThread.interrupt();
 						runThread.stop();
 						runThread = null;
-						buffer.add(new Message("The compiled program timed out!", Message.Type.FAIL, true));
-						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
+						buffer.add(new Message("The compiled program timed out!", LogPoint.Type.FAIL, true));
+						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
@@ -469,8 +470,8 @@ public class TestDriver {
 				}
 				else {
 					/* Wrong output */
-					if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", Message.Type.FAIL, true));
-					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", Message.Type.FAIL, true));
+					if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
 					
 					/* Print inputted parameters */
 					String params = "-> Params: ";
@@ -483,10 +484,10 @@ public class TestDriver {
 							}
 						}
 					}
-					buffer.add(new Message(params, Message.Type.FAIL, true));
+					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
 					if (!printedOutput) {
-						buffer.add(new Message("-> Outputted Assemby Program: ", Message.Type.FAIL, true));
+						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
 						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					}
 					printedOutput = true;

@@ -2,13 +2,20 @@ package Util;
 
 public class Source {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
+	/**
+	 * The filename where this source was created. Does
+	 * not include the full path to the file.
+	 */
 	public String sourceFile;
 	
+	/**
+	 * The row and the column of this source.
+	 */
 	public int row, col;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Source(String sourceFile, int row, int col) {
 		this.sourceFile = sourceFile;
 		this.row = row;
@@ -16,7 +23,7 @@ public class Source {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String getSourceMarker() {
 		return "line: " + this.row + ", column: " + this.col + " (" + this.sourceFile + ")";
 	}

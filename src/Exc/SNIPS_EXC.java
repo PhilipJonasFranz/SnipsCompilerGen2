@@ -2,6 +2,7 @@ package Exc;
 
 import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 /**
@@ -22,7 +23,7 @@ public class SNIPS_EXC extends RuntimeException {
 		
 		if (AsNBody.progress != null) AsNBody.progress.abort();
 		
-		CompilerDriver.log.add(new Message(this.getMessage(), Message.Type.FAIL));
+		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
 
 	public String getExcFieldName() {

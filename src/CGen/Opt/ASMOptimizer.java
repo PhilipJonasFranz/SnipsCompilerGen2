@@ -46,8 +46,8 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
-import Util.Logging.Message.Type;
 
 /**
  * This optimizer can simplify a sequence of asm instructions. By doing so
@@ -2392,7 +2392,7 @@ public class ASMOptimizer {
 						}
 						else {
 							clear = false;
-							new Message("ASMOPT -> ConstOp propagation : Not available " + body.instructions.get(a).getClass().getName(), Type.WARN);
+							new Message("ASMOPT -> ConstOp propagation : Not available " + body.instructions.get(a).getClass().getName(), LogPoint.Type.WARN);
 						}
 						
 					}

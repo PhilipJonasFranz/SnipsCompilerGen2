@@ -6,12 +6,12 @@ import Snips.CompilerDriver;
 public class SimpleMessage extends Message {
 	
 	public SimpleMessage(String message) {
-		super(message, Message.Type.INFO);
+		super(message, LogPoint.Type.INFO);
 		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
 	}
 	
 	public SimpleMessage(String message, boolean buffered) {
-		super(message, Message.Type.INFO, buffered);
+		super(message, LogPoint.Type.INFO, buffered);
 		if (!CompilerDriver.silenced && !buffered) System.out.println(this.getMessage());
 	}
 	

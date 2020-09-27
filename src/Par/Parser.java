@@ -38,27 +38,33 @@ import Util.Logging.ProgressMessage;
  */
 public class Parser {
 
+	/** List of tokens that were created by the scanner */
 	protected List<Token> tokenStream;
 	
+	/** 
+	 * Current token. The current token is not in the {@link #tokenStream}, 
+	 * but is removed and set to the remove element.
+	 */
 	protected Token current;
 	
-	/* Active Struct Ids */
+	/** Active Struct Ids */
 	List<Pair<NamespacePath, Function>> functions = new ArrayList();
 	
-	/* Active Struct Ids */
+	/** Active Struct Ids */
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
-	/* Active Enum Ids */
+	/** Active Enum Ids */
 	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
-	/* All active Provisos, like T, V */
+	/** All active Provisos, like T, V */
 	List<String> activeProvisos = new ArrayList();
 	
-	/* The currently open namespaces */
+	/** The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
 	Stack<List<Declaration>> scopes = new Stack();
 	
+	/** Generated warn messages that are flushed at the end */
 	List<Message> buffered = new ArrayList();
 	
 	protected ProgressMessage progress;
