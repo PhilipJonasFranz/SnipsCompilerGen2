@@ -17,6 +17,12 @@ namespace Display {
 	
 	restricted int cursor = 0;
 
+	/* The amount of characters that fit in a single line. */
+	restricted int lineLength = 70;
+	
+	/* The amount of lines that fit on the display. */
+	restricted int lineCount = 32;
+
 	/* Reads the char from the display input at base + 1 */
 	restricted char getChar() {
 		int* base = (int*) (Display::displayBase + 1);
@@ -25,12 +31,30 @@ namespace Display {
 		return (char) c;
 	}
 	
+	restricted void wrapLine() {
+		/* Clear the next two lines */
+		for (int i = cursor; i < (cursor + (lineLength * 2)); i++) {
+			/* Calculate the address of the character that should be cleared. */
+			int* addr = (int*) (Display::displayBase + 2 + (i % (lineLength * lineCount)));
+			*addr = 0;
+		}
+	}
+	
 	/* Puts the char at the current cursor location and increments the cursor */
 	restricted void putChar(char c) {
+		/* Clean the next two lines if cursor is at start of line */
+		if (cursor % lineLength == 0)
+			wrapLine();
+		
+		/* Calculate the address where to put the character */
 		int* base = (int*) (Display::displayBase + 2);
 		base += cursor;
+		
+		/* Store character */
 		*base = (int) c;
-		Display::cursor++;
+		
+		/* Increment cursor, and wrap around if cursor reached end of page */
+		Display::cursor = (Display::cursor + 1) % (lineCount * lineLength);
 	}
 	
 	namespace Print {
@@ -38,7 +62,8 @@ namespace Display {
 		/* Skips the cursor to a new line */
 		shared void println() {
 			int rest = 70 - (cursor % 70);
-			cursor += rest;
+			for (int i = 0; i < rest; i++)
+				putChar((char) 0);
 		}
 		
 		/* Prints the string the given char pointer points to. */
