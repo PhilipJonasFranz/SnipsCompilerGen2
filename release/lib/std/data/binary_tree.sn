@@ -5,6 +5,7 @@
  * search tree.
  */
 namespace Tree {
+	
 	/*
 	 * A tree node that has a left and right child and holds a value.
 	 */
@@ -23,7 +24,7 @@ namespace Tree {
 		 *		1	if x > y,
 		 *		-1	if x < y,
 		 * 		0 	if x = y.
-		 *Returns the resulting root node.
+		 * Returns the resulting root node.
 		 */
 		shared TreeNode<T>* insert<T>(func (T, T) -> int pred, T value) {
 			/* Initialize new node with null pointers and given value */
