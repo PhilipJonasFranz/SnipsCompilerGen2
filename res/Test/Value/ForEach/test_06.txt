@@ -1,0 +1,21 @@
+SOURCE
+void incr(int* p) {
+	*p = *p * 3;
+}
+
+int smallest(int* arr, int count) {
+	int smallest = 99;
+	for (int i : arr, count) {
+		incr(&i);
+		if (i < smallest) smallest = i;
+	}
+
+	return smallest;
+}
+
+int main() {
+	int [5] arr = {5, 3, 7, 2, 4};
+	return smallest(&arr, 5);
+}
+TESTCASES
+6
