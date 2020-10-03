@@ -1207,10 +1207,14 @@ public class ContextChecker {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
-					if (this.checkPolymorphViolation(paramType, functionParamType))
-						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, a + 1, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
+					int paramNumber = a + 1;
+					if (i.isNestedCall)
+						a -= 1;
 					
-					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, a + 1, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
+					if (this.checkPolymorphViolation(paramType, functionParamType))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
 				}
 			}
 			
@@ -1355,10 +1359,14 @@ public class ContextChecker {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
-					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType()))
-						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, a + 1, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
+					int paramNumber = a + 1;
+					if (i.isNestedCall)
+						a -= 1;
 					
-					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, a + 1, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
+					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType()))
+						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
+					
+					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
 				}
 			}
 		}
