@@ -1,0 +1,31 @@
+SOURCE
+int main() {
+	int var = 5;
+	
+	int* p = &var++;
+	
+	int temp = var;
+	
+	*p = 10;
+	
+	return var + temp;
+}
+TESTCASES
+16
+OUTPUT
+/* --test_24.txt */
+main:                                        /* Function: main */
+    mov r3, #5
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    ldr r0, [sp]                             /* Evaluate Expression */
+    add r1, r0, #1
+    str r1, [sp]
+    sub r0, sp, #0
+    lsr r3, r0, #2
+    ldr r4, [sp]                             /* Evaluate Expression */
+    mov r0, #10                              /* Evaluate Expression */
+    str r0, [r10, r3, lsl #2]
+    ldr r1, [sp]                             /* Evaluate Expression */
+    add r0, r1, r4
+    bx lr
+    

@@ -894,7 +894,7 @@ public class ASMOptimizer {
 								
 								body.instructions.remove(mov);
 								
-								if (push != null) this.patchFramePointerAddressing(patch, 4);
+								this.patchFramePointerAddressing(patch, 4);
 								
 								this.patchFPtoSP(patch);
 								
@@ -1026,6 +1026,7 @@ public class ASMOptimizer {
 							((ImmOp) binary.op1).value -= sub;
 						}
 					}
+					else ((ImmOp) binary.op1).value -= sub;
 				}
 			}
 			else if (ins instanceof ASMMemOp) {

@@ -1531,7 +1531,7 @@ public class ContextChecker {
 	public TYPE checkAddressOf(AddressOf aof) throws CTX_EXC {
 		TYPE t = aof.expression.check(this);
 		
-		if (!(aof.expression instanceof IDRef || aof.expression instanceof ArraySelect || aof.expression instanceof StructSelect || aof.expression instanceof StructureInit)) 
+		if (!(aof.expression instanceof IDRef || aof.expression instanceof IDRefWriteback || aof.expression instanceof ArraySelect || aof.expression instanceof StructSelect || aof.expression instanceof StructureInit)) 
 			throw new CTX_EXC(aof.getSource(), Const.CAN_ONLY_GET_ADDRESS_OF_VARIABLE_REF_OR_ARRAY_SELECT);
 		
 		aof.setType(new POINTER(t.getCoreType()));

@@ -296,6 +296,8 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			AddressOf aof = (AddressOf) e;
 			if (aof.expression instanceof IDRef) 
 				return (((IDRef) aof.expression).origin.equals(dec));
+			else if (aof.expression instanceof IDRefWriteback) 
+				return (((IDRefWriteback) aof.expression).idRef.origin.equals(dec));
 			else if (aof.expression instanceof StructSelect) 
 				/* Struct will be on the stack anyway */
 				return true;

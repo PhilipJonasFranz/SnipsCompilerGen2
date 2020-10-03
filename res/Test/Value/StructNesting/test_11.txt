@@ -278,6 +278,7 @@ main:                                        /* Function: main */
     lsl r1, r0, #2
     pop { r0 }
     str r0, [r1]
+/* Call from B inherited nested function */
     mov r0, r3                               /* Load parameters */
     bl C.A.incr                              /* Call C.A.incr */
     lsl r1, r3, #2                           /* Convert to bytes */

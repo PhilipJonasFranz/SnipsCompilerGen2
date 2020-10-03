@@ -26,7 +26,7 @@ main.L1:                                     /* Evaluate condition */
     cmp r3, #0
     ble main.L2
     lsl r5, r3, #1
-    sub r0, sp, #4                           /* Evaluate Expression */
+    sub r0, sp, #0                           /* Evaluate Expression */
     push { r5 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r5, r0, #2
     ldr r0, [sp]
