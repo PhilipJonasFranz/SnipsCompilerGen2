@@ -1,0 +1,15 @@
+SOURCE
+void incr(int* p) {
+	*p = *p + 1;
+}
+int main() {
+	int cnt = 0;
+	for (int i = 0; i < 10; i++) {
+		cnt++;
+		incr(&i);
+	}
+	
+	return cnt;
+}
+TESTCASES
+5

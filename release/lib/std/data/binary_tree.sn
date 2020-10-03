@@ -43,7 +43,7 @@ namespace Tree {
 						/* Value already in tree. */
 						return self;
 					}
-					else if (cmp == -1) {
+					else if (cmp == 1) {
 						/* Left leaf is null, insert here */
 						if (head->left == null) {
 							head->left = new;
@@ -75,7 +75,7 @@ namespace Tree {
 			else {
 				if (pred(self->value, value) == 0) return true;
 				else {
-					if (pred(self->value, value) == -1) 
+					if (pred(self->value, value) == 1) 
 						return contains<T>(self->left, pred, value);
 					else 
 						return contains<T>(self->right, pred, value);
@@ -95,9 +95,11 @@ namespace Tree {
 			/* Found leaf */
 			if (self == null) return null;
 				
-			if (pred(value, self->value) == 1)
+			int cmp = pred(value, self->value);
+				
+			if (cmp == -1)
 				self->left = (self->left)->delete<T>(pred, value);
-			else if (pred(value, self->value) == -1)
+			else if (cmp == 1)
 				self->right = (self->right)->delete<T>(pred, value);
 			else {
 				if (self->left == null) {

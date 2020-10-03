@@ -149,7 +149,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
 			
 			if (r.declarationLoaded(dec)) {
-				boolean hasAddress = this.hasAddressReference(a, dec); 
+				boolean hasAddress = hasAddressReference(a, dec); 
 				if (hasAddress) {
 					int location = r.declarationRegLocation(dec);
 					
@@ -169,14 +169,14 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * Checks if in the given statement, an address reference via address of
 	 * is made to a variable with given origin declaration. If so, return true.
 	 */
-	public boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXC {
+	public static boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXC {
 		if (s instanceof CompoundStatement) {
 			CompoundStatement cs = (CompoundStatement) s;
 			
 			boolean ref = false;
 			
 			for (Statement s0 : cs.body) {
-				ref |= this.hasAddressReference(s0, dec);
+				ref |= hasAddressReference(s0, dec);
 			}
 			
 			return ref;
@@ -184,24 +184,24 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		else if (s instanceof ReturnStatement) {
 			ReturnStatement ret = (ReturnStatement) s;
 			if (ret.value == null) return false;
-			else return this.hasAddressReference(ret.value, dec);
+			else return hasAddressReference(ret.value, dec);
 		}
 		else if (s instanceof Declaration) {
 			if (s.equals(dec)) return false;
 			else {
 				Declaration d = (Declaration) s;
-				if (d.value != null) return this.hasAddressReference(d.value, dec);
+				if (d.value != null) return hasAddressReference(d.value, dec);
 				else return false;
 			}
 		}
 		else if (s instanceof Assignment) {
-			return this.hasAddressReference(((Assignment) s).value, dec);
+			return hasAddressReference(((Assignment) s).value, dec);
 		}
 		else if (s instanceof FunctionCall) {
 			boolean hasRef = false;
 			FunctionCall fc = (FunctionCall) s;
 			for (Expression e0 : fc.parameters) {
-				hasRef |= this.hasAddressReference(e0, dec);
+				hasRef |= hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
@@ -209,15 +209,15 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			boolean hasRef = false;
 			SwitchStatement sw = (SwitchStatement) s;
 			for (CaseStatement c : sw.cases) {
-				hasRef |= this.hasAddressReference(c, dec);
+				hasRef |= hasAddressReference(c, dec);
 			}
 			
-			hasRef |= this.hasAddressReference(sw.defaultStatement, dec);
+			hasRef |= hasAddressReference(sw.defaultStatement, dec);
 			return hasRef;
 		}
 		else if (s instanceof AssignWriteback) {
 			AssignWriteback awb = (AssignWriteback) s;
-			return this.hasAddressReference(awb.reference, dec);
+			return hasAddressReference(awb.reference, dec);
 		}
 		else if (s instanceof DirectASMStatement) {
 			DirectASMStatement d = (DirectASMStatement) s;
@@ -225,18 +225,18 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			boolean hasRef = false;
 			
 			for (Pair<Expression, REG> p : d.dataIn) {
-				hasRef |= this.hasAddressReference(p.first, dec);
+				hasRef |= hasAddressReference(p.first, dec);
 			}
 			
 			for (Pair<Expression, REG> p : d.dataOut) {
-				hasRef |= this.hasAddressReference(p.first, dec);
+				hasRef |= hasAddressReference(p.first, dec);
 			}
 			
 			return hasRef;
 		}
 		else if (s instanceof SignalStatement) {
 			SignalStatement s0 = (SignalStatement) s;
-			return this.hasAddressReference(s0.exceptionInit, dec);
+			return hasAddressReference(s0.exceptionInit, dec);
 		}
 		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
 			return false;
@@ -248,31 +248,31 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * Checks if in the given expression, an address reference via address of
 	 * is made to a variable with given origin declaration. If so, return true.
 	 */
-	public boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXC {
+	public static boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXC {
 		if (e instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) e;
-			return this.hasAddressReference(b.left, dec) || this.hasAddressReference(b.right, dec);
+			return hasAddressReference(b.left, dec) || hasAddressReference(b.right, dec);
 		}
 		else if (e instanceof UnaryExpression) {
 			UnaryExpression u = (UnaryExpression) e;
-			return this.hasAddressReference(u.getOperand(), dec);
+			return hasAddressReference(u.getOperand(), dec);
 		}
 		else if (e instanceof InlineCall) {
 			boolean hasRef = false;
 			InlineCall ic = (InlineCall) e;
 			for (Expression e0 : ic.parameters) {
-				hasRef |= this.hasAddressReference(e0, dec);
+				hasRef |= hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
 		else if (e instanceof Deref) {
-			return this.hasAddressReference(((Deref) e).expression, dec);
+			return hasAddressReference(((Deref) e).expression, dec);
 		}
 		else if (e instanceof ArrayInit) {
 			boolean hasRef = false;
 			ArrayInit init = (ArrayInit) e;
 			for (Expression e0 : init.elements) {
-				hasRef |= this.hasAddressReference(e0, dec);
+				hasRef |= hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
@@ -280,16 +280,16 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			boolean hasRef = false;
 			ArraySelect sel = (ArraySelect) e;
 			for (Expression e0 : sel.selection) {
-				hasRef |= this.hasAddressReference(e0, dec);
+				hasRef |= hasAddressReference(e0, dec);
 			}
 			return hasRef;
 		}
 		else if (e instanceof Ternary) {
 			boolean hasRef = false;
 			Ternary ter = (Ternary) e;
-			hasRef |= this.hasAddressReference(ter.condition, dec);
-			hasRef |= this.hasAddressReference(ter.leftOperand, dec);
-			hasRef |= this.hasAddressReference(ter.rightOperand, dec);
+			hasRef |= hasAddressReference(ter.condition, dec);
+			hasRef |= hasAddressReference(ter.leftOperand, dec);
+			hasRef |= hasAddressReference(ter.rightOperand, dec);
 			return hasRef;
 		}
 		else if (e instanceof AddressOf) {
@@ -300,37 +300,37 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 				/* Struct will be on the stack anyway */
 				return true;
 			else if (aof.expression instanceof StructureInit) 
-				return this.hasAddressReference(aof.expression, dec);
+				return hasAddressReference(aof.expression, dec);
 			else return (((ArraySelect) aof.expression).idRef.origin.equals(dec));
 		}
 		else if (e instanceof IDRefWriteback) {
 			IDRefWriteback id = (IDRefWriteback) e;
-			return this.hasAddressReference(id.getShadowRef(), dec);
+			return hasAddressReference(id.getShadowRef(), dec);
 		}
 		else if (e instanceof SizeOfExpression) {
 			SizeOfExpression soe = (SizeOfExpression) e;
-			return this.hasAddressReference(soe.expression, dec);
+			return hasAddressReference(soe.expression, dec);
 		}
 		else if (e instanceof InstanceofExpression) {
 			InstanceofExpression iof = (InstanceofExpression) e;
-			return this.hasAddressReference(iof.expression, dec);
+			return hasAddressReference(iof.expression, dec);
 		}
 		else if (e instanceof TypeCast) {
 			TypeCast tc = (TypeCast) e;
-			return this.hasAddressReference(tc.expression, dec);
+			return hasAddressReference(tc.expression, dec);
 		}
 		else if (e instanceof StructureInit) {
 			StructureInit s = (StructureInit) e;
 			boolean ref = false;
 			for (Expression e0 : s.elements) {
-				ref |= this.hasAddressReference(e0, dec);
+				ref |= hasAddressReference(e0, dec);
 			}
 			return ref;
 		}
 		else if (e instanceof TempAtom) {
 			TempAtom a = (TempAtom) e;
 			if (a.base == null) return false;
-			else return this.hasAddressReference(a.base, dec);
+			else return hasAddressReference(a.base, dec);
 		}
 		else if (e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
