@@ -15,7 +15,7 @@ public class AsNBitOr extends AsNBinaryExpression {
 	public static AsNBitOr cast(BitOr b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitOr or = new AsNBitOr();
 		
-		or.generateLoaderCode(or, b, r, map, st, (x, y) -> x << y, 
+		or.generateLoaderCode(or, b, r, map, st, (x, y) -> x | y, 
 				new ASMOrr(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2)));
 			
 		return or;

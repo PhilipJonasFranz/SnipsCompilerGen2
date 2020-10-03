@@ -85,6 +85,17 @@ public class AsNStructSelect extends AsNExpression {
 		if (base instanceof IDRef) {
 			IDRef ref = (IDRef) base;
 			
+			/**
+			 * When a pointer is the base, and the pointer is in the stack, we have a 'remote'
+			 * address. This means that our current address points to somewhere in the stack
+			 * where the pointer is located. The value of this pointer is pointing to the structure
+			 * we are actually interested in. So, we need to load from the pointer location.
+			 * 
+			 * This is done by setting this flag to true. It overrides the addressLoader flag, since
+			 * they are having the same goal, which is loading the location of the substructure.
+			 */
+			boolean isInStack = false;
+			
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
 				
@@ -105,6 +116,8 @@ public class AsNStructSelect extends AsNExpression {
 				
 				/* Load offset of array in memory */
 				node.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
+				
+				isInStack = true;
 			}
 			else if (st.getParameterByteOffset(ref.origin) != -1) {
 				/* In Parameter Stack */
@@ -113,6 +126,8 @@ public class AsNStructSelect extends AsNExpression {
 				ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
 				start.comment = new ASMComment("Start of structure in stack");
 				node.instructions.add(start);
+				
+				isInStack = true;
 			}
 			else if (map.declarationLoaded(ref.origin)) {
 				/* In Global Memory */
@@ -127,8 +142,10 @@ public class AsNStructSelect extends AsNExpression {
 			 * of the substructure. If the IDRef is a pointer, with the code above, we just loaded the location
 			 * of the pointer in the stack. We need to load the value from the stack to recieve the 
 			 * base address of the structure. The offsets are added in the following code.
+			 * 
+			 * The addressLoader flag is overridden by the isInStack flag.
 			 */
-			if (addressLoader && ref.getType() instanceof POINTER) 
+			if ((addressLoader || isInStack) && ref.getType() instanceof POINTER) 
 				node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
 		}
 		else if (base instanceof ArraySelect) {
