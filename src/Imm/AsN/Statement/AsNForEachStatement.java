@@ -8,12 +8,15 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
@@ -28,6 +31,7 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Deref;
+import Imm.AST.Expression.StructSelect;
 import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNBody;
@@ -35,6 +39,7 @@ import Imm.AsN.Expression.AsNArraySelect;
 import Imm.AsN.Expression.AsNDeref;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
+import Imm.AsN.Expression.AsNStructSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {
@@ -89,10 +94,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		/* Compare bounds, branch to end if bound reached */
 		if (a.select != null) {
 			/* Load counter */
-			f.instructions.addAll(AsNIDRef.cast(a.ref, r, map, st, 0).getInstructions());
+			f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 0).getInstructions());
 			
 			ARRAY arr = (ARRAY) a.shadowRef.getType();
-			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(arr.length)));
+			
+			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(arr.getLength())));
 		}
 		else {
 			/* Load the range, automatically calculates range * iterator word size */
@@ -113,11 +119,36 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* In Reg Set */
 			int loc = r.declarationRegLocation(a.iterator);
 			
-			if (a.select != null) 
-				f.instructions.addAll(AsNArraySelect.cast(a.select, r, map, st).getInstructions());
+			if (a.select != null) {
+				if (a.select.idRef == null && a.select.getShadowRef() instanceof StructSelect) {
+					
+					StructSelect sel = (StructSelect) a.select.getShadowRef();
+
+					AsNStructSelect.injectAddressLoader(f, sel, r, map, st, false);
+					
+					f.loadCounter(r, st, a, 0);
+					
+					/* Multiply counter with word size */
+					if (a.counter.getType().wordsize() > 1) {
+						f.instructions.add(new ASMMov(new RegOp(REG.R2), new ImmOp(a.counter.getType().wordsize())));
+						f.instructions.add(new ASMMult(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R2)));
+					}
+					
+					f.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+					
+					/** Counter offset to absolute address, final address now in R1 */
+					f.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R0)));
+					
+					/* Load value */
+					f.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
+				}
+				else 
+					f.instructions.addAll(AsNArraySelect.cast(a.select, r, map, st).getInstructions());
+			}
 			else 
 				f.instructions.addAll(AsNDeref.cast(a.shadowRef, r, map, st).getInstructions());
 			
+			/* Move value to location of iterator */
 			f.instructions.add(new ASMMov(new RegOp(loc), new RegOp(REG.R0)));
 		}
 		else {

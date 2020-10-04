@@ -682,7 +682,7 @@ public class ContextChecker {
 		TYPE refType = f.shadowRef.check(this);
 		
 		f.counter.check(this);
-		f.ref.check(this);
+		f.counterRef.check(this);
 		
 		if (refType instanceof POINTER) {
 			POINTER p = (POINTER) refType;
@@ -691,7 +691,7 @@ public class ContextChecker {
 				throw new CTX_EXC(f.getSource(), Const.POINTER_TYPE_DOES_NOT_MATCH_ITERATOR_TYPE, p.targetType.provisoFree().typeString(), itType.provisoFree().typeString());
 			
 			/* Construct expression to calculate address based on address of the shadowRef, counter and the size of the type */
-			Expression add = new Add(f.shadowRef, f.ref, f.shadowRef.getSource());
+			Expression add = new Add(f.shadowRef, f.counterRef, f.shadowRef.getSource());
 			
 			/* Set as new shadowRef, will be casted during code generation */
 			f.shadowRef = new Deref(add, f.shadowRef.getSource());
@@ -711,7 +711,7 @@ public class ContextChecker {
 			
 			/* Select first value from array */
 			List<Expression> select = new ArrayList();
-			select.add(f.ref);
+			select.add(f.counterRef);
 			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
 			
 			f.select.check(this);
@@ -1645,59 +1645,64 @@ public class ContextChecker {
 		if (select.selection.isEmpty()) 
 			throw new CTX_EXC(select.getSource(), Const.ARRAY_SELECT_MUST_HAVE_SELECTION);
 		
+		Expression ref = null;
+		
 		if (select.getShadowRef() instanceof IDRef) {
-			IDRef ref = (IDRef) select.getShadowRef();
-			select.idRef = ref;
-			
-			TYPE type0 = ref.check(this);
-			
-			/* If pointer, unwrap it */
-			TYPE chain = (type0 instanceof POINTER)? ((POINTER) type0).targetType : type0;
-			
-			/* Check selection chain */
-			for (int i = 0; i < select.selection.size(); i++) {
-				TYPE stype = select.selection.get(i).check(this);
-				if (!(stype instanceof INT)) 
-					throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree().typeString());
-				else {
-					/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
-					if (!(chain instanceof ARRAY || (i == 0 && (type0 instanceof POINTER || chain instanceof VOID)))) 
-						throw new CTX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
-					else if (chain instanceof ARRAY) {
-						ARRAY arr = (ARRAY) chain;
-						
-						if (select.selection.get(i) instanceof Atom) {
-							Atom a = (Atom) select.selection.get(i);
-							int value = (int) a.getType().getValue();
-							if (value < 0 || value >= arr.getLength()) 
-								throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree().typeString());
-						}
-						
-						chain = arr.elementType;
-					}
-					else {
-						if (type0 instanceof POINTER) {
-							POINTER p = (POINTER) type0;
-							chain = p.targetType;
-						}
-						else {
-							/* When selecting from void, type will stay void */
-							VOID v = (VOID) chain;
-							chain = v;
-						}
-						
-						if (select.selection.size() > 1) 
-							throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
-					}
-				}
-			}
-			
-			if (type0 instanceof POINTER) chain = new POINTER(chain);
-			
-			select.setType(chain);
-			return select.getType();
+			ref = (IDRef) select.getShadowRef();
+			select.idRef = (IDRef) ref;
+		}
+		else if (select.getShadowRef() instanceof StructSelect) {
+			ref = (StructSelect) select.getShadowRef();
 		}
 		else throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_FROM_VARIABLE_REF);
+		
+		TYPE type0 = ref.check(this);
+		
+		/* If pointer, unwrap it */
+		TYPE chain = (type0 instanceof POINTER)? ((POINTER) type0).targetType : type0;
+		
+		/* Check selection chain */
+		for (int i = 0; i < select.selection.size(); i++) {
+			TYPE stype = select.selection.get(i).check(this);
+			if (!(stype instanceof INT)) 
+				throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree().typeString());
+			else {
+				/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
+				if (!(chain instanceof ARRAY || (i == 0 && (type0 instanceof POINTER || chain instanceof VOID)))) 
+					throw new CTX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
+				else if (chain instanceof ARRAY) {
+					ARRAY arr = (ARRAY) chain;
+					
+					if (select.selection.get(i) instanceof Atom) {
+						Atom a = (Atom) select.selection.get(i);
+						int value = (int) a.getType().getValue();
+						if (value < 0 || value >= arr.getLength()) 
+							throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree().typeString());
+					}
+					
+					chain = arr.elementType;
+				}
+				else {
+					if (type0 instanceof POINTER) {
+						POINTER p = (POINTER) type0;
+						chain = p.targetType;
+					}
+					else {
+						/* When selecting from void, type will stay void */
+						VOID v = (VOID) chain;
+						chain = v;
+					}
+					
+					if (select.selection.size() > 1) 
+						throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
+				}
+			}
+		}
+		
+		if (type0 instanceof POINTER) chain = new POINTER(chain);
+		
+		select.setType(chain);
+		return select.getType();
 	}
 	
 	public TYPE checkAtom(Atom a) throws CTX_EXC {

@@ -1,0 +1,18 @@
+SOURCE
+struct X {
+	int [4] arr;
+}
+
+int main() {
+	X x = X::({5, 3, 2, 6});
+	
+	X* x0 = &x;
+	
+	int sum = 0;
+	for (int i : x0->arr) 
+		sum += i;
+		
+	return sum;
+}
+TESTCASES
+16
