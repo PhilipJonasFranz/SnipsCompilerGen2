@@ -1283,9 +1283,16 @@ public class Parser {
 		else return this.parseTernary();
 	}
 	
+	/**
+	 * Parses a ternary operation with a condition and two cases The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION?EXPRESSION:EXPRESSION</code>
+	 */
 	protected Expression parseTernary() throws PARSE_EXC {
 		Source source = current.getSource();
+		
 		Expression condition = this.parseOr();
+		
 		if (current.type == TokenType.TERN) {
 			accept();
 			Expression left = this.parseExpression();
@@ -1296,53 +1303,104 @@ public class Parser {
 		else return condition;
 	}
 	
+	/**
+	 * Parses a OR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION||EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive OR operations are stacked on the left side.
+	 */
 	protected Expression parseOr() throws PARSE_EXC {
 		Expression left = this.parseAnd();
+		
 		while (current.type == TokenType.OR) {
 			accept();
 			left = new Or(left, this.parseAnd(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a AND operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION&&EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive AND operations are stacked on the left side.
+	 */
 	protected Expression parseAnd() throws PARSE_EXC {
 		Expression left = this.parseBitOr();
+		
 		while (current.type == TokenType.AND) {
 			accept();
 			left = new And(left, this.parseBitOr(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise OR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION|EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive OR operations are stacked on the left side.
+	 */
 	protected Expression parseBitOr() throws PARSE_EXC {
 		Expression left = this.parseBitXor();
+		
 		while (current.type == TokenType.BITOR) {
 			accept();
 			left = new BitOr(left, this.parseBitXor(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise XOR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION^EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive XOR operations are stacked on the left side.
+	 */
 	protected Expression parseBitXor() throws PARSE_EXC {
 		Expression left = this.parseBitAnd();
+		
 		while (current.type == TokenType.XOR) {
 			accept();
 			left = new BitXor(left, this.parseBitAnd(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise AND operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION&EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive AND operations are stacked on the left side.
+	 */
 	protected Expression parseBitAnd() throws PARSE_EXC {
 		Expression left = this.parseCompare();
+		
 		while (current.type == TokenType.ADDROF) {
 			accept();
 			left = new BitAnd(left, this.parseCompare(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a comparison operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(==|!=|>=|>|<=|<)EXPRESSION</code>
+	 */
 	protected Expression parseCompare() throws PARSE_EXC {
 		Expression left = this.parseShift();
+		
 		if (current.type.group == TokenGroup.COMPARE) {
 			Source source = current.getSource();
 			if (current.type == TokenType.CMPEQ) {
@@ -1374,8 +1432,16 @@ public class Parser {
 		return left;
 	}
 	
+	/**
+	 * Parses a shft operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(<<|>>)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive shift operations are stacked on the left side.
+	 */
 	protected Expression parseShift() throws PARSE_EXC {
 		Expression left = this.parseAddSub();
+		
 		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
 			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
 			if (current.type == TokenType.CMPLT) {
@@ -1389,26 +1455,44 @@ public class Parser {
 				left = new Lsr(left, this.parseAddSub(), current.source);
 			}
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a addition or subtraction operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(+|-)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive operations are stacked on the left side.
+	 */
 	protected Expression parseAddSub() throws PARSE_EXC {
-		Expression left = this.parseMulDiv();
+		Expression left = this.parseMulDivMod();
+		
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
 				accept();
-				left = new Add(left, this.parseMulDiv(), current.source);
+				left = new Add(left, this.parseMulDivMod(), current.source);
 			}
 			else {
 				accept();
-				left = new Sub(left, this.parseMulDiv(), current.source);
+				left = new Sub(left, this.parseMulDivMod(), current.source);
 			}
 		}
+		
 		return left;
 	}
 		
-	protected Expression parseMulDiv() throws PARSE_EXC {
+	/**
+	 * Parses a multiplication, division or modulo operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(*|/|%)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive operations are stacked on the left side.
+	 */
+	protected Expression parseMulDivMod() throws PARSE_EXC {
 		Expression left = this.parseSizeOf();
+		
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
 				accept();
@@ -1435,12 +1519,19 @@ public class Parser {
 				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
 			}
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a sizeof operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>sizeof(TYPE|EXPRESSION)</code>
+	 */
 	protected Expression parseSizeOf() throws PARSE_EXC {
-		Expression sof = null;
-		while (current.type == TokenType.SIZEOF) {
+		if (current.type == TokenType.SIZEOF) {
+			Expression sof = null;
+			
 			Source source = accept().getSource();
 			accept(TokenType.LPAREN);
 			
@@ -1458,14 +1549,20 @@ public class Parser {
 			else sof = new SizeOfExpression(this.parseExpression(), source);
 			
 			accept(TokenType.RPAREN);
+			
+			return sof;
 		}
-		
-		if (sof == null) sof = this.parseInstanceOf();
-		return sof;
+		else return this.parseInstanceOf();
 	}
 	
+	/**
+	 * Parses a sizeof operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSIONinstanceofTYPE</code>
+	 */
 	protected Expression parseInstanceOf() throws PARSE_EXC {
 		Expression iof = this.parseAddressOf();
+		
 		if (current.type == TokenType.INSTANCEOF) {
 			Source source = accept().getSource();
 			
@@ -1477,60 +1574,56 @@ public class Parser {
 		return iof;
 	}
 	
+	/**
+	 * Parses a address of operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>&EXPRESSION</code>
+	 */
 	protected Expression parseAddressOf() throws PARSE_EXC {
-		Expression addr = null;
-		while (current.type == TokenType.ADDROF) {
+		if (current.type == TokenType.ADDROF) {
 			Source source = accept().getSource();
 			
 			if (current.type == TokenType.TYPE || current.type == TokenType.STRUCTID || current.type == TokenType.NAMESPACE_IDENTIFIER)
-				addr = new AddressOf(this.parseExpression(), source);
+				return new AddressOf(this.parseExpression(), source);
 			else 
-				addr = new AddressOf(this.parseDeref(), source);
+				return new AddressOf(this.parseDeref(), source);
 		}
-		
-		if (addr == null) addr = this.parseDeref();
-		return addr;
+		else return this.parseDeref();
 	}
 	
+	/**
+	 * Parses a dereference operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>*EXPRESSION</code>
+	 */
 	protected Expression parseDeref() throws PARSE_EXC {
-		Expression addr = null;
-		
 		if (current.type == TokenType.MUL) {
 			Source source = accept().getSource();
-			
-			if (current.type == TokenType.LPAREN) {
-				accept();
-				Expression e = this.parseExpression();
-				accept(TokenType.RPAREN);
-				addr = new Deref(e, source);
-			}
-			else addr = new Deref(this.parseDeref(), source);
+			return new Deref(this.parseDeref(), source);
 		}
-		
-		if (addr == null) addr = this.parseTypeCast();
-		return addr;
+		else return this.parseTypeCast();
 	}
 	
+	/**
+	 * Parses a type cast operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>(TYPE)EXPRESSION</code>
+	 */
 	protected Expression parseTypeCast() throws PARSE_EXC {
-		Expression cast = null;
-		
 		/* Convert next token */
-		if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
+		if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 			this.tokenStream.get(0).type = TokenType.PROVISO;
-		}
 		
-		while (this.castCheck()) {
+		if (this.castCheck()) {
 			Source source = accept().getSource();
 			TYPE castType = this.parseType();
 			accept(TokenType.RPAREN);
 			
 			Expression cast0 = this.parseNot();
 			
-			cast = new TypeCast(cast0, castType, source);
+			return new TypeCast(cast0, castType, source);
 		}
-		
-		if (cast == null) cast = this.parseNot();
-		return cast;
+		else return this.parseNot();
 	}
 	
 	public boolean castCheck() {
@@ -1561,59 +1654,73 @@ public class Parser {
 				if (!castCheck) break;
 			}
 		}
+		
 		return castCheck;
 	}
 	
+	/**
+	 * Parses a boolean negation operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>!EXPRESSION</code>
+	 */
 	protected Expression parseNot() throws PARSE_EXC {
-		Expression not = null;
-		while (current.type == TokenType.NEG || current.type == TokenType.NOT) {
+		if (current.type == TokenType.NEG || current.type == TokenType.NOT) {
 			if (current.type == TokenType.NEG) {
 				accept();
-				not = new Not(this.parseNot(), current.source);
+				return new Not(this.parseNot(), current.source);
 			}
 			else {
 				accept(TokenType.NOT);
-				not = new BitNot(this.parseNot(), current.source);
+				return new BitNot(this.parseNot(), current.source);
 			}
 		}
-		
-		if (not == null) not = this.parseUnaryMinus();
-		return not;
+		else return this.parseUnaryMinus();
 	}
 	
+	/**
+	 * Parses an arithmetic negation operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>-EXPRESSION</code>
+	 */
 	protected Expression parseUnaryMinus() throws PARSE_EXC {
-		Expression not = null;
-		while (current.type == TokenType.SUB) {
+		if (current.type == TokenType.SUB) {
 			accept();
-			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
+			return new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
-		
-		if (not == null) not = this.parseIncrDecr();
-		return not;
+		else return this.parseIncrDecr();
 	}
 	
+	/**
+	 * Parses a increment or decrement operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(++|--)</code>
+	 */
 	protected Expression parseIncrDecr() throws PARSE_EXC {
 		Expression ref = this.parseStructSelect();
 		
-		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+		if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
 			Source source = current.getSource();
 			if (current.type == TokenType.INCR) {
 				accept();
 				if (ref instanceof IDRef)
-					ref = new IDRefWriteback(WRITEBACK.INCR, ref, source);
-				else ref = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+					return new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else return new StructSelectWriteback(WRITEBACK.INCR, ref, source);
 			}
 			else {
 				accept();
 				if (ref instanceof IDRef)
-					ref = new IDRefWriteback(WRITEBACK.DECR, ref, source);
-				else ref = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+					return new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else return new StructSelectWriteback(WRITEBACK.DECR, ref, source);
 			}
 		}
-		
-		return ref;
+		else return ref;
 	}
 	
+	/**
+	 * Parses a structure select or union access operation for a chain of operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION((.|->)EXPRESSION)+</code>
+	 */
 	protected Expression parseStructSelect() throws PARSE_EXC {
 		Expression ref = this.parseArraySelect();
 		
@@ -1702,6 +1809,11 @@ public class Parser {
 		return ref;
 	}
 	
+	/**
+	 * Parses an array select operation for a chain of operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION([EXPRESSION])+</code>
+	 */
 	protected Expression parseArraySelect() throws PARSE_EXC {
 		Expression ref = this.parseAtom();
 		
@@ -1918,6 +2030,14 @@ public class Parser {
 		}
 	}
 	
+	/**
+	 * Check if the given name is either resv, init, free or hsize. If yes, 
+	 * add this library with the prefix 'lib/mem/*' to the referenced libraries
+	 * in the compiler driver, so they are included in the result.
+	 * 
+	 * @param name The name of the function, does not have to match one of the
+	 * 		listed names. Should not be null.
+	 */
 	public void checkAutoInclude(String name) {
 		if (name.equals("resv")) {
 			CompilerDriver.heap_referenced = true;
@@ -1927,15 +2047,26 @@ public class Parser {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
 		}
+		else if (name.equals("free")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+		}
 		else if (name.equals("hsize")) {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
 		}
 	}
-	
+
+	/**
+	 * Wraps a placeholder operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(...)?</code><br>
+	 * <br>
+	 * Returns the given expression if '...' is not seen.
+	 */
 	public Expression wrapPlaceholder(Expression base) {
-		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
+		if (this.checkPlaceholder()) {
 			Source source = current.getSource();
 			
+			/* Accept ... */
 			accept();
 			accept();
 			accept();
@@ -1945,11 +2076,14 @@ public class Parser {
 		else return base;
 	}
 	
+	/**
+	 * Returns true iff:<br>
+	 * 		- The current token is a '.'<br>
+	 * 		- The next token is a '.'<br>
+	 * 		- The token after that is a '.'
+	 */
 	public boolean checkPlaceholder() {
-		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
-			return true;
-		}
-		else return false;
+		return (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT);
 	}
 	
 	public Function findFunction(NamespacePath path) {
