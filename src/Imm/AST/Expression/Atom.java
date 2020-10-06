@@ -26,7 +26,7 @@ public class Atom extends Expression {
 	public Atom(TYPE type, Token id, Source source) {
 		super(source);
 		this.setType(type);
-		this.spelling = id.spelling;
+		this.spelling = id.spelling();
 	}
 
 	

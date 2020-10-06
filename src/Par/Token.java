@@ -4,12 +4,15 @@ import Util.Source;
 
 public class Token {
 
+			/* ---< FIELDS >--- */
 	TokenType type;
 	
-	public String spelling;
+	String spelling;
 	
 	Source source;
 	
+	
+			/* ---< CONSTRUCTORS >--- */
 	public Token(TokenType type, Source source, String spelling) {
 		this.type = type;
 		this.spelling = spelling; 
@@ -22,23 +25,29 @@ public class Token {
 		this.spelling = type.spelling;
 	}
 	
+	
+			/* ---< METHODS >--- */
 	public boolean equals(Token token) {
 		return this.type == token.type;
 	}
 	
 	public Token clone() {
-		Token t = new Token(this.type, this.source.clone(), this.spelling);
-		return t;
+		return new Token(this.type, this.source.clone(), this.spelling);
 	}
 	
 	public TokenType type() {
 		return this.type;
 	}
 	
-	public Source getSource() {
+	public Source source() {
 		return this.source;
 	}
 	
+	public String spelling() {
+		return this.spelling;
+	}
+	
+			/* ---< NESTED >--- */
 	public enum TokenType {
 		
 		/* Structural */

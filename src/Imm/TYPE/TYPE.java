@@ -46,14 +46,14 @@ public abstract class TYPE<T> {
 	
 	public static TYPE fromToken(Token token, List<Message> buffered) {
 		if (token.type() == TokenType.PROVISO) {
-			return new PROVISO(token.spelling);
+			return new PROVISO(token.spelling());
 		}
 		else {
 			TYPE t = PRIMITIVE.fromToken(token);
 			
 			if (t == null) {
-				t = new PROVISO(token.spelling);
-				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling), LogPoint.Type.WARN, true));
+				t = new PROVISO(token.spelling());
+				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling()), LogPoint.Type.WARN, true));
 			}
 			
 			return t;

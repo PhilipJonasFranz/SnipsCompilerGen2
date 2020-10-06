@@ -264,6 +264,8 @@ public class Const {
 	
 	
 			/* ---< INTERNAL >--- */
+	public static final String UNKNOWN_MODIFIER = "Unknown Modifier '%s', defaulting to SHARED";
+	
 	public static final String UNKNOWN_TYPE = "Unknown Type '%s', creating Proviso";
 	
 	public static final String CANNOT_GET_SOURCE_CODE_REPRESENTATION = "Cannot get source code representation of type %s";

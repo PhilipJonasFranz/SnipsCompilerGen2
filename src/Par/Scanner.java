@@ -11,7 +11,7 @@ import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/**
 	 * Defines the current accumulation state of the scanner.
 	 */
@@ -64,7 +64,7 @@ public class Scanner {
 	}
 
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/**
 	 * All simple scannable tokens, represented in base/reset token format.
 	 */
@@ -153,7 +153,7 @@ public class Scanner {
 	public ProgressMessage progress;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
 		this.progress = progress;
@@ -170,7 +170,7 @@ public class Scanner {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public LinkedList<Token> scan() {
 		ScannerFSM sFSM = new ScannerFSM(new LinkedList(), progress);
 		

@@ -30,7 +30,7 @@ public class RegisterAtom extends Expression {
 	public RegisterAtom(Token id, Source source) {
 		super(source);
 		this.setType(new INT());
-		this.spelling = id.spelling;
+		this.spelling = id.spelling();
 	}
 
 	

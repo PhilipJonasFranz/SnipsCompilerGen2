@@ -20,7 +20,7 @@ public class Comment extends Statement {
 			/* --- CONSTRUCTORS --- */
 	public Comment(Token comment, Source source) {
 		super(source);
-		this.comment = comment.spelling;
+		this.comment = comment.spelling();
 	}
 	
 	
