@@ -8,6 +8,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
+import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -59,7 +60,7 @@ public class AsNStructureInit extends AsNExpression {
 			}
 		}
 		
-		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, r, map, st);
+		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st);
 		
 		return init;
 	}
@@ -73,7 +74,7 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, boolean coveredParam, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -129,6 +130,12 @@ public class AsNStructureInit extends AsNExpression {
 		if (isTopLevel && !CompilerDriver.optimizeFileSize) {
 			flush(regs, node);
 			regs = 0;
+		}
+		
+		/* Delete pushed SID for first param if param is covered */
+		if (coveredParam && !CompilerDriver.disableStructSIDHeaders) {
+			node.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(4)));
+			st.pop();
 		}
 		
 		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {

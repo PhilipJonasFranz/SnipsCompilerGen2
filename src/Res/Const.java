@@ -70,6 +70,8 @@ public class Const {
 	
 	public static final String MISSMATCHING_ARGUMENT_NUMBER = "Missmatching argument number: Expected %d, but got %d";
 	
+	public static final String CAN_ONLY_COVER_WITH_STRUCT = "Can only cover params with STRUCT type, actual %s";
+	
 	public static final String OPERAND_TYPES_DO_NOT_MATCH = "Operand types do not match: %s vs. %s";
 	
 	public static final String PARAMETER_TYPE_DOES_NOT_MATCH = "Parameter type does not match expected type: %s vs %s";

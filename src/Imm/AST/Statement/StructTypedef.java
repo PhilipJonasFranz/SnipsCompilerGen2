@@ -87,6 +87,10 @@ public class StructTypedef extends SyntaxElement {
 			 * adjust the path and add to own functions 
 			 */
 			for (Function f : this.extension.functions) {
+				/* Ignore static functions */
+				if (f.modifier == MODIFIER.STATIC) 
+					continue;
+				
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
 				

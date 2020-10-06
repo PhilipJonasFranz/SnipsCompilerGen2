@@ -317,10 +317,10 @@ public class Parser {
 				
 				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m);
 				
-				if (f.modifier == MODIFIER.STATIC)
-					/* Insert Struct Name */
-					f.path.path.add(f.path.path.size() - 1, def.path.getLast());
-				else {
+				/* Insert Struct Name */
+				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+				
+				if (f.modifier != MODIFIER.STATIC) {
 					/* Inject Self Reference */
 					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
 					f.parameters.add(0, self);
@@ -1207,7 +1207,7 @@ public class Parser {
 	}
 	
 	protected Expression parseStructureInit() throws PARSE_EXC {
-		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.STRUCTID;
+		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			structInitCheck &= tokenStream.get(i).type == TokenType.COLON;
 			structInitCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
@@ -1228,7 +1228,7 @@ public class Parser {
 			}
 		}
 		
-		if (structInitCheck) {
+		if ((current.type == TokenType.STRUCTID && this.tokenStream.get(2).type != TokenType.IDENTIFIER) || structInitCheck) {
 			Source source = current.getSource();
 			
 			TYPE type = this.parseType();
@@ -1818,11 +1818,12 @@ public class Parser {
 				}
 			}
 		}
-		else if (current.type == TokenType.STRUCTID) {
+		else if (current.type == TokenType.STRUCTID && this.tokenStream.get(2).type == TokenType.IDENTIFIER) {
 			Source source = current.getSource();
 			
 			/* Static nested function call */
 			Token sid = accept();
+			
 			accept(TokenType.COLON);
 			accept(TokenType.COLON);
 			
@@ -1831,8 +1832,6 @@ public class Parser {
 			NamespacePath path = def.path.clone();
 			
 			path.path.add(accept(TokenType.IDENTIFIER).spelling);
-			
-			System.out.println(path.build());
 			
 			/* Convert next token */
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 

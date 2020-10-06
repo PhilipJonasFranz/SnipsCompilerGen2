@@ -424,7 +424,20 @@ public class ContextChecker {
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
-		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1) {
+		StructTypedef extension = e.structType.getTypedef().extension;
+		
+		boolean covered = false;
+		
+		if (extension != null) {
+			covered = e.elements.get(0).check(this).isEqual(extension.self);
+			
+			/* Check that type that is covering is a struct type */
+			if (covered && !(e.elements.get(0).getType() instanceof STRUCT)) 
+				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
+			
+		}
+		
+		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1 && !covered) {
 			throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, e.structType.getTypedef().getFields().size(), e.elements.size());
 		}
 		
@@ -433,6 +446,33 @@ public class ContextChecker {
 			TempAtom a = (TempAtom) e.elements.get(0);
 			a.inheritType = e.structType;
 			a.check(this);
+		}
+		else if (covered) {
+			e.hasCoveredParam = true;
+			
+			for (int i = 1; i < e.elements.size(); i++) {
+				TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i + extension.getFields().size() - 1).path).getType();
+				
+				/* Single placeholder case */
+				if (e.elements.get(i) instanceof TempAtom) {
+					TempAtom a = (TempAtom) e.elements.get(i);
+					a.inheritType = strType;
+				}
+				
+				TYPE valType = e.elements.get(i).check(this);
+				
+				if (e.elements.get(i) instanceof StructureInit) {
+					StructureInit init = (StructureInit) e.elements.get(i);
+					init.isTopLevelExpression = false;
+				}
+				
+				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof TempAtom)) {
+					if (valType instanceof POINTER || strType instanceof POINTER) 
+						CompilerDriver.printProvisoTypes = true;
+					
+					throw new CTX_EXC(e.getSource(), Const.ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE, i + 1, valType.provisoFree().typeString(), strType.provisoFree().typeString());
+				}
+			}
 		}
 		else {
 			/* Make sure that all field types are equal to the expected types */
