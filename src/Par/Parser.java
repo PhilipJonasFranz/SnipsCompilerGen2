@@ -317,12 +317,14 @@ public class Parser {
 				
 				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m);
 				
-				/* Insert Struct Name */
-				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
-				
-				/* Inject Self Reference */
-				Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
-				f.parameters.add(0, self);
+				if (f.modifier == MODIFIER.STATIC)
+					/* Insert Struct Name */
+					f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+				else {
+					/* Inject Self Reference */
+					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+					f.parameters.add(0, self);
+				}
 				
 				def.functions.add(f);
 			}
@@ -588,6 +590,23 @@ public class Parser {
 			}
 			else if (current.type == TokenType.SIGNAL) {
 				return this.parseSignal();
+			}
+			else if (current.type == TokenType.STRUCTID) {
+				/* Static nested function call */
+				Token sid = accept();
+				accept(TokenType.COLON);
+				accept(TokenType.COLON);
+				
+				FunctionCall call = this.parseFunctionCall();
+				
+				/* 
+				 * Add the sid infront of the last element of the path, function
+				 * will be re-written out of the struct and will become a regular
+				 * function later.
+				 */
+				call.path.path.add(call.path.path.size() - 1, sid.spelling);
+				
+				return call;
 			}
 			else {
 				if (this.progress != null) this.progress.abort();
@@ -1188,7 +1207,7 @@ public class Parser {
 	}
 	
 	protected Expression parseStructureInit() throws PARSE_EXC {
-		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
+		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.STRUCTID;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			structInitCheck &= tokenStream.get(i).type == TokenType.COLON;
 			structInitCheck &= tokenStream.get(i + 1).type == TokenType.COLON;
@@ -1209,7 +1228,7 @@ public class Parser {
 			}
 		}
 		
-		if (current.type == TokenType.STRUCTID || structInitCheck) {
+		if (structInitCheck) {
 			Source source = current.getSource();
 			
 			TYPE type = this.parseType();
@@ -1745,17 +1764,7 @@ public class Parser {
 					}
 					accept(TokenType.RPAREN);
 					
-					if (path.getPath().get(0).equals("resv")) {
-						CompilerDriver.heap_referenced = true;
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-					}
-					else if (path.getPath().get(0).equals("init")) {
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
-					}
-					else if (path.getPath().get(0).equals("hsize")) {
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
-					}
+					this.checkAutoInclude(path.getPath().get(0));
 					
 					return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
 				}
@@ -1808,6 +1817,43 @@ public class Parser {
 					return this.wrapPlaceholder(new IDRef(path, source));
 				}
 			}
+		}
+		else if (current.type == TokenType.STRUCTID) {
+			Source source = current.getSource();
+			
+			/* Static nested function call */
+			Token sid = accept();
+			accept(TokenType.COLON);
+			accept(TokenType.COLON);
+			
+			StructTypedef def = this.getStructTypedef(new NamespacePath(sid.spelling), source);
+			
+			NamespacePath path = def.path.clone();
+			
+			path.path.add(accept(TokenType.IDENTIFIER).spelling);
+			
+			System.out.println(path.build());
+			
+			/* Convert next token */
+			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
+				this.tokenStream.get(0).type = TokenType.PROVISO;
+			
+			List<TYPE> proviso = this.parseProviso();
+			
+			/* Inline Call */
+			accept(TokenType.LPAREN);
+			
+			List<Expression> parameters = new ArrayList();
+			while (current.type != TokenType.RPAREN) {
+				parameters.add(this.parseExpression());
+				if (current.type != TokenType.COMMA) break;
+				accept(TokenType.COMMA);
+			}
+			accept(TokenType.RPAREN);
+			
+			this.checkAutoInclude(path.getPath().get(0));
+			
+			return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
 		}
 		else if (current.type == TokenType.DIRECTIVE) {
 			/* Direct Reg Targeting */
@@ -1870,6 +1916,20 @@ public class Parser {
 					return this.parseExpression();
 				}
 			}
+		}
+	}
+	
+	public void checkAutoInclude(String name) {
+		if (name.equals("resv")) {
+			CompilerDriver.heap_referenced = true;
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+		}
+		else if (name.equals("init")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+		}
+		else if (name.equals("hsize")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
 		}
 	}
 	
@@ -2290,7 +2350,8 @@ public class Parser {
 	}
 	
 	protected MODIFIER resolve(Token t) {
-		if (t.type == TokenType.SHARED) return MODIFIER.SHARED;
+		if (t.type == TokenType.STATIC) return MODIFIER.STATIC;
+		else if (t.type == TokenType.SHARED) return MODIFIER.SHARED;
 		else if (t.type == TokenType.RESTRICTED) return MODIFIER.RESTRICTED;
 		else return MODIFIER.EXCLUSIVE;
 	}

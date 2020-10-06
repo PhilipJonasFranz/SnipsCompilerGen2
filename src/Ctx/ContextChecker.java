@@ -290,13 +290,15 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
 		for (Function f : e.functions) {
-			/* Add to a pool of nested functions */
-			this.nestedFunctions.add(f);
+			if (f.modifier != MODIFIER.STATIC) {
+				/* Add to a pool of nested functions */
+				this.nestedFunctions.add(f);
 			
-			/* Check for duplicate function name */
-			for (Function f0 : this.functions) {
-				if (f0.path.build().equals(f.path.build()))
-					throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+				/* Check for duplicate function name */
+				for (Function f0 : this.functions) {
+					if (f0.path.build().equals(f.path.build()))
+						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+				}
 			}
 			
 			/* 
@@ -305,7 +307,7 @@ public class ContextChecker {
 			 */
 			this.functions.add(f);
 			
-			if (f.provisosTypes.isEmpty()) f.check(this);
+			if (f.modifier == MODIFIER.STATIC || f.provisosTypes.isEmpty()) f.check(this);
 		}
 		
 		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();

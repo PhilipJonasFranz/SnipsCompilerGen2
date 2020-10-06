@@ -93,6 +93,7 @@ public class Token {
 		TERN("?"),
 		
 		/* Modifiers */
+		STATIC("static", 			TokenGroup.MODIFIER),
 		SHARED("shared", 			TokenGroup.MODIFIER),
 		RESTRICTED("restricted", 	TokenGroup.MODIFIER),
 		EXCLUSIVE("exclusive", 		TokenGroup.MODIFIER),

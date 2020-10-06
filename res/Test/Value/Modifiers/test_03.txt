@@ -1,0 +1,22 @@
+SOURCE
+namespace Data {
+	struct X {
+	
+		int val;
+		
+		/*
+		 * Creates a new instance of X.
+		 */
+		static X create(int val) {
+			return X::(val);
+		}
+	
+	}
+}
+
+int main() {
+	X x = X::create(15);
+	return x.val;
+}
+TESTCASES
+15
