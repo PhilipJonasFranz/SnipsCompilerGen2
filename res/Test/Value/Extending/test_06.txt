@@ -1,0 +1,24 @@
+SOURCE
+struct X {
+	int x;
+	int y;
+	
+	static X create(int x, int y) {
+		return X::(x, y);
+	}
+}
+
+struct Y : X {
+	bool k;
+	
+	static Y create(int x, int y, bool k) {
+		return Y::(super(x, y), k);
+	}
+}
+
+int main() {
+	Y y = Y::create(15, 10, true);
+	return y.x + y.y + (int) y.k;
+}
+TESTCASES
+26

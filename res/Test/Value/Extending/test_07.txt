@@ -1,0 +1,24 @@
+SOURCE
+struct X<T> {
+	int x;
+	T y;
+	
+	static X<T> create<T>(int x, T y) {
+		return X<T>::(x, y);
+	}
+}
+
+struct Y<T> : X<T> {
+	bool k;
+	
+	static Y<T> create<T>(int x, T y, bool k) {
+		return Y<T>::(super<T>(x, y), k);
+	}
+}
+
+int main() {
+	Y<bool> y = Y::create<bool>(15, true, true);
+	return y.x + (int) y.y + (int) y.k;
+}
+TESTCASES
+17

@@ -307,7 +307,8 @@ public class ContextChecker {
 			 */
 			this.functions.add(f);
 			
-			if (f.modifier == MODIFIER.STATIC || f.provisosTypes.isEmpty()) f.check(this);
+			if (f.provisosTypes.isEmpty()) 
+				f.check(this);
 		}
 		
 		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
@@ -408,6 +409,40 @@ public class ContextChecker {
 	public TYPE checkStructureInit(StructureInit e) throws CTX_EXC {
 		e.setType(e.structType);
 		
+		StructTypedef extension = e.structType.getTypedef().extension;
+		
+		boolean covered = false;
+		
+		/* Check if the first element of the call is the super constructor */
+		if (e.elements.get(0) instanceof InlineCall) {
+			InlineCall call = (InlineCall) e.elements.get(0);
+			
+			if (call.path.build().equals("super")) {
+				
+				if (e.structType.getTypedef().extension == null)
+					throw new CTX_EXC(e.getSource(), Const.CANNOT_INVOKE_SUPER_NO_EXTENSION, e.structType.typeString());
+				
+				/* Search for constructor of extension */
+				for (Function f : e.structType.getTypedef().extension.functions) 
+					if (f.path.build().endsWith("create") && f.modifier == MODIFIER.STATIC) 
+						/* Found static constructor, switch out 'super' with path to constructor */
+						call.path = f.path.clone();
+				
+				/* No super constructor was found */
+				if (call.path.build().equals("super"))
+					throw new CTX_EXC(e.getSource(), Const.CANNOT_INVOKE_SUPER_NO_CONSTRUCTOR, e.structType.getTypedef().extension.self.typeString());
+				else
+					covered = true;
+			}
+			/* Does not call directley to super constructor, but calls the super constructor manually */
+			else if (call.path.path.size() > 1 && (call.path.path.get(call.path.path.size() - 2) + ".create").equals(extension.path.getLast() + ".create")) {
+				covered = true;
+			}
+		}
+		/* Creates new instance of extension manually */
+		else if (extension != null && !(e.elements.get(0) instanceof TempAtom))
+			covered = e.elements.get(0).check(this).isEqual(extension.self);
+		
 		if (e.structType.proviso.isEmpty() && !e.structType.getTypedef().proviso.isEmpty()) {
 			/* Attempt to find auto-provisos */
 			List<TYPE> expected = new ArrayList();
@@ -424,22 +459,19 @@ public class ContextChecker {
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
-		StructTypedef extension = e.structType.getTypedef().extension;
+		/* 
+		 * It it is not a temp atom, check the first element here so in the 
+		 * line after this line getType() can be called safely 
+		 */
+		if (!(e.elements.get(0) instanceof TempAtom))
+			e.elements.get(0).check(this);
 		
-		boolean covered = false;
-		
-		if (extension != null) {
-			covered = e.elements.get(0).check(this).isEqual(extension.self);
-			
-			/* Check that type that is covering is a struct type */
-			if (covered && !(e.elements.get(0).getType() instanceof STRUCT)) 
+		/* Check that type that is covering is a struct type */
+		if (extension != null && covered && !(e.elements.get(0).getType() instanceof STRUCT)) 
 				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
-			
-		}
 		
-		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1 && !covered) {
+		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1 && !covered) 
 			throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, e.structType.getTypedef().getFields().size(), e.elements.size());
-		}
 		
 		/* Absolute placeholder case */
 		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof TempAtom && ((TempAtom) e.elements.get(0)).base == null) {
@@ -447,6 +479,7 @@ public class ContextChecker {
 			a.inheritType = e.structType;
 			a.check(this);
 		}
+		/* Covered parameter case */
 		else if (covered) {
 			e.hasCoveredParam = true;
 			

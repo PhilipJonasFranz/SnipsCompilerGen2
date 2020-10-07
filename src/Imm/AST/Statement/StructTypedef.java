@@ -207,9 +207,13 @@ public class StructTypedef extends SyntaxElement {
 	
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
-		if (rec) 
+		if (rec) {
 			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);
+		
+			for (Function f : this.functions)
+				f.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
