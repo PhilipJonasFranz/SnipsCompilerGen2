@@ -30,6 +30,9 @@ public class StructTypedef extends SyntaxElement {
 	
 	public List<Function> functions;
 	
+	/** List that contains functions from the functions list, that have been inherited */
+	public List<Function> inheritedFunctions = new ArrayList();
+	
 	public StructTypedef extension = null;
 	
 	public List<TYPE> extProviso;
@@ -96,6 +99,8 @@ public class StructTypedef extends SyntaxElement {
 				
 				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
 				this.functions.add(f0);
+				
+				this.inheritedFunctions.add(f0);
 			}
 		}
 		

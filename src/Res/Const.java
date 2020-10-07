@@ -196,6 +196,8 @@ public class Const {
 	
 	public static final String NON_PROVISO_TYPE_IN_HEADER = "Found non proviso type in proviso header: %s";
 	
+	public static final String FUNCTION_MISSING_REQUIRED_PROVISOS = "Function '%s' in struct '%s' is missing provisos: %s";
+	
 	public static final String CANNOT_MAP_TYPE_TO_PROVISO = "Cannot map %s to %s";
 	
 	public static final String MULTIPLE_AUTO_MAPS_FOR_PROVISO = "Multiple auto-maps for proviso '%s': %s, provided by arg %d vs %s, provided by arg %d";

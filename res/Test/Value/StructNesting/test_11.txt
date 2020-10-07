@@ -6,7 +6,7 @@ namespace C {
 	struct B<K:void> {
 		K k;
 		
-		void incr() {
+		void incr<K>() {
 			self->k += 1;
 		}
 	}
