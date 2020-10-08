@@ -12,6 +12,7 @@ public class LabelGen {
 	/** Literal Pool number */
 	private static int p = 0;
 	
+	/** Unique ID number */
 	private static int n = 0;
 	
 	/** Current function prefix */
@@ -29,7 +30,10 @@ public class LabelGen {
 		return "_P" + c++;
 	}
 	
-	public static int getSafeNum() {
+	/**
+	 * Returns a unique number.
+	 */
+	public static int getUID() {
 		return n++;
 	}
 	

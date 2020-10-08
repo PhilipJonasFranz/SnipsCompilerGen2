@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
@@ -21,11 +22,13 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Res.Const;
 
 public class AsNAddressOf extends AsNExpression {
 
@@ -36,8 +39,19 @@ public class AsNAddressOf extends AsNExpression {
 		
 		aof.clearReg(r, st, 0, 1);
 		
-		if (a.expression instanceof IDRef) {
-			IDRef ref = (IDRef) a.expression;
+		if (a.expression instanceof IDRef || a.expression instanceof IDRefWriteback) {
+			IDRef ref = null;
+			
+			if (a.expression instanceof IDRef) {
+				ref = (IDRef) a.expression;
+			}
+			else {
+				/* Cast the writeback operation */
+				aof.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
+				
+				/* Re-wire reference from sub-expression */
+				ref = ((IDRefWriteback) a.expression).idRef;
+			}
 			
 			/* Declaration cannot be loaded in regset since the AST was scanned for addressof-nodes,
 			 * and was pushed on the stack. */
@@ -133,9 +147,12 @@ public class AsNAddressOf extends AsNExpression {
 				aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
 			}
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		
 		/* Convert to words for pointer arithmetic */
 		aof.instructions.add(new ASMLsr(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+		
+		r.free(0);
 		
 		return aof;
 	}

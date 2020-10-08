@@ -18,7 +18,7 @@ OUTPUT
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, #0
-    sub r0, sp, #4                           /* Evaluate Expression */
+    sub r0, sp, #0                           /* Evaluate Expression */
     push { r4 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r4, r0, #2
 /* Force s on the stack */

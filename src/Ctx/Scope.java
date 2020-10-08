@@ -12,6 +12,7 @@ import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 /**
@@ -78,7 +79,7 @@ public class Scope {
 				Declaration dec0 = null;
 				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
 					if (!CompilerDriver.disableWarnings) {
-						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path.build(), dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), Message.Type.WARN, true);
+						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path.build(), dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), LogPoint.Type.WARN, true);
 					}
 				}
 			}

@@ -226,7 +226,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					boolean hasRef = false;
 					for (Statement s : f.body) 
-						hasRef |= func.hasAddressReference(s, d);
+						hasRef |= AsNCompoundStatement.hasAddressReference(s, d);
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));

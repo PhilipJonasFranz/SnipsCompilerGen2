@@ -10,7 +10,7 @@ import Util.XMLParser.XMLNode;
 
 public class Util {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static int toDecimal(int [] num) {
     	int s = 0;
     	int c = num.length;

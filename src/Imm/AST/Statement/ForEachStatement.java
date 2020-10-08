@@ -29,7 +29,8 @@ public class ForEachStatement extends CompoundStatement {
 	
 	public Declaration counter;
 	
-	public IDRef ref;
+	/** Reference to the counter of the for-Each Statement */
+	public IDRef counterRef;
 	
 	public Expression shadowRef;
 	
@@ -50,11 +51,11 @@ public class ForEachStatement extends CompoundStatement {
 		
 		this.range = range;
 		
-		String name = "__it_cnt" + LabelGen.getSafeNum();
+		String name = "__it_cnt" + LabelGen.getUID();
 		
 		/* Initialize internal Counter and reference to it */
 		counter = new Declaration(new NamespacePath(name), new INT("0"), new Atom(new INT("0"), new Token(TokenType.INTLIT, this.shadowRef.getSource(), "0"), this.shadowRef.getSource()), MODIFIER.SHARED, this.shadowRef.getSource());
-		ref = new IDRef(new NamespacePath(name), this.shadowRef.getSource());
+		counterRef = new IDRef(new NamespacePath(name), this.shadowRef.getSource());
 	}
 	
 	

@@ -1,0 +1,51 @@
+SOURCE
+struct X {
+	int [4] arr;
+}
+
+int main() {
+	X x = X::({5, 3, 2, 6});
+	
+	X* x0 = &x;
+	
+	int sum = 0;
+	for (int i : x0->arr) 
+		sum += i;
+		
+	return sum;
+}
+TESTCASES
+16
+OUTPUT
+/* --test_07.txt */
+main:                                        /* Function: main */
+    mov fp, sp
+    mov r0, #6                               /* Evaluate Expression */
+    mov r1, #2
+    mov r2, #3
+    stmfd sp!, {r0-r2}
+    mov r0, #5
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #20                          /* Evaluate Expression */
+    lsr r3, r0, #2
+    mov r4, #0
+    mov r0, #0                               /* Load field location */
+    mov r5, #0
+    mov r6, #0
+main.L1: 
+    cmp r5, #4
+    beq main.L2
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #4
+    lsl r0, r5, #2
+    ldr r6, [r1, r0]
+    add r4, r4, r6
+    add r5, r5, #1
+    b main.L1
+main.L2: 
+    mov r0, r4                               /* Evaluate Expression */
+    mov sp, fp
+    bx lr
+    

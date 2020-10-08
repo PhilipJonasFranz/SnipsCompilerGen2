@@ -1,9 +1,6 @@
 package Par;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import Exc.SNIPS_EXC;
 import Par.Token.TokenType;
@@ -14,7 +11,7 @@ import Util.Logging.ProgressMessage;
 
 public class Scanner {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/**
 	 * Defines the current accumulation state of the scanner.
 	 */
@@ -67,7 +64,7 @@ public class Scanner {
 	}
 
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/**
 	 * All simple scannable tokens, represented in base/reset token format.
 	 */
@@ -89,6 +86,7 @@ public class Scanner {
 			new ScannableToken("~",			TokenType.NOT,			ACC_STATE.NONE,			""),
 			new ScannableToken("#",			TokenType.DIRECTIVE,	ACC_STATE.NONE,			""),
 			new ScannableToken("namespace",	TokenType.NAMESPACE,	ACC_STATE.NAMESPACE_ID,	" "),
+			new ScannableToken("static",	TokenType.STATIC,		ACC_STATE.NONE,			" "),
 			new ScannableToken("shared",	TokenType.SHARED,		ACC_STATE.NONE,			" "),
 			new ScannableToken("restricted",TokenType.RESTRICTED,	ACC_STATE.NONE,			" "),
 			new ScannableToken("exclusive",	TokenType.EXCLUSIVE,	ACC_STATE.NONE,			" "),
@@ -155,7 +153,7 @@ public class Scanner {
 	public ProgressMessage progress;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Scanner(List<LineObject> input, ProgressMessage progress) {
 		this.input = input;
 		this.progress = progress;
@@ -172,7 +170,7 @@ public class Scanner {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public LinkedList<Token> scan() {
 		ScannerFSM sFSM = new ScannerFSM(new LinkedList(), progress);
 		

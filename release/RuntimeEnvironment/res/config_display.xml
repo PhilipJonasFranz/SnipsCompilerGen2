@@ -1,6 +1,6 @@
 <Config>
 	<Devices>
-		<Device>RAM, static, 2048, 1, 1</Device>
+		<Device>RAM, static, 4096, 1, 1</Device>
 		<Device>DISPLAY, dynamic, Devices.Display</Device>
 	</Devices>
 	<CodeSources>

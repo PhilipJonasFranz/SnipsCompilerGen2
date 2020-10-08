@@ -92,6 +92,12 @@ public class MemoryMap {
 		System.out.println("---- MEMORY END ----\n");
 	}
 	
+	/**
+	 * Returns the map in the form of a list of memory cells.
+	 * The order of the memory cells corresponds to the final
+	 * memory layout, where the first memory cell lies at the
+	 * start of the memory section.
+	 */
 	public List<MemoryCell> getMap() {
 		return this.map;
 	}

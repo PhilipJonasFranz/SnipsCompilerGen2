@@ -3,7 +3,7 @@ package Util;
 /** A pair of two different data types. */
 public class Pair<K, V> {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The first component. */
 	public K first;
 	
@@ -11,14 +11,14 @@ public class Pair<K, V> {
 	public V second;
 	
 			
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Pair(K first, V second) {
 		this.first = first;
 		this.second = second;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public K getFirst() {
 		return this.first;
 	}

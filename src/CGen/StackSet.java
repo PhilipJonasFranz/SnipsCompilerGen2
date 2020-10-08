@@ -47,14 +47,17 @@ public class StackSet {
 			this.type = CONTENT_TYPE.DECLARATION;
 		}
 		
+		/** Returns the Content type of this stack cell. */
 		public CONTENT_TYPE getType() {
 			return this.type;
 		}
 		
+		/** Returns the register stored in this stack cell. */
 		public REG getReg() {
 			return this.reg;
 		}
 		
+		/** Returns the declaration stored in this stack cell. */
 		public Declaration getDeclaration() {
 			return this.declaration;
 		}
@@ -101,9 +104,16 @@ public class StackSet {
 		this.stack.pop();
 	}
 	
-	public int popXCells(int x) {
+	/** 
+	 * Pops the x first memory cells from the top of the stack. 
+	 * Returns the sum of the word sizes of the popped cells.
+	 */
+	public int popXCells(int x) throws CGEN_EXC {
 		int bytes = 0;
 		for (int i = 0; i < x; i++) {
+			if (stack.isEmpty())
+				throw new CGEN_EXC(Const.UNABLE_TO_POP_X_WORDS, x, i);
+			
 			StackCell c = this.stack.pop();
 			
 			if (c.type == CONTENT_TYPE.REGISTER) bytes += 4;

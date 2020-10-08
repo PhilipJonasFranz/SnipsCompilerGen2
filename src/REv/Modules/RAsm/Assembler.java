@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import REv.Modules.Tools.Util;
 import Snips.CompilerDriver;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 public class Assembler {
@@ -23,13 +24,13 @@ public class Assembler {
 		boolean silent0 = CompilerDriver.silenced;
 		CompilerDriver.silenced = silent;
 		
-		if (input == null || input.isEmpty())new Message("Input is empty!", Message.Type.WARN);
+		if (input == null || input.isEmpty())new Message("Input is empty!", LogPoint.Type.WARN);
 		
-		new Message("Starting compilation", Message.Type.INFO);
+		new Message("Starting compilation", LogPoint.Type.INFO);
 		
 		List<Instruction> in = new ArrayList();
 		
-		/* ---- Pre-Processor ---- */
+		/* ----< Pre-Processor >---- */
 		int c = 0;
 		for (int i = 0; i < input.size(); i++) {
 			String s = input.get(i).toLowerCase();
@@ -81,7 +82,7 @@ public class Assembler {
 					
 					in.get(i).setInstruction(build);
 				} catch (Exception e) {
-					new Message("Bad comment in line " + in.get(i).getLine() + ": " + in.get(i).getInstruction(), Message.Type.FAIL);
+					new Message("Bad comment in line " + in.get(i).getLine() + ": " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
 				}
 				
 				if (in.get(i).isEmpty()) {
@@ -92,7 +93,7 @@ public class Assembler {
 				}
 			}
 		} catch (Exception e) {
-			new Message("Internal Error while removing comments.", Message.Type.FAIL);
+			new Message("Internal Error while removing comments.", LogPoint.Type.FAIL);
 		}
 		
 		boolean labelText = false, labelData = false;
@@ -108,7 +109,7 @@ public class Assembler {
 				}
 				if (in.get(i).getInstruction().equals(".text")) {
 					if (mode == MODE.TEXT) {
-						new Message("Found lines outside of any section, potentially missing .data label.", Message.Type.WARN);
+						new Message("Found lines outside of any section, potentially missing .data label.", LogPoint.Type.WARN);
 					}
 					mode = MODE.TEXT;
 					labelText = true;
@@ -125,12 +126,12 @@ public class Assembler {
 				if (l == 0)break;
 			}
 		} catch (Exception e) {
-			log.add(new Message("Internal Error while relocating sections.", Message.Type.FAIL));
+			log.add(new Message("Internal Error while relocating sections.", LogPoint.Type.FAIL));
 		}
 		
 		if (!in.isEmpty()) {
-			if (!labelData && !labelText)new Message("No section labels found. Assuming a global .text section.", Message.Type.WARN);
-			if (mode.equals(MODE.DATA))new Message("No .text section found.", Message.Type.WARN);
+			if (!labelData && !labelText)new Message("No section labels found. Assuming a global .text section.", LogPoint.Type.WARN);
+			if (mode.equals(MODE.DATA))new Message("No .text section found.", LogPoint.Type.WARN);
 		}
 		
 		mode = MODE.DATA;
@@ -180,7 +181,7 @@ public class Assembler {
 				}
 				
 				if (in.get(i).getInstruction().contains(".skip")) {
-					if (mode == MODE.TEXT)log.add(new Message("Misplaced statement in line " + in.get(i).getLine() + ": .skip in .text section", Message.Type.FAIL));
+					if (mode == MODE.TEXT)log.add(new Message("Misplaced statement in line " + in.get(i).getLine() + ": .skip in .text section", LogPoint.Type.FAIL));
 					if (!in.get(i).getInstruction().startsWith(".skip")) {
 						// Label: .skip -> .word 0 ...
 						String [] sp = in.get(i).getInstruction().split(":");
@@ -216,7 +217,7 @@ public class Assembler {
 				}
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when replacing push/pop operations and unrolling .skip.", Message.Type.FAIL);
+			new Message("Internal Error when replacing push/pop operations and unrolling .skip.", LogPoint.Type.FAIL);
 		}
 		
 		// First pass, get Locations
@@ -227,8 +228,8 @@ public class Assembler {
 					if (!in.get(i).getInstruction().contains(".word") && !in.get(i).getInstruction().contains(".skip")) {
 						// [label]: -> remove line
 						String label = in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1);
-						if (locations.containsKey(label))new Message("Multiple labels with similar name: " + label, Message.Type.FAIL);
-						if (label.equals(""))new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", Message.Type.FAIL);
+						if (locations.containsKey(label))new Message("Multiple labels with similar name: " + label, LogPoint.Type.FAIL);
+						if (label.equals(""))new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						locations.put(in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1), i * 4);
 						in.remove(i);
 						i--;
@@ -242,7 +243,7 @@ public class Assembler {
 				}
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when retrieving address data.", Message.Type.FAIL);
+			new Message("Internal Error when retrieving address data.", LogPoint.Type.FAIL);
 		}
 		
 		int posData = 0;
@@ -254,7 +255,7 @@ public class Assembler {
 				}
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when retrieving location of .data label.", Message.Type.FAIL);
+			new Message("Internal Error when retrieving location of .data label.", LogPoint.Type.FAIL);
 		}
 		
 		// Relocate locations after removal of .data and .text labels
@@ -264,7 +265,7 @@ public class Assembler {
 				if (labelText)entry.setValue(entry.getValue() - 4);
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when relocating address data.", Message.Type.FAIL);
+			new Message("Internal Error when relocating address data.", LogPoint.Type.FAIL);
 		}
 		
 		// Replace Addresses
@@ -273,13 +274,13 @@ public class Assembler {
 				if (in.get(i).getInstruction().startsWith("bl") || (in.get(i).instruction.startsWith("b") && !in.get(i).getInstruction().startsWith("bx"))) {
 					// bl there -> bl [x], x = address there
 					String [] sp = in.get(i).getInstruction().split(" ");
-					if (!locations.containsKey(sp [1]))log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", Message.Type.FAIL));
+					if (!locations.containsKey(sp [1]))log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL));
 					sp [1] = "" + locations.get(sp [1]);
 					in.get(i).setInstruction(sp [0] + " " + sp [1]);
 				}
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when replacing labels with addresses.", Message.Type.FAIL);
+			new Message("Internal Error when replacing labels with addresses.", LogPoint.Type.FAIL);
 		}
 		
 		List<String> instr = new ArrayList();
@@ -297,21 +298,21 @@ public class Assembler {
 				String app = "";
 				
 				if (sp [0].equals(".data")) {
-					if (i * 4 != posData)new Message("Found multiple .data labels.", Message.Type.FAIL);
-					if (mode == MODE.DATA)new Message("Found multiple .data labels.", Message.Type.FAIL);
+					if (i * 4 != posData)new Message("Found multiple .data labels.", LogPoint.Type.FAIL);
+					if (mode == MODE.DATA)new Message("Found multiple .data labels.", LogPoint.Type.FAIL);
 					mode = MODE.DATA;
 					addLine = false;
 					sectionSwitch = true;
 				}
 				else if (sp [0].equals(".text")) {
-					if (mode == MODE.TEXT && sectionSwitch)new Message("Found multiple .text labels.", Message.Type.FAIL);
+					if (mode == MODE.TEXT && sectionSwitch)new Message("Found multiple .text labels.", LogPoint.Type.FAIL);
 					mode = MODE.TEXT;
 					addLine = false;
 					sectionSwitch = true;
 				}
 				else if (sp [0].startsWith("b")) {
 					if (sp [0].startsWith("bx")) {
-						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected register: bx [Reg] in line " + in.get(i).getLine() + ".", Message.Type.FAIL);
+						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected register: bx [Reg] in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						sp [0] = sp [0].substring(2);
 						
 						String cond = getCond(sp [0]);
@@ -323,7 +324,7 @@ public class Assembler {
 						app += getReg(sp [1]);
 					}
 					else {
-						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected destination: " + sp [0] + " in line " + in.get(i).getLine() + ".", Message.Type.FAIL);
+						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected destination: " + sp [0] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						String link = "0";
 						
 						sp [0] = sp [0].substring(1);
@@ -410,7 +411,7 @@ public class Assembler {
 					}
 					else { // Register Source
 						if (sp.length > 3) {
-							if (sp.length < 5)new Message("Expected shift operation and operand in line " + in.get(i).getLine() + ", got " + sp [3], Message.Type.FAIL);
+							if (sp.length < 5)new Message("Expected shift operation and operand in line " + in.get(i).getLine() + ", got " + sp [3], LogPoint.Type.FAIL);
 							app += getShiftBin(sp [3] + " " + sp [4]); // shamt
 						}
 						else app += "00000000";
@@ -441,7 +442,7 @@ public class Assembler {
 					}
 					else {
 						if (sp.length > 4) {
-							if (sp.length < 6)new Message("Expected shift operation and operand in line " + in.get(i).getLine() + ", got " + sp [4], Message.Type.FAIL);
+							if (sp.length < 6)new Message("Expected shift operation and operand in line " + in.get(i).getLine() + ", got " + sp [4], LogPoint.Type.FAIL);
 							app += getShiftBin(sp [4] + " " + sp [5]); // shamt
 						}
 						else app += "00000000";
@@ -565,7 +566,7 @@ public class Assembler {
 					String indexing = "1";
 					if (!in.get(i).getInstruction().contains("[")) {
 						// Address Label
-						if (sp.length < 3)new Message("Expected Address Label or Operands: " + in.get(i).getInstruction(), Message.Type.FAIL);
+						if (sp.length < 3)new Message("Expected Address Label or Operands: " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
 						String [] labelSplit = sp [2].split("\\+");
 						if (locations.containsKey(labelSplit [0])) {
 							imm = "0";
@@ -575,7 +576,7 @@ public class Assembler {
 							rn = "1111";
 						}
 						else {
-							new Message("Unknown Label: " + sp [2] + " in line " + in.get(i).getLine() + ".", Message.Type.FAIL);
+							new Message("Unknown Label: " + sp [2] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						}
 						upDown = "1";
 					}
@@ -714,7 +715,7 @@ public class Assembler {
 					app += getReg(sp [2]); // Rm
 				}
 				else if (sp [0].startsWith(".word")) {
-					if (sp.length == 1)new Message("Expected identifier or numeric: " + in.get(i).getInstruction(), Message.Type.FAIL);
+					if (sp.length == 1)new Message("Expected identifier or numeric: " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
 					if (mode == MODE.TEXT) {
 						// .word [label] -> label address
 						try {
@@ -722,7 +723,7 @@ public class Assembler {
 							int [] num = Util.toBinary(imm);
 							for (int a : num)app = a + app;
 						} catch (NumberFormatException e) {
-							if (!locations.containsKey(sp [1])) new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], Message.Type.FAIL);
+							if (!locations.containsKey(sp [1])) new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], LogPoint.Type.FAIL);
 							int [] num = Util.toBinary(locations.get(sp [1]));
 							for (int a : num)app = a + app;
 						}
@@ -733,13 +734,13 @@ public class Assembler {
 							int [] num = Util.toBinary((sp.length > 1 && !sp [1].equals(""))? Integer.parseInt(sp [1]) : 0);
 							for (int a : num)app = a + app;
 						} catch (Exception e) {
-							new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], Message.Type.FAIL);
-							new Message("Possible causes: Multiple/misplaced .data labels.", Message.Type.WARN);
+							new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
+							new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
 						}
 					}
 				}
 				else {
-					new Message("Unknown Command in line " + in.get(i).getLine() + ": " + in.get(i).getInstruction(), Message.Type.FAIL);
+					new Message("Unknown Command in line " + in.get(i).getLine() + ": " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
 				}
 			
 				if (addLine) {
@@ -750,7 +751,7 @@ public class Assembler {
 			} catch (Exception e) {
 				System.out.println("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine());
 				e.printStackTrace();
-				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), Message.Type.FAIL));
+				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
 			}
 		}
 		
@@ -763,12 +764,12 @@ public class Assembler {
 				for (int a = 0; a < 32; a++)code [i] [31 - a] = Integer.parseInt(sp [a]);
 			}
 		} catch (Exception e) {
-			new Message("Internal Error when formatting to binary data.", Message.Type.FAIL);
+			new Message("Internal Error when formatting to binary data.", LogPoint.Type.FAIL);
 		}
 		
-		int err = (int) log.stream().filter(x -> x.messageType == Message.Type.FAIL).count();
-		int warn = (int) log.stream().filter(x -> x.messageType == Message.Type.WARN).count();
-		new Message("Compilation finished " + ((err == 0 && warn == 0)? "successfully." : ((err > 0)? "with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? Message.Type.INFO : Message.Type.FAIL);
+		int err = (int) log.stream().filter(x -> x.messageType == LogPoint.Type.FAIL).count();
+		int warn = (int) log.stream().filter(x -> x.messageType == LogPoint.Type.WARN).count();
+		new Message("Compilation finished " + ((err == 0 && warn == 0)? "successfully." : ((err > 0)? "with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL);
 		
 		log.clear();
 		
@@ -792,7 +793,7 @@ public class Assembler {
 			try {
 				shift = getReg(sp [1]);
 			} catch (Exception e) {
-				log.add(new Message("Invalid shift operation: " + s, Message.Type.FAIL));
+				log.add(new Message("Invalid shift operation: " + s, LogPoint.Type.FAIL));
 			}
 			shift += "0";
 			shift += getShift(sp [0]);
@@ -884,7 +885,7 @@ public class Assembler {
 		if (r.equals("lr"))return "1110";
 		if (r.equals("pc"))return "1111";
 		if (r.equals("fp"))return "1011";
-		log.add(new Message("Not a register: " + r, Message.Type.FAIL));
+		log.add(new Message("Not a register: " + r, LogPoint.Type.FAIL));
 		throw new Exception();
 	}
 	

@@ -1,102 +1,33 @@
 package Par;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Function;
-import Imm.AST.Namespace;
-import Imm.AST.Program;
-import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ArrayInit;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.FunctionRef;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.InstanceofExpression;
-import Imm.AST.Expression.RegisterAtom;
-import Imm.AST.Expression.SizeOfExpression;
-import Imm.AST.Expression.SizeOfType;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.StructSelectWriteback;
-import Imm.AST.Expression.StructureInit;
-import Imm.AST.Expression.TempAtom;
-import Imm.AST.Expression.TypeCast;
-import Imm.AST.Expression.Arith.Add;
-import Imm.AST.Expression.Arith.BitAnd;
-import Imm.AST.Expression.Arith.BitNot;
-import Imm.AST.Expression.Arith.BitOr;
-import Imm.AST.Expression.Arith.BitXor;
-import Imm.AST.Expression.Arith.Lsl;
-import Imm.AST.Expression.Arith.Lsr;
-import Imm.AST.Expression.Arith.Mul;
-import Imm.AST.Expression.Arith.Sub;
-import Imm.AST.Expression.Arith.UnaryMinus;
-import Imm.AST.Expression.Boolean.And;
-import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.*;
+import Imm.AST.Expression.*;
+import Imm.AST.Expression.Arith.*;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
-import Imm.AST.Expression.Boolean.Not;
-import Imm.AST.Expression.Boolean.Or;
-import Imm.AST.Expression.Boolean.Ternary;
-import Imm.AST.Lhs.ArraySelectLhsId;
-import Imm.AST.Lhs.LhsId;
-import Imm.AST.Lhs.PointerLhsId;
-import Imm.AST.Lhs.SimpleLhsId;
-import Imm.AST.Lhs.StructSelectLhsId;
+import Imm.AST.Expression.Boolean.*;
+import Imm.AST.Lhs.*;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
-import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AST.Statement.BreakStatement;
-import Imm.AST.Statement.CaseStatement;
-import Imm.AST.Statement.Comment;
-import Imm.AST.Statement.ContinueStatement;
-import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.DefaultStatement;
-import Imm.AST.Statement.DirectASMStatement;
-import Imm.AST.Statement.DoWhileStatement;
-import Imm.AST.Statement.EnumTypedef;
-import Imm.AST.Statement.ForEachStatement;
-import Imm.AST.Statement.ForStatement;
-import Imm.AST.Statement.FunctionCall;
-import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.ReturnStatement;
-import Imm.AST.Statement.SignalStatement;
-import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.StructTypedef;
-import Imm.AST.Statement.SwitchStatement;
-import Imm.AST.Statement.TryStatement;
-import Imm.AST.Statement.WatchStatement;
-import Imm.AST.Statement.WhileStatement;
+import Imm.AST.Statement.*;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.PROVISO;
-import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.BOOL;
-import Imm.TYPE.PRIMITIVES.CHAR;
-import Imm.TYPE.PRIMITIVES.FUNC;
-import Imm.TYPE.PRIMITIVES.INT;
-import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.*;
+import Imm.TYPE.COMPOSIT.*;
+import Imm.TYPE.PRIMITIVES.*;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
-import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
-import Util.Pair;
-import Util.Source;
+import Util.*;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
 
@@ -108,27 +39,33 @@ import Util.Logging.ProgressMessage;
  */
 public class Parser {
 
+	/** List of tokens that were created by the scanner */
 	protected List<Token> tokenStream;
 	
+	/** 
+	 * Current token. The current token is not in the {@link #tokenStream}, 
+	 * but is removed and set to the remove element.
+	 */
 	protected Token current;
 	
-	/* Active Struct Ids */
+	/** Active Struct Ids */
 	List<Pair<NamespacePath, Function>> functions = new ArrayList();
 	
-	/* Active Struct Ids */
+	/** Active Struct Ids */
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
-	/* Active Enum Ids */
+	/** Active Enum Ids */
 	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
-	/* All active Provisos, like T, V */
+	/** All active Provisos, like T, V */
 	List<String> activeProvisos = new ArrayList();
 	
-	/* The currently open namespaces */
+	/** The currently open namespaces */
 	Stack<NamespacePath> namespaces = new Stack();
 	
 	Stack<List<Declaration>> scopes = new Stack();
 	
+	/** Generated warn messages that are flushed at the end */
 	List<Message> buffered = new ArrayList();
 	
 	protected ProgressMessage progress;
@@ -240,7 +177,7 @@ public class Parser {
 	}
 	
 	public Namespace parseNamespace() throws PARSE_EXC {
-		Source source = accept(TokenType.NAMESPACE).getSource();
+		Source source = accept(TokenType.NAMESPACE).source();
 		
 		NamespacePath path = this.parseNamespacePath();
 		
@@ -297,14 +234,14 @@ public class Parser {
 	
 	public Comment parseComment() throws PARSE_EXC {
 		Token comment = accept(TokenType.COMMENT);
-		return new Comment(comment, comment.getSource());
+		return new Comment(comment, comment.source());
 	}
 	
 	public StructTypedef parseStructTypedef() throws PARSE_EXC {
 		
 		MODIFIER mod = this.parseModifier();
 		
-		Source source = accept(TokenType.STRUCT).getSource();
+		Source source = accept(TokenType.STRUCT).source();
 		Token id = accept(TokenType.STRUCTID);
 		
 		List<TYPE> proviso = this.parseProviso();
@@ -384,9 +321,11 @@ public class Parser {
 				/* Insert Struct Name */
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
 				
-				/* Inject Self Reference */
-				Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
-				f.parameters.add(0, self);
+				if (f.modifier != MODIFIER.STATIC) {
+					/* Inject Self Reference */
+					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+					f.parameters.add(0, self);
+				}
 				
 				def.functions.add(f);
 			}
@@ -398,7 +337,7 @@ public class Parser {
 	}
 	
 	public EnumTypedef parseEnumTypedef() throws PARSE_EXC {
-		Source source = accept(TokenType.ENUM).getSource();
+		Source source = accept(TokenType.ENUM).source();
 		Token id = accept(TokenType.ENUMID);
 		
 		NamespacePath path = this.buildPath(id.spelling);
@@ -460,9 +399,9 @@ public class Parser {
 				/* Name is a reserved identifier */
 				(name.equals("resv") || name.equals("init") || name.equals("hsize") || name.equals("free")) 
 				/* Currently not parsing any of the libraries that define these reserved function names */
-				&& !identifier.getSource().sourceFile.equals(name + ".sn")) {
+				&& !identifier.source().sourceFile.equals(name + ".sn")) {
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.USED_RESERVED_NAME, name, identifier.getSource().getSourceMarker());
+			throw new SNIPS_EXC(Const.USED_RESERVED_NAME, name, identifier.source().getSourceMarker());
 		}
 		
 		List<TYPE> proviso = this.parseProviso();
@@ -524,7 +463,7 @@ public class Parser {
 		if (parseValue || acceptSemicolon) 
 			accept(TokenType.SEMICOLON);
 		
-		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, id.getSource());
+		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, id.source());
 		this.scopes.peek().add(d);
 		return d;
 	}
@@ -653,6 +592,23 @@ public class Parser {
 			else if (current.type == TokenType.SIGNAL) {
 				return this.parseSignal();
 			}
+			else if (current.type == TokenType.STRUCTID) {
+				/* Static nested function call */
+				Token sid = accept();
+				accept(TokenType.COLON);
+				accept(TokenType.COLON);
+				
+				FunctionCall call = this.parseFunctionCall();
+				
+				/* 
+				 * Add the sid infront of the last element of the path, function
+				 * will be re-written out of the struct and will become a regular
+				 * function later.
+				 */
+				call.path.path.add(call.path.path.size() - 1, sid.spelling);
+				
+				return call;
+			}
 			else {
 				if (this.progress != null) this.progress.abort();
 				throw new PARSE_EXC(current.source, current.type, 
@@ -665,7 +621,7 @@ public class Parser {
 	}
 	
 	protected DirectASMStatement parseDirectASM() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
 		
 		accept(TokenType.ASM);
 		
@@ -701,12 +657,12 @@ public class Parser {
 		
 		while (!(current.type == TokenType.RBRACE && (this.tokenStream.get(0).type == TokenType.LPAREN || this.tokenStream.get(0).type == TokenType.SEMICOLON))) {
 			if (last == -1) 
-				last = current.getSource().row;
+				last = current.source().row;
 			
 			if (current.type == TokenType.COLON) {
 				if (!c.trim().equals("")) assembly.add(c);
 				c = "";
-				last = current.getSource().row;
+				last = current.source().row;
 				accept(TokenType.COLON);
 			}
 			else {
@@ -757,7 +713,7 @@ public class Parser {
 	}
 	
 	protected FunctionCall parseFunctionCall() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
 		
 		NamespacePath path = this.parseNamespacePath();
 		
@@ -784,7 +740,7 @@ public class Parser {
 	}
 	
 	protected SwitchStatement parseSwitch() throws PARSE_EXC {
-		Source source = accept(TokenType.SWITCH).getSource();
+		Source source = accept(TokenType.SWITCH).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
@@ -809,7 +765,7 @@ public class Parser {
 	}
 	
 	protected CaseStatement parseCase() throws PARSE_EXC {
-		Source source = accept(TokenType.CASE).getSource();
+		Source source = accept(TokenType.CASE).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
@@ -821,7 +777,7 @@ public class Parser {
 	}
 	
 	protected DefaultStatement parseDefault() throws PARSE_EXC {
-		Source source = accept(TokenType.DEFAULT).getSource();
+		Source source = accept(TokenType.DEFAULT).source();
 		accept(TokenType.COLON);
 		
 		List<Statement> body = this.parseCompoundStatement(false);
@@ -830,19 +786,19 @@ public class Parser {
 	}
 	
 	protected BreakStatement parseBreak() throws PARSE_EXC {
-		Source source = accept(TokenType.BREAK).getSource();
+		Source source = accept(TokenType.BREAK).source();
 		accept(TokenType.SEMICOLON);
 		return new BreakStatement(source);
 	}
 	
 	protected ContinueStatement parseContinue() throws PARSE_EXC {
-		Source source = accept(TokenType.CONTINUE).getSource();
+		Source source = accept(TokenType.CONTINUE).source();
 		accept(TokenType.SEMICOLON);
 		return new ContinueStatement(source);
 	}
 	
 	protected IfStatement parseIf() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
 		accept(TokenType.IF);
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
@@ -853,7 +809,7 @@ public class Parser {
 		IfStatement if0 = new IfStatement(condition, body, source);
 		
 		if (current.type == TokenType.ELSE) {
-			Source elseSource = accept().getSource();
+			Source elseSource = accept().source();
 			if (current.type == TokenType.IF) {
 				if0.elseStatement = (IfStatement) this.parseIf();
 			}
@@ -867,7 +823,7 @@ public class Parser {
 	}
 	
 	protected TryStatement parseTry() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
 		accept(TokenType.TRY);
 		
 		List<Statement> body = this.parseCompoundStatement(true);
@@ -883,7 +839,7 @@ public class Parser {
 	protected WatchStatement parseWatch() throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
-		Source source = current.getSource();
+		Source source = current.source();
 		accept(TokenType.WATCH);
 		
 		accept(TokenType.LPAREN);
@@ -900,7 +856,7 @@ public class Parser {
 	}
 	
 	protected SignalStatement parseSignal() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
 		
 		accept(TokenType.SIGNAL);
 		
@@ -914,7 +870,7 @@ public class Parser {
 	protected Statement parseFor() throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
-		Source source = accept(TokenType.FOR).getSource();
+		Source source = accept(TokenType.FOR).source();
 		accept(TokenType.LPAREN);
 		
 		TYPE itType = this.parseType();
@@ -928,7 +884,7 @@ public class Parser {
 		Expression value = this.parseExpression();
 		accept(TokenType.SEMICOLON);
 		
-		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, value, MODIFIER.SHARED, itId.getSource());
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, value, MODIFIER.SHARED, itId.source());
 		this.scopes.peek().add(iterator);
 		
 		Expression condition = this.parseExpression();
@@ -948,7 +904,7 @@ public class Parser {
 	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
-		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.getSource());
+		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.source());
 		this.scopes.peek().add(iterator);
 		
 		accept(TokenType.COLON);
@@ -966,11 +922,11 @@ public class Parser {
 		
 		List<Statement> body = this.parseCompoundStatement(false);
 		
-		return new ForEachStatement(iterator, shadowRef, range, body, itId.getSource());
+		return new ForEachStatement(iterator, shadowRef, range, body, itId.source());
 	}
 	
 	protected WhileStatement parseWhile() throws PARSE_EXC {
-		Source source = accept(TokenType.WHILE).getSource();
+		Source source = accept(TokenType.WHILE).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
 		accept(TokenType.RPAREN);
@@ -979,7 +935,7 @@ public class Parser {
 	}
 	
 	protected DoWhileStatement parseDoWhile() throws PARSE_EXC {
-		Source source = accept(TokenType.DO).getSource();
+		Source source = accept(TokenType.DO).source();
 		
 		List<Statement> body = this.parseCompoundStatement(true);
 		
@@ -1018,7 +974,7 @@ public class Parser {
 			increment &= tokenStream.get(i + 2).type == TokenType.IDENTIFIER || tokenStream.get(i + 2).type == TokenType.NAMESPACE_IDENTIFIER;
 		}
 		
-		Source source = current.getSource();
+		Source source = current.source();
 		
 		if (increment || structSelectCheck) {
 			
@@ -1187,14 +1143,14 @@ public class Parser {
 		}
 		else if (current.type == TokenType.IDENTIFIER) {
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.CHECK_FOR_MISSPELLED_TYPES, current.spelling , current.getSource().getSourceMarker());
+			throw new SNIPS_EXC(Const.CHECK_FOR_MISSPELLED_TYPES, current.spelling , current.source().getSourceMarker());
 		}
 		else return null;
 	}
 	
 	protected SyntaxElement parseLhsIdentifer() throws PARSE_EXC {
 		if (current.type == TokenType.MUL) {
-			Source source = current.getSource();
+			Source source = current.source();
 			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
@@ -1237,20 +1193,29 @@ public class Parser {
 		if (current.type == TokenType.SEMICOLON) {
 			/* Void return */
 			accept();
-			return new ReturnStatement(null, ret.getSource());
+			return new ReturnStatement(null, ret.source());
 		}
 		else {
 			/* Value return */
 			Expression expr = this.parseExpression();
 			accept(TokenType.SEMICOLON);
-			return new ReturnStatement(expr, ret.getSource());
+			return new ReturnStatement(expr, ret.source());
 		}
 	}
 	
+	/**
+	 * Parses an expression. Expressions are inductiveley defined. See the parsing methods below
+	 * for possible parsing patterns.
+	 */
 	protected Expression parseExpression() throws PARSE_EXC {
 			return this.parseStructureInit();
 	}
 	
+	/**
+	 * Parses a structure initialization operation with multiple operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>TYPE::((EXPRESSION(,EXPRESSION)*)?)</code>
+	 */
 	protected Expression parseStructureInit() throws PARSE_EXC {
 		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
@@ -1273,8 +1238,8 @@ public class Parser {
 			}
 		}
 		
-		if (current.type == TokenType.STRUCTID || structInitCheck) {
-			Source source = current.getSource();
+		if ((current.type == TokenType.STRUCTID && this.tokenStream.get(2).type != TokenType.IDENTIFIER) || structInitCheck) {
+			Source source = current.source();
 			
 			TYPE type = this.parseType();
 			
@@ -1290,7 +1255,7 @@ public class Parser {
 			accept(TokenType.LPAREN);
 			
 			List<Expression> elements = new ArrayList();
-			while (current.type != TokenType.RBRACE) {
+			while (current.type != TokenType.RPAREN) {
 				Expression expr = this.parseExpression();
 				elements.add(expr);
 				if (current.type == TokenType.COMMA) {
@@ -1305,11 +1270,16 @@ public class Parser {
 		else return this.parseArrayInit();
 	}
 	
+	/**
+	 * Parses an array initialization operation with multiple operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>{(EXPRESSION(,EXPRESSION)*)?}|[(EXPRESSION(,EXPRESSION)*)?]</code>
+	 */
 	protected Expression parseArrayInit() throws PARSE_EXC {
 		if (current.type == TokenType.LBRACE || current.type == TokenType.LBRACKET) {
 			boolean dontCare = current.type == TokenType.LBRACKET;
 			
-			Source source = accept().getSource();
+			Source source = accept().source();
 			List<Expression> elements = new ArrayList();
 			while (current.type != TokenType.RBRACE) {
 				Expression expr = this.parseExpression();
@@ -1328,9 +1298,16 @@ public class Parser {
 		else return this.parseTernary();
 	}
 	
+	/**
+	 * Parses a ternary operation with a condition and two cases. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION?EXPRESSION:EXPRESSION</code>
+	 */
 	protected Expression parseTernary() throws PARSE_EXC {
-		Source source = current.getSource();
+		Source source = current.source();
+		
 		Expression condition = this.parseOr();
+		
 		if (current.type == TokenType.TERN) {
 			accept();
 			Expression left = this.parseExpression();
@@ -1341,55 +1318,106 @@ public class Parser {
 		else return condition;
 	}
 	
+	/**
+	 * Parses a OR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION||EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive OR operations are stacked on the left side.
+	 */
 	protected Expression parseOr() throws PARSE_EXC {
 		Expression left = this.parseAnd();
+		
 		while (current.type == TokenType.OR) {
 			accept();
 			left = new Or(left, this.parseAnd(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a AND operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION&&EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive AND operations are stacked on the left side.
+	 */
 	protected Expression parseAnd() throws PARSE_EXC {
 		Expression left = this.parseBitOr();
+		
 		while (current.type == TokenType.AND) {
 			accept();
 			left = new And(left, this.parseBitOr(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise OR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION|EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive OR operations are stacked on the left side.
+	 */
 	protected Expression parseBitOr() throws PARSE_EXC {
 		Expression left = this.parseBitXor();
+		
 		while (current.type == TokenType.BITOR) {
 			accept();
 			left = new BitOr(left, this.parseBitXor(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise XOR operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION^EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive XOR operations are stacked on the left side.
+	 */
 	protected Expression parseBitXor() throws PARSE_EXC {
 		Expression left = this.parseBitAnd();
+		
 		while (current.type == TokenType.XOR) {
 			accept();
 			left = new BitXor(left, this.parseBitAnd(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a bitwise AND operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION&EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive AND operations are stacked on the left side.
+	 */
 	protected Expression parseBitAnd() throws PARSE_EXC {
 		Expression left = this.parseCompare();
+		
 		while (current.type == TokenType.ADDROF) {
 			accept();
 			left = new BitAnd(left, this.parseCompare(), current.source);
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a comparison operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(==|!=|>=|>|<=|<)EXPRESSION</code>
+	 */
 	protected Expression parseCompare() throws PARSE_EXC {
 		Expression left = this.parseShift();
+		
 		if (current.type.group == TokenGroup.COMPARE) {
-			Source source = current.getSource();
+			Source source = current.source();
 			if (current.type == TokenType.CMPEQ) {
 				accept();
 				return new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
@@ -1419,8 +1447,16 @@ public class Parser {
 		return left;
 	}
 	
+	/**
+	 * Parses a shft operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(<<|>>)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive shift operations are stacked on the left side.
+	 */
 	protected Expression parseShift() throws PARSE_EXC {
 		Expression left = this.parseAddSub();
+		
 		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
 			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
 			if (current.type == TokenType.CMPLT) {
@@ -1434,33 +1470,51 @@ public class Parser {
 				left = new Lsr(left, this.parseAddSub(), current.source);
 			}
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a addition or subtraction operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(+|-)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive operations are stacked on the left side.
+	 */
 	protected Expression parseAddSub() throws PARSE_EXC {
-		Expression left = this.parseMulDiv();
+		Expression left = this.parseMulDivMod();
+		
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
 				accept();
-				left = new Add(left, this.parseMulDiv(), current.source);
+				left = new Add(left, this.parseMulDivMod(), current.source);
 			}
 			else {
 				accept();
-				left = new Sub(left, this.parseMulDiv(), current.source);
+				left = new Sub(left, this.parseMulDivMod(), current.source);
 			}
 		}
+		
 		return left;
 	}
 		
-	protected Expression parseMulDiv() throws PARSE_EXC {
+	/**
+	 * Parses a multiplication, division or modulo operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(*|/|%)EXPRESSION</code><br>
+	 * <br>
+	 * Multiple successive operations are stacked on the left side.
+	 */
+	protected Expression parseMulDivMod() throws PARSE_EXC {
 		Expression left = this.parseSizeOf();
+		
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
 				accept();
 				left = new Mul(left, this.parseSizeOf(), current.source);
 			}
 			else if (current.type == TokenType.DIV) {
-				Source source = accept().getSource();
+				Source source = accept().source();
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
@@ -1470,7 +1524,7 @@ public class Parser {
 				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
 			}
 			else {
-				Source source = accept().getSource();
+				Source source = accept().source();
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
@@ -1480,13 +1534,20 @@ public class Parser {
 				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
 			}
 		}
+		
 		return left;
 	}
 	
+	/**
+	 * Parses a sizeof operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>sizeof(TYPE|EXPRESSION)</code>
+	 */
 	protected Expression parseSizeOf() throws PARSE_EXC {
-		Expression sof = null;
-		while (current.type == TokenType.SIZEOF) {
-			Source source = accept().getSource();
+		if (current.type == TokenType.SIZEOF) {
+			Expression sof = null;
+			
+			Source source = accept().source();
 			accept(TokenType.LPAREN);
 			
 			/* Convert next token */
@@ -1503,16 +1564,22 @@ public class Parser {
 			else sof = new SizeOfExpression(this.parseExpression(), source);
 			
 			accept(TokenType.RPAREN);
+			
+			return sof;
 		}
-		
-		if (sof == null) sof = this.parseInstanceOf();
-		return sof;
+		else return this.parseInstanceOf();
 	}
 	
+	/**
+	 * Parses a sizeof operation between two operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSIONinstanceofTYPE</code>
+	 */
 	protected Expression parseInstanceOf() throws PARSE_EXC {
 		Expression iof = this.parseAddressOf();
+		
 		if (current.type == TokenType.INSTANCEOF) {
-			Source source = accept().getSource();
+			Source source = accept().source();
 			
 			TYPE type = this.parseType();
 			
@@ -1522,60 +1589,56 @@ public class Parser {
 		return iof;
 	}
 	
+	/**
+	 * Parses a address of operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>&EXPRESSION</code>
+	 */
 	protected Expression parseAddressOf() throws PARSE_EXC {
-		Expression addr = null;
-		while (current.type == TokenType.ADDROF) {
-			Source source = accept().getSource();
+		if (current.type == TokenType.ADDROF) {
+			Source source = accept().source();
 			
 			if (current.type == TokenType.TYPE || current.type == TokenType.STRUCTID || current.type == TokenType.NAMESPACE_IDENTIFIER)
-				addr = new AddressOf(this.parseExpression(), source);
+				return new AddressOf(this.parseExpression(), source);
 			else 
-				addr = new AddressOf(this.parseDeref(), source);
+				return new AddressOf(this.parseDeref(), source);
 		}
-		
-		if (addr == null) addr = this.parseDeref();
-		return addr;
+		else return this.parseDeref();
 	}
 	
+	/**
+	 * Parses a dereference operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>*EXPRESSION</code>
+	 */
 	protected Expression parseDeref() throws PARSE_EXC {
-		Expression addr = null;
-		
 		if (current.type == TokenType.MUL) {
-			Source source = accept().getSource();
-			
-			if (current.type == TokenType.LPAREN) {
-				accept();
-				Expression e = this.parseExpression();
-				accept(TokenType.RPAREN);
-				addr = new Deref(e, source);
-			}
-			else addr = new Deref(this.parseDeref(), source);
+			Source source = accept().source();
+			return new Deref(this.parseDeref(), source);
 		}
-		
-		if (addr == null) addr = this.parseTypeCast();
-		return addr;
+		else return this.parseTypeCast();
 	}
 	
+	/**
+	 * Parses a type cast operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>(TYPE)EXPRESSION</code>
+	 */
 	protected Expression parseTypeCast() throws PARSE_EXC {
-		Expression cast = null;
-		
 		/* Convert next token */
-		if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) {
+		if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 			this.tokenStream.get(0).type = TokenType.PROVISO;
-		}
 		
-		while (this.castCheck()) {
-			Source source = accept().getSource();
+		if (this.castCheck()) {
+			Source source = accept().source();
 			TYPE castType = this.parseType();
 			accept(TokenType.RPAREN);
 			
 			Expression cast0 = this.parseNot();
 			
-			cast = new TypeCast(cast0, castType, source);
+			return new TypeCast(cast0, castType, source);
 		}
-		
-		if (cast == null) cast = this.parseNot();
-		return cast;
+		else return this.parseNot();
 	}
 	
 	public boolean castCheck() {
@@ -1606,59 +1669,73 @@ public class Parser {
 				if (!castCheck) break;
 			}
 		}
+		
 		return castCheck;
 	}
 	
+	/**
+	 * Parses a boolean negation operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>!EXPRESSION</code>
+	 */
 	protected Expression parseNot() throws PARSE_EXC {
-		Expression not = null;
-		while (current.type == TokenType.NEG || current.type == TokenType.NOT) {
+		if (current.type == TokenType.NEG || current.type == TokenType.NOT) {
 			if (current.type == TokenType.NEG) {
 				accept();
-				not = new Not(this.parseNot(), current.source);
+				return new Not(this.parseNot(), current.source);
 			}
 			else {
 				accept(TokenType.NOT);
-				not = new BitNot(this.parseNot(), current.source);
+				return new BitNot(this.parseNot(), current.source);
 			}
 		}
-		
-		if (not == null) not = this.parseUnaryMinus();
-		return not;
+		else return this.parseUnaryMinus();
 	}
 	
+	/**
+	 * Parses an arithmetic negation operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>-EXPRESSION</code>
+	 */
 	protected Expression parseUnaryMinus() throws PARSE_EXC {
-		Expression not = null;
-		while (current.type == TokenType.SUB) {
+		if (current.type == TokenType.SUB) {
 			accept();
-			not = new UnaryMinus(this.parseUnaryMinus(), current.source);
+			return new UnaryMinus(this.parseUnaryMinus(), current.source);
 		}
-		
-		if (not == null) not = this.parseIncrDecr();
-		return not;
+		else return this.parseIncrDecr();
 	}
 	
+	/**
+	 * Parses a increment or decrement operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(++|--)</code>
+	 */
 	protected Expression parseIncrDecr() throws PARSE_EXC {
 		Expression ref = this.parseStructSelect();
 		
-		while (current.type == TokenType.INCR || current.type == TokenType.DECR) {
-			Source source = current.getSource();
+		if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
+			Source source = current.source();
 			if (current.type == TokenType.INCR) {
 				accept();
 				if (ref instanceof IDRef)
-					ref = new IDRefWriteback(WRITEBACK.INCR, ref, source);
-				else ref = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+					return new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else return new StructSelectWriteback(WRITEBACK.INCR, ref, source);
 			}
 			else {
 				accept();
 				if (ref instanceof IDRef)
-					ref = new IDRefWriteback(WRITEBACK.DECR, ref, source);
-				else ref = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+					return new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else return new StructSelectWriteback(WRITEBACK.DECR, ref, source);
 			}
 		}
-		
-		return ref;
+		else return ref;
 	}
 	
+	/**
+	 * Parses a structure select or union access operation for a chain of operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION((.|->)EXPRESSION)+</code>
+	 */
 	protected Expression parseStructSelect() throws PARSE_EXC {
 		Expression ref = this.parseArraySelect();
 		
@@ -1747,6 +1824,11 @@ public class Parser {
 		return ref;
 	}
 	
+	/**
+	 * Parses an array select operation for a chain of operands. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION([EXPRESSION])+</code>
+	 */
 	protected Expression parseArraySelect() throws PARSE_EXC {
 		Expression ref = this.parseAtom();
 		
@@ -1763,6 +1845,13 @@ public class Parser {
 		else return ref;
 	}
 	
+	/**
+	 * Parses an range of different base operations. The parsed patterns are:<br>
+	 * <br>
+	 * 		<code>(EXPRESSION)</code><br>
+	 * <br>
+	 * 		<code>ATOM</code>
+	 */
 	protected Expression parseAtom() throws PARSE_EXC {
 		if (current.type == TokenType.LPAREN) {
 			accept();
@@ -1773,10 +1862,10 @@ public class Parser {
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			return this.wrapPlaceholder(new Atom(new NULL(), id, id.getSource()));
+			return this.wrapPlaceholder(new Atom(new NULL(), id, id.source()));
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
-			Source source = current.getSource();
+			Source source = current.source();
 			
 			NamespacePath path = this.parseNamespacePath();
 			
@@ -1809,17 +1898,7 @@ public class Parser {
 					}
 					accept(TokenType.RPAREN);
 					
-					if (path.getPath().get(0).equals("resv")) {
-						CompilerDriver.heap_referenced = true;
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-					}
-					else if (path.getPath().get(0).equals("init")) {
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
-					}
-					else if (path.getPath().get(0).equals("hsize")) {
-						CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
-					}
+					this.checkAutoInclude(path.getPath().get(0));
 					
 					return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
 				}
@@ -1873,9 +1952,45 @@ public class Parser {
 				}
 			}
 		}
+		else if (current.type == TokenType.STRUCTID && this.tokenStream.get(2).type == TokenType.IDENTIFIER) {
+			Source source = current.source();
+			
+			/* Static nested function call */
+			Token sid = accept();
+			
+			accept(TokenType.COLON);
+			accept(TokenType.COLON);
+			
+			StructTypedef def = this.getStructTypedef(new NamespacePath(sid.spelling), source);
+			
+			NamespacePath path = def.path.clone();
+			
+			path.path.add(accept(TokenType.IDENTIFIER).spelling);
+			
+			/* Convert next token */
+			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
+				this.tokenStream.get(0).type = TokenType.PROVISO;
+			
+			List<TYPE> proviso = this.parseProviso();
+			
+			/* Inline Call */
+			accept(TokenType.LPAREN);
+			
+			List<Expression> parameters = new ArrayList();
+			while (current.type != TokenType.RPAREN) {
+				parameters.add(this.parseExpression());
+				if (current.type != TokenType.COMMA) break;
+				accept(TokenType.COMMA);
+			}
+			accept(TokenType.RPAREN);
+			
+			this.checkAutoInclude(path.getPath().get(0));
+			
+			return this.wrapPlaceholder(new InlineCall(path, proviso, parameters, source));
+		}
 		else if (current.type == TokenType.DIRECTIVE) {
 			/* Direct Reg Targeting */
-			Source source = accept().getSource();
+			Source source = accept().source();
 			Token reg = accept(TokenType.IDENTIFIER);
 			return new RegisterAtom(reg, source);
 		}
@@ -1895,7 +2010,7 @@ public class Parser {
 				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
 			}
 			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
-			return new ArrayInit(charAtoms, false, token.getSource());
+			return new ArrayInit(charAtoms, false, token.source());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
@@ -1909,7 +2024,7 @@ public class Parser {
 			accept();
 			accept();
 			
-			return new TempAtom(null, token.getSource());
+			return new TempAtom(null, token.source());
 		}
 		else {
 			/* 
@@ -1937,10 +2052,43 @@ public class Parser {
 		}
 	}
 	
+	/**
+	 * Check if the given name is either resv, init, free or hsize. If yes, 
+	 * add this library with the prefix 'lib/mem/*' to the referenced libraries
+	 * in the compiler driver, so they are included in the result.
+	 * 
+	 * @param name The name of the function, does not have to match one of the
+	 * 		listed names. Should not be null.
+	 */
+	public void checkAutoInclude(String name) {
+		if (name.equals("resv")) {
+			CompilerDriver.heap_referenced = true;
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+		}
+		else if (name.equals("init")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+		}
+		else if (name.equals("free")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+		}
+		else if (name.equals("hsize")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+		}
+	}
+
+	/**
+	 * Wraps a placeholder operation for a single operand. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>EXPRESSION(...)?</code><br>
+	 * <br>
+	 * Returns the given expression if '...' is not seen.
+	 */
 	public Expression wrapPlaceholder(Expression base) {
-		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
-			Source source = current.getSource();
+		if (this.checkPlaceholder()) {
+			Source source = current.source();
 			
+			/* Accept ... */
 			accept();
 			accept();
 			accept();
@@ -1950,11 +2098,14 @@ public class Parser {
 		else return base;
 	}
 	
+	/**
+	 * Returns true iff:<br>
+	 * 		- The current token is a '.'<br>
+	 * 		- The next token is a '.'<br>
+	 * 		- The token after that is a '.'
+	 */
 	public boolean checkPlaceholder() {
-		if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT) {
-			return true;
-		}
-		else return false;
+		return (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT);
 	}
 	
 	public Function findFunction(NamespacePath path) {
@@ -1987,6 +2138,16 @@ public class Parser {
 	/* Anchor used for expression parsing. */
 	private Token curr0 = null;
 	
+	/**
+	 * Attempts to find a struct typedef based on the given namespace path.
+	 * 
+	 * @param path The path that is equal or similar to the path of the searched typedef.
+	 * @param source The source of the syntax element from where this method was called.
+	 * 
+	 * @return The StructTypedef that matches the give path.
+	 * 
+	 * @throws SNIPS_EXC When multiple matches are found for the given path.
+	 */
 	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
 			if (p.getFirst().build().equals(path.build())) {
@@ -2014,6 +2175,16 @@ public class Parser {
 		}
 	}
 	
+	/**
+	 * Attempts to find a enum typedef based on the given namespace path.
+	 * 
+	 * @param path The path that is equal or similar to the path of the searched typedef.
+	 * @param source The source of the syntax element from where this method was called.
+	 * 
+	 * @return The EnumTypedef that matches the give path.
+	 * 
+	 * @throws SNIPS_EXC When multiple matches are found for the given path.
+	 */
 	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
 			if (p.getFirst().build().equals(path.build())) {
@@ -2041,15 +2212,23 @@ public class Parser {
 		}
 	}
 	
-	public boolean containsStructTypedef(String token) {
+	/**
+	 * Returns true iff a StructTypedef exists in the {@link #structIds} list which path
+	 * ends with the given string.
+	 */
+	public boolean containsStructTypedef(String name) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
-			if (p.getFirst().getLast().equals(token)) {
+			if (p.getFirst().getLast().equals(name)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	/**
+	 * Returns true iff a EnumTypedef exists in the {@link #structIds} list which path
+	 * ends with the given string.
+	 */
 	public boolean containsEnumTypedef(String token) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
 			if (p.getFirst().getLast().equals(token)) {
@@ -2080,27 +2259,27 @@ public class Parser {
 			path = this.parseNamespacePath(token);
 			
 			/* Search with relative path */
-			def = this.getStructTypedef(path, token.getSource());
+			def = this.getStructTypedef(path, token.source());
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
 			if (def == null) {
 				path.path.addAll(0, this.buildPath().path);
-				def = this.getStructTypedef(path, token.getSource());
+				def = this.getStructTypedef(path, token.source());
 			}
 			
 			/* Search with relative path */
-			enu = this.getEnumTypedef(path, token.getSource());
+			enu = this.getEnumTypedef(path, token.source());
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
 			if (enu == null) {
 				path.path.addAll(0, this.buildPath().path);
-				enu = this.getEnumTypedef(path, token.getSource());
+				enu = this.getEnumTypedef(path, token.source());
 			}
 			
 			/* Nothing found, error */
 			if (enu == null && def == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM, path.build(), token.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM, path.build(), token.source().getSourceMarker());
 			}
 		}
 		
@@ -2116,7 +2295,7 @@ public class Parser {
 			type = enu.enumType;
 		}
 		else if (token.type == TokenType.FUNC) {
-			Source source = current.getSource();
+			Source source = current.source();
 			
 			List<TYPE> proviso = new ArrayList();
 			List<TYPE> types = new ArrayList();
@@ -2251,7 +2430,7 @@ public class Parser {
 					TYPE def = this.parseType();
 					
 					if (!(type instanceof PROVISO)) 
-						throw new SNIPS_EXC("Cannot parse a default proviso at this location, " + current.getSource().getSourceMarker() + " (" + CompilerDriver.inputFile.getPath() + ")");
+						throw new SNIPS_EXC("Cannot parse a default proviso at this location, " + current.source().getSourceMarker() + " (" + CompilerDriver.inputFile.getPath() + ")");
 				
 					PROVISO prov = (PROVISO) type;
 					prov.defaultContext = def;
@@ -2323,6 +2502,14 @@ public class Parser {
 		return new NamespacePath(ids, term);
 	}
 	
+	/**
+	 * Parses a collection of statements into a list. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>({STATEMENT*})|STATEMENT</code><br>
+	 * <br>
+	 * @param forceBraces If set to true, braces around the body must exist. If set to false,
+	 * 		only a single statement without braces is parsed.
+	 */
 	protected List<Statement> parseCompoundStatement(boolean forceBraces) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
@@ -2331,8 +2518,10 @@ public class Parser {
 		/* Compound Statement with braces */
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
+			
 			while (current.type != TokenType.RBRACE) 
 				body.add(this.parseStatement());
+			
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
@@ -2342,6 +2531,13 @@ public class Parser {
 		return body;
 	}
 	
+	/**
+	 * Parses a single modifier. The parsed pattern is:<br>
+	 * <br>
+	 * 		<code>MODIFIER?</code><br>
+	 * <br>
+	 * Defaults to SHARED modifier if no modifier exists is not seen.
+	 */
 	protected MODIFIER parseModifier() {
 		MODIFIER mod = MODIFIER.SHARED;
 		
@@ -2353,10 +2549,19 @@ public class Parser {
 		return mod;
 	}
 	
-	protected MODIFIER resolve(Token t) {
-		if (t.type == TokenType.SHARED) return MODIFIER.SHARED;
-		else if (t.type == TokenType.RESTRICTED) return MODIFIER.RESTRICTED;
-		else return MODIFIER.EXCLUSIVE;
+	/**
+	 * Converts given token spelling to the corresponding modifier enum. 
+	 * Defaults to SHARED modifier if the token spelling does not match any modifier.
+	 */
+	protected MODIFIER resolve(Token token) {
+		for (MODIFIER mod : MODIFIER.values())
+			if (token.spelling.toUpperCase().equals(mod.toString()))
+				return mod;
+		
+		/* Add a warning to signal the defaulting to SHARED modifier */
+		buffered.add(new Message(String.format(Const.UNKNOWN_MODIFIER, token.spelling), LogPoint.Type.WARN, true));
+		
+		return MODIFIER.SHARED;
 	}
 	
 } 

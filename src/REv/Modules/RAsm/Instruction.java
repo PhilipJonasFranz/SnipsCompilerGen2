@@ -1,21 +1,27 @@
 package REv.Modules.RAsm;
 
+/**
+ * A simple class that stores an assembly instruction and the 
+ * line where the instructions is located.
+ */
 public class Instruction {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	String instruction;
 	
 	int line;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Instruction(String instruction, int line) {
 		this.instruction = instruction.trim();
+		
+		/* Instruction at line 0 in file is displayed at line index 1 */
 		this.line = line + 1;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void setInstruction(String newInstr) {
 		this.instruction = newInstr.trim();
 	}

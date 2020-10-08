@@ -1,0 +1,96 @@
+SOURCE
+struct X {
+	int x;
+	int y;
+	
+	static X create(int x, int y) {
+		return X::(x, y);
+	}
+}
+
+struct Y : X {
+	bool k;
+	
+	static Y create(int x, int y, bool k) {
+		return Y::(X::create(x, y), k);
+	}
+}
+
+int main() {
+	Y y = Y::create(15, 10, true);
+	return y.x + y.y + (int) y.k;
+}
+TESTCASES
+26
+OUTPUT
+/* --test_05.txt */
+    b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+X.create:                                    /* Function: X.create */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, fp}
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    push { r4 }
+    push { r3 }
+    mov r0, #1
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r3, r4, fp}
+    mov r0, #12
+    add r1, r2, #12
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+    
+Y.create:                                    /* Function: Y.create */
+    sub sp, sp, #12
+    stmea sp, {r5, fp, lr}
+    mov fp, sp
+    mov r5, r2
+    push { r5 }
+    bl X.create                              /* Call X.create */
+    add sp, sp, #4
+    mov r0, #2
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r5, fp, lr}
+    mov r0, #16
+    add r1, r2, #16
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #1                               /* Evaluate Expression */
+    push { r0 }
+    mov r0, #10
+    push { r0 }
+    mov r0, #15
+    ldmfd sp!, {r1, r2}
+    bl Y.create                              /* Call Y.create */
+    ldr r0, [fp, #-12]                       /* Load field from struct */
+    ldr r2, [fp, #-8]                        /* Load field from struct */
+    add r0, r0, r2
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

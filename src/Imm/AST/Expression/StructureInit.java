@@ -16,6 +16,8 @@ public class StructureInit extends Expression {
 	
 	public List<Expression> elements;
 	
+	public boolean hasCoveredParam = false;
+	
 	public boolean isTopLevelExpression = true;
 	
 	

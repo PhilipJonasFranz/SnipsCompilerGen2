@@ -3,13 +3,9 @@ package Ctx;
 import java.util.List;
 
 import Exc.SNIPS_EXC;
-import Imm.TYPE.PROVISO;
-import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.FUNC;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.*;
+import Imm.TYPE.COMPOSIT.*;
+import Imm.TYPE.PRIMITIVES.*;
 import Res.Const;
 
 /**
@@ -17,6 +13,9 @@ import Res.Const;
  * 
  * None of these methods will get rid of proviso types, but will only assign
  * contexts to them. Ergo these methods are not destructive.
+ * 
+ * To get the proviso free version of a type with context, the 
+ * {@link #provisoFree()} method can be used.
  */
 public class ProvisoUtil {
 	
@@ -86,7 +85,6 @@ public class ProvisoUtil {
 		 * does not indicate anything wrong. Just return false, so the callee knows
 		 * that this type was not matched.
 		 */
-		//System.out.println("Cannot map " + source.typeString() + " -> " + target.typeString() + " (" + CompilerDriver.inputFile.getPath() + ")");
 		return false;
 	}
 

@@ -1,0 +1,83 @@
+SOURCE
+void incr(int* p) {
+	*p = *p * 3;
+}
+
+int smallest(int* arr, int count) {
+	int smallest = 99;
+	for (int i : arr, count) {
+		incr(&i);
+		if (i < smallest) smallest = i;
+	}
+
+	return smallest;
+}
+
+int main() {
+	int [5] arr = {5, 3, 7, 2, 4};
+	return smallest(&arr, 5);
+}
+TESTCASES
+6
+OUTPUT
+/* --test_06.txt */
+    b main
+incr:                                        /* Function: incr */
+    push { r3 }
+    mov r3, r0
+    ldr r1, [r10, r0, lsl #2]                /* Load from address */
+    mov r2, #3
+    mul r0, r1, r2
+    str r0, [r10, r3, lsl #2]
+    pop { r3 }
+    bx lr
+    
+smallest:                                    /* Function: smallest */
+    sub sp, sp, #28
+    stmea sp, {r3-r7, fp, lr}
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, #99
+    mov r6, #0
+    mov r7, #0
+    push { r7 }
+smallest.L1: 
+    cmp r4, r6
+    beq smallest.L2
+    add r0, r3, r6
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    str r0, [fp, #-4]
+    sub r0, fp, #4                           /* Load parameters */
+    lsr r0, r0, #2
+    bl incr                                  /* Call incr */
+    ldr r0, [fp, #-4]
+    cmp r0, r5
+    bge smallest.L3
+    ldr r5, [fp, #-4]                        /* Evaluate Expression */
+smallest.L3: 
+    add r6, r6, #1
+    b smallest.L1
+smallest.L2: 
+    add sp, sp, #4                           /* Reset stack, remove iterator and counter */
+    mov r0, r5                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3-r7, fp, pc}
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #4                               /* Evaluate Expression */
+    mov r1, #2
+    mov r2, #7
+    stmfd sp!, {r0-r2}
+    mov r0, #3
+    mov r1, #5
+    stmfd sp!, {r0, r1}
+    mov r1, #5
+    sub r0, fp, #20
+    lsr r0, r0, #2
+    bl smallest                              /* Call smallest */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

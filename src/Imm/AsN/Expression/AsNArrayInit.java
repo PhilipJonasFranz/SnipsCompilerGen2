@@ -15,7 +15,7 @@ public class AsNArrayInit extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		AsNStructureInit.structureInit(init, s.elements, null, true, r, map, st);
+		AsNStructureInit.structureInit(init, s.elements, null, true, false, r, map, st);
 		
 		return init;
 	}

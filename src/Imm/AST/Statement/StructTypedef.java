@@ -30,6 +30,9 @@ public class StructTypedef extends SyntaxElement {
 	
 	public List<Function> functions;
 	
+	/** List that contains functions from the functions list, that have been inherited */
+	public List<Function> inheritedFunctions = new ArrayList();
+	
 	public StructTypedef extension = null;
 	
 	public List<TYPE> extProviso;
@@ -79,11 +82,29 @@ public class StructTypedef extends SyntaxElement {
 		this.extProviso = extProviso;
 		
 		/* Add this typedef to extenders of extension */
-		if (this.extension != null) 
+		if (this.extension != null) {
 			this.extension.extenders.add(this);
+			
+			/* 
+			 * For every function in the extension, copy the function, 
+			 * adjust the path and add to own functions 
+			 */
+			for (Function f : this.extension.functions) {
+				/* Ignore static functions */
+				if (f.modifier == MODIFIER.STATIC) 
+					continue;
+				
+				NamespacePath base = this.path.clone();
+				base.path.add(f.path.getLast());
+				
+				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
+				this.functions.add(f0);
+				
+				this.inheritedFunctions.add(f0);
+			}
+		}
 		
 		this.modifier = modifier;
-		
 		this.self = new STRUCT(this, this.proviso);
 	}
 	
@@ -194,6 +215,9 @@ public class StructTypedef extends SyntaxElement {
 		if (rec) {
 			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);
+		
+			for (Function f : this.functions)
+				f.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -202,7 +226,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		
+		return;
 	}
 
 } 

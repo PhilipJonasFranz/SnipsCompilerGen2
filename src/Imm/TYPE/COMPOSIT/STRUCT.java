@@ -51,20 +51,21 @@ public class STRUCT extends COMPOSIT {
 	
 	/**
 	 * Check if the types are equal if struct extending is taken into consideration.
+	 * The passed types acts in this case as the child of this type.
 	 */
 	public boolean isEqualExtended(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
 			
-			StructTypedef sDef = struct.typedef;
-			while (!sDef.equals(this.typedef)) {
+			StructTypedef sDef = this.typedef;
+			while (!sDef.equals(struct.typedef)) {
 				if (sDef.extension == null) 
 					return false;
 				else sDef = sDef.extension;
 			}
 			
-			if (sDef.getFields().size() == this.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
+			if (sDef.getFields().size() == struct.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
 				boolean isEqual = true;
 				
 				/* Compare Provisos, rest of subtree must be equal */

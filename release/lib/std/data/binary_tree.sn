@@ -5,6 +5,7 @@
  * search tree.
  */
 namespace Tree {
+	
 	/*
 	 * A tree node that has a left and right child and holds a value.
 	 */
@@ -19,7 +20,11 @@ namespace Tree {
 		/*
 		 * Inserts given value into the tree. The given predicate is used to place
 		 * the given value at the correct position. The predicate should sort the values
-		 * in a total order. Returns the resulting root node. 
+		 * in a total order. This means that the predicate (x, y) -> int returns:
+		 *		1	if x > y,
+		 *		-1	if x < y,
+		 * 		0 	if x = y.
+		 * Returns the resulting root node.
 		 */
 		shared TreeNode<T>* insert<T>(func (T, T) -> int pred, T value) {
 			/* Initialize new node with null pointers and given value */
@@ -58,6 +63,13 @@ namespace Tree {
 			}
 		}
 		
+		/*
+		 * Checks if given value is contained in the tree. The predicate should sort the values
+		 * in a total order. This means that the predicate (x, y) -> int returns:
+		 *		1	if x > y,
+		 *		-1	if x < y,
+		 * 		0 	if x = y.
+		 */
 		shared bool contains<T>(func (T, T) -> int pred, T value) {
 			if (self == null) return false;
 			else {
@@ -72,47 +84,42 @@ namespace Tree {
 		}
 		
 		/*
-		 * Delete given value from the given tree. The given predicate determines 
-		 * wheter the current value matches the searched value (predicate returns 0).
+		 * Delete given value from the given tree. The predicate should sort the values
+		 * in a total order. This means that the predicate (x, y) -> int returns:
+		 *		1	if x > y,
+		 *		-1	if x < y,
+		 * 		0 	if x = y.
 		 * Returns the new root. May be null when the resulting tree is empty.
 		 */
 		shared TreeNode<T>* delete<T>(func (T, T) -> int pred, T value) {
 			/* Found leaf */
 			if (self == null) return null;
+				
+			int cmp = pred(value, self->value);
+				
+			if (cmp == -1)
+				self->left = (self->left)->delete<T>(pred, value);
+			else if (cmp == 1)
+				self->right = (self->right)->delete<T>(pred, value);
 			else {
-				/* Found value to delete */
-				if (pred(self->value, value) == 0) {
-					if (self->left == null && self->right == null) 
-						return null;
-					else if (self->left != null && self->right == null) {
-						return self->left;
-					}
-					else if (self->left == null && self->right != null) {
-						return self->right;
-					}
-					else {
-						T min = self->value;
-						
-						TreeNode<T>* n = self;
-						while (n->left != null) {
-							min = n->left->value;
-							n = n->left;
-						}
-						
-						self->value = min;
-						self->right = (self->right)->delete<T>(pred, value);
-					}
+				if (self->left == null) {
+					return self->right;
+				}
+				else if (self->right == null) {
+					return self->left;
 				}
 				else {
-					/* Value to delete is further down in subtree */
-					if (pred(self->value, value) == 1) 
-						self->left = (self->left)->delete<T>(pred, value);
-					else 
-						self->right = (self->right)->delete<T>(pred, value);
-						
-					return self;
+					TreeNode<T>* n = self->right;
+					while (n->left != null)
+						n = n->left;
+
+					self->value = n->value;
+					
+					self->right = (self->right)->delete<T>(pred, n->value);
 				}
 			}
+			
+			return self;
 		}
 		
 	}

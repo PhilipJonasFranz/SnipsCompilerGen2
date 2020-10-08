@@ -46,8 +46,8 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
-import Util.Logging.Message.Type;
 
 /**
  * This optimizer can simplify a sequence of asm instructions. By doing so
@@ -894,7 +894,7 @@ public class ASMOptimizer {
 								
 								body.instructions.remove(mov);
 								
-								if (push != null) this.patchFramePointerAddressing(patch, 4);
+								this.patchFramePointerAddressing(patch, 4);
 								
 								this.patchFPtoSP(patch);
 								
@@ -1026,6 +1026,7 @@ public class ASMOptimizer {
 							((ImmOp) binary.op1).value -= sub;
 						}
 					}
+					else ((ImmOp) binary.op1).value -= sub;
 				}
 			}
 			else if (ins instanceof ASMMemOp) {
@@ -2392,7 +2393,7 @@ public class ASMOptimizer {
 						}
 						else {
 							clear = false;
-							new Message("ASMOPT -> ConstOp propagation : Not available " + body.instructions.get(a).getClass().getName(), Type.WARN);
+							new Message("ASMOPT -> ConstOp propagation : Not available " + body.instructions.get(a).getClass().getName(), LogPoint.Type.WARN);
 						}
 						
 					}

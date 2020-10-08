@@ -23,7 +23,7 @@ public abstract class AsNNode {
 			/* --- NESTED --- */
 	public enum MODIFIER {
 		
-		SHARED, RESTRICTED, EXCLUSIVE;
+		STATIC, SHARED, RESTRICTED, EXCLUSIVE;
 		
 	}
 	

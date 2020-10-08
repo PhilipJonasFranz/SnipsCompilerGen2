@@ -8,6 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -33,11 +34,27 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
 		f.continueJump = continueJump;
 		
-		/* Open new scope for iterator */
+		/* Open new seperate scope for iterator, since iterator is persistent between iterations. */
 		st.openScope(a);
 		
 		/* Initialize iterator */
 		f.instructions.addAll(AsNDeclaration.cast(a.iterator, r, map, st).getInstructions());
+		
+		if (r.declarationLoaded(a.iterator)) {
+			/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
+			boolean push = false;
+			for (Statement s : a.body)
+				push |= AsNCompoundStatement.hasAddressReference(s, a.iterator);
+			
+			if (push) {
+				int reg = r.declarationRegLocation(a.iterator);
+				
+				f.instructions.add(new ASMPushStack(new RegOp(reg)));
+				
+				st.push(a.iterator);
+				r.free(reg);
+			}
+		}
 		
 		/* Open scope for condition, body and increment statement */
 		st.openScope(a);
