@@ -289,6 +289,11 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
+		
+		/* Make sure at least one field is in the struct */
+		if (e.getFields().isEmpty())
+			throw new CTX_EXC(e.getSource(), Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
+		
 		for (Function f : e.functions) {
 			if (f.modifier != MODIFIER.STATIC) {
 				/* Add to a pool of nested functions */
@@ -444,12 +449,18 @@ public class ContextChecker {
 		
 		boolean covered = false;
 		
+		/* Make sure the correct number of provisos are supplied. If the provided provisos are empty, an auto mapping still can be created. */
+		if (e.structType.proviso.size() != e.structType.getTypedef().proviso.size() && !e.structType.proviso.isEmpty())
+			throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, e.structType.getTypedef().proviso.size(), e.structType.proviso.size());
+		
 		/* Check if the first element of the call is the super constructor */
 		if (e.elements.get(0) instanceof InlineCall) {
 			InlineCall call = (InlineCall) e.elements.get(0);
 			
+			/* Calls to super constructor */
 			if (call.path.build().equals("super")) {
 				
+				/* Calls to super, but no extension */
 				if (e.structType.getTypedef().extension == null)
 					throw new CTX_EXC(e.getSource(), Const.CANNOT_INVOKE_SUPER_NO_EXTENSION, e.structType.typeString());
 				
@@ -474,6 +485,7 @@ public class ContextChecker {
 		else if (extension != null && !(e.elements.get(0) instanceof TempAtom))
 			covered = e.elements.get(0).check(this).isEqual(extension.self);
 		
+		/* No provisos were supplied, but provisos are expected. Attempt to auto map. */
 		if (e.structType.proviso.isEmpty() && !e.structType.getTypedef().proviso.isEmpty()) {
 			/* Attempt to find auto-provisos */
 			List<TYPE> expected = new ArrayList();
@@ -487,6 +499,7 @@ public class ContextChecker {
 			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource());
 		}
 		
+		/* Map the current function provisos to the resulting struct type */
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(e.getType(), this.currentFunction.peek().provisosTypes);
 		
@@ -501,9 +514,6 @@ public class ContextChecker {
 		if (extension != null && covered && !(e.elements.get(0).getType() instanceof STRUCT)) 
 				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
 		
-		if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1 && !covered) 
-			throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, e.structType.getTypedef().getFields().size(), e.elements.size());
-		
 		/* Absolute placeholder case */
 		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof TempAtom && ((TempAtom) e.elements.get(0)).base == null) {
 			TempAtom a = (TempAtom) e.elements.get(0);
@@ -513,6 +523,12 @@ public class ContextChecker {
 		/* Covered parameter case */
 		else if (covered) {
 			e.hasCoveredParam = true;
+			
+			int expected = e.structType.getTypedef().getFields().size() - extension.getFields().size() + 1;
+			
+			/* Make sure the correct number or parameters is supplied */
+			if (e.elements.size() != expected)
+				throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, expected, e.elements.size());
 			
 			for (int i = 1; i < e.elements.size(); i++) {
 				TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i + extension.getFields().size() - 1).path).getType();
@@ -539,6 +555,10 @@ public class ContextChecker {
 			}
 		}
 		else {
+			/* Make sure the correct number or parameters is supplied, at this point we can strictly compare */
+			if (e.elements.size() != e.structType.getTypedef().getFields().size() && e.elements.size() > 1) 
+				throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, e.structType.getTypedef().getFields().size(), e.elements.size());
+			
 			/* Make sure that all field types are equal to the expected types */
 			for (int i = 0; i < e.elements.size(); i++) {
 				

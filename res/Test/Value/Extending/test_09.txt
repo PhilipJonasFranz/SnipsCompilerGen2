@@ -1,0 +1,111 @@
+SOURCE
+struct X<T, Z> {
+	int x;
+	T y;
+	Z z;
+	
+	static X<T, Z> create<T, Z>(int x, T y, Z z) {
+		return X<T, Z>::(x, y, z);
+	}
+}
+
+struct Y<W, V> : X<W, V> {
+	char k;
+	
+	static Y<W, V> create<W, V>(int x, W y, V z, char k) {
+		return Y<W, V>::(super<W, V>(x, y, z), k);
+	}
+}
+
+int main() {
+	Y<bool, char> y = Y::create<bool, char>(15, true, 'B', 'A');
+	return y.x + (int) y.y + (int) y.z + (int) y.k;
+}
+TESTCASES
+147
+OUTPUT
+/* --test_09.txt */
+    b main
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+    
+X.create_P1:                                 /* Function: X.create, Provisos: BOOL, CHAR */
+    sub sp, sp, #16
+    stmea sp, {r3-r5, fp}
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    push { r5 }
+    push { r4 }
+    push { r3 }
+    mov r0, #1
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r3-r5, fp}
+    mov r0, #16
+    add r1, r2, #16
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+    
+Y.create_P0:                                 /* Function: Y.create, Provisos: BOOL, CHAR */
+    sub sp, sp, #20
+    stmea sp, {r3-r5, fp, lr}
+    mov fp, sp
+    mov r3, r0
+    mov r4, r1
+    mov r5, r2
+    ldr r0, [fp, #20]                        /* Evaluate Expression */
+    push { r0 }
+    push { r5 }
+    push { r4 }
+    mov r0, r3
+    ldmfd sp!, {r1, r2}
+    bl X.create_P1                           /* Call X.create */
+    add sp, sp, #4
+    mov r0, #2
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r3-r5, fp, lr}
+    add sp, sp, #4
+    mov r0, #20
+    add r1, r2, #20
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #65                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #66
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    mov r0, #15
+    ldmfd sp!, {r1, r2}
+    bl Y.create_P0                           /* Call Y.create */
+    ldr r0, [fp, #-16]                       /* Load field from struct */
+    ldr r2, [fp, #-12]                       /* Load field from struct */
+    add r0, r0, r2
+    ldr r2, [fp, #-8]                        /* Load field from struct */
+    add r0, r0, r2
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    
