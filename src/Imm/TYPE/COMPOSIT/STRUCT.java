@@ -122,6 +122,15 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
+	/**
+	 * Returns the amount of bytes the field that corresponds to the given namespace
+	 * path is offsetted from the start of the structure. For example, the first field
+	 * would be offsetted 0 bytes or 4, if SIDs are enabled. If this field is 8 bytes large,
+	 * the second field is offsetted 8 bytes or 12 bytes, respectiveley. Returns -1 if no field
+	 * matches the given namespace path.
+	 * @param path The namespace path that should match the field.
+	 * @return The amount of bytes the field is offsetted or -1.
+	 */
 	public int getFieldByteOffset(NamespacePath path) {
 		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
 		
@@ -137,11 +146,11 @@ public class STRUCT extends COMPOSIT {
 		return -1;
 	}
 	
+	/**
+	 * Check if in this struct a field exists that matches the given namespace path perfectly.
+	 */
 	public boolean hasField(NamespacePath path) {
-		for (Declaration dec : this.typedef.getFields()) 
-			if (dec.path.build().equals(path.build())) return true;
-		
-		return false;
+		return this.getTypedef().getFields().stream().filter(x -> x.path.build().equals(path.build())).count() > 1;
 	}
 	
 	public String typeString() {
@@ -210,9 +219,9 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public TYPE remapProvisoName(String name, TYPE newType) {
-		for (int i = 0; i < this.proviso.size(); i++) { 
+		for (int i = 0; i < this.proviso.size(); i++) 
 			this.proviso.set(i, this.proviso.get(i).remapProvisoName(name, newType));
-		}
+		
 		return this;
 	}
 

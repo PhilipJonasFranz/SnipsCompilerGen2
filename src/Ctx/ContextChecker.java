@@ -1966,7 +1966,7 @@ public class ContextChecker {
 	
 	/**
 	 * Checks for a modifier violation. This is done by constructing the path of the current function and
-	 * comparing it to the given path. If the modifier is SHARED, no checks are required. If it is 
+	 * comparing it to the given path. If the modifier is SHARED or STATIC, no checks are required. If it is 
 	 * RESTRICTED, check if the path of the current function is contained in the subtree of the given namespace
 	 * path. If it is EXCLUSIVE, check for strict equality.
 	 * 
@@ -1978,7 +1978,7 @@ public class ContextChecker {
 	public void checkModifier(MODIFIER mod, NamespacePath path, Source source) throws CTX_EXC {
 		String currentPath = (this.currentFunction.isEmpty())? "" : this.currentFunction.peek().path.buildPathOnly();
 		
-		if (mod == MODIFIER.SHARED) return;
+		if (mod == MODIFIER.SHARED || mod == MODIFIER.STATIC) return;
 		else if (mod == MODIFIER.RESTRICTED) {
 			if (!currentPath.startsWith(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
@@ -2029,6 +2029,7 @@ public class ContextChecker {
 	public boolean signalStackContains(TYPE newSignal) {
 		for (TYPE t : this.signalStack.peek()) 
 			if (t.isEqual(newSignal)) return true;
+		
 		return false;
 	}
 	
@@ -2078,7 +2079,7 @@ public class ContextChecker {
 			/* Found one match, return this match */
 			return funcs.get(0);
 		else {
-			/* Multiple results, cannot determine correct one, return null */
+			/* Multiple results, cannot determine correct one, throw an exception */
 			String s = "";
 			
 			/* Check for match with prefix */
