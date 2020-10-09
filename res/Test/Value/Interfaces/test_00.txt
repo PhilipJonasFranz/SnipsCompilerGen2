@@ -1,0 +1,25 @@
+SOURCE
+interface Inter {
+
+	int get();
+
+}
+
+struct X : Inter {
+
+	int val;
+	
+	int get() {
+		return self->val;
+	}
+
+}
+
+int main() {
+	X x = X::(25);
+	Inter i = &x;
+	Inter* i0 = &i;
+	return i0->get();
+}
+TESTCASES
+25
