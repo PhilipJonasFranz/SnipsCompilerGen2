@@ -35,6 +35,9 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<InterfaceTypedef> implemented;
+	
+	/** Proviso types provided by the typedef to the extension */
 	public List<TYPE> extProviso;
 	
 	/* Contains all struct typedefs that extended from this struct */
@@ -70,7 +73,7 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<TYPE> extProviso, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<InterfaceTypedef> implemented, List<TYPE> extProviso, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -80,6 +83,8 @@ public class StructTypedef extends SyntaxElement {
 		
 		this.extension = extension;
 		this.extProviso = extProviso;
+		
+		this.implemented = implemented;
 		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
@@ -211,7 +216,28 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
+		String s = this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">";
+		
+		if (this.extension != null)
+			s += ":extends:" + this.extension.path.build() + ",";
+		
+		if (!this.implemented.isEmpty()) {
+			if (this.extension != null)
+				s += ",";
+			else 
+				s += ":";
+			
+			s += "implements:";
+		}
+		
+		for (InterfaceTypedef def : this.implemented)
+			s += def.path.build() + ",";
+		
+		if (this.extension != null || !this.implemented.isEmpty())
+			s = s.substring(0, s.length() - 1);
+		
+		System.out.println(s);
+		
 		if (rec) {
 			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);

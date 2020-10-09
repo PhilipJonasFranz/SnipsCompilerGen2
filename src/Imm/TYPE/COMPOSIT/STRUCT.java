@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -30,6 +31,14 @@ public class STRUCT extends COMPOSIT {
 	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
+		if (type instanceof INTERFACE) {
+			INTERFACE i = (INTERFACE) type;
+			for (InterfaceTypedef def : this.typedef.implemented)
+				if (i.getTypedef().equals(def))
+					return true;
+			
+			return false;
+		}
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
 			
