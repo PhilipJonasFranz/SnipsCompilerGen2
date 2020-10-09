@@ -198,6 +198,8 @@ public class Const {
 	
 	public static final String NON_PROVISO_TYPE_IN_HEADER = "Found non proviso type in proviso header: %s";
 	
+	public static final String IMPLEMENTED_FUNCTION_MISSING = "Implemented function '%s' from interface '%s' is missing";
+	
 	public static final String FUNCTION_MISSING_REQUIRED_PROVISOS = "Function '%s' in struct '%s' is missing provisos: %s";
 	
 	public static final String CANNOT_MAP_TYPE_TO_PROVISO = "Cannot map %s to %s";

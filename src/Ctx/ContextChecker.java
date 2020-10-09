@@ -349,6 +349,36 @@ public class ContextChecker {
 			}
 		}
 		
+		/* Make sure implemented interface requirements are satisfied */
+		for (InterfaceTypedef inter : e.implemented) {
+			for (Function f : inter.functions) {
+				boolean found = false;
+				for (int i = 0; i < e.functions.size(); i++) {
+					Function structFunction = e.functions.get(i);
+					
+					if (structFunction.path.getLast().equals(f.path.getLast())) {
+						boolean match = true;
+						
+						match &= structFunction.getReturnTypeDirect().isEqual(f.getReturnTypeDirect());
+						
+						if (structFunction.parameters.size() == f.parameters.size()) {
+							for (int a = 0; a < f.parameters.size(); a++) 
+								match &= f.parameters.get(i).getRawType().isEqual(structFunction.parameters.get(i).getRawType());
+						}
+						else match = false;
+						
+						if (match) {
+							found = true;
+							break;
+						}
+					}
+				}
+				
+				if (!found) 
+					throw new CTX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.path.build());
+			}
+		}
+		
 		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
 		
 		if (opt.isPresent())
