@@ -2050,49 +2050,47 @@ public class ContextChecker {
 			if (f0.path.build().equals(path.build())) 
 				return f0;
 		
-		if (path.path.size() == 1) {
-			List<Function> funcs = new ArrayList();
-			
-			/* Search through the registered function declarations, but only match the end of the namespace path */
-			for (Function f0 : this.functions) 
-				if (f0.path.getLast().equals(path.getLast())) 
-					funcs.add(f0);
-			
-			/* Search through predicate declarations */
-			for (Declaration d : this.currentFunction.peek().parameters) {
-				if (d.getType() instanceof FUNC) {
-					FUNC f0 = (FUNC) d.getType();
-					
-					if (f0.funcHead != null) 
-						f0.funcHead.lambdaDeclaration = d;
-					
-					if (d.path.getLast().equals(path.getLast())) 
-						funcs.add(f0.funcHead);
-				}
-			}
-			
-			if (funcs.isEmpty()) 
-				/* Return if there is only one result */
-				return null;
-			else if (funcs.size() == 1) 
-				/* Found one match, return this match */
-				return funcs.get(0);
-			else {
-				/* Multiple results, cannot determine correct one, return null */
-				String s = "";
+		/* Collect functions that match this namespace path. */
+		List<Function> funcs = new ArrayList();
+		
+		/* Search through the registered function declarations, but only match the end of the namespace path */
+		for (Function f0 : this.functions) 
+			if (f0.path.build().endsWith(path.build())) 
+				funcs.add(f0);
+		
+		/* Search through predicate declarations */
+		for (Declaration d : this.currentFunction.peek().parameters) {
+			if (d.getType() instanceof FUNC) {
+				FUNC f0 = (FUNC) d.getType();
 				
-				/* Check for match with prefix */
-				for (Function f0 : funcs) 
-					if (f0.path.build().equals(prefix + "." + path.build()))
-						return f0;
+				if (f0.funcHead != null) 
+					f0.funcHead.lambdaDeclaration = d;
 				
-				for (Function f0 : funcs) s += f0.path.build() + ", ";
-				s = s.substring(0, s.length() - 2);
-				
-				throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path.build(), s);
+				if (d.path.getLast().equals(path.getLast())) 
+					funcs.add(f0.funcHead);
 			}
 		}
-		else throw new CTX_EXC(source, Const.UNKNOWN_X, ((isPredicate)? "predicate" : "function"), path.build());
+		
+		if (funcs.isEmpty()) 
+			/* Return if there is only one result */
+			return null;
+		else if (funcs.size() == 1) 
+			/* Found one match, return this match */
+			return funcs.get(0);
+		else {
+			/* Multiple results, cannot determine correct one, return null */
+			String s = "";
+			
+			/* Check for match with prefix */
+			for (Function f0 : funcs) 
+				if (f0.path.build().equals(prefix + "." + path.build()))
+					return f0;
+			
+			for (Function f0 : funcs) s += f0.path.build() + ", ";
+			s = s.substring(0, s.length() - 2);
+			
+			throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path.build(), s);
+		}
 	}
 	
 	/**

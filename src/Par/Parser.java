@@ -519,6 +519,10 @@ public class Parser {
 				continue;
 			}
 			else if (t.type == TokenType.STRUCTID) {
+				/* Call to static union member */
+				if (tokenStream.get(i + 3).type == TokenType.COLON) 
+					decCheck = false;
+				
 				break;
 			}
 			else if (t.type == TokenType.ENUMID) {
