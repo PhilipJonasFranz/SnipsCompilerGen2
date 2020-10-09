@@ -20,7 +20,7 @@ public class Scanner {
 		NONE, 
 		
 		/* IDs */
-		ID, STRUCT_ID, NAMESPACE_ID, ENUM_ID, 
+		ID, STRUCT_ID, INTERFACE_ID, NAMESPACE_ID, ENUM_ID, 
 		
 		/* Literals */
 		INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
@@ -115,6 +115,7 @@ public class Scanner {
 			new ScannableToken("switch",	TokenType.SWITCH,		ACC_STATE.NONE,			" ", "("),
 			new ScannableToken("case",		TokenType.CASE,			ACC_STATE.NONE,			" ", "("),
 			new ScannableToken("default",	TokenType.DEFAULT,		ACC_STATE.NONE,			" ", ":"),
+			new ScannableToken("interface",	TokenType.INTERFACE,	ACC_STATE.INTERFACE_ID,	" "),
 			new ScannableToken("struct",	TokenType.STRUCT,		ACC_STATE.STRUCT_ID,	" "),
 			new ScannableToken("enum",		TokenType.ENUM,			ACC_STATE.ENUM_ID,		" "),
 			new ScannableToken("%",			TokenType.MOD,			ACC_STATE.NONE,			""),
@@ -205,6 +206,9 @@ public class Scanner {
 
 		
 				/* --- FIELDS --- */
+		/* All interface ids that have been scanned */
+		List<String> interfaceIds = new ArrayList();
+		
 		/* All struct ids that have been scanned */
 		List<String> structIds = new ArrayList();
 		
@@ -348,7 +352,7 @@ public class Scanner {
 			else {
 				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
+					if (this.state != ACC_STATE.INTERFACE_ID && this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
 						this.state = ACC_STATE.ID;
 				}
 				
@@ -361,20 +365,26 @@ public class Scanner {
 				if (this.buffer.matches(hex_match)) 
 					this.state = ACC_STATE.HEX_INT;
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.INTERFACE_ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
 					/* Ignore Empty buffer */
 					if (this.buffer.trim().isEmpty()) return false;
 					
 					String id = this.buffer.substring(0, this.buffer.length() - 1);
 				
 					if (this.state == ACC_STATE.ID) {
-						if (this.structIds.contains(id))
+						if (this.interfaceIds.contains(id))
+							tokens.add(new Token(TokenType.INTERFACEID, new Source(fileName, i, a), id));
+						else if (this.structIds.contains(id))
 							tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
 						else if (this.enumIds.contains(id))
 							tokens.add(new Token(TokenType.ENUMID, new Source(fileName, i, a), id));
 						else if (this.namespaces.contains(id))
 							tokens.add(new Token(TokenType.NAMESPACE_IDENTIFIER, new Source(fileName, i, a), id));
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
+					}
+					else if (this.state == ACC_STATE.INTERFACE_ID) {
+						this.interfaceIds.add(id);
+						tokens.add(new Token(TokenType.INTERFACEID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.STRUCT_ID) {
 						this.structIds.add(id);

@@ -238,7 +238,7 @@ public class Const {
 			
 	public static final String UNKNOWN_ENUM_FIELD = "The expression '%s' is not a known field of the enum %s, %s";
 	
-	public static final String UNKNOWN_STRUCT_OR_ENUM = "Unknown struct or enum type '%s', %s";
+	public static final String UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE = "Unknown struct, interface or enum type '%s', %s";
 	
 	public static final String MULTIPLE_MATCHES_FOR_STRUCT_TYPE = "Multiple matches for struct type '%s': %s. Ensure namespace path is explicit and correct, %s";
 	

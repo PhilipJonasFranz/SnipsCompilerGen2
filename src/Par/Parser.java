@@ -54,6 +54,9 @@ public class Parser {
 	/** Active Struct Ids */
 	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
+	/** Active Interface Ids */
+	List<Pair<NamespacePath, InterfaceTypedef>> interfaceIds = new ArrayList();
+	
 	/** Active Enum Ids */
 	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
@@ -205,6 +208,9 @@ public class Parser {
 		else if (current.type == TokenType.STRUCT || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
 		}
+		else if (current.type == TokenType.INTERFACE || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.INTERFACE)) {
+			return this.parseInterfaceTypedef();
+		}
 		else if (current.type == TokenType.ENUM || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
 			return this.parseEnumTypedef();
 		}
@@ -220,7 +226,7 @@ public class Parser {
 			
 			SyntaxElement element = null;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				element = this.parseFunction(type, identifier, mod);
+				element = this.parseFunction(type, identifier, mod, false);
 			}
 			else {
 				Declaration d = this.parseGlobalDeclaration(type, identifier, mod);
@@ -251,29 +257,45 @@ public class Parser {
 		List<TYPE> extProviso = new ArrayList();
 		List<Declaration> extendDecs = new ArrayList();
 		
+		List<InterfaceTypedef> implemented = new ArrayList();
+		
 		if (current.type == TokenType.COLON) {
 			accept();
 			
-			NamespacePath ext0 = this.parseNamespacePath();
-			ext = this.getStructTypedef(ext0, source);
-			
-			if (current.type == TokenType.CMPLT) 
-				extProviso.addAll(this.parseProviso());
-			
-			/* Copy the extended fields */
-			for (Declaration d : ext.getFields()) {
-				Declaration c = d.clone();
+			while (current.type != TokenType.LBRACE) {
+				NamespacePath ext0 = this.parseNamespacePath();
 				
-				/* If number of provisos are not equal an exception will be thrown in CTX anyway */
-				if (ext.proviso.size() == extProviso.size()) 
-					/* Remap type of declaration to provided provisos */
-					for (int i = 0; i < ext.proviso.size(); i++) {
-						if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
-						PROVISO prov = (PROVISO) ext.proviso.get(i);
-						c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
+				if (this.getStructTypedef(ext0, source) != null) {
+					/* Attempt to find struct extension */
+					
+					ext = this.getStructTypedef(ext0, source);
+					
+					if (current.type == TokenType.CMPLT) 
+						extProviso.addAll(this.parseProviso());
+					
+					/* Copy the extended fields */
+					for (Declaration d : ext.getFields()) {
+						Declaration c = d.clone();
+						
+						/* If number of provisos are not equal an exception will be thrown in CTX anyway */
+						if (ext.proviso.size() == extProviso.size()) 
+							/* Remap type of declaration to provided provisos */
+							for (int i = 0; i < ext.proviso.size(); i++) {
+								if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
+								PROVISO prov = (PROVISO) ext.proviso.get(i);
+								c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
+							}
+						
+						extendDecs.add(c);
 					}
-				
-				extendDecs.add(c);
+				}
+				else {
+					/* Must be an implemented interface */
+					
+					InterfaceTypedef def = this.getInterfaceTypedef(ext0, source);
+					
+					implemented.add(def);
+				}
 			}
 		}
 		
@@ -282,7 +304,7 @@ public class Parser {
 		 * to another instance of this struct. The struct definition needs to exist before
 		 * such a declaration is parsed.
 		 */
-		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, extProviso, mod, source);
+		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, implemented, extProviso, mod, source);
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
@@ -316,7 +338,7 @@ public class Parser {
 				
 				TYPE type = this.parseType();
 				
-				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m);
+				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false);
 				
 				/* Insert Struct Name */
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
@@ -333,6 +355,47 @@ public class Parser {
 		
 		accept(TokenType.RBRACE);
 
+		return def;
+	}
+	
+	public InterfaceTypedef parseInterfaceTypedef() throws PARSE_EXC {
+		MODIFIER mod = this.parseModifier();
+		
+		Source source = accept(TokenType.INTERFACE).source();
+		Token id = accept(TokenType.INTERFACEID);
+		
+		List<TYPE> proviso = this.parseProviso();
+		NamespacePath path = this.buildPath(id.spelling);
+		
+		List<Function> functions = new ArrayList();
+		
+		InterfaceTypedef def = new InterfaceTypedef(path, proviso, functions, mod, source);
+		this.interfaceIds.add(new Pair<NamespacePath, InterfaceTypedef>(path, def));
+		
+		accept(TokenType.LBRACE);
+		
+		while (current.type != TokenType.RBRACE) {
+			MODIFIER fmod = this.parseModifier();
+			
+			TYPE ret = this.parseType();
+			Function f = this.parseFunction(ret, accept(TokenType.IDENTIFIER), fmod, true);
+			
+			/* Insert Struct Name */
+			f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+			
+			if (f.modifier != MODIFIER.STATIC) {
+				/* Inject Self Reference */
+				Declaration self = new Declaration(new NamespacePath("self"), new POINTER(new VOID()), MODIFIER.SHARED, f.getSource());
+				f.parameters.add(0, self);
+			}
+			
+			def.functions.add(f);
+
+			accept(TokenType.SEMICOLON);
+		}
+		
+		accept(TokenType.RBRACE);
+		
 		return def;
 	}
 	
@@ -390,7 +453,7 @@ public class Parser {
 		return path;
 	}
 	
-	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod) throws PARSE_EXC {
+	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod, boolean parseHeadOnly) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
 		/* Check if a function name is a reserved identifier */
@@ -439,7 +502,7 @@ public class Parser {
 			}
 		}
 		
-		List<Statement> body = this.parseCompoundStatement(true);
+		List<Statement> body = (parseHeadOnly)? new ArrayList() : this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
@@ -2143,6 +2206,43 @@ public class Parser {
 	private Token curr0 = null;
 	
 	/**
+	 * Attempts to find a interface typedef based on the given namespace path.
+	 * 
+	 * @param path The path that is equal or similar to the path of the searched typedef.
+	 * @param source The source of the syntax element from where this method was called.
+	 * 
+	 * @return The InterfaceTypedef that matches the give path.
+	 * 
+	 * @throws SNIPS_EXC When multiple matches are found for the given path.
+	 */
+	public InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
+			if (p.getFirst().build().equals(path.build())) {
+				return p.getSecond();
+			}
+		}
+		
+		List<InterfaceTypedef> defs = new ArrayList();
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
+			if (p.getFirst().getLast().equals(path.getLast())) {
+				defs.add(p.getSecond());
+			}
+		}
+		
+		if (defs.isEmpty()) return null;
+		else if (defs.size() == 1 && path.path.size() == 1) {
+			return defs.get(0);
+		}
+		else {
+			String s = "";
+			for (InterfaceTypedef def : defs) s += def.path.build() + ", ";
+			s = s.substring(0, s.length() - 2);
+			this.progress.abort();
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+		}
+	}
+	
+	/**
 	 * Attempts to find a struct typedef based on the given namespace path.
 	 * 
 	 * @param path The path that is equal or similar to the path of the searched typedef.
@@ -2215,6 +2315,19 @@ public class Parser {
 			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
+
+	/**
+	 * Returns true iff a InterfaceTypedef exists in the {@link #interfaceIds} list which path
+	 * ends with the given string.
+	 */
+	public boolean containsInterfaceTypedef(String name) {
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
+			if (p.getFirst().getLast().equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Returns true iff a StructTypedef exists in the {@link #structIds} list which path
@@ -2251,24 +2364,34 @@ public class Parser {
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
-		StructTypedef def = null;
+		InterfaceTypedef intf = null;
+		StructTypedef stru = null;
 		EnumTypedef enu = null;
 		NamespacePath path = null;
 		
-		if (this.containsStructTypedef(token.spelling) || this.containsEnumTypedef(token.spelling) || 
+		if (this.containsInterfaceTypedef(token.spelling) || this.containsStructTypedef(token.spelling) || this.containsEnumTypedef(token.spelling) || 
 				(current.type == TokenType.COLON && 
 				tokenStream.get(0).type == TokenType.COLON && 
 				tokenStream.get(1).type != TokenType.LPAREN)) {
 			
 			path = this.parseNamespacePath(token);
-			
+
 			/* Search with relative path */
-			def = this.getStructTypedef(path, token.source());
+			intf = this.getInterfaceTypedef(path, token.source());
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
-			if (def == null) {
+			if (intf == null) {
 				path.path.addAll(0, this.buildPath().path);
-				def = this.getStructTypedef(path, token.source());
+				intf = this.getInterfaceTypedef(path, token.source());
+			}
+			
+			/* Search with relative path */
+			stru = this.getStructTypedef(path, token.source());
+			
+			/* Nothing found, attempt to convert to current absolut path and try again */
+			if (stru == null) {
+				path.path.addAll(0, this.buildPath().path);
+				stru = this.getStructTypedef(path, token.source());
 			}
 			
 			/* Search with relative path */
@@ -2281,18 +2404,25 @@ public class Parser {
 			}
 			
 			/* Nothing found, error */
-			if (enu == null && def == null) {
+			if (enu == null && stru == null && intf == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM, path.build(), token.source().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path.build(), token.source().getSourceMarker());
 			}
 		}
 		
-		if (def != null) {
+		if (intf != null) {
+			/* Parse the provided proviso */
+			List<TYPE> proviso = this.parseProviso();
+			
+			/* Construct new Interface Instance with reference to SSOT */
+			type = new INTERFACE(intf, proviso);
+		}
+		else if (stru != null) {
 			/* Parse the provided proviso */
 			List<TYPE> proviso = this.parseProviso();
 			
 			/* Construct new Struct Instance with reference to SSOT */
-			type = new STRUCT(def, proviso);
+			type = new STRUCT(stru, proviso);
 		}
 		else if (enu != null) {
 			/* Enum def was found, set reference to default enum field */
@@ -2455,7 +2585,10 @@ public class Parser {
 	protected NamespacePath parseNamespacePath() throws PARSE_EXC {
 		Token token;
 		
-		if (current.type == TokenType.STRUCTID) {
+		if (current.type == TokenType.INTERFACEID) {
+			return new NamespacePath(accept().spelling, PATH_TERMINATION.INTERFACE);
+		}
+		else if (current.type == TokenType.STRUCTID) {
 			return new NamespacePath(accept().spelling, PATH_TERMINATION.STRUCT);
 		}
 		else if (current.type == TokenType.ENUMID) {
@@ -2485,7 +2618,11 @@ public class Parser {
 				ids.add(accept().spelling);
 			}
 			else {
-				if (current.type == TokenType.STRUCTID) {
+				if (current.type == TokenType.INTERFACEID) {
+					term = PATH_TERMINATION.INTERFACE;
+					ids.add(accept().spelling);
+				}
+				else if (current.type == TokenType.STRUCTID) {
 					term = PATH_TERMINATION.STRUCT;
 					ids.add(accept().spelling);
 				}
