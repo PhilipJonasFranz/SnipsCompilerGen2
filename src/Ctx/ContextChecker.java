@@ -213,6 +213,8 @@ public class ContextChecker {
 		for (Declaration d : declarations) 
 			if (d.last != null) 
 				d.last.free.add(d);
+		
+		p.print(0, true);
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXC {
@@ -361,6 +363,69 @@ public class ContextChecker {
 		 */
 		if (e.extension == null)
 			this.tLStructs.add(e);
+		
+		/* Set the declarations in the struct type */
+		return new VOID();
+	}
+	
+	public TYPE checkInterfaceTypedef(InterfaceTypedef e) throws CTX_EXC {
+		for (Function f : e.functions) {
+			if (f.modifier != MODIFIER.STATIC) {
+				/* Add to a pool of nested functions */
+				this.nestedFunctions.add(f);
+			 
+				/* Check for duplicate function name */
+				for (Function f0 : this.functions) {
+					if (f0.path.build().equals(f.path.build()))
+						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+				}
+			}
+			
+			/* 
+			 * Add the function to the function pool here already, 
+			 * since through recursion the same function may be called. 
+			 */
+			this.functions.add(f);
+			
+			if (f.provisosTypes.isEmpty()) 
+				f.check(this);
+			
+			if (f.modifier != MODIFIER.STATIC) {
+				/* Check if all required provisos are present */
+				List<TYPE> missing = new ArrayList();
+				
+				for (TYPE t : e.proviso) 
+					missing.add(t.clone());
+				
+				for (int i = 0; i < missing.size(); i++) {
+					for (int a = 0; a < f.provisosTypes.size(); a++) {
+						if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) f.provisosTypes.get(a)).placeholderName)) {
+							missing.remove(i);
+							i--;
+							break;
+						}
+					}
+				}
+				
+				/* 
+				 * There are provisos missing and the function is not inherited, throw an error. 
+				 * If the function is inherited, the same check has been done to the function by
+				 * the parent, so we dont need to check it here.
+				 */
+				if (!missing.isEmpty()) {
+					String s = "";
+					for (TYPE t : missing) s += t.typeString() + ", ";
+					s = s.substring(0, s.length() - 2);
+					
+					throw new CTX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path.build(), s);
+				}
+			}
+		}
+		
+		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		
+		if (opt.isPresent())
+			throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
 		
 		/* Set the declarations in the struct type */
 		return new VOID();
@@ -1224,25 +1289,47 @@ public class ContextChecker {
 		String prefix = "";
 		
 		if (i.isNestedCall) {
-			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-			prefix = s.getTypedef().path.build();
+			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
+				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+				prefix = s.getTypedef().path.build();
+			}
+			else {
+				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
+				prefix = s.getTypedef().path.build();
+			}
 		}
 		
 		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
 		
 		if (i.isNestedCall) {
-			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-			
-			boolean found = false;
-			for (Function nested : s.getTypedef().functions) {
-				if (nested.equals(f)) {
-					found = true;
-					break;
+			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
+				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+				
+				boolean found = false;
+				for (Function nested : s.getTypedef().functions) {
+					if (nested.equals(f)) {
+						found = true;
+						break;
+					}
 				}
+				
+				if (!found)
+					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 			}
-			
-			if (!found)
-				throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+			else {
+				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
+				
+				boolean found = false;
+				for (Function nested : s.getTypedef().functions) {
+					if (nested.equals(f)) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found)
+					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+			}
 		}
 		else {
 			if (this.nestedFunctions.contains(f))
