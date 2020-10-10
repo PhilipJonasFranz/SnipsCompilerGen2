@@ -47,11 +47,13 @@ OUTPUT
     b X.set
     
 X.get:                                       /* Function: X.get */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
 X.set:                                       /* Function: X.set */
+    mov r10, #0
     push { r3 }
     mov r3, r0
     mov r0, r1                               /* Evaluate Expression */

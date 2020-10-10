@@ -24,7 +24,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_02.txt */
+/* --test_03.txt */
     b main
 /* Relay table for Interface : Inter */
 .L1: 

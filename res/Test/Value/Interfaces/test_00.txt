@@ -35,6 +35,7 @@ OUTPUT
     b X.get
     
 X.get:                                       /* Function: X.get */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
