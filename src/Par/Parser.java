@@ -257,7 +257,7 @@ public class Parser {
 		List<TYPE> extProviso = new ArrayList();
 		List<Declaration> extendDecs = new ArrayList();
 		
-		List<InterfaceTypedef> implemented = new ArrayList();
+		List<INTERFACE> implemented = new ArrayList();
 		
 		if (current.type == TokenType.COLON) {
 			accept();
@@ -294,7 +294,7 @@ public class Parser {
 					
 					InterfaceTypedef def = this.getInterfaceTypedef(ext0, source);
 					
-					implemented.add(def);
+					implemented.add(new INTERFACE(def, this.parseProviso()));
 				}
 			}
 		}

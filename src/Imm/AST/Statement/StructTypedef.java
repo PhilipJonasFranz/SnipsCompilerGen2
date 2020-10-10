@@ -10,6 +10,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.NamespacePath;
 import Util.Source;
@@ -35,7 +36,7 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
-	public List<InterfaceTypedef> implemented;
+	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
 	public List<TYPE> extProviso;
@@ -73,7 +74,7 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<InterfaceTypedef> implemented, List<TYPE> extProviso, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<INTERFACE> implemented, List<TYPE> extProviso, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -230,8 +231,8 @@ public class StructTypedef extends SyntaxElement {
 			s += "implements:";
 		}
 		
-		for (InterfaceTypedef def : this.implemented)
-			s += def.path.build() + ",";
+		for (INTERFACE def : this.implemented)
+			s += def.getTypedef().path.build() + ",";
 		
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);

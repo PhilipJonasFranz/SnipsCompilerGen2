@@ -49,6 +49,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
@@ -234,6 +235,9 @@ public class AsNBody extends AsNNode {
 					body.instructions.addAll(ins);
 					body.instructions.add(new ASMSeperator());
 				}
+			}
+			else if (s instanceof InterfaceTypedef) {
+				// TODO: Cast interface typedef relay table
 			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());

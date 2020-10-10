@@ -350,20 +350,24 @@ public class ContextChecker {
 		}
 		
 		/* Make sure implemented interface requirements are satisfied */
-		for (InterfaceTypedef inter : e.implemented) {
-			for (Function f : inter.functions) {
+		for (INTERFACE inter : e.implemented) {
+			
+			for (Function f : inter.getTypedef().functions) {
+				
+				Function ftranslated = inter.getTypedef().requestFunction(f.path, inter.proviso);
+				
 				boolean found = false;
 				for (int i = 0; i < e.functions.size(); i++) {
 					Function structFunction = e.functions.get(i);
 					
-					if (structFunction.path.getLast().equals(f.path.getLast())) {
+					if (structFunction.path.getLast().equals(ftranslated.path.getLast())) {
 						boolean match = true;
 						
-						match &= structFunction.getReturnTypeDirect().isEqual(f.getReturnTypeDirect());
+						match &= structFunction.getReturnTypeDirect().isEqual(ftranslated.getReturnTypeDirect());
 						
-						if (structFunction.parameters.size() == f.parameters.size()) {
-							for (int a = 0; a < f.parameters.size(); a++) 
-								match &= f.parameters.get(i).getRawType().isEqual(structFunction.parameters.get(i).getRawType());
+						if (structFunction.parameters.size() == ftranslated.parameters.size()) {
+							for (int a = 0; a < ftranslated.parameters.size(); a++) 
+								match &= ftranslated.parameters.get(i).getRawType().isEqual(structFunction.parameters.get(i).getRawType());
 						}
 						else match = false;
 						
@@ -375,7 +379,7 @@ public class ContextChecker {
 				}
 				
 				if (!found) 
-					throw new CTX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.path.build());
+					throw new CTX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.getTypedef().path.build());
 			}
 		}
 		
@@ -1318,16 +1322,8 @@ public class ContextChecker {
 	public TYPE checkInlineCall(InlineCall i) throws CTX_EXC {
 		String prefix = "";
 		
-		if (i.isNestedCall) {
-			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
-				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-				prefix = s.getTypedef().path.build();
-			}
-			else {
-				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
-				prefix = s.getTypedef().path.build();
-			}
-		}
+		/* Extract path from typedef for more extensive function searching */
+		if (i.isNestedCall) prefix = this.getPath(i.parameters.get(0));
 		
 		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
 		
@@ -1359,6 +1355,15 @@ public class ContextChecker {
 				
 				if (!found)
 					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+			
+				/* Dynamically inject proviso from interface declaration */
+				if (i.proviso.isEmpty()) {
+					List<TYPE> copy = new ArrayList();
+					s.proviso.stream().forEach(x -> copy.add(x.clone()));
+					i.proviso = copy;
+					
+					f.setContext(s.proviso);
+				}
 			}
 		}
 		else {
@@ -1368,7 +1373,8 @@ public class ContextChecker {
 		
 		i.calledFunction = f;
 		
-		if (!this.watchpointStack.isEmpty()) i.watchpoint = this.watchpointStack.peek();
+		if (!this.watchpointStack.isEmpty()) 
+			i.watchpoint = this.watchpointStack.peek();
 		
 		if (f != null) {
 			/* Inline calls made during global setup may not signal, since exception cannot be watched */
@@ -1481,26 +1487,49 @@ public class ContextChecker {
 	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXC {
 		String prefix = "";
 		
-		if (i.isNestedCall) {
-			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-			prefix = s.getTypedef().path.build();
-		}
+		/* Extract path from typedef for more extensive function searching */
+		if (i.isNestedCall) prefix = this.getPath(i.parameters.get(0));
 		
 		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
 		
 		if (i.isNestedCall) {
-			STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
+				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+				
+				boolean found = false;
+				for (Function nested : s.getTypedef().functions) {
+					if (nested.equals(f)) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found)
+					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+			}
+			else {
+				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
+				
+				boolean found = false;
+				for (Function nested : s.getTypedef().functions) {
+					if (nested.equals(f)) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found)
+					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 			
-			boolean found = false;
-			for (Function nested : s.getTypedef().functions) {
-				if (nested.equals(f)) {
-					found = true;
-					break;
+				/* Dynamically inject proviso from interface declaration */
+				if (i.hasAutoProviso) {
+					List<TYPE> copy = new ArrayList();
+					s.proviso.stream().forEach(x -> copy.add(x.clone()));
+					i.proviso = copy;
+					
+					f.setContext(s.proviso);
 				}
 			}
-			
-			if (!found)
-				throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 		}
 		else {
 			if (this.nestedFunctions.contains(f))
@@ -2285,6 +2314,22 @@ public class ContextChecker {
 		}
 		
 		return f;
+	}
+
+	/**
+	 * Return the path of either the struct or interface typedef.
+	 * @param e Expression to extract path from, type of expression must either be STRUCT or INTERFACE.
+	 * @return The extracted and built namespace path.
+	 */
+	public String getPath(Expression e) throws CTX_EXC {
+		if (e.check(this).getCoreType() instanceof STRUCT) {
+			STRUCT s = (STRUCT) e.check(this).getCoreType();
+			return s.getTypedef().path.build();
+		}
+		else {
+			INTERFACE s = (INTERFACE) e.check(this).getCoreType();
+			return s.getTypedef().path.build();
+		}
 	}
 	
 	/* 

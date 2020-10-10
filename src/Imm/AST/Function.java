@@ -153,6 +153,10 @@ public class Function extends CompoundStatement {
 		return this.returnType;
 	}
 	
+	public void setReturnType(TYPE t) {
+		this.returnType = t;
+	}
+	
 	/**
 	 * Return wether this function signals exceptions or not.
 	 */
@@ -262,6 +266,23 @@ public class Function extends CompoundStatement {
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
 			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
 		}
+	}
+	
+	public Function cloneSignature() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.provisosTypes)
+			provClone.add(t.clone());
+		
+		List<Declaration> params = new ArrayList();
+		for (Declaration d : this.parameters)
+			params.add(d.clone());
+		
+		List<TYPE> signalsTypes = new ArrayList();
+		for (TYPE t : this.signalsTypes)
+			signalsTypes.add(t.clone());
+		
+		/* Clone the function signature */
+		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 	}
 	
 } 
