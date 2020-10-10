@@ -13,9 +13,11 @@ import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -189,6 +191,16 @@ public class AsNFunctionCall extends AsNStatement {
 					postfix = provisoMap.provisoPostfix;
 					break;
 				}
+			}
+			
+			boolean nestedDeref = false;
+			if (callee instanceof InlineCall)
+				nestedDeref = ((InlineCall) callee).nestedDeref;
+			
+			if (nestedDeref) {
+				/* Load Interface from pointer into R10 */
+				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 			}
 			
 			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);

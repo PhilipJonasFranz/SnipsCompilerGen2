@@ -1834,6 +1834,7 @@ public class Parser {
 					/* Single call */
 					InlineCall call = (InlineCall) select.selection;
 					call.isNestedCall = true;
+					call.nestedDeref = !dot;
 					
 					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));
 					else call.parameters.add(0, select.selector);
@@ -1851,6 +1852,7 @@ public class Parser {
 					
 					InlineCall call = (InlineCall) nested.selector;
 					call.isNestedCall = true;
+					call.nestedDeref = !dot;
 					
 					/* Nest based on the chain head an address of of the head or just the head in the call parameters */
 					if (dot) call.parameters.add(0, new AddressOf(select.selector, select.selection.getSource()));

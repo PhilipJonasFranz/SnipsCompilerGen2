@@ -54,7 +54,7 @@ main:                                        /* Function: main */
     sub r0, fp, #12                          /* Evaluate Expression */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
-    mov r0, r3                               /* Evaluate Expression */
+    ldr r0, [r10, r3, lsl #2]
     bl .L1                                   /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
