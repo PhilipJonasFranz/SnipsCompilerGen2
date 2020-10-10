@@ -44,25 +44,25 @@ int main() {
 	int s = i.get() + i0.get();
 	
 	i.set(12);
-	i0.set(3);
+	i0.set(4);
 	
-	/* 35 + 12 + 6 = 53 */
+	/* 35 + 12 + 16 = 63 */
 	return s + i.get() + i0.get();
 }
 TESTCASES
-53
+63
 OUTPUT
 /* --test_02.txt */
     b main
 /* Relay table for Interface : Inter */
-.L0: 
+.L1: 
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
-    beq .L1
+    beq .L2
     cmp r10, #2
     moveq r10, #8
-.L1: 
+.L2: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
@@ -122,25 +122,25 @@ main:                                        /* Function: main */
     lsr r4, r0, #2
 /* 25 + 10 = 35 */
     mov r0, r3                               /* Evaluate Expression */
-    bl .L0                                   /* Branch to relay table of Inter */
+    bl .L1                                   /* Branch to relay table of Inter */
     mov r5, r0
     mov r0, r4                               /* Load parameters */
-    bl .L0                                   /* Branch to relay table of Inter */
+    bl .L1                                   /* Branch to relay table of Inter */
     add r5, r5, r0
     mov r1, #12
     mov r0, r3
     mov r12, #4
-    bl .L0                                   /* Branch to relay table of Inter */
-    mov r1, #3
+    bl .L1                                   /* Branch to relay table of Inter */
+    mov r1, #4
     mov r0, r4
     mov r12, #4
-    bl .L0                                   /* Branch to relay table of Inter */
-/* 35 + 12 + 6 = 53 */
+    bl .L1                                   /* Branch to relay table of Inter */
+/* 35 + 12 + 16 = 63 */
     mov r0, r3                               /* Evaluate Expression */
-    bl .L0                                   /* Branch to relay table of Inter */
+    bl .L1                                   /* Branch to relay table of Inter */
     add r6, r5, r0
     mov r0, r4                               /* Load parameters */
-    bl .L0                                   /* Branch to relay table of Inter */
+    bl .L1                                   /* Branch to relay table of Inter */
     add r0, r6, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
