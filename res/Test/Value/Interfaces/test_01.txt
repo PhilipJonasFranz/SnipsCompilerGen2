@@ -1,38 +1,64 @@
 SOURCE
-interface Inter<Z> {
+interface Inter {
 
-	Z get<Z>();
+	int get();
+	
+	void set(int val);
 
 }
 
-struct X<T> : Inter<T> {
+struct X : Inter {
 
-	T val;
+	int val;
 	
-	T get<T>() {
+	int get() {
 		return self->val;
 	}
-
+	
+	void set(int val) {
+		self->val = val;
+	}
+	
 }
 
 int main() {
-	X<int> x = X<int>::(25);
-	Inter<int> i = &x;
-	Inter<int> i0 = &x;
-	return i.get();
+	X x = X::(25);
+	Inter i = &x;
+	
+	int s = i.get();
+	
+	i.set(15);
+	
+	return s + i.get();
 }
 TESTCASES
-25
+40
 OUTPUT
 /* --test_01.txt */
     b main
-.L1: 
+/* Relay table for Interface : Inter */
+.L0: 
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b X.get
+    b X.set
+    
+X.get:                                       /* Function: X.get */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+X.set:                                       /* Function: X.set */
+    push { r3 }
+    mov r3, r0
+    mov r0, r1                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    pop { r3 }
+    bx lr
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -44,7 +70,15 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl .L1                                   /* Branch to relay table of Inter */
+    bl .L0                                   /* Branch to relay table of Inter */
+    mov r4, r0
+    mov r1, #15
+    mov r0, r3
+    mov r12, #4
+    bl .L0                                   /* Branch to relay table of Inter */
+    mov r0, r3                               /* Evaluate Expression */
+    bl .L0                                   /* Branch to relay table of Inter */
+    add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

@@ -1,0 +1,53 @@
+SOURCE
+interface Inter {
+
+	int get();
+	
+	void set(int val);
+
+}
+
+struct X : Inter {
+
+	int val;
+	
+	int get() {
+		return self->val;
+	}
+	
+	void set(int val) {
+		self->val = val;
+	}
+	
+}
+
+struct Y : Inter {
+	int val;
+	
+	int get() {
+		return self->val * 2;
+	}
+	
+	void set(int val) {
+		self->val = val * 2;
+	}
+}
+
+int main() {
+	X x = X::(25);
+	Inter i = &x;
+	
+	Y y = Y::(5);
+	Inter i0 = &y;
+	
+	/* 25 + 10 = 35 */
+	int s = i.get() + i0.get();
+	
+	i.set(12);
+	i0.set(3);
+	
+	/* 35 + 12 + 6 = 53 */
+	return s + i.get() + i0.get();
+}
+TESTCASES
+53
