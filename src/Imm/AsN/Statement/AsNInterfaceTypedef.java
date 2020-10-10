@@ -1,5 +1,8 @@
 package Imm.AsN.Statement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
@@ -14,6 +17,7 @@ import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -26,6 +30,7 @@ import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.TYPE;
 
 public class AsNInterfaceTypedef extends AsNNode {
 
@@ -34,22 +39,84 @@ public class AsNInterfaceTypedef extends AsNNode {
 	public static AsNInterfaceTypedef cast(InterfaceTypedef def, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNInterfaceTypedef intf = new AsNInterfaceTypedef();
 		def.castedNode = intf;
+
+		/* Create relay table */
+		intf.tableHead = new ASMLabel(LabelGen.getLabel());
+
+		/*
+		 * Change names of proviso mappings if the types are word-size equal.
+		 * The translation will result in the same assembly, so we dont have to do it again.
+		 * The name is set to the first occurrence of the similar mappings. Down below
+		 * the name is checked if its already in a list of translated mappings.
+		 * 
+		 * This algorithm is equal to the one in AsNFunction, and thus produces the same
+		 * results as its counterpart, this means that equal proviso mappings are merged
+		 * the same way on both sides.
+		 */
+		for (int i = 0; i < def.registeredMappings.size(); i++) {
+			InterfaceProvisoMapping call0 = def.registeredMappings.get(i);
+			for (int a = i + 1; a < def.registeredMappings.size(); a++) {
+				InterfaceProvisoMapping call1 = def.registeredMappings.get(a);
+				
+				if (!call0.provisoPostfix.equals(call1.provisoPostfix)) {
+					boolean equal = true;
+					
+					/* Check for equal parameter types */
+					for (int k = 0; k < call0.providedHeadProvisos.size(); k++) 
+						equal &= call0.providedHeadProvisos.get(k).wordsize() == call1.providedHeadProvisos.get(k).wordsize();
+					
+					/* 
+					 * Mappings are of equal types, set label gen postfix of 
+					 * this one to the other equal one 
+					 */
+					if (equal) 
+						call1.provisoPostfix = call0.provisoPostfix;
+				}
+			}
+		}
+		
+		List<String> createdTable = new ArrayList();
 		
 		/* For all proviso mappings, create a relay-table */
 		for (InterfaceProvisoMapping mapping : def.registeredMappings) {
+			/* 
+			 * Check if a table has been created for this 'proviso group' 
+			 * has been created already, if yes, simply continue. During function
+			 * casting, the exact algorithm will be executed, resulting in correct
+			 * and equal results on both ends.
+			 */
+			if (createdTable.contains(mapping.provisoPostfix))
+				continue;
+			else 
+				createdTable.add(mapping.provisoPostfix);
 			
-			ASMComment com = new ASMComment("Relay table for Interface : " + def.path.build());
-			intf.instructions.add(com);
+			/* Generate comment with function name and potential proviso types */
+			String s = "Interface : " + def.path.build();
 			
+			List<TYPE> types = mapping.providedHeadProvisos;
+			
+			if (!types.isEmpty())
+				s += ", Provisos: ";
+				
+			for (int x = 0; x < types.size(); x++) 
+				s += types.get(x).provisoFree().typeString() + ", ";
+			
+			if (!mapping.providedHeadProvisos.isEmpty())
+				s = s.trim().substring(0, s.trim().length() - 1);
+			
+			ASMComment com = new ASMComment(s);
+			
+			/* Get the current proviso postfix. If only the default mapping exists, let postfix empty */
 			String postfix = mapping.provisoPostfix;
 			if (def.registeredMappings.size() == 1 && mapping.providedHeadProvisos.isEmpty())
 				postfix = "";
 			
-			/* Create relay table */
-			intf.tableHead = new ASMLabel(LabelGen.getLabel());
-			
+			/* Head of the table for this proviso mapping */
 			ASMLabel tableHeadProviso = new ASMLabel(intf.tableHead.name + postfix);
 			
+			tableHeadProviso.comment = com;
+			
+			/* Label at the end of the table multiplexing section */
 			ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
 			
 			intf.instructions.add(tableHeadProviso);
@@ -61,8 +128,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 			int cnt = 0;
 			
 			/* Generate the table */
-			for (StructTypedef s : def.implementers) {
-				intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(s.SID)));
+			for (StructTypedef struct : def.implementers) {
+				intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
 				intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
 				intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
 			}
@@ -76,8 +143,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 			
 			intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
 			
-			for (StructTypedef s : def.implementers) {
-				for (Function f : s.functions) {
+			for (StructTypedef struct : def.implementers) {
+				for (Function f : struct.functions) {
 					/* Branch to function */
 					String target = f.path.build() + f.getProvisoPostfix(mapping.providedHeadProvisos);
 					
@@ -89,6 +156,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 					intf.instructions.add(b);
 				}
 			}
+			
+			if (!mapping.equals(def.registeredMappings.get(def.registeredMappings.size() - 1)) && def.registeredMappings.size() > 1)
+				intf.instructions.add(new ASMSeperator());
 		}
 		
 		return intf;

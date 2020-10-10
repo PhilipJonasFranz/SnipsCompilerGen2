@@ -54,8 +54,7 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-/* Relay table for Interface : Inter */
-.L1: 
+.L1:                                         /* Interface : Inter */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
