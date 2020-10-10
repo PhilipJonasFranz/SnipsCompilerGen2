@@ -2427,7 +2427,12 @@ public class ASMOptimizer {
 		for (int i = 1; i < body.instructions.size(); i++) {
 			ASMInstruction ins = body.instructions.get(i);
 			if (ins instanceof ASMLabel) {
-				if (!usedLabels.contains(ins)) {
+				boolean contained = false;
+				
+				for (ASMLabel label : usedLabels) 
+					contained |= label.name.equals(((ASMLabel) ins).name);
+				
+				if (!contained) {
 					body.instructions.remove(i);
 					markOpt();
 					while (i < body.instructions.size() && !(ins instanceof ASMLabel)) {
