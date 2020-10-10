@@ -13,6 +13,7 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
+import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -32,6 +33,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 	public static AsNInterfaceTypedef cast(InterfaceTypedef def, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNInterfaceTypedef intf = new AsNInterfaceTypedef();
 		def.castedNode = intf;
+		
+		ASMComment com = new ASMComment("Relay table for Interface : " + def.path.build());
+		intf.instructions.add(com);
 		
 		/* Create relay table */
 		intf.tableHead = new ASMLabel(LabelGen.getLabel());

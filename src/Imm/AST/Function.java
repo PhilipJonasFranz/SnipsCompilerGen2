@@ -49,6 +49,13 @@ public class Function extends CompoundStatement {
 	public InterfaceTypedef definedInInterface;
 	
 	/**
+	 * Set to true if this function is implemented from an interface.
+	 * When the Interface Relay Table branches to the function, the value
+	 * in R10 needs to be set to R10 to prevent wrong behaviour.
+	 */
+	public boolean requireR10Reset = false;
+	
+	/**
 	 * The flattened namespace path of this function.
 	 */
 	public NamespacePath path;

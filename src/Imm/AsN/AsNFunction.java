@@ -204,7 +204,12 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			label.comment = new ASMComment(com);
 			
+			
+			/* Add function label */
 			func.instructions.add(label);
+			
+			if (f.requireR10Reset)
+				func.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 			
 			/* Save FP and lr by default */
 			ASMPushStack push = new ASMPushStack(new RegOp(REG.FP), new RegOp(REG.LR));

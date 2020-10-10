@@ -374,6 +374,8 @@ public class ContextChecker {
 							if (structFunction.provisosTypes.isEmpty())
 								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
 							
+							structFunction.requireR10Reset = true;
+							
 							found = true;
 							break;
 						}
