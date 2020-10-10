@@ -1370,6 +1370,17 @@ public class ContextChecker {
 					
 					f.setContext(s.proviso);
 				}
+				
+				/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
+				for (StructTypedef def : s.getTypedef().implementers) {
+					for (Function f0 : def.functions) {
+						if (f0.path.getLast().equals(f.path.getLast())) {
+							f0.setContext(i.proviso);
+							
+							f0.check(this);
+						}
+					}
+				}
 			}
 		}
 		else {
@@ -1545,6 +1556,17 @@ public class ContextChecker {
 					i.proviso = copy;
 					
 					f.setContext(s.proviso);
+				}
+				
+				/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
+				for (StructTypedef def : s.getTypedef().implementers) {
+					for (Function f0 : def.functions) {
+						if (f0.path.getLast().equals(f.path.getLast())) {
+							f0.setContext(i.proviso);
+
+							f0.check(this);
+						}
+					}
 				}
 			}
 		}

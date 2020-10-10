@@ -6,6 +6,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import Ctx.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
@@ -33,6 +34,7 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
@@ -177,7 +179,21 @@ public class AsNFunctionCall extends AsNStatement {
 					break;
 				}
 			
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(def.tableHead));
+			String postfix = "";
+			
+			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
+				if (ProvisoUtil.mappingIsEqual(provisoMap.providedHeadProvisos, provisos)) {
+					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
+						break;
+					
+					postfix = provisoMap.provisoPostfix;
+					break;
+				}
+			}
+			
+			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);
+			
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
 			branch.comment = new ASMComment("Branch to relay table of " + f.definedInInterface.path.build());
 			call.instructions.add(branch);
 		}

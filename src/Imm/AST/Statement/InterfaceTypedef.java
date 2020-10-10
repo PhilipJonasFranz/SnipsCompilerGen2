@@ -3,6 +3,7 @@ package Imm.AST.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import CGen.LabelGen;
 import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
@@ -30,15 +31,15 @@ public class InterfaceTypedef extends SyntaxElement {
 	public List<Function> functions;
 	
 	public List<StructTypedef> implementers = new ArrayList();
-	
-	/* Contains all struct typedefs that extended from this struct */
-	public List<InterfaceTypedef> extenders = new ArrayList();
 
 	public class InterfaceProvisoMapping {
 		
+		public String provisoPostfix;
+		
 		public List<TYPE> providedHeadProvisos;
 		
-		public InterfaceProvisoMapping(List<TYPE> providedHeadProvisos) {
+		public InterfaceProvisoMapping(String provisoPostfix, List<TYPE> providedHeadProvisos) {
+			this.provisoPostfix = provisoPostfix;
 			this.providedHeadProvisos = providedHeadProvisos;
 		}
 		
@@ -83,7 +84,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelGen.getProvisoPostfix(), clone);
 		this.registeredMappings.add(mapping);
 		
 		//System.out.print("\nRegistered Interface Mapping: ");
