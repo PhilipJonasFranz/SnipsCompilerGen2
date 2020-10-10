@@ -1,0 +1,25 @@
+SOURCE
+interface Inter<Z> {
+
+	Z get<Z>();
+
+}
+
+struct X<T> : Inter<T> {
+
+	T val;
+	
+	T get<T>() {
+		return self->val;
+	}
+
+}
+
+int main() {
+	X<int> x = X<int>::(25);
+	Inter<int> i = &x;
+	
+	return i.get();
+}
+TESTCASES
+25
