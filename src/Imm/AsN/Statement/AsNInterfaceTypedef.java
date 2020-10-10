@@ -37,9 +37,13 @@ public class AsNInterfaceTypedef extends AsNNode {
 	public ASMLabel tableHead;
 	
 	public static AsNInterfaceTypedef cast(InterfaceTypedef def, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		
 		AsNInterfaceTypedef intf = new AsNInterfaceTypedef();
 		def.castedNode = intf;
 
+		if (def.registeredMappings.isEmpty())
+			return intf;
+		
 		/* Create relay table */
 		intf.tableHead = new ASMLabel(LabelGen.getLabel());
 
@@ -76,6 +80,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 		}
 		
 		List<String> createdTable = new ArrayList();
+		
+		/* Check if anything from the interface was used. If not, the interface table does not have to be generated. */
+		boolean hasCalls = false;
 		
 		/* For all proviso mappings, create a relay-table */
 		for (InterfaceProvisoMapping mapping : def.registeredMappings) {
@@ -163,6 +170,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 						intf.instructions.add(add);
 					}
 					else {
+						hasCalls = true;
+						
 						target += post;
 						
 						ASMLabel functionLabel = new ASMLabel(target);
@@ -178,6 +187,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 			if (!mapping.equals(def.registeredMappings.get(def.registeredMappings.size() - 1)) && def.registeredMappings.size() > 1)
 				intf.instructions.add(new ASMSeperator());
 		}
+		
+		if (!hasCalls && def.registeredMappings.size() == 1 && def.registeredMappings.get(0).providedHeadProvisos.isEmpty())
+			intf.instructions.clear();
 		
 		return intf;
 	}

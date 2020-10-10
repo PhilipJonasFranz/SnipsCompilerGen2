@@ -369,6 +369,8 @@ public class ContextChecker {
 						}
 						else match = false;
 						
+						match &= ftranslated.modifier == structFunction.modifier;
+						
 						if (match) {
 							/* Add default context to make sure it is casted */
 							if (structFunction.provisosTypes.isEmpty())

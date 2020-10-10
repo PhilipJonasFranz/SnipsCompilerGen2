@@ -1,4 +1,5 @@
 #include<iterable.sn>
+#include<serializable.sn>
 
 /*
  * This package contains the utility to create a linked-list,
@@ -19,7 +20,7 @@ namespace List {
 	/*
 	 * Wraps the list head and tail.
 	 */
-	restricted struct LinkedList<T> : Iterable<T> {
+	restricted struct LinkedList<T> : Iterable<T>, Serializable {
 		
 		/* Points to the head of the list or is null. */
 		ListNode<T>* head;
@@ -248,6 +249,15 @@ namespace List {
 		 */
 		shared bool isEmpty<T:void>() {
 			return self->head == null;
+		}
+		
+		shared char* serialize<T>() {
+			// TODO
+			return null;
+		}
+		
+		static void* deserialize(char* str) {
+			return null;
 		}
 	
 	}

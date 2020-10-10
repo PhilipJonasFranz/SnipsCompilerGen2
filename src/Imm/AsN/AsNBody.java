@@ -238,8 +238,12 @@ public class AsNBody extends AsNNode {
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
-				body.instructions.addAll(AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st).getInstructions());
-				body.instructions.add(new ASMSeperator());
+				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
+				
+				body.instructions.addAll(def.getInstructions());
+				
+				if (!def.getInstructions().isEmpty())
+					body.instructions.add(new ASMSeperator());
 			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());

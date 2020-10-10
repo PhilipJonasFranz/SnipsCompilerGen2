@@ -288,6 +288,10 @@ public class Parser {
 						
 						extendDecs.add(c);
 					}
+					
+					if (current.type == TokenType.COMMA)
+						accept();
+					else break;
 				}
 				else {
 					/* Must be an implemented interface */
@@ -295,6 +299,10 @@ public class Parser {
 					InterfaceTypedef def = this.getInterfaceTypedef(ext0, source);
 					
 					implemented.add(new INTERFACE(def, this.parseProviso()));
+					
+					if (current.type == TokenType.COMMA)
+						accept();
+					else break;
 				}
 			}
 		}
