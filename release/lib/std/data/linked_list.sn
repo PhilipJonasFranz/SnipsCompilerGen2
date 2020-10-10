@@ -1,6 +1,6 @@
+#include<iterable.sn>
+
 /*
- * [BASE-PACKAGE]
- * 
  * This package contains the utility to create a linked-list,
  * insert and remove values from it, as well as some functions
  * that give information about the state of the list.
@@ -19,7 +19,7 @@ namespace List {
 	/*
 	 * Wraps the list head and tail.
 	 */
-	restricted struct LinkedList<T> {
+	restricted struct LinkedList<T> : Iterable<T> {
 		
 		/* Points to the head of the list or is null. */
 		ListNode<T>* head;
@@ -65,6 +65,23 @@ namespace List {
 			}
 			
 			return n->value;	
+		}
+		
+		/*
+		 * Returns the value of the node at the given index. Returns
+		 * the default value if the index is invalid.
+		 */
+		shared void set<T>(int i, T value) {
+			ListNode<T>* n = self->head;
+			while (i != 0) {
+				if (n->next == null) return;
+				
+				/* Jump to next */
+				n = n->next;
+				i--;
+			}
+			
+			n->value = value;
 		}
 		
 		/*

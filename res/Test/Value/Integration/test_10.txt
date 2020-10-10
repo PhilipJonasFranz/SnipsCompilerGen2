@@ -303,8 +303,6 @@ Hash.hash.L2:
     bx lr
 .POOL1_LIT_5381: .word 5381
     
-/* [BASE-PACKAGE] */
-/*  */
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */

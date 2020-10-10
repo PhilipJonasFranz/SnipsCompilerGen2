@@ -199,8 +199,6 @@ init_P3:                                     /* Provisos: List.ListNode<X<INT>> 
     add sp, sp, #20
     bx lr
     
-/* [BASE-PACKAGE] */
-/*  */
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */
@@ -249,6 +247,7 @@ List.LinkedList.add.L0:
 .POOL1_L6_NULL: .word NULL
     
 List.LinkedList.get_P4:                      /* Function: List.LinkedList.get, Provisos: X<INT> */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
     mov fp, sp

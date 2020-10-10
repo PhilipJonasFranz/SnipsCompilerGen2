@@ -7,6 +7,8 @@
 		<Alias>queue.sn:lib/std/data/queue.sn</Alias>
 		<Alias>hash_map.sn:lib/std/data/hash_map.sn</Alias>
 		
+		<Alias>iterable.sn:lib/std/data/interface/iterable.sn</Alias>
+		
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
 		
 		<Alias>vector.sn:lib/std/math/vector.sn</Alias>

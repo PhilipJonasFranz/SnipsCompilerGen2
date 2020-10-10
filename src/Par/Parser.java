@@ -375,6 +375,11 @@ public class Parser {
 		accept(TokenType.LBRACE);
 		
 		while (current.type != TokenType.RBRACE) {
+			if (current.type == TokenType.COMMENT) {
+				accept();
+				continue;
+			}
+			
 			MODIFIER fmod = this.parseModifier();
 			
 			TYPE ret = this.parseType();
