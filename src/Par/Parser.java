@@ -1307,8 +1307,12 @@ public class Parser {
 			else {
 				Token t = tokenStream.get(i + 2);
 				
+				/* Found Struct ID, must be a structure init or static member function access */
 				if (t.type == TokenType.STRUCTID) {
-					/* Found Struct ID, Must be a structure init */
+					/* Namespace::StructId::create<...>(); */
+					if (tokenStream.get(i + 5).type == TokenType.IDENTIFIER)
+						structInitCheck = false;
+					
 					break;
 				}
 				else if (t.type != TokenType.IDENTIFIER && t.type != TokenType.NAMESPACE_IDENTIFIER && t.type != TokenType.STRUCTID) {

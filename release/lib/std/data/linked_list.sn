@@ -260,14 +260,14 @@ namespace List {
 			return null;
 		}
 	
-	}
-	
-	/*
-	 * Creates a new List Object and initializes the head an tail to null.
-	 */
-	shared LinkedList<T>* create<T>(T defValue) {
-		/* Initialize list, set pointers to null */
-		return init<>(LinkedList<T>::(null, null, defValue));
+		/*
+		 * Creates a new List Object and initializes the head an tail to null.
+		 */
+		static LinkedList<T>* create<T>(T defValue) {
+			/* Initialize list, set pointers to null */
+			return init<>(LinkedList<T>::(null, null, defValue));
+		}
+		
 	}
 	
 } 

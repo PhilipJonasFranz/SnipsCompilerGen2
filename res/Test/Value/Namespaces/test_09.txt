@@ -7,11 +7,11 @@ int relation(int x, int y) {
 }
 
 int main() {
-	LinkedList<int>* list = List::create<int>(0);
+	LinkedList<int>* list = LinkedList::create<int>(0);
 	
 	list->add<int>(10);
 	
-	TreeNode<int>* root = Tree::create<int>(10);
+	TreeNode<int>* root = TreeNode::create<int>(10);
 	
 	root->insert<int>(relation, 5);
 	root->insert<int>(relation, 12);

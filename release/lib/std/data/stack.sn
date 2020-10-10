@@ -67,19 +67,19 @@ namespace Stack {
 				return value;
 			}
 		}
-		
-	}
 	
-	/*
-	 * Creates and initializes a new stack.
-	 * Returns a pointer to the newly created stack.
-	 */
-	shared StackedList<T>* create<T>(T defValue) {
-		/* Allocate a new linked list for the stack */
-		LinkedList<T>* list = List::create<T>(defValue);
+		/*
+		 * Creates and initializes a new stack.
+		 * Returns a pointer to the newly created stack.
+		 */
+		shared StackedList<T>* create<T>(T defValue) {
+			/* Allocate a new linked list for the stack */
+			LinkedList<T>* list = List::create<T>(defValue);
+			
+			/* Initialize the stack with the list */
+			return init<>(StackedList<T>::(list));
+		}
 		
-		/* Initialize the stack with the list */
-		return init<>(StackedList<T>::(list));
 	}
 	
 } 
