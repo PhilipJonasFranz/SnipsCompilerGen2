@@ -144,16 +144,34 @@ public class AsNInterfaceTypedef extends AsNNode {
 			intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
 			
 			for (StructTypedef struct : def.implementers) {
-				for (Function f : struct.functions) {
+				for (Function f : def.functions) {
+					Function f0 = null;
+					
+					for (int i = 0; i < struct.functions.size(); i++)
+						if (struct.functions.get(i).path.getLast().equals(f.path.getLast()))
+							f0 = struct.functions.get(i);
+					
 					/* Branch to function */
-					String target = f.path.build() + f.getProvisoPostfix(mapping.providedHeadProvisos);
+					String target = f0.path.build();
 					
-					ASMLabel functionLabel = new ASMLabel(target);
+					String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
 					
-					ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
-					b.optFlags.add(OPT_FLAG.SYS_JMP);
-					
-					intf.instructions.add(b);
+					if (post == null) {
+						ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+						add.comment = new ASMComment("Function was not called, use as placeholder");
+						
+						intf.instructions.add(add);
+					}
+					else {
+						target += post;
+						
+						ASMLabel functionLabel = new ASMLabel(target);
+						
+						ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
+						b.optFlags.add(OPT_FLAG.SYS_JMP);
+						
+						intf.instructions.add(b);
+					}
 				}
 			}
 			

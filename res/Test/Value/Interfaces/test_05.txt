@@ -1,0 +1,80 @@
+SOURCE
+namespace List {
+
+	interface Iterable<Z> {
+
+		int size<Z>();
+		
+		Z get<Z>(int index);
+
+	}
+
+	restricted struct ListNode<T> {
+		ListNode<T>* next;
+		T value;
+	}
+	
+	shared struct LinkedList<T> : Iterable<T> {
+		ListNode<T>* head;
+		ListNode<T>* tail;
+		T defValue;
+		
+		shared void add<T>(T x) {
+			ListNode<T>* n = init<>(ListNode<T>::(null, x));
+		
+			if (self->head == null) {
+				self->head = n;
+				self->tail = n;
+			}
+			else {
+				self->tail->next = n;
+				self->tail = n;
+			}	
+		}
+		
+		shared T get<T>(int i) {
+			if (i < 0) return self->defValue;
+		
+			ListNode<T>* n = self->head;
+			while (i != 0) {
+				if (n->next == null) return self->defValue;
+				
+				n = n->next;
+				i--;
+			}
+			
+			return n->value;	
+		}
+		
+		shared int size<T:void>() {
+			ListNode<void>* n = self->head;
+			int size = 0;
+			while (n != null) {
+				n = n->next;
+				size++;
+			}
+			return size;
+		}
+		
+	}
+} 
+
+int main() {
+	LinkedList<int> l = LinkedList<int>::(null, null, 0);
+	
+	l.add<int>(12);
+	l.add<int>(4);
+	l.add<int>(9);
+	
+	Iterable<int> it = &l;
+	
+	int size = it.size();
+	
+	int s = 0;
+	for (int i = 0; i < size; i++) 
+		s += it.get(i);
+	
+	return s;
+}
+TESTCASES
+25

@@ -365,7 +365,7 @@ public class ContextChecker {
 						
 						if (structFunction.parameters.size() == ftranslated.parameters.size()) {
 							for (int a = 0; a < ftranslated.parameters.size(); a++) 
-								match &= ftranslated.parameters.get(i).getRawType().isEqual(structFunction.parameters.get(i).getRawType());
+								match &= ftranslated.parameters.get(a).getRawType().isEqual(structFunction.parameters.get(a).getRawType());
 						}
 						else match = false;
 						
