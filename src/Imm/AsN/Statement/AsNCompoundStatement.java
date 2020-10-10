@@ -53,7 +53,6 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
-import Imm.TYPE.COMPOSIT.INTERFACE;
 import Res.Const;
 import Util.Pair;
 
@@ -149,7 +148,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			Declaration dec = (Declaration) s;
 			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
 			
-			if (r.declarationLoaded(dec) && !(dec.getType() instanceof INTERFACE)) {
+			if (r.declarationLoaded(dec)) {
 				boolean hasAddress = hasAddressReference(a, dec); 
 				if (hasAddress) {
 					int location = r.declarationRegLocation(dec);
