@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
+import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
@@ -27,6 +28,8 @@ public class InterfaceTypedef extends SyntaxElement {
 	public List<TYPE> proviso;
 	
 	public List<Function> functions;
+	
+	public List<StructTypedef> implementers = new ArrayList();
 	
 	/* Contains all struct typedefs that extended from this struct */
 	public List<InterfaceTypedef> extenders = new ArrayList();
@@ -65,6 +68,37 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	
 			/* --- METHODS --- */
+	public InterfaceProvisoMapping registerMapping(List<TYPE> newMapping) {
+		
+		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
+		assert this.proviso.size() == newMapping.size() : "Expected " + this.proviso.size() + " proviso types, but got " + newMapping.size();
+		
+		for (InterfaceProvisoMapping m : this.registeredMappings) 
+			if (ProvisoUtil.mappingIsEqual(newMapping, m.providedHeadProvisos))
+				return m;
+		
+		/* Copy own provisos */
+		List<TYPE> clone = new ArrayList();
+		for (TYPE t : newMapping) 
+			clone.add(t.clone());
+		
+		/* Create the new mapping and store it */
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(clone);
+		this.registeredMappings.add(mapping);
+		
+		//System.out.print("\nRegistered Interface Mapping: ");
+		
+		String s = "";
+		for (TYPE t : newMapping)
+			s += t.typeString() + ",";
+		if (!newMapping.isEmpty())
+			s = s.substring(0, s.length() - 1);
+		
+		//System.out.println(s);
+		
+		return mapping;
+	}
+
 	/**
 	 * Creates a copy of the function with the name of the given namespace path, performs
 	 * proviso translation and returns the function. Proviso translation means that if the interface

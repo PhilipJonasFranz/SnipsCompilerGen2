@@ -3,6 +3,7 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
+import Ctx.ProvisoUtil;
 import Imm.AST.Statement.InterfaceTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -19,11 +20,13 @@ public class INTERFACE extends COMPOSIT {
 		super(null);
 		this.typedef = typedef;
 		this.proviso = proviso;
-	}
-	
-	public INTERFACE(List<TYPE> proviso) {
-		super(null);
-		this.proviso = proviso;
+		
+		/* 
+		 * Register a new interface mapping if all of the 
+		 * provided provisos have non-proviso types set. 
+		 */
+		if (ProvisoUtil.isProvisoFreeMapping(this.proviso)) 
+			this.typedef.registerMapping(this.proviso);
 	}
 	
 	public boolean isEqual(TYPE type) {
@@ -128,6 +131,13 @@ public class INTERFACE extends COMPOSIT {
 		}
 		
 		return null;
+	}
+
+	public boolean hasProviso() {
+		for (TYPE t : this.proviso)
+			if (t.hasProviso())
+				return true;
+		return false;
 	}
 	
 } 

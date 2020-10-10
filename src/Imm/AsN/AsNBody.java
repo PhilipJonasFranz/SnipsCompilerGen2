@@ -55,6 +55,7 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNAssignment;
 import Imm.AsN.Statement.AsNComment;
+import Imm.AsN.Statement.AsNInterfaceTypedef;
 import Snips.CompilerDriver;
 import Util.Logging.ProgressMessage;
 
@@ -237,12 +238,11 @@ public class AsNBody extends AsNNode {
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
-				// TODO: Cast interface typedef relay table
+				body.instructions.addAll(AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st).getInstructions());
+				body.instructions.add(new ASMSeperator());
 			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
-			
-				
 			}
 			
 			done++;

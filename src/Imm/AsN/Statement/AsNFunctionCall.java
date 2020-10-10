@@ -53,7 +53,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * When a function has provisos, the order cannot be checked.
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
-			if (fc.calledFunction.castedNode == null) 
+			if (fc.calledFunction.castedNode == null && fc.calledFunction.definedInInterface == null) 
 				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path.build(), fc.getSource().getSourceMarker());
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
@@ -102,7 +102,7 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Integer> sMap = new ArrayList();
 		
 		/* Extract mapping locations from different mappings */
-		if (f == null || (f != null && f.isLambdaHead)) {
+		if (f == null || (f != null && (f.isLambdaHead || f.definedInInterface != null))) {
 			/* Load default mapping */
 			List<Pair<Expression, Integer>> mapping = getDefaultMapping(parameters);
 			mapping.stream().forEach(x -> sMap.add(x.second));
@@ -167,7 +167,21 @@ public class AsNFunctionCall extends AsNStatement {
 		else if (regMapping == 2) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
-		if ((f != null && f.isLambdaHead) || anonCall != null) {
+		if (f != null && f.definedInInterface != null) {
+			AsNInterfaceTypedef def = (AsNInterfaceTypedef) f.definedInInterface.castedNode;
+			
+			/* Move the index in the interface typedef of the function * 4 in R12 */
+			for (int i = 0; i < f.definedInInterface.functions.size(); i++)
+				if (f.definedInInterface.functions.get(i).path.getLast().equals(f.path.getLast())) {
+					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
+					break;
+				}
+			
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(def.tableHead));
+			branch.comment = new ASMComment("Branch to relay table of " + f.definedInInterface.path.build());
+			call.instructions.add(branch);
+		}
+		else if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {
 				if (r.declarationLoaded(anonCall)) {
 					int loc = r.declarationRegLocation(anonCall);

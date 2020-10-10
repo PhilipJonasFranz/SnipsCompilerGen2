@@ -18,8 +18,33 @@ struct X<T> : Inter<T> {
 int main() {
 	X<int> x = X<int>::(25);
 	Inter<int> i = &x;
-	
+	Inter<int> i0 = &x;
 	return i.get();
 }
 TESTCASES
 25
+OUTPUT
+/* --test_01.txt */
+    b main
+.L1: 
+    ldr r10, [r10, r0, lsl #2]
+    cmp r10, #1
+    add r10, r12, #4
+    mov r12, #0
+    add pc, pc, r10
+    b X.get
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r3, r0, #2
+    mov r0, r3                               /* Evaluate Expression */
+    bl .L1                                   /* Branch to relay table of Inter */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

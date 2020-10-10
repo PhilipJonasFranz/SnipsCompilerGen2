@@ -87,6 +87,9 @@ public class StructTypedef extends SyntaxElement {
 		
 		this.implemented = implemented;
 		
+		for (INTERFACE i : this.implemented) 
+			i.getTypedef().implementers.add(this);
+		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
 			this.extension.extenders.add(this);

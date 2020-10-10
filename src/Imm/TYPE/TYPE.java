@@ -101,6 +101,11 @@ public abstract class TYPE<T> {
 	public abstract TYPE provisoFree();
 	
 	/**
+	 * Return true iff this or any of the subtypes contains a proviso.
+	 */
+	public abstract boolean hasProviso();
+	
+	/**
 	 * Remap the proviso with the given name to the given type.
 	 * Remapping happens if the call reaches a proviso type whiches placeholder name
 	 * matches the given name. In this case, the newType is returned. In any other case,

@@ -213,8 +213,6 @@ public class ContextChecker {
 		for (Declaration d : declarations) 
 			if (d.last != null) 
 				d.last.free.add(d);
-		
-		p.print(0, true);
 	}
 	
 	public TYPE checkFunction(Function f) throws CTX_EXC {
@@ -372,6 +370,10 @@ public class ContextChecker {
 						else match = false;
 						
 						if (match) {
+							/* Add default context to make sure it is casted */
+							if (structFunction.provisosTypes.isEmpty())
+								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
+							
 							found = true;
 							break;
 						}
@@ -404,6 +406,8 @@ public class ContextChecker {
 	
 	public TYPE checkInterfaceTypedef(InterfaceTypedef e) throws CTX_EXC {
 		for (Function f : e.functions) {
+			f.definedInInterface = e;
+			
 			if (f.modifier != MODIFIER.STATIC) {
 				/* Add to a pool of nested functions */
 				this.nestedFunctions.add(f);
@@ -1481,6 +1485,17 @@ public class ContextChecker {
 				i.parameters.get(a).check(this);
 		}
 		
+		/* 
+		 * Interface makes an exception to this rule. When the nested 
+		 * call chain is transformed during parsig, the information that this is
+		 * an interface is not available. An interface is a pointer by itself,
+		 * and thus we do not need the extra address reference.
+		 */
+		if (i.isNestedCall && i.parameters.get(0).getType().getCoreType() instanceof INTERFACE && i.parameters.get(0) instanceof AddressOf) {
+			AddressOf aof = (AddressOf) i.parameters.get(0);
+			i.parameters.set(0, aof.expression);
+		}
+		
 		return i.getType();
 	}
 	
@@ -1649,6 +1664,17 @@ public class ContextChecker {
 				
 				i.parameters.get(a).check(this);
 			}
+		}
+		
+		/* 
+		 * Interface makes an exception to this rule. When the nested 
+		 * call chain is transformed during parsig, the information that this is
+		 * an interface is not available. An interface is a pointer by itself,
+		 * and thus we do not need the extra address reference.
+		 */
+		if (i.isNestedCall && i.parameters.get(0).getType().getCoreType() instanceof INTERFACE && i.parameters.get(0) instanceof AddressOf) {
+			AddressOf aof = (AddressOf) i.parameters.get(0);
+			i.parameters.set(0, aof.expression);
 		}
 		
 		return new VOID();

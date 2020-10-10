@@ -54,4 +54,8 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		return null;
 	}
 	
+	public boolean hasProviso() {
+		return false;
+	}
+	
 } 

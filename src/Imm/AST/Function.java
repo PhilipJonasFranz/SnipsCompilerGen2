@@ -10,6 +10,7 @@ import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
@@ -41,6 +42,12 @@ public class Function extends CompoundStatement {
 	}
 	
 			/* --- FIELDS --- */
+	/** 
+	 * Set to the interface typedef when this function is 
+	 * a function head defined in this interface. 
+	 */
+	public InterfaceTypedef definedInInterface;
+	
 	/**
 	 * The flattened namespace path of this function.
 	 */
@@ -217,7 +224,7 @@ public class Function extends CompoundStatement {
 			if (map0.size() != map.size()) 
 				throw new SNIPS_EXC(Const.RECIEVED_MAPPING_LENGTH_NOT_EQUAL, map0.size(), map.size());
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map)) return true;
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) return true;
 		}
 		
 		return false;
@@ -234,7 +241,7 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map)) 
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) 
 				return this.provisosCalls.get(i).provisoPostfix;
 		}
 		
@@ -251,7 +258,7 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map))
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
 				return this.provisosCalls.get(i).returnType;
 		}
 		

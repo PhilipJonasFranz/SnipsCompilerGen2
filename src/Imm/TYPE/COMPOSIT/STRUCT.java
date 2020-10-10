@@ -250,5 +250,12 @@ public class STRUCT extends COMPOSIT {
 		
 		return null;
 	}
+
+	public boolean hasProviso() {
+		for (TYPE t : this.proviso)
+			if (t.hasProviso())
+				return true;
+		return false;
+	}
 	
 } 

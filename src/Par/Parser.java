@@ -2230,7 +2230,7 @@ public class Parser {
 		}
 		
 		if (defs.isEmpty()) return null;
-		else if (defs.size() == 1 && path.path.size() == 1) {
+		else if (defs.size() == 1) {
 			return defs.get(0);
 		}
 		else {
@@ -2267,7 +2267,7 @@ public class Parser {
 		}
 		
 		if (defs.isEmpty()) return null;
-		else if (defs.size() == 1 && path.path.size() == 1) {
+		else if (defs.size() == 1) {
 			return defs.get(0);
 		}
 		else {
@@ -2304,7 +2304,7 @@ public class Parser {
 		}
 		
 		if (defs.isEmpty()) return null;
-		else if (defs.size() == 1 && path.path.size() == 1) {
+		else if (defs.size() == 1) {
 			return defs.get(0);
 		}
 		else {

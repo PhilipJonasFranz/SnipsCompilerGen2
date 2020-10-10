@@ -20,6 +20,7 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
@@ -60,7 +61,7 @@ public class AsNIDRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			if (i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER) {
+			if (i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE) {
 				/* Load value from memory */
 				
 				ASMDataLabel label = map.resolve(i.origin);
@@ -80,7 +81,7 @@ public class AsNIDRef extends AsNExpression {
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
-			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER)) {
+			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE)) {
 				ref.loadMemorySection(i, r, map, st);
 			}
 			/* Load in register */
