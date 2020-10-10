@@ -3,7 +3,7 @@ This test verifies global array/struct initialization.
 SOURCE
 #include<linked_list.sn>
 
-LinkedList<int>* list0 = List::create<int>(0);
+LinkedList<int>* list0 = LinkedList::create<int>(0);
 
 bool pred0(int x, int y) {
 	return x == y;

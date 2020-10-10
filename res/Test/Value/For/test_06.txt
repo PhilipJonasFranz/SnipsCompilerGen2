@@ -2,7 +2,7 @@ SOURCE
 #include<linked_list.sn>
 
 int main(int a) {
-    LinkedList<int>* l = List::create<int>(-1);
+    LinkedList<int>* l = LinkedList::create<int>(-1);
     
     l->add<int>(12);
     l->add<int>(10);

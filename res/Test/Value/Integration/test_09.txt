@@ -2,7 +2,7 @@ SOURCE
 #include<queue.sn>
 
 int main() {
-	CyclicQueue<int[2]>* q = Queue::create<int[2]>(3, {0, 0});
+	CyclicQueue<int[2]>* q = CyclicQueue::create<int[2]>(3, {0, 0});
 	
 	q->enqueue<int [2]>({3, 4});
 	q->enqueue<int [2]>({9, 3});

@@ -23,7 +23,7 @@ int main() {
 	X<int>* x = &Storage::X<>::(12);
 	
 	/* Create a new linked list with 0 as default value. */
-	LinkedList<int>* list = List::create<int>(0);
+	LinkedList<int>* list = LinkedList::create<int>(0);
 	
 	x->set<>(8);
 

@@ -11,7 +11,7 @@ struct X<T> {
 }
 
 /* Message queue that temporarily hold incoming messages */
-LinkedList<X<int>>* buffer = List::create<X<int>>(0...);
+LinkedList<X<int>>* buffer = LinkedList::create<X<int>>(0...);
 
 int main() {
 	buffer->add<>(X<int>::(Type.REQ, 20));

@@ -79,7 +79,7 @@ namespace Map {
 	
 			/* Initialize new list at index */
 			if (l == null) {
-				l = List::create<MapEntry<K, V>*>(self->defValue);
+				l = LinkedList::create<MapEntry<K, V>*>(self->defValue);
 				*(self->storage + hash) = l;
 			}
 			
@@ -222,7 +222,7 @@ namespace Map {
 		 */
 		shared LinkedList<MapEntry<K, V>*>* getEntries<K, V>() {
 			/* Create new list to collect */
-			LinkedList<MapEntry<K, V>*>* list = List::create<MapEntry<K, V>*>(self->defValue);
+			LinkedList<MapEntry<K, V>*>* list = LinkedList::create<MapEntry<K, V>*>(self->defValue);
 			
 			/* Iterate over storage lists */
 			int s = self->size;
@@ -251,7 +251,7 @@ namespace Map {
 		 */
 		shared LinkedList<V>* getValues<K, V>() {
 			/* Create new list to collect */
-			LinkedList<V>* list = List::create<V>(self->defValue->value);
+			LinkedList<V>* list = LinkedList::create<V>(self->defValue->value);
 			
 			/* Iterate over storage lists */
 			int s = self->size;

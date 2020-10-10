@@ -74,7 +74,7 @@ namespace Stack {
 		 */
 		shared StackedList<T>* create<T>(T defValue) {
 			/* Allocate a new linked list for the stack */
-			LinkedList<T>* list = List::create<T>(defValue);
+			LinkedList<T>* list = LinkedList::create<T>(defValue);
 			
 			/* Initialize the stack with the list */
 			return init<>(StackedList<T>::(list));

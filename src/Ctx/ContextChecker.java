@@ -2254,11 +2254,16 @@ public class ContextChecker {
 		
 		/* Search through the registered function declarations, but only match the end of the namespace path */
 		for (Function f0 : this.functions) 
-			if (f0.path.build().endsWith(path.build())) 
-				funcs.add(f0);
+			if (f0.path.build().endsWith(path.build())) {
+				String p0 = f0.path.build();
+				String p1 = path.build();
+				
+				if (p0.length() == p1.length() || p0.substring(0, p0.length() - p1.length()).endsWith("."))
+					funcs.add(f0);
+			}
 		
 		/* Search through predicate declarations */
-		for (Declaration d : this.currentFunction.peek().parameters) {
+		if (!this.currentFunction.isEmpty()) for (Declaration d : this.currentFunction.peek().parameters) {
 			if (d.getType() instanceof FUNC) {
 				FUNC f0 = (FUNC) d.getType();
 				

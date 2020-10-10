@@ -12,7 +12,7 @@ int getSum(Iterable<int> it) {
 }
 
 int main(bool b) {
-	LinkedList<int>* l = List::create<int>(0);
+	LinkedList<int>* l = LinkedList::create<int>(0);
 	
 	l->add<int>(15);
 	l->add<int>(6);

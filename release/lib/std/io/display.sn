@@ -149,7 +149,7 @@ namespace Display {
 		
 		shared char* scanf() {
 			/* Create a list where the input is temporarily stored */
-			LinkedList<char>* input = List::create<>((char) 0);
+			LinkedList<char>* input = LinkedList::create<>((char) 0);
 			
 			while (true) {
 				char c = Display::getChar();
