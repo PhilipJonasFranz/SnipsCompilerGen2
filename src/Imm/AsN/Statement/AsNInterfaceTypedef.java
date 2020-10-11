@@ -128,9 +128,12 @@ public class AsNInterfaceTypedef extends AsNNode {
 			
 			intf.instructions.add(tableHeadProviso);
 			
+			/**
+			 * Only one struct implemented this interface, so the SID must be the one from 
+			 * this struct. This allows to precalculate some values, which is done below.
+			 */
 			if (def.implementers.size() == 1) {
-				/* Simplified version of table */
-				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(def.implementers.get(0).SID + 4)));
+				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
 				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
 
 				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
@@ -140,6 +143,10 @@ public class AsNInterfaceTypedef extends AsNNode {
 				/* Inject for only struct typedef */
 				hasCalls |= intf.injectStructTypedefTableMapping(def, sdef, mapping);
 			}
+			/**
+			 * Multiple structs implement this interface, so the SID needs to be loaded and mapped
+			 * to the index of the struct typedef in the InterfaceTypedef.implementes list.
+			 */
 			else {
 				/* Load SID from pointer into R10 */
 				intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
