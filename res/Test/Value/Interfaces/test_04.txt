@@ -29,8 +29,8 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-.L6_P0:                                      /* Interface : Inter, Provisos: INT */
-    add r10, r12, #5
+.L6_P0:                                      /* Interface : Inter, Provisos: INT,  */
+    add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b X.get_P3

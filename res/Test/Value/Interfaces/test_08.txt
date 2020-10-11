@@ -184,8 +184,8 @@ init_P9:                                     /* Provisos: List.ListNode<INT> */
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
-free.L0_P1:                                  /* Interface : Iterable, Provisos: INT */
-    add r10, r12, #6
+free.L0_P1:                                  /* Interface : Iterable, Provisos: INT,  */
+    add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b List.LinkedList.size_P3

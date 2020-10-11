@@ -85,91 +85,106 @@ public class AsNInterfaceTypedef extends AsNNode {
 		/* Check if anything from the interface was used. If not, the interface table does not have to be generated. */
 		boolean hasCalls = false;
 		
-		/* For all proviso mappings, create a relay-table */
-		for (InterfaceProvisoMapping mapping : def.registeredMappings) {
-			/* 
-			 * Check if a table has been created for this 'proviso group' 
-			 * has been created already, if yes, simply continue. During function
-			 * casting, the exact algorithm will be executed, resulting in correct
-			 * and equal results on both ends.
-			 */
-			if (createdTable.contains(mapping.provisoPostfix))
-				continue;
-			else createdTable.add(mapping.provisoPostfix);
-			
+		/* Only one mapping and only one function, table will have only one entry, directly relay to single function target. */
+		if (def.registeredMappings.size() == 1 && def.registeredMappings.get(0).providedHeadProvisos.isEmpty() && def.implementers.size() == 1 && def.functions.size() == 1) {
 			/* Generate comment with function name and potential proviso types */
 			String s = "Interface : " + def.path.build();
-			List<TYPE> types = mapping.providedHeadProvisos;
-			if (!types.isEmpty()) s += ", Provisos: ";
-			for (int x = 0; x < types.size(); x++) 
-				s += types.get(x).provisoFree().typeString() + ", ";
-			if (s.isEmpty()) s = s.trim().substring(0, s.trim().length() - 1);
-			
-			/* Get the current proviso postfix. If only the default mapping exists, let postfix empty */
-			String postfix = mapping.provisoPostfix;
-			if (def.registeredMappings.size() == 1 && mapping.providedHeadProvisos.isEmpty())
-				postfix = "";
 			
 			/* Head of the table for this proviso mapping */
-			ASMLabel tableHeadProviso = new ASMLabel(intf.tableHead.name + postfix);
+			ASMLabel tableHeadProviso = new ASMLabel(intf.tableHead.name);
 			tableHeadProviso.comment =  new ASMComment(s);
 			intf.instructions.add(tableHeadProviso);
 			
-			/**
-			 * Only one struct implemented this interface, so the SID must be the one from 
-			 * this struct. This allows to precalculate some values, which is done below.
-			 */
-			if (def.implementers.size() == 1) {
+			hasCalls |= intf.injectStructTypedefTableMapping(def, def.implementers.get(0), def.registeredMappings.get(0));
+		}
+		else {
+			/* For all proviso mappings, create a relay-table */
+			for (InterfaceProvisoMapping mapping : def.registeredMappings) {
+				/* 
+				 * Check if a table has been created for this 'proviso group' 
+				 * has been created already, if yes, simply continue. During function
+				 * casting, the exact algorithm will be executed, resulting in correct
+				 * and equal results on both ends.
+				 */
+				if (createdTable.contains(mapping.provisoPostfix))
+					continue;
+				else createdTable.add(mapping.provisoPostfix);
 				
-				/* Compute the offset to be jumped to select the correct function */
-				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
-				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
-
-				/* Jump to the correct function */
-				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+				/* Generate comment with function name and potential proviso types */
+				String s = "Interface : " + def.path.build();
 				
-				StructTypedef sdef = def.implementers.get(0);
+				List<TYPE> types = mapping.providedHeadProvisos;
+				if (!types.isEmpty()) s += ", Provisos: ";
+				for (int x = 0; x < types.size(); x++) 
+					s += types.get(x).provisoFree().typeString() + ", ";
+				if (s.isEmpty()) s = s.trim().substring(0, s.trim().length() - 1);
 				
-				/* Inject for only struct typedef */
-				hasCalls |= intf.injectStructTypedefTableMapping(def, sdef, mapping);
-			}
-			/**
-			 * Multiple structs implement this interface, so the SID needs to be loaded and mapped
-			 * to the index of the struct typedef in the InterfaceTypedef.implementes list.
-			 */
-			else {
-				/* Label at the end of the table multiplexing section */
-				ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
+				/* Get the current proviso postfix. If only the default mapping exists, let postfix empty */
+				String postfix = mapping.provisoPostfix;
+				if (def.registeredMappings.size() == 1 && mapping.providedHeadProvisos.isEmpty())
+					postfix = "";
 				
-				/* Load SID from pointer into R10 */
-				intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
-				intf.instructions.add(new ASMLdr(new RegOp(REG.R10), new RegOp(REG.R10)));
+				/* Head of the table for this proviso mapping */
+				ASMLabel tableHeadProviso = new ASMLabel(intf.tableHead.name + postfix);
+				tableHeadProviso.comment =  new ASMComment(s);
+				intf.instructions.add(tableHeadProviso);
 				
-				int cnt = 0;
-				
-				/* Generate the SID-to-Index mapper */
-				for (StructTypedef struct : def.implementers) {
-					intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
-					intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
-					intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
+				/**
+				 * Only one struct implemented this interface, so the SID must be the one from 
+				 * this struct. This allows to precalculate some values, which is done below.
+				 */
+				if (def.implementers.size() == 1) {
+					
+					/* Compute the offset to be jumped to select the correct function */
+					intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
+					intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+	
+					/* Jump to the correct function */
+					intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+					
+					StructTypedef sdef = def.implementers.get(0);
+					
+					/* Inject for only struct typedef */
+					hasCalls |= intf.injectStructTypedefTableMapping(def, sdef, mapping);
+				}
+				/**
+				 * Multiple structs implement this interface, so the SID needs to be loaded and mapped
+				 * to the index of the struct typedef in the InterfaceTypedef.implementes list.
+				 */
+				else {
+					/* Label at the end of the table multiplexing section */
+					ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
+					
+					/* Load SID from pointer into R10 */
+					intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
+					intf.instructions.add(new ASMLdr(new RegOp(REG.R10), new RegOp(REG.R10)));
+					
+					int cnt = 0;
+					
+					/* Generate the SID-to-Index mapper */
+					for (StructTypedef struct : def.implementers) {
+						intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
+						intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
+						intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
+					}
+					
+					intf.instructions.add(tableEnd);
+					
+					/* Compute the offset to be jumped to select the correct function */
+					intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R12)));
+					intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new ImmOp(4)));
+					intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+					
+					/* Jump to the correct function */
+					intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+					
+					/* Generate the relay-table */
+					for (StructTypedef struct : def.implementers) 
+						hasCalls |= intf.injectStructTypedefTableMapping(def, struct, mapping);
 				}
 				
-				intf.instructions.add(tableEnd);
-				
-				/* Compute the offset to be jumped to select the correct function */
-				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R12)));
-				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new ImmOp(4)));
-				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
-				
-				/* Jump to the correct function */
-				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
-				
-				/* Generate the relay-table */
-				for (StructTypedef struct : def.implementers) 
-					hasCalls |= intf.injectStructTypedefTableMapping(def, struct, mapping);
+				intf.instructions.add(new ASMSeperator());
 			}
-			
-			intf.instructions.add(new ASMSeperator());
 		}
 		
 		/* No calls were made to the interface, and the only registered mapping 

@@ -102,6 +102,8 @@ public class StructTypedef extends SyntaxElement {
 	 * overwritten functions.
 	 */
 	public void postInitialize() {
+		int c = 0;
+		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
@@ -127,7 +129,7 @@ public class StructTypedef extends SyntaxElement {
 				}
 				
 				if (!override) {
-					this.functions.add(f0);
+					this.functions.add(c++, f0);
 					this.inheritedFunctions.add(f0);
 				}
 			}
