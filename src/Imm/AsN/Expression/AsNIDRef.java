@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
@@ -23,6 +24,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Res.Const;
 
 public class AsNIDRef extends AsNExpression {
 
@@ -94,12 +96,13 @@ public class AsNIDRef extends AsNExpression {
 					int off = st.getParameterByteOffset(i.origin);
 					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, off)));
 				}
-				else {
+				else if (st.getDeclarationInStackByteOffset(i.origin) != -1) {
 					/* Load Declaration Location from Stack */
 					int off = st.getDeclarationInStackByteOffset(i.origin);
 					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), 
 						new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 				}
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				
 				r.getReg(target).setDeclaration(i.origin);
 			}
@@ -160,7 +163,7 @@ public class AsNIDRef extends AsNExpression {
 			}
 		}
 		/* Origin is in local stack */
-		else {
+		else if (st.getDeclarationInStackByteOffset(i.origin) != -1) {
 			int offset = st.getDeclarationInStackByteOffset(i.origin);
 			
 			/* Copy memory location with the size of the array */
@@ -180,6 +183,7 @@ public class AsNIDRef extends AsNExpression {
 			
 			AsNStructureInit.flush(regs, this);
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 

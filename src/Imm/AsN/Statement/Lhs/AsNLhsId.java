@@ -7,6 +7,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -202,6 +203,7 @@ public class AsNLhsId extends AsNStatement {
 				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), new Cond(COND.EQ)));
 			}
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		
 		/* Pop Last Operand Register if Operand Register was used */
 		if (clearOtherOperandReg && save) {

@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -32,6 +33,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Res.Const;
 import Snips.CompilerDriver;
 
 public class AsNStructSelect extends AsNExpression {
@@ -206,6 +208,7 @@ public class AsNStructSelect extends AsNExpression {
 			/* Add sum to current */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		
 		/* 
 		 * Only convert to bytes if select does deref and selector is not a array select since array select will
@@ -256,6 +259,7 @@ public class AsNStructSelect extends AsNExpression {
 						
 						injectArraySelect(node, (ArraySelect) sel1.selector, r, map, st);
 					}
+					else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				}
 				/* Base Case */
 				else if (selection instanceof IDRef) {
@@ -270,6 +274,7 @@ public class AsNStructSelect extends AsNExpression {
 					
 					injectArraySelect(node, arrSel, r, map, st);
 				}
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			}
 			
 			/* If current selection derefs and its not the last selection in the chain */
@@ -283,9 +288,9 @@ public class AsNStructSelect extends AsNExpression {
 			}
 			
 			/* Keep selecting */
-			if (selection instanceof StructSelect) {
+			if (selection instanceof StructSelect) 
 				sel0 = (StructSelect) sel0.selection;
-			}
+			
 			/* Base Case reached */
 			else break;
 		}

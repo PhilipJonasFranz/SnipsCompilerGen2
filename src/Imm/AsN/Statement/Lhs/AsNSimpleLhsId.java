@@ -6,6 +6,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
@@ -31,6 +32,7 @@ import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Res.Const;
 
 public class AsNSimpleLhsId extends AsNLhsId {
 
@@ -116,7 +118,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					id.instructions.add(load);
 				}
 				/* Local */
-				else {
+				else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 					int offset = st.getDeclarationInStackByteOffset(ref.origin);
 					offset += (ref.origin.getType().wordsize() - 1) * 4;
 					
@@ -125,10 +127,12 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					sub.comment = new ASMComment("Start of structure in stack");
 					id.instructions.add(sub);
 				}
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				
 				/* Copy array */
 				AsNAssignment.copyStackSection((lhs.origin.getType()).wordsize(), id, st);
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}
 		
 		r.free(0, 1, 2);
