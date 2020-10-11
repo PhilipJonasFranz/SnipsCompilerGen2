@@ -134,18 +134,23 @@ public class AsNInterfaceTypedef extends AsNNode {
 				 * this struct. This allows to precalculate some values, which is done below.
 				 */
 				if (def.implementers.size() == 1) {
+					/* If there is only one function we can relay directly */
+					if (def.functions.size() > 1)
+						/* Compute the offset to be jumped to select the correct function */
+						intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
 					
-					/* Compute the offset to be jumped to select the correct function */
-					intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
 					intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
 	
-					/* Jump to the correct function */
-					intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
-					
-					StructTypedef sdef = def.implementers.get(0);
+					/* 
+					 * If only one function, the is no need to jump to the 
+					 * correct branch, since there is only one 
+					 */
+					if (def.functions.size() > 1)
+						/* Jump to the correct function */
+						intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
 					
 					/* Inject for only struct typedef */
-					hasCalls |= intf.injectStructTypedefTableMapping(def, sdef, mapping);
+					hasCalls |= intf.injectStructTypedefTableMapping(def, def.implementers.get(0), mapping);
 				}
 				/**
 				 * Multiple structs implement this interface, so the SID needs to be loaded and mapped
