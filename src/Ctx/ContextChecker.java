@@ -1356,6 +1356,8 @@ public class ContextChecker {
 				boolean found = false;
 				for (Function nested : s.getTypedef().functions) {
 					if (nested.equals(f)) {
+						nested.wasCalled = true;
+						
 						found = true;
 						break;
 					}
@@ -1543,6 +1545,8 @@ public class ContextChecker {
 				boolean found = false;
 				for (Function nested : s.getTypedef().functions) {
 					if (nested.equals(f)) {
+						nested.wasCalled = true;
+						
 						found = true;
 						break;
 					}

@@ -185,9 +185,7 @@ init_P9:                                     /* Provisos: List.ListNode<INT> */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
 free.L0_P1:                                  /* Interface : Iterable, Provisos: INT */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
+    add r10, r12, #6
     mov r12, #0
     add pc, pc, r10
     b List.LinkedList.size_P3
@@ -198,14 +196,6 @@ free.L0_P1:                                  /* Interface : Iterable, Provisos: 
 /*  */
 /* Using the serializable interface, structs can be converted */
 /* into string format. */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    add r10, r10, r10                        /* Function was not called, use as placeholder */
-    b List.LinkedList.deserialize
-    
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */
@@ -349,8 +339,7 @@ List.LinkedList.deserialize:                 /* Function: List.LinkedList.deseri
     bx lr
 .POOL5_L12_NULL: .word NULL
     
-/* Creates a new List Object and initializes the head an tail to null. */
-List.create_P6:                              /* Function: List.create, Provisos: INT */
+List.LinkedList.create_P6:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
@@ -389,7 +378,7 @@ getSum.L2:
 main:                                        /* Function: main */
     push { lr }
     mov r0, #0                               /* Evaluate Expression */
-    bl List.create_P6                        /* Call List.create */
+    bl List.LinkedList.create_P6             /* Call List.LinkedList.create */
     mov r4, r0
     mov r1, #15
     mov r0, r4

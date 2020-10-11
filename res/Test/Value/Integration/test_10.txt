@@ -312,14 +312,6 @@ Hash.hash.L2:
 /*  */
 /* Using the serializable interface, structs can be converted */
 /* into string format. */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    add r10, r10, r10                        /* Function was not called, use as placeholder */
-    b List.LinkedList.deserialize
-    
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */
@@ -476,8 +468,7 @@ List.LinkedList.deserialize:                 /* Function: List.LinkedList.deseri
     bx lr
 .POOL4_L14_NULL: .word NULL
     
-/* Creates a new List Object and initializes the head an tail to null. */
-List.create_P4:                              /* Function: List.create, Provisos: Map.MapEntry<INT,INT>* */
+List.LinkedList.create_P4:                   /* Function: List.LinkedList.create, Provisos: Map.MapEntry<INT,INT>* */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
@@ -562,7 +553,7 @@ Map.HashMap.put_P3:                          /* Function: Map.HashMap.put, Provi
     bne Map.HashMap.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    bl List.create_P4                        /* Call List.create */
+    bl List.LinkedList.create_P4             /* Call List.LinkedList.create */
     mov r6, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
@@ -818,9 +809,7 @@ Map.HashMap.remove.L0:
     ldmfd sp!, {r3-r5, fp, pc}
 .POOL9_L14_NULL: .word NULL
     
-/* Creates a new hash map with defined size and default value. */
-/* Also sets up the storage and initializes it. */
-Map.create_P1:                               /* Function: Map.create, Provisos: INT, INT */
+Map.HashMap.create_P1:                       /* Function: Map.HashMap.create, Provisos: INT, INT */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
@@ -829,9 +818,9 @@ Map.create_P1:                               /* Function: Map.create, Provisos: 
     mov r5, r0
 /* Initialize storage to null */
     mov r6, #0
-Map.create.L1: 
+Map.HashMap.create.L1: 
     cmp r6, r3
-    bge Map.create.L2
+    bge Map.HashMap.create.L2
     ldr r0, .POOL10_L14_NULL                 /* Evaluate Expression */
     push { r0 }
     add r0, r5, r6
@@ -839,8 +828,8 @@ Map.create.L1:
     pop { r0 }
     str r0, [r1]
     add r6, r6, #1
-    b Map.create.L1
-Map.create.L2: 
+    b Map.HashMap.create.L1
+Map.HashMap.create.L2: 
 /* Initialize default tuple */
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
@@ -863,7 +852,7 @@ main:                                        /* Function: main */
     mov r3, r0
     mvn r1, #0
     mov r0, #10
-    bl Map.create_P1                         /* Call Map.create */
+    bl Map.HashMap.create_P1                 /* Call Map.HashMap.create */
     mov r4, r0
 /* Hash function will hash the same value here */
     mov r0, #12                              /* Load parameters */

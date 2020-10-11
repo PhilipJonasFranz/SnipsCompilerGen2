@@ -55,6 +55,8 @@ public class Function extends CompoundStatement {
 	 */
 	public boolean requireR10Reset = false;
 	
+	public boolean wasCalled = false;
+	
 	/**
 	 * The flattened namespace path of this function.
 	 */

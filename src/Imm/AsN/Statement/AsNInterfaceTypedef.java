@@ -128,60 +128,44 @@ public class AsNInterfaceTypedef extends AsNNode {
 			
 			intf.instructions.add(tableHeadProviso);
 			
-			/* Load SID from pointer into R10 */
-			intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
-			intf.instructions.add(new ASMLdr(new RegOp(REG.R10), new RegOp(REG.R10)));
-			
-			int cnt = 0;
-			
-			/* Generate the table */
-			for (StructTypedef struct : def.implementers) {
-				intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
-				intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
-				intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
+			if (def.implementers.size() == 1) {
+				/* Simplified version of table */
+				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(def.implementers.get(0).SID + 4)));
+				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+
+				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+				
+				StructTypedef sdef = def.implementers.get(0);
+				
+				/* Inject for only struct typedef */
+				hasCalls |= intf.injectStructTypedefTableMapping(def, sdef, mapping);
 			}
-			
-			intf.instructions.add(tableEnd);
-			
-			/* Add selected function to offset */
-			intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R12)));
-			intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new ImmOp(4)));
-			intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
-			
-			intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
-			
-			for (StructTypedef struct : def.implementers) {
-				for (Function f : def.functions) {
-					Function f0 = null;
-					
-					for (int i = 0; i < struct.functions.size(); i++)
-						if (struct.functions.get(i).path.getLast().equals(f.path.getLast()))
-							f0 = struct.functions.get(i);
-					
-					/* Branch to function */
-					String target = f0.path.build();
-					
-					String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
-					
-					if (post == null) {
-						ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
-						add.comment = new ASMComment("Function was not called, use as placeholder");
-						
-						intf.instructions.add(add);
-					}
-					else {
-						hasCalls = true;
-						
-						target += post;
-						
-						ASMLabel functionLabel = new ASMLabel(target);
-						
-						ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
-						b.optFlags.add(OPT_FLAG.SYS_JMP);
-						
-						intf.instructions.add(b);
-					}
+			else {
+				/* Load SID from pointer into R10 */
+				intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
+				intf.instructions.add(new ASMLdr(new RegOp(REG.R10), new RegOp(REG.R10)));
+				
+				int cnt = 0;
+				
+				/* Generate the table */
+				for (StructTypedef struct : def.implementers) {
+					intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
+					intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
+					intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
 				}
+				
+				intf.instructions.add(tableEnd);
+				
+				/* Add selected function to offset */
+				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R12)));
+				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new ImmOp(4)));
+				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+				
+				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+				
+				/* Inject for all struct typedefs */
+				for (StructTypedef struct : def.implementers) 
+					hasCalls |= intf.injectStructTypedefTableMapping(def, struct, mapping);
 			}
 			
 			if (!mapping.equals(def.registeredMappings.get(def.registeredMappings.size() - 1)) && def.registeredMappings.size() > 1)
@@ -192,6 +176,53 @@ public class AsNInterfaceTypedef extends AsNNode {
 			intf.instructions.clear();
 		
 		return intf;
+	}
+	
+	/**
+	 * Injects for a given struct typedef the function relays in the table. For example, 
+	 * the generated instructions by this function could look like:<br>
+	 * <br>
+	 * b X.set<br>
+	 * b X.get<br>
+	 * add r10, r10, r10 ...<br>
+	 * b X.foo<br>
+	 */
+	public boolean injectStructTypedefTableMapping(InterfaceTypedef typedef, StructTypedef def, InterfaceProvisoMapping mapping) {
+		boolean hasCalls = false;
+		
+		for (Function f : typedef.functions) {
+			Function f0 = null;
+			
+			for (int i = 0; i < def.functions.size(); i++)
+				if (def.functions.get(i).path.getLast().equals(f.path.getLast()))
+					f0 = def.functions.get(i);
+			
+			/* Branch to function */
+			String target = f0.path.build();
+			
+			String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
+			
+			if (post == null) {
+				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+				add.comment = new ASMComment("Function was not called, use as placeholder");
+				
+				this.instructions.add(add);
+			}
+			else {
+				hasCalls |= f.wasCalled;
+				
+				target += post;
+				
+				ASMLabel functionLabel = new ASMLabel(target);
+				
+				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
+				b.optFlags.add(OPT_FLAG.SYS_JMP);
+				
+				this.instructions.add(b);
+			}
+		}
+		
+		return hasCalls;
 	}
 	
 } 

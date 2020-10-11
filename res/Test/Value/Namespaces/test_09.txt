@@ -185,14 +185,6 @@ init_P4:                                     /* Provisos: List.ListNode<INT> |  
 /*  */
 /* Using the serializable interface, structs can be converted */
 /* into string format. */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    add r10, r10, r10                        /* Function was not called, use as placeholder */
-    b List.LinkedList.deserialize
-    
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */
@@ -280,8 +272,7 @@ List.LinkedList.deserialize:                 /* Function: List.LinkedList.deseri
     bx lr
 .POOL3_L10_NULL: .word NULL
     
-/* Creates a new List Object and initializes the head an tail to null. */
-List.create_P1:                              /* Function: List.create, Provisos: INT */
+List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
@@ -468,9 +459,7 @@ Tree.TreeNode.delete.L4:
     ldmfd sp!, {r3-r6, pc}
 .POOL6_L10_NULL: .word NULL
     
-/* Create a new Tree, initialize both childs to 0, set root value */
-/* to given value. Return a pointer to the root. */
-Tree.create_P5:                              /* Function: Tree.create, Provisos: INT */
+Tree.TreeNode.create_P5:                     /* Function: Tree.TreeNode.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize the root with null pointers and the given value */
@@ -509,13 +498,13 @@ relation.L3:
 main:                                        /* Function: main */
     push { lr }
     mov r0, #0                               /* Evaluate Expression */
-    bl List.create_P1                        /* Call List.create */
+    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
     mov r3, r0
     mov r1, #10
     mov r0, r3
     bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
     mov r0, #10                              /* Evaluate Expression */
-    bl Tree.create_P5                        /* Call Tree.create */
+    bl Tree.TreeNode.create_P5               /* Call Tree.TreeNode.create */
     mov r4, r0
     mov r0, #5                               /* Load parameters */
     push { r0 }

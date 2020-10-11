@@ -216,14 +216,6 @@ free.L2:
 /*  */
 /* Using the serializable interface, structs can be converted */
 /* into string format. */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    add r10, r10, r10                        /* Function was not called, use as placeholder */
-    b List.LinkedList.deserialize
-    
 /* This package contains the utility to create a linked-list, */
 /* insert and remove values from it, as well as some functions */
 /* that give information about the state of the list. */
@@ -339,8 +331,7 @@ List.LinkedList.deserialize:                 /* Function: List.LinkedList.deseri
     bx lr
 .POOL4_L8_NULL: .word NULL
     
-/* Creates a new List Object and initializes the head an tail to null. */
-List.create_P1:                              /* Function: List.create, Provisos: INT */
+List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
@@ -359,7 +350,7 @@ main_init:
     sub sp, sp, #20
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
-    bl List.create_P1                        /* Call List.create */
+    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
     ldr r1, .POOL6_L7_list0                  /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}

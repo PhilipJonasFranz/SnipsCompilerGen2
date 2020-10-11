@@ -410,10 +410,7 @@ Queue.CyclicQueue.dequeue.L4:
     mov r10, #0
     bx lr
     
-/* Allocates a new queue and initializes it. */
-/* The passed size will be set as the maximum amount of elements */
-/* in the queue. */
-Queue.create_P0:                             /* Function: Queue.create, Provisos: INT[2] */
+Queue.CyclicQueue.create_P0:                 /* Function: Queue.CyclicQueue.create, Provisos: INT[2] */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -448,7 +445,7 @@ main:                                        /* Function: main */
     mov r1, #0
     stmfd sp!, {r0, r1}
     mov r0, #3
-    bl Queue.create_P0                       /* Call Queue.create */
+    bl Queue.CyclicQueue.create_P0           /* Call Queue.CyclicQueue.create */
     mov r3, r0
     mov r0, #4                               /* Load parameters */
     mov r1, #3

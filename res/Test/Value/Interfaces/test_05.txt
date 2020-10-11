@@ -207,9 +207,7 @@ init_P2:                                     /* Function: init, Provisos: List.L
     bx lr
     
 init.L2_P0:                                  /* Interface : List.Iterable, Provisos: INT */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
+    add r10, r12, #6
     mov r12, #0
     add pc, pc, r10
     b List.LinkedList.size_P4

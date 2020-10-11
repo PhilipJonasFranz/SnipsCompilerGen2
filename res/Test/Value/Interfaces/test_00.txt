@@ -26,9 +26,7 @@ OUTPUT
 /* --test_00.txt */
     b main
 .L1:                                         /* Interface : Inter */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #1
-    add r10, r12, #4
+    add r10, r12, #5
     mov r12, #0
     add pc, pc, r10
     b X.get

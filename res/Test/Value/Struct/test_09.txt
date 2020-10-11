@@ -145,31 +145,13 @@ init_P2:                                     /* Function: init, Provisos: List.L
     add sp, sp, #16
     bx lr
     
-/* [BASE-PACKAGE] */
-/*  */
-/* This package contains the interface definition for an iterable struct. */
-/* The interface creates data access and exchange points, so data can be */
-/* read and written. */
-/* [BASE-PACKAGE] */
-/*  */
-/* Using the serializable interface, structs can be converted */
-/* into string format. */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    add r10, r10, r10                        /* Function was not called, use as placeholder */
-    b List.LinkedList.deserialize
-    
 List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
     mov r10, #0
     ldr r0, .POOL1_L3_NULL                   /* Evaluate Expression */
     bx lr
 .POOL1_L3_NULL: .word NULL
     
-/* Creates a new List Object and initializes the head an tail to null. */
-List.create_P1:                              /* Function: List.create, Provisos: INT* */
+List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT* */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
@@ -190,7 +172,7 @@ main:                                        /* Function: main */
     mov r1, #10
     stmfd sp!, {r0, r1}
     ldr r0, .POOL3_L3_NULL                   /* Evaluate Expression */
-    bl List.create_P1                        /* Call List.create */
+    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
