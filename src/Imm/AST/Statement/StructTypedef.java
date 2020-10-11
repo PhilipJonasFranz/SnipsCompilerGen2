@@ -90,6 +90,18 @@ public class StructTypedef extends SyntaxElement {
 		for (INTERFACE i : this.implemented) 
 			i.getTypedef().implementers.add(this);
 		
+		this.modifier = modifier;
+		this.self = new STRUCT(this, this.proviso);
+	}
+	
+	
+			/* --- METHODS --- */
+	/**
+	 * This method is called once the entire struct typedef is parsed. After all function 
+	 * in this struct are added, functions from the extensions are added, with respect to 
+	 * overwritten functions.
+	 */
+	public void postInitialize() {
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
@@ -107,18 +119,21 @@ public class StructTypedef extends SyntaxElement {
 				base.path.add(f.path.getLast());
 				
 				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
-				this.functions.add(f0);
 				
-				this.inheritedFunctions.add(f0);
+				boolean override = false;
+				for (Function fs : this.functions) {
+					if (fs.path.getLast().equals(f0.path.getLast()))
+						override = true;
+				}
+				
+				if (!override) {
+					this.functions.add(f0);
+					this.inheritedFunctions.add(f0);
+				}
 			}
 		}
-		
-		this.modifier = modifier;
-		this.self = new STRUCT(this, this.proviso);
 	}
 	
-	
-			/* --- METHODS --- */
 	/**
 	 * Assign SIDs and neighbours to the StructTypedefs based on the location
 	 * in the extension tree. SIDs are unique, as well as the neighbours.

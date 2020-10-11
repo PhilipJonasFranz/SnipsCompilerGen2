@@ -363,6 +363,14 @@ public class Parser {
 		
 		accept(TokenType.RBRACE);
 
+		/* 
+		 * Initialize the Struct typedef, mainly copy the functions from the extension.
+		 * This is nessesary to be done here since the functions in the typedef are present
+		 * from this point. To check if functions from the extension are overwritten, all
+		 * functions need to be present, so we do the init here.
+		 */
+		def.postInitialize();
+		
 		return def;
 	}
 	

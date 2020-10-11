@@ -1,0 +1,28 @@
+DESCRIPTION
+Tests the overriding of functions from the extension.
+SOURCE
+namespace C {
+
+	struct B {
+		
+		int v;
+		
+		int get() {
+			return self->v;
+		}
+	}
+
+	struct A : B {
+		/* Overrides function get() in B */
+		int get() {
+			return self->v * 2;
+		}
+	}
+}
+
+int main() {
+	C::A* a = init<>(A::(12));
+	return a->get();
+}
+TESTCASES
+24
