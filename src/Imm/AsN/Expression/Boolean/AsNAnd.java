@@ -66,7 +66,7 @@ public class AsNAnd extends AsNBinaryExpression {
 			
 			/* Perform and */
 			ASMAdd and0 = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(0));
-			and0.updateConditionField = true;
+			and0.updateCondField();
 			and.instructions.add(and0);
 			
 			and.instructions.add(new ASMMov(new RegOp(REG.R1), new ImmOp(1), new Cond(COND.NE)));

@@ -2020,22 +2020,18 @@ public class Parser {
 				 */
 				for (int i = this.scopes.size() - 1; i >= 0; i--) {
 					List<Declaration> scope = this.scopes.get(i);
-					for (int a = 0; a < scope.size(); a++) {
-						if (scope.get(a).path.build().equals(path.build())) {
+					for (int a = 0; a < scope.size(); a++) 
+						if (scope.get(a).path.build().equals(path.build())) 
 							/* Path referres to a variable, set lambda to null */
 							lambda = null;
-						}
-					}
 				}
 				
-				if (lambda != null) {
+				if (lambda != null) 
 					/* Predicate without proviso */
 					return this.wrapPlaceholder(new FunctionRef(new ArrayList(), lambda, source));
-				}
-				else {
+				else 
 					/* Identifier Reference */
 					return this.wrapPlaceholder(new IDRef(path, source));
-				}
 			}
 		}
 		else if (current.type == TokenType.STRUCTID && this.tokenStream.get(2).type == TokenType.IDENTIFIER) {
@@ -2092,10 +2088,14 @@ public class Parser {
 			Token token = accept();
 			List<Expression> charAtoms = new ArrayList();
 			String [] sp = token.spelling.split("");
-			for (int i = 0; i < sp.length; i++) {
+			
+			/* Create a list of expressions of char atoms */
+			for (int i = 0; i < sp.length; i++) 
 				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
-			}
+			
+			/* Insert null-termination character */
 			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
+			
 			return new ArrayInit(charAtoms, false, token.source());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
@@ -2197,22 +2197,18 @@ public class Parser {
 	public Function findFunction(NamespacePath path) {
 		Function lambda = null;
 		
-		for (Pair<NamespacePath, Function> p : this.functions) {
-			if (p.first.build().equals(path.build())) {
+		for (Pair<NamespacePath, Function> p : this.functions) 
+			if (p.first.build().equals(path.build())) 
 				return p.second;
-			}
-		}
-		
+
 		if (lambda == null) {
 			if (path.path.size() == 1) {
 				List<Function> f0 = new ArrayList();
 				
-				for (Pair<NamespacePath, Function> p : this.functions) {
-					if (p.first.getLast().equals(path.getLast())) {
+				for (Pair<NamespacePath, Function> p : this.functions) 
+					if (p.first.getLast().equals(path.getLast())) 
 						f0.add(p.second);
-					}
-				}
-				
+
 				/* Return if there is only one result */
 				if (f0.size() == 1) return f0.get(0);
 			}
@@ -2235,19 +2231,15 @@ public class Parser {
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
 	public InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
-		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
-			if (p.getFirst().build().equals(path.build())) {
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
+			if (p.getFirst().build().equals(path.build())) 
 				return p.getSecond();
-			}
-		}
-		
+
 		List<InterfaceTypedef> defs = new ArrayList();
-		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
-			if (p.getFirst().getLast().equals(path.getLast())) {
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
+			if (p.getFirst().getLast().equals(path.getLast())) 
 				defs.add(p.getSecond());
-			}
-		}
-		
+
 		if (defs.isEmpty()) return null;
 		else if (defs.size() == 1) {
 			return defs.get(0);
@@ -2272,19 +2264,15 @@ public class Parser {
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
 	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
-		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
-			if (p.getFirst().build().equals(path.build())) {
+		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
+			if (p.getFirst().build().equals(path.build())) 
 				return p.getSecond();
-			}
-		}
-		
+
 		List<StructTypedef> defs = new ArrayList();
-		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
-			if (p.getFirst().getLast().equals(path.getLast())) {
+		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
+			if (p.getFirst().getLast().equals(path.getLast())) 
 				defs.add(p.getSecond());
-			}
-		}
-		
+
 		if (defs.isEmpty()) return null;
 		else if (defs.size() == 1) {
 			return defs.get(0);
@@ -2309,19 +2297,15 @@ public class Parser {
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
 	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
-		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
-			if (p.getFirst().build().equals(path.build())) {
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
+			if (p.getFirst().build().equals(path.build())) 
 				return p.getSecond();
-			}
-		}
-		
+
 		List<EnumTypedef> defs = new ArrayList();
-		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
-			if (p.getFirst().getLast().equals(path.getLast())) {
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
+			if (p.getFirst().getLast().equals(path.getLast())) 
 				defs.add(p.getSecond());
-			}
-		}
-		
+
 		if (defs.isEmpty()) return null;
 		else if (defs.size() == 1) {
 			return defs.get(0);
@@ -2340,11 +2324,10 @@ public class Parser {
 	 * ends with the given string.
 	 */
 	public boolean containsInterfaceTypedef(String name) {
-		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) {
-			if (p.getFirst().getLast().equals(name)) {
+		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
+			if (p.getFirst().getLast().equals(name)) 
 				return true;
-			}
-		}
+
 		return false;
 	}
 	
@@ -2353,11 +2336,10 @@ public class Parser {
 	 * ends with the given string.
 	 */
 	public boolean containsStructTypedef(String name) {
-		for (Pair<NamespacePath, StructTypedef> p : this.structIds) {
-			if (p.getFirst().getLast().equals(name)) {
+		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
+			if (p.getFirst().getLast().equals(name)) 
 				return true;
-			}
-		}
+			
 		return false;
 	}
 	
@@ -2366,11 +2348,10 @@ public class Parser {
 	 * ends with the given string.
 	 */
 	public boolean containsEnumTypedef(String token) {
-		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) {
-			if (p.getFirst().getLast().equals(token)) {
+		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
+			if (p.getFirst().getLast().equals(token)) 
 				return true;
-			}
-		}
+
 		return false;
 	}
 
@@ -2458,9 +2439,8 @@ public class Parser {
 			boolean anonymous = false;
 			
 			/* Convert next token */
-			if (this.activeProvisos.contains(current.spelling)) {
+			if (this.activeProvisos.contains(current.spelling)) 
 				current.type = TokenType.PROVISO;
-			}
 			
 			/* Non-anonymous */
 			if (current.type != TokenType.IDENTIFIER && current.type != TokenType.RPAREN && current.type != TokenType.LBRACKET && current.type != TokenType.MUL) {
@@ -2526,7 +2506,16 @@ public class Parser {
 			}
 		}
 		else {
-			type = TYPE.fromToken(token, buffered);
+			/* Create a new type from the token type */
+			if (token.type() == TokenType.INT) type = new INT();
+			else if (token.type() == TokenType.BOOL) type = new BOOL();
+			else if (token.type() == TokenType.CHAR) type = new CHAR();
+			else if (token.type() == TokenType.VOID) type = new VOID();
+			else if (token.type() == TokenType.FUNC) type = new FUNC();
+			else {
+				type = new PROVISO(token.spelling());
+				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling()), LogPoint.Type.WARN, true));
+			}
 			
 			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
 				this.activeProvisos.add(token.spelling);
@@ -2534,12 +2523,15 @@ public class Parser {
 		
 		while (true) {
 			Token c0 = current;
+			
 			while (current.type == TokenType.MUL) {
 				accept();
 				type = new POINTER(type);
 			}
 			
+			/* Need to flip dimensions from parsed order */
 			Stack<Expression> dimensions = new Stack();
+			
 			while (current.type == TokenType.LBRACKET) {
 				accept();
 				Expression length = this.parseExpression();
@@ -2567,9 +2559,8 @@ public class Parser {
 						this.tokenStream.get(i).type != TokenType.IDENTIFIER &&
 						this.tokenStream.get(i).type != TokenType.CMPGT)) break;
 				
-				if (this.tokenStream.get(i).type == TokenType.IDENTIFIER) {
+				if (this.tokenStream.get(i).type == TokenType.IDENTIFIER) 
 					this.tokenStream.get(i).type = TokenType.PROVISO;
-				}
 			}
 			
 			accept();
@@ -2590,8 +2581,8 @@ public class Parser {
 				}
 				
 				pro.add(type);
-				if (current.type == TokenType.COMMA) 
-					accept();
+				
+				if (current.type == TokenType.COMMA) accept();
 				else break;
 			}
 			

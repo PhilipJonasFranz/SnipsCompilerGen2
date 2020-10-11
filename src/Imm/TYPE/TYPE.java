@@ -1,33 +1,43 @@
 package Imm.TYPE;
 
-import java.util.List;
-
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Par.Token;
-import Par.Token.TokenType;
-import Res.Const;
-import Util.Logging.LogPoint;
-import Util.Logging.Message;
+import Exc.SNIPS_EXC;
 
 public abstract class TYPE<T> {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
+	/** The size of this type in datawords. */
 	protected int wordSize = 1;
 	
+	/** 
+	 * The value stored in this particular type instance. 
+	 * Used for attatching values to atoms. 
+	 */
 	public T value;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
+	/**
+	 * Default constructor, creates new type without value.
+	 */
 	public TYPE() {
 		
 	}
 	
+	/**
+	 * Creates a new type instance and parses the given string to the value of the type.
+	 * For example, the type BOOL would parse the String 'true' to a Boolean 'true' internally.
+	 */
 	public TYPE(String initialValue) {
 		this.setValue(initialValue);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
+	/**
+	 * Sets the value of this type. Types extending from this type use different parsing
+	 * methods to convert the given string to a parameterized value format.
+	 * @param value The value to set to this type.
+	 */
 	public abstract void setValue(String value);
 	
 	/**
@@ -44,6 +54,11 @@ public abstract class TYPE<T> {
 	 */
 	public abstract String typeString();
 	
+	/**
+	 * Returns the value of this type in a form that can be written into the generated assembly
+	 * file. For example, an int would just return the stored number, a char would return the UTF-8 value
+	 * of the stored character.
+	 */
 	public abstract String sourceCodeRepresentation();
 	
 	/**
@@ -61,22 +76,6 @@ public abstract class TYPE<T> {
 	 * @return A reference to the core type.
 	 */
 	public abstract TYPE getCoreType();
-	
-	public static TYPE fromToken(Token token, List<Message> buffered) {
-		if (token.type() == TokenType.PROVISO) {
-			return new PROVISO(token.spelling());
-		}
-		else {
-			TYPE t = PRIMITIVE.fromToken(token);
-			
-			if (t == null) {
-				t = new PROVISO(token.spelling());
-				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling()), LogPoint.Type.WARN, true));
-			}
-			
-			return t;
-		}
-	}
 	
 	/**
 	 * Creates a disjunct copy of this type.

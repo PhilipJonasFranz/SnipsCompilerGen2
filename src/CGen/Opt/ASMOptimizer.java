@@ -1432,7 +1432,7 @@ public class ASMOptimizer {
 			
 			if (body.instructions.get(i) instanceof ASMBinaryData) {
 				ASMBinaryData d = (ASMBinaryData) body.instructions.get(i);
-				if (d.updateConditionField || d.cond != null) continue;
+				if (d.isUpdatingCondField() || d.cond != null) continue;
 				reg = d.target.reg;
 			}
 			else if (body.instructions.get(i) instanceof ASMLdr) {
@@ -1698,7 +1698,7 @@ public class ASMOptimizer {
 		for (int i = 0; i < body.instructions.size(); i++) {
 			if (body.instructions.get(i) instanceof ASMAdd) {
 				ASMAdd add = (ASMAdd) body.instructions.get(i);
-				if (add.target.reg == add.op0.reg && add.op1 instanceof ImmOp && !add.updateConditionField) {
+				if (add.target.reg == add.op0.reg && add.op1 instanceof ImmOp && !add.isUpdatingCondField()) {
 					ImmOp imm = (ImmOp) add.op1;
 					if (imm.value == 0) {
 						body.instructions.remove(i);
@@ -1709,7 +1709,7 @@ public class ASMOptimizer {
 			}
 			else if (body.instructions.get(i) instanceof ASMSub) {
 				ASMSub sub = (ASMSub) body.instructions.get(i);
-				if (sub.target.reg == sub.op0.reg && sub.op1 instanceof ImmOp && !sub.updateConditionField) {
+				if (sub.target.reg == sub.op0.reg && sub.op1 instanceof ImmOp && !sub.isUpdatingCondField()) {
 					ImmOp imm = (ImmOp) sub.op1;
 					if (imm.value == 0) {
 						body.instructions.remove(i);

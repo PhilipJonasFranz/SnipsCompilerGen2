@@ -31,7 +31,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	public Shift shift;
 	
 	/** Wether to update the condition field when executing this instruction. */
-	public boolean updateConditionField = false;
+	private boolean updateConditionField = false;
 	
 	
 			/* --- CONSTRUCTURS --- */
@@ -58,6 +58,14 @@ public abstract class ASMBinaryData extends ASMInstruction {
 			s += this.shift.getShiftPostfix();
 		
 		return s;
+	}
+	
+	public void updateCondField() {
+		this.updateConditionField = true;
+	}
+	
+	public boolean isUpdatingCondField() {
+		return this.updateConditionField;
 	}
 
 } 

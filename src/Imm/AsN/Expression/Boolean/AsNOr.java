@@ -65,7 +65,7 @@ public class AsNOr extends AsNBinaryExpression {
 			or.generatePrimitiveLoaderCode(or, o, r, map, st, 0, 1);
 			
 			ASMOrr orr = new ASMOrr(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R1));
-			orr.updateConditionField = true;
+			orr.updateCondField();
 			or.instructions.add(orr);
 			
 			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.NE)));
