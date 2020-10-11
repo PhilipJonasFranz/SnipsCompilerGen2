@@ -41,6 +41,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		AsNInterfaceTypedef intf = new AsNInterfaceTypedef();
 		def.castedNode = intf;
 
+		/* Not a single mapping was registered, interface was not used. */
 		if (def.registeredMappings.isEmpty())
 			return intf;
 		
@@ -94,24 +95,15 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 */
 			if (createdTable.contains(mapping.provisoPostfix))
 				continue;
-			else 
-				createdTable.add(mapping.provisoPostfix);
+			else createdTable.add(mapping.provisoPostfix);
 			
 			/* Generate comment with function name and potential proviso types */
 			String s = "Interface : " + def.path.build();
-			
 			List<TYPE> types = mapping.providedHeadProvisos;
-			
-			if (!types.isEmpty())
-				s += ", Provisos: ";
-				
+			if (!types.isEmpty()) s += ", Provisos: ";
 			for (int x = 0; x < types.size(); x++) 
 				s += types.get(x).provisoFree().typeString() + ", ";
-			
-			if (!mapping.providedHeadProvisos.isEmpty())
-				s = s.trim().substring(0, s.trim().length() - 1);
-			
-			ASMComment com = new ASMComment(s);
+			if (s.isEmpty()) s = s.trim().substring(0, s.trim().length() - 1);
 			
 			/* Get the current proviso postfix. If only the default mapping exists, let postfix empty */
 			String postfix = mapping.provisoPostfix;
@@ -120,12 +112,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			
 			/* Head of the table for this proviso mapping */
 			ASMLabel tableHeadProviso = new ASMLabel(intf.tableHead.name + postfix);
-			
-			tableHeadProviso.comment = com;
-			
-			/* Label at the end of the table multiplexing section */
-			ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
-			
+			tableHeadProviso.comment =  new ASMComment(s);
 			intf.instructions.add(tableHeadProviso);
 			
 			/**
@@ -133,9 +120,12 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 * this struct. This allows to precalculate some values, which is done below.
 			 */
 			if (def.implementers.size() == 1) {
+				
+				/* Compute the offset to be jumped to select the correct function */
 				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R12), new ImmOp(4)));
 				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
 
+				/* Jump to the correct function */
 				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
 				
 				StructTypedef sdef = def.implementers.get(0);
@@ -148,13 +138,16 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 * to the index of the struct typedef in the InterfaceTypedef.implementes list.
 			 */
 			else {
+				/* Label at the end of the table multiplexing section */
+				ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
+				
 				/* Load SID from pointer into R10 */
 				intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));
 				intf.instructions.add(new ASMLdr(new RegOp(REG.R10), new RegOp(REG.R10)));
 				
 				int cnt = 0;
 				
-				/* Generate the table */
+				/* Generate the SID-to-Index mapper */
 				for (StructTypedef struct : def.implementers) {
 					intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
 					intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
@@ -163,22 +156,25 @@ public class AsNInterfaceTypedef extends AsNNode {
 				
 				intf.instructions.add(tableEnd);
 				
-				/* Add selected function to offset */
+				/* Compute the offset to be jumped to select the correct function */
 				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R12)));
 				intf.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new ImmOp(4)));
 				intf.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
 				
+				/* Jump to the correct function */
 				intf.instructions.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
 				
-				/* Inject for all struct typedefs */
+				/* Generate the relay-table */
 				for (StructTypedef struct : def.implementers) 
 					hasCalls |= intf.injectStructTypedefTableMapping(def, struct, mapping);
 			}
 			
-			if (!mapping.equals(def.registeredMappings.get(def.registeredMappings.size() - 1)) && def.registeredMappings.size() > 1)
-				intf.instructions.add(new ASMSeperator());
+			intf.instructions.add(new ASMSeperator());
 		}
 		
+		/* No calls were made to the interface, and the only registered mapping 
+		 * is the default mapping, interface table is not needed. 
+		 */
 		if (!hasCalls && def.registeredMappings.size() == 1 && def.registeredMappings.get(0).providedHeadProvisos.isEmpty())
 			intf.instructions.clear();
 		
@@ -200,6 +196,12 @@ public class AsNInterfaceTypedef extends AsNNode {
 		for (Function f : typedef.functions) {
 			Function f0 = null;
 			
+			/*
+			 * Search function from interface in struct typedef, and set reference to it.
+			 * This is done since the acutal proviso mappings of this function are stored
+			 * in the function located in the struct typedef, and not in the function in
+			 * the interface typedef.
+			 */
 			for (int i = 0; i < def.functions.size(); i++)
 				if (def.functions.get(i).path.getLast().equals(f.path.getLast()))
 					f0 = def.functions.get(i);
@@ -207,24 +209,32 @@ public class AsNInterfaceTypedef extends AsNNode {
 			/* Branch to function */
 			String target = f0.path.build();
 			
+			/* Get the proviso postfix from the function in the struct with the current mapping */
 			String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
 			
+			/* 
+			 * The mapping has not been registered in the function, this means that this function
+			 * has not been called with this specific provisos.
+			 */
 			if (post == null) {
 				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
 				add.comment = new ASMComment("Function was not called, use as placeholder");
 				
 				this.instructions.add(add);
 			}
+			/*
+			 * Mapping was found, append to target to create final label and branch to it.
+			 */
 			else {
 				hasCalls |= f.wasCalled;
 				
 				target += post;
 				
+				/* Final label to function with proviso postfix */
 				ASMLabel functionLabel = new ASMLabel(target);
 				
 				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
 				b.optFlags.add(OPT_FLAG.SYS_JMP);
-				
 				this.instructions.add(b);
 			}
 		}
