@@ -409,6 +409,10 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkInterfaceTypedef(InterfaceTypedef e) throws CTX_EXC {
+		/* Require SIDs since we need to check in it interface table */
+		if (CompilerDriver.disableStructSIDHeaders)
+			throw new CTX_EXC(e.getSource(), Const.SID_DISABLED_NO_INTERFACES);
+		
 		for (Function f : e.functions) {
 			f.definedInInterface = e;
 			

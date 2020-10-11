@@ -174,6 +174,8 @@ public class Const {
 	
 	public static final String SID_DISABLED_NO_INSTANCEOF = "SID headers are disabled, instanceof is not available";
 	
+	public static final String SID_DISABLED_NO_INTERFACES = "SID headers are disabled, interfaces are not available";
+	
 	public static final String FIELD_NOT_IN_STRUCT = "The selected field %s in the structure %s does not exist";
 	
 	public static final String PREDICATE_IS_ANONYMOUS = "Unsafe operation, predicate '%s' is anonymous, %s";
