@@ -42,4 +42,8 @@ public class SNIPS_EXC extends RuntimeException {
 		return String.format(this.message, format);
 	}
 	
+	public String getDirectMessage() {
+		return this.message;
+	}
+	
 } 

@@ -1,28 +1,96 @@
 package Ctx;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Stack;
 
 import Exc.CTX_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.*;
-import Imm.AST.Expression.*;
-import Imm.AST.Expression.Arith.*;
-import Imm.AST.Expression.Boolean.*;
+import Imm.AST.Function;
+import Imm.AST.Namespace;
+import Imm.AST.Program;
+import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.Deref;
+import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
+import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
+import Imm.AST.Expression.RegisterAtom;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
+import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
+import Imm.AST.Expression.TypeCast;
+import Imm.AST.Expression.UnaryExpression;
+import Imm.AST.Expression.Arith.Add;
+import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.Mul;
+import Imm.AST.Expression.Arith.UnaryMinus;
+import Imm.AST.Expression.Boolean.BoolBinaryExpression;
+import Imm.AST.Expression.Boolean.BoolUnaryExpression;
+import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
-import Imm.AST.Statement.*;
+import Imm.AST.Statement.AssignWriteback;
+import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CaseStatement;
+import Imm.AST.Statement.CompoundStatement;
+import Imm.AST.Statement.ContinueStatement;
+import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DirectASMStatement;
+import Imm.AST.Statement.DoWhileStatement;
+import Imm.AST.Statement.ForEachStatement;
+import Imm.AST.Statement.ForStatement;
+import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.InterfaceTypedef;
+import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
+import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Statement.SwitchStatement;
+import Imm.AST.Statement.TryStatement;
+import Imm.AST.Statement.WatchStatement;
+import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.*;
-import Imm.TYPE.COMPOSIT.*;
-import Imm.TYPE.PRIMITIVES.*;
+import Imm.TYPE.PROVISO;
+import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.INTERFACE;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.FUNC;
+import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Par.Token;
 import Par.Token.TokenType;
 import Res.Const;
 import Snips.CompilerDriver;
-import Util.*;
-import Util.Logging.*;
+import Util.NamespacePath;
+import Util.Pair;
+import Util.Source;
+import Util.Logging.LogPoint;
+import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class ContextChecker {
 
@@ -700,6 +768,9 @@ public class ContextChecker {
 		/* Struct may have modifier restrictions */
 		this.checkModifier(e.structType.getTypedef().modifier, e.structType.getTypedef().path, e.getSource());
 		
+		/* Check if all required provisos are present */
+		e.structType.checkProvisoPresent(e.getSource());
+		
 		return e.getType();
 	}
 	
@@ -802,8 +873,15 @@ public class ContextChecker {
 				else if (selection instanceof IDRef) {
 					IDRef ref = (IDRef) selection;
 					
-					/* Last selection */
-					type = findAndLinkField(struct, ref);
+					try {
+						/* Last selection */
+						type = findAndLinkField(struct, ref);
+					} catch (SNIPS_EXC ex) {
+						if (ex.getDirectMessage().equals(Const.CANNOT_FREE_CONTEXTLESS_PROVISO))
+							throw new SNIPS_EXC(Const.MISSING_PROVISOS, e.getClass().getSimpleName(), e.getSource().getSourceMarker());
+						else 
+							throw ex;
+					}
 					
 					TYPE type0 = type;
 					if (type0 instanceof POINTER) 
@@ -1058,6 +1136,11 @@ public class ContextChecker {
 		if (m != null) this.messages.add(m);
 		
 		this.declarations.add(d);
+		
+		if (d.getType().getCoreType() instanceof STRUCT) {
+			STRUCT s = (STRUCT) d.getType().getCoreType();
+			s.checkProvisoPresent(d.getSource());
+		}
 		
 		/* No need to set type here, is done while parsing */
 		return d.getType();

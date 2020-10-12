@@ -196,6 +196,8 @@ public class Const {
 
 	public static final String MISSMATCHING_NUMBER_OF_PROVISOS = "Missmatching number of provided provisos, expected %d, but got %d";
 	
+	public static final String MISSING_PROVISOS = "Operation '%s' is mission proviso types, %s";
+	
 	public static final String MISSMATCHING_NUMBER_OF_PROVISOS_EXTENSION = "Incorrect number of proviso for extension %s, expected %d, got %d";
 	
 	public static final String NON_PROVISO_TYPE_IN_HEADER = "Found non proviso type in proviso header: %s";

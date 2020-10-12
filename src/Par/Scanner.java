@@ -352,7 +352,9 @@ public class Scanner {
 			else {
 				/* --- REGEX MATCHER --- */
 				if (this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) {
-					if (this.state != ACC_STATE.INTERFACE_ID && this.state != ACC_STATE.STRUCT_ID && this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
+					if (this.state != ACC_STATE.INTERFACE_ID && this.state != ACC_STATE.STRUCT_ID && 
+						this.state != ACC_STATE.ENUM_ID && this.state != ACC_STATE.NAMESPACE_ID) 
+						
 						this.state = ACC_STATE.ID;
 				}
 				
@@ -365,7 +367,10 @@ public class Scanner {
 				if (this.buffer.matches(hex_match)) 
 					this.state = ACC_STATE.HEX_INT;
 				
-				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && (this.state == ACC_STATE.ID || this.state == ACC_STATE.INTERFACE_ID || this.state == ACC_STATE.STRUCT_ID || this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
+				if ((this.buffer.endsWith(" ") || !this.buffer.matches("([a-z]|[A-Z]|_)([a-z]|[A-Z]|[0-9]|_)*")) && 
+					(this.state == ACC_STATE.ID || this.state == ACC_STATE.INTERFACE_ID || this.state == ACC_STATE.STRUCT_ID || 
+					this.state == ACC_STATE.ENUM_ID || this.state == ACC_STATE.NAMESPACE_ID)) {
+					
 					/* Ignore Empty buffer */
 					if (this.buffer.trim().isEmpty()) return false;
 					

@@ -1,0 +1,16 @@
+SOURCE
+struct B<T> {
+	
+	T v;
+	
+	int get<T>() {
+		return self->v;
+	}
+}
+
+int main() {
+	B<int>* b = init<>(B::(12));
+	return b->get<>();
+}
+TESTCASES
+12

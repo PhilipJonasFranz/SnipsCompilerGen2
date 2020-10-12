@@ -3,13 +3,16 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
+import Util.Source;
 
 public class STRUCT extends COMPOSIT {
 
@@ -131,6 +134,11 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
+	public void checkProvisoPresent(Source source) throws CTX_EXC {
+		if (this.proviso.size() != this.typedef.proviso.size())
+			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
+	}
+	
 	/**
 	 * Returns the amount of bytes the field that corresponds to the given namespace
 	 * path is offsetted from the start of the structure. For example, the first field
@@ -238,6 +246,10 @@ public class STRUCT extends COMPOSIT {
 		if (mapType instanceof STRUCT) {
 			STRUCT s = (STRUCT) mapType;
 			if (s.getTypedef().SID == this.getTypedef().SID) {
+				/* Missing provisos */
+				if (this.proviso.size() != s.proviso.size())
+					return null;
+				
 				for (int i = 0; i < this.proviso.size(); i++) {
 					PROVISO prov = (PROVISO) this.proviso.get(i);
 					if (prov.placeholderName.equals(searchedProviso)) {
