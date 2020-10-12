@@ -741,7 +741,17 @@ public class ContextChecker {
 			/* Make sure that all field types are equal to the expected types */
 			for (int i = 0; i < e.elements.size(); i++) {
 				
-				TYPE strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+				TYPE strType = null;
+
+				try {
+					/* Last selection */
+					strType = e.structType.getField(e.structType.getTypedef().getFields().get(i).path).getType();
+				} catch (SNIPS_EXC ex) {
+					if (ex.getDirectMessage().equals(Const.CANNOT_FREE_CONTEXTLESS_PROVISO))
+						throw new SNIPS_EXC(Const.MISSING_PROVISOS, e.getClass().getSimpleName(), e.getSource().getSourceMarker());
+					else 
+						throw ex;
+				}
 				
 				/* Single placeholder case */
 				if (e.elements.get(i) instanceof TempAtom) {
