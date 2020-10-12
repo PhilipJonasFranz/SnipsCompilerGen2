@@ -2522,11 +2522,10 @@ public class Parser {
 			else if (token.type() == TokenType.FUNC) type = new FUNC();
 			else {
 				type = new PROVISO(token.spelling());
-				buffered.add(new Message(String.format(Const.UNKNOWN_TYPE, token.spelling()), LogPoint.Type.WARN, true));
+				
+				if (!this.activeProvisos.contains(token.spelling)) 
+					this.activeProvisos.add(token.spelling);
 			}
-			
-			if (type instanceof PROVISO && !this.activeProvisos.contains(token.spelling)) 
-				this.activeProvisos.add(token.spelling);
 		}
 		
 		while (true) {

@@ -1,6 +1,6 @@
+#include<iterable.sn>
+
 /*
- * [BASE-PACKAGE]
- *
  * This package contains the utility to create and use
  * a circular queue.
  */
@@ -13,7 +13,7 @@ namespace Queue {
 	 * that is used to determine wether the queue is full or empty when
 	 * the head index is the same as the tail index.
 	 */
-	restricted struct CyclicQueue<T> {
+	restricted struct CyclicQueue<T> : Iterable<T> {
 		
 		T* storage;
 		
@@ -111,6 +111,24 @@ namespace Queue {
 			self->tail = 0;
 			self->isEmpty = true;
 			return;
+		}
+		
+		/*
+		 * Returns the value at the given index, where the index 0 is
+		 * the index at the tail, or the next value to be dequeued. 
+		 */
+		shared T get<T>(int index) {
+			return *(self->storage + (((self->tail + index) % self->size) * sizeof(T)));
+		}
+		
+		/*
+		 * Sets the value at the given index, where the index 0 is
+		 * the index at the tail, or the next value to be dequeued,
+		 * to the provided value.
+		 */
+		shared void set<T>(int index, T value) {
+			int off = (((self->tail + index) % self->size) * sizeof(T));
+			*(self->storage + off) = value;
 		}
 		
 		/*

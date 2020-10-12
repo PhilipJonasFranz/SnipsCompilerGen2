@@ -258,6 +258,9 @@ init_P1:                                     /* Function: init, Provisos: Queue.
     
 /* [BASE-PACKAGE] */
 /*  */
+/* This package contains the interface definition for an iterable struct. */
+/* The interface creates data access and exchange points, so data can be */
+/* read and written. */
 /* This package contains the utility to create and use */
 /* a circular queue. */
 /* The cyclic queue capsules a pointer to a storage location for */
