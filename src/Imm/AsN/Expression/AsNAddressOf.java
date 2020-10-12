@@ -71,7 +71,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get offset of parameter relative to fp */
 				aof.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
-			else {
+			else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(ref.origin);
 				offset += (ref.origin.getType().wordsize() - 1) * 4;
@@ -79,6 +79,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.FP), new ImmOp(offset)));
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}
 		else if (a.expression instanceof ArraySelect) {
 			ArraySelect select = (ArraySelect) a.expression;
@@ -104,7 +105,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get offset of parameter relative to fp */
 				aof.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
-			else {
+			else if (st.getDeclarationInStackByteOffset(origin) != -1) {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(origin);
 				offset += (origin.getType().wordsize() - 1) * 4;
@@ -112,6 +113,7 @@ public class AsNAddressOf extends AsNExpression {
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOp(REG.R0), new RegOp(REG.FP), new ImmOp(offset)));
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			
 			ASMAdd add = new ASMAdd(new RegOp(target), new RegOp(REG.R0), new RegOp(REG.R2));
 			add.comment = new ASMComment("Add structure offset");

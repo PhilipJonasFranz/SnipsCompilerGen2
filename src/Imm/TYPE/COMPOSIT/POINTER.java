@@ -120,4 +120,8 @@ public class POINTER extends COMPOSIT {
 		else return null;
 	}
 
+	public boolean hasProviso() {
+		return this.targetType.hasProviso();
+	}
+
 } 

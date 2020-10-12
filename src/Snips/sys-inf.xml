@@ -7,21 +7,29 @@
 		<Alias>queue.sn:lib/std/data/queue.sn</Alias>
 		<Alias>hash_map.sn:lib/std/data/hash_map.sn</Alias>
 		
+			<Alias>iterable.sn:lib/std/data/interface/iterable.sn</Alias>
+		
+		
 		<Alias>display.sn:lib/std/io/display.sn</Alias>
+		
 		
 		<Alias>vector.sn:lib/std/math/vector.sn</Alias>
 		<Alias>math.sn:lib/std/math/math.sn</Alias>
 		<Alias>matrix.sn:lib/std/math/matrix.sn</Alias>
 		
+		
 		<Alias>boolean.sn:lib/std/type/boolean.sn</Alias>
 		<Alias>integer.sn:lib/std/type/integer.sn</Alias>
 		<Alias>string.sn:lib/std/type/string.sn</Alias>
+		
 		
 		<Alias>bits.sn:lib/std/util/bits.sn</Alias>
 		<Alias>color.sn:lib/std/util/color.sn</Alias>
 		<Alias>graphics.sn:lib/std/util/graphics.sn</Alias>
 		<Alias>hash.sn:lib/std/util/hash.sn</Alias>
 		
-		<Alias>sfloat.sn:lib/std/util/temp/sfloat.sn</Alias>
+			<Alias>sfloat.sn:lib/std/util/temp/sfloat.sn</Alias>
+			
+			<Alias>serializable.sn:lib/std/util/interface/serializable.sn</Alias>
 	</Library>
 </Inf> 

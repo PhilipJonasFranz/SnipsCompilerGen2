@@ -129,4 +129,8 @@ public class ARRAY extends COMPOSIT {
 		else return null;
 	}
 
+	public boolean hasProviso() {
+		return this.elementType.hasProviso();
+	}
+
 } 

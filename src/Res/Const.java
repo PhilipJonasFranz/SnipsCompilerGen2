@@ -174,6 +174,8 @@ public class Const {
 	
 	public static final String SID_DISABLED_NO_INSTANCEOF = "SID headers are disabled, instanceof is not available";
 	
+	public static final String SID_DISABLED_NO_INTERFACES = "SID headers are disabled, interfaces are not available";
+	
 	public static final String FIELD_NOT_IN_STRUCT = "The selected field %s in the structure %s does not exist";
 	
 	public static final String PREDICATE_IS_ANONYMOUS = "Unsafe operation, predicate '%s' is anonymous, %s";
@@ -194,9 +196,13 @@ public class Const {
 
 	public static final String MISSMATCHING_NUMBER_OF_PROVISOS = "Missmatching number of provided provisos, expected %d, but got %d";
 	
+	public static final String MISSING_PROVISOS = "Operation '%s' is mission proviso types, %s";
+	
 	public static final String MISSMATCHING_NUMBER_OF_PROVISOS_EXTENSION = "Incorrect number of proviso for extension %s, expected %d, got %d";
 	
 	public static final String NON_PROVISO_TYPE_IN_HEADER = "Found non proviso type in proviso header: %s";
+	
+	public static final String IMPLEMENTED_FUNCTION_MISSING = "Implemented function '%s' from interface '%s' is missing";
 	
 	public static final String FUNCTION_MISSING_REQUIRED_PROVISOS = "Function '%s' in struct '%s' is missing provisos: %s";
 	
@@ -238,7 +244,7 @@ public class Const {
 			
 	public static final String UNKNOWN_ENUM_FIELD = "The expression '%s' is not a known field of the enum %s, %s";
 	
-	public static final String UNKNOWN_STRUCT_OR_ENUM = "Unknown struct or enum type '%s', %s";
+	public static final String UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE = "Unknown struct, interface or enum type '%s', %s";
 	
 	public static final String MULTIPLE_MATCHES_FOR_STRUCT_TYPE = "Multiple matches for struct type '%s': %s. Ensure namespace path is explicit and correct, %s";
 	

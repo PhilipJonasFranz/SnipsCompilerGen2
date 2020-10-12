@@ -133,4 +133,8 @@ public class PROVISO extends TYPE<Void> {
 		return (searchedProviso.equals(this.placeholderName))? mapType : null;
 	}
 
+	public boolean hasProviso() {
+		return true;
+	}
+
 } 

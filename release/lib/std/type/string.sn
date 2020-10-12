@@ -31,7 +31,7 @@ namespace String {
 	 * but result may not be as expected.
 	 */
 	shared char* substring(char* str, int begin, int end) {
-		LinkedList<char>* sub = List::create<>((char) 0);
+		LinkedList<char>* sub = LinkedList::create<>((char) 0);
 		
 		/* Iterate over String and collect characters in range */
 		int c = 0;

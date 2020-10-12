@@ -35,6 +35,8 @@ public class InlineCall extends Expression {
 	
 	public boolean isNestedCall = false;
 	
+	public boolean nestedDeref = false;
+	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

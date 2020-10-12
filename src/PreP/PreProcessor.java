@@ -3,6 +3,7 @@ package PreP;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import Exc.SNIPS_EXC;
 import Res.Const;
@@ -50,6 +51,8 @@ public class PreProcessor {
 	 * Convert the input to line objects and resolve #include directives, while maintaining correct file markers.
 	 */
 	public List<LineObject> getProcessed() {
+		Stack<String> imports = new Stack();
+		
 		for (int i = 0; i < this.process.size(); i++) {
 			String line = this.process.get(i).line.trim();
 			if (line.startsWith("#include")) {
@@ -66,7 +69,8 @@ public class PreProcessor {
 							for (int a = 0; a < lines.size(); a++) 
 								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
 							
-							new Message("PRE0 -> Resolved import " + path, LogPoint.Type.INFO);
+							imports.push(path);
+							
 							this.imported.add(path);
 						} catch (NullPointerException e) {
 							throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
@@ -81,6 +85,10 @@ public class PreProcessor {
 				}
 			}
 		}
+		
+		if (CompilerDriver.printAllImports)
+			while (!imports.isEmpty())
+				new Message("PRE0 -> Imported library " + imports.pop(), LogPoint.Type.INFO);
 		
 		for (int i = 0; i < this.process.size(); i++) 
 			this.process.get(i).line = this.process.get(i).line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);

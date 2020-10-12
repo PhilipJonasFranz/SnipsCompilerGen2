@@ -17,9 +17,8 @@ public class CHAR extends PRIMITIVE<Character> {
 	
 	public void setValue(String value) {
 		/* Termination char */
-		if (value == null) {
+		if (value == null) 
 			this.value = (char) 0;
-		}
 		else this.value = value.charAt(0);
 	}
 
