@@ -2531,8 +2531,9 @@ public class ContextChecker {
 		
 		if (check.isPresent()) {
 			try {
-				return (TYPE) check.get().invoke(this, s);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				 return (TYPE) check.get().invoke(this, s);
+			} 
+			catch (InvocationTargetException e) {
 				/* 
 				 * If the cause is a compiler exception, relay the exception back, since 
 				 * for example the test driver may test for exceptions.
@@ -2541,9 +2542,10 @@ public class ContextChecker {
 					throw (CTX_EXC) e.getCause();
 				else if (e.getCause() instanceof SNIPS_EXC)
 					throw (SNIPS_EXC) e.getCause();
-				else
-					/* In this case, we have a non-standard issue, print stacktrace. */
-					e.printStackTrace();
+			}
+			catch (IllegalAccessException | IllegalArgumentException e) {
+				/* In this case, we have a non-standard issue, print stacktrace. */
+				e.printStackTrace();
 			}
 		}
 		
