@@ -301,4 +301,36 @@ public class Function extends CompoundStatement {
 		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 	}
 	
+	/**
+	 * Compares the signatures of the two given functions. This includes name, parameters
+	 * and return type. Returns true if the signatures match.
+	 * @param f0 The first function.
+	 * @param f1 The second function to match against the first.
+	 * @param matchParamNames If set to true, the name of the parameter names will be matched as well.
+	 * @return True iff the signatures match.
+	 */
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames) {
+		boolean match = true;
+		
+		/* Match function name, not namespace path */
+		match &= f0.path.getLast().equals(f1.path.getLast());
+		
+		if (f0.parameters.size() == f1.parameters.size()) {
+			for (int i = 0; i < f0.parameters.size(); i++) {
+				Declaration d0 = f0.parameters.get(i);
+				Declaration d1 = f1.parameters.get(i);
+				
+				if (matchParamNames)
+					match &= d0.path.getLast().equals(d1.path.getLast());
+				
+				match &= d0.getType().isEqual(d1.getType());
+			}
+		}
+		else return false;
+		
+		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
+		
+		return match;
+	}
+	
 } 

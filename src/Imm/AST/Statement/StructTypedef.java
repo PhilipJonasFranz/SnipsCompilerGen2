@@ -114,19 +114,19 @@ public class StructTypedef extends SyntaxElement {
 			 */
 			for (Function f : this.extension.functions) {
 				/* Ignore static functions */
-				if (f.modifier == MODIFIER.STATIC) 
-					continue;
+				if (f.modifier == MODIFIER.STATIC) continue;
 				
+				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
 				
+				/* Create a copy of the function, but keep references */
 				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
 				
 				boolean override = false;
-				for (Function fs : this.functions) {
-					if (fs.path.getLast().equals(f0.path.getLast()))
+				for (Function fs : this.functions) 
+					if (Function.signatureMatch(f0, fs, true))
 						override = true;
-				}
 				
 				if (!override) {
 					this.functions.add(c++, f0);
