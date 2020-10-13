@@ -1,4 +1,5 @@
-# Snips Compiler Gen.2 v.4.4.0-RELEASE
+# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-stable-green.svg)](https://semver.org)
+
 ## Some words in advance
  This project was started for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results produced by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
@@ -31,10 +32,10 @@
  
 ## Usage & Setup
 ### Running the executable
- If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console "snips (Full Path to file to compile)". With "snips -help" you can get more information on the arguments.
+ If you just want to use the compiler, you can use the compiled and wrapped .exe in release/. The lib/ folder includes some libary functions that the compiler uses. To compile enter in the console `snips (Full Path to file to compile)`. With `snips -help` you can get more information on the arguments.
 
 ### Running the code
-If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E. "res/Test/Arith/Static/test_00.txt" or a list of directories, f.E. "res/Test/Arith/ res/Test/Stack/".
+If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E.`res/Test/Arith/Static/test_00.txt` or a list of directories, f.E. `res/Test/Arith/ res/Test/Stack/`.
 ### Code Examples
  Code examples and testcases can be found under res/Test/ and under release/examples/.
 ## Included Modules
