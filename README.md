@@ -29,7 +29,7 @@
 
  The compiler uses a built-in system library, located at release/lib. 
  
- The compiler will output ARM Assembly. See https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf for more information. 
+ The compiler will output ARM Assembly. See [ARM Instruction Set](/https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
  
 ## Usage & Setup
 ### Running the compiler executable
