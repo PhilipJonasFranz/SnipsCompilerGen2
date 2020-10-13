@@ -13,7 +13,28 @@
  
  Currently supported statement structures are if, if-else, else, while, do-while, for, for each, switch, break, continue, try/watch, signal and return.
  
- You can find more information on the language and the libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
+ Some of the core features of Snips are shown in this little code example:
+ 
+<pre><code>
+  struct X<T> {
+      T val;
+    
+      T get<T>() {
+          return self->val;
+      }
+    
+      static X<T> create<T>(T val) {
+          return X<T>::(val);
+      }
+  }
+  
+  int main() {
+      X<int>* x = init<>(X::create<int>(12));
+      return (x->get() == 12)? 25 : 5;
+  }
+</code></pre>
+ 
+ You can find more information about the language and the included libraries in the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
  
 ### The compiler
  The compiler pipeline consists out of various stages:
@@ -27,7 +48,7 @@
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, local changes while keeping mostly the original functionality
 
- The compiler uses a built-in system library, located at release/lib. 
+ The compiler uses a built-in [System Library](release/lib "release/lib"), located at `release/lib`. 
  
  The compiler will output ARM Assembly. See [ARM Instruction Set](/https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
  
@@ -55,7 +76,7 @@
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E.`res/Test/Arith/Static/test_00.txt` or a list of directories, f.E. `res/Test/Arith/ res/Test/Stack/`.
 
 ### Code Examples
- Code examples and testcases can be found under res/Test/ and under release/examples/.
+ [Code Examples](release/examples/) can be found under `release/examples`, [Testcases](res/Test/) can be found under `res/Test/`.
  
 ## Included Modules
 ### Assembler
@@ -73,10 +94,10 @@ If you want to run the code, you can run either the CompilerDriver.java with the
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 
 ### XML-Parser
- Under src/REv/Modules/Tools/ you can also find a basic implementation of a XML-Parser, that converts a given .xml file to a tree structure. 
+ Under `src/Util/XMLParser.java` you can also find a basic implementation of an [XML-Parser](src/Util/XMLParser.java), that converts a given .xml file to a tree structure. 
  
 ### Utility
- Under src/REv/Modules/Tools/Util.java you can find some utility functions for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
+ Under `src/REv/Modules/Tools/Util.java` you can find some [Utility Functions](src/REv/Modules/Tools/Util.java) for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
  
 ## License & Copyright
  © Philip Jonas Franz
