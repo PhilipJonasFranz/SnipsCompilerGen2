@@ -1,0 +1,51 @@
+SOURCE
+interface Inter<Z> {
+
+	Z get<Z>();
+
+}
+
+struct X<T> : Inter<T> {
+
+	T val;
+	
+	T get<T>() {
+		return self->val;
+	}
+
+}
+
+int main() {
+	X<int> x = X<int>::(25);
+	Inter<int> i = &x;
+	return i.get();
+}
+TESTCASES
+25
+OUTPUT
+/* --test_03.txt */
+    b main
+.L3_P0:                                      /* Interface : Inter, Provisos: INT,  */
+    mov r12, #0
+    b X.get_P2
+    
+X.get_P2:                                    /* Function: X.get, Provisos: INT */
+    mov r10, #0
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r0, #25                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r3, r0, #2
+    mov r0, r3                               /* Evaluate Expression */
+    bl .L3_P0                                /* Branch to relay table of Inter */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    

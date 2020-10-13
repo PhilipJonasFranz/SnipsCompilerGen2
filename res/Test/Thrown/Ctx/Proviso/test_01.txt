@@ -1,0 +1,51 @@
+SOURCE
+struct B {
+	
+	T v;
+	
+	int get<T>() {
+		return self->v;
+	}
+}
+
+int main() {
+	B<int>* b = init<>(B::(12));
+	return b->get<>();
+}
+THROWN
+MISSING_PROVISOS
+
+SOURCE
+struct B<T> {
+	
+	T v;
+	
+	int get() {
+		return self->v;
+	}
+}
+
+int main() {
+	B<int>* b = init<>(B::(12));
+	return b->get<>();
+}
+THROWN
+MISSING_PROVISOS
+
+SOURCE
+struct B {
+	
+	T v;
+	
+	int get<T>() {
+		return self->v;
+	}
+}
+
+int main() {
+	B* b = init<>(B::(12));
+	return b->get<>();
+}
+THROWN
+MISSING_PROVISOS
+

@@ -2,7 +2,7 @@ SOURCE
 #include<queue.sn>
 
 int main() {
-	CyclicQueue<int[2]>* q = Queue::create<int[2]>(3, {0, 0});
+	CyclicQueue<int[2]>* q = CyclicQueue::create<int[2]>(3, {0, 0});
 	
 	q->enqueue<int [2]>({3, 4});
 	q->enqueue<int [2]>({9, 3});
@@ -258,6 +258,9 @@ init_P1:                                     /* Function: init, Provisos: Queue.
     
 /* [BASE-PACKAGE] */
 /*  */
+/* This package contains the interface definition for an iterable struct. */
+/* The interface creates data access and exchange points, so data can be */
+/* read and written. */
 /* This package contains the utility to create and use */
 /* a circular queue. */
 /* The cyclic queue capsules a pointer to a storage location for */
@@ -410,10 +413,7 @@ Queue.CyclicQueue.dequeue.L4:
     mov r10, #0
     bx lr
     
-/* Allocates a new queue and initializes it. */
-/* The passed size will be set as the maximum amount of elements */
-/* in the queue. */
-Queue.create_P0:                             /* Function: Queue.create, Provisos: INT[2] */
+Queue.CyclicQueue.create_P0:                 /* Function: Queue.CyclicQueue.create, Provisos: INT[2] */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -448,7 +448,7 @@ main:                                        /* Function: main */
     mov r1, #0
     stmfd sp!, {r0, r1}
     mov r0, #3
-    bl Queue.create_P0                       /* Call Queue.create */
+    bl Queue.CyclicQueue.create_P0           /* Call Queue.CyclicQueue.create */
     mov r3, r0
     mov r0, #4                               /* Load parameters */
     mov r1, #3

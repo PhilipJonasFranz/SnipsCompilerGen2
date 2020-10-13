@@ -1,0 +1,14 @@
+/*
+ * [BASE-PACKAGE]
+ *
+ * Using the serializable interface, structs can be converted
+ * into string format.
+ */
+interface Serializable {
+
+	/* Create a string representation of the struct. */
+	shared char* serialize();
+	
+	static void* deserialize(char* str);
+	
+}

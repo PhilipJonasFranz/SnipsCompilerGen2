@@ -10,6 +10,7 @@ import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
@@ -41,6 +42,21 @@ public class Function extends CompoundStatement {
 	}
 	
 			/* --- FIELDS --- */
+	/** 
+	 * Set to the interface typedef when this function is 
+	 * a function head defined in this interface. 
+	 */
+	public InterfaceTypedef definedInInterface;
+	
+	/**
+	 * Set to true if this function is implemented from an interface.
+	 * When the Interface Relay Table branches to the function, the value
+	 * in R10 needs to be set to R10 to prevent wrong behaviour.
+	 */
+	public boolean requireR10Reset = false;
+	
+	public boolean wasCalled = false;
+	
 	/**
 	 * The flattened namespace path of this function.
 	 */
@@ -153,6 +169,10 @@ public class Function extends CompoundStatement {
 		return this.returnType;
 	}
 	
+	public void setReturnType(TYPE t) {
+		this.returnType = t;
+	}
+	
 	/**
 	 * Return wether this function signals exceptions or not.
 	 */
@@ -213,7 +233,7 @@ public class Function extends CompoundStatement {
 			if (map0.size() != map.size()) 
 				throw new SNIPS_EXC(Const.RECIEVED_MAPPING_LENGTH_NOT_EQUAL, map0.size(), map.size());
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map)) return true;
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) return true;
 		}
 		
 		return false;
@@ -230,7 +250,7 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map)) 
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) 
 				return this.provisosCalls.get(i).provisoPostfix;
 		}
 		
@@ -247,7 +267,7 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqual(map0, map))
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
 				return this.provisosCalls.get(i).returnType;
 		}
 		
@@ -262,6 +282,23 @@ public class Function extends CompoundStatement {
 			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
 			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
 		}
+	}
+	
+	public Function cloneSignature() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.provisosTypes)
+			provClone.add(t.clone());
+		
+		List<Declaration> params = new ArrayList();
+		for (Declaration d : this.parameters)
+			params.add(d.clone());
+		
+		List<TYPE> signalsTypes = new ArrayList();
+		for (TYPE t : this.signalsTypes)
+			signalsTypes.add(t.clone());
+		
+		/* Clone the function signature */
+		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 	}
 	
 } 

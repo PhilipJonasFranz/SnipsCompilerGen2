@@ -171,7 +171,7 @@ public class ProvisoUtil {
 	 * @param map1 The second proviso map.
 	 * @return True if the maps are equal, false if not.
 	 */
-	public static boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
+	public static boolean mappingIsEqualProvisoFree(List<TYPE> map0, List<TYPE> map1) {
 		boolean isEqual = true;
 		for (int a = 0; a < map0.size(); a++) 
 			isEqual &= map0.get(a).provisoFree().typeString().equals(map1.get(a).provisoFree().typeString());
@@ -179,5 +179,34 @@ public class ProvisoUtil {
 		return isEqual;
 	}
 	
+	public static boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
+		boolean isEqual = true;
+		for (int a = 0; a < map0.size(); a++) 
+			isEqual &= map0.get(a).typeString().equals(map1.get(a).typeString());
+		
+		return isEqual;
+	}
+	
+	public static boolean isProvisoFreeMapping(List<TYPE> mapping) {
+		boolean provisoFree = true;
+		for (TYPE t : mapping)
+			provisoFree &= !t.hasProviso();
+		
+		return provisoFree;
+	}
+	
+	public static String mappingToString(List<TYPE> mapping) {
+		String s = "[";
+		
+		for (TYPE t : mapping) 
+			s += t.typeString() + ",";
+		
+		if (!mapping.isEmpty())
+			s = s.substring(0, s.length() - 1);
+		
+		s += "]";
+		
+		return s;
+	}
 	
 } 

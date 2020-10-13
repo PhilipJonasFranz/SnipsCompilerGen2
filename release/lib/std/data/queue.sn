@@ -1,6 +1,6 @@
+#include<iterable.sn>
+
 /*
- * [BASE-PACKAGE]
- *
  * This package contains the utility to create and use
  * a circular queue.
  */
@@ -13,7 +13,7 @@ namespace Queue {
 	 * that is used to determine wether the queue is full or empty when
 	 * the head index is the same as the tail index.
 	 */
-	restricted struct CyclicQueue<T> {
+	restricted struct CyclicQueue<T> : Iterable<T> {
 		
 		T* storage;
 		
@@ -114,6 +114,24 @@ namespace Queue {
 		}
 		
 		/*
+		 * Returns the value at the given index, where the index 0 is
+		 * the index at the tail, or the next value to be dequeued. 
+		 */
+		shared T get<T>(int index) {
+			return *(self->storage + (((self->tail + index) % self->size) * sizeof(T)));
+		}
+		
+		/*
+		 * Sets the value at the given index, where the index 0 is
+		 * the index at the tail, or the next value to be dequeued,
+		 * to the provided value.
+		 */
+		shared void set<T>(int index, T value) {
+			int off = (((self->tail + index) % self->size) * sizeof(T));
+			*(self->storage + off) = value;
+		}
+		
+		/*
 		 * Returns the amount of elements that are currently 
 		 * stored in the queue.
 		 */
@@ -129,20 +147,20 @@ namespace Queue {
 			
 			return size;
 		}
-		
-	}
 	
-	/*
-	 * Allocates a new queue and initializes it.
-	 * The passed size will be set as the maximum amount of elements
-	 * in the queue.
-	 */
-	shared CyclicQueue<T>* create<T>(int size, T defValue) {
-		/* Allocate memory for storage of given size */
-		T* storage = resv(sizeof(T) * size);
-		
-		/* Initialize, set start values */
-		return init<>(CyclicQueue<T>::(storage, defValue, size, 0, 0, true));
+		/*
+		 * Allocates a new queue and initializes it.
+		 * The passed size will be set as the maximum amount of elements
+		 * in the queue.
+		 */
+		static CyclicQueue<T>* create<T>(int size, T defValue) {
+			/* Allocate memory for storage of given size */
+			T* storage = resv(sizeof(T) * size);
+			
+			/* Initialize, set start values */
+			return init<>(CyclicQueue<T>::(storage, defValue, size, 0, 0, true));
+		}
+	
 	}
 	
 } 

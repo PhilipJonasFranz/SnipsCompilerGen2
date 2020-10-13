@@ -6,15 +6,18 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import Ctx.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
+import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -33,6 +36,7 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
@@ -53,7 +57,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * When a function has provisos, the order cannot be checked.
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
-			if (fc.calledFunction.castedNode == null) 
+			if (fc.calledFunction.castedNode == null && fc.calledFunction.definedInInterface == null) 
 				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path.build(), fc.getSource().getSourceMarker());
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
@@ -102,7 +106,7 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Integer> sMap = new ArrayList();
 		
 		/* Extract mapping locations from different mappings */
-		if (f == null || (f != null && f.isLambdaHead)) {
+		if (f == null || (f != null && (f.isLambdaHead || f.definedInInterface != null))) {
 			/* Load default mapping */
 			List<Pair<Expression, Integer>> mapping = getDefaultMapping(parameters);
 			mapping.stream().forEach(x -> sMap.add(x.second));
@@ -167,7 +171,45 @@ public class AsNFunctionCall extends AsNStatement {
 		else if (regMapping == 2) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
-		if ((f != null && f.isLambdaHead) || anonCall != null) {
+		if (f != null && f.definedInInterface != null) {
+			AsNInterfaceTypedef def = (AsNInterfaceTypedef) f.definedInInterface.castedNode;
+			
+			/* Move the index in the interface typedef of the function * 4 in R12 */
+			for (int i = 0; i < f.definedInInterface.functions.size(); i++)
+				if (f.definedInInterface.functions.get(i).path.getLast().equals(f.path.getLast())) {
+					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
+					break;
+				}
+			
+			String postfix = "";
+			
+			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
+				if (ProvisoUtil.mappingIsEqual(provisoMap.providedHeadProvisos, provisos)) {
+					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
+						break;
+					
+					postfix = provisoMap.provisoPostfix;
+					break;
+				}
+			}
+			
+			boolean nestedDeref = false;
+			if (callee instanceof InlineCall)
+				nestedDeref = ((InlineCall) callee).nestedDeref;
+			
+			if (nestedDeref) {
+				/* Load Interface from pointer into R10 */
+				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
+			}
+			
+			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);
+			
+			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
+			branch.comment = new ASMComment("Branch to relay table of " + f.definedInInterface.path.build());
+			call.instructions.add(branch);
+		}
+		else if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {
 				if (r.declarationLoaded(anonCall)) {
 					int loc = r.declarationRegLocation(anonCall);

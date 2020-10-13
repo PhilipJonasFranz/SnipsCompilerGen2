@@ -20,7 +20,7 @@ public class NamespacePath {
 	 * termination is set to unknown.
 	 */
 	public enum PATH_TERMINATION {
-		UNKNOWN, STRUCT, ENUM;
+		UNKNOWN, INTERFACE, STRUCT, ENUM;
 	}
 	
 	

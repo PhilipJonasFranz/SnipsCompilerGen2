@@ -51,7 +51,8 @@ public class CompilerDriver {
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
-		includeMetaInformation = 		true;	/* Add compilation date, version and settings to output.		*/
+		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
+		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
 	
 			/* --- DEBUG --- */
@@ -260,8 +261,9 @@ public class CompilerDriver {
 				List<Program> dependencies = this.addDependencies();
 				
 				/* Print out imported libaries */
-				for (SyntaxElement s : dependencies) 
-					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
+				if (printAllImports)
+					for (SyntaxElement s : dependencies) 
+						log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
 				
 				/* Add libaries to AST, duplicates were already filtered */
 				int c = 0;
@@ -515,19 +517,20 @@ public class CompilerDriver {
 		
 		if (args.length > 1) {
 			for (int i = 1; i < args.length; i++) {
-				if (args [i].equals("-viz"))useTerminalColors = false;
-				else if (args [i].equals("-imm"))imm = true;
-				else if (args [i].equals("-warn"))disableWarnings = true;
-				else if (args [i].equals("-opt"))disableOptimizer = true;
-				else if (args [i].equals("-ofs"))optimizeFileSize = true;
-				else if (args [i].equals("-com"))enableComments = false;
-				else if (args [i].equals("-rov"))disableModifiers = true;
-				else if (args [i].equals("-sid"))disableStructSIDHeaders = true;
+				if (args [i].equals("-viz"))		useTerminalColors = false;
+				else if (args [i].equals("-imm")) 	imm = true;
+				else if (args [i].equals("-warn")) 	disableWarnings = true;
+				else if (args [i].equals("-imp")) 	printAllImports = true;
+				else if (args [i].equals("-opt")) 	disableOptimizer = true;
+				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
+				else if (args [i].equals("-com")) 	enableComments = false;
+				else if (args [i].equals("-rov")) 	disableModifiers = true;
+				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
 				}
-				else if (args [i].equals("-o")) outputPath = args [i++ + 1];
+				else if (args [i].equals("-o")) 	outputPath = args [i++ + 1];
 				else log.add(new Message("Unknown Parameter: " + args [i], LogPoint.Type.FAIL));
 			}
 		}
@@ -546,6 +549,7 @@ public class CompilerDriver {
 				"-log      : Print out log and compile information",
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable Warnings",
+				"-imp      : Print out all imports",
 				"-opt      : Disable Optimizer",
 				"-ofs      : Optimize for Filesize, slight performance hit",
 				"-rov      : Disable visibility modifiers",

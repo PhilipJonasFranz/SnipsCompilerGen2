@@ -5,6 +5,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
@@ -33,6 +34,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Res.Const;
 
 public class AsNArraySelect extends AsNExpression {
 
@@ -311,6 +313,7 @@ public class AsNArraySelect extends AsNExpression {
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 	public static void loadPointer(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {

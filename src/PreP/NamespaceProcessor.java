@@ -12,6 +12,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.EnumTypedef;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.StructTypedef;
 import Res.Const;
 
@@ -76,7 +77,7 @@ public class NamespaceProcessor {
 					/* Append current namespace path */
 					dec.path.path.addAll(0, name.path.path);
 				}
-				else if (s instanceof StructTypedef || s instanceof EnumTypedef) {
+				else if (s instanceof InterfaceTypedef || s instanceof StructTypedef || s instanceof EnumTypedef) {
 					/* Full path is already present */
 				}
 				else if (s instanceof Function) {

@@ -3,13 +3,16 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
+import Util.Source;
 
 public class STRUCT extends COMPOSIT {
 
@@ -30,6 +33,15 @@ public class STRUCT extends COMPOSIT {
 	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
+		if (type instanceof INTERFACE) {
+			INTERFACE i = (INTERFACE) type;
+			for (INTERFACE def : this.typedef.implemented)
+				if (i.getTypedef().equals(def.getTypedef())) {
+					return true;
+				}
+			
+			return false;
+		}
 		if (type instanceof STRUCT) {
 			STRUCT struct = (STRUCT) type;
 			
@@ -122,6 +134,20 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
+	public void checkProvisoPresent(Source source) throws CTX_EXC {
+		if (this.proviso.size() != this.typedef.proviso.size())
+			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
+	}
+	
+	/**
+	 * Returns the amount of bytes the field that corresponds to the given namespace
+	 * path is offsetted from the start of the structure. For example, the first field
+	 * would be offsetted 0 bytes or 4, if SIDs are enabled. If this field is 8 bytes large,
+	 * the second field is offsetted 8 bytes or 12 bytes, respectiveley. Returns -1 if no field
+	 * matches the given namespace path.
+	 * @param path The namespace path that should match the field.
+	 * @return The amount of bytes the field is offsetted or -1.
+	 */
 	public int getFieldByteOffset(NamespacePath path) {
 		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
 		
@@ -137,11 +163,11 @@ public class STRUCT extends COMPOSIT {
 		return -1;
 	}
 	
+	/**
+	 * Check if in this struct a field exists that matches the given namespace path perfectly.
+	 */
 	public boolean hasField(NamespacePath path) {
-		for (Declaration dec : this.typedef.getFields()) 
-			if (dec.path.build().equals(path.build())) return true;
-		
-		return false;
+		return this.getTypedef().getFields().stream().filter(x -> x.path.build().equals(path.build())).count() > 1;
 	}
 	
 	public String typeString() {
@@ -210,9 +236,9 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public TYPE remapProvisoName(String name, TYPE newType) {
-		for (int i = 0; i < this.proviso.size(); i++) { 
+		for (int i = 0; i < this.proviso.size(); i++) 
 			this.proviso.set(i, this.proviso.get(i).remapProvisoName(name, newType));
-		}
+		
 		return this;
 	}
 
@@ -220,6 +246,10 @@ public class STRUCT extends COMPOSIT {
 		if (mapType instanceof STRUCT) {
 			STRUCT s = (STRUCT) mapType;
 			if (s.getTypedef().SID == this.getTypedef().SID) {
+				/* Missing provisos */
+				if (this.proviso.size() != s.proviso.size())
+					return null;
+				
 				for (int i = 0; i < this.proviso.size(); i++) {
 					PROVISO prov = (PROVISO) this.proviso.get(i);
 					if (prov.placeholderName.equals(searchedProviso)) {
@@ -231,6 +261,13 @@ public class STRUCT extends COMPOSIT {
 		}
 		
 		return null;
+	}
+
+	public boolean hasProviso() {
+		for (TYPE t : this.proviso)
+			if (t.hasProviso())
+				return true;
+		return false;
 	}
 	
 } 

@@ -121,16 +121,16 @@ namespace Tree {
 			
 			return self;
 		}
-		
-	}
 	
-	/*
-	 * Create a new Tree, initialize both childs to 0, set root value
-	 * to given value. Return a pointer to the root.
-	 */
-	shared TreeNode<T>* create<T>(T value) {
-		/* Initialize the root with null pointers and the given value */
-		return init<>(TreeNode<T>::(null, null, value));
+		/*
+		 * Create a new Tree, initialize both childs to 0, set root value
+		 * to given value. Return a pointer to the root.
+		 */
+		static TreeNode<T>* create<T>(T value) {
+			/* Initialize the root with null pointers and the given value */
+			return init<>(TreeNode<T>::(null, null, value));
+		}
+	
 	}
 	
 } 

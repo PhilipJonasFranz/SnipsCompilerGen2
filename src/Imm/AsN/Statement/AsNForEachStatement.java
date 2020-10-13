@@ -5,6 +5,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -41,6 +42,7 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Res.Const;
 
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 
@@ -162,7 +164,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 				int off = st.getDeclarationInStackByteOffset(a.iterator);
 				f.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
-			else {
+			else if (st.getDeclarationInStackByteOffset(a.iterator) != -1) {
 				int offset = st.getDeclarationInStackByteOffset(a.iterator);
 				offset += (a.iterator.getType().wordsize() - 1) * 4;
 				
@@ -172,6 +174,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 				/* Pop the loaded words and store them to the iterator */
 				AsNAssignment.copyStackSection(a.iterator.getType().wordsize(), f, st);
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}
 		
 		/* Add body, dont use addBody() because of custom scope handling */
@@ -256,12 +259,13 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			if (loc != target)
 				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(loc)));
 		}
-		else {
+		else if (st.getDeclarationInStackByteOffset(f.counter) != -1) {
 			/* On Stack */
 			int off = st.getDeclarationInStackByteOffset(f.counter);
 		
 			this.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 

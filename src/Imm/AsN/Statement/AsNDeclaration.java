@@ -15,6 +15,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
@@ -28,7 +29,7 @@ public class AsNDeclaration extends AsNStatement {
 		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
 		
 		int free = r.findFree();
-		if (free != -1 && (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER)) {
+		if (free != -1 && (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER || d.getType() instanceof INTERFACE)) {
 			/* Free Register exists and declaration fits into a register */
 			ASMMov mov = new ASMMov(new RegOp(free), new RegOp(0));
 			mov.optFlags.add(OPT_FLAG.WRITEBACK);
@@ -39,7 +40,7 @@ public class AsNDeclaration extends AsNStatement {
 		else {
 			/* Push only if primitive or pointer, in every other case the expression 
 			 * is already on the stack */
-			if ((d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER) && !(d.value instanceof StructureInit)) {
+			if ((d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER || d.getType() instanceof INTERFACE) && !(d.value instanceof StructureInit)) {
 				dec.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 			}
 			else {

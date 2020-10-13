@@ -49,11 +49,13 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.StructTypedef;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNAssignment;
 import Imm.AsN.Statement.AsNComment;
+import Imm.AsN.Statement.AsNInterfaceTypedef;
 import Snips.CompilerDriver;
 import Util.Logging.ProgressMessage;
 
@@ -235,10 +237,12 @@ public class AsNBody extends AsNNode {
 					body.instructions.add(new ASMSeperator());
 				}
 			}
+			else if (s instanceof InterfaceTypedef) {
+				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
+				body.instructions.addAll(def.getInstructions());
+			}
 			else if (s instanceof Comment) {
 				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
-			
-				
 			}
 			
 			done++;

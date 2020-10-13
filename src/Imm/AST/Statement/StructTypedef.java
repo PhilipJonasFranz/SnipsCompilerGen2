@@ -10,6 +10,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Util.NamespacePath;
 import Util.Source;
@@ -35,6 +36,9 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<INTERFACE> implemented;
+	
+	/** Proviso types provided by the typedef to the extension */
 	public List<TYPE> extProviso;
 	
 	/* Contains all struct typedefs that extended from this struct */
@@ -70,7 +74,7 @@ public class StructTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<TYPE> extProviso, MODIFIER modifier, Source source) {
+	public StructTypedef(NamespacePath path, List<TYPE> proviso, List<Declaration> declarations, List<Function> functions, StructTypedef extension, List<INTERFACE> implemented, List<TYPE> extProviso, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -80,6 +84,25 @@ public class StructTypedef extends SyntaxElement {
 		
 		this.extension = extension;
 		this.extProviso = extProviso;
+		
+		this.implemented = implemented;
+		
+		for (INTERFACE i : this.implemented) 
+			i.getTypedef().implementers.add(this);
+		
+		this.modifier = modifier;
+		this.self = new STRUCT(this, this.proviso);
+	}
+	
+	
+			/* --- METHODS --- */
+	/**
+	 * This method is called once the entire struct typedef is parsed. After all function 
+	 * in this struct are added, functions from the extensions are added, with respect to 
+	 * overwritten functions.
+	 */
+	public void postInitialize() {
+		int c = 0;
 		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
@@ -98,18 +121,21 @@ public class StructTypedef extends SyntaxElement {
 				base.path.add(f.path.getLast());
 				
 				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
-				this.functions.add(f0);
 				
-				this.inheritedFunctions.add(f0);
+				boolean override = false;
+				for (Function fs : this.functions) {
+					if (fs.path.getLast().equals(f0.path.getLast()))
+						override = true;
+				}
+				
+				if (!override) {
+					this.functions.add(c++, f0);
+					this.inheritedFunctions.add(f0);
+				}
 			}
 		}
-		
-		this.modifier = modifier;
-		this.self = new STRUCT(this, this.proviso);
 	}
 	
-	
-			/* --- METHODS --- */
 	/**
 	 * Assign SIDs and neighbours to the StructTypedefs based on the location
 	 * in the extension tree. SIDs are unique, as well as the neighbours.
@@ -211,7 +237,28 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">");
+		String s = this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">";
+		
+		if (this.extension != null)
+			s += ":extends:" + this.extension.path.build() + ",";
+		
+		if (!this.implemented.isEmpty()) {
+			if (this.extension != null)
+				s += ",";
+			else 
+				s += ":";
+			
+			s += "implements:";
+		}
+		
+		for (INTERFACE def : this.implemented)
+			s += def.getTypedef().path.build() + ",";
+		
+		if (this.extension != null || !this.implemented.isEmpty())
+			s = s.substring(0, s.length() - 1);
+		
+		System.out.println(s);
+		
 		if (rec) {
 			for (Declaration dec : this.fields) 
 				dec.print(d + this.printDepthStep, rec);

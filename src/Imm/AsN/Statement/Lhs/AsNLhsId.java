@@ -7,6 +7,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -172,7 +173,7 @@ public class AsNLhsId extends AsNStatement {
 		}
 		else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
 			ASMAdd and0 = new ASMAdd(new RegOp(combineOperand), new RegOp(combineOperand), new ImmOp(0));
-			and0.updateConditionField = true;
+			and0.updateCondField();
 			inj.add(and0);
 			
 			inj.add(new ASMMov(new RegOp(combineOperand), new ImmOp(1), new Cond(COND.NE)));
@@ -190,7 +191,7 @@ public class AsNLhsId extends AsNStatement {
 		}
 		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
 			ASMOrr orr = new ASMOrr(new RegOp(sourceOperand), new RegOp(sourceOperand), new RegOp(combineOperand));
-			orr.updateConditionField = true;
+			orr.updateCondField();
 			inj.add(orr);
 			
 			if (!directInjection) {
@@ -202,6 +203,7 @@ public class AsNLhsId extends AsNStatement {
 				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), new Cond(COND.EQ)));
 			}
 		}
+		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		
 		/* Pop Last Operand Register if Operand Register was used */
 		if (clearOtherOperandReg && save) {
