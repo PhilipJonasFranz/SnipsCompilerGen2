@@ -21,20 +21,20 @@ as well as pointers and arrays of said types. Structs can be created capsuling f
  Some of the core features of Snips are shown in this little code example:
  
 <pre><code>
-struct X<T> {
+struct X&lt;T> {
     T val;
   
-    T get<T>() {
+    T get&lt;T>() {
         return self->val;
     }
   
-    static X<T> create<T>(T val) {
-        return X<T>::(val);
+    static X&lt;T> create&lt;T>(T val) {
+        return X&lt;T>::(val);
     }
 }
   
 int main() {
-    X<int>* x = init<>(X::create<int>(12));
+    X&lt;int>* x = init&lt;>(X::create&lt;int>(12));
     return (x->get() == 12)? 25 : 5;
 }
 </code></pre>
