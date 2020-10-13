@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org)
+# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-stable-green.svg)](https://semver.org)
 
 ## Some words in advance
  This project was started for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results produced by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
@@ -58,6 +58,7 @@ int main() {
  The compiler will output ARM Assembly. See [ARM Instruction Set](/https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
  
 ## Usage & Setup
+
 ### Running the compiler executable
  The compiler executable can be run with `snips [Path to file] ARGS`. The possible arguments can be found below:
 
