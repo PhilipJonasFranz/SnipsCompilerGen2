@@ -80,10 +80,10 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  
 ## Included Modules
 ### Assembler
- Under src/REv/Modules/RAsm/ you can find an assembler that is used by the test driver to assemble the outputted program and run it on the SWARM32Pc. The Assembler will work with the code that the Compiler outputs, but it does not fully support all instructions and does not follow any compilation conventions. I do not recommend to use it anywhere else than in combination with this project.
+ Under `src/REv/Modules/RAsm/` you can find an [Assembler](src/REv/Modules/RAsm/) that is used by the test driver to assemble the outputted program and run it on the SWARM32Pc. The Assembler will work with the code that the Compiler outputs, but it does not fully support all instructions and does not follow any compilation conventions. I do not recommend to use it anywhere else than in combination with this project.
  
 ### SWARM32Pc
- Under src/REv/CPU/ you can find a virtual machine, which implements a subset of the ARM Instruction Set. Again, this is used to test the output of the Compiler. Since the processor does not support all instructions i would not recommend to use it somewhere else. Supported instructions are: 
+ Under `src/REv/CPU/` you can find a [Virtual Machine](src/REv/CPU/), which implements a subset of the ARM Instruction Set. Again, this is used to test the output of the Compiler. Since the processor does not support all instructions i would not recommend to use it somewhere else. Supported instructions are: 
  - b, bl, bx
  - All data processing operations
  - mrs, msr
