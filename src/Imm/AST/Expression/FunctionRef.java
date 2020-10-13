@@ -2,7 +2,6 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
-import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.TYPE.TYPE;
@@ -50,10 +49,6 @@ public class FunctionRef extends Expression {
 		System.out.println(this.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkFunctionRef(this);
-	}
-
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
 	}

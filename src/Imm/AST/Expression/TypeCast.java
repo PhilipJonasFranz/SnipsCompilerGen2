@@ -2,7 +2,6 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
-import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
@@ -36,10 +35,6 @@ public class TypeCast extends Expression {
 		System.out.println(this.pad(d) + "TypeCast");
 		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());
 		this.expression.print(d + this.printDepthStep, rec);
-	}
-
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkTypeCast(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

@@ -2,7 +2,6 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
-import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -36,10 +35,6 @@ public class WatchStatement extends CompoundStatement {
 				s.print(d + this.printDepthStep, rec);
 			}
 		}
-	}
-
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkWatchStatement(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

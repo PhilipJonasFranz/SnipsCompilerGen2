@@ -2,7 +2,6 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
-import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Lhs.LhsId;
@@ -62,10 +61,6 @@ public class Assignment extends Statement {
 			this.lhsId.print(d + this.printDepthStep, rec);
 			this.value.print(d + this.printDepthStep, rec);
 		}
-	}
-
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkAssignment(this);
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {

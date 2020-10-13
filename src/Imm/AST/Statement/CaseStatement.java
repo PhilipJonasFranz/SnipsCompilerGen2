@@ -2,10 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
-import Ctx.ContextChecker;
-import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
-import Imm.TYPE.TYPE;
 import Util.Source;
 
 /**
@@ -32,8 +29,4 @@ public class CaseStatement extends ConditionalCompoundStatement {
 			s.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkCaseStatement(this);
-	}
-	
 } 

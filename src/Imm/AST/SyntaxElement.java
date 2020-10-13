@@ -69,7 +69,9 @@ public abstract class SyntaxElement {
 	/**
 	 * Visitor relay for context checking
 	 */
-	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkRelay(this);
+	}
 	
 	/**
 	 * Returns the source at which this syntax element was parsed.

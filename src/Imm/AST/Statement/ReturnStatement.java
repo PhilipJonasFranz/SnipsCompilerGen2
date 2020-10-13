@@ -38,7 +38,7 @@ public class ReturnStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkReturn(this);
+		return ctx.checkReturnStatement(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

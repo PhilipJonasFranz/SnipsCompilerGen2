@@ -1,6 +1,9 @@
 package Ctx;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -938,6 +941,7 @@ public class ContextChecker {
 		this.compoundStack.push(w);
 		
 		TYPE cond = w.condition.check(this);
+		
 		if (!(cond instanceof BOOL)) 
 			throw new CTX_EXC(w.getSource(), Const.CONDITION_NOT_BOOLEAN);
 		
@@ -1205,14 +1209,14 @@ public class ContextChecker {
 		return null;
 	}
 	
-	public TYPE checkBreak(BreakStatement b) throws CTX_EXC {
+	public TYPE checkBreakStatement(BreakStatement b) throws CTX_EXC {
 		if (this.compoundStack.isEmpty()) 
 			throw new CTX_EXC(b.getSource(), Const.CAN_ONLY_BREAK_OUT_OF_LOOP);
 		else b.superLoop = this.compoundStack.peek();
 		return null;
 	}
 	
-	public TYPE checkContinue(ContinueStatement c) throws CTX_EXC {
+	public TYPE checkContinueStatement(ContinueStatement c) throws CTX_EXC {
 		if (this.compoundStack.isEmpty()) 
 			throw new CTX_EXC(c.getSource(), Const.CAN_ONLY_CONTINUE_IN_LOOP);
 		else c.superLoop = this.compoundStack.peek();
@@ -1260,7 +1264,7 @@ public class ContextChecker {
 		return null;
 	}
 	
-	public TYPE checkReturn(ReturnStatement r) throws CTX_EXC {
+	public TYPE checkReturnStatement(ReturnStatement r) throws CTX_EXC {
 		if (r.value != null) {
 			TYPE t = r.value.check(this);
 
@@ -2513,6 +2517,38 @@ public class ContextChecker {
 				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
 			}
 		}
+	}
+	
+	/**
+	 * Multi-relay for this context checker. Given a SyntaxElement s, this method relays to the
+	 * correct context check routine for this syntax element using Java Reflections.
+	 * @param s The syntax element to where the function is supposed to relay to.
+	 * @return The TYPE returned by the check method.
+	 */
+	public TYPE checkRelay(SyntaxElement s) throws CTX_EXC {
+		/* Get the name by semi-guessing the name, name should be 'check' + s.getClass().getSimpleName(); */
+		Optional<Method> check = Arrays.stream(this.getClass().getMethods()).filter(x -> x.getName().equals("check" + s.getClass().getSimpleName())).findAny();
+		
+		if (check.isPresent()) {
+			try {
+				return (TYPE) check.get().invoke(this, s);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				/* 
+				 * If the cause is a compiler exception, relay the exception back, since 
+				 * for example the test driver may test for exceptions.
+				 */
+				if (e.getCause() instanceof CTX_EXC)
+					throw (CTX_EXC) e.getCause();
+				else if (e.getCause() instanceof SNIPS_EXC)
+					throw (SNIPS_EXC) e.getCause();
+				else
+					/* In this case, we have a non-standard issue, print stacktrace. */
+					e.printStackTrace();
+			}
+		}
+		
+		/* Function is not implemented or has the wrong name */
+		throw new SNIPS_EXC("Check method is not implemented for class : '" + s.getClass().getSimpleName() + "'");
 	}
 	
 } 
