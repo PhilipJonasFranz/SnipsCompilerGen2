@@ -2,6 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -31,6 +32,10 @@ public class BreakStatement extends Statement {
 		System.out.println(this.pad(d) + "Break");
 	}
 
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkBreak(this);
+	}
+	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
 	}

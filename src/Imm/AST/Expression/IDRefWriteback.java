@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
@@ -36,6 +37,10 @@ public class IDRefWriteback extends Expression {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
 		this.shadowRef.print(d + this.printDepthStep, rec);
+	}
+
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkIDRefWriteback(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

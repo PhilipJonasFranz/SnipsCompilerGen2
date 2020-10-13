@@ -3,12 +3,15 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import CGen.LabelGen;
+import Ctx.ContextChecker;
+import Exc.CTX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token;
 import Par.Token.TokenType;
@@ -68,4 +71,8 @@ public class ForEachStatement extends CompoundStatement {
 		}
 	}
 
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkForEachStatement(this);
+	}
+	
 } 

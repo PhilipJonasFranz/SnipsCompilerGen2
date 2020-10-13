@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CGen.LabelGen;
+import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
@@ -148,6 +149,10 @@ public class Function extends CompoundStatement {
 				s.print(d + this.printDepthStep, rec);
 			}
 		}
+	}
+
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkFunction(this);
 	}
 
 	/** 

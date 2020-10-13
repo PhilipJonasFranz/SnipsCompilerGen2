@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
@@ -40,6 +41,10 @@ public class StructureInit extends Expression {
 		}
 	}
 	
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkStructureInit(this);
+	}
+
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		ProvisoUtil.mapNTo1(this.structType, context);
 		

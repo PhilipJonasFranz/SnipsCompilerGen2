@@ -2,6 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Expression;
@@ -51,6 +52,10 @@ public class DirectASMStatement extends Statement {
 		}
 	}
 
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkDirectASMStatement(this);
+	}
+	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		for (Pair<Expression, REG> p : this.dataIn) 
 			p.first.setContext(context);

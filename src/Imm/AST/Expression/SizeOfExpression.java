@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
@@ -33,6 +34,10 @@ public class SizeOfExpression extends Expression {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "SizeOf");
 		this.expression.print(d + this.printDepthStep, rec);
+	}
+
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkSizeOfExpression(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

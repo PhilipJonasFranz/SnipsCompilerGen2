@@ -2,6 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.List;
 
+import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
@@ -35,6 +36,10 @@ public class AssignWriteback extends Statement {
 		if (rec) this.reference.print(d + this.printDepthStep, rec);
 	}
 
+	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		return ctx.checkAssignWriteback(this);
+	}
+	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.reference.setContext(context);
 	}
