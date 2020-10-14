@@ -10,30 +10,30 @@ The type-system is a big part of the foundation of the language. While being str
 
 Types are seperated in three classes: Primitives, Composit and Special Types. Primitive types are:
 
- |         Type       |                  Description                  |
- | ------------------ | --------------------------------------------- |
- | INT (Integer)      | A whole number ranging from `2^-32 to 2^31`   |
- | BOOL (Boolean)     | A logic type with two states, `true or false` |
- | CHAR (Character)   | A single character encoded in UTF-8           |
- | FUNC (Function)    | Holds the address of a function, is callable  |
- | ENUM (Enumeration) | Holds a value from an enumeration             |
- | VOID (Void)        | Universal type that matches any other type    |
- | NULL (Null)        | Type that holds reference to null-pointer     |
+ |         Type         |                  Description                  |
+ | -------------------- | --------------------------------------------- |
+ | `INT` (Integer)      | A whole number ranging from `2^-32 to 2^31`   |
+ | `BOOL` (Boolean)     | A logic type with two states, `true or false` |
+ | `CHAR` (Character)   | A single character encoded in UTF-8           |
+ | `FUNC` (Function)    | Holds the address of a function, is callable  |
+ | `ENUM` (Enumeration) | Holds a value from an enumeration             |
+ | `VOID` (Void)        | Universal type that matches any other type    |
+ | `NULL` (Null)        | Type that holds reference to null-pointer     |
  
  Composit types are built up from other types and are combined into a new type. Composit types are:
  
- |         Type       |                         Description                         |
- | ------------------ | ----------------------------------------------------------- |
- | STRUCT             | A collection of types and functions                         |
- | ARRAY              | A collection of equal types                                 |
- | INTERFACE          | Provides abstraction by defining functions to be implemented|
- | POINTER            | Holds address reference to other target type                |
+ |          Type        |                         Description                         |
+ | -------------------- | ----------------------------------------------------------- |
+ | `STRUCT`             | A collection of types and functions                         |
+ | `ARRAY`              | A collection of equal types                                 |
+ | `INTERFACE`          | Provides abstraction by defining functions to be implemented|
+ | `POINTER`            | Holds address reference to other target type                |
 
 Special types are managed during compile time, and are fixed during runtime. Special types are:
 
- |         Type       |                         Description                         |
- | ------------------ | ----------------------------------------------------------- |
- | PROVISO            | A shapeshifter type, used for templating and re-usability   |
+ |          Type        |                         Description                         |
+ | -------------------- | ----------------------------------------------------------- |
+ | `PROVISO`            | A shapeshifter type, used for templating and re-usability   |
 
 ## Expressions
 
@@ -70,4 +70,26 @@ Now, with the defined operators, we can inductiveley define expressions. For exa
 - `a * (4 + b)`
 - `*(p + 4) % 5`
 - `(int) ((b)? true : eval(a, c))`
-- `Data::(5, true, 'c');
+- `Data::(5, true, 'c');`
+
+## Statements
+
+Statements make up the context around expressions and provide an infrastructure for data management and flow. Using statements in a clever and effective way is critical to creating efficient and well-defined programs. 
+
+### Data Statements
+
+Data statements provide the infrastructure for data in the program. These statements are:
+
+ |     Statement   |       Code Example    |                                 Description                                 |
+ | ----------------| --------------------- | --------------------------------------------------------------------------- |
+ | Declaration     | `int i = eval(10);`   | Creates a new variable in the current scope and assigns a value to it       |
+ | Assignment      | `i = eval(i + 4);`    | Re-assigns the variable in the most inner scope to the new vale             |
+
+### Flow Statements
+
+Flow statements alter the flow of the program
+
+ |     Statement   |       Code Example    |                                 Description                                 |
+ | ----------------| --------------------- | --------------------------------------------------------------------------- |
+ | Function Call   | `incr(p);`            | Calls the given function with given parameters and discards the return value|
+ | Return          | `return;`, `return a` | Returns from the current function with or without return value              |
