@@ -28,12 +28,14 @@ struct X&lt;T> {
         return self->val;
     }
   
+    /* Construct a new struct instance */
     static X&lt;T> create&lt;T>(T val) {
         return X&lt;T>::(val);
     }
 }
   
 int main() {
+    // Push the struct on the heap and create a pointer
     X&lt;int>* x = init&lt;>(X::create&lt;int>(12));
     return (x->get&lt;>() == 12)? 25 : 5;
 }
