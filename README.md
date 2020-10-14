@@ -8,7 +8,7 @@
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
  the table, like functions, conditionals, loops, arrays, references, global variables and a wide roster of built in operators. Also, more advanced features like imports, interfaces, structs, polymorphism, templating, heap functionality, namespaces, exception handling, predicates and inline assembly are supported.
  
- Snips is mainly a procedual language, but through interfaces, struct polymorphism and struct nesting, a object-oriented programming style can be achieved.
+ Snips is mainly a procedural language, but through interfaces, struct polymorphism and struct nesting, an object-oriented programming style can be achieved.
 
 Currently supported data types are:
 
@@ -18,7 +18,7 @@ Currently supported data types are:
 
 as well as pointers and arrays of said types. Structs can be created capsuling fields of any type. The Void Type can be used as a type wildcard. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
 
- Some of the core features of Snips are shown in this little code example:
+ Some of the core features of Snips are shown in this little code example below:
  
 <pre><code>
 struct X&lt;T> {
@@ -35,7 +35,7 @@ struct X&lt;T> {
   
 int main() {
     X&lt;int>* x = init&lt;>(X::create&lt;int>(12));
-    return (x->get() == 12)? 25 : 5;
+    return (x->get&lt;>() == 12)? 25 : 5;
 }
 </code></pre>
  
@@ -80,7 +80,7 @@ int main() {
 ### Running the code
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E.`res/Test/Arith/Static/test_00.txt` or a list of directories, f.E. `res/Test/Arith/ res/Test/Stack/`.
 
-### Code Examples
+### Code Examples, Tests
  [Code Examples](release/examples/) can be found under `release/examples`, [Testcases](res/Test/) can be found under `res/Test/`.
  
 ## Included Modules
