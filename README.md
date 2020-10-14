@@ -99,12 +99,12 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  
 ### SWARM32Pc
  Under `src/REv/CPU/` you can find a [Virtual Machine](src/REv/CPU/), which implements a subset of the ARM Instruction Set. Again, this is used to test the output of the Compiler. Since the processor does not support all instructions i would not recommend to use it somewhere else. Supported instructions are: 
- - b, bl, bx
+ - `b`, `bl`, `bx`
  - All data processing operations
- - mrs, msr
- - mul, mla
- - ldr, str
- - ldm, stm
+ - `mrs`, `msr`
+ - `mul`, `mla`
+ - `ldr`, `str`
+ - `ldm`, `stm`
  
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 

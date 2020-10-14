@@ -6,7 +6,11 @@
 
 - [Type System](#type-system)
 - [Expressions](#expressions)
+  - [Operators](#operators)
+  - [Examples](#examples)
 - [Statements](#statements)
+  - [Data Statements](#data-statements)
+  - [Flow Statements](#flow-statements)
 
 ## Type System
 
@@ -64,7 +68,7 @@ Expressions are inductiveley defined. From a wide range of operators, expression
  | Shift left, Shift right| `a << b`, `a >> b`        | Logical shift operation of the first operand by the second operand |
  | Comparison             | `a <= b`, `a == b`        | Compares two operands based on operator and returns boolean result |
  | Bitwise and, xor, or   | `a & b`, `a ^ b`, `a \| b`| The bitwise and, xor and or operation of two operands              |
- | Logical and, or        | `a && b`, `a \|\| b`        | The logical and, xor and or operation of two operands              |
+ | Logical and, or        | `a && b`, `a \|\| b`        | The logical and, xor and or operation of two operands            |
  | Ternary                | `(c)? a : b`              | Selects one of two operands based on condition                     |
  | Array Initialization   | `{1, 2, a, b + 1}`        | Creates a new array from the given values                          |
  | Struct Initialization  | `Struct::(1, c, a + 3)`   | Creates a new struct instance from the given values                |
@@ -86,16 +90,60 @@ Statements make up the context around expressions and provide an infrastructure 
 
 Data statements provide the infrastructure for data in the program. These statements are:
 
- |     Statement   |       Code Example    |                                 Description                                 |
- | ----------------| --------------------- | --------------------------------------------------------------------------- |
- | Declaration     | `int i = 10;`         | Creates a new variable in the current scope and assigns a value to it       |
- | Assignment      | `i = eval(i + 4);`    | Re-assigns the variable in the most inner scope to the new vale             |
+#### Declaration
+
+A declaration creates a new variable in the current scope and assigns a value to it. The data type of the declaration and value has to match.
+
+```c
+  int i = 10;
+```
+
+#### Assignment
+
+An assignment re-assigns a value to an existing variable. The data type of the value and the variable has to match.
+
+```c
+  i = eval(i + 4);
+```
+
+The data target from an assignment can vary, as well as the assign arithmetic. Assign arithmetic can be used to alter the value of the variable not only using the new value, but the old value of the variable as well:
+
+ |   Assign Operator    |                         Description                                    |
+ | -------------------- | ---------------------------------------------------------------------- |
+ | `=`                  | Simple assignment to the variable                                      |
+ | `+=`, `-=`           | Adds or subtracts new value from current value                         |
+ | `*=`, `/=`, `%=`     | Multiplis, divides or modulus operation on current value with new vaue |
+ | `&=`, `\|=`, `^=`    | Bitwise and, or, xor with new value and current value                  |
+ | `&&=`, `\|\|=`, `^=` | Bitwise and, or, xor with new value and current value                  |
+ | `<<=`, `>>=`         | Shift current value by new value                                       |
+
+The data target can be direct, when the value is assigned to the variable name directley. But data targets hidden behind a struct or array select, or even behind a pointer can be used:
+
+ |         Operator       |       Code Example        |                               Description                          |
+ | ---------------------- | ------------------------- | ------------------------------------------------------------------ |
+ | Direct                 | `a = 25;`                 | Assigns the value to the variable directley                        |
+ | Array Selection        | `a [i] = c * d;`          | Assigns the value to the element at the selected index in the array|
+ | Pointer                | `*(p + 2) = get();`       | Assigns to the address the expression in the dereference defines   |
+ | Struct Select          | `a->b = x->v * 3;`        | Assigns to the selected field in the struct                        |
 
 ### Flow Statements
 
-Flow statements alter the flow of the program
+Flow statements alter the flow of the program. This is done by creating branches in the code flow, either through a function call or a conditional statement. Flow statements are:
 
- |     Statement   |       Code Example    |                                 Description                                 |
- | ----------------| --------------------- | --------------------------------------------------------------------------- |
- | Function Call   | `incr(p);`            | Calls the given function with given parameters and discards the return value|
- | Return          | `return;`, `return a` | Returns from the current function with or without return value              |
+#### Function call
+
+Calls the given function with given parameters and discards the return value.
+
+```c
+  incr(p);
+```
+
+#### Return Statement
+
+Returns from the current function with or without a return value.
+
+```c
+  return;
+  
+  return a + 4;
+```
