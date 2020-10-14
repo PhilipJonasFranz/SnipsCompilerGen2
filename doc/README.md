@@ -1,4 +1,4 @@
-# The Snips Language
+# Introduction to Snips language
 
  This document aims to give a brief introduction to the language and its basic mechanisms. If you want a more in-depth guide, see the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 
@@ -37,11 +37,13 @@ Special types are managed during compile time, and are fixed during runtime. Spe
 
 ## Expressions
 
-Expressions are inductiveley defined. From a wide range of operators, expressions can be built up into a complex term. During compilation, operator precedence is taken into account. In the table below, the operators are listed in the correct precedence, starting with the highest precedence.
+Expressions are inductiveley defined. From a wide range of operators, expressions can be built up into a complex term. At any point, parentheses can be inserted between sub-expressions. Evaluating expressions will always yield a return value. This means that expressions must have a target like a declaration or assignment. During compilation, operator precedence is taken into account. In the table below, the operators are listed in the correct precedence, starting with the highest precedence.
+
+### Operators
 
  |         Operator       |       Code Example        |                               Description                          |
  | ---------------------- | ------------------------- | ------------------------------------------------------------------ |
- | Atom, Enum Selection   | `a`, `10`, `State.Ok`     | Atoms can be a variable reference or direct value.                 |
+ | Atom, Enum Select, Call| `a`, `State.Ok`, `f()`    | Atoms can be a variable reference, direct value or a function call |
  | Array Selection        | `a [0]`, `m [0] [1]`      | Select from multi-dimensional array. Results in value or array     |
  | Structure Selection    | `st.v`, `st->v`           | Select a field from a struct                                       |
  | Increment, Decrement   | `i++`, `i--`              | Get the value from the variable and increment/decrement the origin |
@@ -61,3 +63,11 @@ Expressions are inductiveley defined. From a wide range of operators, expression
  | Array Initialization   | `{1, 2, a, b + 1}`        | Creates a new array from the given values                          |
  | Struct Initialization  | `Struct::(1, c, a + 3)`   | Creates a new struct instance from the given values                |
  
+### Examples
+
+Now, with the defined operators, we can inductiveley define expressions. For example:
+
+- `a * (4 + b)`
+- `*(p + 4) % 5`
+- `(int) ((b)? true : eval(a, c))`
+- `Data::(5, true, 'c');
