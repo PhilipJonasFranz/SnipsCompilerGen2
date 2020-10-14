@@ -3,6 +3,14 @@
 ## Some words in advance
  This project was started for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results produced by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
  
+## Contents
+
+- [What is Snips?](#what-is-snips)
+- [The Compiler](#the-compiler)
+- [Usage & Setup](#usage-and-setup)
+- [Included Modules](#included-modules)
+- [License & Copyright](#license-and-copyright)
+
 ## What is Snips?
 ### Short introduction
  Snips is a lightweight C/Java oriented programming language. This brings familiar programming concepts to 
@@ -43,7 +51,7 @@ int main() {
  
  You can find more information about the language in the [Quick-start Documentation](doc/README.md). For a more in-depth guide and information about the included libraries, see [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
  
-### The compiler
+## The compiler
  The compiler pipeline consists out of various stages:
  
  - Reading the code to compile
@@ -59,7 +67,7 @@ int main() {
  
  The compiler will output ARM Assembly. See [ARM Instruction Set](/https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
  
-## Usage & Setup
+## Usage and Setup
 ### Running the compiler executable
  The compiler executable can be run with `snips [Path to file] ARGS`. The possible arguments can be found below:
 
@@ -106,7 +114,7 @@ All instructions do support the condition field. If you compile your assembly co
 ### Utility
  Under `src/REv/Modules/Tools/Util.java` you can find some [Utility Functions](src/REv/Modules/Tools/Util.java) for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
  
-## License & Copyright
+## License and Copyright
  © Philip Jonas Franz
  
  Licensed under [Apache License 2.0](LICENSE). 
