@@ -20,9 +20,9 @@
 
 Currently supported data types are:
 
-- Primitive types : Int, Bool, Char
-- Custom types    : Interface, Struct, Enum
-- Special types   : Function, Proviso, Void
+- Primitive types : `int`, `bool`, `char`
+- Custom types    : `interface`, `struct`, `enum`
+- Special types   : `func`, `proviso`, `void`
 
 as well as pointers and arrays of said types. Structs can be created capsuling fields of any type. The Void Type can be used as a type wildcard. Provisos act as a special, dynamic type that can take the shape of any other type. The can f.E. be used to re-use the same struct with different field types. Also, functions can pass and receive proviso types, allowing them to handle various types.
 
