@@ -61,7 +61,7 @@ int main() {
  - Processing dynamic imports
  - Context checking and creating the DAST
  - Code Generation, create list of Assembly instructions
- - Assembly Optimizer, local changes while keeping mostly the original functionality
+ - Assembly Optimizer, rule-based optimizations
 
  The compiler uses a built-in [System Library](release/lib "release/lib"), located at `release/lib`. 
  
