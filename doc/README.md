@@ -63,8 +63,8 @@ Expressions are inductiveley defined. From a wide range of operators, expression
  | Add, Sub               | `a + b`, `a - b`          | The addition or subtraction operation of two operands              |
  | Shift left, Shift right| `a << b`, `a >> b`        | Logical shift operation of the first operand by the second operand |
  | Comparison             | `a <= b`, `a == b`        | Compares two operands based on operator and returns boolean result |
- | Bitwise and, xor, or   | `a & b`, `a ^ b`, `a | b` | The bitwise and, xor and or operation of two operands              |
- | Logical and, or        | `a && b`, `a || b`        | The logical and, xor and or operation of two operands              |
+ | Bitwise and, xor, or   | `a & b`, `a ^ b`, `a \| b`| The bitwise and, xor and or operation of two operands              |
+ | Logical and, or        | `a && b`, `a \|\| b`        | The logical and, xor and or operation of two operands              |
  | Ternary                | `(c)? a : b`              | Selects one of two operands based on condition                     |
  | Array Initialization   | `{1, 2, a, b + 1}`        | Creates a new array from the given values                          |
  | Struct Initialization  | `Struct::(1, c, a + 3)`   | Creates a new struct instance from the given values                |
