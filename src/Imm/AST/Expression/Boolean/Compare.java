@@ -31,8 +31,11 @@ public class Compare extends BinaryExpression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
-		this.getLeft().print(d + this.printDepthStep, rec);
-		this.getRight().print(d + this.printDepthStep, rec);
+		
+		if (rec) {
+			this.getLeft().print(d + this.printDepthStep, rec);
+			this.getRight().print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

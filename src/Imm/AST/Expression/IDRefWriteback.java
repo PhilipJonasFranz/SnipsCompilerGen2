@@ -36,7 +36,7 @@ public class IDRefWriteback extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
-		this.shadowRef.print(d + this.printDepthStep, rec);
+		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

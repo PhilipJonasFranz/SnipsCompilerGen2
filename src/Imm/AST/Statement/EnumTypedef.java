@@ -60,6 +60,7 @@ public class EnumTypedef extends SyntaxElement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Enum Typedef <" + this.path.build() + ">");
+		
 		if (rec) {
 			for (String e : this.enums) 
 				System.out.println(this.pad(d + this.printDepthStep) + e);

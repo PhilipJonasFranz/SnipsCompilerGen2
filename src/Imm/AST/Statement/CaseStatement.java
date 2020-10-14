@@ -28,7 +28,7 @@ public class CaseStatement extends ConditionalCompoundStatement {
 		System.out.println(this.pad(d) + "Case");
 		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) 
+		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 

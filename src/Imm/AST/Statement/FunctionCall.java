@@ -67,7 +67,7 @@ public class FunctionCall extends Statement {
 		
 		System.out.println();
 		
-		for (Expression e : this.parameters) 
+		if (rec) for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);
 	}
 

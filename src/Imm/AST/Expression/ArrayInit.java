@@ -33,9 +33,9 @@ public class ArrayInit extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
-		for (Expression e : this.elements) {
+		
+		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

@@ -6,14 +6,17 @@ import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
+/**
+ * A compound statement capsules a list of statements.
+ */
 public abstract class CompoundStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** All statements contained in the body of the compound statement. */
 	public List<Statement> body;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -23,6 +26,8 @@ public abstract class CompoundStatement extends Statement {
 		this.body = body;
 	}
 	
+	
+			/* ---< METHODS >--- */
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		for (Statement s : this.body) 
 			s.setContext(context);

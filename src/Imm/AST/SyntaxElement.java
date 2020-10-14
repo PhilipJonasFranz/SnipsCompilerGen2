@@ -13,7 +13,7 @@ import Util.Source;
  */
 public abstract class SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The Tab width when pretty printing [NON-CRITICAL] */
 	protected int printDepthStep = 4;
 	
@@ -24,13 +24,12 @@ public abstract class SyntaxElement {
 	public AsNNode castedNode;
 	
 	/**
-	 * [NON-CRITICAL]<br>
 	 * The location of this syntax element in the source code, row and column representation. 
 	 */
 	Source source;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -40,25 +39,14 @@ public abstract class SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
-	 * [PURE] <br>
 	 * Pretty print this syntax element.
 	 * @param d The current printing depth, method should be called with 0.
 	 * @param rec Wether to recursiveley print the subtree.
 	 */
 	public abstract void print(int d, boolean rec);
-	
-	/** 
-	 * [PURE] <br>
-	 * Create a padding of spaces with the width w 
-	 */
-	public String pad(int w) {
-		String pad = "";
-		for (int i = 0; i < w; i++) pad += " ";
-		return pad;
-	}
-	
+
 	/**
 	 * Applies given context to contained proviso types if available.
 	 * Also applies context recursiveley to the entire subtree.
@@ -70,6 +58,15 @@ public abstract class SyntaxElement {
 	 * Visitor relay for context checking
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
+	
+	/** 
+	 * Create a padding of spaces with the width w 
+	 */
+	public String pad(int w) {
+		String pad = "";
+		for (int i = 0; i < w; i++) pad += " ";
+		return pad;
+	}
 	
 	/**
 	 * Returns the source at which this syntax element was parsed.

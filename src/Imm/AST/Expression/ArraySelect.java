@@ -36,9 +36,11 @@ public class ArraySelect extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArraySelect");
-		this.shadowRef.print(d + this.printDepthStep, rec);
-		for (Expression e : this.selection) {
-			e.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.shadowRef.print(d + this.printDepthStep, rec);
+			
+			for (Expression e : this.selection) 
+				e.print(d + this.printDepthStep, rec);
 		}
 	}
 

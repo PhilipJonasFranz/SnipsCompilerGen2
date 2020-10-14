@@ -33,7 +33,7 @@ public class PointerLhsId extends LhsId {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "PointerLhsId");
-		if (this.deref != null) this.deref.print(d + this.printDepthStep, rec);
+		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

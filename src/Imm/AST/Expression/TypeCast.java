@@ -35,7 +35,7 @@ public class TypeCast extends Expression {
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "TypeCast");
 		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());
-		this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

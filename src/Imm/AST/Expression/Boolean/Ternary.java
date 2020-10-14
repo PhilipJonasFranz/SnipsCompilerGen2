@@ -30,9 +30,12 @@ public class Ternary extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Ternary");
-		this.condition.print(d + this.printDepthStep, rec);
-		this.leftOperand.print(d + this.printDepthStep, rec);
-		this.rightOperand.print(d + this.printDepthStep, rec);
+		
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+			this.leftOperand.print(d + this.printDepthStep, rec);
+			this.rightOperand.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

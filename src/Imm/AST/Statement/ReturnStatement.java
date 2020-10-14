@@ -31,10 +31,9 @@ public class ReturnStatement extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Return");
-		if (rec) {
-			if (this.value != null) 
-				this.value.print(d + this.printDepthStep, rec);
-		}
+		
+		if (rec && this.value != null) 
+			this.value.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

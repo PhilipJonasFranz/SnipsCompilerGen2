@@ -21,13 +21,14 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 	
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Do");
+		System.out.println(this.pad(d) + "Do While");
 		
-		for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
 		
-		System.out.println(this.pad(d) + "While");
-		this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

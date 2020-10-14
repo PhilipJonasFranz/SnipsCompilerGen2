@@ -35,8 +35,11 @@ public class InstanceofExpression extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "InstanceOf");
-		this.expression.print(d + this.printDepthStep, rec);
-		System.out.println(this.pad(d + this.printDepthStep) + this.instanceType.typeString());
+		
+		if (rec) {
+			this.expression.print(d + this.printDepthStep, rec);
+			System.out.println(this.pad(d + this.printDepthStep) + this.instanceType.typeString());
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

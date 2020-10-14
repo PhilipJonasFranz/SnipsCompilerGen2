@@ -35,13 +35,15 @@ public class SwitchStatement extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Switch");
-		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (CaseStatement c : this.cases) {
-			c.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+			
+			for (CaseStatement c : this.cases) 
+				c.print(d + this.printDepthStep, rec);
+			
+			this.defaultStatement.print(d + this.printDepthStep, rec);
 		}
-		
-		this.defaultStatement.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

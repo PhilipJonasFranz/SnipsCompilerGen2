@@ -41,9 +41,7 @@ public abstract class UnaryExpression extends Expression {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + this.operator.toString());
-		if (rec) {
-			this.operand.print(d + this.printDepthStep, rec);
-		}
+		if (rec) this.operand.print(d + this.printDepthStep, rec);
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

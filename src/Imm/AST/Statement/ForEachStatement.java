@@ -62,6 +62,7 @@ public class ForEachStatement extends CompoundStatement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ForEach");
+		
 		if (rec) {
 			this.iterator.print(d + this.printDepthStep, rec);
 			this.shadowRef.print(d + this.printDepthStep, rec);

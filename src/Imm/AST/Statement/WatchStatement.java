@@ -31,11 +31,9 @@ public class WatchStatement extends CompoundStatement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
-		if (rec) {
-			for (Statement s : this.body) {
-				s.print(d + this.printDepthStep, rec);
-			}
-		}
+		
+		if (rec) for (Statement s : this.body) 
+			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -44,9 +42,8 @@ public class WatchStatement extends CompoundStatement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.watched.setContext(context);
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.setContext(context);
-		}
 	}
 
 } 

@@ -47,9 +47,10 @@ public class Scope {
 	public void print(int d) {
 		if (d != 0) System.out.println("--- SCOPE ---");
 		else System.out.println("--- TOP SCOPE ---");
-		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) {
+		
+		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) 
 			dec.getValue().first.print(d, true);
-		}
+
 		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
 	
@@ -120,11 +121,9 @@ public class Scope {
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
-						if (entry.getValue().second.getLast().equals(path.getLast())) {
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) 
+						if (entry.getValue().second.getLast().equals(path.getLast())) 
 							decs.add(entry.getValue().first);
-						}
-					}
 					
 					/* Return if there is only one result */
 					if (decs.size() == 1) return decs.get(0);
@@ -139,9 +138,7 @@ public class Scope {
 						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
 					}
 				}
-				else {
-					throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
-				}
+				else throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 			}
 		}
 	}
@@ -165,11 +162,9 @@ public class Scope {
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
-						if (entry.getValue().second.getLast().equals(path.getLast())) {
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) 
+						if (entry.getValue().second.getLast().equals(path.getLast())) 
 							decs.add(entry.getValue().first);
-						}
-					}
 					
 					/* Return if there is only one result */
 					if (decs.size() == 1) return decs.get(0);

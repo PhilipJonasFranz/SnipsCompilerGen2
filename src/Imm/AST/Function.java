@@ -144,11 +144,9 @@ public class Function extends CompoundStatement {
 		}
 		
 		System.out.println(" " + this.toString().split("@") [1]);
-		if (rec) {
-			for (Statement s : body) {
-				s.print(d + this.printDepthStep, rec);
-			}
-		}
+		
+		if (rec) for (Statement s : body) 
+			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

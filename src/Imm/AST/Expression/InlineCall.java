@@ -64,9 +64,8 @@ public class InlineCall extends Expression {
 			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
 		}
 		
-		if (rec) for (Expression e : this.parameters) {
+		if (rec) for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

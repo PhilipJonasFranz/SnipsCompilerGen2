@@ -35,6 +35,7 @@ public class DirectASMStatement extends Statement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Direct ASM");
+		
 		if (rec) {
 			System.out.println(this.pad(d + this.printDepthStep) + "Data In:");
 			

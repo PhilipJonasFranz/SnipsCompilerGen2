@@ -32,12 +32,15 @@ public class ForStatement extends ConditionalCompoundStatement {
 			/* --- METHODS --- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "For");
-		this.iterator.print(d + this.printDepthStep, rec);
-		this.condition.print(d + this.printDepthStep, rec);
-		this.increment.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.iterator.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, rec);
+			this.increment.print(d + this.printDepthStep, rec);
+			
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

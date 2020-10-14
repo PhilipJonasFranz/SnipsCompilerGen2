@@ -147,10 +147,9 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
-		if (rec) {
-			for (Function f : this.functions)
-				f.print(d + this.printDepthStep, rec);
-		}
+		
+		if (rec) for (Function f : this.functions)
+			f.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
