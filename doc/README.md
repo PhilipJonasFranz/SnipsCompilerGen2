@@ -88,7 +88,7 @@ Data statements provide the infrastructure for data in the program. These statem
 
  |     Statement   |       Code Example    |                                 Description                                 |
  | ----------------| --------------------- | --------------------------------------------------------------------------- |
- | Declaration     | `int i = eval(10);`   | Creates a new variable in the current scope and assigns a value to it       |
+ | Declaration     | `int i = 10;`         | Creates a new variable in the current scope and assigns a value to it       |
  | Assignment      | `i = eval(i + 4);`    | Re-assigns the variable in the most inner scope to the new vale             |
 
 ### Flow Statements
