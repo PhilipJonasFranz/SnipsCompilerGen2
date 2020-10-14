@@ -6,7 +6,11 @@
 
 - [Type System](#type-system)
 - [Expressions](#expressions)
+  - [Operators](#operators)
+  - [Examples](#examples)
 - [Statements](#statements)
+  - [Data Statements](#data-statements)
+  - [Flow Statements](#flow-statements)
 
 ## Type System
 
