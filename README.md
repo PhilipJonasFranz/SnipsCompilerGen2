@@ -20,8 +20,8 @@ as well as pointers and arrays of said types. Structs can be created capsuling f
 
  Some of the core features of Snips are shown in this little code example below:
  
-<pre><code>
-struct X&lt;T> {
+```c
+struct X<T> {
     T val;
   
     T get&lt;T>() {
@@ -29,17 +29,17 @@ struct X&lt;T> {
     }
   
     /* Construct a new struct instance */
-    static X&lt;T> create&lt;T>(T val) {
-        return X&lt;T>::(val);
+    static X<T> create<T>(T val) {
+        return X<T>::(val);
     }
 }
   
 int main() {
     // Push the struct on the heap and create a pointer
-    X&lt;int>* x = init&lt;>(X::create&lt;int>(12));
-    return (x->get&lt;>() == 12)? 25 : 5;
+    X<int>* x = init<>(X::create<int>(12));
+    return (x->get<>() == 12)? 25 : 5;
 }
-</code></pre>
+```
  
  You can find more information about the language in the [Quick-start Documentation](doc/README.md). For a more in-depth guide and information about the included libraries, see [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
  
