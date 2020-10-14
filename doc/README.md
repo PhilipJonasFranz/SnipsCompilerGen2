@@ -2,6 +2,12 @@
 
  This document aims to give a brief introduction to the language and its basic mechanisms. If you want a more in-depth guide and information about included libraries, see the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 
+## Contents
+
+- [Type System](#type-system)
+- [Expressions](#expressions)
+- [Statements](#statements)
+
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
