@@ -1,0 +1,18 @@
+SOURCE
+struct A<X> {
+	X x;
+}
+
+struct B<T> : A<T> {
+	void incr<T>() {
+		self->x++;
+	}
+}
+
+int main() {
+	A<int>* a = init<>(A<int>::(14));
+	((B<int>*) a)->incr();
+	return a->x;
+}
+TESTCASES
+15

@@ -347,7 +347,7 @@ public class TestDriver {
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
-					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + thrown.size() + " failed.", LogPoint.Type.FAIL, true));
 					buffer.add(new Message("-> Expected Exception '" + thrown.get(i).first + "', but got none.", LogPoint.Type.FAIL, true));
 					fail++;
 				}
@@ -374,7 +374,7 @@ public class TestDriver {
 					}
 					else {
 						/* Exceptions do not match */
-						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + thrown.size() + " failed.", LogPoint.Type.FAIL, true));
 						buffer.add(new Message("-> Thrown Exception: " + e, LogPoint.Type.FAIL, true));
 						buffer.add(new Message("-> Thrown Exception does not match expected: " + msg + " vs " + thrown.get(i).first, LogPoint.Type.FAIL, true));
 						fail++;

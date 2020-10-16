@@ -30,6 +30,7 @@ import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
@@ -336,6 +337,10 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		else if (e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
 			return false;
+		}
+		else if (e instanceof StructSelectWriteback) {
+			StructSelectWriteback s = (StructSelectWriteback) e;
+			return hasAddressReference(s.getShadowSelect(), dec) || ((s.select != null)? hasAddressReference(s.select, dec) : false);
 		}
 		else throw new CGEN_EXC(e.getSource(), Const.CANNOT_CHECK_REFERENCES, e.getClass().getName());
 	}

@@ -22,7 +22,6 @@ public class Util {
 		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {
 			return s.collect(Collectors.toList());
 		} catch (IOException e) {
-			new Message("Could not read file: " + file.getPath(), Type.FAIL);
 			return null;
 		}
 	}
