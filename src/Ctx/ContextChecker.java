@@ -1574,8 +1574,13 @@ public class ContextChecker {
 					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
+					if (paramType.getCoreType() instanceof STRUCT) {
+						STRUCT s = (STRUCT) paramType.getCoreType();
+						s.checkProvisoPresent(i.parameters.get(a).getSource());
+					}
+					
 					int paramNumber = a + 1;
-					if (i.isNestedCall)
+					if (i.isNestedCall && a > 0)
 						a -= 1;
 					
 					if (this.checkPolymorphViolation(paramType, functionParamType))
@@ -1773,8 +1778,13 @@ public class ContextChecker {
 					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
+					if (paramType.getCoreType() instanceof STRUCT) {
+						STRUCT s = (STRUCT) paramType.getCoreType();
+						s.checkProvisoPresent(i.parameters.get(a).getSource());
+					}
+					
 					int paramNumber = a + 1;
-					if (i.isNestedCall)
+					if (i.isNestedCall && a > 0)
 						a -= 1;
 					
 					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType()))
