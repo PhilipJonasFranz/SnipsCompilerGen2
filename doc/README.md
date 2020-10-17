@@ -16,7 +16,8 @@
   - [Interface Typedef](#interface-typedef)
   - [Struct Typedef](#struct-typedef)
   - [Enum Typedef](#enum-typedef)
-  
+- [Advanced Features](#advanced-features)
+ 
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
@@ -251,10 +252,10 @@ The continue statement causes the program to jump to the end of the current loop
 A function is the largest building block of a program. It consists out of a function signature and a body. The signature looks like this:
 
 ```c
-  [Type] [Name]<[Provisos]>([Parameters])
+  [Type] [Name]<[Provisos]>([Parameters]) signals [Exceptions]
 ```
 
-The body of the function is simply a list of statements, which are wrapped in braces. A function finally looks like this:
+Note that provisos and the signals attatchment is optional. The body of the function is simply a list of statements, which are wrapped in braces. A function finally looks like this:
 
 ```c
   T getValue<T>(A<T>* a) {
@@ -362,3 +363,74 @@ The enum typedef contains field, whiches names are unique within the enum. For e
     
   }
 ```
+
+
+## Advanced Features
+
+### Exceptions
+
+Exception handling in Snips consists out of two parts: Signaling the exception, and watching it. An exception can be any struct instance. When the exception is thrown, the current program execution ends and the program jumps to the nearest watchpoint. A watchpoint is either a watch-statement, or the function itself. If it is the function itself, the program returns from the function and the cycle repeats. Lets have a look at how to signal exceptions.
+
+#### Signaling Exceptions
+
+Signaling an exception is as easy as using the `signal` keyword, followed by an expression that evaluates to a stuct. This struct then acts as the thrown exception.
+
+```c
+  signal e;
+  signal Exc::(...);
+```
+
+#### Watching Exceptions
+
+Watching exceptions can happen in one of two ways. Either the function itself is signaling exceptions, or the function watches the exception with a watchpoint. Lets have a look at the latter option:
+
+```c
+  ...
+  
+  try {
+    ...
+    // The exception e of type Exc is thrown somewhere here
+    ...
+  } watch (Exc e) {
+    ...
+  }
+  
+  ...
+```
+
+In the example, we watch over a piece of code that may signal an exception of the type `Exc`. We try to execute the piece of code. It may signal an exception, but may not. In case that it signals an exception, the code of the watchpoint is executed. Example:
+
+```c
+  int status = 0;
+  try {
+    signal Exc::(12);
+  } watch (Exc e) {
+    status = e.status;
+  }
+```
+
+In the example, an exception is signaled and watched. The watchpoint retrieves the status from the exception and wires it to a status flag. Watching multiple exception types is possible as well:
+
+```c
+  int status = 0;
+  try {
+    maySignalException();
+    signal Exc::(12);
+  } watch (Exc e) {
+    status = e.status;
+  } watch (Exc2 e) {
+    status = e.status;
+  }
+```
+
+In this example we watch two exception types, `Exc` and `Exc2`. Depending on which exception type is signaled, the corresponding watchpoint executes its code. 
+
+Functions may signal exceptions as well:
+
+```c
+  void maySignalException() signals Exc2 {
+    signal Exc2::(25);
+  }
+```
+
+The function signals the exception of type `Exc2`. Note that all exception types that can be signaled in the function body, must either be covered by a watchpoint or by the `signals` option at the function head.
