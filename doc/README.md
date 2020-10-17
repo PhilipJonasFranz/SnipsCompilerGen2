@@ -524,6 +524,10 @@ Lets first look at an example:
     int get() {
       return self->value;
     }
+    
+    S* id() {
+      return self;
+    }
   }
   
   int main() {
@@ -543,6 +547,10 @@ When nesting a struct function, it is associated with this struct. This means it
     int get(S* self) {
       return self->value;
     }
+    
+    S* id(S* self) {
+      return self;
+    }
   }
   
   int main() {
@@ -557,5 +565,23 @@ When using a struct instance directley to access the function, an address refere
   int main() {
     S s = S::(12);
     return get(&s);
+  }
+```
+
+Struct nested calls can even be chained, for example:
+
+```c
+  int main() {
+    S* s = init<>(S::(12));
+    return s->id()->get();
+  }
+```
+
+Again, behind the scenes this chain is transformed into:
+
+```c
+  int main() {
+    S* s = init<>(S::(12));
+    return get(id(s));
   }
 ```
