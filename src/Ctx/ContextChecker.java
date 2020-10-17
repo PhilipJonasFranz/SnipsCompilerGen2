@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
+import Ctx.CheckUtil.Callee;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -1424,17 +1425,21 @@ public class ContextChecker {
 		else throw new CTX_EXC(c.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, left.provisoFree().typeString(), right.provisoFree().typeString());
 	}
 	
-	public TYPE checkInlineCall(InlineCall i) throws CTX_EXC {
+	/**
+	 * Unified check method for function call and inline call. Both of them implement
+	 * the Callee interface, which is used to easily retrieve and set data to one of them.
+	 */
+	public TYPE checkCall(Callee c) throws CTX_EXC {
 		String prefix = "";
 		
 		/* Extract path from typedef for more extensive function searching */
-		if (i.isNestedCall) prefix = this.getPath(i.parameters.get(0));
+		if (c.isNestedCall()) prefix = this.getPath(c.getParams().get(0));
 		
-		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
+		Function f = this.linkFunction(c.getPath(), c.getCallee(), c.getCallee().getSource(), prefix);
 		
-		if (i.isNestedCall) {
-			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
-				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
+		if (c.isNestedCall()) {
+			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT) {
+				STRUCT s = (STRUCT) c.getParams().get(0).check(this).getCoreType();
 				
 				boolean found = false;
 				for (Function nested : s.getTypedef().functions) {
@@ -1445,10 +1450,10 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+					throw new CTX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 			}
 			else {
-				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
+				INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
 				
 				boolean found = false;
 				for (Function nested : s.getTypedef().functions) {
@@ -1461,13 +1466,13 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+					throw new CTX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 			
 				/* Dynamically inject proviso from interface declaration */
-				if (i.proviso.isEmpty()) {
+				if (c.getProviso().isEmpty()) {
 					List<TYPE> copy = new ArrayList();
 					s.proviso.stream().forEach(x -> copy.add(x.clone()));
-					i.proviso = copy;
+					c.setProviso(copy);
 					
 					f.setContext(s.proviso);
 				}
@@ -1476,8 +1481,7 @@ public class ContextChecker {
 				for (StructTypedef def : s.getTypedef().implementers) {
 					for (Function f0 : def.functions) {
 						if (f0.path.getLast().equals(f.path.getLast())) {
-							f0.setContext(i.proviso);
-							
+							f0.setContext(c.getProviso());
 							f0.check(this);
 						}
 					}
@@ -1486,213 +1490,24 @@ public class ContextChecker {
 		}
 		else {
 			if (this.nestedFunctions.contains(f))
-				throw new CTX_EXC(i.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
+				throw new CTX_EXC(c.getCallee().getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
 		}
 		
-		i.calledFunction = f;
+		c.setCalledFunction(f);
 		
 		if (!this.watchpointStack.isEmpty()) 
-			i.watchpoint = this.watchpointStack.peek();
+			c.setWatchpoint(this.watchpointStack.peek());
 		
 		if (f != null) {
 			/* Inline calls made during global setup may not signal, since exception cannot be watched */
-			if (f.signals() && this.scopes.size() == 1) 
-				throw new CTX_EXC(i.getSource(), Const.CALL_DURING_INIT_CANNOT_SIGNAL, f.path.build());
-			
-			checkModifier(f.modifier, f.path, i.getSource());
-			
-			/* Add signaled types */
-			if (f.signals()) {
-				for (TYPE s : f.signalsTypes) 
-					if (!this.signalStackContains(s)) 
-						this.signalStack.peek().add(s);
+			if (c.getCallee() instanceof InlineCall && f.signals() && this.scopes.size() == 1) {
+				throw new CTX_EXC(c.getCallee().getSource(), Const.CALL_DURING_INIT_CANNOT_SIGNAL, f.path.build());
 			}
-			
-			if (!f.provisosTypes.isEmpty()) {
-				if (i.proviso.isEmpty() || i.hasAutoProviso) {
-					i.hasAutoProviso = true;
-					
-					/* Attempt to find auto-proviso mapping */
-					List<TYPE> iParamTypes = new ArrayList();
-					
-					for (int a = 0; a < i.parameters.size(); a++) {
-						/* Apply parameter type if atom is placeholder */
-						if (i.parameters.get(a) instanceof TempAtom) {
-							TempAtom atom = (TempAtom) i.parameters.get(a);
-							atom.inheritType = f.parameters.get(a).getType();
-						}
-						
-						iParamTypes.add(i.parameters.get(a).check(this));
-					}	
-					
-					List<TYPE> functionTypes = new ArrayList();
-					
-					for (Declaration d : f.parameters) 
-						functionTypes.add(d.getRawType());
-					
-					i.proviso = this.autoProviso(f.provisosTypes, functionTypes, iParamTypes, i.getSource());
-				}
-				
-				if (f.containsMapping(i.proviso)) {
-					/* Mapping already exists, just return return type of this specific mapping */
-					f.setContext(i.proviso);
-					
-					i.setType(f.getReturnType());
-				}
-				else {
-					/* Create a new context, check function for this specific context */
-					f.setContext(i.proviso);
-					
-					this.scopes.push(new Scope(this.scopes.get(0)));
-					f.check(this);
-					this.scopes.pop();
-					i.setType(f.getReturnType());
-				}
-			}
-			else 
-				/* 
-				 * Add default proviso mapping, so mapping is present,
-				 * function was called and will be compiled.
-				 */
-				f.addProvisoMapping(f.getReturnType(), new ArrayList());
-			
-			if (i.parameters.size() != f.parameters.size()) 
-				throw new CTX_EXC(i.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, f.parameters.size(), i.parameters.size());
-			
-			for (int a = 0; a < f.parameters.size(); a++) {
-				TYPE functionParamType = f.parameters.get(a).getType();
-				
-				/* Apply parameter type if atom is placeholder */
-				if (i.parameters.get(a) instanceof TempAtom) {
-					TempAtom atom = (TempAtom) i.parameters.get(a);
-					atom.inheritType = functionParamType;
-				}
-				
-				TYPE paramType = i.parameters.get(a).check(this);
-				
-				if (!paramType.isEqual(functionParamType)) {
-					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
-						CompilerDriver.printProvisoTypes = true;
-					
-					if (paramType.getCoreType() instanceof STRUCT) {
-						STRUCT s = (STRUCT) paramType.getCoreType();
-						s.checkProvisoPresent(i.parameters.get(a).getSource());
-					}
-					
-					int paramNumber = a + 1;
-					if (i.isNestedCall && a > 0)
-						a -= 1;
-					
-					if (this.checkPolymorphViolation(paramType, functionParamType))
-						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
-					
-					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
-				}
-			}
-			
-			if (f.provisosTypes.isEmpty() || !f.containsMapping(i.proviso)) 
-				i.setType(f.getReturnType().clone());
-			
-			if (i.getType() instanceof VOID && !f.hasReturn) 
-				throw new CTX_EXC(i.getSource(), Const.EXPECTED_RETURN_VALUE);
-		}
-		else {
-			/* Set void as return type */
-			i.setType(new VOID());
-			
-			for (int a = 0; a < i.parameters.size(); a++) 
-				i.parameters.get(a).check(this);
-		}
-		
-		/* 
-		 * Interface makes an exception to this rule. When the nested 
-		 * call chain is transformed during parsig, the information that this is
-		 * an interface is not available. An interface is a pointer by itself,
-		 * and thus we do not need the extra address reference.
-		 */
-		if (i.isNestedCall && i.parameters.get(0).getType().getCoreType() instanceof INTERFACE && i.parameters.get(0) instanceof AddressOf) {
-			AddressOf aof = (AddressOf) i.parameters.get(0);
-			i.parameters.set(0, aof.expression);
-		}
-		
-		return i.getType();
-	}
-	
-	public TYPE checkFunctionCall(FunctionCall i) throws CTX_EXC {
-		String prefix = "";
-		
-		/* Extract path from typedef for more extensive function searching */
-		if (i.isNestedCall) prefix = this.getPath(i.parameters.get(0));
-		
-		Function f = this.linkFunction(i.path, i, i.getSource(), prefix);
-		
-		if (i.isNestedCall) {
-			if (i.parameters.get(0).check(this).getCoreType() instanceof STRUCT) {
-				STRUCT s = (STRUCT) i.parameters.get(0).check(this).getCoreType();
-				
-				boolean found = false;
-				for (Function nested : s.getTypedef().functions) {
-					if (nested.equals(f)) {
-						found = true;
-						break;
-					}
-				}
-				
-				if (!found)
-					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
-			}
-			else {
-				INTERFACE s = (INTERFACE) i.parameters.get(0).check(this).getCoreType();
-				
-				boolean found = false;
-				for (Function nested : s.getTypedef().functions) {
-					if (nested.equals(f)) {
-						nested.wasCalled = true;
-						
-						found = true;
-						break;
-					}
-				}
-				
-				if (!found)
-					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
-			
-				/* Dynamically inject proviso from interface declaration */
-				if (i.hasAutoProviso) {
-					List<TYPE> copy = new ArrayList();
-					s.proviso.stream().forEach(x -> copy.add(x.clone()));
-					i.proviso = copy;
-					
-					f.setContext(s.proviso);
-				}
-				
-				/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
-				for (StructTypedef def : s.getTypedef().implementers) {
-					for (Function f0 : def.functions) {
-						if (f0.path.getLast().equals(f.path.getLast())) {
-							f0.setContext(i.proviso);
-
-							f0.check(this);
-						}
-					}
-				}
-			}
-		}
-		else {
-			if (this.nestedFunctions.contains(f))
-				throw new CTX_EXC(i.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
-		}
-		
-		i.calledFunction = f;
-		i.watchpoint = this.watchpointStack.peek();
-		
-		if (f != null) {
-			
-			if (i.baseRef != null) {
-				TYPE t = i.baseRef.check(this);
+			else if (c.getCallee() instanceof FunctionCall && c.getBaseRef() != null) {
+				TYPE t = c.getBaseRef().check(this);
 				
 				if (!(t.getCoreType() instanceof STRUCT)) 
-					throw new CTX_EXC(i.getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
+					throw new CTX_EXC(c.getCallee().getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
 				
 				STRUCT s = (STRUCT) t.getCoreType();
 				
@@ -1705,35 +1520,33 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTX_EXC(i.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.typeString());
+					throw new CTX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.typeString());
 			}
 			
-			checkModifier(f.modifier, f.path, i.getSource());
+			checkModifier(f.modifier, f.path, c.getCallee().getSource());
 			
 			/* Add signaled types */
 			if (f.signals()) {
-				for (TYPE s : f.signalsTypes) {
+				for (TYPE s : f.signalsTypes) 
 					if (!this.signalStackContains(s)) 
 						this.signalStack.peek().add(s);
-				}
 			}
 			
 			if (!f.provisosTypes.isEmpty()) {
-				
-				if (i.proviso.isEmpty() || i.hasAutoProviso) {
-					i.hasAutoProviso = true;
+				if (c.getProviso().isEmpty() || c.hasAutoProviso()) {
+					c.setAutoProviso(true);
 					
 					/* Attempt to find auto-proviso mapping */
 					List<TYPE> iParamTypes = new ArrayList();
-
-					for (int a = 0; a < i.parameters.size(); a++) {
+					
+					for (int a = 0; a < c.getParams().size(); a++) {
 						/* Apply parameter type if atom is placeholder */
-						if (i.parameters.get(a) instanceof TempAtom) {
-							TempAtom atom = (TempAtom) i.parameters.get(a);
+						if (c.getParams().get(a) instanceof TempAtom) {
+							TempAtom atom = (TempAtom) c.getParams().get(a);
 							atom.inheritType = f.parameters.get(a).getType();
 						}
 						
-						iParamTypes.add(i.parameters.get(a).check(this));
+						iParamTypes.add(c.getParams().get(a).check(this));
 					}	
 					
 					List<TYPE> functionTypes = new ArrayList();
@@ -1741,18 +1554,23 @@ public class ContextChecker {
 					for (Declaration d : f.parameters) 
 						functionTypes.add(d.getRawType());
 					
-					i.proviso = this.autoProviso(f.provisosTypes, functionTypes, iParamTypes, i.getSource());
+					c.setProviso(this.autoProviso(f.provisosTypes, functionTypes, iParamTypes, c.getCallee().getSource()));
 				}
 				
-				if (!f.containsMapping(i.proviso)) {
-					/* Create new scope that points to the global scope */
-					f.setContext(i.proviso);
+				if (f.containsMapping(c.getProviso())) {
+					/* Mapping already exists, just return return type of this specific mapping */
+					f.setContext(c.getProviso());
+					c.setType(f.getReturnType());
+				}
+				else {
+					/* Create a new context, check function for this specific context */
+					f.setContext(c.getProviso());
 					
 					this.scopes.push(new Scope(this.scopes.get(0)));
 					f.check(this);
 					this.scopes.pop();
+					c.setType(f.getReturnType());
 				}
-				else f.setContext(i.proviso);
 			}
 			else 
 				/* 
@@ -1761,45 +1579,57 @@ public class ContextChecker {
 				 */
 				f.addProvisoMapping(f.getReturnType(), new ArrayList());
 			
-			if (i.parameters.size() != f.parameters.size()) 
-				throw new CTX_EXC(i.getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, f.parameters.size(), i.parameters.size());
+			if (c.getParams().size() != f.parameters.size()) 
+				throw new CTX_EXC(c.getCallee().getSource(), Const.MISSMATCHING_ARGUMENT_NUMBER, f.parameters.size(), c.getParams().size());
 			
 			for (int a = 0; a < f.parameters.size(); a++) {
+				TYPE functionParamType = f.parameters.get(a).getType();
 				
 				/* Apply parameter type if atom is placeholder */
-				if (i.parameters.get(a) instanceof TempAtom) {
-					TempAtom atom = (TempAtom) i.parameters.get(a);
-					atom.inheritType = f.parameters.get(a).getType();
+				if (c.getParams().get(a) instanceof TempAtom) {
+					TempAtom atom = (TempAtom) c.getParams().get(a);
+					atom.inheritType = functionParamType;
 				}
 				
-				TYPE paramType = i.parameters.get(a).check(this);
+				TYPE paramType = c.getParams().get(a).check(this);
 				
-				if (!paramType.isEqual(f.parameters.get(a).getType())) {
-					if (paramType instanceof POINTER || f.parameters.get(a).getType() instanceof POINTER) 
+				if (!paramType.isEqual(functionParamType)) {
+					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
 						CompilerDriver.printProvisoTypes = true;
 					
 					if (paramType.getCoreType() instanceof STRUCT) {
 						STRUCT s = (STRUCT) paramType.getCoreType();
-						s.checkProvisoPresent(i.parameters.get(a).getSource());
+						s.checkProvisoPresent(c.getParams().get(a).getSource());
 					}
 					
 					int paramNumber = a + 1;
-					if (i.isNestedCall && a > 0)
+					if (c.isNestedCall() && a > 0)
 						a -= 1;
 					
-					if (this.checkPolymorphViolation(paramType, f.parameters.get(a).getType()))
-						throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
+					if (this.checkPolymorphViolation(paramType, functionParamType))
+						throw new CTX_EXC(c.getParams().get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
 					
-					throw new CTX_EXC(i.parameters.get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree().typeString(), f.parameters.get(a).getType().provisoFree().typeString());
+					throw new CTX_EXC(c.getParams().get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree().typeString(), functionParamType.provisoFree().typeString());
 				}
+			}
+			
+			if (c.getCallee() instanceof InlineCall) {
+				if (f.provisosTypes.isEmpty() || !f.containsMapping(c.getProviso())) 
+					c.setType(f.getReturnType().clone());
+				
+				if (c.getType() instanceof VOID && !f.hasReturn) 
+					throw new CTX_EXC(c.getCallee().getSource(), Const.EXPECTED_RETURN_VALUE);
 			}
 		}
 		else {
-			for (int a = 0; a < i.parameters.size(); a++) {
-				if (i.parameters.get(a) instanceof ArrayInit) 
-					throw new CTX_EXC(i.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+			/* Set void as return type */
+			c.setType(new VOID());
+			
+			for (int a = 0; a < c.getParams().size(); a++) {
+				if (c.getCallee() instanceof FunctionCall && c.getParams().get(a) instanceof ArrayInit) 
+					throw new CTX_EXC(c.getCallee().getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 				
-				i.parameters.get(a).check(this);
+				c.getParams().get(a).check(this);
 			}
 		}
 		
@@ -1809,12 +1639,12 @@ public class ContextChecker {
 		 * an interface is not available. An interface is a pointer by itself,
 		 * and thus we do not need the extra address reference.
 		 */
-		if (i.isNestedCall && i.parameters.get(0).getType().getCoreType() instanceof INTERFACE && i.parameters.get(0) instanceof AddressOf) {
-			AddressOf aof = (AddressOf) i.parameters.get(0);
-			i.parameters.set(0, aof.expression);
+		if (c.isNestedCall() && c.getParams().get(0).getType().getCoreType() instanceof INTERFACE && c.getParams().get(0) instanceof AddressOf) {
+			AddressOf aof = (AddressOf) c.getParams().get(0);
+			c.getParams().set(0, aof.expression);
 		}
 		
-		return new VOID();
+		return (c.getCallee() instanceof FunctionCall)? new VOID() : c.getType();
 	}
 	
 	/**

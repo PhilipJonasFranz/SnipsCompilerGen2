@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
+import Ctx.CheckUtil.Callee;
 import Ctx.ContextChecker;
 import Ctx.ProvisoUtil;
 import Exc.CTX_EXC;
@@ -12,7 +13,7 @@ import Imm.TYPE.TYPE;
 import Util.NamespacePath;
 import Util.Source;
 
-public class InlineCall extends Expression {
+public class InlineCall extends Expression implements Callee {
 
 			/* --- FIELDS --- */
 	public SyntaxElement watchpoint;
@@ -69,7 +70,7 @@ public class InlineCall extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkInlineCall(this);
+		return ctx.checkCall(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
@@ -82,6 +83,52 @@ public class InlineCall extends Expression {
 		for (Expression e : this.parameters) {
 			e.setContext(context);
 		}
+	}
+
+
+			/* ---< IMPLEMENTATIONS >--- */
+	public boolean isNestedCall() {
+		return this.isNestedCall;
+	}
+
+	public boolean hasAutoProviso() {
+		return this.hasAutoProviso;
+	}
+
+	public List<Expression> getParams() {
+		return this.parameters;
+	}
+
+	public NamespacePath getPath() {
+		return this.path;
+	}
+
+	public SyntaxElement getCallee() {
+		return this;
+	}
+
+	public Expression getBaseRef() {
+		return null;
+	}
+
+	public List<TYPE> getProviso() {
+		return this.proviso;
+	}
+
+	public void setAutoProviso(boolean b) {
+		this.hasAutoProviso = b;
+	}
+
+	public void setProviso(List<TYPE> proviso) {
+		this.proviso = proviso;
+	}
+
+	public void setCalledFunction(Function f) {
+		this.calledFunction = f;
+	}
+
+	public void setWatchpoint(SyntaxElement w) {
+		this.watchpoint = w;
 	}
 
 } 
