@@ -32,7 +32,7 @@ as well as pointers and arrays of said types. Structs can be created capsuling f
 struct X<T> {
     T val;
   
-    T get&lt;T>() {
+    T get<T>() {
         return self->val;
     }
   
