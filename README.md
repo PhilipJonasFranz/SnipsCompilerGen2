@@ -52,7 +52,7 @@ int main() {
  You can find more information about the language in the [Quick-start Documentation](doc/README.md). For a more in-depth guide and information about the included libraries, see [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
  
 ## The compiler
- The compiler pipeline consists out of various stages:
+ The compiler pipeline consists out of these stages:
  
  - Reading the code to compile
  - Pre Processing and resolving static imports
@@ -65,7 +65,7 @@ int main() {
 
  The compiler uses a built-in [System Library](release/lib "release/lib"), located at `release/lib`. 
  
- The compiler will output ARM Assembly. See [ARM Instruction Set](/https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
+ The compiler will output ARM Assembly. See [ARM Instruction Set](https://iitd-plos.github.io/col718/ref/arm-instructionset.pdf) for more information. 
  
 ## Usage and Setup
 ### Running the compiler executable
