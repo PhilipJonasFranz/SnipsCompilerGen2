@@ -11,6 +11,7 @@
 - [Statements](#statements)
   - [Data Statements](#data-statements)
   - [Flow Statements](#flow-statements)
+- [Program Elements](#program-elements)
 
 ## Type System
 
@@ -223,3 +224,100 @@ The do-While loop executes a code section as long as a condition is true, but ch
     ...
   } while (a < b);
 ```
+
+## Program Elements
+
+### Functions
+
+A function is the largest building block of a program. It consists out of a function signature and a body. The signature looks like this:
+
+```c
+  [Type] [Name]<[Provisos]>([Parameters])
+```
+
+The body of the function is simply a list of statements, which are wrapped in braces. A function finally looks like this:
+
+```c
+  T getValue<T>(A<T>* a) {
+    return (T) a->value;
+  }
+```
+
+#### Function Provisos
+
+Function signatures can have proviso heads, which mean they can provide provisos for the return type, parameters and code section. In the example, the function `getValue` provides the proviso `T`. Every time the function is called, the callee has to define types to act as provisos. These types are then substituted into the return type, parameters and code. For example, if we call the function with the call `getValue<int>(a)`, behind the scenes, the function now will look like this:
+
+```c
+  int getValue(A<int>* a) {
+    return (int) a->value;
+  }
+```
+
+### Interface Typedef
+
+An interface typedef defines a new interface and provides an anchor for a new interface type based on this typedef. The syntax of an interface typedef is:
+
+```c
+  interface [Name]<[Proviso]> {
+  
+    [Function Signature];
+  
+    ...
+  
+  }
+```
+
+As we can see, an interface typedef starts with the keyword `interface`, followed by the interface name, and a list of optional provisos. The body of the typedef contains multiple function signatures with semicolons at the end. The head provisos of the typedef are passed to the contained function signatures.
+
+For example, the `Iterable<T>` interface from the included library:
+
+```c
+  interface Iterable<T> {
+  
+    int size<T>();
+    
+    T get<T>(int index);
+    
+    void set<T>(int index, T val);
+  
+  }
+```
+
+### Struct Typedef
+
+A struct typedef defines a new struct union and provides an anchor for a new struct type based on this typedef. The syntax of a struct typedef is:
+
+```c
+  struct [Name]<[Proviso]> : [Extension], [Interfaces] {
+  
+    [Type] [Fieldname];
+    
+    ...
+    
+    [Function Signature]
+  
+    ...
+  
+  }
+```
+
+As we can see, a struct typedef starts with the keyword `struct`, followed by the struct name, and a list of optional provisos. A struct can extend from another struct. In this case, we add `: [Extension]`. Also, the struct can implement multiple interfaces. In this case, we write the interface names seperated by commas.
+
+Example:
+
+```c
+  struct A<T> : B<T>, Iterable<T>, Serializable {
+  
+    T value;
+    
+    void getValue<T>() {
+      return self->value;
+    }
+  
+    ...
+  }
+```
+
+In the example, the struct typedef extends from the struct type `B`, and implements the interfaces `Iterable` and `Serializable`. Note that the implementation of the functions are left out to keep the example short. 
+
+When extending and implementing in the struct typedef, provisos can be passed as well. In the example, we pass the proviso `T` to the extension `B` and to the interface `Iterable`.
