@@ -18,6 +18,7 @@
   - [Enum Typedef](#enum-typedef)
 - [Advanced Features](#advanced-features)
    - [Exceptions](#exceptions)
+   - [Direct ASM](#direct-asm)
 
 ## Type System
 
@@ -435,3 +436,19 @@ Functions may signal exceptions as well:
 ```
 
 The function signals the exception of type `Exc2`. Note that all exception types that can be signaled in the function body, must either be covered by a watchpoint or by the `signals` option at the function head.
+
+
+### Direct ASM
+
+When programming highly important and performance-ciritcal routines, it may sometimes be required to directley write asm within Snips. This can be done with the direct ASM statement:
+
+```asm
+asm(a : r0, b : r1) {
+  /* Directley inject assembly */
+  lsl r0, #1 :
+  lsr r1, #1 :
+  and r0, r0, r1
+} (r0 : r);
+ ```
+ 
+Using the `asm` keyword, we can define a new assembly section. In parentheses, we can define values to be copied before starting to execute the assembly. In the example, we copy the variable `a` into the register `R0`. After execution, we copy the register `R0` into the variable `r`. Note that when writing custom assembly, you have full control over the entire assembly execution. Your assembly code will not be optimized by the optimizer. Be aware to reset the stack and any registers you use - or you may break the program execution. With great power comes great responsibility!
