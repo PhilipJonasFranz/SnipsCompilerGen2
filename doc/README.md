@@ -140,10 +140,86 @@ Calls the given function with given parameters and discards the return value.
 
 #### Return Statement
 
-Returns from the current function with or without a return value.
+Returns from the current function with or without a return value. The type of the returned value must match witht the function return type.
 
 ```c
   return;
   
   return a + 4;
+```
+
+#### If Statement
+
+Creates a branch in the program based on the evaluated value of a condition. The statements in the if-block are executed if the condition evaluates to true. An optional `else if`/`else` statement can be attatched. An `if`-statement can have multiple `else if` statements, but only one else statement. The if statement whiches condition evaluates to true is executed, all other statements attatched are skipped. If an else statement is present, and all conditions are false, the else statemnet block is executed.
+
+```c
+  if (a < 10) {
+    ...
+  }
+  else if (b && c) {
+    ...
+  }
+  else {
+    ...
+  }
+```
+
+#### Switch Statement
+
+The switch statement takes a variable and compares in multiple cases its value. Once one case matches, the corresponding statements are executed and the program jumps to the end of the switch statement. If no case matches, the default case is executed. This implies that for each switch statement, exactly one default case is present.
+
+```c
+  switch (var) {
+    case (10) : {
+      ...
+    }
+    case (15) : {
+      ...
+    }
+    default : {
+      ...
+    }
+  }
+```
+
+#### For Loop
+
+The for loop can repeats the same code section multiple times, based on the iterator and the condition. Upon entering, an iterator is declared. Then for every loop execution, the condition is checked. If the condition is false, the loop terminates. If not, the code section is executed and the increment operation is executed.
+
+```c
+  for (int i = 0; i < 10; i++) ...
+  
+  for (ListNode* n = head; n != null; n = n->next) ...
+```
+
+#### For-Each Loop
+
+The for-each loop can, like the for loop, iterate over a code section, but has automatic iterator wiring. The loop can iterate over an array with fixed length, or over a pointer. In this case, the loop requires a second range parameter, that defines the length of the array. In each iteration, the current value is loaded into the iterator. The iterator value is not written back to the source, so modifications to the iterator do not change the data source.
+
+```c
+  for (int i : array) ...
+  
+  for (int i : p, 10) ...
+  
+  for (int i : s->arr) ...
+```
+
+#### While 
+
+The while loop executes a code section as long as a condition is true. The loop checks the condition at the start of each iteration.
+
+```c
+  while (a < b) {
+    ...
+  }
+```
+
+#### Do-While Loop
+
+The do-While loop executes a code section as long as a condition is true, but checks the condition after each iteration.
+
+```c
+  do {
+    ...
+  } while (a < b);
 ```
