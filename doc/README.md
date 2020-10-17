@@ -20,6 +20,9 @@
    - [Exceptions](#exceptions)
    - [Direct ASM](#direct-asm)
    - [The Heap](#the-heap)
+   - [Namespaces](#namespaces)
+   - [Visibility Modifiers](#visibility-modifiers)
+   - [Struct Nesting](#struct-nesting)
 
 ## Type System
 
@@ -486,4 +489,73 @@ Example:
   
   // Free memory
   free(p);
+```
+
+### Namespaces
+
+Namespaces allow the programmer to hierarchically structure their program. Also, they allow ressources with the same name in different namespaces.
+
+### Visibility Modifiers
+
+Visibility modifiers, or modifiers for short, are a way for the programmer to restrict the access to a function or struct typedef. Modifiers are optional, by default, all functions and struct typedefs are shared. Modifiers can even be overridden with the argument `-rov` when compiling the program. Modifiers are meant as a way to give a hint of direction when working with an external library. For example you may want to restrict the access to a struct typedef, so it is not possible to initialize an instance of this struct directley, but only by the constructor.
+
+Modifiers are:
+
+ |         Name           |                                                      Description                                                |
+ | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+ | `static`               | Most permissive, allows access from anywhere, even allows struct nested function access without struct instance |
+ | `shared`               | Same as `static`, but does not allow struct nested function access without struct instance                      |
+ | `restricted`           | Allows only access to the ressource if the current scope is the same or child of the resource scope             |
+ | `exclusive`            | Allows only access if the current scope is the same as the scope of the ressource                               |
+
+### Struct Nesting
+
+Struct nesting is a tool that allows the programmer to write code that associates functions more with the struct they work with. This brings multiple benefits:
+
+- Implicit `self` reference
+- Constructors and implicit `super()` constructor
+
+Lets first look at an example:
+
+```c
+  struct S {
+    int value;
+    
+    int get() {
+      return self->value;
+    }
+  }
+  
+  int main() {
+    S* s = init<>(S::(12));
+    return s->get();
+  }
+```
+
+In the example we create a new struct type with a struct typedef, give it a value, and a function `get`, which is nested in the struct typedef. In the following `main` method, we create a new struct instance on the heap, and recieve a pointer to it. Finally, we call the function `get` in `S` via the pointer `s`. Lets have a look behind the scenes what is going on:
+
+When nesting a struct function, it is associated with this struct. This means it can only be called via an instanceof of the struct or a pointer to the struct. When we call the function using a pointer reference, the pointer is added as an implicit first parameter to the call. On the other end, a new argument is added to the function signature of `get`: a pointer to an instance of `S` named `self`. So, behind the scenes, the example looks like this:
+
+```c
+  struct S {
+    int value;
+    
+    int get(S* self) {
+      return self->value;
+    }
+  }
+  
+  int main() {
+    S* s = init<>(S::(12));
+    return get(s);
+  }
+```
+
+When using a struct instance directley to access the function, an address reference is injected, the rest stays the same:
+
+```c
+  int main() {
+    S s = S::(12);
+    return get(&s);
+  }
 ```
