@@ -46,6 +46,7 @@ Special types are managed during compile time, and are fixed during runtime. Spe
  | -------------------- | ----------------------------------------------------------- |
  | `PROVISO`            | A shapeshifter type, used for templating and re-usability   |
 
+
 ## Expressions
 
 Expressions are inductiveley defined. From a wide range of operators, expressions can be built up into a complex term. At any point, parentheses can be inserted between sub-expressions. Evaluating expressions will always yield a return value. This means that expressions must have a target like a declaration or assignment. During compilation, operator precedence is taken into account. In the table below, the operators are listed in the correct precedence, starting with the highest precedence.
@@ -83,9 +84,11 @@ Now, with the defined operators, we can inductiveley define expressions. For exa
 - `(int) ((b)? true : eval(a, c))`
 - `Data::(5, true, 'c');`
 
+
 ## Statements
 
 Statements make up the context around expressions and provide an infrastructure for data management and flow. Using statements in a clever and effective way is critical to creating efficient and well-defined programs. 
+
 
 ### Data Statements
 
@@ -126,6 +129,7 @@ The data target can be direct, when the value is assigned to the variable name d
  | Array Selection        | `a [i] = c * d;`          | Assigns the value to the element at the selected index in the array|
  | Pointer                | `*(p + 2) = get();`       | Assigns to the address the expression in the dereference defines   |
  | Struct Select          | `a->b = x->v * 3;`        | Assigns to the selected field in the struct                        |
+
 
 ### Flow Statements
 
@@ -205,7 +209,7 @@ The for-each loop can, like the for loop, iterate over a code section, but has a
   for (int i : s->arr) ...
 ```
 
-#### While 
+#### While Loop
 
 The while loop executes a code section as long as a condition is true. The loop checks the condition at the start of each iteration.
 
@@ -224,6 +228,17 @@ The do-While loop executes a code section as long as a condition is true, but ch
     ...
   } while (a < b);
 ```
+
+#### Continue and Break Statement
+
+The continue statement causes the program to jump to the end of the current loop iteration and immediately starts with the execution of the next loop iteration. The break statement jumps to the end of the current loop iteration and quits the loop execution and continues with the next statement.
+
+```c
+  continue;
+  
+  break;
+```
+
 
 ## Program Elements
 
@@ -321,3 +336,25 @@ Example:
 In the example, the struct typedef extends from the struct type `B`, and implements the interfaces `Iterable` and `Serializable`. Note that the implementation of the functions are left out to keep the example short. 
 
 When extending and implementing in the struct typedef, provisos can be passed as well. In the example, we pass the proviso `T` to the extension `B` and to the interface `Iterable`.
+
+### Struct Typedef
+
+An enum typedef defines a new enum and provides an anchor for a new enum type based on this typedef. The syntax of an enum typedef is:
+
+```c
+  enum [Name] {
+  
+    [FIELDS]
+    
+  }
+```
+
+The enum typedef contains field, whiches names are unique within the enum. For example:
+
+```c
+  enum Status {
+  
+    NORMAL, EXCEPTIONAL;
+    
+  }
+```
