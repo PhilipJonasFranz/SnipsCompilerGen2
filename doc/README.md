@@ -19,7 +19,7 @@
 - [Advanced Features](#advanced-features)
    - [Exceptions](#exceptions)
    - [Direct ASM](#direct-asm)
-   - [Heap](#heap)
+   - [The Heap](#the-heap)
 
 ## Type System
 
@@ -454,7 +454,7 @@ asm(a : r0, b : r1) {
  
 Using the `asm` keyword, we can define a new assembly section. In parentheses, we can define values to be copied before starting to execute the assembly. In the example, we copy the variable `a` into the register `R0`. After execution, we copy the register `R0` into the variable `r`. Note that when writing custom assembly, you have full control over the entire assembly execution. Your assembly code will not be optimized by the optimizer. Be aware to reset the stack and any registers you use - or you may break the program execution. With great power comes great responsibility!
 
-### Heap
+### The Heap
 
 Using the heap can be crititcal to achieve more complex and functioncal programs. In short, the Heap is like an external database, that can be accessed from anyone at any point, given they have the correct address for what they are looking for.
 
@@ -464,7 +464,7 @@ Allthough the heap can be used manually, it is highly suggested to use the built
 
  |         Name           |         Signature         |                                        Description                                     |
  | ---------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
- | Reserve Memory         | `void* resv(int size)`    | Allocates a new memory section on the heap with the given size in datawords            |
+ | Allocate Memory        | `void* resv(int size)`    | Allocates a new memory section on the heap with the given size in datawords            |
  | Free Memory            | `void free(void* p)`      | De-allocates the memory section corresponding to the given pointer                     |
  | Initialize in memory   | `void* init<T>(T value)`  | Allocates a new memory section, copies the given value to it and returns pointer to it |
  | Memory heap size       | `int hsize(void* p)`      | Loads the size of the memory section corresponding to the given pointer in datawords   |
@@ -472,7 +472,10 @@ Allthough the heap can be used manually, it is highly suggested to use the built
 Example:
 
 ```c
-  // Create new number on heap
+  // Allocate memory for number
+  void* p0 = resv(sizeof(int));
+
+  // Initialize number on heap
   int* p = init<>(14); 
   
   // Set value to 20
