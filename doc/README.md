@@ -12,7 +12,11 @@
   - [Data Statements](#data-statements)
   - [Flow Statements](#flow-statements)
 - [Program Elements](#program-elements)
-
+  - [Function](#function)
+  - [Interface Typedef](#interface-typedef)
+  - [Struct Typedef](#struct-typedef)
+  - [Enum Typedef](#enum-typedef)
+  
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
@@ -242,7 +246,7 @@ The continue statement causes the program to jump to the end of the current loop
 
 ## Program Elements
 
-### Functions
+### Function
 
 A function is the largest building block of a program. It consists out of a function signature and a body. The signature looks like this:
 
@@ -337,7 +341,7 @@ In the example, the struct typedef extends from the struct type `B`, and impleme
 
 When extending and implementing in the struct typedef, provisos can be passed as well. In the example, we pass the proviso `T` to the extension `B` and to the interface `Iterable`.
 
-### Struct Typedef
+### Enum Typedef
 
 An enum typedef defines a new enum and provides an anchor for a new enum type based on this typedef. The syntax of an enum typedef is:
 
