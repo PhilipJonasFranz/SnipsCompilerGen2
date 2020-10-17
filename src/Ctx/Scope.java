@@ -115,7 +115,7 @@ public class Scope {
 				return this.parentScope.getField(path, source);
 			}
 			else {
-				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return null */
 				if (path == null) return null;
 				
 				if (path.path.size() == 1) {

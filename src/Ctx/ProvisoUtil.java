@@ -144,8 +144,11 @@ public class ProvisoUtil {
 			map1To1Maybe(target, source.get(i));
 	}
 	
+	/**
+	 * Map each type from the source to each type of the target. Possible that
+	 * types do not match.
+	 */
 	public static void mapNToNMaybe(List<TYPE> target, List<TYPE> source) {
-		/* Map the given source to the target, stop once a match was found */
 		for (int i = 0; i < source.size(); i++) 
 			for (int a = 0; a < target.size(); a++)
 				map1To1Maybe(target.get(i), source.get(i));

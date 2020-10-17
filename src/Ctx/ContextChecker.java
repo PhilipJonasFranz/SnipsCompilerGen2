@@ -1430,10 +1430,9 @@ public class ContextChecker {
 	 * the Callee interface, which is used to easily retrieve and set data to one of them.
 	 */
 	public TYPE checkCall(Callee c) throws CTX_EXC {
-		String prefix = "";
 		
 		/* Extract path from typedef for more extensive function searching */
-		if (c.isNestedCall()) prefix = this.getPath(c.getParams().get(0));
+		String prefix = (c.isNestedCall())? this.getPath(c.getParams().get(0)) : "";
 		
 		Function f = this.linkFunction(c.getPath(), c.getCallee(), c.getCallee().getSource(), prefix);
 		
@@ -1474,7 +1473,7 @@ public class ContextChecker {
 					s.proviso.stream().forEach(x -> copy.add(x.clone()));
 					c.setProviso(copy);
 					
-					f.setContext(s.proviso);
+					f.setContext(c.getProviso());
 				}
 				
 				/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
@@ -1489,6 +1488,7 @@ public class ContextChecker {
 			}
 		}
 		else {
+			/* Found function is nested, should not be able to access it */
 			if (this.nestedFunctions.contains(f))
 				throw new CTX_EXC(c.getCallee().getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
 		}
@@ -1525,12 +1525,11 @@ public class ContextChecker {
 			
 			checkModifier(f.modifier, f.path, c.getCallee().getSource());
 			
-			/* Add signaled types */
-			if (f.signals()) {
+			if (f.signals()) 
+				/* Add signaled types if not contained already */
 				for (TYPE s : f.signalsTypes) 
 					if (!this.signalStackContains(s)) 
 						this.signalStack.peek().add(s);
-			}
 			
 			if (!f.provisosTypes.isEmpty()) {
 				if (c.getProviso().isEmpty() || c.hasAutoProviso()) {
