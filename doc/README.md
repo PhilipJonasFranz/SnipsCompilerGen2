@@ -17,7 +17,8 @@
   - [Struct Typedef](#struct-typedef)
   - [Enum Typedef](#enum-typedef)
 - [Advanced Features](#advanced-features)
- 
+   - [Exceptions](#exceptions)
+
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
