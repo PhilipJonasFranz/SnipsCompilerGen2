@@ -30,7 +30,7 @@ Types are seperated in three classes: Primitives, Composit and Special Types. Pr
 
  |         Type         |                  Description                  |
  | -------------------- | --------------------------------------------- |
- | `INT` (Integer)      | A whole number ranging from `2^-32 to 2^31`   |
+ | `INT` (Integer)      | A number ranging from `2^-32 to (2^32)-1`     |
  | `BOOL` (Boolean)     | A logic type with two states, `true or false` |
  | `CHAR` (Character)   | A single character encoded in UTF-8           |
  | `FUNC` (Function)    | Holds the address of a function, is callable  |
