@@ -103,9 +103,9 @@ public class AsNAssignWriteback extends AsNStatement {
 			node.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			
 			/* Apply writeback operation */
-			injectWriteback(node, sel.writeback, 0, partOfExpression);
-			
-			node.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
+			injectWriteback(node, sel.writeback, 2, partOfExpression);
+
+			node.instructions.add(new ASMStr(new RegOp(REG.R2), new RegOp(REG.R1)));
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED, reference.getClass().getName(), reference.getSource().getSourceMarker());
 	}

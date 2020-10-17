@@ -20,6 +20,7 @@ import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
 import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
@@ -56,6 +57,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof StructSelect) {
 			node = AsNStructSelect.cast((StructSelect) e, r, map, st); 
+		}
+		else if (e instanceof StructSelectWriteback) {
+			node = AsNStructSelectWriteback.cast((StructSelectWriteback) e, r, map, st); 
 		}
 		else if (e instanceof Ternary) {
 			node = AsNTernary.cast((Ternary) e, r, map, st);
