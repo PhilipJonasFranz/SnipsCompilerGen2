@@ -19,7 +19,7 @@
 - [Advanced Features](#advanced-features)
    - [Exceptions](#exceptions)
    - [Direct ASM](#direct-asm)
-   - [The Heap](#the-heap)
+   - [Heap Functionality](#heap-functionality)
    - [Namespaces](#namespaces)
    - [Visibility Modifiers](#visibility-modifiers)
    - [Parameter Covering](#parameter-covering)
@@ -458,7 +458,7 @@ asm(a : r0, b : r1) {
  
 Using the `asm` keyword, we can define a new assembly section. In parentheses, we can define values to be copied before starting to execute the assembly. In the example, we copy the variable `a` into the register `R0`. After execution, we copy the register `R0` into the variable `r`. Note that when writing custom assembly, you have full control over the entire assembly execution. Your assembly code will not be optimized by the optimizer. Be aware to reset the stack and any registers you use - or you may break the program execution. With great power comes great responsibility!
 
-### The Heap
+### Heap functionality
 
 Using the heap can be crititcal to achieve more complex and functioncal programs. In short, the Heap is like an external database, that can be accessed from anyone at any point, given they have the correct address for what they are looking for.
 
