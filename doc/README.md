@@ -496,6 +496,60 @@ Example:
 
 Namespaces allow the programmer to hierarchically structure their program. Also, they allow ressources with the same name in different namespaces.
 
+Example:
+
+```c
+  namespace N {
+    struct X {
+      int value;
+    }
+  }
+  
+  int main() {
+    X x0 = X::(10);
+    N::X x = N::X::(12);
+    return x.value + x0.value;
+  }
+```
+
+In the example we declare a namespace `N` and capsule a struct in it. We can access the nested ressource either by navigating to it with the namespace path or by accessing it directly. This works as long as the ressource name is unique:
+
+```c
+  namespace N {
+    struct X {
+      int value;
+    }
+  }
+  
+  namespace M {
+    struct X {
+      bool value;
+    }
+  }
+```
+
+Now there are two ressources with the same name, but capsuled in different namespaces. Now we are forced to use full namespace paths:
+
+```c
+  int main() {
+    N::X x0 = N::X::(10);
+    M::X x1 = M::X::(true);
+    return x0.value + (int) x1.value;
+  }
+```
+
+Namespaces can be stacked within each other as well:
+
+```c
+  namespace N {
+    namespace M {
+      struct X {
+        int value;
+      }
+    }
+  }
+```
+
 ### Visibility Modifiers
 
 Visibility modifiers, or modifiers for short, are a way for the programmer to restrict the access to a function or struct typedef. Modifiers are optional, by default, all functions and struct typedefs are shared. Modifiers can even be overridden with the argument `-rov` when compiling the program. Modifiers are meant as a way to give a hint of direction when working with an external library. For example you may want to restrict the access to a struct typedef, so it is not possible to initialize an instance of this struct directley, but only by the constructor.
