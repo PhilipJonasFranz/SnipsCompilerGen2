@@ -351,17 +351,7 @@ When extending and implementing in the struct typedef, provisos can be passed as
 
 ### Enum Typedef
 
-An enum typedef defines a new enum and provides an anchor for a new enum type based on this typedef. The syntax of an enum typedef is:
-
-```c
-  enum [Name] {
-  
-    [FIELDS]
-    
-  }
-```
-
-The enum typedef contains field, whiches names are unique within the enum. For example:
+An enum typedef defines a new enum and provides an anchor for a new enum type based on this typedef. The enum typedef contains field, whiches names are unique within the enum. For example:
 
 ```c
   enum Status {
