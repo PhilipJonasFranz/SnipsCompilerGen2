@@ -82,7 +82,7 @@ Expressions are inductiveley defined. From a wide range of operators, expression
  | Shift left, Shift right| `a << b`, `a >> b`        | Logical shift operation of the first operand by the second operand |
  | Comparison             | `a <= b`, `a == b`        | Compares two operands based on operator and returns boolean result |
  | Bitwise and, xor, or   | `a & b`, `a ^ b`, `a \| b`| The bitwise and, xor and or operation of two operands              |
- | Logical and, or        | `a && b`, `a \|\| b`        | The logical and, xor and or operation of two operands            |
+ | Logical and, or        | `a && b`, `a \|\| b`      | The logical and, xor and or operation of two operands            |
  | Ternary                | `(c)? a : b`              | Selects one of two operands based on condition                     |
  | Array Initialization   | `{1, 2, a, b + 1}`        | Creates a new array from the given values                          |
  | Struct Initialization  | `Struct::(1, c, a + 3)`   | Creates a new struct instance from the given values                |
@@ -130,7 +130,7 @@ The data target from an assignment can vary, as well as the assign arithmetic. A
  | `+=`, `-=`           | Adds or subtracts new value from current value                         |
  | `*=`, `/=`, `%=`     | Multiplis, divides or modulus operation on current value with new vaue |
  | `&=`, `\|=`, `^=`    | Bitwise and, or, xor with new value and current value                  |
- | `&&=`, `\|\|=`, `^=` | Bitwise and, or, xor with new value and current value                  |
+ | `&&=`, `\|\|=`, `^=` | Logical and, or, xor with new value and current value                  |
  | `<<=`, `>>=`         | Shift current value by new value                                       |
 
 The data target can be direct, when the value is assigned to the variable name directley. But data targets hidden behind a struct or array select, or even behind a pointer can be used:
