@@ -22,6 +22,7 @@
    - [The Heap](#the-heap)
    - [Namespaces](#namespaces)
    - [Visibility Modifiers](#visibility-modifiers)
+   - [Parameter Covering](#parameter-covering)
    - [Struct Nesting](#struct-nesting)
 
 ## Type System
@@ -508,6 +509,56 @@ Modifiers are:
  | `restricted`           | Allows only access to the ressource if the current scope is the same or child of the resource scope             |
  | `exclusive`            | Allows only access if the current scope is the same as the scope of the ressource                               |
 
+Modifiers can be placed in front of the following program elements:
+
+ |     Ressource          |                Example               |
+ | ---------------------- | ------------------------------------ |
+ | Function               |  `shared T get<T>(int index) ...`    |
+ | Interface              |  `shared interface Serializable ...` |
+ | Struct                 |  `shared struct X<T> ...`            |
+ | Enum                   |  `shared enum State ...`             |
+
+### Parameter Covering
+
+Paramter covering simplifies the process of creating a new instance of a struct that extends another struct. Lets look at an example:
+
+```c
+  struct Point2D {
+    int x;
+    int y;
+  }
+  
+  struct Point3D : Point2D {
+    int z;
+  }
+```
+
+The struct `Point3D` extends the struct `Point2D`, and now has per definition three fields: `x, y, z`. If we want to create a new instance of this struct, we could use the expression:
+
+```c
+  Point3D p = Point3D::(5, 2, 6);
+```
+
+In this case, we manually enter every parameter in the structure initialize, even the values for fields that are inherited. Parameter covering allows us to re-write this expression to:
+
+```c
+  Point3D p = Point3D::(Point2D::(5, 2), 6);
+```
+
+Now, we use parameter covering to 'cover' the first two parameters from the original expression with the first parameter from the second expression. The instance of `Point2D` that is created provides us the values for these parameters. In this form, the example is a bit pointless, since it makes the code unnessesarily more complex, if not a bit more readable. But lets now think of an example where the two structs have a `create()` method that performs computations on the parameters before setting them. In this case, an expression like this makes a lot more sense:
+
+```c
+  Point3D p = Point3D::create(Point2D::create(5, 2), 6);
+```
+
+Because now we use the computataion logic of the both `create()` methods to create the new instance. This way we can be sure our structs are correctly initialized.
+
+Restrictions of this feature are:
+
+- Paramter Covering only works for the first parameter
+- Works only when initiating a new struct instance
+- Works only if the struct extends from a struct and the parameters are covered by an expression that returns an instance of the extended struct
+
 ### Struct Nesting
 
 Struct nesting is a tool that allows the programmer to write code that associates functions more with the struct they work with. This brings multiple benefits:
@@ -585,3 +636,52 @@ Again, behind the scenes this chain is transformed into:
     return get(id(s));
   }
 ```
+
+Now that we have an understanding on how struct nesting works behind the scenes, lets have a look at the implicit `super()` constructor and constructors in general. A method is identified as a 'constructor' iff:
+
+- The method signature is `static`
+- The method name is `create`
+- The method returns an instance of the struct its nested in
+
+Example:
+
+```c
+  struct X {
+    int value;
+    
+    static X create(int value) {
+      return X::(value);
+    }
+  }
+```
+
+If we re-visit parameter covering, we now can take advantage of one small shortcut. Lets look at this example:
+
+```c
+  struct Point2D {
+    int x;
+    int y;
+    
+    static Point2D(int x, int y) {
+      return Point2D::(x, y);
+    }
+  }
+  
+  struct Point3D : Point2D {
+    int z;
+    
+    static Point3D(int x, int y, int z) {
+      return Point3D::(Point2D::create(5, 2), 6);
+    }
+  }
+```
+
+In the constructor of the struct `Point3D` we call explicitly to the constructor of the extended struct, making use of paramter covering. We now can use the `super()` shortcut to implicitly reference this constructor, and we can re-write the constructor as:
+
+```c
+  static Point3D(int x, int y, int z) {
+    return Point3D::(super(5, 2), 6);
+  }
+```
+
+During compile time, the constructor of the extended struct is searched and replaces the `super()` construct.
