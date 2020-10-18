@@ -589,7 +589,25 @@ Lets first look at an example:
 
 In the example we create a new struct type with a struct typedef, give it a value, and a function `get`, which is nested in the struct typedef. In the following `main` method, we create a new struct instance on the heap, and recieve a pointer to it. Finally, we call the function `get` in `S` via the pointer `s`. Lets have a look behind the scenes what is going on:
 
-When nesting a struct function, it is associated with this struct. This means it can only be called via an instanceof of the struct or a pointer to the struct. When we call the function using a pointer reference, the pointer is added as an implicit first parameter to the call. On the other end, a new argument is added to the function signature of `get`: a pointer to an instance of `S` named `self`. So, behind the scenes, the example looks like this:
+When nesting a struct function, it is associated with this struct. This means it can only be called via an instance of the struct or a pointer to the struct. An exception to this is the `static` modifier: A nested method annotated with static can be accessed with the name of the struct:
+
+```c
+  struct S {
+    int value;
+    
+    static int getNum() {
+      return 10;
+    }
+  }
+  
+  int main() {
+    return S::getNum();
+  }
+```
+
+Note that if the function is static, no implicit `self` is added, so the function call will not be associated with a specific struct instance.
+
+When we call the function using a pointer reference, the pointer is added as an implicit first parameter to the call. On the other end, a new argument is added to the function signature of `get`: a pointer to an instance of `S` named `self`. So, behind the scenes, the example looks like this:
 
 ```c
   struct S {
