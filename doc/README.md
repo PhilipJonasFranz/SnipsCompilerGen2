@@ -130,7 +130,7 @@ The data target from an assignment can vary, as well as the assign arithmetic. A
  | `+=`, `-=`           | Adds or subtracts new value from current value                         |
  | `*=`, `/=`, `%=`     | Multiplis, divides or modulus operation on current value with new vaue |
  | `&=`, `\|=`, `^=`    | Bitwise and, or, xor with new value and current value                  |
- | `&&=`, `\|\|=`, `^=` | Logical and, or, xor with new value and current value                  |
+ | `&&=`, `\|\|=`       | Logical and, or with new value and current value                       |
  | `<<=`, `>>=`         | Shift current value by new value                                       |
 
 The data target can be direct, when the value is assigned to the variable name directley. But data targets hidden behind a struct or array select, or even behind a pointer can be used:
