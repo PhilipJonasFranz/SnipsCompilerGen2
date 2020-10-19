@@ -47,7 +47,7 @@ import Util.Pair;
 
 public class AsNFunction extends AsNCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public List<Pair<Declaration, Integer>> parameterMapping;
 	
 	public Function source;
@@ -55,7 +55,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	public ASMLabel copyLoopEscape;
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
 	 * @throws CTX_EXC 

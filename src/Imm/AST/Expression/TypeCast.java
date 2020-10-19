@@ -13,13 +13,13 @@ import Util.Source;
  */
 public class TypeCast extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	public TYPE castType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -31,7 +31,7 @@ public class TypeCast extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "TypeCast");
 		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());

@@ -13,13 +13,13 @@ import Util.Source;
  */
 public class DoWhileStatement extends ConditionalCompoundStatement {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public DoWhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Do While");
 		

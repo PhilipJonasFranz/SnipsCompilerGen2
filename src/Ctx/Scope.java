@@ -21,7 +21,7 @@ import Util.Logging.Message;
  */
 public class Scope {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
@@ -32,7 +32,7 @@ public class Scope {
 	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Create a new scope and set the parent scope. */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;

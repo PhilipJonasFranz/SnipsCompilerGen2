@@ -12,13 +12,13 @@ import Util.Source;
  */
 public class ArrayInit extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public List<Expression> elements;
 	
 	public boolean dontCareTypes = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -30,7 +30,7 @@ public class ArrayInit extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
 		

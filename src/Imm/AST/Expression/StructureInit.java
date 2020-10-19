@@ -11,7 +11,7 @@ import Util.Source;
 
 public class StructureInit extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public STRUCT structType;
 	
 	public List<Expression> elements;
@@ -21,7 +21,7 @@ public class StructureInit extends Expression {
 	public boolean isTopLevelExpression = true;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class StructureInit extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 		

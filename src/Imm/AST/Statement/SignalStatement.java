@@ -15,7 +15,7 @@ import Util.Source;
  */
 public class SignalStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	private Expression shadowRef;
@@ -23,7 +23,7 @@ public class SignalStatement extends Statement {
 	public StructureInit exceptionInit;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -34,7 +34,7 @@ public class SignalStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Signal");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);

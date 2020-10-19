@@ -14,18 +14,18 @@ import Util.Source;
  */
 public class SimpleLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public IDRef ref;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public SimpleLhsId(IDRef ref, Source source) {
 		super(source);
 		this.ref = ref;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "SimpleLhsId");
 		if (rec) this.ref.print(d + this.printDepthStep, rec);

@@ -15,7 +15,7 @@ import Util.Source;
  */
 public class DirectASMStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public List<String> assembly;
 	
 	public List<Pair<Expression, REG>> dataIn;
@@ -23,7 +23,7 @@ public class DirectASMStatement extends Statement {
 	public List<Pair<Expression, REG>> dataOut;
 	
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public DirectASMStatement(List<String> assembly, List<Pair<Expression, REG>> dataIn, List<Pair<Expression, REG>> dataOut, Source source) {
 		super(source);
 		this.assembly = assembly;
@@ -32,7 +32,7 @@ public class DirectASMStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Direct ASM");
 		

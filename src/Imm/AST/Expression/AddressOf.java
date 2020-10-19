@@ -12,11 +12,11 @@ import Util.Source;
  */
 public class AddressOf extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -27,7 +27,7 @@ public class AddressOf extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "AddressOf");
 		if (rec) this.expression.print(d + this.printDepthStep, rec);

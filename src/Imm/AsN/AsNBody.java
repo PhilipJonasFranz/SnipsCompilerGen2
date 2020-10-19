@@ -65,7 +65,7 @@ public class AsNBody extends AsNNode {
 	
 	public static LiteralUtil literalManager;
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralUtil();

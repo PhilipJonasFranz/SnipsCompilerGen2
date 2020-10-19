@@ -22,11 +22,11 @@ import Imm.TYPE.PRIMITIVES.NULL;
 
 public class AsNCmp extends AsNBinaryExpression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public COND trueC, neg;
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
 	 * expression is true, #0 if not.

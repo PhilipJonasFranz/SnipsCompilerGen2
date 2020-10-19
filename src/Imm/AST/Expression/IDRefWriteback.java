@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class IDRefWriteback extends Expression {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public WRITEBACK writeback;
 	
 	private Expression shadowRef;
@@ -21,7 +21,7 @@ public class IDRefWriteback extends Expression {
 	public IDRef idRef;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class IDRefWriteback extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);

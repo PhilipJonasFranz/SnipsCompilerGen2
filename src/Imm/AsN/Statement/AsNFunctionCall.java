@@ -47,7 +47,7 @@ import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;

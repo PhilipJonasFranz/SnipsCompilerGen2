@@ -9,7 +9,7 @@ import Imm.AsN.Statement.AsNAssignWriteback;
 
 public class AsNStructSelectWriteback extends AsNExpression {
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNStructSelectWriteback cast(StructSelectWriteback s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructSelectWriteback sel = new AsNStructSelectWriteback();
 		s.castedNode = sel;

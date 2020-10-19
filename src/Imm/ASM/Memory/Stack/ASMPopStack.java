@@ -10,18 +10,18 @@ import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The list of operands that are popped in the order of the list. */
 	public List<RegOp> operands;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMPopStack(RegOp...operands) {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build() {
 		String s = CompilerDriver.printDepth + "pop" + 
 					((this.cond != null)? this.cond.getCondPostfix() : "" ) + 

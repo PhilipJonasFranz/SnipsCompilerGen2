@@ -21,7 +21,7 @@ import Util.Source;
  */
 public class InterfaceTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public MODIFIER modifier;
 	
 	public NamespacePath path;
@@ -50,7 +50,7 @@ public class InterfaceTypedef extends SyntaxElement {
 	public INTERFACE self;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -68,7 +68,7 @@ public class InterfaceTypedef extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public InterfaceProvisoMapping registerMapping(List<TYPE> newMapping) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */

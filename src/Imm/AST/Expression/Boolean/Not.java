@@ -8,7 +8,7 @@ import Util.Source;
  */
 public class Not extends BoolUnaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

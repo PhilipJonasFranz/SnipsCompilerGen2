@@ -14,7 +14,7 @@ import Util.Source;
  */
 public class TryStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	public List<WatchStatement> watchpoints;
@@ -22,7 +22,7 @@ public class TryStatement extends CompoundStatement {
 	public List<TYPE> unwatched = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class TryStatement extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Try");
 		

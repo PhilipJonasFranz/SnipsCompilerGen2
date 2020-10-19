@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class Program extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public String fileName;
 	
 	public List<SyntaxElement> programElements;
@@ -23,7 +23,7 @@ public class Program extends SyntaxElement {
 	public List<Namespace> namespaces = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -34,7 +34,7 @@ public class Program extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		for (SyntaxElement e : this.programElements) {
 			e.print(d, rec);

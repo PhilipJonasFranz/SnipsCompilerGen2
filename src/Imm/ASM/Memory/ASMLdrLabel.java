@@ -12,14 +12,14 @@ public class ASMLdrLabel extends ASMLdr {
 	public Declaration dec;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr r0, a_label */
 	public ASMLdrLabel(RegOp target, LabelOp op0, Declaration dec) {
 		super(target, op0, null);
 		this.dec = dec;
 	}
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build() {
 		String s = CompilerDriver.printDepth + "ldr " + target.toString();
 		s += ", " + this.prefix;

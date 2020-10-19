@@ -9,7 +9,7 @@ import Util.Source;
  */
 public class Add extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

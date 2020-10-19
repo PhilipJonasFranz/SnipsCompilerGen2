@@ -15,7 +15,7 @@ import Util.Source;
 
 public class InlineCall extends Expression implements Callee {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	public NamespacePath path;
@@ -39,7 +39,7 @@ public class InlineCall extends Expression implements Callee {
 	public boolean nestedDeref = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -52,7 +52,7 @@ public class InlineCall extends Expression implements Callee {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
 		if (this.calledFunction != null) {

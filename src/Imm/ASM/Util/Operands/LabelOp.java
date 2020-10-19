@@ -4,14 +4,14 @@ import Imm.ASM.Structural.Label.ASMLabel;
 
 public class LabelOp extends Operand {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/**
 	 * The ASM Label this operand points to.
 	 */
 	public ASMLabel label;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default Constructor. Needs patching via {@link #patch(ASMLabel)} to work properly.
 	 */
@@ -27,7 +27,7 @@ public class LabelOp extends Operand {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Set the {@link #label} to given label.
 	 */

@@ -14,7 +14,7 @@ import Imm.AsN.Expression.AsNUnaryExpression;
 
 public class AsNUnaryMinus extends AsNUnaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNUnaryMinus cast(UnaryMinus m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNUnaryMinus minus = new AsNUnaryMinus();
 		

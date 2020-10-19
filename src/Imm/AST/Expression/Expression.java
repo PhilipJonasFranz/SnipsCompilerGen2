@@ -10,11 +10,11 @@ import Util.Source;
  */
 public abstract class Expression extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	private TYPE type;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

@@ -18,7 +18,7 @@ import Util.Source;
  */
 public class EnumTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	public List<String> enums;
@@ -28,7 +28,7 @@ public class EnumTypedef extends SyntaxElement {
 	public List<ENUM> enumFields = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -57,7 +57,7 @@ public class EnumTypedef extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Enum Typedef <" + this.path.build() + ">");
 		

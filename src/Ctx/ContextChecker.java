@@ -94,7 +94,7 @@ import Util.Logging.ProgressMessage;
 
 public class ContextChecker {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/**
 	 * Set to the current progress message instance for 
 	 * the context checking process.
@@ -199,14 +199,14 @@ public class ContextChecker {
 	protected List<StructTypedef> tLStructs = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = (Program) AST;
 		ContextChecker.progress = progress;
 	}
 	
 	
-			/* --- AST Check Methods --- */
+			/* ---< AST Check MethodS >--- */
 	public TYPE check() throws CTX_EXC {
 		this.checkProgram((Program) AST);
 		
@@ -2018,7 +2018,7 @@ public class ContextChecker {
 	}
 	
 	
-			/* --- HELPER METHODS --- */
+			/* ---< HELPER METHODS >--- */
 	/**
 	 * Attempts to figure out the provided proviso.
 	 * 

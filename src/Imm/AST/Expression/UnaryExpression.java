@@ -12,13 +12,13 @@ import Util.Source;
  */
 public abstract class UnaryExpression extends Expression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum UnaryOperator {
 		NOT, NEG;
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The operator */
 	private UnaryOperator operator;
 	
@@ -26,7 +26,7 @@ public abstract class UnaryExpression extends Expression {
 	private Expression operand;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -38,7 +38,7 @@ public abstract class UnaryExpression extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + this.operator.toString());
 		if (rec) this.operand.print(d + this.printDepthStep, rec);

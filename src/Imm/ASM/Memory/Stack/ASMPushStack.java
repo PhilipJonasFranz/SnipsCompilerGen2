@@ -10,20 +10,20 @@ import Snips.CompilerDriver;
 
 public class ASMPushStack extends ASMInstruction {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The list of operands that are pushed in the order of the list. */
 	public List<RegOp>operands;
 	
 	public ASMPopStack popCounterpart;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMPushStack(RegOp...operands) {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build() {
 		String s = CompilerDriver.printDepth + "push" + 
 					((this.cond != null)? this.cond.getCondPostfix() : "" ) + 

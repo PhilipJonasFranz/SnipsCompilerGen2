@@ -9,7 +9,7 @@ import Imm.AsN.AsNBody;
 
 public class AsNSizeOfExpression extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNSizeOfExpression cast(SizeOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNSizeOfExpression s = new AsNSizeOfExpression();
 		soe.castedNode = s;

@@ -9,7 +9,7 @@ import Snips.CompilerDriver;
 
 public abstract class ASMBinaryData extends ASMInstruction {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Used to solve a binary expression between two operands. 
 	 * Implementations are defined by classes extending from this class.
 	 */
@@ -18,7 +18,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public RegOp target;
 	
 	public RegOp op0;
@@ -34,7 +34,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	private boolean updateConditionField = false;
 	
 	
-			/* --- CONSTRUCTURS --- */
+			/* ---< CONSTRUCTURS >--- */
 	public ASMBinaryData(RegOp target, RegOp op0, Operand op1) {
 		this.target = target;
 		this.op0 = op0;
@@ -49,7 +49,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build(String operation) {
 		String s = CompilerDriver.printDepth + operation + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
 		

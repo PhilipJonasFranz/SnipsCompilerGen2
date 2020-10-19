@@ -14,7 +14,7 @@ import Util.Source;
  */
 public class FunctionRef extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	/* Set during context checking */
@@ -26,7 +26,7 @@ public class FunctionRef extends Expression {
 	public IDRef base = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -45,7 +45,7 @@ public class FunctionRef extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}

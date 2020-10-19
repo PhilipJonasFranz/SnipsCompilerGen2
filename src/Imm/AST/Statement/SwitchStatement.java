@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class SwitchStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression condition;
 	
 	public List<CaseStatement> cases;
@@ -21,7 +21,7 @@ public class SwitchStatement extends Statement {
 	public DefaultStatement defaultStatement;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public SwitchStatement(Expression condition, List<CaseStatement> cases, DefaultStatement defaultStatement, Source source) {
 		super(source);
 		this.condition = condition;
@@ -31,7 +31,7 @@ public class SwitchStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Switch");
 		

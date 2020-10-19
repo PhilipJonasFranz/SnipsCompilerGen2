@@ -9,7 +9,7 @@ import Imm.AsN.Statement.AsNAssignWriteback;
 
 public class AsNIDRefWriteback extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNIDRefWriteback cast(IDRefWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIDRefWriteback w = new AsNIDRefWriteback();
 		wb.castedNode = w;

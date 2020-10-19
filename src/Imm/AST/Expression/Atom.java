@@ -12,7 +12,7 @@ import Util.Source;
  */
 public class Atom extends Expression {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -23,7 +23,7 @@ public class Atom extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">");
 	}

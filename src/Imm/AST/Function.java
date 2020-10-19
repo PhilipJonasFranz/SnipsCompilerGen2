@@ -24,7 +24,7 @@ import Util.Source;
  */
 public class Function extends CompoundStatement {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public class ProvisoMapping {
 		
 		public String provisoPostfix;
@@ -41,7 +41,7 @@ public class Function extends CompoundStatement {
 		
 	}
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** 
 	 * Set to the interface typedef when this function is 
 	 * a function head defined in this interface. 
@@ -55,6 +55,11 @@ public class Function extends CompoundStatement {
 	 */
 	public boolean requireR10Reset = false;
 	
+	/**
+	 * Set to true when this function is called at least once. This is required
+	 * when this function is part of an interface typedef, its nessesary to determine
+	 * which functions need to be included in the relay table.
+	 */
 	public boolean wasCalled = false;
 	
 	/**
@@ -62,7 +67,9 @@ public class Function extends CompoundStatement {
 	 */
 	public NamespacePath path;
 	
-	/** List of the provisos types this function is templated with */
+	/** 
+	 * List of the provisos types this function is templated with 
+	 */
 	public List<TYPE> provisosTypes;
 	
 	/** 
@@ -94,7 +101,7 @@ public class Function extends CompoundStatement {
 	public ReturnStatement noReturn = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
@@ -114,7 +121,7 @@ public class Function extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
 		
@@ -167,6 +174,9 @@ public class Function extends CompoundStatement {
 		return this.returnType;
 	}
 	
+	/**
+	 * Sets the return type of this function.
+	 */
 	public void setReturnType(TYPE t) {
 		this.returnType = t;
 	}
@@ -179,7 +189,7 @@ public class Function extends CompoundStatement {
 	}
 
 	
-			/* --- PROVISO RELATED --- */
+			/* --- PROVISO RELATED >--- */
 	/**
 	 * Set given context to the function, including parameters, return type and body.
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
@@ -272,16 +282,36 @@ public class Function extends CompoundStatement {
 		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
 	}
 	
-	public void addProvisoMapping(TYPE type, List<TYPE> context) {
+	/**
+	 * Adds a new proviso mapping to this function if the given proviso mapping
+	 * does not exist already.
+	 * @param returnType The return type of the new mapping.
+	 * @param context The proviso types of the new mapping.
+	 */
+	public void addProvisoMapping(TYPE returnType, List<TYPE> context) {
 		/* Proviso mapping already exists, just return */
 		if (this.containsMapping(context)) return;
 		else {
 			/* Add proviso mapping, create new proviso postfix for mapping */
 			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
-			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
+			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
 		}
 	}
 	
+	/**
+	 * Clones the function's signature. This includes deep copies of:
+	 * 
+	 * - Return Type
+	 * - Namespace Path
+	 * - Proviso Types
+	 * - Parameters
+	 * - Signal Types
+	 * 
+	 * As well as copies of all other fields and flags, except the body of the function,
+	 * which is left empty.
+	 * 
+	 * @return The newly created function signature.
+	 */
 	public Function cloneSignature() {
 		List<TYPE> provClone = new ArrayList();
 		for (TYPE t : this.provisosTypes)

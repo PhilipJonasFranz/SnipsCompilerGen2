@@ -13,18 +13,18 @@ import Util.Source;
  */
 public class Comment extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public String comment;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Comment(Token comment, Source source) {
 		super(source);
 		this.comment = comment.spelling();
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		return;
 	}

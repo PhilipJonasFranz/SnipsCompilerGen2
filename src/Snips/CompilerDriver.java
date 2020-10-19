@@ -54,7 +54,7 @@ public class CompilerDriver {
 		"	 |_______||_|  \\__||___||___|    |_______|"};
 	
 	
-			/* --- FLAGS & SETTINGS --- */
+			/* ---< FLAGS & SETTINGS >--- */
 	public static boolean 
 		logoPrinted = 					false, 	/* Set to true when the logo was printed once. 					*/
 		useTerminalColors = 			true, 	/* ANSI-Escape codes are used in the console. 					*/
@@ -78,12 +78,12 @@ public class CompilerDriver {
 		expectError =					false;	/* Expect an error during compilation, used for debug. 			*/
 	
 	
-			/* --- FORMATTING --- */
+			/* ---< FORMATTING --- */
 	public static String printDepth = "    ";	/* Inserted in front of every ASM instruction in output.		*/
 	public static int commentDistance = 45;		/* How far comments are formated into the output form the left.	*/
 	
 	
-			/* --- STATS --- */
+			/* --- STATS >--- */
 	/* Documents the occurred compression rates */
 	public static List<Double> compressions = new ArrayList();
 	
@@ -97,7 +97,7 @@ public class CompilerDriver {
 	public static int instructionsGenerated = 0;
 	
 	
-			/* --- ACCESSIBILITY --- */
+			/* ---< ACCESSIBILITY --- */
 	public static List<Message> log = new ArrayList();
 	
 	public static File inputFile;
@@ -111,7 +111,7 @@ public class CompilerDriver {
 	public Exception thrownException = null;
 	
 	
-			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
+			/* --- RESERVED DECLARATIONS & RESSOURCES >--- */
 	public static Source nullSource = new Source("Default", 0, 0);
 	public static Atom zero_atom = new Atom(new INT("0"), nullSource);
 	
@@ -122,7 +122,7 @@ public class CompilerDriver {
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
 								
 	
-			/* --- MAIN --- */
+			/* ---< MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
@@ -161,7 +161,7 @@ public class CompilerDriver {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** 
 	 * Dynamic libraries referenced in the program, like resv or __op_div. 
 	 * These will be included in second stage import resolving.
@@ -169,7 +169,7 @@ public class CompilerDriver {
 	public List<String> referencedLibaries = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Default constructor */
 	public CompilerDriver(String [] args) {
 		this.readConfig();
@@ -182,7 +182,7 @@ public class CompilerDriver {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void readConfig() {
 		/* Read Configuration */
 		List<String> conf = Util.readFile(new File("src\\Snips\\sys-inf.xml"));
@@ -261,7 +261,7 @@ public class CompilerDriver {
 			parse_progress.finish();
 			
 			
-					/* --- PROCESS IMPORTS --- */
+					/* --- PROCESS IMPORTS >--- */
 			Program p = (Program) AST;
 			p.fileName = inputFile.getPath();
 			if (!referencedLibaries.isEmpty()) {
@@ -281,14 +281,14 @@ public class CompilerDriver {
 			}
 			
 			
-					/* --- NAMESPACE MANAGER --- */
+					/* ---< NAMESPACE MANAGER --- */
 			NamespaceProcessor nameProc = new NamespaceProcessor();
 			nameProc.process((Program) AST);
 			
 			if (imm) AST.print(4, true);
 			
 			
-					/* --- CONTEXT CHECKING --- */
+					/* ---< CONTEXT CHECKING --- */
 			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
@@ -297,7 +297,7 @@ public class CompilerDriver {
 			if (imm) AST.print(4, true);
 			
 			
-					/* --- CODE GENERATION --- */
+					/* ---< CODE GENERATION --- */
 			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
 			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
 
@@ -431,7 +431,7 @@ public class CompilerDriver {
 			Program AST = null;
 			
 			try {
-					/* --- PRE-PROCESS --- */
+					/* --- PRE-PROCESS >--- */
 				PreProcessor preProcess = new PreProcessor(code, file.getName());
 				List<LineObject> lines = preProcess.getProcessed();
 				
@@ -545,7 +545,7 @@ public class CompilerDriver {
 		if (silenced) logoPrinted = true;
 	}
 	
-			/* --- CONSOLE INFORMATION --- */
+			/* ---< CONSOLE INFORMATION --- */
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", LogPoint.Type.INFO);

@@ -10,7 +10,7 @@ import Util.Source;
 
 public class Ternary extends Expression {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression condition;
 	
 	public Expression leftOperand;
@@ -18,7 +18,7 @@ public class Ternary extends Expression {
 	public Expression rightOperand;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Ternary(Expression condition, Expression left, Expression right, Source source) {
 		super(source);
 		this.condition = condition;
@@ -27,7 +27,7 @@ public class Ternary extends Expression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Ternary");
 		

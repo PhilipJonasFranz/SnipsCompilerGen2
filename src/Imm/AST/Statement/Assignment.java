@@ -14,7 +14,7 @@ import Util.Source;
  */
 public class Assignment extends Statement {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum ASSIGN_ARITH {
 		
 		/* Just assign value */
@@ -32,7 +32,7 @@ public class Assignment extends Statement {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public ASSIGN_ARITH assignArith = ASSIGN_ARITH.NONE;
 	
 	/** The LHS that defines the assigning method, f.E direct, assign by dereference... */
@@ -42,7 +42,7 @@ public class Assignment extends Statement {
 	public Expression value;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Assignment(ASSIGN_ARITH operator, LhsId target, Expression value, Source source) {
 		super(source);
 		this.assignArith = operator;
@@ -52,7 +52,7 @@ public class Assignment extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign, arith = " + this.assignArith.toString());
 		

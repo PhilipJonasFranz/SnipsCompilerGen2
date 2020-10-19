@@ -15,14 +15,14 @@ import Util.Source;
  */
 public class IDRef extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	/* Set during context checking */
 	public Declaration origin;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class IDRef extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}

@@ -13,13 +13,13 @@ import Util.Source;
  */
 public class WhileStatement extends ConditionalCompoundStatement {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public WhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "While");
 		

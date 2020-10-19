@@ -13,14 +13,14 @@ import Util.Source;
  */
 public class TempAtom extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression base;
 	
 	/* The type this placeholder atom replaces */
 	public TYPE inheritType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -31,7 +31,7 @@ public class TempAtom extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
 		System.out.println(this.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");

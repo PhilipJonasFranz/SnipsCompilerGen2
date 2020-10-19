@@ -14,13 +14,13 @@ import Util.Source;
  */
 public class InstanceofExpression extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	public TYPE instanceType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -32,7 +32,7 @@ public class InstanceofExpression extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "InstanceOf");
 		

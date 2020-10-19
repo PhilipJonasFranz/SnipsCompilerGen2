@@ -17,7 +17,7 @@ import Util.Source;
  */
 public class Declaration extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The visibility modifer of this declaration. Can only be applied to global declarations. */
 	public MODIFIER modifier;
 	
@@ -34,7 +34,7 @@ public class Declaration extends Statement {
 	public Statement last = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -55,7 +55,7 @@ public class Declaration extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
 			System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());

@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class ForStatement extends ConditionalCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The declaration of the iterator. */
 	public Declaration iterator;
 	
@@ -21,7 +21,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	public Statement increment;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ForStatement(Declaration iterator, Expression condition, Statement increment, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.iterator = iterator;
@@ -29,7 +29,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "For");
 		

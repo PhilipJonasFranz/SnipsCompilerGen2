@@ -13,7 +13,7 @@ import Util.Pair;
 
 public class StackSet {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Used to identify the contents of a stack cell. */
 	public enum CONTENT_TYPE {
 		REGISTER, DECLARATION;
@@ -65,7 +65,7 @@ public class StackSet {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The stack that houses the stack cells. */
 	private Stack<StackCell> stack = new Stack();
 	
@@ -79,7 +79,7 @@ public class StackSet {
 	public boolean newDecsOnStack = false;
 
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/** Push all given declarations on the stack and wrap them in stack cells. 
 	 * The first given declaration will end up on the bottom of the newly pushed stack section.
 	 */

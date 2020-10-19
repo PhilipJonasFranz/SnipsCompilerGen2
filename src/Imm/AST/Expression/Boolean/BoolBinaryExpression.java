@@ -12,7 +12,7 @@ import Util.Source;
  */
 public abstract class BoolBinaryExpression extends BinaryExpression {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -22,7 +22,7 @@ public abstract class BoolBinaryExpression extends BinaryExpression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkBoolBinaryExpression(this);
 	}

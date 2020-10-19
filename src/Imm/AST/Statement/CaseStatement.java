@@ -13,17 +13,17 @@ import Util.Source;
  */
 public class CaseStatement extends ConditionalCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SwitchStatement superStatement;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public CaseStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Case");
 		this.condition.print(d + this.printDepthStep, rec);

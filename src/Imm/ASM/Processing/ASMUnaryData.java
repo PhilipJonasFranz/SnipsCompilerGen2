@@ -7,7 +7,7 @@ import Imm.ASM.Util.Operands.RegOp;
 
 public abstract class ASMUnaryData extends ASMInstruction {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public RegOp target;
 	
 	public Operand op0;
@@ -16,7 +16,7 @@ public abstract class ASMUnaryData extends ASMInstruction {
 	public boolean updateConditionField = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMUnaryData(RegOp target, Operand op0) {
 		this.target = target;
 		this.op0 = op0;
@@ -29,7 +29,7 @@ public abstract class ASMUnaryData extends ASMInstruction {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public abstract String build();
 
 } 

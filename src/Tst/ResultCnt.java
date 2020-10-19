@@ -2,17 +2,17 @@ package Tst;
 
 public class ResultCnt {
 		
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public int failed = 0, crashed = 0, timeout = 0;
 	
 	
-			/* --- CONSTRUCTORS -- */
+			/* ---< CONSTRUCTORS -- */
 	public ResultCnt() {
 		
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void add(ResultCnt cnt) {
 		this.failed += cnt.failed;
 		this.crashed += cnt.crashed;

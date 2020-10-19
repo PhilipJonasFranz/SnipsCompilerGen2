@@ -5,7 +5,7 @@ import Util.Source;
 
 public class And extends BoolBinaryExpression {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public And(Expression left, Expression right, Source source) {
 		super(left, right, Operator.AND, source);
 	}

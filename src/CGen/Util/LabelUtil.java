@@ -5,7 +5,7 @@ package CGen.Util;
  */
 public class LabelUtil {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
@@ -18,7 +18,7 @@ public class LabelUtil {
 	/** Current function prefix */
 	public static String funcPrefix = "";
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Returns a new unique label. 
 	 */

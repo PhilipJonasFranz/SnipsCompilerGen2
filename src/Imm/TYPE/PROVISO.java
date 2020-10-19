@@ -6,7 +6,7 @@ import Snips.CompilerDriver;
 
 public class PROVISO extends TYPE<Void> {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public String placeholderName;
 	
 	protected TYPE context;
@@ -14,13 +14,13 @@ public class PROVISO extends TYPE<Void> {
 	public TYPE defaultContext = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public PROVISO(String placeholderName) {
 		this.placeholderName = placeholderName;
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void setContext(TYPE type) {
 		if (type instanceof PROVISO) {
 			while (type instanceof PROVISO) {

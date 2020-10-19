@@ -7,7 +7,7 @@ import Snips.CompilerDriver;
 
 public class ASMBranch extends ASMInstruction {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** The type of the branch. Corresponds to the notation of the assembly language. */
 	public enum BRANCH_TYPE {
 	
@@ -16,7 +16,7 @@ public class ASMBranch extends ASMInstruction {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/**
 	 * The Type of the branch. See {@link #BRANCH_TYPE}.
 	 */
@@ -30,7 +30,7 @@ public class ASMBranch extends ASMInstruction {
 	public Operand target;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMBranch(BRANCH_TYPE type, Operand target) {
 		this.type = type;
 		this.target = target;
@@ -43,7 +43,7 @@ public class ASMBranch extends ASMInstruction {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build() {
 		return CompilerDriver.printDepth
 				/* Branch type */

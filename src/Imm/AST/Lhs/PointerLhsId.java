@@ -17,20 +17,20 @@ import Util.Source;
  */
 public class PointerLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	private Expression shadowDeref;
 	
 	public Deref deref;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public PointerLhsId(Expression deref, Source source) {
 		super(source);
 		this.shadowDeref = deref;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "PointerLhsId");
 		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);

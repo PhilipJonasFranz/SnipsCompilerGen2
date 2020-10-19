@@ -9,7 +9,7 @@ import Util.Source;
  */
 public class BitNot extends UnaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

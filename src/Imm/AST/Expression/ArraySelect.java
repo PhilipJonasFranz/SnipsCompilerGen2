@@ -12,7 +12,7 @@ import Util.Source;
  */
 public class ArraySelect extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
 	private Expression shadowRef;
 	
@@ -21,7 +21,7 @@ public class ArraySelect extends Expression {
 	public List<Expression> selection;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class ArraySelect extends Expression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArraySelect");
 		if (rec) {

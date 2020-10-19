@@ -11,7 +11,7 @@ import Imm.ASM.Util.Cond;
  */
 public abstract class ASMInstruction {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** 
 	 * Flags that can be applied to {@link #optFlags} to interfere with the asm optimizer. 
 	 */
@@ -68,7 +68,7 @@ public abstract class ASMInstruction {
 	public ASMComment comment;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMInstruction() {
 		
 	}
@@ -81,7 +81,7 @@ public abstract class ASMInstruction {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Create the ASM memonic representation of this instruction.
 	 * @return

@@ -12,12 +12,12 @@ import Util.Source;
  */
 public class BreakStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The loop this break statements breaks out of. */
 	public CompoundStatement superLoop;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -27,7 +27,7 @@ public class BreakStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Break");
 	}

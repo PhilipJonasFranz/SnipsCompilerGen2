@@ -17,7 +17,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 
 public abstract class AsNNode {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum MODIFIER {
 		
 		STATIC, SHARED, RESTRICTED, EXCLUSIVE;
@@ -25,11 +25,11 @@ public abstract class AsNNode {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public List<ASMInstruction> instructions = new ArrayList();
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Returns all generated ASM Instructions in order. 
 	 */

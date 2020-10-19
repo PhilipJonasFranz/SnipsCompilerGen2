@@ -10,7 +10,7 @@ import Imm.AST.Expression.RegisterAtom;
 
 public class AsNRegisterAtom extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNRegisterAtom cast(RegisterAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNRegisterAtom atom = new AsNRegisterAtom();
 		a.castedNode = atom;

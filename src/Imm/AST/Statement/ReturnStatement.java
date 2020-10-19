@@ -13,11 +13,11 @@ import Util.Source;
  */
 public class ReturnStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression value;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -28,7 +28,7 @@ public class ReturnStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Return");
 		

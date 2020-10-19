@@ -7,7 +7,7 @@ import Res.Const;
 
 public class NULL extends PRIMITIVE<Object> {
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void setValue(String value) {
 		
 	}

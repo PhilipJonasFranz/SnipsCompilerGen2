@@ -20,7 +20,7 @@ import Util.Source;
  */
 public class ForEachStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The declaration of the iterator. */
 	public Declaration iterator;
 	
@@ -37,7 +37,7 @@ public class ForEachStatement extends CompoundStatement {
 	public ArraySelect select;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ForEachStatement(Declaration iterator, Expression shadowRef, Expression range, List<Statement> body, Source source) {
 		super(body, source);
 		this.iterator = iterator;
@@ -53,7 +53,7 @@ public class ForEachStatement extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ForEach");
 		

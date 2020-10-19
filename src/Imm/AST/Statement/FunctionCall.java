@@ -15,7 +15,7 @@ import Util.Source;
 
 public class FunctionCall extends Statement implements Callee {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	public NamespacePath path;
@@ -42,7 +42,7 @@ public class FunctionCall extends Statement implements Callee {
 	public Expression baseRef = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -55,7 +55,7 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
 		if (this.proviso != null && !this.proviso.isEmpty()) {

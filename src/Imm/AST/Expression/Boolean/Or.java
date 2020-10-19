@@ -5,7 +5,7 @@ import Util.Source;
 
 public class Or extends BoolBinaryExpression {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Or(Expression left, Expression right, Source source) {
 		super(left, right, Operator.ORR, source);
 	}

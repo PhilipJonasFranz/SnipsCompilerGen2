@@ -58,14 +58,14 @@ import Util.Logging.Message;
  */
 public class ASMOptimizer {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Wether an optimization was done in this cycle and a new iteration should be launched. */
 	boolean OPT_DONE = true;
 
 	int iterations = 0;
 	long opts = 0;
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/** Optimize given body. */
 	public void optimize(AsNBody body) {
 		

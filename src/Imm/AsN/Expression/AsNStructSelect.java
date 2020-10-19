@@ -39,7 +39,7 @@ import Snips.CompilerDriver;
 
 public class AsNStructSelect extends AsNExpression {
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructSelect sel = new AsNStructSelect();
 		s.castedNode = sel;

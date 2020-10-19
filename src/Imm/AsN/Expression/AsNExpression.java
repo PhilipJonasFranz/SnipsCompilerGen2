@@ -32,7 +32,7 @@ import Res.Const;
 
 public abstract class AsNExpression extends AsNNode {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
 		AsNExpression node = null;

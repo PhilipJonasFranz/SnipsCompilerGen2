@@ -9,7 +9,7 @@ import Util.Source;
 
 public class Compare extends BinaryExpression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum COMPARATOR {
 		EQUAL, NOT_EQUAL,
 		LESS_SAME, LESS_THAN, 
@@ -17,18 +17,18 @@ public class Compare extends BinaryExpression {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public COMPARATOR comparator;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Compare(Expression left, Expression right, COMPARATOR comparator, Source source) {
 		super(left, right, Operator.CMP, source);
 		this.comparator = comparator;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
 		

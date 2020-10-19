@@ -16,18 +16,18 @@ import Util.Source;
  */
 public class StructSelectLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public StructSelect select;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public StructSelectLhsId(StructSelect select, Source source) {
 		super(source);
 		this.select = select;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "StructSelectLhsId");
 		if (rec) this.select.print(d + this.printDepthStep, rec);

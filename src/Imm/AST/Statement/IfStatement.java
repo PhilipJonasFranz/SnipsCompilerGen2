@@ -13,11 +13,11 @@ import Util.Source;
  */
 public class IfStatement extends ConditionalCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public IfStatement elseStatement;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public IfStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.condition = condition;
@@ -28,7 +28,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "If");
 		

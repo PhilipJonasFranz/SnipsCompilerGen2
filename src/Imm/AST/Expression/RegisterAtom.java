@@ -15,14 +15,14 @@ import Util.Source;
  */
 public class RegisterAtom extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/* Type information and potential value */
 	public String spelling;
 	
 	public REG reg;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -34,7 +34,7 @@ public class RegisterAtom extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
 	}

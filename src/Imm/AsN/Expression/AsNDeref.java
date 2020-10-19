@@ -18,7 +18,7 @@ import Snips.CompilerDriver;
 
 public class AsNDeref extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNDeref cast(Deref a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNDeref ref = new AsNDeref();
 		a.castedNode = ref;

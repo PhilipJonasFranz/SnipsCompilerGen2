@@ -25,7 +25,7 @@ import Snips.CompilerDriver;
 
 public class AsNStructureInit extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructureInit init = new AsNStructureInit();
 		s.castedNode = init;

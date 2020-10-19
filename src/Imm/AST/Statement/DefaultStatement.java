@@ -12,13 +12,13 @@ import Util.Source;
  */
 public class DefaultStatement extends CompoundStatement {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public DefaultStatement(List<Statement> body, Source source) {
 		super(body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Default");
 		

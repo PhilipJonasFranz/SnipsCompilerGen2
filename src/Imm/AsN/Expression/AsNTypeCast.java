@@ -8,7 +8,7 @@ import Imm.AST.Expression.TypeCast;
 
 public class AsNTypeCast extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNTypeCast cast(TypeCast tc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNTypeCast t = new AsNTypeCast();
 		tc.castedNode = t;

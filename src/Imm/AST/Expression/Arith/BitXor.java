@@ -9,7 +9,7 @@ import Util.Source;
  */
 public class BitXor extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

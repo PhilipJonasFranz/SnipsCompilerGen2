@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class StructSelectWriteback extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public WRITEBACK writeback;
 	
 	private Expression shadowSelect;
@@ -21,7 +21,7 @@ public class StructSelectWriteback extends Expression {
 	public StructSelect select;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,7 +33,7 @@ public class StructSelectWriteback extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
 		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);

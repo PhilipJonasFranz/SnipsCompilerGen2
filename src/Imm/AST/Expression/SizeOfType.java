@@ -13,11 +13,11 @@ import Util.Source;
  */
 public class SizeOfType extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public TYPE sizeType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -28,7 +28,7 @@ public class SizeOfType extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "SizeOf");
 		System.out.println(this.pad(d + this.printDepthStep) + this.sizeType.typeString()); 

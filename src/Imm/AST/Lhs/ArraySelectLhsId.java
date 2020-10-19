@@ -14,18 +14,18 @@ import Util.Source;
  */
 public class ArraySelectLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public ArraySelect selection;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ArraySelectLhsId(ArraySelect selection, Source source) {
 		super(source);
 		this.selection = selection;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ElementSelectLhsId");
 		if (rec) this.selection.print(d + this.printDepthStep, rec);

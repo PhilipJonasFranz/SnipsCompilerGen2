@@ -20,7 +20,7 @@ import Util.Source;
  */
 public class StructTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public MODIFIER modifier;
 	
 	public NamespacePath path;
@@ -69,7 +69,7 @@ public class StructTypedef extends SyntaxElement {
 	public List<StructProvisoMapping> registeredMappings = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -95,7 +95,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * This method is called once the entire struct typedef is parsed. After all function 
 	 * in this struct are added, functions from the extensions are added, with respect to 

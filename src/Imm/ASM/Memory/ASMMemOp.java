@@ -7,7 +7,7 @@ import Snips.CompilerDriver;
 
 public abstract class ASMMemOp extends ASMInstruction {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The target of the memory operation, or the origin when loading */
 	public RegOp target;
 	
@@ -17,7 +17,7 @@ public abstract class ASMMemOp extends ASMInstruction {
 	public boolean subFromBase = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr/str r0, [r1, #2] */
 	public ASMMemOp(RegOp target, Operand op0, Operand op1) {
 		this.target = target;
@@ -26,7 +26,7 @@ public abstract class ASMMemOp extends ASMInstruction {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Builds assembly instruction corresponding to the memory operation.
 	 * @param operation The type of the operation f.E ldr/str.

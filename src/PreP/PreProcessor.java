@@ -18,7 +18,7 @@ public class PreProcessor {
 
 	public class LineObject {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		public int lineNumber;
 		
 		public String line;
@@ -26,7 +26,7 @@ public class PreProcessor {
 		public String fileName;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		public LineObject(int lineNumber, String line, String fileName) {
 			this.lineNumber = lineNumber;
 			this.line = line;

@@ -12,12 +12,12 @@ import Util.Source;
  */
 public class ContinueStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The compound statement or loop this continue statements jumps in. */
 	public CompoundStatement superLoop;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -27,7 +27,7 @@ public class ContinueStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Continue");
 	}

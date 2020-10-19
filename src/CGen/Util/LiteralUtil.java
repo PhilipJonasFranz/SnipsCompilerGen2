@@ -22,12 +22,12 @@ import Imm.AsN.AsNNode;
  */
 public class LiteralUtil {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/* The stored literals, and the corresponding data label */
 	private HashMap<Integer, ASMDataLabel> storedLiterals = new HashMap();
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Check if a label already exists that contains the given value, if yes,
 	 * return this label. If not, create a new label and add it to the stored

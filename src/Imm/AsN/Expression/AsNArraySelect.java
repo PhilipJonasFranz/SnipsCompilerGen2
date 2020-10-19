@@ -29,7 +29,7 @@ import Res.Const;
 
 public class AsNArraySelect extends AsNExpression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum SELECT_TYPE {
 		REG_SINGLE, REG_SUB,
 		LOCAL_SINGLE, LOCAL_SUB,
@@ -38,7 +38,7 @@ public class AsNArraySelect extends AsNExpression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNArraySelect select = new AsNArraySelect();
 		s.castedNode = select;

@@ -27,11 +27,11 @@ import Util.Logging.SimpleMessage;
 
 public class TestDriver {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Result summary of a test */
 	public class Result {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		/** The return type status of the test */
 		public RET_TYPE res;
 		
@@ -39,7 +39,7 @@ public class TestDriver {
 		public int succ, fail;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		public Result(RET_TYPE res, int succ, int fail) {
 			this.res = res;
 			this.succ = succ;
@@ -54,7 +54,7 @@ public class TestDriver {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
@@ -80,7 +80,7 @@ public class TestDriver {
 	public long start, firstStart;
 	
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
@@ -151,7 +151,7 @@ public class TestDriver {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/** Launch a new test driver run with given arguments. */
 	public static void main(String [] args) {
 		new TestDriver(args);	

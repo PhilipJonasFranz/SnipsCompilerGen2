@@ -6,13 +6,13 @@ public class ASMHardcode extends ASMInstruction {
 
 	public String hardCode;
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMHardcode(String hardCode) {
 		this.hardCode = hardCode;
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Create the ASM memonic representation of this instruction.
 	 * @return
