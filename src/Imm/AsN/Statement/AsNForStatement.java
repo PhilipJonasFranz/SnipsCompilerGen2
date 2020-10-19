@@ -93,10 +93,10 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
+			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
 			/* Condition was false, jump to else */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
 		}
 		
 		

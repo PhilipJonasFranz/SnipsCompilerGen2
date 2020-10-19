@@ -42,7 +42,6 @@ public class SizeOfExpression extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
-		
 		this.expression.setContext(context);
 	}
 

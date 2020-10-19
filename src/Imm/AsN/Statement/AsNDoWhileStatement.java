@@ -53,10 +53,10 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 			w.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
-			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
+			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
 			/* Condition was false, jump to else */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(whileEnd)));
+			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(whileEnd)));
 			
 			/* Branch to loop start */
 			ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));

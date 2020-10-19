@@ -75,14 +75,12 @@ public class InlineCall extends Expression implements Callee {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		/* If func head exists */
-		if (this.anonTarget == null) {
+		if (this.anonTarget == null) 
 			for (int i = 0; i < this.proviso.size(); i++) 
 				ProvisoUtil.mapNTo1(this.proviso.get(i), context);
-		}
 		
-		for (Expression e : this.parameters) {
+		for (Expression e : this.parameters) 
 			e.setContext(context);
-		}
 	}
 
 
