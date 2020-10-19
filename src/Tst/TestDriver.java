@@ -458,6 +458,7 @@ public class TestDriver {
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
+						break;
 					}
 				}
 				
