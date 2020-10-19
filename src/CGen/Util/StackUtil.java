@@ -170,7 +170,7 @@ public class StackUtil {
 	 * @param map The current memory map.
 	 * @param st The current stack-set.
 	 */
-	public static void loadToStackFromDeclaration(AsNNode node, IDRef i, RegSet r, MemoryMap map, StackSet st) {
+	public static void copyToStackFromDeclaration(AsNNode node, IDRef i, RegSet r, MemoryMap map, StackSet st) {
 		int wordSize = i.getType().wordsize();
 		
 		r.free(0);

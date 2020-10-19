@@ -76,14 +76,14 @@ public class AsNIDRef extends AsNExpression {
 			}
 			else {
 				/* Copy on stack */
-				StackUtil.loadToStackFromDeclaration(ref, i, r, map, st);
+				StackUtil.copyToStackFromDeclaration(ref, i, r, map, st);
 			}
 		}
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
 			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE)) {
-				StackUtil.loadToStackFromDeclaration(ref, i, r, map, st);
+				StackUtil.copyToStackFromDeclaration(ref, i, r, map, st);
 			}
 			/* Load in register */
 			else {
