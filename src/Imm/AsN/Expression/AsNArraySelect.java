@@ -251,9 +251,4 @@ public class AsNArraySelect extends AsNExpression {
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
-	public static void loadPointer(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
-		node.instructions.addAll(AsNIDRef.cast(s.idRef, r, map, st, target).getInstructions());
-		node.instructions.add(new ASMLsl(new RegOp(target), new RegOp(target), new ImmOp(2)));
-	}
-	
 } 

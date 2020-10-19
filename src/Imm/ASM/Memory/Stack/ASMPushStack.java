@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
@@ -23,11 +22,6 @@ public class ASMPushStack extends ASMInstruction {
 		this.operands = Arrays.stream(operands).collect(Collectors.toList());
 	}
 	
-	public ASMPushStack(Cond cond, RegOp...operands) {
-		super(cond);
-		this.operands = Arrays.stream(operands).collect(Collectors.toList());
-	}
-
 	
 			/* --- METHODS --- */
 	public String build() {

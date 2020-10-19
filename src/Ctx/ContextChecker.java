@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
-import Ctx.Util.ProvisoUtil;
 import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -83,8 +83,6 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
-import Par.Token;
-import Par.Token.TokenType;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
@@ -97,11 +95,6 @@ import Util.Logging.ProgressMessage;
 public class ContextChecker {
 
 			/* --- FIELDS --- */
-	/**
-	 * Set to the current Context Checker instance.
-	 */
-	public static ContextChecker checker;
-	
 	/**
 	 * Set to the current progress message instance for 
 	 * the context checking process.
@@ -210,7 +203,6 @@ public class ContextChecker {
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
 		this.AST = (Program) AST;
 		ContextChecker.progress = progress;
-		checker = this;
 	}
 	
 	
@@ -1027,7 +1019,7 @@ public class ContextChecker {
 			if (f.range == null)
 				throw new CTX_EXC(f.getSource(), Const.CANNOT_ITERATE_WITHOUT_RANGE);
 			
-			f.range = new Mul(f.range, new Atom(new INT("" + itType.wordsize()), new Token(TokenType.INTLIT, null, ""), f.shadowRef.getSource()), f.range.getSource());
+			f.range = new Mul(f.range, new Atom(new INT("" + itType.wordsize()), f.shadowRef.getSource()), f.range.getSource());
 			f.range.check(this);
 		}
 		else if (refType instanceof ARRAY) {
@@ -1165,9 +1157,7 @@ public class ContextChecker {
 		
 		NamespacePath path = a.lhsId.getFieldName();
 		
-		Declaration dec = null;
 		if (path != null) scopes.peek().getField(path, a.getSource());
-		a.origin = dec;
 		
 		/* Override for placeholder atom */
 		if (a.value instanceof TempAtom) {

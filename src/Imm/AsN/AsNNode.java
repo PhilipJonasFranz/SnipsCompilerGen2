@@ -3,10 +3,8 @@ package Imm.AsN;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
@@ -16,7 +14,6 @@ import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.SyntaxElement;
 
 public abstract class AsNNode {
 
@@ -33,13 +30,6 @@ public abstract class AsNNode {
 	
 	
 			/* --- METHODS --- */
-	/**
-	 * Casts given syntax element based on the given reg set to a asm node. 
-	 */
-	public static AsNNode cast(SyntaxElement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		return null;
-	}
-	
 	/**
 	 * Returns all generated ASM Instructions in order. 
 	 */

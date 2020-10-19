@@ -26,19 +26,8 @@ public class ASMMemBlock extends ASMInstruction {
 	
 	public List<RegOp> registerList;
 	
-	/* Set to true when op1 is reg Operand and is supposed to be subtracted from base */
-	public boolean subFromBase = false;
-	
 	
 			/* --- CONSTRUCTORS --- */
-	/** Example Usage: ldr/str r0, [r1, #2] */
-	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList) {
-		this.target = target;
-		this.registerList = registerList;
-		this.mode = mode;
-		this.writeback = writeback;
-	}
-	
 	/** Example Usage: ldr/str r0, [r1] */
 	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList, Cond cond) {
 		super(cond);

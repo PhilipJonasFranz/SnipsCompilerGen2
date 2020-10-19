@@ -8,11 +8,6 @@ public class VOID extends PRIMITIVE<Void> {
 	
 	}
 	
-	public VOID(String initial) {
-		super(initial);
-		this.setValue(initial);
-	}
-	
 	public void setValue(String value) {
 		this.value = null;
 	}

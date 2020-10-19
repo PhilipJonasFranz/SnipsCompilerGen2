@@ -62,14 +62,12 @@ public class ASMOptimizer {
 	/** Wether an optimization was done in this cycle and a new iteration should be launched. */
 	boolean OPT_DONE = true;
 
-	int iterations = 0, ins_pre;
+	int iterations = 0;
 	long opts = 0;
 	
 			/* --- METHODS --- */
 	/** Optimize given body. */
 	public void optimize(AsNBody body) {
-		
-		ins_pre = body.instructions.size();
 		
 		/* While an optimization was done in this iteration */
 		while (OPT_DONE) {

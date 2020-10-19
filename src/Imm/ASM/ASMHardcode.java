@@ -1,6 +1,5 @@
 package Imm.ASM;
 
-import Imm.ASM.Util.Cond;
 import Snips.CompilerDriver;
 
 public class ASMHardcode extends ASMInstruction {
@@ -11,14 +10,7 @@ public class ASMHardcode extends ASMInstruction {
 	public ASMHardcode(String hardCode) {
 		this.hardCode = hardCode;
 	}
-	
-	/**
-	 * Constructor for instruction with conditional.
-	 */
-	public ASMHardcode(Cond cond) {
-		this.cond = cond;
-	}
-	
+
 	
 			/* --- METHODS --- */
 	/**

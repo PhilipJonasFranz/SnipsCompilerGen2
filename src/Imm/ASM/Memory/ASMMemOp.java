@@ -1,7 +1,6 @@
 package Imm.ASM.Memory;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
@@ -25,15 +24,7 @@ public abstract class ASMMemOp extends ASMInstruction {
 		this.op0 = op0;
 		this.op1 = op1;
 	}
-	
-	/** Example Usage: ldr/str r0, [r1] */
-	public ASMMemOp(RegOp target, Operand op0, Operand op1, Cond cond) {
-		super(cond);
-		this.target = target;
-		this.op0 = op0;
-		this.op1 = op1;
-	}
-	
+
 	
 			/* --- METHODS --- */
 	/**

@@ -21,8 +21,6 @@ public class IDRef extends Expression {
 	/* Set during context checking */
 	public Declaration origin;
 	
-	public boolean lastUsage = false;
-	
 	
 			/* --- CONSTRUCTORS --- */
 	/**

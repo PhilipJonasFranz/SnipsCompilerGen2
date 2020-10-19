@@ -10,13 +10,7 @@ public class ResultCnt {
 	public ResultCnt() {
 		
 	}
-	
-	public ResultCnt(int failed, int crashed, int timeout) {
-		this.failed = failed;
-		this.crashed = crashed;
-		this.timeout = timeout;
-	}
-	
+
 	
 			/* --- METHODS --- */
 	public void add(ResultCnt cnt) {

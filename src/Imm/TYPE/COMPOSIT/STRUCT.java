@@ -26,11 +26,6 @@ public class STRUCT extends COMPOSIT {
 		this.proviso = proviso;
 	}
 	
-	public STRUCT(List<TYPE> proviso) {
-		super(null);
-		this.proviso = proviso;
-	}
-	
 	public boolean isEqual(TYPE type) {
 		if (type.getCoreType() instanceof VOID) return true;
 		if (type instanceof INTERFACE) {
@@ -161,13 +156,6 @@ public class STRUCT extends COMPOSIT {
 		}
 	
 		return -1;
-	}
-	
-	/**
-	 * Check if in this struct a field exists that matches the given namespace path perfectly.
-	 */
-	public boolean hasField(NamespacePath path) {
-		return this.getTypedef().getFields().stream().filter(x -> x.path.build().equals(path.build())).count() > 1;
 	}
 	
 	public String typeString() {

@@ -1,6 +1,5 @@
 package Imm.AST;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -19,8 +18,6 @@ public class Namespace extends SyntaxElement {
 	public NamespacePath path;
 	
 	public List<SyntaxElement> programElements;
-	
-	public List<Namespace> namespaces = new ArrayList();
 	
 	
 			/* --- CONSTRUCTORS --- */

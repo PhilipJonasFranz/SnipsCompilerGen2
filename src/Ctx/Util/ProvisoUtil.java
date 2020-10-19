@@ -198,18 +198,4 @@ public class ProvisoUtil {
 		return provisoFree;
 	}
 	
-	public static String mappingToString(List<TYPE> mapping) {
-		String s = "[";
-		
-		for (TYPE t : mapping) 
-			s += t.typeString() + ",";
-		
-		if (!mapping.isEmpty())
-			s = s.substring(0, s.length() - 1);
-		
-		s += "]";
-		
-		return s;
-	}
-	
 } 

@@ -33,11 +33,6 @@ public class MemoryMap {
 		
 		
 				/* --- METHODS --- */
-		/** Returns the word size of the type of the capsuled declaration. */
-		public int wordsize() {
-			return this.declaration.getType().wordsize();
-		}
-		
 		/** Returns the stored declaration */
 		public Declaration getDeclaration() {
 			return this.declaration;

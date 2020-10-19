@@ -28,7 +28,6 @@ public class SwitchStatement extends Statement {
 		this.cases = cases;
 		this.cases.stream().forEach(x -> x.superStatement = this);
 		this.defaultStatement = defaultStatement;
-		this.defaultStatement.superStatement = this;
 	}
 	
 	

@@ -119,14 +119,12 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
 		
-		if (current.type().group == group)return accept();
+		if (current.type().group() == group)return accept();
 		else {
 			this.progress.abort();
 			throw new PARSE_EXC(current.source, current.type());
 		}
 	}
-	
-	public int p = 0;
 	
 	/**
 	 * Accept a token without any checks.
@@ -205,13 +203,13 @@ public class Parser {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
-		else if (current.type == TokenType.STRUCT || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
+		else if (current.type == TokenType.STRUCT || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
 		}
-		else if (current.type == TokenType.INTERFACE || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.INTERFACE)) {
+		else if (current.type == TokenType.INTERFACE || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.INTERFACE)) {
 			return this.parseInterfaceTypedef();
 		}
-		else if (current.type == TokenType.ENUM || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
+		else if (current.type == TokenType.ENUM || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
 			return this.parseEnumTypedef();
 		}
 		else if (current.type == TokenType.NAMESPACE) {
@@ -558,7 +556,7 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		
-		Token modT = (current.type.group == TokenGroup.MODIFIER)? current : null;
+		Token modT = (current.type.group() == TokenGroup.MODIFIER)? current : null;
 		MODIFIER mod = this.parseModifier();
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
@@ -585,7 +583,7 @@ public class Parser {
 			}
 		}
 		
-		boolean decCheck = current.type.group == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
+		boolean decCheck = current.type.group() == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.IDENTIFIER || 
 				tokenStream.get(i).type == TokenType.ENUMID || 
@@ -1508,7 +1506,7 @@ public class Parser {
 	protected Expression parseCompare() throws PARSE_EXC {
 		Expression left = this.parseShift();
 		
-		if (current.type.group == TokenGroup.COMPARE) {
+		if (current.type.group() == TokenGroup.COMPARE) {
 			Source source = current.source();
 			if (current.type == TokenType.CMPEQ) {
 				accept();
@@ -1648,7 +1646,7 @@ public class Parser {
 			}
 			
 			/* Size of Type */
-			if (current.type.group == TokenGroup.TYPE) {
+			if (current.type.group() == TokenGroup.TYPE) {
 				TYPE type = this.parseType();
 				sof = new SizeOfType(type, source);
 			}
@@ -1744,7 +1742,7 @@ public class Parser {
 			 * First type token, from here only allowed token are RPAREN and all other type related
 			 * tokens like [, ], *. If a colon is seen, the current structure cannot be a cast.
 			 */
-			if (tokenStream.get(i - 2).type.group == TokenGroup.TYPE) {
+			if (tokenStream.get(i - 2).type.group() == TokenGroup.TYPE) {
 				for (int a = i - 1; a < tokenStream.size(); a++) {
 					if (tokenStream.get(a).type == TokenType.RPAREN) return true;
 					else if (tokenStream.get(a).type == TokenType.COLON) {
@@ -1956,7 +1954,7 @@ public class Parser {
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			return this.wrapPlaceholder(new Atom(new NULL(), id, id.source()));
+			return this.wrapPlaceholder(new Atom(new NULL(), id.source()));
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.source();
@@ -1972,7 +1970,7 @@ public class Parser {
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
 			
-			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
+			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group() == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
 				List<TYPE> proviso = this.parseProviso();
 				
 				/* Predicate with proviso */
@@ -2016,7 +2014,7 @@ public class Parser {
 					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
 				}
 				
-				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
+				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), source));
 			}
 			else {
 				/* Find the function that may match this path and act as a predicate */
@@ -2086,11 +2084,11 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token.source));
 		}
 		else if (current.type == TokenType.CHARLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token.source));
 		}
 		else if (current.type == TokenType.STRINGLIT) {
 			Token token = accept();
@@ -2099,16 +2097,16 @@ public class Parser {
 			
 			/* Create a list of expressions of char atoms */
 			for (int i = 0; i < sp.length; i++) 
-				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
+				charAtoms.add(new Atom(new CHAR(sp [i]), token.source));
 			
 			/* Insert null-termination character */
-			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
+			charAtoms.add(new Atom(new CHAR(null), token.source));
 			
 			return new ArrayInit(charAtoms, false, token.source());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token.source));
 		}
 		else if (this.checkPlaceholder()) {
 			/* Pure placeholder token */
@@ -2699,7 +2697,7 @@ public class Parser {
 	protected MODIFIER parseModifier() {
 		MODIFIER mod = MODIFIER.SHARED;
 		
-		if (current.type.group == TokenGroup.MODIFIER) {
+		if (current.type.group() == TokenGroup.MODIFIER) {
 			Token modT = accept();
 			mod = this.resolve(modT);
 		}

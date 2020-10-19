@@ -1,30 +1,45 @@
 package Snips;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Exc.*;
-import Imm.ASM.Structural.*;
-import Imm.AST.*;
+import Exc.CGEN_EXC;
+import Exc.CTX_EXC;
+import Exc.PARSE_EXC;
+import Exc.SNIPS_EXC;
+import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Structural.ASMSeperator;
+import Imm.AST.Program;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
-import Par.*;
+import Par.Parser;
 import Par.Scanner;
-import Par.Token.TokenType;
-import PreP.*;
+import Par.Token;
+import PreP.NamespaceProcessor;
+import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
-import Util.*;
+import Util.NamespacePath;
+import Util.Pair;
+import Util.Source;
+import Util.Util;
 import Util.XMLParser.XMLNode;
-import Util.Logging.*;
+import Util.Logging.LogPoint;
+import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 public class CompilerDriver {
 
@@ -98,7 +113,7 @@ public class CompilerDriver {
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES --- */
 	public static Source nullSource = new Source("Default", 0, 0);
-	public static Atom zero_atom = new Atom(new INT("0"), new Token(TokenType.INTLIT, nullSource), nullSource);
+	public static Atom zero_atom = new Atom(new INT("0"), nullSource);
 	
 	public static boolean null_referenced = false;
 	public static Declaration NULL_PTR = new Declaration(new NamespacePath("NULL"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
@@ -106,15 +121,7 @@ public class CompilerDriver {
 	public static boolean heap_referenced = false;
 	public static Declaration HEAP_START = new Declaration(new NamespacePath("HEAP_START"), new INT(), zero_atom, MODIFIER.SHARED, nullSource);
 								
-	public static Declaration create(String name, TYPE type) {
-		List<String> path1 = new ArrayList();
-		path1.add(name);
-		NamespacePath pa1 = new NamespacePath(path1);
-		
-		Declaration dec = new Declaration(pa1, type, MODIFIER.SHARED, nullSource);
-		return dec;
-	}
-													
+	
 			/* --- MAIN --- */
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */

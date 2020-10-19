@@ -38,9 +38,6 @@ public class Assignment extends Statement {
 	/** The LHS that defines the assigning method, f.E direct, assign by dereference... */
 	public LhsId lhsId;
 	
-	/** The declaration of the targeted variable */
-	public Declaration origin;
-	
 	/** The value to be assigned. */
 	public Expression value;
 	

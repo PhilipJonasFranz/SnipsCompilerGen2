@@ -22,11 +22,6 @@ public class RegOp extends Operand {
 		this.reg = reg;
 	}
 	
-	public RegOp(REG reg, Shift shift) {
-		this.reg = reg;
-		this.shift = shift;
-	}
-	
 	public RegOp(int reg) {
 		this.reg = toReg(reg);
 	}
