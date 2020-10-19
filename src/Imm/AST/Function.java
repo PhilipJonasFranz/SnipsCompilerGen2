@@ -3,9 +3,9 @@ package Imm.AST;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
@@ -277,7 +277,7 @@ public class Function extends CompoundStatement {
 		if (this.containsMapping(context)) return;
 		else {
 			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
+			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
 			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
 		}
 	}

@@ -1,9 +1,9 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -34,11 +34,11 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		}
 		else {
 			/* Create jump as target for continue statements */
-			ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+			ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 			w.continueJump = continueJump;
 			
 			/* Loop Entrypoint */
-			ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
+			ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
 			w.instructions.add(whileStart);
 			
 			/* Evaluate Condition */
@@ -47,7 +47,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 			/* Check if expression was evaluated to true */
 			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
 			
-			ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+			ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
 			w.breakJump = whileEnd;
 			
 			/* Condition was false, jump to else */
@@ -75,10 +75,10 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 	}
 	
 	protected void topComparison(WhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		this.continueJump = continueJump;
 		
-		ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
+		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
 		this.instructions.add(whileStart);
 		
 		COND neg = com.neg;
@@ -90,7 +90,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		/* Evaluate Condition */
 		this.instructions.addAll(com.getInstructions());
 		
-		ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
 		this.breakJump = whileEnd;
 		
 		/* Condition was false, no else, skip body */

@@ -5,6 +5,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
@@ -19,7 +20,6 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Statement.AsNAssignment;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
@@ -33,9 +33,8 @@ public class AsNPointerLhsId extends AsNLhsId {
 		Deref dref = lhs.deref;
 		
 		/* Store single cell, push value in R0 */
-		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) {
+		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) 
 			id.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-		}
 		
 		r.free(0);
 		
@@ -59,7 +58,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 			
 			id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
-		else AsNAssignment.copyStackSection(lhs.assign.value.getType().wordsize(), id, st);
+		else StackUtil.copyToAddressFromStack(lhs.assign.value.getType().wordsize(), id, st);
 		
 		return id;
 	}

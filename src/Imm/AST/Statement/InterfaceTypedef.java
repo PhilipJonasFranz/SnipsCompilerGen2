@@ -3,9 +3,9 @@ package Imm.AST.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
@@ -84,7 +84,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelGen.getProvisoPostfix(), clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
 		this.registeredMappings.add(mapping);
 		
 		//System.out.print("\nRegistered Interface Mapping: ");

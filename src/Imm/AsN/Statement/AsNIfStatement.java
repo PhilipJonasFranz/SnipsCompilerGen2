@@ -1,9 +1,9 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -37,9 +37,9 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			/* Check if expression was evaluated to true */
 			if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
-			ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
+			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
 			
-			ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
+			ASMLabel endTarget = new ASMLabel(LabelUtil.getLabel());
 			
 			/* Condition was false, jump to else */
 			if (a.elseStatement == null) {
@@ -60,7 +60,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 					
 					if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 					
-					elseTarget = new ASMLabel(LabelGen.getLabel());
+					elseTarget = new ASMLabel(LabelUtil.getLabel());
 				
 					/* False Jump */
 					if (elseS.elseStatement != null)
@@ -101,9 +101,9 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		IfStatement elseS = a.elseStatement;
 		
 		/* The target of the if/elseif/else chain */
-		ASMLabel endTarget = new ASMLabel(LabelGen.getLabel());
+		ASMLabel endTarget = new ASMLabel(LabelUtil.getLabel());
 		
-		ASMLabel elseTarget = new ASMLabel(LabelGen.getLabel());
+		ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
 		if (elseS != null) {
 			/* Condition was false, jump to else */
 			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(elseTarget)));
@@ -136,7 +136,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 					
 					this.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 					
-					elseTarget = new ASMLabel(LabelGen.getLabel());
+					elseTarget = new ASMLabel(LabelUtil.getLabel());
 				
 					/* False Jump */
 					if (elseS.elseStatement != null)

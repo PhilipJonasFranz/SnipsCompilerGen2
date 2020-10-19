@@ -3,11 +3,11 @@ package Imm.AsN;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Opt.ASMOptimizer;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Imm.ASM.ASMInstruction;
@@ -75,10 +75,10 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
-		LabelGen.reset();
-		LabelGen.funcPrefix = f.path.build();
+		LabelUtil.reset();
+		LabelUtil.funcPrefix = f.path.build();
 		
-		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelGen.getLabel());
+		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelUtil.getLabel());
 		
 		List<ASMInstruction> all = new ArrayList();
 		
@@ -269,7 +269,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}).count() > 0;
 			
 			/* Jumplabel to centralized function return */
-			ASMLabel funcReturn = new ASMLabel(LabelGen.getLabel());
+			ASMLabel funcReturn = new ASMLabel(LabelUtil.getLabel());
 			
 			List<REG> used = func.getUsed();
 			
@@ -371,7 +371,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 			}
 			
-			ASMLabel singleWordSkip = new ASMLabel(LabelGen.getLabel());
+			ASMLabel singleWordSkip = new ASMLabel(LabelUtil.getLabel());
 			if (f.getReturnType().wordsize() == 1 && f.signals()) {
 				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
 			}

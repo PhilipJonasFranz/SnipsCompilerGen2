@@ -5,8 +5,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import CGen.LabelGen;
 import CGen.Opt.ASMOptimizer;
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.*;
 import Imm.ASM.Structural.*;
@@ -218,7 +218,7 @@ public class CompilerDriver {
 		
 		/* Setup & set settings */
 		List<String> output = null;
-		LabelGen.reset();
+		LabelUtil.reset();
 		inputFile = file0;
 		printLogo();
 		log.clear();

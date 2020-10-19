@@ -2,9 +2,9 @@ package Imm.AST.Expression;
 
 import java.util.List;
 
-import Ctx.CheckUtil.Callee;
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
+import Ctx.Util.CheckUtil.Callee;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;

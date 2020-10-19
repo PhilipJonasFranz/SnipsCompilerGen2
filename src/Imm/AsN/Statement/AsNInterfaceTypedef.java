@@ -3,10 +3,10 @@ package Imm.AsN.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -46,7 +46,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			return intf;
 		
 		/* Create relay table */
-		intf.tableHead = new ASMLabel(LabelGen.getLabel());
+		intf.tableHead = new ASMLabel(LabelUtil.getLabel());
 
 		/*
 		 * Change names of proviso mappings if the types are word-size equal.
@@ -158,7 +158,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 				 */
 				else {
 					/* Label at the end of the table multiplexing section */
-					ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
+					ASMLabel tableEnd = new ASMLabel(LabelUtil.getLabel());
 					
 					/* Load SID from pointer into R10 */
 					intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));

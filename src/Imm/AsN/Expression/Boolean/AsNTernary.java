@@ -1,9 +1,9 @@
 package Imm.AsN.Expression.Boolean;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -30,10 +30,10 @@ public class AsNTernary extends AsNExpression {
 		AsNExpression expr = AsNExpression.cast(t.condition, r, map, st);
 		
 		/* The Target that is branched to if the condition is false */
-		ASMLabel loadFalse = new ASMLabel(LabelGen.getLabel());
+		ASMLabel loadFalse = new ASMLabel(LabelUtil.getLabel());
 		
 		/* The End Label Target */
-		ASMLabel end = new ASMLabel(LabelGen.getLabel());
+		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
 		
 		if (expr instanceof AsNCmp) {
 			/* Top Comparison */

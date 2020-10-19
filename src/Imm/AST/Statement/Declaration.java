@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode.MODIFIER;

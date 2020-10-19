@@ -37,14 +37,12 @@ public class AsNDirectASMStatement extends AsNStatement {
 		}
 		
 		/* Pop data in in correct regs */
-		for (int i = d.dataIn.size() - 1; i >= 0; i--) {
+		for (int i = d.dataIn.size() - 1; i >= 0; i--) 
 			asm.instructions.add(new ASMPopStack(new RegOp(d.dataIn.get(i).second)));
-		}
 		
 		/* Add hardcoded assembly */
-		for (String s : d.assembly) {
+		for (String s : d.assembly) 
 			asm.instructions.add(new ASMHardcode(s));
-		}
 		
 		/* Pop data in in correct regs */
 		for (Pair<Expression, REG> p : d.dataOut) {

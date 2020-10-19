@@ -3,6 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
@@ -10,11 +11,9 @@ import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
-import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
@@ -77,14 +76,14 @@ public class AsNIDRef extends AsNExpression {
 			}
 			else {
 				/* Copy on stack */
-				ref.loadMemorySection(i, r, map, st);
+				StackUtil.loadToStackFromDeclaration(ref, i, r, map, st);
 			}
 		}
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
 			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE)) {
-				ref.loadMemorySection(i, r, map, st);
+				StackUtil.loadToStackFromDeclaration(ref, i, r, map, st);
 			}
 			/* Load in register */
 			else {
@@ -109,81 +108,6 @@ public class AsNIDRef extends AsNExpression {
 		}
 		
 		return ref;
-	}
-	
-	protected void loadMemorySection(IDRef i, RegSet r, MemoryMap map, StackSet st) {
-		int wordSize = i.getType().wordsize();
-		
-		r.free(0);
-		
-		/* Origin is in parameter stack */
-		if (st.getParameterByteOffset(i.origin) != -1) {
-			int offset = st.getParameterByteOffset(i.origin);
-			offset += (wordSize - 1) * 4;
-			
-			/* Copy memory location with the size of the array */
-			int regs = 0;
-			for (int a = 0; a < wordSize; a++) {
-				if (regs < 3) {
-					this.instructions.add(new ASMLdr(new RegOp(regs), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
-					regs++;
-				}
-				if (regs == 3) {
-					AsNStructureInit.flush(regs, this);
-					regs = 0;
-				}
-				offset -= 4;
-				st.push(REG.R0);
-			}
-			
-			AsNStructureInit.flush(regs, this);
-		}
-		/* Origin is in global map */
-		else if (map.declarationLoaded(i.origin)) {
-			ASMDataLabel label = map.resolve(i.origin);
-			
-			ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R2), new LabelOp(label), i.origin);
-			load.comment = new ASMComment("Load data section address");
-			this.instructions.add(load);
-			
-			this.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new ImmOp((wordSize - 1) * 4)));
-			
-			/* Copy memory location with the size of the array */
-			int regs = 0;
-			for (int a = 0; a < wordSize; a++) {
-				if (regs < 2) {
-					this.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOp(regs), new RegOp(REG.R2), new ImmOp(-4)));
-					regs++;
-				}
-				if (regs == 2) {
-					AsNStructureInit.flush(regs, this);
-					regs = 0;
-				}
-				st.push(REG.R0);
-			}
-		}
-		/* Origin is in local stack */
-		else if (st.getDeclarationInStackByteOffset(i.origin) != -1) {
-			int offset = st.getDeclarationInStackByteOffset(i.origin);
-			
-			/* Copy memory location with the size of the array */
-			int regs = 0;
-			for (int a = 0; a < wordSize; a++) {
-				if (regs < 3) {
-					this.instructions.add(new ASMLdr(new RegOp(regs), new RegOp(REG.FP), new ImmOp(-offset)));
-					regs++;
-				}
-				if (regs == 3) {
-					AsNStructureInit.flush(regs, this);
-					regs = 0;
-				}
-				offset += 4;
-				st.push(REG.R0);
-			}
-			
-			AsNStructureInit.flush(regs, this);
-		}
-		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 

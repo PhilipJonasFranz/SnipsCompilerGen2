@@ -1,9 +1,10 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
@@ -51,7 +52,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */
-		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		f.continueJump = continueJump;
 		
 		/* Open new scope for counter and iterator */
@@ -83,11 +84,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		st.openScope(a);
 		
 		/* Marks the start of the loop */
-		ASMLabel forStart = new ASMLabel(LabelGen.getLabel());
+		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
 		f.instructions.add(forStart);
 		
 		/* End of the loop */
-		ASMLabel forEnd = new ASMLabel(LabelGen.getLabel());
+		ASMLabel forEnd = new ASMLabel(LabelUtil.getLabel());
 		
 		/* Set jump target for break statements */
 		f.breakJump = forEnd;
@@ -172,7 +173,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 				f.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset)));
 				
 				/* Pop the loaded words and store them to the iterator */
-				AsNAssignment.copyStackSection(a.iterator.getType().wordsize(), f, st);
+				StackUtil.copyToAddressFromStack(a.iterator.getType().wordsize(), f, st);
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}

@@ -3,6 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
@@ -56,7 +57,7 @@ public class AsNStructSelect extends AsNExpression {
 				/* Copy result on the stack, push dummy values on stack set */
 				if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
 					/* Copy memory section */
-					AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
+					StackUtil.copyToStackFromAddress(sel, s.getType().wordsize());
 					
 					/* Create dummy stack entries for newly copied struct on stack */
 					for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);

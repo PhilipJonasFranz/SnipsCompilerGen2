@@ -6,7 +6,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;

@@ -1,9 +1,9 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -32,9 +32,9 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		/* Capsule expressions in compare statements */
 		s.cases.stream().forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
 	
-		ASMLabel end = new ASMLabel(LabelGen.getLabel());
+		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
 		
-		ASMLabel next = new ASMLabel(LabelGen.getLabel());
+		ASMLabel next = new ASMLabel(LabelUtil.getLabel());
 		
 		for (CaseStatement cs : s.cases) {
 			sw.evaluateCondition(cs.condition, r, map, st, next);
@@ -49,7 +49,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 			sw.instructions.add(next);
 			
 			/* Next element in chain */
-			next = new ASMLabel(LabelGen.getLabel());
+			next = new ASMLabel(LabelUtil.getLabel());
 		}
 		
 		/* Add default body */

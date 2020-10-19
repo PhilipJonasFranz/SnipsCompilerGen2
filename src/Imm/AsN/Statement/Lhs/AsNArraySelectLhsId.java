@@ -5,6 +5,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
@@ -18,7 +19,6 @@ import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNArraySelect;
 import Imm.AsN.Expression.AsNArraySelect.SELECT_TYPE;
-import Imm.AsN.Statement.AsNAssignment;
 import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNArraySelectLhsId extends AsNLhsId {
@@ -43,7 +43,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			AsNAssignment.copyStackSection(((ARRAY) select.getType()).wordsize(), id, st);
+			StackUtil.copyToAddressFromStack(((ARRAY) select.getType()).wordsize(), id, st);
 		}
 		/* Assign single array cell */
 		else {

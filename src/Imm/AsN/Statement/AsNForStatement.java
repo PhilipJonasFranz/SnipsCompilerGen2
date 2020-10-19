@@ -1,9 +1,9 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -31,7 +31,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */
-		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		f.continueJump = continueJump;
 		
 		/* Open new seperate scope for iterator, since iterator is persistent between iterations. */
@@ -60,11 +60,11 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		st.openScope(a);
 		
 		/* Marks the start of the loop */
-		ASMLabel forStart = new ASMLabel(LabelGen.getLabel());
+		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
 		f.instructions.add(forStart);
 		
 		/* End of the loop */
-		ASMLabel forEnd = new ASMLabel(LabelGen.getLabel());
+		ASMLabel forEnd = new ASMLabel(LabelUtil.getLabel());
 		
 		/* Set jump target for break statements */
 		f.breakJump = forEnd;

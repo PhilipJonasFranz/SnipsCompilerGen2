@@ -1,9 +1,9 @@
-package CGen;
+package CGen.Util;
 
 /**
  * Provides unique labels for branches.
  */
-public class LabelGen {
+public class LabelUtil {
 
 			/* --- FIELDS --- */
 	/** Internal counter used to create labels */

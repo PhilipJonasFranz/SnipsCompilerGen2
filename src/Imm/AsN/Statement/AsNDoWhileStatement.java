@@ -1,9 +1,9 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -32,15 +32,15 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 			w.topComparison(a, (AsNCmp) expr, r, map, st);
 		}
 		else {
-			ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+			ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
 			w.breakJump = whileEnd;
 			
 			/* Create jump as target for continue statements */
-			ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+			ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 			w.continueJump = continueJump;
 			
 			/* Loop Entrypoint */
-			ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
+			ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
 			w.instructions.add(whileStart);
 			
 			/* Add Body */
@@ -71,13 +71,13 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 	}
 	
 	protected void topComparison(DoWhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		ASMLabel continueJump = new ASMLabel(LabelGen.getLabel());
+		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		this.continueJump = continueJump;
 		
-		ASMLabel whileEnd = new ASMLabel(LabelGen.getLabel());
+		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
 		this.breakJump = whileEnd;
 		
-		ASMLabel whileStart = new ASMLabel(LabelGen.getLabel());
+		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
 		this.instructions.add(whileStart);
 		
 		/* Add Body */
