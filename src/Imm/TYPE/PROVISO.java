@@ -72,11 +72,6 @@ public class PROVISO extends TYPE<Void> {
 		}
 	}
 	
-	public boolean hasValue() {
-		if (this.context != null && this.context.hasValue()) return true;
-		else return this.defaultContext.hasValue();
-	}
-	
 	public String typeString() {
 		String s = "";
 		

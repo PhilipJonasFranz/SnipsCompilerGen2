@@ -37,10 +37,6 @@ public abstract class TYPE<T> {
 	 */
 	public abstract boolean isEqual(TYPE type);
 	
-	public boolean hasValue() {
-		return this.value != null;
-	}
-	
 	/**
 	 * Create a pretty-print version of this type and the sub-types.
 	 */
