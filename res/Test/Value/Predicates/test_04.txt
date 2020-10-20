@@ -28,9 +28,9 @@ add5_P0:                                     /* Function: add5, Provisos: INT | 
     push { r3 }
     mov r3, r0
     cmp r0, #0
-    beq add5.L1
+    beq add5.L0
     sub r3, r3, #2
-add5.L1: 
+add5.L0: 
     add r0, r3, #5
     pop { r3 }
     bx lr

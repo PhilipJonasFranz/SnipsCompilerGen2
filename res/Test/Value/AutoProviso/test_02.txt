@@ -69,12 +69,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -97,10 +97,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -111,8 +111,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -124,7 +124,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L23_HEAP_START: .word HEAP_START
@@ -266,9 +266,9 @@ __op_mod.L9:
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq __op_mod.L13
+    beq __op_mod.L12
     sub r7, r4, r7
-__op_mod.L13: 
+__op_mod.L12: 
     mov r0, r7                               /* Evaluate Expression */
 __op_mod.L14: 
     ldmfd sp!, {r3-r7}
@@ -407,37 +407,37 @@ List.LinkedList.remove.L3:
     mov r0, r4
     sub r4, r4, #1
 /* Jump to element before element to remove */
-List.LinkedList.remove.L9:                   /* Evaluate condition */
+List.LinkedList.remove.L10:                  /* Evaluate condition */
     cmp r4, #0
-    ble List.LinkedList.remove.L10
+    ble List.LinkedList.remove.L11
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L12
+    bne List.LinkedList.remove.L13
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L12: 
+List.LinkedList.remove.L13: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r4, #1
-    b List.LinkedList.remove.L9
-List.LinkedList.remove.L10: 
+    b List.LinkedList.remove.L10
+List.LinkedList.remove.L11: 
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L14
+    bne List.LinkedList.remove.L16
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L14: 
+List.LinkedList.remove.L16: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L16
+    bne List.LinkedList.remove.L19
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -449,7 +449,7 @@ List.LinkedList.remove.L14:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L16: 
+List.LinkedList.remove.L19: 
 /* Cut out element and set next pointers */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
@@ -637,7 +637,7 @@ Map.HashMap.replace.L3:                      /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.replace.L5
+    beq Map.HashMap.replace.L6
 /* Reassign value with new tuple */
     push { r4 }
     mov r0, #0
@@ -651,7 +651,7 @@ Map.HashMap.replace.L3:                      /* Evaluate condition */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
     b Map.HashMap.replace.L4
-Map.HashMap.replace.L5: 
+Map.HashMap.replace.L6: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r3, [r1, #4]                         /* Load field from struct */
     b Map.HashMap.replace.L3
@@ -715,13 +715,13 @@ Map.HashMap.get.L3:                          /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.get.L5
+    beq Map.HashMap.get.L6
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b Map.HashMap.get.L7
-Map.HashMap.get.L5: 
+    b Map.HashMap.get.L8
+Map.HashMap.get.L6: 
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
     b Map.HashMap.get.L3
@@ -733,7 +733,7 @@ Map.HashMap.get.L0:
     ldr r1, [r1, #12]
     lsl r1, r1, #2
     ldr r0, [r1, #12]                        /* Load field from struct */
-Map.HashMap.get.L7: 
+Map.HashMap.get.L8: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
 .POOL8_L22_NULL: .word NULL
@@ -793,12 +793,12 @@ Map.HashMap.remove.L3:                       /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.remove.L5
+    beq Map.HashMap.remove.L6
     mov r0, r5
     mov r1, r4
     bl List.LinkedList.remove_P17            /* Call List.LinkedList.remove */
     b Map.HashMap.remove.L4
-Map.HashMap.remove.L5: 
+Map.HashMap.remove.L6: 
     mov r0, r4
     add r4, r4, #1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -917,7 +917,7 @@ main:                                        /* Function: main */
     mov r0, r5
     bl Map.HashMap.remove_P16                /* Call Map.HashMap.remove */
     cmp r3, #0
-    beq main.L0
+    beq main.L1
     mov r1, #1
     mov r0, r4
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */
@@ -931,7 +931,7 @@ main:                                        /* Function: main */
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */
     add r0, r6, r0
     pop { pc }
-main.L0: 
+main.L1: 
     mov r1, #1
     mov r0, r4
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */

@@ -85,12 +85,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -113,10 +113,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -127,8 +127,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -140,7 +140,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L0_HEAP_START: .word HEAP_START

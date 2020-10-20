@@ -36,10 +36,10 @@ get:                                         /* Function: get */
     add lr, pc, #8
     mov pc, r3
     cmp r0, #0
-    beq get.L1
+    beq get.L0
     mov r0, #12                              /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
-get.L1: 
+get.L0: 
     mov r0, #25                              /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
     

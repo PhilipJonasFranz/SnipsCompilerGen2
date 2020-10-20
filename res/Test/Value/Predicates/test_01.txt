@@ -75,21 +75,21 @@ sort.L6:
     add lr, pc, #8
     mov pc, r5
     cmp r0, #0
-    beq sort.L9
+    beq sort.L8
     mov r6, #0
     add r1, r3, r7
     sub r0, r1, #1
     str r9, [r10, r0, lsl #2]
     add r0, r3, r7
     str r8, [r10, r0, lsl #2]
-sort.L9: 
+sort.L8: 
     add r7, r7, #1
     b sort.L6
 sort.L7: 
     cmp r6, #0
-    beq sort.L11
+    beq sort.L10
     ldmfd sp!, {r3-r9, pc}
-sort.L11: 
+sort.L10: 
     b sort.L3
     ldmfd sp!, {r3-r9, pc}
     

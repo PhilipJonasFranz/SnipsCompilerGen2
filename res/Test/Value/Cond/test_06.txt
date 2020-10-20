@@ -45,20 +45,20 @@ main.L4:
     bx lr
 main.L7: 
     cmp r3, #4
-    bne main.L8
+    bne main.L6
     mov r0, #8                               /* Evaluate Expression */
     bx lr
-main.L8: 
+main.L6: 
     cmp r3, #5
-    bne main.L11
+    bne main.L10
     mov r0, #7                               /* Evaluate Expression */
     bx lr
-main.L11: 
+main.L10: 
     cmp r3, #6
-    bne main.L13
+    bne main.L11
     mov r0, #9                               /* Evaluate Expression */
     bx lr
-main.L13: 
+main.L11: 
     mov r0, #10                              /* Evaluate Expression */
     bx lr
     
