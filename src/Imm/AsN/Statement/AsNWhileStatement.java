@@ -8,18 +8,13 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
@@ -39,27 +34,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
 		w.breakJump = whileEnd;
 		
-		COND cond = COND.EQ;
-		
-		if (expr instanceof AsNCmp) {
-			AsNCmp com = (AsNCmp) expr;
-			
-			cond = com.neg;
-
-			/* Remove two conditional mov instrutions */
-			com.instructions.remove(com.instructions.size() - 1);
-			com.instructions.remove(com.instructions.size() - 1);
-
-			/* Evaluate Condition */
-			w.instructions.addAll(com.getInstructions());
-		}
-		else {
-			/* Evaluate Condition */
-			w.instructions.addAll(expr.getInstructions());
-			
-			/* Check if expression was evaluated to false */
-			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-		}
+		COND cond =	w.injectConditionEvaluation(expr);
 		
 		/* Condition was false, no else, skip body */
 		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(whileEnd)));

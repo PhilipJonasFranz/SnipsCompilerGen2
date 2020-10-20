@@ -7,17 +7,12 @@ import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.IfStatement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNIfStatement extends AsNConditionalCompoundStatement {
 
@@ -36,34 +31,14 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 			if (currentIf.condition != null) {
 				AsNExpression expr = AsNExpression.cast(currentIf.condition, r, map, st);
 
-				COND cond = COND.EQ;
+				COND cond = if0.injectConditionEvaluation(expr);
 				
-				if (expr instanceof AsNCmp) {
-					AsNCmp com = (AsNCmp) expr;
-					
-					/* Remove Conditional results */
-					com.instructions.remove(com.instructions.size() - 1);
-					com.instructions.remove(com.instructions.size() - 1);
-					
-					if0.instructions.addAll(com.getInstructions());
-					
-					cond = com.neg;
-				}
-				else {
-					if0.instructions.addAll(expr.getInstructions());
-					
-					/* Check if condition was evaluated to false */
-					if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-				}
-				
-				if (currentIf.elseStatement != null) {
+				if (currentIf.elseStatement != null) 
 					/* Condition was false, jump to else */
 					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
-				}
-				else {
+				else 
 					/* Condition was false, no else, skip body */
 					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
-				}
 			}
 			
 			/* Add Body */
