@@ -29,9 +29,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		
 			/* Else If Statement */
 			if (currentIf.condition != null) {
-				AsNExpression expr = AsNExpression.cast(currentIf.condition, r, map, st);
-
-				COND cond = if0.injectConditionEvaluation(expr);
+				COND cond = if0.injectConditionEvaluation(AsNExpression.cast(currentIf.condition, r, map, st));
 				
 				if (currentIf.elseStatement != null) 
 					/* Condition was false, jump to else */

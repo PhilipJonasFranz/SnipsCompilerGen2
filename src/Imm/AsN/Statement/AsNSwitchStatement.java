@@ -31,10 +31,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		for (CaseStatement cs : s.cases) {
 			ASMLabel next = new ASMLabel(LabelUtil.getLabel());
 			
-			/* Cast condition */
-			AsNExpression expr = AsNExpression.cast(cs.condition, r, map, st);
-			
-			COND cond = sw.injectConditionEvaluation(expr);
+			COND cond = sw.injectConditionEvaluation(AsNExpression.cast(cs.condition, r, map, st));
 			
 			/* Condition was false, skip body */
 			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(next)));

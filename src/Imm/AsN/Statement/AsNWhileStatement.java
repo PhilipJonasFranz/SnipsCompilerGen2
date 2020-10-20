@@ -22,35 +22,31 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		AsNWhileStatement w = new AsNWhileStatement();
 		a.castedNode = w;
 		
-		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
-
 		/* Generate labels for targets within this loop and set them to the casted node */
-		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
-		w.continueJump = continueJump;
+		w.continueJump = new ASMLabel(LabelUtil.getLabel());
 		
 		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
 		w.instructions.add(whileStart);
 
-		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
-		w.breakJump = whileEnd;
+		w.breakJump = new ASMLabel(LabelUtil.getLabel());
 		
-		COND cond =	w.injectConditionEvaluation(expr);
+		COND cond =	w.injectConditionEvaluation(AsNExpression.cast(a.condition, r, map, st));
 		
 		/* Condition was false, no else, skip body */
-		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(whileEnd)));
+		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
 		
 		/* Add Body */
 		w.addBody(a, r, map, st);
 		
 		/* Add jump for continue statements to use as target */
-		w.instructions.add(continueJump);
+		w.instructions.add(w.continueJump);
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
 		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
 		w.instructions.add(branch);
 		
-		w.instructions.add(whileEnd);
+		w.instructions.add(w.breakJump);
 		
 		if (!w.instructions.isEmpty()) 
 			w.instructions.get(0).comment = new ASMComment("Evaluate condition");

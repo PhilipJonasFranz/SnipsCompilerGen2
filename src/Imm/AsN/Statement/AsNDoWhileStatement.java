@@ -21,12 +21,11 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		AsNDoWhileStatement w = new AsNDoWhileStatement();
 		a.castedNode = w;
 
-		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
-		w.breakJump = whileEnd;
+		/* End of while loop */
+		w.breakJump = new ASMLabel(LabelUtil.getLabel());
 		
 		/* Create jump as target for continue statements */
-		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
-		w.continueJump = continueJump;
+		w.continueJump = new ASMLabel(LabelUtil.getLabel());
 		
 		/* Loop Entrypoint */
 		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
@@ -36,21 +35,19 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		w.addBody(a, r, map, st);
 
 		/* Add jump for continue statements to use as target */
-		w.instructions.add(continueJump);
-		
-		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
+		w.instructions.add(w.continueJump);
 
-		COND cond = w.injectConditionEvaluation(expr);
+		COND cond = w.injectConditionEvaluation(AsNExpression.cast(a.condition, r, map, st));
 
 		/* Condition was false, no else, skip body */
-		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(whileEnd)));
+		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
 		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
 		w.instructions.add(branch);
 		
-		w.instructions.add(whileEnd);
+		w.instructions.add(w.breakJump);
 		return w;
 	}
 	
