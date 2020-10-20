@@ -24,143 +24,64 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 	public static AsNIfStatement cast(IfStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIfStatement if0 = new AsNIfStatement();
 		
-		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
+		/* Used to iterate over if-chain */
+		IfStatement currentIf = a;
 		
-		if (expr instanceof AsNCmp) {
-			if0.topComparison(a, (AsNCmp) expr, r, map, st);
-			if0.freeDecs(r, a);
-			return if0;
-		}
-		else {
-			if0.instructions.addAll(expr.getInstructions());
-			
-			/* Check if expression was evaluated to true */
-			if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-			
-			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
-			
-			ASMLabel endTarget = new ASMLabel(LabelUtil.getLabel());
-			
-			/* Condition was false, jump to else */
-			if (a.elseStatement == null) {
-				if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(endTarget)));
-			}
-			else if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(elseTarget)));
-			
-			/* Add Body */
-			if0.addBody(a, r, map, st);
-			
-			if (a.elseStatement != null) if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
-			
-			IfStatement elseS = a.elseStatement;
-			if (elseS != null) if0.instructions.add(elseTarget);
-			while (elseS != null) {
-				if (elseS.condition != null) {
-					if0.instructions.addAll(AsNExpression.cast(elseS.condition, r, map, st).getInstructions());
-					
-					if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-					
-					elseTarget = new ASMLabel(LabelUtil.getLabel());
-				
-					/* False Jump */
-					if (elseS.elseStatement != null)
-						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(elseTarget)));
-					else 
-						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(endTarget)));
-				}
-				
-				/* Add Body */
-				if0.addBody(elseS, r, map, st);
-				
-				if (elseS.elseStatement != null) {
-					/* Jump to end after body */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
-					if0.instructions.add(elseTarget);
-				}
-				else break;
-				
-				elseS = elseS.elseStatement;
-			}
-			
-			if0.instructions.add(endTarget);
-			
-			if0.freeDecs(r, a);
-			return if0;
-		}
-	}
-	
-	protected void topComparison(IfStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		COND neg = com.neg;
-		
-		/* Remove Conditional results */
-		com.instructions.remove(com.instructions.size() - 1);
-		com.instructions.remove(com.instructions.size() - 1);
-		
-		this.instructions.addAll(com.getInstructions());
-		
-		IfStatement elseS = a.elseStatement;
-		
-		/* The target of the if/elseif/else chain */
 		ASMLabel endTarget = new ASMLabel(LabelUtil.getLabel());
 		
-		ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
-		if (elseS != null) {
-			/* Condition was false, jump to else */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(elseTarget)));
-		}
-		else {
-			/* Condition was false, no else, skip body */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(endTarget)));
-		}
+		while (currentIf != null) {
+			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
 		
-		/* Add Body */
-		this.addBody(a, r, map, st);
-		
-		if (a.elseStatement != null) this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
-		
-		/* ElseIf / Else Exists, needs jump to next case */
-		if (elseS != null) this.instructions.add(elseTarget);
-		
-		while (elseS != null) {
 			/* Else If Statement */
-			if (elseS.condition != null) {
-				AsNExpression expr = AsNExpression.cast(elseS.condition, r, map, st);
+			if (currentIf.condition != null) {
+				AsNExpression expr = AsNExpression.cast(currentIf.condition, r, map, st);
+
+				COND cond = COND.EQ;
 				
 				if (expr instanceof AsNCmp) {
-					this.topComparison(elseS, (AsNCmp) expr, r, map, st);
-					this.instructions.add(endTarget);
-					return;
+					AsNCmp com = (AsNCmp) expr;
+					
+					/* Remove Conditional results */
+					com.instructions.remove(com.instructions.size() - 1);
+					com.instructions.remove(com.instructions.size() - 1);
+					
+					if0.instructions.addAll(com.getInstructions());
+					
+					cond = com.neg;
 				}
 				else {
-					this.instructions.addAll(expr.getInstructions());
+					if0.instructions.addAll(expr.getInstructions());
 					
-					this.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-					
-					elseTarget = new ASMLabel(LabelUtil.getLabel());
+					if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
+				}
 				
-					/* False Jump */
-					if (elseS.elseStatement != null)
-						this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(elseTarget)));
-					else 
-						this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(endTarget)));
+				if (currentIf.elseStatement != null) {
+					/* Condition was false, jump to else */
+					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
+				}
+				else {
+					/* Condition was false, no else, skip body */
+					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
 				}
 			}
 			
 			/* Add Body */
-			this.addBody(elseS, r, map, st);
+			if0.addBody(currentIf, r, map, st);
 			
-			if (elseS.elseStatement != null) {
+			if (currentIf.elseStatement != null) {
 				/* Jump to end */
-				this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
-				this.instructions.add(elseTarget);
+				if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
+				if0.instructions.add(elseTarget);
 			}
 			else break;
 			
-			elseS = elseS.elseStatement;
+			currentIf = currentIf.elseStatement;
 		}
 		
-		/* End Target Destination */
-		this.instructions.add(endTarget);
+		if0.instructions.add(endTarget);
+		
+		if0.freeDecs(r, a);
+		return if0;
 	}
 	
 } 
