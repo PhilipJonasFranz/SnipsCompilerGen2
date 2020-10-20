@@ -1,6 +1,6 @@
-# Snips Compiler Gen.2
+# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org)
 
-[![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org) ![size](https://img.shields.io/github/repo-size/PhilipJonasFranz/SnipsCompilerGen2) ![size](https://img.shields.io/github/languages/code-size/PhilipJonasFranz/SnipsCompilerGen2)
+![size](https://img.shields.io/github/repo-size/PhilipJonasFranz/SnipsCompilerGen2) ![size](https://img.shields.io/github/languages/code-size/PhilipJonasFranz/SnipsCompilerGen2)
 
 ## Some words in advance
  This project was started for educational purposes. The programming language Snips, the Compiler and all included modules are not following any standards and are built to function well only for this project. Results produced by the compiler and included modules may contain errors and are not thought for any production environment. The project and all its included modules are still under development and are subject to change.
