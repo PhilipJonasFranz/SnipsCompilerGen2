@@ -19,6 +19,7 @@
 - [Advanced Features](#advanced-features)
    - [Exceptions](#exceptions)
    - [Direct ASM](#direct-asm)
+   - [Imports](#imports)
    - [Heap Functionality](#heap-functionality)
    - [Namespaces](#namespaces)
    - [Visibility Modifiers](#visibility-modifiers)
@@ -447,6 +448,29 @@ asm(a : r0, b : r1) {
  ```
  
 Using the `asm` keyword, we can define a new assembly section. In parentheses, we can define values to be copied before starting to execute the assembly. In the example, we copy the variable `a` into the register `R0`. After execution, we copy the register `R0` into the variable `r`. Note that when writing custom assembly, you have full control over the entire assembly execution. Your assembly code will not be optimized by the optimizer. Be aware to reset the stack and any registers you use - or you may break the program execution. With great power comes great responsibility!
+
+### Imports
+
+Using the `#include<[Path]>` directive, code from other files can be included in the current file. Imports are transitive, which means when a file is imported into a file, and this file has imports itself, these imports will be resolved into the current file as well. When multiple files import the same file, the file is only included once. The order of the imports, so that all dependencies are in total order, is determined automatically. All include directives should be stated at the file start, but its not required. Import paths can be of one of three types:
+
+- Absolute filepath
+- Relative filepath to the main file the compiler was called with
+- Alias Names, which is only available for included libraries
+
+Example
+
+```c
+  // Absolute import
+  #include<C:\Users\...\file.sn>
+  
+  // Relative import
+  #include<...\file.sn>
+  
+  // Alias Import
+  #include<linked_list.sn>
+```
+
+Warning: A limitation of the system are cyclic imports. This means `A` imports `B` and the other way round. These imports cannot be resolved.
 
 ### Heap functionality
 
