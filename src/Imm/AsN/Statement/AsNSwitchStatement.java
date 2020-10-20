@@ -15,7 +15,6 @@ import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Statement.CaseStatement;
@@ -34,10 +33,37 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 	
 		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
 		
-		ASMLabel next = new ASMLabel(LabelUtil.getLabel());
-		
 		for (CaseStatement cs : s.cases) {
-			sw.evaluateCondition(cs.condition, r, map, st, next);
+			ASMLabel next = new ASMLabel(LabelUtil.getLabel());
+			
+			/* Cast condition */
+			AsNExpression expr = AsNExpression.cast(cs.condition, r, map, st);
+			
+			COND cond = COND.EQ;
+			
+			if (expr instanceof AsNCmp) {
+				/* Top Comparison */
+				AsNCmp com = (AsNCmp) expr;
+				
+				cond = com.neg;
+				
+				/* Remove two conditional mov instrutions */
+				com.instructions.remove(com.instructions.size() - 1);
+				com.instructions.remove(com.instructions.size() - 1);
+				
+				/* Evaluate Condition */
+				sw.instructions.addAll(com.getInstructions());
+			}
+			else {
+				/* Default condition evaluation */
+				sw.instructions.addAll(expr.getInstructions());
+				
+				/* Check if expression was evaluated to true */
+				sw.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
+			}
+			
+			/* Condition was false, skip body */
+			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(next)));
 			
 			/* Add body */
 			sw.addBody(cs, r, map, st);
@@ -47,9 +73,6 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 			
 			/* Add jump to next case */
 			sw.instructions.add(next);
-			
-			/* Next element in chain */
-			next = new ASMLabel(LabelUtil.getLabel());
 		}
 		
 		/* Add default body */
@@ -60,38 +83,6 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		
 		sw.freeDecs(r, s);
 		return sw;
-	}
-	
-	public void evaluateCondition(Expression condition, RegSet r, MemoryMap map, StackSet st, ASMLabel next) throws CGEN_EXC {
-		/* Cast condition */
-		AsNExpression expr = AsNExpression.cast(condition, r, map, st);
-		
-		if (expr instanceof AsNCmp) {
-			/* Top Comparison */
-			AsNCmp com = (AsNCmp) expr;
-			
-			COND neg = com.neg;
-			
-			/* Remove two conditional mov instrutions */
-			com.instructions.remove(com.instructions.size() - 1);
-			com.instructions.remove(com.instructions.size() - 1);
-			
-			/* Evaluate Condition */
-			this.instructions.addAll(com.getInstructions());
-			
-			/* Condition was false, skip body */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(next)));
-		}
-		else {
-			/* Default condition evaluation */
-			this.instructions.addAll(expr.getInstructions());
-			
-			/* Check if expression was evaluated to true */
-			this.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
-			
-			/* Condition was false, jump to else */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(next)));
-		}
 	}
 	
 } 
