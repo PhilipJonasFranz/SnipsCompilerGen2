@@ -109,8 +109,15 @@ public class PreProcessor {
 		/* Read from file */
 		List<String> code = Util.readFile(file);
 		
+		/* Read from release library */
 		if (code == null) {
 			file = new File("release\\" + filePath);
+			code = Util.readFile(file);
+		}
+		
+		/* Use path relative to input file */
+		if (code == null) {
+			file = new File(CompilerDriver.inputFile.getParent() + "\\" + filePath);
 			code = Util.readFile(file);
 		}
 		
