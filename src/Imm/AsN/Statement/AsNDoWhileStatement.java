@@ -25,85 +25,58 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDoWhileStatement w = new AsNDoWhileStatement();
 		a.castedNode = w;
+
+		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
+		w.breakJump = whileEnd;
+		
+		/* Create jump as target for continue statements */
+		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
+		w.continueJump = continueJump;
+		
+		/* Loop Entrypoint */
+		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
+		w.instructions.add(whileStart);
+		
+		/* Add Body */
+		w.addBody(a, r, map, st);
+
+		/* Add jump for continue statements to use as target */
+		w.instructions.add(continueJump);
 		
 		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
+
+		COND cond = COND.EQ;
 		
 		if (expr instanceof AsNCmp) {
-			w.topComparison(a, (AsNCmp) expr, r, map, st);
+			AsNCmp com = (AsNCmp) expr;
+			
+			cond = com.neg;
+			
+			/* Remove two conditional mov instrutions */
+			com.instructions.remove(com.instructions.size() - 1);
+			com.instructions.remove(com.instructions.size() - 1);
+			
+			/* Evaluate Condition */
+			w.instructions.addAll(com.getInstructions());
 		}
 		else {
-			ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
-			w.breakJump = whileEnd;
-			
-			/* Create jump as target for continue statements */
-			ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
-			w.continueJump = continueJump;
-			
-			/* Loop Entrypoint */
-			ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
-			w.instructions.add(whileStart);
-			
-			/* Add Body */
-			w.addBody(a, r, map, st);
-			
-			/* Add jump for continue statements to use as target */
-			w.instructions.add(continueJump);
-			
 			/* Evaluate Condition */
 			w.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to true */
 			w.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-			
-			/* Condition was false, jump to else */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(whileEnd)));
-			
-			/* Branch to loop start */
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
-			branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
-			w.instructions.add(branch);
-			
-			/* While End Label */
-			w.instructions.add(whileEnd);
 		}
-		
-		return w;
-	}
-	
-	protected void topComparison(DoWhileStatement a, AsNCmp com, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
-		this.continueJump = continueJump;
-		
-		ASMLabel whileEnd = new ASMLabel(LabelUtil.getLabel());
-		this.breakJump = whileEnd;
-		
-		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
-		this.instructions.add(whileStart);
-		
-		/* Add Body */
-		this.addBody(a, r, map, st);
-		
-		/* Add jump for continue statements to use as target */
-		this.instructions.add(continueJump);
-		
-		COND neg = com.neg;
-		
-		/* Remove two conditional mov instrutions */
-		com.instructions.remove(com.instructions.size() - 1);
-		com.instructions.remove(com.instructions.size() - 1);
-		
-		/* Evaluate Condition */
-		this.instructions.addAll(com.getInstructions());
-		
+
 		/* Condition was false, no else, skip body */
-		this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(whileEnd)));
+		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(whileEnd)));
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
 		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
-		this.instructions.add(branch);
+		w.instructions.add(branch);
 		
-		this.instructions.add(whileEnd);
+		w.instructions.add(whileEnd);
+		return w;
 	}
 	
 } 
