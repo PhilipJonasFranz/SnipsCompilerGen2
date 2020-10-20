@@ -15,6 +15,7 @@ import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
 import Res.Const;
@@ -59,7 +60,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	 * the returned condition is the negation of the condition of this expression, since we
 	 * want to check if the condition is false.
 	 */
-	public COND injectConditionEvaluation(AsNExpression expr) {
+	public static COND injectConditionEvaluation(AsNNode node, AsNExpression expr) {
 		COND cond = COND.EQ;
 		
 		if (expr instanceof AsNCmp) {
@@ -72,14 +73,14 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 			com.instructions.remove(com.instructions.size() - 1);
 
 			/* Evaluate Condition */
-			this.instructions.addAll(com.getInstructions());
+			node.instructions.addAll(com.getInstructions());
 		}
 		else {
 			/* Evaluate Condition */
-			this.instructions.addAll(expr.getInstructions());
+			node.instructions.addAll(expr.getInstructions());
 			
 			/* Check if expression was evaluated to false */
-			this.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
+			node.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 		}
 		
 		return cond;

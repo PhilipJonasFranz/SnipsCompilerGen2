@@ -30,7 +30,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
 		w.breakJump = new ASMLabel(LabelUtil.getLabel());
 		
-		COND cond =	w.injectConditionEvaluation(AsNExpression.cast(a.condition, r, map, st));
+		COND cond =	injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st));
 		
 		/* Condition was false, no else, skip body */
 		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
