@@ -52,6 +52,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				else {
 					if0.instructions.addAll(expr.getInstructions());
 					
+					/* Check if condition was evaluated to false */
 					if0.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 				}
 				
