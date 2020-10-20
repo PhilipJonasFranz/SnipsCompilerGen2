@@ -42,4 +42,3 @@ hs_err_pid*
 /target/
 
 doc/~$ips Documentation.docx
-release/RuntimeEnvironment/res/config_display.xml
