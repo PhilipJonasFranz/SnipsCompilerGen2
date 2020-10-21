@@ -45,14 +45,14 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
     b main
-.L1:                                         /* Interface : Inter */
+Inter.L1:                                    /* Interface : Inter */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
-    beq .L2
+    beq Inter.L2
     cmp r10, #2
     moveq r10, #4
-.L2: 
+Inter.L2: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
@@ -74,7 +74,7 @@ Y.get:                                       /* Function: Y.get */
     bx lr
     
 process:                                     /* Function: process */
-    b .L1                                    /* Branch to relay table of Inter */
+    b Inter.L1                               /* Branch to relay table of Inter */
     
 main:                                        /* Function: main */
     push { fp, lr }

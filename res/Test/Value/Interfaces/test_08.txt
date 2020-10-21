@@ -184,7 +184,7 @@ init_P9:                                     /* Provisos: List.ListNode<INT> */
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
-free.L0_P1:                                  /* Interface : Iterable, Provisos: INT,  */
+Iterable.L0_P1:                              /* Interface : Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -357,7 +357,7 @@ getSum:                                      /* Function: getSum */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -367,7 +367,7 @@ getSum.L1:
     mov r0, r3
     mov r1, r6
     mov r12, #4
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     add r5, r5, r0
     add r6, r6, #1
     b getSum.L1
@@ -397,7 +397,7 @@ main:                                        /* Function: main */
     mov r0, r5
     ldmfd sp!, {r1, r2}
     mov r12, #8
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     mov r0, r5                               /* Evaluate Expression */
     bl getSum                                /* Call getSum */
     pop { pc }

@@ -206,7 +206,7 @@ init_P2:                                     /* Function: init, Provisos: List.L
     add sp, sp, #12
     bx lr
     
-init.L2_P0:                                  /* Interface : List.Iterable, Provisos: INT,  */
+List.Iterable.L2_P0:                         /* Interface : List.Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -333,7 +333,7 @@ main:                                        /* Function: main */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl init.L2_P0                            /* Branch to relay table of List.Iterable */
+    bl List.Iterable.L2_P0                   /* Branch to relay table of List.Iterable */
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -343,7 +343,7 @@ main.L1:
     mov r0, r3
     mov r1, r6
     mov r12, #4
-    bl init.L2_P0                            /* Branch to relay table of List.Iterable */
+    bl List.Iterable.L2_P0                   /* Branch to relay table of List.Iterable */
     add r5, r5, r0
     add r6, r6, #1
     b main.L1

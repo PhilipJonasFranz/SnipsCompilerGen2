@@ -45,6 +45,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 		if (def.registeredMappings.isEmpty())
 			return intf;
 		
+		/* Set as function prefix, so label gen creates label with name reflecting the interface */
+		LabelUtil.funcPrefix = def.path.build();
+		
 		/* Create relay table */
 		intf.tableHead = new ASMLabel(LabelUtil.getLabel());
 

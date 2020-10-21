@@ -209,7 +209,7 @@ init_P7:                                     /* Provisos: Streamable.Stream<INT>
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
-free.L0_P1:                                  /* Interface : Iterable, Provisos: INT,  */
+Iterable.L0_P1:                              /* Interface : Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -391,7 +391,7 @@ Streamable.Stream.forEach_P8:                /* Function: Streamable.Stream.forE
     mov r4, r1
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     mov r5, r0
     mov r6, #0
 Streamable.Stream.forEach.L1: 
@@ -401,7 +401,7 @@ Streamable.Stream.forEach.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r6
     mov r12, #4
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     add lr, pc, #8
     mov pc, r4
     push { r0 }
@@ -410,7 +410,7 @@ Streamable.Stream.forEach.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldmfd sp!, {r1, r2}
     mov r12, #8
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     add r6, r6, #1
     b Streamable.Stream.forEach.L1
 Streamable.Stream.forEach.L2: 
@@ -470,6 +470,6 @@ main:                                        /* Function: main */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r3
     mov r12, #4
-    bl free.L0_P1                            /* Branch to relay table of Iterable */
+    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
     pop { pc }
     
