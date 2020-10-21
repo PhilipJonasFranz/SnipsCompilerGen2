@@ -139,5 +139,9 @@ public class FunctionCall extends Statement implements Callee {
 	public void setWatchpoint(SyntaxElement w) {
 		this.watchpoint = w;
 	}
+
+	public void setAnonTarget(Declaration d) {
+		this.anonTarget = d;
+	}
 	
 } 

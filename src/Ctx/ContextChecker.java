@@ -1155,11 +1155,13 @@ public class ContextChecker {
 		
 		this.declarations.add(d);
 		
+		/* If the type is a struct, make sure all required provisos are present */
 		if (d.getType().getCoreType() instanceof STRUCT) {
 			STRUCT s = (STRUCT) d.getType().getCoreType();
 			s.checkProvisoPresent(d.getSource());
 		}
 
+		/* If the type is an interface, make sure the modifier is not violated */
 		if (d.getType().getCoreType() instanceof INTERFACE) { 
 			INTERFACE i = (INTERFACE) d.getType().getCoreType();
 			
@@ -1443,10 +1445,7 @@ public class ContextChecker {
 	 */
 	public TYPE checkCall(Callee c) throws CTX_EXC {
 		
-		/* Extract path from typedef for more extensive function searching */
-		String prefix = (c.isNestedCall())? this.getPath(c.getParams().get(0)) : "";
-		
-		Function f = this.linkFunction(c.getPath(), c.getCallee(), c.getCallee().getSource(), prefix);
+		Function f = this.linkFunction(c);
 		
 		if (c.isNestedCall()) {
 			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT) {
@@ -2250,39 +2249,29 @@ public class ContextChecker {
 	}
 	
 	/**
-	 * Attempts to find the function with the name of given namespace path. If the function is not found,
-	 * it is searched as a predicate. If the called function is a predicate, and the predicate is not anonymous,
-	 * the provisos are overridden by the provisos by the predicate. Also, the anonTarget field is set.
+	 * Attempts to find the function with the name of the callee namespace path. If the function is not
+	 * found, it is searched as a predicate. If the called function is a predicate, and the predicate is
+	 * not anonymous, the provisos are overridden by the provisos of the predicate. Also, the anontarget
+	 * is set.
 	 * 
-	 * @param path The path that specifies the function name.
-	 * @param i The callee, should be either an InlineCall or FunctionCall.
-	 * @param source The source of the AST node that initiated the check.
+	 * @param c The callee that called the function.
 	 * @return The found function.
 	 * @throws CTX_EXC Thrown if the callee has provisos in a predicate call, or if the function cannot be found.
 	 */
-	public Function linkFunction(NamespacePath path, SyntaxElement i, Source source, String prefix) throws CTX_EXC {
-		List<TYPE> proviso = null;
-		
-		assert i instanceof InlineCall || i instanceof FunctionCall : "Given SyntaxElement is neither an InlineCall or FunctionCall!";
-		
-		/* Extract the proviso from the callee */
-		if (i instanceof InlineCall) {
-			InlineCall i0 = (InlineCall) i;
-			proviso = i0.proviso;
-		}
-		else {
-			FunctionCall i0 = (FunctionCall) i;
-			proviso = i0.proviso;
-		}
+	public Function linkFunction(Callee c) throws CTX_EXC {
+		List<TYPE> proviso = c.getProviso();
+
+		/* Extract path from typedef for more extensive function searching */
+		String prefix = (c.isNestedCall())? this.getPath(c.getParams().get(0)) : "";
 		
 		/* Find the called function */
-		Function f = this.findFunction(path, source, false, prefix);
+		Function f = this.findFunction(c.getPath(), c.getCallee().getSource(), false, prefix);
 		
 		Declaration anonTarget = null;
 		
 		/* Function not found, may be a lambda call */
 		if (f == null) {
-			anonTarget = this.scopes.peek().getFieldNull(path, source);
+			anonTarget = this.scopes.peek().getFieldNull(c.getPath(), c.getCallee().getSource());
 			
 			/* Found target as predicate, predicate is not anonymous */
 			if (anonTarget != null && anonTarget.getType() instanceof FUNC) {
@@ -2290,7 +2279,7 @@ public class ContextChecker {
 				
 				/* Provisos of call must be empty in case of predicate. */
 				if (!proviso.isEmpty()) 
-					throw new CTX_EXC(source, Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path.build());
+					throw new CTX_EXC(c.getCallee().getSource(), Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path.build());
 				
 				/* Proviso types are provided through lambda */
 				proviso = f0.proviso;
@@ -2301,26 +2290,18 @@ public class ContextChecker {
 				if (f == null) {
 					/* Anonymous function head */
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.PREDICATE_IS_ANONYMOUS, path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.PREDICATE_IS_ANONYMOUS, c.getPath().build(), c.getCallee().getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 				}
 			}
 		}
 		
 		/* Neither regular function or predicate was found, undefined */
 		if (f == null && anonTarget == null) 
-			throw new CTX_EXC(source, Const.UNDEFINED_FUNCTION_OR_PREDICATE, path.build());
+			throw new CTX_EXC(c.getCallee().getSource(), Const.UNDEFINED_FUNCTION_OR_PREDICATE, c.getPath().build());
 		
 		/* Write back anon target and provisos */
-		if (i instanceof InlineCall) {
-			InlineCall i0 = (InlineCall) i;
-			i0.anonTarget = anonTarget;
-			i0.proviso = proviso;
-		}
-		else {
-			FunctionCall i0 = (FunctionCall) i;
-			i0.anonTarget = anonTarget;
-			i0.proviso = proviso;
-		}
+		c.setProviso(proviso);
+		c.setAnonTarget(anonTarget);
 		
 		return f;
 	}

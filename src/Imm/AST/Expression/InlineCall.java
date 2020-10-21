@@ -129,4 +129,8 @@ public class InlineCall extends Expression implements Callee {
 		this.watchpoint = w;
 	}
 
+	public void setAnonTarget(Declaration d) {
+		this.anonTarget = d;
+	}
+
 } 

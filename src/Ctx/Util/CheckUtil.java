@@ -5,6 +5,7 @@ import java.util.List;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
 import Util.NamespacePath;
 
@@ -35,6 +36,8 @@ public class CheckUtil {
 		public void setAutoProviso(boolean b);
 		
 		public void setProviso(List<TYPE> proviso);
+		
+		public void setAnonTarget(Declaration d);
 		
 		public void setType(TYPE t);
 		
