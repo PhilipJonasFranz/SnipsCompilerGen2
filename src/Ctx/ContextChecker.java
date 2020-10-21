@@ -1159,7 +1159,14 @@ public class ContextChecker {
 			STRUCT s = (STRUCT) d.getType().getCoreType();
 			s.checkProvisoPresent(d.getSource());
 		}
-		
+
+		if (d.getType().getCoreType() instanceof INTERFACE) { 
+			INTERFACE i = (INTERFACE) d.getType().getCoreType();
+			
+			/* Check for modifier restrictions */
+			this.checkModifier(i.getTypedef().modifier, i.getTypedef().path, d.getSource());
+		}
+
 		/* No need to set type here, is done while parsing */
 		return d.getType();
 	}
