@@ -35,7 +35,7 @@ namespace List {
 		 * Creates a new list node for given value x and adds the node at the
 		 * end of the list.
 		 */
-		shared void add<T>(T x) {
+		shared void add(T x) {
 			/* Initialize the new List Node, set the next pointer to null */
 			ListNode<T>* n = init<>(ListNode<T>::(null, x));
 		
@@ -53,7 +53,7 @@ namespace List {
 		 * Returns the value of the node at the given index. Returns
 		 * the default value if the index is invalid.
 		 */
-		shared T get<T>(int i) {
+		shared T get(int i) {
 			if (i < 0) return self->defValue;
 		
 			ListNode<T>* n = self->head;
@@ -72,7 +72,7 @@ namespace List {
 		 * Returns the value of the node at the given index. Returns
 		 * the default value if the index is invalid.
 		 */
-		shared void set<T>(int i, T value) {
+		shared void set(int i, T value) {
 			ListNode<T>* n = self->head;
 			while (i != 0) {
 				if (n->next == null) return;
@@ -101,7 +101,7 @@ namespace List {
 		 * Check if given list contains given value. If the current value matches
 		 * the searched value determines the predicate.
 		 */
-		shared bool contains<T>(func (T, T) -> bool pred, T x) {
+		shared bool contains(func (T, T) -> bool pred, T x) {
 			ListNode<T>* n = self->head;
 			while (true) {
 				if (n == null) return false;
@@ -119,7 +119,7 @@ namespace List {
 		 * Returns a pointer to this list node, or 0 in case the
 		 * value wasnt found.
 		 */
-		shared ListNode<T>* find<T>(func (T, T) -> bool pred, T x) {
+		shared ListNode<T>* find(func (T, T) -> bool pred, T x) {
 			ListNode<T>* n = self->head;
 			while (n != null) {
 				/* 
