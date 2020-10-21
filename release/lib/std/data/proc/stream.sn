@@ -1,0 +1,45 @@
+#include<iterable.sn>
+
+/*
+ * Contains the utility to create a stream from an iterable
+ * interface and to modify the data behind the interface with
+ * predicates.
+ */
+namespace Streamable {
+	
+	/*
+	 * A stream capsules an Iterable interface, that contains the
+	 * data. Within the typedef, a range of functions are defined
+	 * to modify the data using predicates.
+	 */
+	restricted struct Stream<T> {
+		
+		/* The interface which the data is behind */
+		Iterable<T> iter;
+		
+		/*
+		 * Iterates over the data and applies the given predicate
+		 * to it. Overwrites the previous data in the stream.
+		 */
+		shared Stream<T>* forEach(func T -> T pred) {
+			int size = (self->iter).size();
+			
+			for (int i = 0; i < size; i++) {
+				T val = pred((self->iter).get(i));
+				(self->iter).set(i, val);
+			}
+			
+			return self;
+		}
+		
+		/*
+		 * Creates and initializes a new stack.
+		 * Returns a pointer to the newly created stack.
+		 */
+		static Stream<T>* create<T>(Iterable<T> iter) {
+			return init<>(Stream<T>::(iter));
+		}
+		
+	}
+	
+} 
