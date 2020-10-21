@@ -367,14 +367,14 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			
-			if (size != 0 && !f.path.build().equals("main")) {
+			if (size != 0 && !f.path.build().equals("main")) 
 				func.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
-			}
+		
 			
 			ASMLabel singleWordSkip = new ASMLabel(LabelUtil.getLabel());
-			if (f.getReturnType().wordsize() == 1 && f.signals()) {
+			if (f.getReturnType().wordsize() == 1 && f.signals()) 
 				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
-			}
+			
 			
 			if (f.getReturnType().wordsize() > 1 || f.signals()) {
 				if (f.signals() && f.getReturnType().wordsize() > 1) {
@@ -400,9 +400,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				AsNBody.branchToCopyRoutine(func);
 			}
 			
-			if (f.getReturnType().wordsize() == 1 && f.signals()) {
+			if (f.getReturnType().wordsize() == 1 && f.signals()) 
 				func.instructions.add(singleWordSkip);
-			}
 			
 			/* Branch back */
 			func.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
@@ -422,9 +421,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.remove(pop);
 			}
 			
-			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) {
+			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) 
 				func.instructions.add(new ASMSeperator());
-			}
 			
 			if (!f.provisosTypes.isEmpty()) {
 				all.addAll(func.instructions);
@@ -511,33 +509,20 @@ public class AsNFunction extends AsNCompoundStatement {
 	}
 	
 	/**
-	 * Return a list of all registers that were used. Registers 0-2 and FP, SP, LR, PC are excluded.
-	 * @return
+	 * Return a list of all registers that were used. Registers 0-2 and 10-15 are excluded.
 	 */
 	public List<REG> getUsed() {
-		REG [] notIncluded = {REG.R0, REG.R1, REG.R2, REG.R10, REG.R12, REG.FP, REG.SP, REG.LR, REG.PC};
 		List<REG> used = new ArrayList();
 		
 		this.instructions.stream().forEach(x -> {
 			if (x instanceof ASMMov) {
-				ASMMov mov = (ASMMov) x;
+				REG reg = ((ASMMov) x).target.reg;
 				
-				boolean use = true;
-				for (REG r : notIncluded) if (r == mov.target.reg) use = false;
+				boolean included = RegOp.toInt(reg) > 2 && RegOp.toInt(reg) < 10;
 				
-				if (use) used.add(mov.target.reg);
+				if (included && used.stream().filter(y -> y == reg).count() == 0) used.add(reg);
 			}
 		});
-		
-		/* Filter duplicates */
-		for (int i = 0; i < used.size(); i++) {
-			for (int a = i + 1; a < used.size(); a++) {
-				if (used.get(a) == used.get(i)) {
-					used.remove(a);
-					a--;
-				}
-			}
-		}
 		
 		return used;
 	}
@@ -560,6 +545,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Load in stack */
 				mapping.add(new Pair(dec, -1));
 		}
+		
 		return mapping;
 	}
 	

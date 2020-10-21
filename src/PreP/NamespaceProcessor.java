@@ -95,7 +95,9 @@ public class NamespaceProcessor {
 	
 	protected void merge(List<Namespace> namespaces) {
 		for (int i = 0; i < namespaces.size(); i++) {
-			merge(namespaces.get(i));
+			List<Namespace> name = getNamespaces(namespaces.get(i));
+			
+			merge(name);
 			
 			for (int a = i + 1; a < namespaces.size(); a++) {
 				if (namespaces.get(i).path.getPath().get(0).equals(namespaces.get(a).path.getPath().get(0))) {
@@ -112,11 +114,6 @@ public class NamespaceProcessor {
 				}
 			}
 		}
-	}
-	
-	protected void merge(Namespace n) {
-		List<Namespace> name = getNamespaces(n);
-		merge(name);
 	}
 	
 	public List<Namespace> getNamespaces(Namespace n) {
