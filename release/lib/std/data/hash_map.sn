@@ -70,7 +70,7 @@ namespace Map {
 		/*
 		 * Stores given value at the hashed key location.
 		 */
-		shared void put<K, V>(K key, V value) {
+		shared void put(K key, V value) {
 			/* Compute the hash of the key and limit it to the map size */
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
@@ -94,7 +94,7 @@ namespace Map {
 		 * If the given key is contained in the map, replace the
 		 * value stored under the key with the given value.
 		 */
-		shared void replace<K, V>(K key, V value) {
+		shared void replace(K key, V value) {
 			/* Compute the hash of the key and limit it to the map size */
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
@@ -127,7 +127,7 @@ namespace Map {
 		 * Returns the value corresponding to given key, or
 		 * the default value if the key does not exist.
 		 */
-		shared V get<K, V>(K key) {
+		shared V get(K key) {
 			/* Compute the hash of the key and limit it to the map size */
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
@@ -158,7 +158,7 @@ namespace Map {
 		/*
 		 * Remove the key from the map. Return if it doesnt exist.
 		 */
-		shared void remove<K, V>(K key) {
+		shared void remove(K key) {
 			/* Compute the hash of the key and limit it to the map size */
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
@@ -190,7 +190,7 @@ namespace Map {
 		/*
 		 * Checks wether given key is contained in the map.
 		 */
-		shared bool contains<K, V>(K key) {
+		shared bool contains(K key) {
 			/* Compute the hash of the key and limit it to the map size */
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
@@ -220,7 +220,7 @@ namespace Map {
 		 * Retrieves all entries from the HashMap sorted by hash value ascending,
 		 * and adds them into a single linked list and returns that list.
 		 */
-		shared LinkedList<MapEntry<K, V>*>* getEntries<K, V>() {
+		shared LinkedList<MapEntry<K, V>*>* getEntries() {
 			/* Create new list to collect */
 			LinkedList<MapEntry<K, V>*>* list = LinkedList::create<MapEntry<K, V>*>(self->defValue);
 			
@@ -249,7 +249,7 @@ namespace Map {
 		 * Retrieves all stored values from the HashMap sorted by hash value ascending,
 		 * and adds them into a single linked list and returns that list.
 		 */
-		shared LinkedList<V>* getValues<K, V>() {
+		shared LinkedList<V>* getValues() {
 			/* Create new list to collect */
 			LinkedList<V>* list = LinkedList::create<V>(self->defValue->value);
 			
