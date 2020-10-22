@@ -1690,7 +1690,23 @@ public class ContextChecker {
 		if (r.origin != null)
 			lambda = r.origin;
 		else {
-			lambda = this.findFunction(r.path, r.getSource(), true, "");
+			String prefix = "";
+			
+			if (r.base != null) {
+				TYPE t = r.base.check(this);
+				
+				/* Extract prefix from ressource */
+				if (t.getCoreType() instanceof STRUCT) {
+					STRUCT s = (STRUCT) t.getCoreType();
+					prefix = s.getTypedef().path.getLast();
+				}
+				else if (t.getCoreType() instanceof INTERFACE) {
+					INTERFACE i = (INTERFACE) t.getCoreType();
+					prefix = i.getTypedef().path.getLast();
+				}
+			}
+			
+			lambda = this.findFunction(r.path, r.getSource(), true, prefix);
 			
 			if (r.base != null) {
 				STRUCT s = (STRUCT) r.base.check(this).getCoreType();
@@ -1709,7 +1725,6 @@ public class ContextChecker {
 			else {
 				if (this.nestedFunctions.contains(lambda))
 					throw new CTX_EXC(r.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, lambda.path.build());
-			
 			}
 		}
 		
@@ -1840,6 +1855,7 @@ public class ContextChecker {
 		
 		if (tc.expression instanceof InlineCall) {
 			InlineCall ic = (InlineCall) tc.expression;
+			
 			/* Anonymous inline call */
 			if (ic.calledFunction == null) {
 				ic.setType(tc.castType);
@@ -2227,7 +2243,7 @@ public class ContextChecker {
 			
 			/* Check for match with prefix */
 			for (Function f0 : funcs) 
-				if (f0.path.build().equals(prefix + "." + path.build()))
+				if (f0.path.build().endsWith(prefix + "." + path.build()))
 					return f0;
 			
 			for (Function f0 : funcs) s += f0.path.build() + ", ";
