@@ -434,29 +434,15 @@ public class ContextChecker {
 				for (int i = 0; i < e.functions.size(); i++) {
 					Function structFunction = e.functions.get(i);
 					
-					if (structFunction.path.getLast().equals(ftranslated.path.getLast())) {
-						boolean match = true;
+					if (Function.signatureMatch(structFunction, ftranslated, false)) {
+						/* Add default context to make sure it is casted */
+						if (structFunction.provisosTypes.isEmpty())
+							structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
 						
-						match &= structFunction.getReturnTypeDirect().isEqual(ftranslated.getReturnTypeDirect());
+						structFunction.requireR10Reset = true;
 						
-						if (structFunction.parameters.size() == ftranslated.parameters.size()) {
-							for (int a = 0; a < ftranslated.parameters.size(); a++) 
-								match &= ftranslated.parameters.get(a).getRawType().isEqual(structFunction.parameters.get(a).getRawType());
-						}
-						else match = false;
-						
-						match &= ftranslated.modifier == structFunction.modifier;
-						
-						if (match) {
-							/* Add default context to make sure it is casted */
-							if (structFunction.provisosTypes.isEmpty())
-								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
-							
-							structFunction.requireR10Reset = true;
-							
-							found = true;
-							break;
-						}
+						found = true;
+						break;
 					}
 				}
 				
