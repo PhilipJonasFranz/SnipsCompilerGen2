@@ -108,6 +108,25 @@ public class StructTypedef extends SyntaxElement {
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
 			
+			/* Register this struct typedef at all implemented interfaces from the extension */
+			for (INTERFACE i : this.extension.implemented) {
+				boolean contained = false;
+				for (TYPE t : this.implemented)
+					if (t.isEqual(i))
+						contained = true;
+				
+				/* 
+				 * The Struct typedef may define implementation by itself, 
+				 * and may even override the provisos. In this case leave the
+				 * existing interface reference.
+				 */
+				if (!contained) {
+					/* If not contained, add to implemented and register at interface */
+					this.implemented.add(i.clone());
+					i.getTypedef().implementers.add(this);
+				}
+			}
+			
 			/* 
 			 * For every function in the extension, copy the function, 
 			 * adjust the path and add to own functions 
