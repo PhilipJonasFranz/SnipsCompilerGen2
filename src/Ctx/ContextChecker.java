@@ -2160,6 +2160,8 @@ public class ContextChecker {
 	public boolean checkPolymorphViolation(TYPE child, TYPE target) {
 		if (!(target instanceof STRUCT)) return false;
 		
+		if (!(child instanceof STRUCT)) return false;
+		
 		if (child.getCoreType() instanceof STRUCT) {
 			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && 
 				!((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {

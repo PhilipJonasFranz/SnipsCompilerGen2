@@ -59,8 +59,8 @@ namespace Streamable {
 		 * Creates and initializes a new stack.
 		 * Returns a pointer to the newly created stack.
 		 */
-		static Stream<T>* create<T>(Iterable<T> iter) {
-			return init<>(Stream<T>::(iter));
+		static Stream<T> create<T>(Iterable<T> iter) {
+			return Stream<T>::(iter);
 		}
 		
 	}
