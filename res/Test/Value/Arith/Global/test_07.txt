@@ -325,25 +325,19 @@ List.LinkedList.clear.L2:
     ldmfd sp!, {r3, r4, pc}
 .POOL3_L8_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL4_L8_NULL                   /* Evaluate Expression */
-    bx lr
-.POOL4_L8_NULL: .word NULL
-    
 List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL5_L8_NULL                   /* Load null address */
-    ldr r1, .POOL5_L8_NULL                   /* Load null address */
+    ldr r0, .POOL4_L8_NULL                   /* Load null address */
+    ldr r1, .POOL4_L8_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL5_L8_NULL: .word NULL
+.POOL4_L8_NULL: .word NULL
     
 /* Initialize the global variables */
 main_init: 
@@ -351,17 +345,17 @@ main_init:
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
     bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
-    ldr r1, .POOL6_L7_list0                  /* Load from .data section */
+    ldr r1, .POOL5_L7_list0                  /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r1, #12
-    ldr r0, .POOL6_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
-    ldr r0, .POOL6_L7_list0                  /* Load parameters */
+    ldr r0, .POOL5_L7_list0                  /* Load parameters */
     ldr r0, [r0]
     bl List.LinkedList.clear_P5              /* Call List.LinkedList.clear */
     add r10, pc, #8                          /* Evaluate Expression */
@@ -369,16 +363,16 @@ main:                                        /* Function: main */
     mov r10, #0
     mov r3, r0
     mov r1, #30
-    ldr r0, .POOL6_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
     ldr r0, [r0]
     add lr, pc, #8
     mov pc, r3
     mov sp, fp                               /* Reset the stack after anonymous call */
     mov r1, #0
-    ldr r0, .POOL6_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.get_P6                /* Call List.LinkedList.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL6_L7_list0: .word list0
+.POOL5_L7_list0: .word list0
     

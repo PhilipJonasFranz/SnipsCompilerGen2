@@ -318,12 +318,6 @@ List.LinkedList.get.L7:
     bx lr
 .POOL2_L7_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL3_L7_NULL                   /* Evaluate Expression */
-    bx lr
-.POOL3_L7_NULL: .word NULL
-    
 List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: X<INT> */
     push { fp, lr }
     mov fp, sp
@@ -331,8 +325,8 @@ List.LinkedList.create_P1:                   /* Function: List.LinkedList.create
     add r0, fp, #16
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL4_L7_NULL                   /* Load null address */
-    ldr r1, .POOL4_L7_NULL                   /* Load null address */
+    ldr r0, .POOL3_L7_NULL                   /* Load null address */
+    ldr r1, .POOL3_L7_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
@@ -341,7 +335,7 @@ List.LinkedList.create_P1:                   /* Function: List.LinkedList.create
     ldmfd sp!, {fp, lr}
     add sp, sp, #12
     bx lr
-.POOL4_L7_NULL: .word NULL
+.POOL3_L7_NULL: .word NULL
     
 /* Initialize the global variables */
 main_init: 
@@ -352,7 +346,7 @@ main_init:
     mov r2, #3
     stmfd sp!, {r0-r2}
     bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
-    ldr r1, .POOL5_L6_buffer                 /* Load from .data section */
+    ldr r1, .POOL4_L6_buffer                 /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
 /* Message queue that temporarily hold incoming messages */
@@ -364,15 +358,15 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #3
     push { r0 }
-    ldr r0, .POOL5_L6_buffer                 /* Load from .data section */
+    ldr r0, .POOL4_L6_buffer                 /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
     mov r1, #0
-    ldr r0, .POOL5_L6_buffer                 /* Load from .data section */
+    ldr r0, .POOL4_L6_buffer                 /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.get_P5                /* Call List.LinkedList.get */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL5_L6_buffer: .word buffer
+.POOL4_L6_buffer: .word buffer
     

@@ -222,25 +222,19 @@ List.LinkedList.add.L1:
     ldmfd sp!, {r3-r5, pc}
 .POOL1_L5_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL2_L5_NULL                   /* Evaluate Expression */
-    bx lr
-.POOL2_L5_NULL: .word NULL
-    
 List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL3_L5_NULL                   /* Load null address */
-    ldr r1, .POOL3_L5_NULL                   /* Load null address */
+    ldr r0, .POOL2_L5_NULL                   /* Load null address */
+    ldr r1, .POOL2_L5_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL3_L5_NULL: .word NULL
+.POOL2_L5_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { lr }
@@ -264,7 +258,7 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
 main.L1: 
-    ldr r1, .POOL4_L5_NULL                   /* Load null address */
+    ldr r1, .POOL3_L5_NULL                   /* Load null address */
     cmp r6, r1
     beq main.L2
     lsl r1, r6, #2                           /* Convert to bytes */
@@ -276,5 +270,5 @@ main.L1:
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */
     pop { pc }
-.POOL4_L5_NULL: .word NULL
+.POOL3_L5_NULL: .word NULL
     

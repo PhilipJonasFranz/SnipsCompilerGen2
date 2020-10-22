@@ -333,25 +333,19 @@ List.LinkedList.size.L2:
     bx lr
 .POOL4_L12_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL5_L12_NULL                  /* Evaluate Expression */
-    bx lr
-.POOL5_L12_NULL: .word NULL
-    
 List.LinkedList.create_P6:                   /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL6_L12_NULL                  /* Load null address */
-    ldr r1, .POOL6_L12_NULL                  /* Load null address */
+    ldr r0, .POOL5_L12_NULL                  /* Load null address */
+    ldr r1, .POOL5_L12_NULL                  /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     bl init_P7                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL6_L12_NULL: .word NULL
+.POOL5_L12_NULL: .word NULL
     
 getSum:                                      /* Function: getSum */
     sub sp, sp, #20

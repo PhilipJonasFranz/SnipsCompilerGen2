@@ -306,25 +306,19 @@ List.LinkedList.size.L2:
     bx lr
 .POOL3_L7_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL4_L7_NULL                   /* Evaluate Expression */
-    bx lr
-.POOL4_L7_NULL: .word NULL
-    
 List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: CHAR */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL5_L7_NULL                   /* Load null address */
-    ldr r1, .POOL5_L7_NULL                   /* Load null address */
+    ldr r0, .POOL4_L7_NULL                   /* Load null address */
+    ldr r1, .POOL4_L7_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL5_L7_NULL: .word NULL
+.POOL4_L7_NULL: .word NULL
     
 /* This package contains various utility functions for Strings chars. */
 /* Compares the two given strings. Checks if all chars are equal and returns the */
