@@ -184,7 +184,7 @@ public class AsNFunctionCall extends AsNStatement {
 			String postfix = "";
 			
 			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
-				if (ProvisoUtil.mappingIsEqual(provisoMap.providedHeadProvisos, provisos)) {
+				if (ProvisoUtil.mappingIsEqualProvisoFree(provisoMap.providedHeadProvisos, provisos)) {
 					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
 						break;
 					

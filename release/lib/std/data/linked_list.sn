@@ -251,12 +251,12 @@ namespace List {
 			return self->head == null;
 		}
 		
-		shared char* serialize<T>() {
+		shared char* serialize() {
 			// TODO
 			return null;
 		}
 		
-		static void* deserialize(char* str) {
+		static void* deserialize<T:void>(char* str) {
 			return null;
 		}
 	

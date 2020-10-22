@@ -1490,7 +1490,8 @@ public class ContextChecker {
 				/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
 				for (StructTypedef def : s.getTypedef().implementers) {
 					for (Function f0 : def.functions) {
-						if (f0.path.getLast().equals(f.path.getLast())) {
+						/* Only do this if mapping is not present already, may cause stack overflow */
+						if (!f0.containsMapping(c.getProviso()) && f0.path.getLast().equals(f.path.getLast())) {
 							f0.setContext(c.getProviso());
 							f0.check(this);
 						}

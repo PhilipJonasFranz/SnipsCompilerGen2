@@ -12,7 +12,7 @@ namespace Streamable {
 	 * data. Within the typedef, a range of functions are defined
 	 * to modify the data using predicates.
 	 */
-	restricted struct Stream<T> {
+	restricted struct Stream<T> : Iterable<T> {
 		
 		/* The interface which the data is behind */
 		Iterable<T> iter;
@@ -30,6 +30,29 @@ namespace Streamable {
 			}
 			
 			return self;
+		}
+
+		/*
+		 * Returns the size of the capsuled interable interface.
+		 */
+		shared int size() {
+			return (self->iter).size();
+		}
+		
+		/*
+		 * Returns the value at given index from 
+		 * the capsuled iterable interface.
+		 */
+		shared T get(int index) {
+			return (self->iter).get(index);
+		}
+		
+		/*
+		 * Sets the value at the given index to the
+		 * given value in the capsuled iterable interface.
+		 */
+		shared void set(int index, T value) {
+			(self->iter).set(index, value);
 		}
 		
 		/*
