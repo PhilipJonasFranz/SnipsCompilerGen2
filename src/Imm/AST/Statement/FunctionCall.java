@@ -33,6 +33,8 @@ public class FunctionCall extends Statement implements Callee {
 	public boolean hasAutoProviso = false;
 	
 	public boolean isNestedCall = false;
+
+	public boolean nestedDeref = false;
 	
 	/** 
 	 * This field is only set when this function call is a struct nested call. In this case, 
@@ -142,6 +144,10 @@ public class FunctionCall extends Statement implements Callee {
 
 	public void setAnonTarget(Declaration d) {
 		this.anonTarget = d;
+	}
+
+	public boolean isNestedDeref() {
+		return this.nestedDeref;
 	}
 	
 } 

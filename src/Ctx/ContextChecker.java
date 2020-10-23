@@ -1484,6 +1484,11 @@ public class ContextChecker {
 					}
 				}
 			}
+			
+			/* Generate warning if instance is not a pointer, but is derefed in call */
+			if (c.isNestedDeref() && !(c.getParams().get(0).getType() instanceof POINTER))
+				if (!CompilerDriver.disableWarnings) 
+					this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, c.getParams().get(0).getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		else {
 			/* Found function is nested, should not be able to access it */

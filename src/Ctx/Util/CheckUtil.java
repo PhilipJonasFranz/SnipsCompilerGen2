@@ -19,6 +19,8 @@ public class CheckUtil {
 		
 		public boolean isNestedCall();
 		
+		public boolean isNestedDeref();
+		
 		public boolean hasAutoProviso();
 		
 		public TYPE getType();

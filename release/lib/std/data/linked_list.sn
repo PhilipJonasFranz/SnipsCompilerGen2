@@ -28,6 +28,9 @@ namespace List {
 		/* Points to the last element of the list or is null. */
 		ListNode<T>* tail;
 		
+		/* Assumed size of list, use count() to re-count the elements */
+		int size;
+		
 		/* The default value that can be returned */
 		T defValue;
 		
@@ -47,6 +50,8 @@ namespace List {
 				self->tail->next = n;
 				self->tail = n;
 			}	
+			
+			self->size++;
 		}
 		
 		/*
@@ -140,12 +145,25 @@ namespace List {
 		 * Returns the amount of elements stored in the list.
 		 */
 		shared int size<T:void>() {
+			return self->size;
+		}
+		
+		/* 
+		 * Re-counts the elements in the list. In general, the
+		 * size count should not differ from the actual size, but
+		 * when manual list manipulation is done, the size may very
+		 * well be changed. Calling this method will refresh the size
+		 * counter and returns the current size.
+		 */
+		shared int count<T:void>() {
 			ListNode<void>* n = self->head;
 			int size = 0;
 			while (n != null) {
 				n = n->next;
 				size++;
 			}
+			
+			self->size = size;
 			return size;
 		}
 		
@@ -265,7 +283,7 @@ namespace List {
 		 */
 		static LinkedList<T>* create<T>(T defValue) {
 			/* Initialize list, set pointers to null */
-			return init<>(LinkedList<T>::(null, null, defValue));
+			return init<>(LinkedList<T>::(null, null, 0, defValue));
 		}
 		
 	}

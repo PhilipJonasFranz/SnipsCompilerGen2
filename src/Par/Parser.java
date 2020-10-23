@@ -1153,6 +1153,7 @@ public class Parser {
 					InlineCall ic = (InlineCall) select.selection;
 					FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
 					fc.baseRef = select.selector;
+					fc.nestedDeref = ic.nestedDeref;
 					accept(TokenType.SEMICOLON);
 					return fc;
 				}

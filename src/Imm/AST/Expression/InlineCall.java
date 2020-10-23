@@ -133,4 +133,8 @@ public class InlineCall extends Expression implements Callee {
 		this.anonTarget = d;
 	}
 
+	public boolean isNestedDeref() {
+		return this.nestedDeref;
+	}
+
 } 
