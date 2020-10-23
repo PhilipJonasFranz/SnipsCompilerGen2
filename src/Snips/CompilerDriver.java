@@ -185,7 +185,8 @@ public class CompilerDriver {
 			/* ---< METHODS >--- */
 	public void readConfig() {
 		/* Read Configuration */
-		List<String> conf = Util.readFile(new File("release/sys-inf.xml"));
+		List<String> conf = Util.readFile(new File("release\\sys-inf.xml"));
+		if (conf == null) conf = Util.readFile(new File("sys-inf.xml"));
 		sys_config  = new XMLNode(conf);
 	}
 	
