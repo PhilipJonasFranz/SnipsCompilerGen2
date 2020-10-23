@@ -30,6 +30,9 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public List<Function> functions;
 	
+	/* Interfaces this interface is implementing */
+	public List<INTERFACE> implemented = new ArrayList();
+	
 	public List<StructTypedef> implementers = new ArrayList();
 
 	public class InterfaceProvisoMapping {
@@ -55,7 +58,7 @@ public class InterfaceTypedef extends SyntaxElement {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public InterfaceTypedef(NamespacePath path, List<TYPE> proviso, List<Function> functions, MODIFIER modifier, Source source) {
+	public InterfaceTypedef(NamespacePath path, List<TYPE> proviso, List<INTERFACE> implemented, List<Function> functions, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -64,11 +67,51 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		this.modifier = modifier;
 		
+		this.implemented = implemented;
+		
+		this.initialize();
+		
 		this.self = new INTERFACE(this, this.proviso);
 	}
 	
 	
 			/* ---< METHODS >--- */
+	public void initialize() {
+		int c = 0;
+		
+		for (INTERFACE i : this.implemented) {
+			InterfaceTypedef def = i.getTypedef();
+			
+			/* 
+			 * For every function in the extension, copy the function, 
+			 * adjust the path and add to own functions 
+			 */
+			for (Function f : def.functions) {
+				
+				/* Construct a namespace path that has this struct as base */
+				NamespacePath base = this.path.clone();
+				base.path.add(f.path.getLast());
+				
+				List<TYPE> provClone = new ArrayList();
+				for (TYPE t : f.provisosTypes) provClone.add(t.clone());
+				
+				/* Create a copy of the function, but keep references */
+				Function f0 = new Function(f.getReturnTypeDirect(), base, provClone, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
+				
+				f0.translateProviso(i.getTypedef().proviso, this.proviso);
+				
+				boolean override = false;
+				for (Function fs : this.functions) 
+					if (Function.signatureMatch(fs, f0, false))
+						override = true;
+				
+				if (!override) {
+					this.functions.add(c++, f0);
+				}
+			}
+		}
+	}
+	
 	public InterfaceProvisoMapping registerMapping(List<TYPE> newMapping) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */

@@ -330,6 +330,31 @@ public class Function extends CompoundStatement {
 	}
 	
 	/**
+	 * Translates this function from the source proviso space to the target proviso space.<br>
+	 * <br>
+	 * When to use this function: A function nested in struct type A is re-located to type B. B extends A.<br>
+	 * Then the function needs to be proviso translated, with f.translate(A.provisos, B.provisos).<br>
+	 * <br>
+	 * This will cause the functions provisos to be adjusted to the provisos in B.<br>
+	 * <br>
+	 * Note: Only does this to the functions signature, not the body.
+	 * 
+	 * @param source The proviso heads of the ressource where the function was located
+	 * @param target The proviso heads of the ressource where the function is re-located to
+	 */
+	public void translateProviso(List<TYPE> source, List<TYPE> target) {
+		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
+		
+		for (int i = 0; i < this.provisosTypes.size(); i++)
+			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
+		
+		for (Declaration d : this.parameters)
+			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
+		
+		// TODO: Also translate body
+	}
+	
+	/**
 	 * Compares the signatures of the two given functions. This includes name, parameters
 	 * and return type. Returns true if the signatures match.
 	 * @param f0 The first function.

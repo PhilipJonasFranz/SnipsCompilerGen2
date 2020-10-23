@@ -1,7 +1,8 @@
 SOURCE
+#include<collection.sn>
 #include<linked_list.sn>
 
-int getSum(Iterable<int> it) {
+int getSum(Collection<int> it) {
 	int size = it.size();
 	
 	int s = 0;
@@ -18,7 +19,7 @@ int main(bool b) {
 	l->add<int>(6);
 	l->add<int>(2);
 	
-	Iterable<int> it = l;
+	Collection<int> it = l;
 	
 	it.set<int>(1, 9);
 	
@@ -184,13 +185,23 @@ init_P9:                                     /* Provisos: List.ListNode<INT> */
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
-Iterable.L0_P1:                              /* Interface : Iterable, Provisos: INT,  */
+/* Interface for a collection. A collection has to include the methods: */
+/* - size */
+/* - get(int) */
+/* - set(int, T) */
+/* - add(T) */
+/* - remove(int) */
+/* A collection provides an abstract interface for a database or data storage */
+/* and the endpoints to access the data. */
+Collection.L0_P1:                            /* Interface : Collection, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b List.LinkedList.size_P3
     b List.LinkedList.get_P4
     b List.LinkedList.set_P10
+    b List.LinkedList.add_P8
+    add r10, r10, r10                        /* Function was not called, use as placeholder */
     
 /* [BASE-PACKAGE] */
 /*  */
@@ -203,6 +214,7 @@ Iterable.L0_P1:                              /* Interface : Iterable, Provisos: 
 /* and a value. */
 /* Wraps the list head and tail. */
 List.LinkedList.add_P8:                      /* Function: List.LinkedList.add, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0
@@ -351,7 +363,7 @@ getSum:                                      /* Function: getSum */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
-    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
+    bl Collection.L0_P1                      /* Branch to relay table of Collection */
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -361,7 +373,7 @@ getSum.L1:
     mov r0, r3
     mov r1, r6
     mov r12, #4
-    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
+    bl Collection.L0_P1                      /* Branch to relay table of Collection */
     add r5, r5, r0
     add r6, r6, #1
     b getSum.L1
@@ -391,7 +403,7 @@ main:                                        /* Function: main */
     mov r0, r5
     ldmfd sp!, {r1, r2}
     mov r12, #8
-    bl Iterable.L0_P1                        /* Branch to relay table of Iterable */
+    bl Collection.L0_P1                      /* Branch to relay table of Collection */
     mov r0, r5                               /* Evaluate Expression */
     bl getSum                                /* Call getSum */
     pop { pc }

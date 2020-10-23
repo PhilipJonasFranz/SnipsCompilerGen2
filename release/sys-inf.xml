@@ -8,7 +8,8 @@
 		<Alias>hash_map.sn:lib/std/data/hash_map.sn</Alias>
 		
 			<Alias>iterable.sn:lib/std/data/interface/iterable.sn</Alias>
-		
+			<Alias>collection.sn:lib/std/data/interface/collection.sn</Alias>
+			
 			<Alias>stream.sn:lib/std/data/proc/stream.sn</Alias>
 		
 		

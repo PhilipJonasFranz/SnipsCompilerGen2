@@ -207,6 +207,14 @@ free.L2:
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
+/* Interface for a collection. A collection has to include the methods: */
+/* - size */
+/* - get(int) */
+/* - set(int, T) */
+/* - add(T) */
+/* - remove(int) */
+/* A collection provides an abstract interface for a database or data storage */
+/* and the endpoints to access the data. */
 /* [BASE-PACKAGE] */
 /*  */
 /* Using the serializable interface, structs can be converted */
@@ -218,6 +226,7 @@ free.L2:
 /* and a value. */
 /* Wraps the list head and tail. */
 List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0

@@ -1,51 +1,38 @@
 SOURCE
-#include<linked_list.sn>
-#include<iterable.sn>
-#include<stream.sn>
+interface Getter {
 
-int add5(int x) {
-	return x + 5;
+	int get();
+
+}
+
+struct A : Getter {
+	int val;
+	
+	int get() {
+		return self->val;
+	}
+}
+
+struct B : A {
+	int val2;
 }
 
 int main(int a) {
-	LinkedList<int>* l = LinkedList::create<int>(0);
+	B* b = init<>(B::(10, 16));
+	Getter g = b;
 	
-	l->add(10);
-	l->add(5);
-	l->add(2);
-	
-	Stream<int>* s = init<>(Stream::create<int>(l));
-	
-	Stream<int>* s0 = init<>(Stream::create<int>(s));
-	
-	s0->forEach(add5);
-	
-	return (s0->iter).get(a);
+	return g.get();
 }
 
 TESTCASES
-0 15
-1 10
-2 7
+10
 OUTPUT
 /* --test_10.txt */
 .data
-NULL: .word 0
 HEAP_START: .word 0
     
 .text
     b main
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-    
 /* Reseve a memory block with given size + 1. The block size has to be increased */
 /* by one to accomodate the block metadata. The function returns a void pointer to */
 /* the start of the reserved memory section + 1. This means the pointer points to */
@@ -57,7 +44,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L19_HEAP_START            /* Evaluate Expression */
+    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -138,37 +125,12 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L19_HEAP_START: .word HEAP_START
+.POOL0_L2_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
 /* section. */
-init_P2:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #24
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    ldr r0, [fp, #12]
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #16
-    bx lr
-    
-init_P4:                                     /* Provisos: List.ListNode<INT> |  */
+init_P1:                                     /* Function: init, Provisos: B */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -191,331 +153,41 @@ init_P4:                                     /* Provisos: List.ListNode<INT> |  
     add sp, sp, #12
     bx lr
     
-init_P7:                                     /* Provisos: Streamable.Stream<INT> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    ldr r0, [fp, #16]                        /* Evaluate Expression */
-    ldr r1, [fp, #12]
-    stmfd sp!, {r0, r1}
-    pop { r0 }
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #8
-    bx lr
-    
-/* [BASE-PACKAGE] */
-/*  */
-/* This package contains the interface definition for an iterable struct. */
-/* The interface creates data access and exchange points, so data can be */
-/* read and written. */
-Iterable.L0_P6:                              /* Interface : Iterable, Provisos: INT,  */
+Getter.L2:                                   /* Interface : Getter */
     ldr r10, [r10, r0, lsl #2]
-    cmp r10, #2
+    cmp r10, #1
     moveq r10, #0
-    beq Iterable.L1
-    cmp r10, #3
-    moveq r10, #12
-Iterable.L1: 
+    beq Getter.L3
+    cmp r10, #2
+    moveq r10, #4
+Getter.L3: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
     add pc, pc, r10
-    b List.LinkedList.size_P10
-    b List.LinkedList.get_P13
-    b List.LinkedList.set_P16
-    b Streamable.Stream.size_P11
-    b Streamable.Stream.get_P14
-    b Streamable.Stream.set_P17
+    b A.get
+    b B.get
     
-/* [BASE-PACKAGE] */
-/*  */
-/* Using the serializable interface, structs can be converted */
-/* into string format. */
-/* This package contains the utility to create a linked-list, */
-/* insert and remove values from it, as well as some functions */
-/* that give information about the state of the list. */
-/* A single list entry, contains a pointer to the next node */
-/* and a value. */
-/* Wraps the list head and tail. */
-List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, Provisos: INT */
-    sub sp, sp, #16
-    stmea sp, {r3-r5, lr}
-    mov r3, r0
-    mov r4, r1
-/* Initialize the new List Node, set the next pointer to null */
-    push { r4 }
-    ldr r0, .POOL1_L18_NULL                  /* Load null address */
-    push { r0 }
-    mov r0, #1
-    push { r0 }
-    bl init_P4                               /* Call init */
-    mov r5, r0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L18_NULL                  /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.add.L1
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.add.L1: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r1, [r1, #8]
-    lsl r1, r1, #2
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
-.POOL1_L18_NULL: .word NULL
-    
-List.LinkedList.get_P13:                     /* Function: List.LinkedList.get, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #12
-    stmea sp, {r3-r5}
-    mov r3, r0
-    mov r4, r1
-    cmp r1, #0
-    bge List.LinkedList.get.L0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.get.L4
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L18_NULL                  /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get.L5
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
-/* Jump to next */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get.L7: 
-    ldmfd sp!, {r3-r5}
-    bx lr
-.POOL2_L18_NULL: .word NULL
-    
-List.LinkedList.set_P16:                     /* Function: List.LinkedList.set, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #12
-    stmea sp, {r4-r6}
-    mov r4, r1
-    mov r5, r2
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r6, [r1, #4]                         /* Load field from struct */
-List.LinkedList.set.L1:                      /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.set.L2
-    lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L18_NULL                  /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.set.L3
-    b List.LinkedList.set.L5
-List.LinkedList.set.L3: 
-/* Jump to next */
-    lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r6, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.set.L1
-List.LinkedList.set.L2: 
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r6, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.set.L5: 
-    ldmfd sp!, {r4-r6}
-    bx lr
-.POOL3_L18_NULL: .word NULL
-    
-List.LinkedList.size_P10:                    /* Function: List.LinkedList.size, Provisos: INT */
-    mov r10, #0
-    push { r3, r4 }
-    mov r3, r0
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #0                               /* Evaluate Expression */
-    mov r3, #0
-List.LinkedList.size.L1:                     /* Evaluate condition */
-    ldr r1, .POOL4_L18_NULL                  /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size.L2
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, r3
-    add r3, r3, #1
-    b List.LinkedList.size.L1
-List.LinkedList.size.L2: 
-    mov r0, r3                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4}
-    bx lr
-.POOL4_L18_NULL: .word NULL
-    
-List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
-    push { r3, lr }
-    mov r3, r0
-/* Initialize list, set pointers to null */
-    push { r3 }
-    ldr r0, .POOL5_L18_NULL                  /* Load null address */
-    ldr r1, .POOL5_L18_NULL                  /* Load null address */
-    stmfd sp!, {r0, r1}
-    mov r0, #2
-    push { r0 }
-    bl init_P2                               /* Call init */
-    ldmfd sp!, {r3, pc}
-.POOL5_L18_NULL: .word NULL
-    
-/* Contains the utility to create a stream from an iterable */
-/* interface and to modify the data behind the interface with */
-/* predicates. */
-/* A stream capsules an Iterable interface, that contains the */
-/* data. Within the typedef, a range of functions are defined */
-/* to modify the data using predicates. */
-Streamable.Stream.forEach_P8:                /* Function: Streamable.Stream.forEach, Provisos: INT */
-    sub sp, sp, #20
-    stmea sp, {r3-r6, lr}
-    mov r3, r0
-    mov r4, r1
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
-    mov r5, r0
-    mov r6, #0
-Streamable.Stream.forEach.L1: 
-    cmp r6, r5
-    bge Streamable.Stream.forEach.L2
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    mov r1, r6
-    mov r12, #4
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
-    add lr, pc, #8
-    mov pc, r4
-    push { r0 }
-    push { r6 }
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldmfd sp!, {r1, r2}
-    mov r12, #8
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
-    add r6, r6, #1
-    b Streamable.Stream.forEach.L1
-Streamable.Stream.forEach.L2: 
-    mov r0, r3                               /* Evaluate Expression */
-    ldmfd sp!, {r3-r6, pc}
-    
-Streamable.Stream.size_P11:                  /* Function: Streamable.Stream.size, Provisos: INT */
+A.get:                                       /* Function: A.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    b Iterable.L0_P6                         /* Branch to relay table of Iterable */
-    
-Streamable.Stream.get_P14:                   /* Function: Streamable.Stream.get, Provisos: INT */
-    mov r10, #0
-    push { r4, lr }
-    mov r4, r1
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    mov r1, r4
-    mov r12, #4
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
-    ldmfd sp!, {r4, pc}
-    
-Streamable.Stream.set_P17:                   /* Function: Streamable.Stream.set, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #12
-    stmea sp, {r4, r5, lr}
-    mov r4, r1
-    mov r5, r2
-    push { r5 }
-    push { r4 }
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldmfd sp!, {r1, r2}
-    mov r12, #8
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
-    ldmfd sp!, {r4, r5, pc}
-    
-Streamable.Stream.create_P5:                 /* Function: Streamable.Stream.create, Provisos: INT */
-    push { fp }
-    mov fp, sp
-    push { r0 }
-    mov r0, #3
-    push { r0 }
-    mov r2, sp
-    mov sp, fp
-    pop { fp }
-    mov r0, #8
-    add r1, r2, #8
-    add r10, pc, #8                          /* Setup return address for routine */
-    b _routine_stack_copy_
-    mov r10, #0
     bx lr
     
-lambda_add5:                                 /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
-add5:                                        /* Function: add5 */
-    add r0, r0, #5
+B.get:                                       /* Function: B.get */
+    mov r10, #0
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
 main:                                        /* Function: main */
     push { lr }
-    mov r3, r0
-    mov r0, #0                               /* Evaluate Expression */
-    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
-    mov r4, r0
+    mov r0, #16                              /* Evaluate Expression */
     mov r1, #10
-    mov r0, r4
-    bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
-    mov r1, #5
-    mov r0, r4
-    bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
-    mov r1, #2
-    mov r0, r4
-    bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
-    mov r0, r4                               /* Evaluate Expression */
-    bl Streamable.Stream.create_P5           /* Call Streamable.Stream.create */
-    bl init_P7                               /* Call init */
-    bl Streamable.Stream.create_P5           /* Call Streamable.Stream.create */
-    bl init_P7                               /* Call init */
-    mov r6, r0
-    add r10, pc, #8                          /* Load parameters */
-    b lambda_add5
-    mov r10, #0
-    mov r1, r0
-    mov r0, r6
-    bl Streamable.Stream.forEach_P8          /* Call Streamable.Stream.forEach */
-    lsl r1, r6, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    mov r1, r3
-    mov r12, #4
-    bl Iterable.L0_P6                        /* Branch to relay table of Iterable */
+    stmfd sp!, {r0, r1}
+    mov r0, #2
+    push { r0 }
+    bl init_P1                               /* Call init */
+    bl Getter.L2                             /* Branch to relay table of Getter */
     pop { pc }
     

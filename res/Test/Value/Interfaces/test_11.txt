@@ -1,8 +1,4 @@
 SOURCE
-#include<linked_list.sn>
-#include<iterable.sn>
-#include<stream.sn>
-
 interface Getter {
 
 	int get();
@@ -19,6 +15,10 @@ struct A : Getter {
 
 struct B : A {
 	int val2;
+	
+	int get() {
+		return self->val2;
+	}
 }
 
 int main(int a) {
@@ -29,11 +29,10 @@ int main(int a) {
 }
 
 TESTCASES
-10
+16
 OUTPUT
 /* --test_11.txt */
 .data
-NULL: .word 0
 HEAP_START: .word 0
     
 .text
@@ -49,7 +48,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L4_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -130,12 +129,12 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L4_HEAP_START: .word HEAP_START
+.POOL0_L2_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
 /* section. */
-init_P2:                                     /* Function: init, Provisos: B */
+init_P1:                                     /* Function: init, Provisos: B */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -158,14 +157,14 @@ init_P2:                                     /* Function: init, Provisos: B */
     add sp, sp, #12
     bx lr
     
-Getter.L0:                                   /* Interface : Getter */
+Getter.L2:                                   /* Interface : Getter */
     ldr r10, [r10, r0, lsl #2]
-    cmp r10, #4
+    cmp r10, #1
     moveq r10, #0
-    beq Getter.L1
-    cmp r10, #5
+    beq Getter.L3
+    cmp r10, #2
     moveq r10, #4
-Getter.L1: 
+Getter.L3: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
@@ -182,7 +181,7 @@ A.get:                                       /* Function: A.get */
 B.get:                                       /* Function: B.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r0, [r1, #8]                         /* Load field from struct */
     bx lr
     
 main:                                        /* Function: main */
@@ -190,9 +189,9 @@ main:                                        /* Function: main */
     mov r0, #16                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #5
+    mov r0, #2
     push { r0 }
-    bl init_P2                               /* Call init */
-    bl Getter.L0                             /* Branch to relay table of Getter */
+    bl init_P1                               /* Call init */
+    bl Getter.L2                             /* Branch to relay table of Getter */
     pop { pc }
     

@@ -1,4 +1,4 @@
-#include<iterable.sn>
+#include<collection.sn>
 #include<serializable.sn>
 
 /*
@@ -20,7 +20,7 @@ namespace List {
 	/*
 	 * Wraps the list head and tail.
 	 */
-	restricted struct LinkedList<T> : Iterable<T>, Serializable {
+	restricted struct LinkedList<T> : Collection<T>, Serializable {
 		
 		/* Points to the head of the list or is null. */
 		ListNode<T>* head;

@@ -383,7 +383,20 @@ public class Parser {
 		
 		List<Function> functions = new ArrayList();
 		
-		InterfaceTypedef def = new InterfaceTypedef(path, proviso, functions, mod, source);
+		List<INTERFACE> implemented = new ArrayList();
+		
+		if (current.type == TokenType.COLON) {
+			accept();
+			while (current.type != TokenType.LBRACE) {
+				INTERFACE i = (INTERFACE) this.parseType();
+				implemented.add(i);
+				
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+		}
+		
+		InterfaceTypedef def = new InterfaceTypedef(path, proviso, implemented, functions, mod, source);
 		this.interfaceIds.add(new Pair<NamespacePath, InterfaceTypedef>(path, def));
 		
 		accept(TokenType.LBRACE);

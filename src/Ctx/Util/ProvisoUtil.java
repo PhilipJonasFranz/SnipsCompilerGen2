@@ -208,5 +208,18 @@ public class ProvisoUtil {
 		
 		return provisoFree;
 	}
+
+	/**
+	 * For the given type, re-map all provisos of the interface to the provided provisos and
+	 * apply the new provisos to the type. Return the resulting type.
+	 */
+	public static TYPE translate(TYPE t, List<TYPE> source, List<TYPE> target) {
+		for (int k = 0; k < target.size(); k++) {
+			PROVISO definedProviso = (PROVISO) source.get(k).clone();
+			t = t.remapProvisoName(definedProviso.placeholderName, target.get(k).clone());
+		}
+		
+		return t;
+	}
 	
 } 

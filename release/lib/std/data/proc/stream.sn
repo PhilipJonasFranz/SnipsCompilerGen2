@@ -1,7 +1,8 @@
 #include<iterable.sn>
+#include<collection.sn>
 
 /*
- * Contains the utility to create a stream from an iterable
+ * Contains the utility to create a stream from an collection
  * interface and to modify the data behind the interface with
  * predicates.
  */
@@ -15,18 +16,38 @@ namespace Streamable {
 	restricted struct Stream<T> : Iterable<T> {
 		
 		/* The interface which the data is behind */
-		Iterable<T> iter;
+		Collection<T> collection;
 		
 		/*
 		 * Iterates over the data and applies the given predicate
 		 * to it. Overwrites the previous data in the stream.
 		 */
 		shared Stream<T>* forEach(func T -> T pred) {
-			int size = (self->iter).size();
+			int size = (self->collection).size();
 			
 			for (int i = 0; i < size; i++) {
-				T val = pred((self->iter).get(i));
-				(self->iter).set(i, val);
+				T val = pred((self->collection).get(i));
+				(self->collection).set(i, val);
+			}
+			
+			return self;
+		}
+		
+		/*
+		 * Filters out all values in the stream that do not match
+		 * the filter predicate.
+		 */
+		shared Stream<T>* filter(func T -> bool pred) {
+			int c = 0;
+			int size = (self->collection).size();
+			
+			for (int i = 0; i < size; i++) {
+				if (!pred((self->collection).get(i))) {
+					(self->collection).remove(c);
+					c--;
+				}
+				
+				c++;
 			}
 			
 			return self;
@@ -36,31 +57,31 @@ namespace Streamable {
 		 * Returns the size of the capsuled interable interface.
 		 */
 		shared int size() {
-			return (self->iter).size();
+			return (self->collection).size();
 		}
 		
 		/*
 		 * Returns the value at given index from 
-		 * the capsuled iterable interface.
+		 * the capsuled collection interface.
 		 */
 		shared T get(int index) {
-			return (self->iter).get(index);
+			return (self->collection).get(index);
 		}
 		
 		/*
 		 * Sets the value at the given index to the
-		 * given value in the capsuled iterable interface.
+		 * given value in the capsuled collection interface.
 		 */
 		shared void set(int index, T value) {
-			(self->iter).set(index, value);
+			(self->collection).set(index, value);
 		}
 		
 		/*
-		 * Creates and initializes a new stack.
-		 * Returns a pointer to the newly created stack.
+		 * Creates and initializes a new stream.
+		 * Returns a pointer to the newly created stream.
 		 */
-		static Stream<T> create<T>(Iterable<T> iter) {
-			return Stream<T>::(iter);
+		static Stream<T> create<T>(Collection<T> collection) {
+			return Stream<T>::(collection);
 		}
 		
 	}
