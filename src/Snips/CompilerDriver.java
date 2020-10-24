@@ -692,6 +692,7 @@ public class CompilerDriver {
 		heap_referenced = false;
 		null_referenced = false;
 		expectError = false;
+		AsNBody.instructionAppenix.clear();
 	}
 	
 } 

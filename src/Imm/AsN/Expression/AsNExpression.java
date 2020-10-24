@@ -15,6 +15,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InlineFunction;
 import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
@@ -99,6 +100,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof TypeCast) {
 			node = AsNTypeCast.cast((TypeCast) e, r, map, st); 
+		}
+		else if (e instanceof InlineFunction) {
+			node = AsNInlineFunction.cast((InlineFunction) e, r, map, st); 
 		}
 		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
 	

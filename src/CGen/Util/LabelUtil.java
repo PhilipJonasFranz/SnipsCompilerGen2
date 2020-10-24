@@ -59,4 +59,8 @@ public class LabelUtil {
 		return ".POOL" + p++ + "_";
 	}
 	
+	public static String getAnonLabel() {
+		return "ANON" + LabelUtil.getUID();
+	}
+	
 } 

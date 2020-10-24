@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import CGen.Util.LabelUtil;
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
@@ -23,6 +24,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InlineFunction;
 import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
@@ -1381,8 +1383,43 @@ public class Parser {
 	 * for possible parsing patterns.
 	 */
 	protected Expression parseExpression() throws PARSE_EXC {
-			return this.parseStructureInit();
+			return this.parseInlineFunction();
 	}
+	
+	public Expression parseInlineFunction() throws PARSE_EXC {
+		if (current.type == TokenType.DOLLAR) {
+			accept();
+			accept(TokenType.COLON);
+			accept(TokenType.COLON);
+			
+			accept(TokenType.LPAREN);
+			
+			List<Declaration> params = new ArrayList();
+			while (current.type != TokenType.UNION_ACCESS) {
+				params.add(this.parseDeclaration(MODIFIER.SHARED, false, false));
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+			
+			accept(TokenType.UNION_ACCESS);
+			
+			TYPE ret = this.parseType();
+			
+			accept(TokenType.RPAREN);
+			
+			accept(TokenType.COLON);
+			
+			List<Statement> body = this.parseCompoundStatement(true);
+			
+			Function function = new Function(ret, this.buildPath(LabelUtil.getAnonLabel()), new ArrayList(), params, false, new ArrayList(), body, MODIFIER.SHARED, current.source);
+		
+			function.isLambdaTarget = true;
+			
+			return new InlineFunction(function, current.source);
+		}
+		else return this.parseStructureInit();
+	}
+	
 	
 	/**
 	 * Parses a structure initialization operation with multiple operands. The parsed pattern is:<br>

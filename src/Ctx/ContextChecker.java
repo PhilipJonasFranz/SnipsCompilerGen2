@@ -26,6 +26,7 @@ import Imm.AST.Expression.FunctionRef;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InlineFunction;
 import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
@@ -49,8 +50,6 @@ import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AST.Typedef.InterfaceTypedef;
-import Imm.AST.Typedef.StructTypedef;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.CompoundStatement;
@@ -70,6 +69,8 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -1688,6 +1689,13 @@ public class ContextChecker {
 			return i.getType();
 		}
 		else throw new CTX_EXC(i.getSource(), Const.UNKNOWN_VARIABLE, i.path.build());
+	}
+	
+	public TYPE checkInlineFunction(InlineFunction i) throws CTX_EXC {
+		i.inlineFunction.check(this);
+		i.inlineFunction.wasCalled = true;
+		i.inlineFunction.addProvisoMapping(i.inlineFunction.getReturnType(), new ArrayList());
+		return new FUNC(i.inlineFunction, new ArrayList());
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTX_EXC {

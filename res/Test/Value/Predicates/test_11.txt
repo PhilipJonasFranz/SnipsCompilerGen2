@@ -1,0 +1,38 @@
+SOURCE
+T process<T>(T v, func T -> T pred) {
+	return pred(v);
+}
+
+int main() {
+	return process<int>(5, $::(int x -> int) : {
+		return x + 12;
+	});
+}
+TESTCASES
+17
+OUTPUT
+/* --test_11.txt */
+    b main
+    
+lambda_ANON0:                                /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+ANON0:                                       /* Function: ANON0 */
+    add r0, r0, #12
+    bx lr
+    
+process_P0:                                  /* Function: process, Provisos: INT */
+    push { r4, lr }
+    mov r4, r1
+    add lr, pc, #8
+    mov pc, r4
+    ldmfd sp!, {r4, pc}
+    
+main:                                        /* Function: main */
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_ANON0
+    mov r10, #0
+    mov r1, r0
+    mov r0, #5
+    b process_P0                             /* Call process */
+    

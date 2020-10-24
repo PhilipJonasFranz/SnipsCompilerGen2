@@ -65,6 +65,8 @@ public class AsNBody extends AsNNode {
 	
 	public static LiteralUtil literalManager;
 	
+	public static List<ASMInstruction> instructionAppenix = new ArrayList();
+	
 			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
 		AsNBody.usedStackCopyRoutine = false;
@@ -324,11 +326,6 @@ public class AsNBody extends AsNNode {
 		/* Routine was not used, remove */
 		if (!AsNBody.usedStackCopyRoutine) body.instructions.removeAll(routine);
 		
-		/* Main function is first function and routine was not used, so the branch to main can be removed */
-		if (p.programElements.get(0) instanceof Function && ((Function) p.programElements.get(0)).path.build().equals("main") && !AsNBody.usedStackCopyRoutine) {
-			body.instructions.remove(branch);
-		}
-		
 		/* Manage and create Literal Pools */
 		List<ASMLdr> buffer = new ArrayList();
 		for (int i = 0; i < body.instructions.size(); i++) {
@@ -379,6 +376,17 @@ public class AsNBody extends AsNNode {
 						
 						buffer.clear();
 					}
+				}
+			}
+		}
+		
+		if (!instructionAppenix.isEmpty()) {
+			for (int i = 0; i < body.instructions.size(); i++) {
+				if (body.instructions.get(i).equals(branch)) {
+					body.instructions.add(i + 1, new ASMSeperator());
+					instructionAppenix.add(new ASMSeperator());
+					body.instructions.addAll(i + 2, instructionAppenix);
+					break;
 				}
 			}
 		}

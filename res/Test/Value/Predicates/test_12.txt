@@ -1,0 +1,29 @@
+SOURCE
+int main() {
+	func int -> int pred = $::(int x -> int) : { return x + 10; };
+	return pred(3);
+}
+TESTCASES
+13
+OUTPUT
+/* --test_12.txt */
+    b main
+    
+lambda_ANON0:                                /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+ANON0:                                       /* Function: ANON0 */
+    add r0, r0, #10
+    bx lr
+    
+main:                                        /* Function: main */
+    push { lr }
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_ANON0
+    mov r10, #0
+    mov r3, r0
+    mov r0, #3                               /* Evaluate Expression */
+    add lr, pc, #8
+    mov pc, r3
+    pop { pc }
+    
