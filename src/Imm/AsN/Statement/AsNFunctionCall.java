@@ -40,6 +40,7 @@ import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;

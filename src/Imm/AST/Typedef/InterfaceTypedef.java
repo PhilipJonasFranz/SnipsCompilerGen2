@@ -91,14 +91,12 @@ public class InterfaceTypedef extends SyntaxElement {
 				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
+
+				/* Create a copy of the function, but keep reference on body */
+				Function f0 = f.clone();
+				f0.path = base;
 				
-				List<TYPE> provClone = new ArrayList();
-				for (TYPE t : f.provisosTypes) provClone.add(t.clone());
-				
-				/* Create a copy of the function, but keep references */
-				Function f0 = new Function(f.getReturnTypeDirect(), base, provClone, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
-				
-				f0.translateProviso(i.getTypedef().proviso, this.proviso);
+				f0.translateProviso(def.proviso, i.proviso);
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
@@ -130,15 +128,11 @@ public class InterfaceTypedef extends SyntaxElement {
 		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
 		this.registeredMappings.add(mapping);
 		
-		//System.out.print("\nRegistered Interface Mapping: ");
-		
 		String s = "";
 		for (TYPE t : newMapping)
 			s += t.typeString() + ",";
 		if (!newMapping.isEmpty())
 			s = s.substring(0, s.length() - 1);
-		
-		//System.out.println(s);
 		
 		return mapping;
 	}

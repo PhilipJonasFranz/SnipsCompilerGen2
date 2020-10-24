@@ -9,7 +9,6 @@ import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -157,12 +156,7 @@ public class StructTypedef extends SyntaxElement {
 				base.path.add(f.path.getLast());
 
 				/* Create a copy of the function, but keep reference on body */
-				Function f0 = f.cloneSignature();
-				
-				List<Statement> clone = new ArrayList();
-				for (Statement s : f.body) clone.add(s.clone());
-				f0.body = clone;
-				
+				Function f0 = f.clone();
 				f0.path = base;
 				
 				f0.translateProviso(this.extension.proviso, this.extProviso);
