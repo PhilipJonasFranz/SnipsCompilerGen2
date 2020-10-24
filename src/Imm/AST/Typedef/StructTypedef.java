@@ -1,4 +1,4 @@
-package Imm.AST;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
+import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Exc.CTX_EXC;
-import Imm.AST.StructTypedef;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
