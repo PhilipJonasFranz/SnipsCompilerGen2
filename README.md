@@ -1,4 +1,4 @@
-# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.4.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org)
+# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.5.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org)
 
 ![size](https://img.shields.io/github/repo-size/PhilipJonasFranz/SnipsCompilerGen2) ![size](https://img.shields.io/github/languages/code-size/PhilipJonasFranz/SnipsCompilerGen2)
 
