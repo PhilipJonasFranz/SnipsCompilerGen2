@@ -42,4 +42,8 @@ public class SizeOfType extends Expression {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
 	}
 
+	public Expression clone() {
+		return new SizeOfType(this.sizeType.clone(), this.getSource().clone());
+	}
+
 } 

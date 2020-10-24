@@ -50,5 +50,9 @@ public class IDRefWriteback extends Expression {
 	public Expression getShadowRef() {
 		return this.shadowRef;
 	}
+
+	public Expression clone() {
+		return new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
+	}
 	
 } 

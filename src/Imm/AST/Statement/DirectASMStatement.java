@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -63,6 +64,19 @@ public class DirectASMStatement extends Statement {
 		
 		for (Pair<Expression, REG> p : this.dataOut) 
 			p.first.setContext(context);
+	}
+
+	public Statement clone() {
+		List<String> ac = new ArrayList();
+		for (String s : this.assembly) ac.add(s);
+		
+		List<Pair<Expression, REG>> dataInC = new ArrayList();
+		for (Pair<Expression, REG> p : this.dataIn) dataInC.add(new Pair<Expression, REG>(p.first, p.second));
+		
+		List<Pair<Expression, REG>> dataOutC = new ArrayList();
+		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<Expression, REG>(p.first, p.second));
+		
+		return new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
 	}
 
 } 

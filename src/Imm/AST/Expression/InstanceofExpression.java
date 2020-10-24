@@ -53,4 +53,8 @@ public class InstanceofExpression extends Expression {
 		this.expression.setContext(context);
 	}
 
+	public Expression clone() {
+		return new InstanceofExpression(this.expression.clone(), this.instanceType.clone(), this.getSource().clone());
+	}
+
 } 

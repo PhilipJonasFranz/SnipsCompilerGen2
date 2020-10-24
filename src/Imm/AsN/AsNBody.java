@@ -44,12 +44,12 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
-import Imm.AsN.Statement.AsNInterfaceTypedef;
+import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Snips.CompilerDriver;
 import Util.Logging.ProgressMessage;
 

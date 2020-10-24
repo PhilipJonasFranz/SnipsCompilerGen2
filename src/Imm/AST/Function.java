@@ -10,9 +10,9 @@ import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Res.Const;
@@ -371,26 +371,34 @@ public class Function extends CompoundStatement {
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;
 		
-		// TODO: Issues with proviso translation, SB-31
-		
-		/*
+		/* Compare parameters */
 		if (f0.parameters.size() == f1.parameters.size()) {
 			for (int i = 0; i < f0.parameters.size(); i++) {
 				Declaration d0 = f0.parameters.get(i);
 				Declaration d1 = f1.parameters.get(i);
 				
-				if (matchParamNames)
-					match &= d0.path.getLast().equals(d1.path.getLast());
+				/* Also match names if flag is set */
+				if (matchParamNames) match &= d0.path.getLast().equals(d1.path.getLast());
 				
 				match &= d0.getType().isEqual(d1.getType());
 			}
 		}
-		else return false;
+		else match = false;
 		
+		/* Compare the return type */
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
-		*/
 		
 		return match;
+	}
+
+	public Function clone() {
+		Function f = this.cloneSignature();
+		
+		List<Statement> clone = new ArrayList();
+		for (Statement s : this.body) clone.add(s.clone());
+		f.body = clone;
+		
+		return f;
 	}
 	
 } 

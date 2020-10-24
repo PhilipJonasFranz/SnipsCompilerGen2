@@ -1,4 +1,4 @@
-package Imm.AST.Statement;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -122,7 +123,22 @@ public class StructTypedef extends SyntaxElement {
 				 */
 				if (!contained) {
 					/* If not contained, add to implemented and register at interface */
-					this.implemented.add(i.clone());
+					INTERFACE iclone = i.clone();
+					
+					/* Translate: Extension Interface Proviso -> Extension Head Proviso */
+					List<TYPE> pClone = new ArrayList();
+					for (int a = 0; a < this.extension.proviso.size(); a++) {
+						TYPE translated = ProvisoUtil.translate(i.getTypedef().proviso.get(a).clone(), i.getTypedef().proviso, this.extension.proviso);
+						pClone.add(translated);
+					}
+					
+					/* Translate: Extension Head Proviso -> Extension Proviso */
+					for (int a = 0; a < iclone.proviso.size(); a++) {
+						TYPE translated = ProvisoUtil.translate(iclone.proviso.get(a), pClone, this.proviso);
+						iclone.proviso.set(a, translated);
+					}
+					
+					this.implemented.add(iclone);
 					i.getTypedef().implementers.add(this);
 				}
 			}
@@ -138,9 +154,14 @@ public class StructTypedef extends SyntaxElement {
 				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
+
+				/* Create a copy of the function, but keep reference on body */
+				Function f0 = f.clone();
+				f0.path = base;
 				
-				/* Create a copy of the function, but keep references */
-				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
+				f0.translateProviso(this.extension.proviso, this.extProviso);
+				
+				STRUCT.useProvisoFreeInCheck = false;
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
@@ -151,6 +172,8 @@ public class StructTypedef extends SyntaxElement {
 					this.functions.add(c++, f0);
 					this.inheritedFunctions.add(f0);
 				}
+
+				STRUCT.useProvisoFreeInCheck = true;
 			}
 		}
 	}

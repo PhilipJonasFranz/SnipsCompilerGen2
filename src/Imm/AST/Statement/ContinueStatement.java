@@ -40,4 +40,10 @@ public class ContinueStatement extends Statement {
 		return;
 	}
 
+	public Statement clone() {
+		ContinueStatement b = new ContinueStatement(this.getSource().clone());
+		b.superLoop = this.superLoop;
+		return b;
+	}
+	
 } 

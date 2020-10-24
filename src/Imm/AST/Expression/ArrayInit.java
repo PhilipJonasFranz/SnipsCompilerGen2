@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -46,6 +47,13 @@ public class ArrayInit extends Expression {
 		for (Expression e : this.elements) {
 			e.setContext(context);
 		}
+	}
+
+	public Expression clone() {
+		List<Expression> eclone = new ArrayList();
+		for (Expression e : this.elements) eclone.add(e.clone());
+		
+		return new ArrayInit(eclone, this.dontCareTypes, this.getSource().clone());
 	}
 
 } 

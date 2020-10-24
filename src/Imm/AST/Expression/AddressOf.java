@@ -41,4 +41,8 @@ public class AddressOf extends Expression {
 		this.expression.setContext(context);
 	}
 
+	public Expression clone() {
+		return new AddressOf(this.expression.clone(), this.getSource().clone());
+	}
+
 } 

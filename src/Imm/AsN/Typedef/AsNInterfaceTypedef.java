@@ -1,4 +1,4 @@
-package Imm.AsN.Statement;
+package Imm.AsN.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +26,9 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 

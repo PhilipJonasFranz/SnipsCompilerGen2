@@ -58,4 +58,19 @@ public class TryStatement extends CompoundStatement {
 			w.setContext(context);
 	}
 
+	public TryStatement clone() {
+		List<WatchStatement> watchClone = null;
+		if (this.watchpoints != null) {
+			watchClone = new ArrayList();
+			for (WatchStatement w : this.watchpoints) watchClone.add((WatchStatement) w.clone());
+		}
+	
+		List<TYPE> unw = new ArrayList();
+		for (TYPE t : this.unwatched) unw.add(t.clone());
+		
+		TryStatement tr = new TryStatement(this.cloneBody(), watchClone, this.getSource().clone());
+		if (this.watchpoint != null) tr.watchpoint = this.watchpoint;
+		return tr;
+	}
+
 } 

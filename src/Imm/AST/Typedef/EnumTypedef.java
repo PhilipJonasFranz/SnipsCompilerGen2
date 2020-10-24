@@ -1,4 +1,4 @@
-package Imm.AST.Statement;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;

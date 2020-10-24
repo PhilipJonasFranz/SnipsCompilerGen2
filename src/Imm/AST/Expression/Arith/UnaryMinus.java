@@ -17,5 +17,9 @@ public class UnaryMinus extends UnaryExpression {
 	public UnaryMinus(Expression operand, Source source) {
 		super(operand, UnaryOperator.NEG, source);
 	}
+	
+	public UnaryExpression clone() {
+		return new UnaryMinus(this.getOperand().clone(), this.getSource().clone());
+	}
 
 } 

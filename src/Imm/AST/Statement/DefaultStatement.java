@@ -29,5 +29,9 @@ public class DefaultStatement extends CompoundStatement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkDefaultStatement(this);
 	}
+
+	public Statement clone() {
+		return new DefaultStatement(this.cloneBody(), this.getSource().clone());
+	}
 	
 } 

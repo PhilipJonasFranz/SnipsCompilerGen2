@@ -17,5 +17,9 @@ public class BitNot extends UnaryExpression {
 	public BitNot(Expression operand, Source source) {
 		super(operand, UnaryOperator.NOT, source);
 	}
+	
+	public UnaryExpression clone() {
+		return new BitNot(this.getOperand().clone(), this.getSource().clone());
+	}
 
 } 

@@ -49,6 +49,8 @@ import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.CompoundStatement;
@@ -61,11 +63,9 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.StructTypedef;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
@@ -351,7 +351,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
-		
 		/* Make sure at least one field is in the struct */
 		if (e.getFields().isEmpty())
 			throw new CTX_EXC(e.getSource(), Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
@@ -428,7 +427,9 @@ public class ContextChecker {
 			
 			for (Function f : inter.getTypedef().functions) {
 				
-				Function ftranslated = inter.getTypedef().requestFunction(f.path, inter.proviso);
+				Function ftranslated = f.cloneSignature();
+				
+				ftranslated.translateProviso(inter.getTypedef().proviso, inter.proviso);
 				
 				boolean found = false;
 				for (int i = 0; i < e.functions.size(); i++) {

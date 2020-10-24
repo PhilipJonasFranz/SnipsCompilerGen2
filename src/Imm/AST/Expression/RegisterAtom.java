@@ -32,6 +32,13 @@ public class RegisterAtom extends Expression {
 		this.setType(new INT());
 		this.spelling = id.spelling();
 	}
+	
+	public RegisterAtom(String spelling, REG reg, Source source) {
+		super(source);
+		this.spelling = spelling;
+		this.reg = reg;
+	}
+
 
 	
 			/* ---< METHODS >--- */
@@ -46,6 +53,10 @@ public class RegisterAtom extends Expression {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		return;
+	}
+
+	public Expression clone() {
+		return new RegisterAtom(this.spelling, this.reg, this.getSource().clone());
 	}
 
 } 

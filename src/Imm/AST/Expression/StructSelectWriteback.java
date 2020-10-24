@@ -53,6 +53,9 @@ public class StructSelectWriteback extends Expression {
 	public Expression getShadowSelect() {
 		return this.shadowSelect;
 	}
-	
+
+	public Expression clone() {
+		return new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+	}
 	
 } 

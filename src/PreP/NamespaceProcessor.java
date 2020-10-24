@@ -11,9 +11,9 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.EnumTypedef;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.EnumTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Res.Const;
 
 /**

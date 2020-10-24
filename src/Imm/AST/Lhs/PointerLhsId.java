@@ -63,5 +63,9 @@ public class PointerLhsId extends LhsId {
 	public Expression getShadowDeref() {
 		return this.shadowDeref;
 	}
+
+	public PointerLhsId clone() {
+		return new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+	}
 	
 } 

@@ -45,4 +45,8 @@ public class ArraySelectLhsId extends LhsId {
 		this.selection.setContext(context);
 	}
 
+	public ArraySelectLhsId clone() {
+		return new ArraySelectLhsId((ArraySelect) this.selection.clone(), this.getSource().clone());
+	}
+
 } 

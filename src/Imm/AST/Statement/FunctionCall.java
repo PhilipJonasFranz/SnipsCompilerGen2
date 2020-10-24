@@ -1,10 +1,11 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.Util.ProvisoUtil;
 import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
@@ -43,6 +44,28 @@ public class FunctionCall extends Statement implements Callee {
 	 */
 	public Expression baseRef = null;
 	
+	
+	public Statement clone() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.proviso) provClone.add(t.clone());
+		
+		List<Expression> ec = new ArrayList();
+		for (Expression e : this.parameters) ec.add(e.clone());
+		
+		FunctionCall ic = new FunctionCall(this.path.clone(), provClone, ec, this.getSource().clone());
+		ic.calledFunction = this.calledFunction;
+		ic.anonTarget = this.anonTarget;
+		ic.hasAutoProviso = this.hasAutoProviso;
+		ic.isNestedCall = this.isNestedCall;
+		ic.nestedDeref = this.nestedDeref;
+		
+		ic.watchpoint = this.watchpoint;
+		
+		if (this.baseRef != null)
+			ic.baseRef = this.baseRef.clone();
+		
+		return ic;
+	}
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**

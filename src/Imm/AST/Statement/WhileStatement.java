@@ -34,5 +34,9 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkWhileStatement(this);
 	}
+
+	public WhileStatement clone() {
+		return new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
+	}
 	
 } 

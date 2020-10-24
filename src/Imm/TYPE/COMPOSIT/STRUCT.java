@@ -5,7 +5,7 @@ import java.util.List;
 
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
@@ -16,6 +16,8 @@ import Util.Source;
 
 public class STRUCT extends COMPOSIT {
 
+	public static boolean useProvisoFreeInCheck = true;
+	
 	private StructTypedef typedef;
 	
 	public List<TYPE> proviso;
@@ -76,8 +78,12 @@ public class STRUCT extends COMPOSIT {
 				boolean isEqual = true;
 				
 				/* Compare Provisos, rest of subtree must be equal */
-				for (int i = 0; i < this.proviso.size(); i++) 
-					isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
+				for (int i = 0; i < this.proviso.size(); i++) {
+					if (useProvisoFreeInCheck) 
+						isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
+					else 
+						isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
+				}
 				
 				return isEqual;
 			}

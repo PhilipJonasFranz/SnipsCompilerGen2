@@ -45,4 +45,8 @@ public class SizeOfExpression extends Expression {
 		this.expression.setContext(context);
 	}
 
+	public Expression clone() {
+		return new SizeOfExpression(this.expression.clone(), this.getSource().clone());
+	}
+
 } 

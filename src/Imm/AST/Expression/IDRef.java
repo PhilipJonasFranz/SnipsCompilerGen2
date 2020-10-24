@@ -49,4 +49,10 @@ public class IDRef extends Expression {
 		ProvisoUtil.mapNTo1(this.getType(), context);
 	}
 
+	public Expression clone() {
+		IDRef r = new IDRef(this.path.clone(), this.getSource().clone());
+		r.origin = this.origin;
+		return r;
+	}
+
 } 

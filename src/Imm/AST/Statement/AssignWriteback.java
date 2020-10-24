@@ -44,4 +44,8 @@ public class AssignWriteback extends Statement {
 		this.reference.setContext(context);
 	}
 
+	public Statement clone() {
+		return new AssignWriteback(this.reference.clone(), this.getSource().clone());
+	}
+
 } 

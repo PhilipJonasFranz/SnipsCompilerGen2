@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -57,6 +58,13 @@ public class ArraySelect extends Expression {
 
 	public Expression getShadowRef() {
 		return this.shadowRef;
+	}
+
+	public Expression clone() {
+		List<Expression> eclone = new ArrayList();
+		for (Expression e : this.selection) eclone.add(e.clone());
+		
+		return new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
 	}
 	
 } 
