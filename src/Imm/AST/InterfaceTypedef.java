@@ -1,4 +1,4 @@
-package Imm.AST.Statement;
+package Imm.AST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,6 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
-import Imm.AST.Function;
-import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;

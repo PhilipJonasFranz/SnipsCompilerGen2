@@ -73,6 +73,4 @@ public abstract class BinaryExpression extends Expression {
 		return this.operator;
 	}
 	
-	
-	
 } 

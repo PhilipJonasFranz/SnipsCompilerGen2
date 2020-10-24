@@ -52,7 +52,7 @@ public class AsNStructSelect extends AsNExpression {
 		else {
 			/* Create a address loader that points to the first word of the target */
 			boolean directLoad = injectAddressLoader(sel, s, r, map, st, false);
-			
+
 			if (!directLoad) {
 				/* Copy result on the stack, push dummy values on stack set */
 				if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
@@ -139,6 +139,7 @@ public class AsNStructSelect extends AsNExpression {
 				/* Load data label */
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			
 			/*
 			 * When loading the address of a pointer substructure, we are interested in the address 

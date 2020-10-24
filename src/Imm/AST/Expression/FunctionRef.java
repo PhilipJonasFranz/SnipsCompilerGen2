@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -56,6 +57,18 @@ public class FunctionRef extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
+	}
+
+	public Expression clone() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.proviso) provClone.add(t.clone());
+		
+		FunctionRef f = new FunctionRef(provClone, this.path.clone(), this.getSource().clone());
+		if (this.base != null) f.base = (IDRef) this.base.clone();
+		
+		f.origin = this.origin;
+		
+		return f;
 	}
 
 } 

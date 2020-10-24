@@ -17,5 +17,9 @@ public class BitXor extends BinaryExpression {
 	public BitXor(Expression left, Expression right, Source source) {
 		super(left, right, Operator.LSR, source);
 	}
+	
+	public BinaryExpression clone() {
+		return new BitXor(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
 
 } 

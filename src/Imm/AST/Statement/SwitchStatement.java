@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -53,6 +54,13 @@ public class SwitchStatement extends Statement {
 		this.condition.setContext(context);
 		for (CaseStatement c : this.cases) c.setContext(context);
 		this.defaultStatement.setContext(context);
+	}
+
+	public SwitchStatement clone() {
+		List<CaseStatement> casesC = new ArrayList();
+		for (CaseStatement w : this.cases) casesC.add((CaseStatement) w.clone());
+		
+		return new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
 	}
 
 } 

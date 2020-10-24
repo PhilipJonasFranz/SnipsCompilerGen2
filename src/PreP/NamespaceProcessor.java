@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 
 import Exc.SNIPS_EXC;
 import Imm.AST.Function;
+import Imm.AST.InterfaceTypedef;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
+import Imm.AST.StructTypedef;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.EnumTypedef;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.StructTypedef;
 import Res.Const;
 
 /**

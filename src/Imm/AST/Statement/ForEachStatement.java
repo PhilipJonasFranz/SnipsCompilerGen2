@@ -69,5 +69,13 @@ public class ForEachStatement extends CompoundStatement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkForEachStatement(this);
 	}
+
+	public Statement clone() {
+		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
+		if (this.select != null)
+			f.select = (ArraySelect) this.select.clone();
+		
+		return f;
+	}
 	
 } 

@@ -71,4 +71,8 @@ public class Assignment extends Statement {
 		this.lhsId.setContext(context);
 	}
 
+	public Assignment clone() {
+		return new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+	}
+
 } 

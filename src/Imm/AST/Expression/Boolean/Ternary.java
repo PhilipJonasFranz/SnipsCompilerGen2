@@ -48,4 +48,8 @@ public class Ternary extends Expression {
 		this.rightOperand.setContext(context);
 	}
 
+	public Expression clone() {
+		return new Ternary(this.condition.clone(), this.leftOperand.clone(), this.rightOperand.clone(), this.getSource().clone());
+	}
+
 } 

@@ -1,4 +1,4 @@
-package Imm.AST.Statement;
+package Imm.AST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
-import Imm.AST.Function;
-import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -124,14 +124,14 @@ public class StructTypedef extends SyntaxElement {
 					/* If not contained, add to implemented and register at interface */
 					INTERFACE iclone = i.clone();
 					
-					/* Translate Extension Interface Proviso -> Extension Head Proviso */
+					/* Translate: Extension Interface Proviso -> Extension Head Proviso */
 					List<TYPE> pClone = new ArrayList();
 					for (int a = 0; a < this.extension.proviso.size(); a++) {
 						TYPE translated = ProvisoUtil.translate(i.getTypedef().proviso.get(a).clone(), i.getTypedef().proviso, this.extension.proviso);
 						pClone.add(translated);
 					}
 					
-					/* Translate Extension Head Proviso -> Extension Proviso */
+					/* Translate: Extension Head Proviso -> Extension Proviso */
 					for (int a = 0; a < iclone.proviso.size(); a++) {
 						TYPE translated = ProvisoUtil.translate(iclone.proviso.get(a), pClone, this.proviso);
 						iclone.proviso.set(a, translated);
@@ -154,8 +154,13 @@ public class StructTypedef extends SyntaxElement {
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
 
-				/* Create a copy of the function, but keep references */
+				/* Create a copy of the function, but keep reference on body */
 				Function f0 = f.cloneSignature();
+				
+				List<Statement> clone = new ArrayList();
+				for (Statement s : f.body) clone.add(s.clone());
+				f0.body = clone;
+				
 				f0.path = base;
 				
 				f0.translateProviso(this.extension.proviso, this.extProviso);

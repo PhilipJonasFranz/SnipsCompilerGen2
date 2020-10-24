@@ -26,9 +26,9 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.InterfaceTypedef;
+import Imm.AST.StructTypedef;
+import Imm.AST.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 

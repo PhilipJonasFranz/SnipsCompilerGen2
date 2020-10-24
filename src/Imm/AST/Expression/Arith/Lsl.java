@@ -17,5 +17,9 @@ public class Lsl extends BinaryExpression {
 	public Lsl(Expression left, Expression right, Source source) {
 		super(left, right, Operator.LSL, source);
 	}
+	
+	public BinaryExpression clone() {
+		return new Lsl(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
 
 } 

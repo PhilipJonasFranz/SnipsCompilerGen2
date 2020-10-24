@@ -45,4 +45,8 @@ public class ReturnStatement extends Statement {
 			this.value.setContext(context);
 	}
 
+	public Statement clone() {
+		return new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
+	}
+
 } 

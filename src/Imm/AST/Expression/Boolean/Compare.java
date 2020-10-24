@@ -42,4 +42,8 @@ public class Compare extends BinaryExpression {
 		return ctx.checkCompare(this);
 	}
 	
+	public BinaryExpression clone() {
+		return new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
+	}
+	
 } 

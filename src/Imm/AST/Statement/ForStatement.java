@@ -46,5 +46,9 @@ public class ForStatement extends ConditionalCompoundStatement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkForStatement(this);
 	}
+
+	public Statement clone() {
+		return new ForStatement(this.iterator.clone(), this.condition.clone(), this.increment.clone(), this.cloneBody(), this.getSource().clone());
+	}
 	
 } 

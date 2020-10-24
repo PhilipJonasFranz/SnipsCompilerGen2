@@ -10,7 +10,6 @@ import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNNode.MODIFIER;
@@ -389,6 +388,10 @@ public class Function extends CompoundStatement {
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
 		
 		return match;
+	}
+
+	public Statement clone() {
+		throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 

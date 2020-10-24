@@ -18,4 +18,8 @@ public class Lsr extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
+	public BinaryExpression clone() {
+		return new Lsr(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
 } 

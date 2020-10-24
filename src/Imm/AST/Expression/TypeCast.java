@@ -49,4 +49,8 @@ public class TypeCast extends Expression {
 		this.expression.setContext(context);
 	}
 
+	public Expression clone() {
+		return new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+	}
+
 } 

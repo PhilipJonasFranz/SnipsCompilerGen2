@@ -18,4 +18,8 @@ public class BitOr extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
+	public BinaryExpression clone() {
+		return new BitOr(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
 } 

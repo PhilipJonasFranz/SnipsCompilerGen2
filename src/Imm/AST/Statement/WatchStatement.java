@@ -46,4 +46,13 @@ public class WatchStatement extends CompoundStatement {
 			s.setContext(context);
 	}
 
+	public WatchStatement clone() {
+		Declaration wc = null;
+		if (this.watched != null) wc = this.watched.clone();
+		
+		WatchStatement w = new WatchStatement(this.cloneBody(), wc, this.getSource().clone());
+		w.hasTarget = this.hasTarget;
+		return w;
+	}
+
 } 

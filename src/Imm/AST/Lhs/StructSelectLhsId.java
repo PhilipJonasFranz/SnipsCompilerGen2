@@ -62,4 +62,8 @@ public class StructSelectLhsId extends LhsId {
 		this.select.setContext(context);
 	}
 
+	public StructSelectLhsId clone() {
+		return new StructSelectLhsId((StructSelect) this.select.clone(), this.getSource().clone());
+	}
+
 } 

@@ -53,4 +53,15 @@ public class SignalStatement extends Statement {
 			this.shadowRef.setContext(context);
 	}
 
+	public Statement clone() {
+		SignalStatement s = new SignalStatement(this.shadowRef.clone(), this.getSource().clone());
+		if (this.watchpoint != null) 
+			s.watchpoint = this.watchpoint;
+		
+		if (this.exceptionInit != null)
+			s.exceptionInit = this.exceptionInit;
+		
+		return s;
+	}
+
 } 

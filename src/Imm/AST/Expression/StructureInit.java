@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -50,6 +51,17 @@ public class StructureInit extends Expression {
 		
 		for (Expression e : this.elements) 
 			e.setContext(context);
+	}
+
+	public Expression clone() {
+		List<Expression> ec = new ArrayList();
+		for (Expression e : this.elements) ec.add(e.clone());
+		
+		StructureInit in = new StructureInit(this.structType.clone(), ec, this.getSource().clone());
+		in.hasCoveredParam = this.hasCoveredParam;
+		in.isTopLevelExpression = this.isTopLevelExpression;
+		
+		return in;
 	}
 
 } 

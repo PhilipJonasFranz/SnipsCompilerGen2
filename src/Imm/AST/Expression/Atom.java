@@ -36,4 +36,8 @@ public class Atom extends Expression {
 		
 	}
 
+	public Expression clone() {
+		return new Atom(this.getType().clone(), this.getSource().clone());
+	}
+
 } 

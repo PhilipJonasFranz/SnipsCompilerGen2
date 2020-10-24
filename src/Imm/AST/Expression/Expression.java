@@ -39,4 +39,6 @@ public abstract class Expression extends SyntaxElement {
 		this.type = type;
 	}
 	
+	public abstract Expression clone();
+	
 } 

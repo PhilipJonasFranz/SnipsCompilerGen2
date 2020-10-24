@@ -47,4 +47,8 @@ public class StructSelect extends Expression {
 		this.selection.setContext(context);
 	}
 
+	public Expression clone() {
+		return new StructSelect(this.selector.clone(), this.selection.clone(), this.deref, this.getSource().clone());
+	}
+
 } 

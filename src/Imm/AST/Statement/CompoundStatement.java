@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Exc.CTX_EXC;
@@ -31,6 +32,12 @@ public abstract class CompoundStatement extends Statement {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		for (Statement s : this.body) 
 			s.setContext(context);
+	}
+	
+	public List<Statement> cloneBody() {
+		List<Statement> clone = new ArrayList();
+		for (Statement s : this.body) clone.add((Statement) s.clone());
+		return clone;
 	}
 
 } 

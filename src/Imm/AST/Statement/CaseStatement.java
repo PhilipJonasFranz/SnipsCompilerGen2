@@ -35,5 +35,11 @@ public class CaseStatement extends ConditionalCompoundStatement {
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkCaseStatement(this);
 	}
+
+	public Statement clone() {
+		CaseStatement c = new CaseStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		c.superStatement = this.superStatement;
+		return c;
+	}
 	
 } 

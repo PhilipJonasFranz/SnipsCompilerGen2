@@ -44,5 +44,9 @@ public class SimpleLhsId extends LhsId {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.ref.setContext(context);
 	}
+
+	public SimpleLhsId clone() {
+		return new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
+	}
 	
 } 

@@ -18,4 +18,8 @@ public class BitAnd extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
+	public BinaryExpression clone() {
+		return new BitAnd(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
 } 
