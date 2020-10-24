@@ -9,13 +9,17 @@ import Util.Source;
  */
 public class BitNot extends UnaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
 	public BitNot(Expression operand, Source source) {
 		super(operand, UnaryOperator.NOT, source);
+	}
+	
+	public UnaryExpression clone() {
+		return new BitNot(this.getOperand().clone(), this.getSource().clone());
 	}
 
 } 

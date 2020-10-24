@@ -12,7 +12,7 @@ import Imm.AsN.Expression.AsNBinaryExpression;
 
 public class AsNAdd extends AsNBinaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNAdd cast(Add a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNAdd add = new AsNAdd();
 		

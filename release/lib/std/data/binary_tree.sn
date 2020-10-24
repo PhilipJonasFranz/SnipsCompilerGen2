@@ -26,7 +26,7 @@ namespace Tree {
 		 * 		0 	if x = y.
 		 * Returns the resulting root node.
 		 */
-		shared TreeNode<T>* insert<T>(func (T, T) -> int pred, T value) {
+		shared TreeNode<T>* insert(func (T, T) -> int pred, T value) {
 			/* Initialize new node with null pointers and given value */
 			TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
 			
@@ -70,15 +70,15 @@ namespace Tree {
 		 *		-1	if x < y,
 		 * 		0 	if x = y.
 		 */
-		shared bool contains<T>(func (T, T) -> int pred, T value) {
+		shared bool contains(func (T, T) -> int pred, T value) {
 			if (self == null) return false;
 			else {
 				if (pred(self->value, value) == 0) return true;
 				else {
 					if (pred(self->value, value) == 1) 
-						return contains<T>(self->left, pred, value);
+						return contains(self->left, pred, value);
 					else 
-						return contains<T>(self->right, pred, value);
+						return contains(self->right, pred, value);
 				}
 			}
 		}
@@ -91,16 +91,16 @@ namespace Tree {
 		 * 		0 	if x = y.
 		 * Returns the new root. May be null when the resulting tree is empty.
 		 */
-		shared TreeNode<T>* delete<T>(func (T, T) -> int pred, T value) {
+		shared TreeNode<T>* delete(func (T, T) -> int pred, T value) {
 			/* Found leaf */
 			if (self == null) return null;
 				
 			int cmp = pred(value, self->value);
 				
 			if (cmp == -1)
-				self->left = (self->left)->delete<T>(pred, value);
+				self->left = (self->left)->delete(pred, value);
 			else if (cmp == 1)
-				self->right = (self->right)->delete<T>(pred, value);
+				self->right = (self->right)->delete(pred, value);
 			else {
 				if (self->left == null) {
 					return self->right;
@@ -115,7 +115,7 @@ namespace Tree {
 
 					self->value = n->value;
 					
-					self->right = (self->right)->delete<T>(pred, n->value);
+					self->right = (self->right)->delete(pred, n->value);
 				}
 			}
 			

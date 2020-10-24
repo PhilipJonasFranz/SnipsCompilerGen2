@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
@@ -15,16 +15,14 @@ import Util.Source;
  */
 public class IDRef extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	/* Set during context checking */
 	public Declaration origin;
 	
-	public boolean lastUsage = false;
 	
-	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -35,7 +33,7 @@ public class IDRef extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
@@ -49,6 +47,12 @@ public class IDRef extends Expression {
 			this.setType(this.origin.getType().clone());
 		
 		ProvisoUtil.mapNTo1(this.getType(), context);
+	}
+
+	public Expression clone() {
+		IDRef r = new IDRef(this.path.clone(), this.getSource().clone());
+		r.origin = this.origin;
+		return r;
 	}
 
 } 

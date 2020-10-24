@@ -18,7 +18,7 @@ import Imm.AST.Expression.FunctionRef;
 
 public class AsNFunctionRef extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNFunctionRef cast(FunctionRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNFunctionRef ref = new AsNFunctionRef();
 		i.castedNode = ref;

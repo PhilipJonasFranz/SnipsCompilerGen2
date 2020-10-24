@@ -84,10 +84,10 @@ main:                                        /* Function: main */
     bl Storage.X.setValue_P1                 /* Call Storage.X.setValue */
     mov r0, r3                               /* Evaluate Expression */
     bl Storage.X.getValue_P2                 /* Call Storage.X.getValue */
-    b main.L2
+    b main.L3
 main.L1: 
     mov r0, #2                               /* Evaluate Expression */
-main.L2: 
+main.L3: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -14,13 +14,13 @@ import Util.Source;
  */
 public class InstanceofExpression extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	public TYPE instanceType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -32,11 +32,14 @@ public class InstanceofExpression extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "InstanceOf");
-		this.expression.print(d + this.printDepthStep, rec);
-		System.out.println(this.pad(d + this.printDepthStep) + this.instanceType.typeString());
+		
+		if (rec) {
+			this.expression.print(d + this.printDepthStep, rec);
+			System.out.println(this.pad(d + this.printDepthStep) + this.instanceType.typeString());
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -48,6 +51,10 @@ public class InstanceofExpression extends Expression {
 			ProvisoUtil.mapNTo1(this.instanceType, context);
 			
 		this.expression.setContext(context);
+	}
+
+	public Expression clone() {
+		return new InstanceofExpression(this.expression.clone(), this.instanceType.clone(), this.getSource().clone());
 	}
 
 } 

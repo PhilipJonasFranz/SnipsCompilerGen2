@@ -13,24 +13,30 @@ import Util.Source;
  */
 public class WhileStatement extends ConditionalCompoundStatement {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public WhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "While");
-		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) {
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+		
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
 		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkWhileStatement(this);
+	}
+
+	public WhileStatement clone() {
+		return new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
 	}
 	
 } 

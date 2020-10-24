@@ -13,11 +13,11 @@ import Util.Source;
  */
 public class IfStatement extends ConditionalCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public IfStatement elseStatement;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public IfStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.condition = condition;
@@ -28,29 +28,35 @@ public class IfStatement extends ConditionalCompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "If");
-		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+			
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
+		}
 		
 		IfStatement if0 = this.elseStatement;
 		while (if0 != null) {
 			if (if0.condition != null) {
 				System.out.println(this.pad(d) + "Else If");
-				if0.condition.print(d + this.printDepthStep, rec);
 				
-				for (Statement s : if0.body) 
-					s.print(d + this.printDepthStep, rec);
+				if (rec) {
+					if0.condition.print(d + this.printDepthStep, rec);
+					
+					for (Statement s : if0.body) 
+						s.print(d + this.printDepthStep, rec);
+				}
 				
 				if0 = if0.elseStatement;
 			}
 			else {
 				System.out.println(this.pad(d) + "Else");
 				
-				for (Statement s : if0.body) 
+				if (rec) for (Statement s : if0.body) 
 					s.print(d + this.printDepthStep, rec);
 				
 				return;
@@ -70,6 +76,13 @@ public class IfStatement extends ConditionalCompoundStatement {
 		
 		if (this.elseStatement != null) 
 			this.elseStatement.setContext(context);
+	}
+
+	public Statement clone() {
+		IfStatement i = new IfStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		if (this.elseStatement != null)
+			i.elseStatement = (IfStatement) this.elseStatement.clone();
+		return i;
 	}
 
 } 

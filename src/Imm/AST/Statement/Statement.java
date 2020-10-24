@@ -11,13 +11,15 @@ import Util.Source;
  */
 public abstract class Statement extends SyntaxElement {
 
+			/* ---< FIELDS >--- */
 	/**
 	 * Contains all declarations that can be freed after this
 	 * statement was excecuted. See 'AsNStatement.freeDecs()'.
 	 */
 	public List<Declaration> free = new ArrayList();
 	
-			/* --- CONSTRUCTORS --- */
+	
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -26,4 +28,6 @@ public abstract class Statement extends SyntaxElement {
 		super(source);
 	}
 
+	public abstract Statement clone();
+	
 } 

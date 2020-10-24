@@ -12,26 +12,26 @@ import Util.Source;
  */
 public class DefaultStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
-	public SwitchStatement superStatement;
-	
-	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public DefaultStatement(List<Statement> body, Source source) {
 		super(body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Default");
 		
-		for (Statement s : this.body) 
+		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkDefaultStatement(this);
+	}
+
+	public Statement clone() {
+		return new DefaultStatement(this.cloneBody(), this.getSource().clone());
 	}
 	
 } 

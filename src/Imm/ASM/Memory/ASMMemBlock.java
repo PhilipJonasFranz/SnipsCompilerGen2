@@ -9,14 +9,14 @@ import Snips.CompilerDriver;
 
 public class ASMMemBlock extends ASMInstruction {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum MEM_BLOCK_MODE {
 		LDMED, LDMFD, LDMEA, LDMFA,
 		
 		STMFA, STMEA, STMFD, STMED;
 	}
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public MEM_BLOCK_MODE mode;
 	
 	public boolean writeback;
@@ -26,19 +26,8 @@ public class ASMMemBlock extends ASMInstruction {
 	
 	public List<RegOp> registerList;
 	
-	/* Set to true when op1 is reg Operand and is supposed to be subtracted from base */
-	public boolean subFromBase = false;
 	
-	
-			/* --- CONSTRUCTORS --- */
-	/** Example Usage: ldr/str r0, [r1, #2] */
-	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList) {
-		this.target = target;
-		this.registerList = registerList;
-		this.mode = mode;
-		this.writeback = writeback;
-	}
-	
+			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr/str r0, [r1] */
 	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList, Cond cond) {
 		super(cond);
@@ -49,7 +38,7 @@ public class ASMMemBlock extends ASMInstruction {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static boolean checkInOrder(List<RegOp> operands) {
 		if (operands.size() == 1) return true;
 		else {

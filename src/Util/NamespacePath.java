@@ -34,7 +34,7 @@ public class NamespacePath {
 	 * <br>
 	 * <code>[Name1, Name2, Target]</code>
 	 */
-	public List<String> path;
+	public List<String> path = new ArrayList();
 	
 	/** The termination for this namespace path. See {@link #PATH_TERMINATION} for more information. */
 	public PATH_TERMINATION termination = PATH_TERMINATION.UNKNOWN;
@@ -51,18 +51,16 @@ public class NamespacePath {
 	}
 	
 	public NamespacePath(String path, PATH_TERMINATION termination) {
-		this.path = new ArrayList();
 		this.path.add(path);
 		this.termination = termination;
 	}
 	
 	public NamespacePath(String name) {
-		this.path = new ArrayList();
 		this.path.add(name);
 	}
 	
 	public NamespacePath() {
-		this.path = new ArrayList();
+		
 	}
 	
 	

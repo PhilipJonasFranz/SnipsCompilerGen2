@@ -14,7 +14,7 @@ import Util.Source;
  */
 public class Assignment extends Statement {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum ASSIGN_ARITH {
 		
 		/* Just assign value */
@@ -32,20 +32,17 @@ public class Assignment extends Statement {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public ASSIGN_ARITH assignArith = ASSIGN_ARITH.NONE;
 	
 	/** The LHS that defines the assigning method, f.E direct, assign by dereference... */
 	public LhsId lhsId;
 	
-	/** The declaration of the targeted variable */
-	public Declaration origin;
-	
 	/** The value to be assigned. */
 	public Expression value;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Assignment(ASSIGN_ARITH operator, LhsId target, Expression value, Source source) {
 		super(source);
 		this.assignArith = operator;
@@ -55,9 +52,10 @@ public class Assignment extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign, arith = " + this.assignArith.toString());
+		
 		if (rec) {
 			this.lhsId.print(d + this.printDepthStep, rec);
 			this.value.print(d + this.printDepthStep, rec);
@@ -71,6 +69,10 @@ public class Assignment extends Statement {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.value.setContext(context);
 		this.lhsId.setContext(context);
+	}
+
+	public Assignment clone() {
+		return new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
 	}
 
 } 

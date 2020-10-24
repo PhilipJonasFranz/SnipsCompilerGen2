@@ -18,7 +18,7 @@ public class PreProcessor {
 
 	public class LineObject {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		public int lineNumber;
 		
 		public String line;
@@ -26,7 +26,7 @@ public class PreProcessor {
 		public String fileName;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		public LineObject(int lineNumber, String line, String fileName) {
 			this.lineNumber = lineNumber;
 			this.line = line;
@@ -109,8 +109,15 @@ public class PreProcessor {
 		/* Read from file */
 		List<String> code = Util.readFile(file);
 		
+		/* Read from release library */
 		if (code == null) {
 			file = new File("release\\" + filePath);
+			code = Util.readFile(file);
+		}
+		
+		/* Use path relative to input file */
+		if (code == null) {
+			file = new File(CompilerDriver.inputFile.getParent() + "\\" + filePath);
 			code = Util.readFile(file);
 		}
 		

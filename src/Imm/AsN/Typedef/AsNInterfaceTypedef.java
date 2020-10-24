@@ -1,12 +1,12 @@
-package Imm.AsN.Statement;
+package Imm.AsN.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -26,9 +26,9 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 
@@ -45,8 +45,11 @@ public class AsNInterfaceTypedef extends AsNNode {
 		if (def.registeredMappings.isEmpty())
 			return intf;
 		
+		/* Set as function prefix, so label gen creates label with name reflecting the interface */
+		LabelUtil.funcPrefix = def.path.build();
+		
 		/* Create relay table */
-		intf.tableHead = new ASMLabel(LabelGen.getLabel());
+		intf.tableHead = new ASMLabel(LabelUtil.getLabel());
 
 		/*
 		 * Change names of proviso mappings if the types are word-size equal.
@@ -158,7 +161,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 				 */
 				else {
 					/* Label at the end of the table multiplexing section */
-					ASMLabel tableEnd = new ASMLabel(LabelGen.getLabel());
+					ASMLabel tableEnd = new ASMLabel(LabelUtil.getLabel());
 					
 					/* Load SID from pointer into R10 */
 					intf.instructions.add(new ASMLsl(new RegOp(REG.R10), new RegOp(REG.R0), new ImmOp(2)));

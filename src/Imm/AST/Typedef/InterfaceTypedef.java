@@ -1,11 +1,11 @@
-package Imm.AST.Statement;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
@@ -21,7 +21,7 @@ import Util.Source;
  */
 public class InterfaceTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public MODIFIER modifier;
 	
 	public NamespacePath path;
@@ -29,6 +29,9 @@ public class InterfaceTypedef extends SyntaxElement {
 	public List<TYPE> proviso;
 	
 	public List<Function> functions;
+	
+	/* Interfaces this interface is implementing */
+	public List<INTERFACE> implemented = new ArrayList();
 	
 	public List<StructTypedef> implementers = new ArrayList();
 
@@ -50,12 +53,12 @@ public class InterfaceTypedef extends SyntaxElement {
 	public INTERFACE self;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public InterfaceTypedef(NamespacePath path, List<TYPE> proviso, List<Function> functions, MODIFIER modifier, Source source) {
+	public InterfaceTypedef(NamespacePath path, List<TYPE> proviso, List<INTERFACE> implemented, List<Function> functions, MODIFIER modifier, Source source) {
 		super(source);
 		this.path = path;
 		
@@ -64,11 +67,49 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		this.modifier = modifier;
 		
+		this.implemented = implemented;
+		
+		this.initialize();
+		
 		this.self = new INTERFACE(this, this.proviso);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
+	public void initialize() {
+		int c = 0;
+		
+		for (INTERFACE i : this.implemented) {
+			InterfaceTypedef def = i.getTypedef();
+			
+			/* 
+			 * For every function in the extension, copy the function, 
+			 * adjust the path and add to own functions 
+			 */
+			for (Function f : def.functions) {
+				
+				/* Construct a namespace path that has this struct as base */
+				NamespacePath base = this.path.clone();
+				base.path.add(f.path.getLast());
+
+				/* Create a copy of the function, but keep reference on body */
+				Function f0 = f.clone();
+				f0.path = base;
+				
+				f0.translateProviso(def.proviso, i.proviso);
+				
+				boolean override = false;
+				for (Function fs : this.functions) 
+					if (Function.signatureMatch(fs, f0, false))
+						override = true;
+				
+				if (!override) {
+					this.functions.add(c++, f0);
+				}
+			}
+		}
+	}
+	
 	public InterfaceProvisoMapping registerMapping(List<TYPE> newMapping) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
@@ -84,18 +125,14 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelGen.getProvisoPostfix(), clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
 		this.registeredMappings.add(mapping);
-		
-		//System.out.print("\nRegistered Interface Mapping: ");
 		
 		String s = "";
 		for (TYPE t : newMapping)
 			s += t.typeString() + ",";
 		if (!newMapping.isEmpty())
 			s = s.substring(0, s.length() - 1);
-		
-		//System.out.println(s);
 		
 		return mapping;
 	}
@@ -147,10 +184,9 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
-		if (rec) {
-			for (Function f : this.functions)
-				f.print(d + this.printDepthStep, rec);
-		}
+		
+		if (rec) for (Function f : this.functions)
+			f.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {

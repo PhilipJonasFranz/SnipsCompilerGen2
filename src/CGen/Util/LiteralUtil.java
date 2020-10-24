@@ -1,4 +1,4 @@
-package CGen;
+package CGen.Util;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -20,14 +20,14 @@ import Imm.AsN.AsNNode;
  * these data labels dynamically. These Data Labels are then injected
  * during the casting of the body of the program.
  */
-public class LiteralManager {
+public class LiteralUtil {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/* The stored literals, and the corresponding data label */
 	private HashMap<Integer, ASMDataLabel> storedLiterals = new HashMap();
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Check if a label already exists that contains the given value, if yes,
 	 * return this label. If not, create a new label and add it to the stored

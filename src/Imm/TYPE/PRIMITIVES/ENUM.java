@@ -1,6 +1,6 @@
 package Imm.TYPE.PRIMITIVES;
 
-import Imm.AST.Statement.EnumTypedef;
+import Imm.AST.Typedef.EnumTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;

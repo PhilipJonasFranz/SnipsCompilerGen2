@@ -48,8 +48,8 @@ resv.L1:                                     /* Evaluate condition */
 /* Defragment Heap */
 resv.L6:                                     /* Evaluate condition */
     mov r0, #1
-    cmp r0, #1
-    bne resv.L7
+    cmp r0, #0
+    beq resv.L7
     sub r0, r4, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
     cmp r6, #0
@@ -57,12 +57,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -85,10 +85,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -99,8 +99,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -112,7 +112,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L4_HEAP_START: .word HEAP_START
@@ -124,13 +124,16 @@ init_P2:                                     /* Function: init, Provisos: List.L
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
+    mov r0, #5                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
-    add r0, fp, #24
+    add r0, fp, #28
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, [fp, #12]
+    ldr r0, [fp, #16]
+    ldr r1, [fp, #12]
+    stmfd sp!, {r0, r1}
+    pop { r0 }
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -139,31 +142,28 @@ init_P2:                                     /* Function: init, Provisos: List.L
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #16
+    add sp, sp, #20
     bx lr
-    
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL1_L3_NULL                   /* Evaluate Expression */
-    bx lr
-.POOL1_L3_NULL: .word NULL
     
 List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT* */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL2_L3_NULL                   /* Load null address */
-    ldr r1, .POOL2_L3_NULL                   /* Load null address */
-    stmfd sp!, {r0, r1}
+    mov r0, #0
+    ldr r1, .POOL1_L3_NULL                   /* Load null address */
+    ldr r2, .POOL1_L3_NULL                   /* Load null address */
+    stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL2_L3_NULL: .word NULL
+.POOL1_L3_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -171,10 +171,10 @@ main:                                        /* Function: main */
     mov r0, #20                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL3_L3_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL2_L3_NULL                   /* Evaluate Expression */
     bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL3_L3_NULL: .word NULL
+.POOL2_L3_NULL: .word NULL
     

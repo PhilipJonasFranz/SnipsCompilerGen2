@@ -9,7 +9,7 @@ import Util.Source;
  */
 public class BitOr extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -18,4 +18,8 @@ public class BitOr extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
+	public BinaryExpression clone() {
+		return new BitOr(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
 } 

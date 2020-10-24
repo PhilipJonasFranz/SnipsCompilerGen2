@@ -23,10 +23,10 @@ main:                                        /* Function: main */
     bx lr
 main.L1: 
     cmp r3, #4
-    bne main.L3
+    bne main.L2
     mov r0, #16                              /* Evaluate Expression */
     bx lr
-main.L3: 
+main.L2: 
     add r3, r3, #10
     cmp r3, #13
     bne main.L5

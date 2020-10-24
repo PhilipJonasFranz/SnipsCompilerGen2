@@ -15,7 +15,7 @@ import Util.Source;
  */
 public class SignalStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	private Expression shadowRef;
@@ -23,7 +23,7 @@ public class SignalStatement extends Statement {
 	public StructureInit exceptionInit;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -34,12 +34,10 @@ public class SignalStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Signal");
-		if (rec) {
-			this.shadowRef.print(d + this.printDepthStep, rec);
-		}
+		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -53,6 +51,17 @@ public class SignalStatement extends Statement {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (this.shadowRef != null) 
 			this.shadowRef.setContext(context);
+	}
+
+	public Statement clone() {
+		SignalStatement s = new SignalStatement(this.shadowRef.clone(), this.getSource().clone());
+		if (this.watchpoint != null) 
+			s.watchpoint = this.watchpoint;
+		
+		if (this.exceptionInit != null)
+			s.exceptionInit = this.exceptionInit;
+		
+		return s;
 	}
 
 } 

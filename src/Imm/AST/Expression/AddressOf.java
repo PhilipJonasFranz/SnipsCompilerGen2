@@ -12,11 +12,11 @@ import Util.Source;
  */
 public class AddressOf extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -27,10 +27,10 @@ public class AddressOf extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "AddressOf");
-		this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -39,6 +39,10 @@ public class AddressOf extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.expression.setContext(context);
+	}
+
+	public Expression clone() {
+		return new AddressOf(this.expression.clone(), this.getSource().clone());
 	}
 
 } 

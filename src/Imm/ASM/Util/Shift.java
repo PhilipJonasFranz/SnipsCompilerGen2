@@ -4,26 +4,26 @@ import Imm.ASM.Util.Operands.Operand;
 
 public class Shift {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum SHIFT {
 		LSL, LSR, ASR, ROR;
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SHIFT shift;
 	
 	public Operand distance;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Shift(SHIFT shift, Operand distance) {
 		this.shift = shift;
 		this.distance = distance;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String getShiftPostfix() {
 		return ", " + this.shift.toString().toLowerCase() + " " + this.distance.toString();
 	}

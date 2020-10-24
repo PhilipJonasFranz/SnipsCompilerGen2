@@ -112,9 +112,9 @@ __op_mod.L9:
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq __op_mod.L13
+    beq __op_mod.L12
     sub r7, r4, r7
-__op_mod.L13: 
+__op_mod.L12: 
     mov r0, r7                               /* Evaluate Expression */
 __op_mod.L14: 
     ldmfd sp!, {r3-r7}
@@ -145,8 +145,8 @@ resv.L1:                                     /* Evaluate condition */
 /* Defragment Heap */
 resv.L6:                                     /* Evaluate condition */
     mov r0, #1
-    cmp r0, #1
-    bne resv.L7
+    cmp r0, #0
+    beq resv.L7
     sub r0, r4, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
     cmp r6, #0
@@ -154,12 +154,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -182,10 +182,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -196,8 +196,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -209,7 +209,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L5_HEAP_START: .word HEAP_START
@@ -304,10 +304,10 @@ Queue.CyclicQueue.enqueue_P2:                /* Function: Queue.CyclicQueue.enqu
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq Queue.CyclicQueue.enqueue.L0
+    beq Queue.CyclicQueue.enqueue.L1
 /* Queue is full */
-    b Queue.CyclicQueue.enqueue.L2
-Queue.CyclicQueue.enqueue.L0: 
+    b Queue.CyclicQueue.enqueue.L3
+Queue.CyclicQueue.enqueue.L1: 
 /* Calculate word offset to the storage location based on the */
 /* Size of the proviso type and the head index */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -340,7 +340,7 @@ Queue.CyclicQueue.enqueue.L0:
     mov r0, #0                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #28]                        /* Store value to struct field */
-Queue.CyclicQueue.enqueue.L2: 
+Queue.CyclicQueue.enqueue.L3: 
     mov sp, fp
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #8
@@ -354,15 +354,15 @@ Queue.CyclicQueue.dequeue_P3:                /* Function: Queue.CyclicQueue.dequ
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #28]                        /* Load field from struct */
     cmp r0, #0
-    beq Queue.CyclicQueue.dequeue.L0
+    beq Queue.CyclicQueue.dequeue.L1
 /* Queue is empty, return a default value. */
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #8
     ldr r0, [r1, #4]
     ldr r2, [r1]
     stmfd sp!, {r0, r2}
-    b Queue.CyclicQueue.dequeue.L4
-Queue.CyclicQueue.dequeue.L0: 
+    b Queue.CyclicQueue.dequeue.L5
+Queue.CyclicQueue.dequeue.L1: 
 /* Read value from tail */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -394,15 +394,15 @@ Queue.CyclicQueue.dequeue.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #20]                        /* Load field from struct */
     cmp r0, r1
-    bne Queue.CyclicQueue.dequeue.L2
+    bne Queue.CyclicQueue.dequeue.L3
     mov r0, #1                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #28]                        /* Store value to struct field */
-Queue.CyclicQueue.dequeue.L2: 
+Queue.CyclicQueue.dequeue.L3: 
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
     stmfd sp!, {r0, r1}
-Queue.CyclicQueue.dequeue.L4: 
+Queue.CyclicQueue.dequeue.L5: 
     mov r2, sp
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}

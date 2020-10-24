@@ -199,13 +199,13 @@ public class Scanner {
 	
 	private static class ScannerFSM {
 
-				/* --- REGEXES --- */
+				/* --- REGEXES >--- */
 		public static String int_match = "[0-9]+",
 							 hex_match = "hx([0-9]|[a-f]|[A-F])+",
 							 bin_match = "bx[0-1]+";
 
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		/* All interface ids that have been scanned */
 		List<String> interfaceIds = new ArrayList();
 		
@@ -231,14 +231,14 @@ public class Scanner {
 		public boolean wasAwaiting = false;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		public ScannerFSM(LinkedList<Token> tokens, ProgressMessage progress) {
 			this.tokens = tokens;
 			this.progress = progress;
 		}
 		
 		
-				/* --- METHODS --- */
+				/* ---< METHODS >--- */
 		/**
 		 * Read a single char, append it to the buffer and check the state.
 		 */
@@ -258,7 +258,7 @@ public class Scanner {
 		}
 		
 		public boolean checkState(int i, int a, String fileName) {
-			/* --- COMMENT SCANNER --- */
+			/* ---< COMMENT SCANNER --- */
 			if (this.state == ACC_STATE.COMMENT) {
 				if (i != this.lastLine && this.buffer.startsWith("//")) {
 					/* End of single line comment */

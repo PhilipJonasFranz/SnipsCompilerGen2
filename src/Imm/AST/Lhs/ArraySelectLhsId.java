@@ -14,21 +14,21 @@ import Util.Source;
  */
 public class ArraySelectLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public ArraySelect selection;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ArraySelectLhsId(ArraySelect selection, Source source) {
 		super(source);
 		this.selection = selection;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ElementSelectLhsId");
-		this.selection.print(d + this.printDepthStep, rec);
+		if (rec) this.selection.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -43,6 +43,10 @@ public class ArraySelectLhsId extends LhsId {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.selection.setContext(context);
+	}
+
+	public ArraySelectLhsId clone() {
+		return new ArraySelectLhsId((ArraySelect) this.selection.clone(), this.getSource().clone());
 	}
 
 } 

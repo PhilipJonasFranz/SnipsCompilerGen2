@@ -21,7 +21,7 @@ import Util.Logging.Message;
  */
 public class Scope {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Reference to the parent scope. Is null if this is the super scope. */
 	Scope parentScope;
 	
@@ -32,7 +32,7 @@ public class Scope {
 	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Create a new scope and set the parent scope. */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;
@@ -47,9 +47,10 @@ public class Scope {
 	public void print(int d) {
 		if (d != 0) System.out.println("--- SCOPE ---");
 		else System.out.println("--- TOP SCOPE ---");
-		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) {
+		
+		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) 
 			dec.getValue().first.print(d, true);
-		}
+
 		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
 	
@@ -114,17 +115,15 @@ public class Scope {
 				return this.parentScope.getField(path, source);
 			}
 			else {
-				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return null */
 				if (path == null) return null;
 				
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
-						if (entry.getValue().second.getLast().equals(path.getLast())) {
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) 
+						if (entry.getValue().second.getLast().equals(path.getLast())) 
 							decs.add(entry.getValue().first);
-						}
-					}
 					
 					/* Return if there is only one result */
 					if (decs.size() == 1) return decs.get(0);
@@ -139,9 +138,7 @@ public class Scope {
 						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
 					}
 				}
-				else {
-					throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
-				}
+				else throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 			}
 		}
 	}
@@ -165,11 +162,9 @@ public class Scope {
 				if (path.path.size() == 1) {
 					List<Declaration> decs = new ArrayList();
 					
-					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) {
-						if (entry.getValue().second.getLast().equals(path.getLast())) {
+					for (Entry<String, Pair<Declaration, NamespacePath>> entry : this.declarations.entrySet()) 
+						if (entry.getValue().second.getLast().equals(path.getLast())) 
 							decs.add(entry.getValue().first);
-						}
-					}
 					
 					/* Return if there is only one result */
 					if (decs.size() == 1) return decs.get(0);

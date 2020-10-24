@@ -15,14 +15,14 @@ import Util.Source;
  */
 public class RegisterAtom extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/* Type information and potential value */
 	public String spelling;
 	
 	public REG reg;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -32,9 +32,16 @@ public class RegisterAtom extends Expression {
 		this.setType(new INT());
 		this.spelling = id.spelling();
 	}
+	
+	public RegisterAtom(String spelling, REG reg, Source source) {
+		super(source);
+		this.spelling = spelling;
+		this.reg = reg;
+	}
+
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
 	}
@@ -46,6 +53,10 @@ public class RegisterAtom extends Expression {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		//System.out.println("Applied Context: " + this.getClass().getName());
 		return;
+	}
+
+	public Expression clone() {
+		return new RegisterAtom(this.spelling, this.reg, this.getSource().clone());
 	}
 
 } 

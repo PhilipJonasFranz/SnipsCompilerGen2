@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import Res.Const;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 public class Util {
 
@@ -32,7 +34,7 @@ public class Util {
 				w.write(System.getProperty("line.separator"));
 			}
 		} catch (IOException e) {
-		
+			new Message("Could not write in file: " + filePath, Type.FAIL);
 		}
 	}
 	
@@ -63,7 +65,7 @@ public class Util {
 		        	if (field.get(null).toString().equals(excMessage)) 
 						return field.getName();
 				} catch (Exception e) {
-					
+					new Message("Could not find exception field name for message '" + excMessage + "'", Type.WARN);
 				}
 		    }
 		}

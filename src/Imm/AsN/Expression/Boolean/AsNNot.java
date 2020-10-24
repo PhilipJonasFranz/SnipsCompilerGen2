@@ -17,7 +17,7 @@ import Imm.AsN.Expression.AsNUnaryExpression;
 
 public class AsNNot extends AsNUnaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNNot cast(Not n, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNNot not = new AsNNot();
 		

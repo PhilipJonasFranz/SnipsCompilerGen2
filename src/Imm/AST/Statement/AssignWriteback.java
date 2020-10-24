@@ -13,24 +13,24 @@ import Util.Source;
  */
 public class AssignWriteback extends Statement {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum WRITEBACK {
 		INCR, DECR;
 	}
 
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression reference;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public AssignWriteback(Expression value, Source source) {
 		super(source);
 		this.reference = value;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Assign Writeback");
 		if (rec) this.reference.print(d + this.printDepthStep, rec);
@@ -42,6 +42,10 @@ public class AssignWriteback extends Statement {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.reference.setContext(context);
+	}
+
+	public Statement clone() {
+		return new AssignWriteback(this.reference.clone(), this.getSource().clone());
 	}
 
 } 

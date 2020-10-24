@@ -1,11 +1,11 @@
-package CGen;
+package CGen.Util;
 
 /**
  * Provides unique labels for branches.
  */
-public class LabelGen {
+public class LabelUtil {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Internal counter used to create labels */
 	private static int c = 0;
 	
@@ -18,7 +18,7 @@ public class LabelGen {
 	/** Current function prefix */
 	public static String funcPrefix = "";
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Returns a new unique label. 
 	 */

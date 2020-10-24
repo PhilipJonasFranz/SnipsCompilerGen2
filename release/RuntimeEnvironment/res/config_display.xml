@@ -1,0 +1,9 @@
+<Config>
+	<Devices>
+		<Device>RAM, static, 4096, 1, 1</Device>
+		<Device>DISPLAY, dynamic, Devices.Display</Device>
+	</Devices>
+	<CodeSources>
+		<Source>[Absolute Path to your .s file], assemble, RAM</Source>
+	</CodeSources>
+</Config> 

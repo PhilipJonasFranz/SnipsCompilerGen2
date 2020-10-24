@@ -9,13 +9,17 @@ import Util.Source;
  */
 public class Mul extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
 	public Mul(Expression left, Expression right, Source source) {
 		super(left, right, Operator.MUL, source);
+	}
+	
+	public BinaryExpression clone() {
+		return new Mul(this.left.clone(), this.right.clone(), this.getSource().clone());
 	}
 
 } 

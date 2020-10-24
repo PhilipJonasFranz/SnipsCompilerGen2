@@ -55,7 +55,6 @@ public class Token {
 		DIRECTIVE("#"),
 		AT("@"),
 		BACKSL("\\"),
-		USCORE("_"),
 		EOF("<EOF>"),
 		
 		LPAREN("("),
@@ -80,7 +79,6 @@ public class Token {
 		SWITCH("switch"),
 		CASE("case"),
 		DEFAULT("default"),
-		INCLUDE("include"),
 		SIZEOF("sizeof"),
 		INSTANCEOF("instanceof"),
 		RETURN("return"),
@@ -95,7 +93,6 @@ public class Token {
 		SIGNALS("signals"),
 		
 		DOT("."),
-		APOS("'"),
 		SEMICOLON(";"),
 		COLON(":"),
 		COMMA(","),
@@ -163,9 +160,9 @@ public class Token {
 			MISC;
 		}
 		
-		final String spelling;
+		private final String spelling;
 		
-		TokenGroup group;
+		private TokenGroup group;
 		
 		private TokenType(String spelling, TokenGroup tokenGroup) {
 			this.spelling = spelling;
@@ -179,6 +176,10 @@ public class Token {
 		
 		public TokenGroup group() {
 			return this.group;
+		}
+		
+		public String spelling() {
+			return this.spelling;
 		}
 	}
 	

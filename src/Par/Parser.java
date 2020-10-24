@@ -1,32 +1,105 @@
 package Par;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.*;
-import Imm.AST.Expression.*;
-import Imm.AST.Expression.Arith.*;
+import Imm.AST.Function;
+import Imm.AST.Namespace;
+import Imm.AST.Program;
+import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.AddressOf;
+import Imm.AST.Expression.ArrayInit;
+import Imm.AST.Expression.ArraySelect;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Deref;
+import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDRef;
+import Imm.AST.Expression.IDRefWriteback;
+import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.InstanceofExpression;
+import Imm.AST.Expression.RegisterAtom;
+import Imm.AST.Expression.SizeOfExpression;
+import Imm.AST.Expression.SizeOfType;
+import Imm.AST.Expression.StructSelect;
+import Imm.AST.Expression.StructSelectWriteback;
+import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.TempAtom;
+import Imm.AST.Expression.TypeCast;
+import Imm.AST.Expression.Arith.Add;
+import Imm.AST.Expression.Arith.BitAnd;
+import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.BitOr;
+import Imm.AST.Expression.Arith.BitXor;
+import Imm.AST.Expression.Arith.Lsl;
+import Imm.AST.Expression.Arith.Lsr;
+import Imm.AST.Expression.Arith.Mul;
+import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Arith.UnaryMinus;
+import Imm.AST.Expression.Boolean.And;
+import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
-import Imm.AST.Expression.Boolean.*;
-import Imm.AST.Lhs.*;
+import Imm.AST.Expression.Boolean.Not;
+import Imm.AST.Expression.Boolean.Or;
+import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.ArraySelectLhsId;
+import Imm.AST.Lhs.LhsId;
+import Imm.AST.Lhs.PointerLhsId;
+import Imm.AST.Lhs.SimpleLhsId;
+import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
+import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AST.Statement.*;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.CaseStatement;
+import Imm.AST.Statement.Comment;
+import Imm.AST.Statement.ContinueStatement;
+import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.DefaultStatement;
+import Imm.AST.Statement.DirectASMStatement;
+import Imm.AST.Statement.DoWhileStatement;
+import Imm.AST.Statement.ForEachStatement;
+import Imm.AST.Statement.ForStatement;
+import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.ReturnStatement;
+import Imm.AST.Statement.SignalStatement;
+import Imm.AST.Statement.Statement;
+import Imm.AST.Statement.SwitchStatement;
+import Imm.AST.Statement.TryStatement;
+import Imm.AST.Statement.WatchStatement;
+import Imm.AST.Statement.WhileStatement;
+import Imm.AST.Typedef.EnumTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.TYPE.*;
-import Imm.TYPE.COMPOSIT.*;
-import Imm.TYPE.PRIMITIVES.*;
+import Imm.TYPE.PROVISO;
+import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.INTERFACE;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.CHAR;
+import Imm.TYPE.PRIMITIVES.FUNC;
+import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
-import Util.*;
+import Util.Pair;
+import Util.Source;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -119,14 +192,12 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
 		
-		if (current.type().group == group)return accept();
+		if (current.type().group() == group)return accept();
 		else {
 			this.progress.abort();
 			throw new PARSE_EXC(current.source, current.type());
 		}
 	}
-	
-	public int p = 0;
 	
 	/**
 	 * Accept a token without any checks.
@@ -205,13 +276,13 @@ public class Parser {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
-		else if (current.type == TokenType.STRUCT || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
+		else if (current.type == TokenType.STRUCT || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
 		}
-		else if (current.type == TokenType.INTERFACE || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.INTERFACE)) {
+		else if (current.type == TokenType.INTERFACE || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.INTERFACE)) {
 			return this.parseInterfaceTypedef();
 		}
-		else if (current.type == TokenType.ENUM || (current.type.group == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
+		else if (current.type == TokenType.ENUM || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.ENUM)) {
 			return this.parseEnumTypedef();
 		}
 		else if (current.type == TokenType.NAMESPACE) {
@@ -385,7 +456,20 @@ public class Parser {
 		
 		List<Function> functions = new ArrayList();
 		
-		InterfaceTypedef def = new InterfaceTypedef(path, proviso, functions, mod, source);
+		List<INTERFACE> implemented = new ArrayList();
+		
+		if (current.type == TokenType.COLON) {
+			accept();
+			while (current.type != TokenType.LBRACE) {
+				INTERFACE i = (INTERFACE) this.parseType();
+				implemented.add(i);
+				
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+		}
+		
+		InterfaceTypedef def = new InterfaceTypedef(path, proviso, implemented, functions, mod, source);
 		this.interfaceIds.add(new Pair<NamespacePath, InterfaceTypedef>(path, def));
 		
 		accept(TokenType.LBRACE);
@@ -558,7 +642,7 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		
-		Token modT = (current.type.group == TokenGroup.MODIFIER)? current : null;
+		Token modT = (current.type.group() == TokenGroup.MODIFIER)? current : null;
 		MODIFIER mod = this.parseModifier();
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
@@ -585,7 +669,7 @@ public class Parser {
 			}
 		}
 		
-		boolean decCheck = current.type.group == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
+		boolean decCheck = current.type.group() == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.IDENTIFIER || 
 				tokenStream.get(i).type == TokenType.ENUMID || 
@@ -1142,6 +1226,7 @@ public class Parser {
 					InlineCall ic = (InlineCall) select.selection;
 					FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
 					fc.baseRef = select.selector;
+					fc.nestedDeref = ic.nestedDeref;
 					accept(TokenType.SEMICOLON);
 					return fc;
 				}
@@ -1508,7 +1593,7 @@ public class Parser {
 	protected Expression parseCompare() throws PARSE_EXC {
 		Expression left = this.parseShift();
 		
-		if (current.type.group == TokenGroup.COMPARE) {
+		if (current.type.group() == TokenGroup.COMPARE) {
 			Source source = current.source();
 			if (current.type == TokenType.CMPEQ) {
 				accept();
@@ -1648,7 +1733,7 @@ public class Parser {
 			}
 			
 			/* Size of Type */
-			if (current.type.group == TokenGroup.TYPE) {
+			if (current.type.group() == TokenGroup.TYPE) {
 				TYPE type = this.parseType();
 				sof = new SizeOfType(type, source);
 			}
@@ -1744,7 +1829,7 @@ public class Parser {
 			 * First type token, from here only allowed token are RPAREN and all other type related
 			 * tokens like [, ], *. If a colon is seen, the current structure cannot be a cast.
 			 */
-			if (tokenStream.get(i - 2).type.group == TokenGroup.TYPE) {
+			if (tokenStream.get(i - 2).type.group() == TokenGroup.TYPE) {
 				for (int a = i - 1; a < tokenStream.size(); a++) {
 					if (tokenStream.get(a).type == TokenType.RPAREN) return true;
 					else if (tokenStream.get(a).type == TokenType.COLON) {
@@ -1956,7 +2041,7 @@ public class Parser {
 		else if (current.type == TokenType.NULL) {
 			Token id = accept();
 			CompilerDriver.null_referenced = true;
-			return this.wrapPlaceholder(new Atom(new NULL(), id, id.source()));
+			return this.wrapPlaceholder(new Atom(new NULL(), id.source()));
 		}
 		else if (current.type == TokenType.IDENTIFIER || current.type == TokenType.ENUMID || current.type == TokenType.NAMESPACE_IDENTIFIER) {
 			Source source = current.source();
@@ -1972,7 +2057,7 @@ public class Parser {
 			if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 				this.tokenStream.get(0).type = TokenType.PROVISO;
 			
-			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
+			if (current.type == TokenType.LPAREN || (current.type == TokenType.CMPLT && (tokenStream.get(0).type.group() == TokenGroup.TYPE || tokenStream.get(0).type == TokenType.CMPGT))) {
 				List<TYPE> proviso = this.parseProviso();
 				
 				/* Predicate with proviso */
@@ -2016,7 +2101,7 @@ public class Parser {
 					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
 				}
 				
-				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), value, source));
+				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), source));
 			}
 			else {
 				/* Find the function that may match this path and act as a predicate */
@@ -2086,11 +2171,11 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token.source));
 		}
 		else if (current.type == TokenType.CHARLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new CHAR(token.spelling), token.source));
 		}
 		else if (current.type == TokenType.STRINGLIT) {
 			Token token = accept();
@@ -2099,16 +2184,16 @@ public class Parser {
 			
 			/* Create a list of expressions of char atoms */
 			for (int i = 0; i < sp.length; i++) 
-				charAtoms.add(new Atom(new CHAR(sp [i]), new Token(TokenType.CHARLIT, token.source, sp [i]), token.source));
+				charAtoms.add(new Atom(new CHAR(sp [i]), token.source));
 			
 			/* Insert null-termination character */
-			charAtoms.add(new Atom(new CHAR(null), new Token(TokenType.CHARLIT, token.source, null), token.source));
+			charAtoms.add(new Atom(new CHAR(null), token.source));
 			
 			return new ArrayInit(charAtoms, false, token.source());
 		}
 		else if (current.type == TokenType.BOOLLIT) {
 			Token token = accept();
-			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token, token.source));
+			return this.wrapPlaceholder(new Atom(new BOOL(token.spelling), token.source));
 		}
 		else if (this.checkPlaceholder()) {
 			/* Pure placeholder token */
@@ -2699,7 +2784,7 @@ public class Parser {
 	protected MODIFIER parseModifier() {
 		MODIFIER mod = MODIFIER.SHARED;
 		
-		if (current.type.group == TokenGroup.MODIFIER) {
+		if (current.type.group() == TokenGroup.MODIFIER) {
 			Token modT = accept();
 			mod = this.resolve(modT);
 		}

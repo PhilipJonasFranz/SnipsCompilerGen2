@@ -55,7 +55,7 @@ namespace Queue {
 		 * Enqueue a new value. The value is only enqueued if the 
 		 * queue is not full.
 		 */
-		shared void enqueue<T>(T value) {
+		shared void enqueue(T value) {
 			if (self->head == self->tail && !self->isEmpty) {
 				/* Queue is full */
 				return;
@@ -83,7 +83,7 @@ namespace Queue {
 		 * Dequeues a value and removes it from the queue. Returns
 		 * the default value if the queue is empty.
 		 */
-		shared T dequeue<T>() {
+		shared T dequeue() {
 			if (self->isEmpty) {
 				/* Queue is empty, return a default value. */
 				return self->defValue;
@@ -117,7 +117,7 @@ namespace Queue {
 		 * Returns the value at the given index, where the index 0 is
 		 * the index at the tail, or the next value to be dequeued. 
 		 */
-		shared T get<T>(int index) {
+		shared T get(int index) {
 			return *(self->storage + (((self->tail + index) % self->size) * sizeof(T)));
 		}
 		
@@ -126,7 +126,7 @@ namespace Queue {
 		 * the index at the tail, or the next value to be dequeued,
 		 * to the provided value.
 		 */
-		shared void set<T>(int index, T value) {
+		shared void set(int index, T value) {
 			int off = (((self->tail + index) % self->size) * sizeof(T));
 			*(self->storage + off) = value;
 		}

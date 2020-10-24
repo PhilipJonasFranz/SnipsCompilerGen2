@@ -9,12 +9,12 @@ import Util.Source;
 
 public abstract class ConditionalCompoundStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The condition that has to be true so that the body is executed, f.E if-statement */
 	public Expression condition;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}

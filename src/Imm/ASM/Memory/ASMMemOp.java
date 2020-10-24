@@ -1,14 +1,13 @@
 package Imm.ASM.Memory;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public abstract class ASMMemOp extends ASMInstruction {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The target of the memory operation, or the origin when loading */
 	public RegOp target;
 	
@@ -18,24 +17,16 @@ public abstract class ASMMemOp extends ASMInstruction {
 	public boolean subFromBase = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr/str r0, [r1, #2] */
 	public ASMMemOp(RegOp target, Operand op0, Operand op1) {
 		this.target = target;
 		this.op0 = op0;
 		this.op1 = op1;
 	}
+
 	
-	/** Example Usage: ldr/str r0, [r1] */
-	public ASMMemOp(RegOp target, Operand op0, Operand op1, Cond cond) {
-		super(cond);
-		this.target = target;
-		this.op0 = op0;
-		this.op1 = op1;
-	}
-	
-	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Builds assembly instruction corresponding to the memory operation.
 	 * @param operation The type of the operation f.E ldr/str.

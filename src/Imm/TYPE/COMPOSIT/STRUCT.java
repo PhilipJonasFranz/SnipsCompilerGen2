@@ -5,7 +5,7 @@ import java.util.List;
 
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
@@ -16,6 +16,8 @@ import Util.Source;
 
 public class STRUCT extends COMPOSIT {
 
+	public static boolean useProvisoFreeInCheck = true;
+	
 	private StructTypedef typedef;
 	
 	public List<TYPE> proviso;
@@ -23,11 +25,6 @@ public class STRUCT extends COMPOSIT {
 	public STRUCT(StructTypedef typedef, List<TYPE> proviso) {
 		super(null);
 		this.typedef = typedef;
-		this.proviso = proviso;
-	}
-	
-	public STRUCT(List<TYPE> proviso) {
-		super(null);
 		this.proviso = proviso;
 	}
 	
@@ -81,8 +78,12 @@ public class STRUCT extends COMPOSIT {
 				boolean isEqual = true;
 				
 				/* Compare Provisos, rest of subtree must be equal */
-				for (int i = 0; i < this.proviso.size(); i++) 
-					isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
+				for (int i = 0; i < this.proviso.size(); i++) {
+					if (useProvisoFreeInCheck) 
+						isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
+					else 
+						isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
+				}
 				
 				return isEqual;
 			}
@@ -161,13 +162,6 @@ public class STRUCT extends COMPOSIT {
 		}
 	
 		return -1;
-	}
-	
-	/**
-	 * Check if in this struct a field exists that matches the given namespace path perfectly.
-	 */
-	public boolean hasField(NamespacePath path) {
-		return this.getTypedef().getFields().stream().filter(x -> x.path.build().equals(path.build())).count() > 1;
 	}
 	
 	public String typeString() {

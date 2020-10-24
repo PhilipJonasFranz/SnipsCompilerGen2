@@ -1,4 +1,4 @@
-#include<iterable.sn>
+#include<collection.sn>
 #include<serializable.sn>
 
 /*
@@ -20,13 +20,16 @@ namespace List {
 	/*
 	 * Wraps the list head and tail.
 	 */
-	restricted struct LinkedList<T> : Iterable<T>, Serializable {
+	restricted struct LinkedList<T> : Collection<T>, Serializable {
 		
 		/* Points to the head of the list or is null. */
 		ListNode<T>* head;
 		
 		/* Points to the last element of the list or is null. */
 		ListNode<T>* tail;
+		
+		/* Assumed size of list, use count() to re-count the elements */
+		int size;
 		
 		/* The default value that can be returned */
 		T defValue;
@@ -35,7 +38,7 @@ namespace List {
 		 * Creates a new list node for given value x and adds the node at the
 		 * end of the list.
 		 */
-		shared void add<T>(T x) {
+		shared void add(T x) {
 			/* Initialize the new List Node, set the next pointer to null */
 			ListNode<T>* n = init<>(ListNode<T>::(null, x));
 		
@@ -47,13 +50,15 @@ namespace List {
 				self->tail->next = n;
 				self->tail = n;
 			}	
+			
+			self->size++;
 		}
 		
 		/*
 		 * Returns the value of the node at the given index. Returns
 		 * the default value if the index is invalid.
 		 */
-		shared T get<T>(int i) {
+		shared T get(int i) {
 			if (i < 0) return self->defValue;
 		
 			ListNode<T>* n = self->head;
@@ -72,7 +77,7 @@ namespace List {
 		 * Returns the value of the node at the given index. Returns
 		 * the default value if the index is invalid.
 		 */
-		shared void set<T>(int i, T value) {
+		shared void set(int i, T value) {
 			ListNode<T>* n = self->head;
 			while (i != 0) {
 				if (n->next == null) return;
@@ -101,7 +106,7 @@ namespace List {
 		 * Check if given list contains given value. If the current value matches
 		 * the searched value determines the predicate.
 		 */
-		shared bool contains<T>(func (T, T) -> bool pred, T x) {
+		shared bool contains(func (T, T) -> bool pred, T x) {
 			ListNode<T>* n = self->head;
 			while (true) {
 				if (n == null) return false;
@@ -119,7 +124,7 @@ namespace List {
 		 * Returns a pointer to this list node, or 0 in case the
 		 * value wasnt found.
 		 */
-		shared ListNode<T>* find<T>(func (T, T) -> bool pred, T x) {
+		shared ListNode<T>* find(func (T, T) -> bool pred, T x) {
 			ListNode<T>* n = self->head;
 			while (n != null) {
 				/* 
@@ -140,12 +145,25 @@ namespace List {
 		 * Returns the amount of elements stored in the list.
 		 */
 		shared int size<T:void>() {
+			return self->size;
+		}
+		
+		/* 
+		 * Re-counts the elements in the list. In general, the
+		 * size count should not differ from the actual size, but
+		 * when manual list manipulation is done, the size may very
+		 * well be changed. Calling this method will refresh the size
+		 * counter and returns the current size.
+		 */
+		shared int count<T:void>() {
 			ListNode<void>* n = self->head;
 			int size = 0;
 			while (n != null) {
 				n = n->next;
 				size++;
 			}
+			
+			self->size = size;
 			return size;
 		}
 		
@@ -251,12 +269,12 @@ namespace List {
 			return self->head == null;
 		}
 		
-		shared char* serialize<T>() {
+		shared char* serialize() {
 			// TODO
 			return null;
 		}
 		
-		static void* deserialize(char* str) {
+		static void* deserialize<T:void>(char* str) {
 			return null;
 		}
 	
@@ -265,7 +283,7 @@ namespace List {
 		 */
 		static LinkedList<T>* create<T>(T defValue) {
 			/* Initialize list, set pointers to null */
-			return init<>(LinkedList<T>::(null, null, defValue));
+			return init<>(LinkedList<T>::(null, null, 0, defValue));
 		}
 		
 	}

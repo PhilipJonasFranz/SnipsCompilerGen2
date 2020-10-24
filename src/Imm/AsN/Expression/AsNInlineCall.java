@@ -18,7 +18,7 @@ import Res.Const;
 
 public class AsNInlineCall extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNInlineCall cast(InlineCall ic, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNInlineCall call = new AsNInlineCall();
 		ic.castedNode = call;

@@ -1,6 +1,5 @@
 package Imm.AST;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -15,15 +14,13 @@ import Util.Source;
  */
 public class Namespace extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	public List<SyntaxElement> programElements;
 	
-	public List<Namespace> namespaces = new ArrayList();
 	
-	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -35,10 +32,10 @@ public class Namespace extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Namespace: " + this.path.build());
-		for (SyntaxElement e : this.programElements) {
+		if (rec) for (SyntaxElement e : this.programElements) {
 			e.print(d + this.printDepthStep, rec);
 		}
 	}

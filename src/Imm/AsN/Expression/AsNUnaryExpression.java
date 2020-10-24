@@ -15,7 +15,7 @@ import Res.Const;
 
 public abstract class AsNUnaryExpression extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNUnaryExpression cast(UnaryExpression u, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNUnaryExpression node = null;
 		

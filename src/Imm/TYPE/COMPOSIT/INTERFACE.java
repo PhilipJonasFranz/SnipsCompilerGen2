@@ -3,8 +3,8 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
-import Ctx.ProvisoUtil;
-import Imm.AST.Statement.InterfaceTypedef;
+import Ctx.Util.ProvisoUtil;
+import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;

@@ -111,8 +111,8 @@ resv.L1:                                     /* Evaluate condition */
 /* Defragment Heap */
 resv.L6:                                     /* Evaluate condition */
     mov r0, #1
-    cmp r0, #1
-    bne resv.L7
+    cmp r0, #0
+    beq resv.L7
     sub r0, r4, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
     cmp r6, #0
@@ -120,12 +120,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -148,10 +148,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -162,8 +162,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -175,7 +175,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L8_HEAP_START: .word HEAP_START
@@ -206,7 +206,7 @@ init_P2:                                     /* Function: init, Provisos: List.L
     add sp, sp, #12
     bx lr
     
-init.L2_P0:                                  /* Interface : List.Iterable, Provisos: INT,  */
+List.Iterable.L2_P0:                         /* Interface : List.Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -333,7 +333,7 @@ main:                                        /* Function: main */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl init.L2_P0                            /* Branch to relay table of List.Iterable */
+    bl List.Iterable.L2_P0                   /* Branch to relay table of List.Iterable */
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -343,7 +343,7 @@ main.L1:
     mov r0, r3
     mov r1, r6
     mov r12, #4
-    bl init.L2_P0                            /* Branch to relay table of List.Iterable */
+    bl List.Iterable.L2_P0                   /* Branch to relay table of List.Iterable */
     add r5, r5, r0
     add r6, r6, #1
     b main.L1

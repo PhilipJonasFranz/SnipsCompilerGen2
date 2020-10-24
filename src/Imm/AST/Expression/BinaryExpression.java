@@ -12,14 +12,14 @@ import Util.Source;
  */
 public abstract class BinaryExpression extends Expression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum Operator {
 		MUL, ADD, SUB, ORR,
 		LSL, LSR, CMP, AND;
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The left operand expression */
 	public Expression left;
 	
@@ -30,7 +30,7 @@ public abstract class BinaryExpression extends Expression {
 	public Expression right;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -43,7 +43,7 @@ public abstract class BinaryExpression extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + this.operator.toString());
 		if (rec) {
@@ -72,7 +72,5 @@ public abstract class BinaryExpression extends Expression {
 	public Operator getOperator() {
 		return this.operator;
 	}
-	
-	
 	
 } 

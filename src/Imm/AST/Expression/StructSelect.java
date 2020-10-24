@@ -9,14 +9,14 @@ import Util.Source;
 
 public class StructSelect extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression selector;
 	
 	public boolean deref;
 	
 	public Expression selection;
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -29,7 +29,7 @@ public class StructSelect extends Expression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
 		if (rec) {
@@ -45,6 +45,10 @@ public class StructSelect extends Expression {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.selector.setContext(context);
 		this.selection.setContext(context);
+	}
+
+	public Expression clone() {
+		return new StructSelect(this.selector.clone(), this.selection.clone(), this.deref, this.getSource().clone());
 	}
 
 } 

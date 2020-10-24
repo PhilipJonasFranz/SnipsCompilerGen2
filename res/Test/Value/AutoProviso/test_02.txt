@@ -60,8 +60,8 @@ resv.L1:                                     /* Evaluate condition */
 /* Defragment Heap */
 resv.L6:                                     /* Evaluate condition */
     mov r0, #1
-    cmp r0, #1
-    bne resv.L7
+    cmp r0, #0
+    beq resv.L7
     sub r0, r4, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
     cmp r6, #0
@@ -69,12 +69,12 @@ resv.L6:                                     /* Evaluate condition */
     b resv.L7
 resv.L9: 
     cmp r6, #0
-    bne resv.L11
+    bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
 /* All structures to end are free */
     b resv.L7
-resv.L11: 
+resv.L10: 
     add r5, r5, r6
 /* Add to current size */
     b resv.L6
@@ -97,10 +97,10 @@ resv.L12:
 /* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-    b resv.L18
+    b resv.L19
 resv.L15: 
     cmp r5, r3
-    ble resv.L17
+    ble resv.L16
 /* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
@@ -111,8 +111,8 @@ resv.L15:
     pop { r0 }
     str r0, [r1]
     add r0, r4, #1
-    b resv.L18
-resv.L17: 
+    b resv.L19
+resv.L16: 
     add r4, r4, r5
     b resv.L3
 resv.L4: 
@@ -124,7 +124,7 @@ resv.L2:
 /* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
-resv.L18: 
+resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L23_HEAP_START: .word HEAP_START
@@ -132,7 +132,7 @@ resv.L18:
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
 /* section. */
-init_P2:                                     /* Function: init, Provisos: Map.HashMap<INT,INT> | Map.HashMap<CHAR,BOOL> | List.LinkedList<Map.MapEntry<CHAR,BOOL>*> | Map.MapEntry<CHAR,BOOL> | Map.MapEntry<INT,INT> */
+init_P2:                                     /* Function: init, Provisos: Map.HashMap<INT,INT> | Map.HashMap<CHAR,BOOL> | Map.MapEntry<CHAR,BOOL> | Map.MapEntry<INT,INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -155,6 +155,36 @@ init_P2:                                     /* Function: init, Provisos: Map.Ha
     mov sp, fp
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #16
+    bx lr
+    
+init_P7:                                     /* Provisos: List.LinkedList<Map.MapEntry<CHAR,BOOL>*> |  */
+    sub sp, sp, #12
+    stmea sp, {r3, fp, lr}
+    mov fp, sp
+    mov r0, #5                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    add r0, fp, #28
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #16]
+    ldr r1, [fp, #12]
+    stmfd sp!, {r0, r1}
+    pop { r0 }
+    lsl r1, r3, #2
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    mov r0, r3                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {r3, fp, lr}
+    add sp, sp, #20
     bx lr
     
 init_P10:                                    /* Provisos: List.ListNode<Map.MapEntry<CHAR,BOOL>> |  */
@@ -266,9 +296,9 @@ __op_mod.L9:
     movne r0, r1
     moveq r0, #0
     cmp r0, #0
-    beq __op_mod.L13
+    beq __op_mod.L12
     sub r7, r4, r7
-__op_mod.L13: 
+__op_mod.L12: 
     mov r0, r7                               /* Evaluate Expression */
 __op_mod.L14: 
     ldmfd sp!, {r3-r7}
@@ -310,6 +340,14 @@ Hash.hash.L2:
 /* This package contains the interface definition for an iterable struct. */
 /* The interface creates data access and exchange points, so data can be */
 /* read and written. */
+/* Interface for a collection. A collection has to include the methods: */
+/* - size */
+/* - get(int) */
+/* - set(int, T) */
+/* - add(T) */
+/* - remove(int) */
+/* A collection provides an abstract interface for a database or data storage */
+/* and the endpoints to access the data. */
 /* [BASE-PACKAGE] */
 /*  */
 /* Using the serializable interface, structs can be converted */
@@ -321,6 +359,7 @@ Hash.hash.L2:
 /* and a value. */
 /* Wraps the list head and tail. */
 List.LinkedList.add_P9:                      /* Function: List.LinkedList.add, Provisos: Map.MapEntry<INT,INT> */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -353,10 +392,14 @@ List.LinkedList.add.L1:
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r4, [r1, #4]                         /* Store value to struct field */
-    mov r0, r4                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r4, [r1, #8]                         /* Store value to struct field */
 List.LinkedList.add.L0: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #12
+    ldr r0, [r1]
+    add r2, r0, #1
+    str r2, [r1]
     mov sp, fp
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #16
@@ -364,6 +407,7 @@ List.LinkedList.add.L0:
 .POOL2_L22_NULL: .word NULL
     
 List.LinkedList.remove_P17:                  /* Function: List.LinkedList.remove, Provisos: Map.MapEntry<INT,INT>* | Map.MapEntry<CHAR,BOOL>* */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0
@@ -407,37 +451,37 @@ List.LinkedList.remove.L3:
     mov r0, r4
     sub r4, r4, #1
 /* Jump to element before element to remove */
-List.LinkedList.remove.L9:                   /* Evaluate condition */
+List.LinkedList.remove.L10:                  /* Evaluate condition */
     cmp r4, #0
-    ble List.LinkedList.remove.L10
+    ble List.LinkedList.remove.L11
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L12
+    bne List.LinkedList.remove.L13
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L12: 
+List.LinkedList.remove.L13: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r4, #1
-    b List.LinkedList.remove.L9
-List.LinkedList.remove.L10: 
+    b List.LinkedList.remove.L10
+List.LinkedList.remove.L11: 
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L14
+    bne List.LinkedList.remove.L16
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L14: 
+List.LinkedList.remove.L16: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .POOL3_L22_NULL                  /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.remove.L16
+    bne List.LinkedList.remove.L19
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -449,7 +493,7 @@ List.LinkedList.remove.L14:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L16: 
+List.LinkedList.remove.L19: 
 /* Cut out element and set next pointers */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
@@ -464,25 +508,20 @@ List.LinkedList.remove.L16:
     ldmfd sp!, {r3-r5, pc}
 .POOL3_L22_NULL: .word NULL
     
-List.LinkedList.deserialize:                 /* Function: List.LinkedList.deserialize */
-    mov r10, #0
-    ldr r0, .POOL4_L22_NULL                  /* Evaluate Expression */
-    bx lr
-.POOL4_L22_NULL: .word NULL
-    
 List.LinkedList.create_P6:                   /* Function: List.LinkedList.create, Provisos: Map.MapEntry<INT,INT>* */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
-    ldr r0, .POOL5_L22_NULL                  /* Load null address */
-    ldr r1, .POOL5_L22_NULL                  /* Load null address */
-    stmfd sp!, {r0, r1}
+    mov r0, #0
+    ldr r1, .POOL4_L22_NULL                  /* Load null address */
+    ldr r2, .POOL4_L22_NULL                  /* Load null address */
+    stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
-    bl init_P2                               /* Call init */
+    bl init_P7                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL5_L22_NULL: .word NULL
+.POOL4_L22_NULL: .word NULL
     
 /* This package contains the utility and definitions */
 /* to create and maintain a hash-map of any type. */
@@ -550,7 +589,7 @@ Map.HashMap.put_P5:                          /* Function: Map.HashMap.put, Provi
     add r0, r1, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
 /* Initialize new list at index */
-    ldr r1, .POOL6_L22_NULL                  /* Load null address */
+    ldr r1, .POOL5_L22_NULL                  /* Load null address */
     cmp r6, r1
     bne Map.HashMap.put.L0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -581,7 +620,7 @@ Map.HashMap.put.L0:
     bl List.LinkedList.add_P9                /* Call List.LinkedList.add */
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL6_L22_NULL: .word NULL
+.POOL5_L22_NULL: .word NULL
     
 Map.HashMap.replace_P13:                     /* Function: Map.HashMap.replace, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #24
@@ -606,7 +645,7 @@ Map.HashMap.replace_P13:                     /* Function: Map.HashMap.replace, P
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL7_L22_NULL                  /* Load null address */
+    ldr r1, .POOL6_L22_NULL                  /* Load null address */
     cmp r6, r1
     beq Map.HashMap.replace.L0
 /* Init tuple for searching */
@@ -626,7 +665,7 @@ Map.HashMap.replace_P13:                     /* Function: Map.HashMap.replace, P
     ldr r3, [r1, #4]                         /* Load field from struct */
 /* Iterate through list, check for match */
 Map.HashMap.replace.L3:                      /* Evaluate condition */
-    ldr r1, .POOL7_L22_NULL                  /* Load null address */
+    ldr r1, .POOL6_L22_NULL                  /* Load null address */
     cmp r3, r1
     beq Map.HashMap.replace.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -637,7 +676,7 @@ Map.HashMap.replace.L3:                      /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.replace.L5
+    beq Map.HashMap.replace.L6
 /* Reassign value with new tuple */
     push { r4 }
     mov r0, #0
@@ -651,7 +690,7 @@ Map.HashMap.replace.L3:                      /* Evaluate condition */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
     b Map.HashMap.replace.L4
-Map.HashMap.replace.L5: 
+Map.HashMap.replace.L6: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r3, [r1, #4]                         /* Load field from struct */
     b Map.HashMap.replace.L3
@@ -660,7 +699,7 @@ Map.HashMap.replace.L4:
 Map.HashMap.replace.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r6, fp, pc}
-.POOL7_L22_NULL: .word NULL
+.POOL6_L22_NULL: .word NULL
     
 Map.HashMap.get_P21:                         /* Function: Map.HashMap.get, Provisos: INT, INT */
     sub sp, sp, #20
@@ -684,7 +723,7 @@ Map.HashMap.get_P21:                         /* Function: Map.HashMap.get, Provi
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL8_L22_NULL                  /* Load null address */
+    ldr r1, .POOL7_L22_NULL                  /* Load null address */
     cmp r5, r1
     beq Map.HashMap.get.L0
 /* Init tuple for searching */
@@ -704,7 +743,7 @@ Map.HashMap.get_P21:                         /* Function: Map.HashMap.get, Provi
     ldr r4, [r1, #4]                         /* Load field from struct */
 /* Iterate through list, check for match, and remove */
 Map.HashMap.get.L3:                          /* Evaluate condition */
-    ldr r1, .POOL8_L22_NULL                  /* Load null address */
+    ldr r1, .POOL7_L22_NULL                  /* Load null address */
     cmp r4, r1
     beq Map.HashMap.get.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -715,13 +754,13 @@ Map.HashMap.get.L3:                          /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.get.L5
+    beq Map.HashMap.get.L6
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b Map.HashMap.get.L7
-Map.HashMap.get.L5: 
+    b Map.HashMap.get.L8
+Map.HashMap.get.L6: 
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
     b Map.HashMap.get.L3
@@ -733,10 +772,10 @@ Map.HashMap.get.L0:
     ldr r1, [r1, #12]
     lsl r1, r1, #2
     ldr r0, [r1, #12]                        /* Load field from struct */
-Map.HashMap.get.L7: 
+Map.HashMap.get.L8: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL8_L22_NULL: .word NULL
+.POOL7_L22_NULL: .word NULL
     
 Map.HashMap.remove_P16:                      /* Function: Map.HashMap.remove, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #20
@@ -760,7 +799,7 @@ Map.HashMap.remove_P16:                      /* Function: Map.HashMap.remove, Pr
     ldr r1, [r1, #4]                         /* Load field from struct */
     add r0, r1, r4
     ldr r5, [r10, r0, lsl #2]                /* Load from address */
-    ldr r1, .POOL9_L22_NULL                  /* Load null address */
+    ldr r1, .POOL8_L22_NULL                  /* Load null address */
     cmp r5, r1
     beq Map.HashMap.remove.L0
 /* Init tuple for searching */
@@ -782,7 +821,7 @@ Map.HashMap.remove_P16:                      /* Function: Map.HashMap.remove, Pr
     mov r4, #0
 /* Iterate through list, check for match, and remove */
 Map.HashMap.remove.L3:                       /* Evaluate condition */
-    ldr r1, .POOL9_L22_NULL                  /* Load null address */
+    ldr r1, .POOL8_L22_NULL                  /* Load null address */
     cmp r3, r1
     beq Map.HashMap.remove.L4
     sub r0, fp, #20                          /* Load parameters */
@@ -793,12 +832,12 @@ Map.HashMap.remove.L3:                       /* Evaluate condition */
     pop { r1 }
     bl Map.tupleKeyMatcher_P14               /* Call Map.tupleKeyMatcher */
     cmp r0, #0
-    beq Map.HashMap.remove.L5
+    beq Map.HashMap.remove.L6
     mov r0, r5
     mov r1, r4
     bl List.LinkedList.remove_P17            /* Call List.LinkedList.remove */
     b Map.HashMap.remove.L4
-Map.HashMap.remove.L5: 
+Map.HashMap.remove.L6: 
     mov r0, r4
     add r4, r4, #1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -809,7 +848,7 @@ Map.HashMap.remove.L4:
 Map.HashMap.remove.L0: 
     mov sp, fp
     ldmfd sp!, {r3-r5, fp, pc}
-.POOL9_L22_NULL: .word NULL
+.POOL8_L22_NULL: .word NULL
     
 Map.HashMap.create_P1:                       /* Function: Map.HashMap.create, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #20
@@ -823,7 +862,7 @@ Map.HashMap.create_P1:                       /* Function: Map.HashMap.create, Pr
 Map.HashMap.create.L1: 
     cmp r6, r3
     bge Map.HashMap.create.L2
-    ldr r0, .POOL10_L22_NULL                 /* Evaluate Expression */
+    ldr r0, .POOL9_L22_NULL                  /* Evaluate Expression */
     push { r0 }
     add r0, r5, r6
     lsl r1, r0, #2
@@ -847,7 +886,7 @@ Map.HashMap.create.L2:
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3-r6, pc}
-.POOL10_L22_NULL: .word NULL
+.POOL9_L22_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { lr }
@@ -917,7 +956,7 @@ main:                                        /* Function: main */
     mov r0, r5
     bl Map.HashMap.remove_P16                /* Call Map.HashMap.remove */
     cmp r3, #0
-    beq main.L0
+    beq main.L1
     mov r1, #1
     mov r0, r4
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */
@@ -931,7 +970,7 @@ main:                                        /* Function: main */
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */
     add r0, r6, r0
     pop { pc }
-main.L0: 
+main.L1: 
     mov r1, #1
     mov r0, r4
     bl Map.HashMap.get_P21                   /* Call Map.HashMap.get */

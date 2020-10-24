@@ -1,9 +1,10 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -11,7 +12,7 @@ import Util.Source;
 
 public class StructureInit extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public STRUCT structType;
 	
 	public List<Expression> elements;
@@ -21,7 +22,7 @@ public class StructureInit extends Expression {
 	public boolean isTopLevelExpression = true;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,12 +34,12 @@ public class StructureInit extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
-		for (Expression e : this.elements) {
+		
+		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -50,6 +51,17 @@ public class StructureInit extends Expression {
 		
 		for (Expression e : this.elements) 
 			e.setContext(context);
+	}
+
+	public Expression clone() {
+		List<Expression> ec = new ArrayList();
+		for (Expression e : this.elements) ec.add(e.clone());
+		
+		StructureInit in = new StructureInit(this.structType.clone(), ec, this.getSource().clone());
+		in.hasCoveredParam = this.hasCoveredParam;
+		in.isTopLevelExpression = this.isTopLevelExpression;
+		
+		return in;
 	}
 
 } 

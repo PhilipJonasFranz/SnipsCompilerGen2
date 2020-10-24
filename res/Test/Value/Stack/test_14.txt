@@ -35,10 +35,10 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r5, r0, r2
     add sp, sp, #12
-    b main.L2
+    b main.L0
 main.L1: 
     cmp r3, #4
-    bne main.L2
+    bne main.L0
     mov r0, #12                              /* Evaluate Expression */
     mov r1, #5
     stmfd sp!, {r0, r1}
@@ -48,7 +48,7 @@ main.L1:
     ldr r2, [fp, #-4]
     add r5, r0, r2
     add sp, sp, #16
-main.L2: 
+main.L0: 
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     bx lr

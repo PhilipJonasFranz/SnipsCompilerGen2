@@ -3,6 +3,7 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
@@ -38,7 +39,7 @@ import Snips.CompilerDriver;
 
 public class AsNStructSelect extends AsNExpression {
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructSelect sel = new AsNStructSelect();
 		s.castedNode = sel;
@@ -51,12 +52,12 @@ public class AsNStructSelect extends AsNExpression {
 		else {
 			/* Create a address loader that points to the first word of the target */
 			boolean directLoad = injectAddressLoader(sel, s, r, map, st, false);
-			
+
 			if (!directLoad) {
 				/* Copy result on the stack, push dummy values on stack set */
 				if (s.getType() instanceof STRUCT || s.getType() instanceof ARRAY) {
 					/* Copy memory section */
-					AsNArraySelect.subStructureCopy(sel, s.getType().wordsize());
+					StackUtil.copyToStackFromAddress(sel, s.getType().wordsize());
 					
 					/* Create dummy stack entries for newly copied struct on stack */
 					for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
@@ -138,6 +139,7 @@ public class AsNStructSelect extends AsNExpression {
 				/* Load data label */
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			}
+			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			
 			/*
 			 * When loading the address of a pointer substructure, we are interested in the address 

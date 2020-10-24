@@ -13,31 +13,26 @@ import Imm.AST.Statement.Declaration;
  */
 public class MemoryMap {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/**
 	 * Memory cell to describe an entry in the memory cell. The cells can have
 	 * different word sizes based on the declaration they capsule.
 	 */
 	public class MemoryCell {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		/** The declaration that this cell houses */
 		private Declaration declaration;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		/** Default constructor */
 		public MemoryCell(Declaration dec) {
 			this.declaration = dec;
 		}
 		
 		
-				/* --- METHODS --- */
-		/** Returns the word size of the type of the capsuled declaration. */
-		public int wordsize() {
-			return this.declaration.getType().wordsize();
-		}
-		
+				/* ---< METHODS >--- */
 		/** Returns the stored declaration */
 		public Declaration getDeclaration() {
 			return this.declaration;
@@ -46,7 +41,7 @@ public class MemoryMap {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The map that houses all active memory cells. */
 	private List<MemoryCell> map = new ArrayList();
 
@@ -57,7 +52,7 @@ public class MemoryMap {
 	private HashMap<Declaration, ASMDataLabel> cellMapping = new HashMap();
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Check wether given declaration is loaded in the memory map.
 	 */
@@ -84,12 +79,12 @@ public class MemoryMap {
 	
 	/** Prints out the memory layout. */
 	public void print() {
-		System.out.println("\n---- MEMORY START ----");
+		System.out.println("\n----< MEMORY START ----");
 		for (int i = 0; i < this.map.size(); i++) {
 			MemoryCell x = this.map.get(i);
 			x.declaration.print(4, true);
 		}
-		System.out.println("---- MEMORY END ----\n");
+		System.out.println("----< MEMORY END >----\n");
 	}
 	
 	/**

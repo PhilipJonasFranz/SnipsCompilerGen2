@@ -5,7 +5,6 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
-import Par.Token;
 import Util.Source;
 
 /**
@@ -13,24 +12,18 @@ import Util.Source;
  */
 public class Atom extends Expression {
 
-			/* --- FIELDS --- */
-	/* Type information and potential value */
-	public String spelling;
-	
-	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public Atom(TYPE type, Token id, Source source) {
+	public Atom(TYPE type, Source source) {
 		super(source);
 		this.setType(type);
-		this.spelling = id.spelling();
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">");
 	}
@@ -41,6 +34,10 @@ public class Atom extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		
+	}
+
+	public Expression clone() {
+		return new Atom(this.getType().clone(), this.getSource().clone());
 	}
 
 } 

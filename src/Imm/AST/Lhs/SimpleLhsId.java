@@ -14,21 +14,21 @@ import Util.Source;
  */
 public class SimpleLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public IDRef ref;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public SimpleLhsId(IDRef ref, Source source) {
 		super(source);
 		this.ref = ref;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "SimpleLhsId");
-		this.ref.print(d + this.printDepthStep, rec);
+		if (rec) this.ref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -43,6 +43,10 @@ public class SimpleLhsId extends LhsId {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.ref.setContext(context);
+	}
+
+	public SimpleLhsId clone() {
+		return new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
 	}
 	
 } 

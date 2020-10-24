@@ -27,11 +27,11 @@ import Util.Logging.SimpleMessage;
 
 public class TestDriver {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Result summary of a test */
 	public class Result {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		/** The return type status of the test */
 		public RET_TYPE res;
 		
@@ -39,7 +39,7 @@ public class TestDriver {
 		public int succ, fail;
 		
 		
-				/* --- CONSTRUCTORS --- */
+				/* ---< CONSTRUCTORS >--- */
 		public Result(RET_TYPE res, int succ, int fail) {
 			this.res = res;
 			this.succ = succ;
@@ -54,7 +54,7 @@ public class TestDriver {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
@@ -80,7 +80,7 @@ public class TestDriver {
 	public long start, firstStart;
 	
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public TestDriver(String [] args) {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
@@ -151,7 +151,7 @@ public class TestDriver {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/** Launch a new test driver run with given arguments. */
 	public static void main(String [] args) {
 		new TestDriver(args);	
@@ -347,7 +347,7 @@ public class TestDriver {
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
-					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+					if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + thrown.size() + " failed.", LogPoint.Type.FAIL, true));
 					buffer.add(new Message("-> Expected Exception '" + thrown.get(i).first + "', but got none.", LogPoint.Type.FAIL, true));
 					fail++;
 				}
@@ -374,7 +374,7 @@ public class TestDriver {
 					}
 					else {
 						/* Exceptions do not match */
-						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+						if (thrown.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + thrown.size() + " failed.", LogPoint.Type.FAIL, true));
 						buffer.add(new Message("-> Thrown Exception: " + e, LogPoint.Type.FAIL, true));
 						buffer.add(new Message("-> Thrown Exception does not match expected: " + msg + " vs " + thrown.get(i).first, LogPoint.Type.FAIL, true));
 						fail++;
@@ -458,6 +458,7 @@ public class TestDriver {
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
+						break;
 					}
 				}
 				

@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -13,14 +13,14 @@ import Util.Source;
  */
 public class TempAtom extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression base;
 	
 	/* The type this placeholder atom replaces */
 	public TYPE inheritType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -31,7 +31,7 @@ public class TempAtom extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
 		System.out.println(this.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
@@ -52,6 +52,12 @@ public class TempAtom extends Expression {
 			ProvisoUtil.mapNTo1(this.inheritType, context);
 		
 		this.base.setContext(context);
+	}
+
+	public Expression clone() {
+		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
+		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
+		return t;
 	}
 
 } 

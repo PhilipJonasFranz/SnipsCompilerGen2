@@ -16,21 +16,21 @@ import Util.Source;
  */
 public class StructSelectLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public StructSelect select;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public StructSelectLhsId(StructSelect select, Source source) {
 		super(source);
 		this.select = select;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "StructSelectLhsId");
-		this.select.print(d + this.printDepthStep, rec);
+		if (rec) this.select.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -60,6 +60,10 @@ public class StructSelectLhsId extends LhsId {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.select.setContext(context);
+	}
+
+	public StructSelectLhsId clone() {
+		return new StructSelectLhsId((StructSelect) this.select.clone(), this.getSource().clone());
 	}
 
 } 

@@ -13,25 +13,30 @@ import Util.Source;
  */
 public class DoWhileStatement extends ConditionalCompoundStatement {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public DoWhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Do");
+		System.out.println(this.pad(d) + "Do While");
 		
-		for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
 		
-		System.out.println(this.pad(d) + "While");
-		this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkDoWhileStatement(this);
+	}
+
+	public Statement clone() {
+		return new DoWhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
 	}
 	
 } 

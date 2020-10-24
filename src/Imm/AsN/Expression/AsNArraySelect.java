@@ -1,29 +1,20 @@
 package Imm.AsN.Expression;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.Branch.ASMBranch;
-import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
-import Imm.ASM.Memory.Stack.ASMLdrStack;
-import Imm.ASM.Memory.Stack.ASMPushStack;
-import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMult;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
@@ -38,7 +29,7 @@ import Res.Const;
 
 public class AsNArraySelect extends AsNExpression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public enum SELECT_TYPE {
 		REG_SINGLE, REG_SUB,
 		LOCAL_SINGLE, LOCAL_SUB,
@@ -47,7 +38,7 @@ public class AsNArraySelect extends AsNExpression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNArraySelect select = new AsNArraySelect();
 		s.castedNode = select;
@@ -83,7 +74,7 @@ public class AsNArraySelect extends AsNExpression {
 		
 		if (s.getType().wordsize() > 1) {
 			/* Loop through array word size and copy values */
-			subStructureCopy(select, s.getType().wordsize());
+			StackUtil.copyToStackFromAddress(select, s.getType().wordsize());
 			
 			/* Push dummy values on the stack */
 			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
@@ -150,62 +141,6 @@ public class AsNArraySelect extends AsNExpression {
 			}
 		}
 		
-	}
-	
-	/**
-	 * Copy memory location the size of the word size of the type of s, assumes that the start
-	 * of the sub structure is located in R1. Push the copied section on the stack.
-	 */
-	public static void subStructureCopy(AsNNode node, int size) {
-		
-		/* Do it sequentially for 8 or less words to copy */
-		if (size <= 8) {
-			int offset = (size - 1) * 4;
-			
-			boolean r0 = false;
-			for (int a = 0; a < size; a++) {
-				if (!r0) {
-					node.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1), new ImmOp(offset)));
-				    r0 = true;
-				}
-				else {
-					node.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(offset)));
-					node.instructions.add(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R0)));
-					r0 = false;
-				}
-				offset -= 4;
-			}
-			
-			if (r0) {
-				node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-			}
-		}
-		/* Do it via ASM Loop for bigger data chunks */
-		else {
-			/* Move counter in R2 */
-			node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(size * 4)));
-			
-			ASMLabel loopStart = new ASMLabel(LabelGen.getLabel());
-			loopStart.comment = new ASMComment("Copy memory section with loop");
-			node.instructions.add(loopStart);
-			
-			ASMLabel loopEnd = new ASMLabel(LabelGen.getLabel());
-			
-			/* Check if whole sub array was loaded */
-			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));
-			
-			/* Branch to loop end */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
-			
-			/* Load value and push it on the stack */
-			node.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.R1), new ImmOp(4)));
-			node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-			
-			/* Branch to loop start */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(loopStart)));
-			
-			node.instructions.add(loopEnd);
-		}
 	}
 	
 	/**
@@ -314,11 +249,6 @@ public class AsNArraySelect extends AsNExpression {
 			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
-	}
-	
-	public static void loadPointer(AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
-		node.instructions.addAll(AsNIDRef.cast(s.idRef, r, map, st, target).getInstructions());
-		node.instructions.add(new ASMLsl(new RegOp(target), new RegOp(target), new ImmOp(2)));
 	}
 	
 } 

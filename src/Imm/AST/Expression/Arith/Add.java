@@ -9,7 +9,7 @@ import Util.Source;
  */
 public class Add extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -18,4 +18,8 @@ public class Add extends BinaryExpression {
 		super(left, right, Operator.ADD, source);
 	}
 
+	public BinaryExpression clone() {
+		return new Add(this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
 } 

@@ -14,7 +14,7 @@ import Util.Source;
  */
 public abstract class LhsId extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/* Set during context checking */
 	public Declaration origin;
 	
@@ -23,13 +23,13 @@ public abstract class LhsId extends SyntaxElement {
 	public Assignment assign;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public LhsId(Source source) {
 		super(source);
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public abstract void print(int d, boolean rec);
 
 	/**
@@ -39,5 +39,7 @@ public abstract class LhsId extends SyntaxElement {
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
 	
 	public abstract NamespacePath getFieldName();
+	
+	public abstract LhsId clone();
 	
 } 

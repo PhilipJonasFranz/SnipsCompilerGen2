@@ -12,12 +12,12 @@ import Util.Source;
  */
 public class WatchStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Declaration watched;
 	
 	public boolean hasTarget = false;
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -28,14 +28,12 @@ public class WatchStatement extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
-		if (rec) {
-			for (Statement s : this.body) {
-				s.print(d + this.printDepthStep, rec);
-			}
-		}
+		
+		if (rec) for (Statement s : this.body) 
+			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -44,9 +42,17 @@ public class WatchStatement extends CompoundStatement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.watched.setContext(context);
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.setContext(context);
-		}
+	}
+
+	public WatchStatement clone() {
+		Declaration wc = null;
+		if (this.watched != null) wc = this.watched.clone();
+		
+		WatchStatement w = new WatchStatement(this.cloneBody(), wc, this.getSource().clone());
+		w.hasTarget = this.hasTarget;
+		return w;
 	}
 
 } 

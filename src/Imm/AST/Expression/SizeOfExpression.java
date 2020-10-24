@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -13,13 +13,13 @@ import Util.Source;
  */
 public class SizeOfExpression extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	public TYPE sizeType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -30,10 +30,10 @@ public class SizeOfExpression extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "SizeOf");
-		this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -42,8 +42,11 @@ public class SizeOfExpression extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
-		
 		this.expression.setContext(context);
+	}
+
+	public Expression clone() {
+		return new SizeOfExpression(this.expression.clone(), this.getSource().clone());
 	}
 
 } 

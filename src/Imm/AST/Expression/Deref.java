@@ -12,11 +12,11 @@ import Util.Source;
  */
 public class Deref extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -27,7 +27,7 @@ public class Deref extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Deref");
 		this.expression.print(d + this.printDepthStep, rec);
@@ -39,6 +39,10 @@ public class Deref extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.expression.setContext(context);
+	}
+
+	public Expression clone() {
+		return new Deref(this.expression.clone(), this.getSource().clone());
 	}
 
 } 

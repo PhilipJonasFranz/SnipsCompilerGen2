@@ -20,7 +20,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 
 public class AsNAnd extends AsNBinaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNAnd cast(And a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNAnd and = new AsNAnd();
 		

@@ -4,7 +4,7 @@ import Imm.AST.Statement.Declaration;
 
 public class RegSet {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Used to identify the state of a register */
 	public enum STATUS {
 		USED, FREE, RESERVED;
@@ -17,14 +17,14 @@ public class RegSet {
 	 */
 	public class Reg {
 		
-				/* --- FIELDS --- */
+				/* ---< FIELDS >--- */
 		/** The status of the Register */
 		public STATUS status = STATUS.FREE;
 		
 		/** The declaration that is currently in the register. */
 		public Declaration declaration;
 		
-				/* --- METHODS --- */
+				/* ---< METHODS >--- */
 		/** Free the register, set the declaration to null and set the status to free */
 		public void free() {
 			this.declaration = null;
@@ -52,12 +52,12 @@ public class RegSet {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The register array. */
 	private Reg [] regs = new Reg [16]; 
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/** Create a new RegSet object, initialize the regs, set regs 11-15 to reserved. */
 	public RegSet() {
 		for (int i = 0; i < regs.length; i++) regs [i] = new Reg();

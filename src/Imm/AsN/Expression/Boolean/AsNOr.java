@@ -20,7 +20,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 
 public class AsNOr extends AsNBinaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNOr cast(Or o, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNOr or = new AsNOr();
 		

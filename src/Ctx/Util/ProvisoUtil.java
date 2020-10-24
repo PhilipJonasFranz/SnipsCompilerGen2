@@ -1,8 +1,9 @@
-package Ctx;
+package Ctx.Util;
 
 import java.util.List;
 
 import Exc.SNIPS_EXC;
+import Imm.AST.Statement.Declaration;
 import Imm.TYPE.*;
 import Imm.TYPE.COMPOSIT.*;
 import Imm.TYPE.PRIMITIVES.*;
@@ -33,14 +34,13 @@ public class ProvisoUtil {
 			boolean map = true;
 			
 			/* Map to each predicate proviso */
-			for (int i = 0; i < f.proviso.size(); i++)
-				map &= map1To1Maybe(f.proviso.get(i), source);
-
+			for (TYPE t : f.proviso) map &= map1To1Maybe(t, source);
+			
 			if (f.funcHead != null) {
 				/* Map to each parameter type */
-				for (int i = 0; i < f.funcHead.parameters.size(); i++)
-					map &= map1To1Maybe(f.funcHead.parameters.get(i).getType(), source);
-			
+				for (Declaration d : f.funcHead.parameters)
+					map &= map1To1Maybe(d.getType(), source);
+				
 				map &= map1To1Maybe(f.funcHead.getReturnTypeDirect(), source);
 			}
 			
@@ -67,8 +67,17 @@ public class ProvisoUtil {
 			boolean map = true;
 			
 			/* Map to each struct proviso */
-			for (int i = 0; i < s.proviso.size(); i++)
-				map &= map1To1Maybe(s.proviso.get(i), source);
+			for (TYPE t : s.proviso) map &= map1To1Maybe(t, source);
+			
+			return map;
+		}
+		else if (target instanceof INTERFACE) {
+			INTERFACE i = (INTERFACE) target;
+			
+			boolean map = true;
+			
+			/* Map to each struct proviso */
+			for (TYPE t : i.proviso) map &= map1To1Maybe(t, source);
 			
 			return map;
 		}
@@ -78,7 +87,7 @@ public class ProvisoUtil {
 			/* Relay to array target type */
 			return map1To1Maybe(a.elementType, source);
 		}
-		
+
 		/* 
 		 * When using this mapping method, its possible that f.E PROVISO<K, ...> is 
 		 * attempted to be mapped to PROVISO<V>. This doesnt work of course, but this
@@ -102,8 +111,7 @@ public class ProvisoUtil {
 			FUNC f = (FUNC) target;
 
 			/* Map to each predicate proviso */
-			for (int i = 0; i < f.proviso.size(); i++)
-				map1To1(f.proviso.get(i), source);
+			for (TYPE t : f.proviso) map1To1(t, source);
 		}
 		else if (target instanceof PROVISO) {
 			PROVISO p = (PROVISO) target;
@@ -121,8 +129,13 @@ public class ProvisoUtil {
 			STRUCT s = (STRUCT) target;
 			
 			/* Map to each struct proviso */
-			for (int i = 0; i < s.proviso.size(); i++)
-				map1To1(s.proviso.get(i), source);
+			for (TYPE t : s.proviso) map1To1(t, source);
+		}
+		else if (target instanceof INTERFACE) {
+			INTERFACE i = (INTERFACE) target;
+			
+			/* Map to each struct proviso */
+			for (TYPE t : i.proviso) map1To1(t, source);
 		}
 		else if (target instanceof ARRAY) {
 			ARRAY a = (ARRAY) target;
@@ -140,15 +153,15 @@ public class ProvisoUtil {
 	 */
 	public static void mapNTo1(TYPE target, List<TYPE> source) {
 		/* Map the given source to the target, stop once a match was found */
-		for (int i = 0; i < source.size(); i++) 
-			map1To1Maybe(target, source.get(i));
+		for (TYPE t : source) map1To1Maybe(target, t);
 	}
 	
+	/**
+	 * Map each type from the source to each type of the target. Possible that
+	 * types do not match.
+	 */
 	public static void mapNToNMaybe(List<TYPE> target, List<TYPE> source) {
-		/* Map the given source to the target, stop once a match was found */
-		for (int i = 0; i < source.size(); i++) 
-			for (int a = 0; a < target.size(); a++)
-				map1To1Maybe(target.get(i), source.get(i));
+		for (TYPE s : source) for (TYPE t : target) map1To1Maybe(t, s);
 	}
 	
 	/**
@@ -173,6 +186,7 @@ public class ProvisoUtil {
 	 */
 	public static boolean mappingIsEqualProvisoFree(List<TYPE> map0, List<TYPE> map1) {
 		boolean isEqual = true;
+		
 		for (int a = 0; a < map0.size(); a++) 
 			isEqual &= map0.get(a).provisoFree().typeString().equals(map1.get(a).provisoFree().typeString());
 		
@@ -189,24 +203,23 @@ public class ProvisoUtil {
 	
 	public static boolean isProvisoFreeMapping(List<TYPE> mapping) {
 		boolean provisoFree = true;
-		for (TYPE t : mapping)
-			provisoFree &= !t.hasProviso();
+		
+		for (TYPE t : mapping) provisoFree &= !t.hasProviso();
 		
 		return provisoFree;
 	}
-	
-	public static String mappingToString(List<TYPE> mapping) {
-		String s = "[";
+
+	/**
+	 * For the given type, re-map all provisos of the interface to the provided provisos and
+	 * apply the new provisos to the type. Return the resulting type.
+	 */
+	public static TYPE translate(TYPE t, List<TYPE> source, List<TYPE> target) {
+		for (int k = 0; k < target.size(); k++) {
+			PROVISO definedProviso = (PROVISO) source.get(k).clone();
+			t = t.remapProvisoName(definedProviso.placeholderName, target.get(k).clone());
+		}
 		
-		for (TYPE t : mapping) 
-			s += t.typeString() + ",";
-		
-		if (!mapping.isEmpty())
-			s = s.substring(0, s.length() - 1);
-		
-		s += "]";
-		
-		return s;
+		return t;
 	}
 	
 } 

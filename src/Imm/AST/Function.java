@@ -3,16 +3,16 @@ package Imm.AST;
 import java.util.ArrayList;
 import java.util.List;
 
-import CGen.LabelGen;
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.InterfaceTypedef;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
+import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Res.Const;
@@ -24,7 +24,7 @@ import Util.Source;
  */
 public class Function extends CompoundStatement {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	public class ProvisoMapping {
 		
 		public String provisoPostfix;
@@ -41,7 +41,7 @@ public class Function extends CompoundStatement {
 		
 	}
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** 
 	 * Set to the interface typedef when this function is 
 	 * a function head defined in this interface. 
@@ -55,6 +55,11 @@ public class Function extends CompoundStatement {
 	 */
 	public boolean requireR10Reset = false;
 	
+	/**
+	 * Set to true when this function is called at least once. This is required
+	 * when this function is part of an interface typedef, its nessesary to determine
+	 * which functions need to be included in the relay table.
+	 */
 	public boolean wasCalled = false;
 	
 	/**
@@ -62,7 +67,9 @@ public class Function extends CompoundStatement {
 	 */
 	public NamespacePath path;
 	
-	/** List of the provisos types this function is templated with */
+	/** 
+	 * List of the provisos types this function is templated with 
+	 */
 	public List<TYPE> provisosTypes;
 	
 	/** 
@@ -94,7 +101,7 @@ public class Function extends CompoundStatement {
 	public ReturnStatement noReturn = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
@@ -114,7 +121,7 @@ public class Function extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
 		
@@ -144,11 +151,9 @@ public class Function extends CompoundStatement {
 		}
 		
 		System.out.println(" " + this.toString().split("@") [1]);
-		if (rec) {
-			for (Statement s : body) {
-				s.print(d + this.printDepthStep, rec);
-			}
-		}
+		
+		if (rec) for (Statement s : body) 
+			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -169,6 +174,9 @@ public class Function extends CompoundStatement {
 		return this.returnType;
 	}
 	
+	/**
+	 * Sets the return type of this function.
+	 */
 	public void setReturnType(TYPE t) {
 		this.returnType = t;
 	}
@@ -181,7 +189,7 @@ public class Function extends CompoundStatement {
 	}
 
 	
-			/* --- PROVISO RELATED --- */
+			/* --- PROVISO RELATED >--- */
 	/**
 	 * Set given context to the function, including parameters, return type and body.
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
@@ -274,16 +282,36 @@ public class Function extends CompoundStatement {
 		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
 	}
 	
-	public void addProvisoMapping(TYPE type, List<TYPE> context) {
+	/**
+	 * Adds a new proviso mapping to this function if the given proviso mapping
+	 * does not exist already.
+	 * @param returnType The return type of the new mapping.
+	 * @param context The proviso types of the new mapping.
+	 */
+	public void addProvisoMapping(TYPE returnType, List<TYPE> context) {
 		/* Proviso mapping already exists, just return */
 		if (this.containsMapping(context)) return;
 		else {
 			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelGen.getProvisoPostfix();
-			this.provisosCalls.add(new ProvisoMapping(postfix, type, context));
+			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
+			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
 		}
 	}
 	
+	/**
+	 * Clones the function's signature. This includes deep copies of:
+	 * 
+	 * - Return Type
+	 * - Namespace Path
+	 * - Proviso Types
+	 * - Parameters
+	 * - Signal Types
+	 * 
+	 * As well as copies of all other fields and flags, except the body of the function,
+	 * which is left empty.
+	 * 
+	 * @return The newly created function signature.
+	 */
 	public Function cloneSignature() {
 		List<TYPE> provClone = new ArrayList();
 		for (TYPE t : this.provisosTypes)
@@ -299,6 +327,78 @@ public class Function extends CompoundStatement {
 		
 		/* Clone the function signature */
 		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+	}
+	
+	/**
+	 * Translates this function from the source proviso space to the target proviso space.<br>
+	 * <br>
+	 * When to use this function: A function nested in struct type A is re-located to type B. B extends A.<br>
+	 * Then the function needs to be proviso translated, with f.translate(A.provisos, B.provisos).<br>
+	 * <br>
+	 * This will cause the functions provisos to be adjusted to the provisos in B.<br>
+	 * <br>
+	 * Note: Only does this to the functions signature, not the body.
+	 * 
+	 * @param source The proviso heads of the ressource where the function was located
+	 * @param target The proviso heads of the ressource where the function is re-located to
+	 */
+	public void translateProviso(List<TYPE> source, List<TYPE> target) {
+		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
+		
+		for (int i = 0; i < this.provisosTypes.size(); i++)
+			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
+		
+		for (Declaration d : this.parameters)
+			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
+		
+		// TODO: Also translate body
+	}
+	
+	/**
+	 * Compares the signatures of the two given functions. This includes name, parameters
+	 * and return type. Returns true if the signatures match.
+	 * @param f0 The first function.
+	 * @param f1 The second function to match against the first.
+	 * @param matchParamNames If set to true, the name of the parameter names will be matched as well.
+	 * @return True iff the signatures match.
+	 */
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames) {
+		boolean match = true;
+		
+		/* Match function name, not namespace path */
+		match &= f0.path.getLast().equals(f1.path.getLast());
+		
+		/* Match function modifier */
+		match &= f0.modifier == f1.modifier;
+		
+		/* Compare parameters */
+		if (f0.parameters.size() == f1.parameters.size()) {
+			for (int i = 0; i < f0.parameters.size(); i++) {
+				Declaration d0 = f0.parameters.get(i);
+				Declaration d1 = f1.parameters.get(i);
+				
+				/* Also match names if flag is set */
+				if (matchParamNames) match &= d0.path.getLast().equals(d1.path.getLast());
+				
+				match &= d0.getType().isEqual(d1.getType());
+			}
+		}
+		else match = false;
+		
+		/* Compare the return type */
+		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
+		
+		return match;
+	}
+
+	public Function clone() {
+		Function f = this.cloneSignature();
+		
+		List<Statement> clone = new ArrayList();
+		for (Statement s : this.body) clone.add(s.clone());
+		f.body = clone;
+		
+		return f;
 	}
 	
 } 

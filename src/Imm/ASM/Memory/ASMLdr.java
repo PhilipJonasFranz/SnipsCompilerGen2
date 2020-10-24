@@ -5,7 +5,7 @@ import Imm.ASM.Util.Operands.RegOp;
 
 public class ASMLdr extends ASMMemOp {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMLdr(RegOp target, Operand op0, Operand op1) {
 		super(target, op0, op1);
 	}
@@ -14,7 +14,7 @@ public class ASMLdr extends ASMMemOp {
 		super(target, op0, null);
 	}
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * Calls build of ASMMemOp with class as parameter.
 	 */

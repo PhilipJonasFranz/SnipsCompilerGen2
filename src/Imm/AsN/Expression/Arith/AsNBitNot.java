@@ -13,7 +13,7 @@ import Imm.AsN.Expression.AsNUnaryExpression;
 
 public class AsNBitNot extends AsNUnaryExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNBitNot cast(BitNot b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitNot not = new AsNBitNot();
 		

@@ -14,7 +14,7 @@ import Util.Source;
  */
 public class TryStatement extends CompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
 	public List<WatchStatement> watchpoints;
@@ -22,7 +22,7 @@ public class TryStatement extends CompoundStatement {
 	public List<TYPE> unwatched = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,16 +33,16 @@ public class TryStatement extends CompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Try");
+		
 		if (rec) {
-			for (Statement s : this.body) {
+			for (Statement s : this.body) 
 				s.print(d + this.printDepthStep, rec);
-			}
-			for (WatchStatement w : this.watchpoints) {
+			
+			for (WatchStatement w : this.watchpoints) 
 				w.print(d + this.printDepthStep, rec);
-			}
 		}
 	}
 
@@ -51,12 +51,26 @@ public class TryStatement extends CompoundStatement {
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
-		for (Statement s : this.body) {
+		for (Statement s : this.body) 
 			s.setContext(context);
-		}
-		for (WatchStatement w : this.watchpoints) {
+		
+		for (WatchStatement w : this.watchpoints) 
 			w.setContext(context);
+	}
+
+	public TryStatement clone() {
+		List<WatchStatement> watchClone = null;
+		if (this.watchpoints != null) {
+			watchClone = new ArrayList();
+			for (WatchStatement w : this.watchpoints) watchClone.add((WatchStatement) w.clone());
 		}
+	
+		List<TYPE> unw = new ArrayList();
+		for (TYPE t : this.unwatched) unw.add(t.clone());
+		
+		TryStatement tr = new TryStatement(this.cloneBody(), watchClone, this.getSource().clone());
+		if (this.watchpoint != null) tr.watchpoint = this.watchpoint;
+		return tr;
 	}
 
 } 

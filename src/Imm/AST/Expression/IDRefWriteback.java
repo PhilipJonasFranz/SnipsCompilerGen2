@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class IDRefWriteback extends Expression {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public WRITEBACK writeback;
 	
 	private Expression shadowRef;
@@ -21,7 +21,7 @@ public class IDRefWriteback extends Expression {
 	public IDRef idRef;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,10 +33,10 @@ public class IDRefWriteback extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
-		this.shadowRef.print(d + this.printDepthStep, rec);
+		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -49,6 +49,10 @@ public class IDRefWriteback extends Expression {
 
 	public Expression getShadowRef() {
 		return this.shadowRef;
+	}
+
+	public Expression clone() {
+		return new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
 	}
 	
 } 

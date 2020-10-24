@@ -32,7 +32,7 @@ import Res.Const;
 
 public class AsNAddressOf extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNAddressOf cast(AddressOf a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNAddressOf aof = new AsNAddressOf();
 		a.castedNode = aof;

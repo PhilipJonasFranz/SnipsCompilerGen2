@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -13,7 +14,7 @@ import Util.Source;
  */
 public class SwitchStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression condition;
 	
 	public List<CaseStatement> cases;
@@ -21,27 +22,28 @@ public class SwitchStatement extends Statement {
 	public DefaultStatement defaultStatement;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public SwitchStatement(Expression condition, List<CaseStatement> cases, DefaultStatement defaultStatement, Source source) {
 		super(source);
 		this.condition = condition;
 		this.cases = cases;
 		this.cases.stream().forEach(x -> x.superStatement = this);
 		this.defaultStatement = defaultStatement;
-		this.defaultStatement.superStatement = this;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Switch");
-		this.condition.print(d + this.printDepthStep, rec);
 		
-		for (CaseStatement c : this.cases) {
-			c.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+			
+			for (CaseStatement c : this.cases) 
+				c.print(d + this.printDepthStep, rec);
+			
+			this.defaultStatement.print(d + this.printDepthStep, rec);
 		}
-		
-		this.defaultStatement.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -52,6 +54,13 @@ public class SwitchStatement extends Statement {
 		this.condition.setContext(context);
 		for (CaseStatement c : this.cases) c.setContext(context);
 		this.defaultStatement.setContext(context);
+	}
+
+	public SwitchStatement clone() {
+		List<CaseStatement> casesC = new ArrayList();
+		for (CaseStatement w : this.cases) casesC.add((CaseStatement) w.clone());
+		
+		return new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
 	}
 
 } 

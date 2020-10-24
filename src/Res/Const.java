@@ -48,8 +48,6 @@ public class Const {
 	
 	public static final String UNKNOWN_REGISTER = "Unknown register: %s";
 	
-	public static final String UNKNOWN_X = "Unknown %s '%s'";
-	
 	public static final String UNDEFINED_FUNCTION_OR_PREDICATE = "Undefined function or predicate '%s'";
 	
 	public static final String EXPECTED_TYPE_ACTUAL = "Expected %s, actual %s";
@@ -260,15 +258,11 @@ public class Const {
 			/* ---< CODE GENERATION >--- */
 	public static final String UNABLE_TO_POP_X_WORDS = "Unable to pop %d Words from the stack, could only pop %d";
 	
-	public static final String UNABLE_TO_POP_X_CELLS = "Unable to pop %d Cells from the stack, could only pop %d";
-	
 	public static final String CANNOT_PATCH_NON_PATCHABLE_IMM_OP = "Cannot patch non-patchable imm operand!";
 	
 	public static final String NO_INJECTION_CAST_AVAILABLE = "No injection cast available for %s";
 	
 	public static final String FUNCTION_UNDEFINED_AT_THIS_POINT = "Function %s is undefined at this point, %s";
-	
-	public static final String OPERATION_NOT_IMPLEMENTED_FOR = "Assign writeback not implemented for %s at %s";
 	
 	public static final String OPERATION_NOT_IMPLEMENTED = "Operation not implemented!";
 	
@@ -279,8 +273,6 @@ public class Const {
 	
 			/* ---< INTERNAL >--- */
 	public static final String UNKNOWN_MODIFIER = "Unknown Modifier '%s', defaulting to SHARED";
-	
-	public static final String UNKNOWN_TYPE = "Unknown Type '%s', creating Proviso";
 	
 	public static final String CANNOT_GET_SOURCE_CODE_REPRESENTATION = "Cannot get source code representation of type %s";
 	

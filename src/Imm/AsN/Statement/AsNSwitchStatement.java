@@ -1,27 +1,21 @@
 package Imm.AsN.Statement;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
-import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.SwitchStatement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
 
 public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 
@@ -32,12 +26,15 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		/* Capsule expressions in compare statements */
 		s.cases.stream().forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
 	
-		ASMLabel end = new ASMLabel(LabelGen.getLabel());
-		
-		ASMLabel next = new ASMLabel(LabelGen.getLabel());
+		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
 		
 		for (CaseStatement cs : s.cases) {
-			sw.evaluateCondition(cs.condition, r, map, st, next);
+			ASMLabel next = new ASMLabel(LabelUtil.getLabel());
+			
+			COND cond = injectConditionEvaluation(sw, AsNExpression.cast(cs.condition, r, map, st));
+			
+			/* Condition was false, skip body */
+			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(next)));
 			
 			/* Add body */
 			sw.addBody(cs, r, map, st);
@@ -47,9 +44,6 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 			
 			/* Add jump to next case */
 			sw.instructions.add(next);
-			
-			/* Next element in chain */
-			next = new ASMLabel(LabelGen.getLabel());
 		}
 		
 		/* Add default body */
@@ -60,38 +54,6 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		
 		sw.freeDecs(r, s);
 		return sw;
-	}
-	
-	public void evaluateCondition(Expression condition, RegSet r, MemoryMap map, StackSet st, ASMLabel next) throws CGEN_EXC {
-		/* Cast condition */
-		AsNExpression expr = AsNExpression.cast(condition, r, map, st);
-		
-		if (expr instanceof AsNCmp) {
-			/* Top Comparison */
-			AsNCmp com = (AsNCmp) expr;
-			
-			COND neg = com.neg;
-			
-			/* Remove two conditional mov instrutions */
-			com.instructions.remove(com.instructions.size() - 1);
-			com.instructions.remove(com.instructions.size() - 1);
-			
-			/* Evaluate Condition */
-			this.instructions.addAll(com.getInstructions());
-			
-			/* Condition was false, skip body */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(next)));
-		}
-		else {
-			/* Default condition evaluation */
-			this.instructions.addAll(expr.getInstructions());
-			
-			/* Check if expression was evaluated to true */
-			this.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(1)));
-			
-			/* Condition was false, jump to else */
-			this.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(next)));
-		}
 	}
 	
 } 

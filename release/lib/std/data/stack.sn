@@ -26,8 +26,8 @@ namespace Stack {
 		/*
 		 * Pushes given element on top of the stack.
 		 */
-		shared void push<T>(T value) {
-			(self->list)->add<T>(value);
+		shared void push(T value) {
+			(self->list)->add(value);
 		}
 		
 		/*
@@ -48,42 +48,42 @@ namespace Stack {
 		 * Returns the element on the top of the stack, but doesnt
 		 * remove it. Returns the default value if the stack is empty.
 		 */
-		shared T peek<T>() {
-			if (self->isEmpty<T>()) return self->list->defValue;
-			else return (self->list)->get<T>((self->list)->size<T>() - 1);
+		shared T peek() {
+			if (self->isEmpty()) return self->list->defValue;
+			else return (self->list)->get((self->list)->size() - 1);
 		}
 		
 		/*
 		 * Returns the element on the top of the stack, and 
 		 * removes it. Returns the default value if the stack is empty.
 		 */
-		shared T pop<T>() {
-			if (self->isEmpty<T>()) {
+		shared T pop() {
+			if (self->isEmpty()) {
 				return self->list->defValue;
 			}
 			else {
 				int size = (self->list)->size();
-				T value = (self->list)->get<T>(size - 1);
-				(self->list)->remove<T>(size - 1);
+				T value = (self->list)->get(size - 1);
+				(self->list)->remove(size - 1);
 				return value;
 			}
 		}
 		
-		shared T get<T>(int index) {
-			return (self->list)->get<T>(index);
+		shared T get(int index) {
+			return (self->list)->get(index);
 		}
 		
-		shared void set<T>(int index, T value) {
-			(self->list)->set<T>(index, value);
+		shared void set(int index, T value) {
+			(self->list)->set(index, value);
 		}
 		
 		/*
 		 * Creates and initializes a new stack.
 		 * Returns a pointer to the newly created stack.
 		 */
-		shared StackedList<T>* create<T>(T defValue) {
+		static StackedList<T>* create<T>(T defValue) {
 			/* Allocate a new linked list for the stack */
-			LinkedList<T>* list = LinkedList::create<T>(defValue);
+			LinkedList<T>* list = LinkedList::create(defValue);
 			
 			/* Initialize the stack with the list */
 			return init<>(StackedList<T>::(list));

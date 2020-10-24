@@ -1,9 +1,9 @@
 package Imm.AsN.Expression;
 
-import CGen.LabelGen;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -28,7 +28,7 @@ import Snips.CompilerDriver;
 
 public class AsNTempAtom extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNTempAtom cast(TempAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNTempAtom atom = new AsNTempAtom();
 		a.castedNode = atom;
@@ -82,9 +82,9 @@ public class AsNTempAtom extends AsNExpression {
 					mov.comment = new ASMComment("Copy substructure with loop " + (range - 1) + " times");
 					atom.instructions.add(mov);
 					
-					start = new ASMLabel(LabelGen.getLabel());
+					start = new ASMLabel(LabelUtil.getLabel());
 					
-					end = new ASMLabel(LabelGen.getLabel());
+					end = new ASMLabel(LabelUtil.getLabel());
 					
 					atom.instructions.add(start);
 					

@@ -13,11 +13,11 @@ import Util.Source;
  */
 public class ReturnStatement extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression value;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -28,13 +28,12 @@ public class ReturnStatement extends Statement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Return");
-		if (rec) {
-			if (this.value != null) 
-				this.value.print(d + this.printDepthStep, rec);
-		}
+		
+		if (rec && this.value != null) 
+			this.value.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -44,6 +43,10 @@ public class ReturnStatement extends Statement {
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		if (this.value != null) 
 			this.value.setContext(context);
+	}
+
+	public Statement clone() {
+		return new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
 	}
 
 } 

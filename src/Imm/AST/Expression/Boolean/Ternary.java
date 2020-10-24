@@ -10,7 +10,7 @@ import Util.Source;
 
 public class Ternary extends Expression {
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression condition;
 	
 	public Expression leftOperand;
@@ -18,7 +18,7 @@ public class Ternary extends Expression {
 	public Expression rightOperand;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Ternary(Expression condition, Expression left, Expression right, Source source) {
 		super(source);
 		this.condition = condition;
@@ -27,12 +27,15 @@ public class Ternary extends Expression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Ternary");
-		this.condition.print(d + this.printDepthStep, rec);
-		this.leftOperand.print(d + this.printDepthStep, rec);
-		this.rightOperand.print(d + this.printDepthStep, rec);
+		
+		if (rec) {
+			this.condition.print(d + this.printDepthStep, rec);
+			this.leftOperand.print(d + this.printDepthStep, rec);
+			this.rightOperand.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -43,6 +46,10 @@ public class Ternary extends Expression {
 		this.condition.setContext(context);
 		this.leftOperand.setContext(context);
 		this.rightOperand.setContext(context);
+	}
+
+	public Expression clone() {
+		return new Ternary(this.condition.clone(), this.leftOperand.clone(), this.rightOperand.clone(), this.getSource().clone());
 	}
 
 } 

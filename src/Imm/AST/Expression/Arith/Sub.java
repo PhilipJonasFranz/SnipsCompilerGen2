@@ -9,13 +9,17 @@ import Util.Source;
  */
 public class Sub extends BinaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
 	public Sub(Expression left, Expression right, Source source) {
 		super(left, right, Operator.SUB, source);
+	}
+	
+	public BinaryExpression clone() {
+		return new Sub(this.left.clone(), this.right.clone(), this.getSource().clone());
 	}
 
 } 

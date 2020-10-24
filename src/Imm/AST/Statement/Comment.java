@@ -13,18 +13,23 @@ import Util.Source;
  */
 public class Comment extends Statement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public String comment;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Comment(Token comment, Source source) {
 		super(source);
 		this.comment = comment.spelling();
 	}
 	
+	public Comment(String comment, Source source) {
+		super(source);
+		this.comment = comment;
+	}
 	
-			/* --- METHODS --- */
+	
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		return;
 	}
@@ -35,6 +40,10 @@ public class Comment extends Statement {
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
+	}
+
+	public Statement clone() {
+		return new Comment(this.comment, this.getSource().clone());
 	}
 
 } 

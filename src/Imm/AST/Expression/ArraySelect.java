@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -12,7 +13,7 @@ import Util.Source;
  */
 public class ArraySelect extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Expression passed by parser, is context checked to be idref, field idRef will be set to casted ref. */
 	private Expression shadowRef;
 	
@@ -21,7 +22,7 @@ public class ArraySelect extends Expression {
 	public List<Expression> selection;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,12 +34,14 @@ public class ArraySelect extends Expression {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArraySelect");
-		this.shadowRef.print(d + this.printDepthStep, rec);
-		for (Expression e : this.selection) {
-			e.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.shadowRef.print(d + this.printDepthStep, rec);
+			
+			for (Expression e : this.selection) 
+				e.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -55,6 +58,13 @@ public class ArraySelect extends Expression {
 
 	public Expression getShadowRef() {
 		return this.shadowRef;
+	}
+
+	public Expression clone() {
+		List<Expression> eclone = new ArrayList();
+		for (Expression e : this.selection) eclone.add(e.clone());
+		
+		return new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
 	}
 	
 } 

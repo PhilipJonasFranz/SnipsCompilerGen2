@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.4.4.0</Version>
+	<Version>v.4.5.0</Version>
 	<Library>
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
 		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
@@ -8,6 +8,9 @@
 		<Alias>hash_map.sn:lib/std/data/hash_map.sn</Alias>
 		
 			<Alias>iterable.sn:lib/std/data/interface/iterable.sn</Alias>
+			<Alias>collection.sn:lib/std/data/interface/collection.sn</Alias>
+			
+			<Alias>stream.sn:lib/std/data/proc/stream.sn</Alias>
 		
 		
 		<Alias>display.sn:lib/std/io/display.sn</Alias>

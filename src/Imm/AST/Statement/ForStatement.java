@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class ForStatement extends ConditionalCompoundStatement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** The declaration of the iterator. */
 	public Declaration iterator;
 	
@@ -21,7 +21,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	public Statement increment;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ForStatement(Declaration iterator, Expression condition, Statement increment, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.iterator = iterator;
@@ -29,19 +29,26 @@ public class ForStatement extends ConditionalCompoundStatement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "For");
-		this.iterator.print(d + this.printDepthStep, rec);
-		this.condition.print(d + this.printDepthStep, rec);
-		this.increment.print(d + this.printDepthStep, rec);
 		
-		for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+		if (rec) {
+			this.iterator.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, rec);
+			this.increment.print(d + this.printDepthStep, rec);
+			
+			for (Statement s : this.body) 
+				s.print(d + this.printDepthStep, rec);
+		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
 		return ctx.checkForStatement(this);
+	}
+
+	public Statement clone() {
+		return new ForStatement(this.iterator.clone(), this.condition.clone(), this.increment.clone(), this.cloneBody(), this.getSource().clone());
 	}
 	
 } 

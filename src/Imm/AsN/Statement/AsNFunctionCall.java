@@ -6,7 +6,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.SNIPS_EXC;
@@ -36,10 +36,11 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
-import Imm.AST.Statement.InterfaceTypedef.InterfaceProvisoMapping;
+import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
@@ -47,7 +48,7 @@ import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNFunctionCall call = new AsNFunctionCall();
 		fc.castedNode = call;
@@ -184,7 +185,7 @@ public class AsNFunctionCall extends AsNStatement {
 			String postfix = "";
 			
 			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
-				if (ProvisoUtil.mappingIsEqual(provisoMap.providedHeadProvisos, provisos)) {
+				if (ProvisoUtil.mappingIsEqualProvisoFree(provisoMap.providedHeadProvisos, provisos)) {
 					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
 						break;
 					

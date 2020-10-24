@@ -3,7 +3,7 @@ package Imm.AST.Expression;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -13,13 +13,13 @@ import Util.Source;
  */
 public class TypeCast extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public Expression expression;
 	
 	public TYPE castType;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -31,11 +31,11 @@ public class TypeCast extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "TypeCast");
 		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());
-		this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -47,6 +47,10 @@ public class TypeCast extends Expression {
 		ProvisoUtil.mapNTo1(this.castType, context);
 		
 		this.expression.setContext(context);
+	}
+
+	public Expression clone() {
+		return new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
 	}
 
 } 

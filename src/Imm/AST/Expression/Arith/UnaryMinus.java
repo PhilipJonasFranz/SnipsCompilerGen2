@@ -9,13 +9,17 @@ import Util.Source;
  */
 public class UnaryMinus extends UnaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
 	public UnaryMinus(Expression operand, Source source) {
 		super(operand, UnaryOperator.NEG, source);
+	}
+	
+	public UnaryExpression clone() {
+		return new UnaryMinus(this.getOperand().clone(), this.getSource().clone());
 	}
 
 } 

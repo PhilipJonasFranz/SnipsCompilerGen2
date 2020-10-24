@@ -17,23 +17,23 @@ import Util.Source;
  */
 public class PointerLhsId extends LhsId {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	private Expression shadowDeref;
 	
 	public Deref deref;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public PointerLhsId(Expression deref, Source source) {
 		super(source);
 		this.shadowDeref = deref;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "PointerLhsId");
-		if (this.deref != null) this.deref.print(d + this.printDepthStep, rec);
+		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -62,6 +62,10 @@ public class PointerLhsId extends LhsId {
 
 	public Expression getShadowDeref() {
 		return this.shadowDeref;
+	}
+
+	public PointerLhsId clone() {
+		return new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
 	}
 	
 } 

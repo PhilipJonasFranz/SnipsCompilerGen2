@@ -4,7 +4,7 @@ import Imm.TYPE.TYPE;
 
 public abstract class PRIMITIVE<T> extends TYPE<T> {
 
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public PRIMITIVE() {
 		super();
 	}

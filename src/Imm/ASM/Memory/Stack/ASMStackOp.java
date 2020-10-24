@@ -1,14 +1,13 @@
 package Imm.ASM.Memory.Stack;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
 public abstract class ASMStackOp extends ASMInstruction {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/** Used to describe the writeback and indexing behaviour */
 	public enum MEM_OP {
 		PRE_WRITEBACK, 
@@ -17,7 +16,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	/** Writeback and indexing behaviour */
 	public MEM_OP memOp;
 	
@@ -28,7 +27,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 	public Operand op1;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public ASMStackOp(MEM_OP memOp, RegOp target, RegOp op0, Operand op1) {
 		this.memOp = memOp;
 		this.target = target;
@@ -36,16 +35,8 @@ public abstract class ASMStackOp extends ASMInstruction {
 		this.op1 = op1;
 	}
 	
-	public ASMStackOp(MEM_OP memOp, RegOp target, RegOp op0, Operand op1, Cond cond) {
-		super(cond);
-		this.memOp = memOp;
-		this.target = target;
-		this.op0 = op0;
-		this.op1 = op1;
-	}
 	
-	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String build(String operation) {
 		operation += " ";
 		if (this.memOp == MEM_OP.POST_WRITEBACK) {

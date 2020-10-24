@@ -21,7 +21,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNInstanceOfExpression extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNInstanceOfExpression cast(InstanceofExpression iof, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNInstanceOfExpression s = new AsNInstanceOfExpression();
 		iof.castedNode = s;

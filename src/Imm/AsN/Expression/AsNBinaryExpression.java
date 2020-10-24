@@ -45,7 +45,7 @@ import Res.Const;
 
 public abstract class AsNBinaryExpression extends AsNExpression {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/**
 	 * Solve the binary expression for two given operands.
 	 */
@@ -54,7 +54,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNBinaryExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
 		AsNBinaryExpression node = null;

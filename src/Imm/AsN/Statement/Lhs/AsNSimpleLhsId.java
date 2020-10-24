@@ -5,6 +5,7 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
@@ -27,7 +28,6 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.AsN.Statement.AsNAssignment;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -76,7 +76,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			}
 			else {
 				/* Copy the value on the stack to the desired location */
-				AsNAssignment.copyStackSection(ref.origin.getType().wordsize(), id, st);
+				StackUtil.copyToAddressFromStack(ref.origin.getType().wordsize(), id, st);
 			}
 		}
 		/* Store to stack */
@@ -130,7 +130,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				
 				/* Copy array */
-				AsNAssignment.copyStackSection((lhs.origin.getType()).wordsize(), id, st);
+				StackUtil.copyToAddressFromStack((lhs.origin.getType()).wordsize(), id, st);
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}

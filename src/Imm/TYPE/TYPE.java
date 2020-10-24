@@ -23,14 +23,6 @@ public abstract class TYPE<T> {
 		
 	}
 	
-	/**
-	 * Creates a new type instance and parses the given string to the value of the type.
-	 * For example, the type BOOL would parse the String 'true' to a Boolean 'true' internally.
-	 */
-	public TYPE(String initialValue) {
-		this.setValue(initialValue);
-	}
-	
 	
 			/* ---< METHODS >--- */
 	/**
@@ -44,10 +36,6 @@ public abstract class TYPE<T> {
 	 * Check if this type is equal to the given type.
 	 */
 	public abstract boolean isEqual(TYPE type);
-	
-	public boolean hasValue() {
-		return this.value != null;
-	}
 	
 	/**
 	 * Create a pretty-print version of this type and the sub-types.

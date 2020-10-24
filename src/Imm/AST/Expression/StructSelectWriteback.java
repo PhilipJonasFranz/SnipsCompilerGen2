@@ -13,7 +13,7 @@ import Util.Source;
  */
 public class StructSelectWriteback extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public WRITEBACK writeback;
 	
 	private Expression shadowSelect;
@@ -21,7 +21,7 @@ public class StructSelectWriteback extends Expression {
 	public StructSelect select;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -33,10 +33,10 @@ public class StructSelectWriteback extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Increment");
-		this.shadowSelect.print(d + this.printDepthStep, rec);
+		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -45,12 +45,17 @@ public class StructSelectWriteback extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		this.shadowSelect.setContext(context);
-		this.select.setContext(context);
+		
+		if (this.select != null) 
+			this.select.setContext(context);
 	}
 
 	public Expression getShadowSelect() {
 		return this.shadowSelect;
 	}
-	
+
+	public Expression clone() {
+		return new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+	}
 	
 } 

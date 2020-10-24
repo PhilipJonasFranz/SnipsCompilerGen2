@@ -1,4 +1,4 @@
-package Imm.AST.Statement;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import Util.Source;
  */
 public class EnumTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	public List<String> enums;
@@ -28,7 +28,7 @@ public class EnumTypedef extends SyntaxElement {
 	public List<ENUM> enumFields = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -57,9 +57,10 @@ public class EnumTypedef extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Enum Typedef <" + this.path.build() + ">");
+		
 		if (rec) {
 			for (String e : this.enums) 
 				System.out.println(this.pad(d + this.printDepthStep) + e);

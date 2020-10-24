@@ -8,7 +8,7 @@ import Util.Source;
  */
 public class Not extends BoolUnaryExpression {
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -17,4 +17,8 @@ public class Not extends BoolUnaryExpression {
 		super(op, UnaryOperator.NOT, source);
 	}
 
+	public BoolUnaryExpression clone() {
+		return new Not(this.getOperand().clone(), this.getSource().clone());
+	}
+	
 } 

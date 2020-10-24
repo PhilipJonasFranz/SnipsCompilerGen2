@@ -7,11 +7,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import CGen.LabelGen;
-import CGen.LiteralManager;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.Util.LabelUtil;
+import CGen.Util.LiteralUtil;
+import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Imm.ASM.ASMInstruction;
@@ -21,22 +22,16 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
-import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
-import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -49,13 +44,12 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.InterfaceTypedef;
-import Imm.AST.Statement.StructTypedef;
+import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
-import Imm.AsN.Statement.AsNAssignment;
 import Imm.AsN.Statement.AsNComment;
-import Imm.AsN.Statement.AsNInterfaceTypedef;
+import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Snips.CompilerDriver;
 import Util.Logging.ProgressMessage;
 
@@ -69,12 +63,12 @@ public class AsNBody extends AsNNode {
 	/* Set to true to signal that a part of the program used the routine */
 	public static boolean usedStackCopyRoutine = false;
 	
-	public static LiteralManager literalManager;
+	public static LiteralUtil literalManager;
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
 		AsNBody.usedStackCopyRoutine = false;
-		AsNBody.literalManager = new LiteralManager();
+		AsNBody.literalManager = new LiteralUtil();
 		
 		stackCopyRoutine = new ASMLabel("_routine_stack_copy_");
 		
@@ -126,7 +120,7 @@ public class AsNBody extends AsNNode {
 				body.instructions.add(dataEntry);
 
 				/* Create address reference instruction for .text section */
-				ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(dec.path.build()), new MemoryWordRefOp(dataEntry));
+				ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(dec.path.build()), new MemoryWordRefOp(dataEntry));
 				globalVarReferences.add(reference);
 				
 				/* Add declaration to global memory */
@@ -146,7 +140,7 @@ public class AsNBody extends AsNNode {
 			body.instructions.add(dataEntry);
 			
 			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
+			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
 			globalVarReferences.add(reference);
 			
 			/* Add declaration to global memory */
@@ -163,7 +157,7 @@ public class AsNBody extends AsNNode {
 			body.instructions.add(dataEntry);
 			
 			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelGen.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntry));
+			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntry));
 			globalVarReferences.add(reference);
 			
 			/* Add declaration to global memory */
@@ -187,7 +181,7 @@ public class AsNBody extends AsNNode {
 				
 		
 		/* --- Inject Stack Copy Routine --- */
-		List<ASMInstruction> routine = body.buildStackCopyRoutine();
+		List<ASMInstruction> routine = StackUtil.buildStackCopyRoutine();
 		body.instructions.addAll(routine);
 	
 		ASMLabel mainLabel = null;
@@ -274,7 +268,7 @@ public class AsNBody extends AsNNode {
 					else {
 						/* Quick and dirty way to relay the generated instructions into a AsNNode */
 						AsNIDRef ref = new AsNIDRef();
-						AsNAssignment.copyStackSection(dec.getType().wordsize(), ref, st);
+						StackUtil.copyToAddressFromStack(dec.getType().wordsize(), ref, st);
 						globalsInit.addAll(ref.instructions);
 					}
 				}
@@ -352,7 +346,7 @@ public class AsNBody extends AsNNode {
 					/* Flush buffer here */
 					if (!buffer.isEmpty()) {
 						/* Create a new prefix for this literal pool */
-						String prefix = LabelGen.literalPoolPrefix();
+						String prefix = LabelUtil.literalPoolPrefix();
 						
 						List<String> added = new ArrayList();
 						
@@ -414,39 +408,6 @@ public class AsNBody extends AsNNode {
 		/* Move 0 into R10 */
 		ASMMov resetR10 = new ASMMov(new RegOp(REG.R10), new ImmOp(0));
 		node.instructions.add(resetR10);
-	}
-	
-	public List<ASMInstruction> buildStackCopyRoutine() {
-		List<ASMInstruction> routine = new ArrayList();
-		routine.add(new ASMComment("System Routine, used to copy memory on the stack"));
-		
-		routine.add(AsNBody.stackCopyRoutine);
-		
-		ASMLabel loopEnd = new ASMLabel("_routine_stack_copy_end_");
-		
-		/* Check if whole sub array was loaded */
-		routine.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
-		
-		/* Branch to loop end */
-		routine.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
-		
-		routine.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(-4)));
-		
-		routine.add(new ASMPushStack(new RegOp(REG.R2)));
-		
-		/* Decrement counter */
-		routine.add(new ASMSub(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(4)));
-		
-		/* Branch to loop start */
-		routine.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(AsNBody.stackCopyRoutine)));
-		
-		routine.add(loopEnd);
-		
-		/* Branch back */
-		routine.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
-		routine.add(new ASMSeperator());
-		
-		return routine;
 	}
 	
 } 

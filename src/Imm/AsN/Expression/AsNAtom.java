@@ -17,7 +17,7 @@ import Snips.CompilerDriver;
 
 public class AsNAtom extends AsNExpression {
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNAtom atom = new AsNAtom();
 		a.castedNode = atom;

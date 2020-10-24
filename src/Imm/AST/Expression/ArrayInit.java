@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -12,13 +13,13 @@ import Util.Source;
  */
 public class ArrayInit extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public List<Expression> elements;
 	
 	public boolean dontCareTypes = false;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -30,12 +31,12 @@ public class ArrayInit extends Expression {
 	}
 	
 
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
-		for (Expression e : this.elements) {
+		
+		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
-		}
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
@@ -46,6 +47,13 @@ public class ArrayInit extends Expression {
 		for (Expression e : this.elements) {
 			e.setContext(context);
 		}
+	}
+
+	public Expression clone() {
+		List<Expression> eclone = new ArrayList();
+		for (Expression e : this.elements) eclone.add(e.clone());
+		
+		return new ArrayInit(eclone, this.dontCareTypes, this.getSource().clone());
 	}
 
 } 

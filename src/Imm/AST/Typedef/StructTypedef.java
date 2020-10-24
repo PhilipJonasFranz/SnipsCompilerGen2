@@ -1,13 +1,14 @@
-package Imm.AST.Statement;
+package Imm.AST.Typedef;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Ctx.ProvisoUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -20,7 +21,7 @@ import Util.Source;
  */
 public class StructTypedef extends SyntaxElement {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public MODIFIER modifier;
 	
 	public NamespacePath path;
@@ -69,7 +70,7 @@ public class StructTypedef extends SyntaxElement {
 	public List<StructProvisoMapping> registeredMappings = new ArrayList();
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -95,7 +96,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	/**
 	 * This method is called once the entire struct typedef is parsed. After all function 
 	 * in this struct are added, functions from the extensions are added, with respect to 
@@ -108,30 +109,71 @@ public class StructTypedef extends SyntaxElement {
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
 			
+			/* Register this struct typedef at all implemented interfaces from the extension */
+			for (INTERFACE i : this.extension.implemented) {
+				boolean contained = false;
+				for (TYPE t : this.implemented)
+					if (t.isEqual(i))
+						contained = true;
+				
+				/* 
+				 * The Struct typedef may define implementation by itself, 
+				 * and may even override the provisos. In this case leave the
+				 * existing interface reference.
+				 */
+				if (!contained) {
+					/* If not contained, add to implemented and register at interface */
+					INTERFACE iclone = i.clone();
+					
+					/* Translate: Extension Interface Proviso -> Extension Head Proviso */
+					List<TYPE> pClone = new ArrayList();
+					for (int a = 0; a < this.extension.proviso.size(); a++) {
+						TYPE translated = ProvisoUtil.translate(i.getTypedef().proviso.get(a).clone(), i.getTypedef().proviso, this.extension.proviso);
+						pClone.add(translated);
+					}
+					
+					/* Translate: Extension Head Proviso -> Extension Proviso */
+					for (int a = 0; a < iclone.proviso.size(); a++) {
+						TYPE translated = ProvisoUtil.translate(iclone.proviso.get(a), pClone, this.proviso);
+						iclone.proviso.set(a, translated);
+					}
+					
+					this.implemented.add(iclone);
+					i.getTypedef().implementers.add(this);
+				}
+			}
+			
 			/* 
 			 * For every function in the extension, copy the function, 
 			 * adjust the path and add to own functions 
 			 */
 			for (Function f : this.extension.functions) {
 				/* Ignore static functions */
-				if (f.modifier == MODIFIER.STATIC) 
-					continue;
+				if (f.modifier == MODIFIER.STATIC) continue;
 				
+				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
+
+				/* Create a copy of the function, but keep reference on body */
+				Function f0 = f.clone();
+				f0.path = base;
 				
-				Function f0 = new Function(f.getReturnTypeDirect(), base, f.provisosTypes, f.parameters, f.signals(), f.signalsTypes, f.body, f.modifier, f.getSource());
+				f0.translateProviso(this.extension.proviso, this.extProviso);
+				
+				STRUCT.useProvisoFreeInCheck = false;
 				
 				boolean override = false;
-				for (Function fs : this.functions) {
-					if (fs.path.getLast().equals(f0.path.getLast()))
+				for (Function fs : this.functions) 
+					if (Function.signatureMatch(fs, f0, false))
 						override = true;
-				}
 				
 				if (!override) {
 					this.functions.add(c++, f0);
 					this.inheritedFunctions.add(f0);
 				}
+
+				STRUCT.useProvisoFreeInCheck = true;
 			}
 		}
 	}

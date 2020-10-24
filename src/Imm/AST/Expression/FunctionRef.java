@@ -1,5 +1,6 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -14,7 +15,7 @@ import Util.Source;
  */
 public class FunctionRef extends Expression {
 
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public NamespacePath path;
 	
 	/* Set during context checking */
@@ -26,7 +27,7 @@ public class FunctionRef extends Expression {
 	public IDRef base = null;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Default constructor.
 	 * @param source See {@link #source}
@@ -45,7 +46,7 @@ public class FunctionRef extends Expression {
 	}
 
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		System.out.println(this.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
@@ -56,6 +57,18 @@ public class FunctionRef extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
+	}
+
+	public Expression clone() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.proviso) provClone.add(t.clone());
+		
+		FunctionRef f = new FunctionRef(provClone, this.path.clone(), this.getSource().clone());
+		if (this.base != null) f.base = (IDRef) this.base.clone();
+		
+		f.origin = this.origin;
+		
+		return f;
 	}
 
 } 

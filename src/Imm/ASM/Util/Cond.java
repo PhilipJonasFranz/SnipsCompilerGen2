@@ -2,7 +2,7 @@ package Imm.ASM.Util;
 
 public class Cond {
 
-			/* --- NESTED --- */
+			/* ---< NESTED >--- */
 	/**
 	 * Condition mnemonics for the assembly instructions.
 	 */
@@ -14,17 +14,17 @@ public class Cond {
 	}
 	
 	
-			/* --- FIELDS --- */
+			/* ---< FIELDS >--- */
 	public COND cond;
 	
 	
-			/* --- CONSTRUCTORS --- */
+			/* ---< CONSTRUCTORS >--- */
 	public Cond(COND cond) {
 		this.cond = cond;
 	}
 	
 	
-			/* --- METHODS --- */
+			/* ---< METHODS >--- */
 	public String getCondPostfix() {
 		return this.cond.toString().toLowerCase();
 	}

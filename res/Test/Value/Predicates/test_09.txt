@@ -54,10 +54,10 @@ main:                                        /* Function: main */
     add lr, pc, #8
     mov pc, r3
     cmp r0, #0
-    beq main.L1
+    beq main.L0
     mov r0, #12                              /* Evaluate Expression */
     b main.L2
-main.L1: 
+main.L0: 
     mov r0, #25                              /* Evaluate Expression */
 main.L2: 
     mov sp, fp
