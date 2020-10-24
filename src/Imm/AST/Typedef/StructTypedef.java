@@ -161,6 +161,7 @@ public class StructTypedef extends SyntaxElement {
 				
 				f0.translateProviso(this.extension.proviso, this.extProviso);
 				
+				/* Temporarily disable the provisoFree() part in the isEqualExtended() method */
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				boolean override = false;
