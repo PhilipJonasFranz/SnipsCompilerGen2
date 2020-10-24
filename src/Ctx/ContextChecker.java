@@ -351,7 +351,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
-		
 		/* Make sure at least one field is in the struct */
 		if (e.getFields().isEmpty())
 			throw new CTX_EXC(e.getSource(), Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
@@ -428,7 +427,9 @@ public class ContextChecker {
 			
 			for (Function f : inter.getTypedef().functions) {
 				
-				Function ftranslated = inter.getTypedef().requestFunction(f.path, inter.proviso);
+				Function ftranslated = f.cloneSignature();
+				
+				ftranslated.translateProviso(inter.getTypedef().proviso, inter.proviso);
 				
 				boolean found = false;
 				for (int i = 0; i < e.functions.size(); i++) {

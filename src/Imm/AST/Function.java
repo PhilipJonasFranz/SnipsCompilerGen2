@@ -373,7 +373,6 @@ public class Function extends CompoundStatement {
 		
 		// TODO: Issues with proviso translation, SB-31
 		
-		/*
 		if (f0.parameters.size() == f1.parameters.size()) {
 			for (int i = 0; i < f0.parameters.size(); i++) {
 				Declaration d0 = f0.parameters.get(i);
@@ -388,7 +387,6 @@ public class Function extends CompoundStatement {
 		else return false;
 		
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
-		*/
 		
 		return match;
 	}
