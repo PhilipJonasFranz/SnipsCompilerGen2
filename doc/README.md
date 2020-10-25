@@ -821,6 +821,8 @@ During compile time, the constructor of the extended struct is searched and repl
 
 ## Further Reading
 
+In this section, some more language features are discussed, which mostly are used to take shortcuts during development and make code more readable. The following features can be replaced with other language constructs, if not as efficiently.
+
 ### Function Overloading
 
 Functions can be overloaded, or in other words, can have the same name, while having different parameter types. For Example:
