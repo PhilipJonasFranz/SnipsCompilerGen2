@@ -223,11 +223,9 @@ public class AsNInterfaceTypedef extends AsNNode {
 			
 			/* Find the interface type the given struct typedef has implemented */
 			INTERFACE inter = null;
-			for (TYPE t : def.implemented) {
-				if (((INTERFACE) t).getTypedef().equals(typedef)) {
+			for (TYPE t : def.implemented) 
+				if (((INTERFACE) t).getTypedef().equals(typedef)) 
 					inter = (INTERFACE) t;
-				}
-			}
 				
 			/* 
 			 * Create a signature clone of the searched function and translate 

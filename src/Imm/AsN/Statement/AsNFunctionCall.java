@@ -178,11 +178,17 @@ public class AsNFunctionCall extends AsNStatement {
 			AsNInterfaceTypedef def = (AsNInterfaceTypedef) inter.castedNode;
 			
 			/* Move the index in the interface typedef of the function * 4 in R12 */
-			for (int i = 0; i < inter.functions.size(); i++)
+			boolean found = false;
+			for (int i = 0; i < inter.functions.size(); i++) {
 				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
 					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
+					found = true;
 					break;
 				}
+			}
+			
+			/* Make sure the function was found */
+			assert found : "Failed to locate function '" + f.path.build() + "'!";
 			
 			String postfix = "";
 			
