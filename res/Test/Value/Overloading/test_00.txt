@@ -14,7 +14,7 @@ TESTCASES
 26
 OUTPUT
 /* --test_00.txt */
-    b main@2
+    b main
 get@0:                                       /* Function: get */
     add r0, r0, r1
     bx lr
@@ -23,7 +23,7 @@ get@1:                                       /* Function: get */
     lsl r0, r0, #1
     bx lr
     
-main@2:                                      /* Function: main */
+main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     bl get@1                                 /* Call get */

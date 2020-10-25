@@ -32,7 +32,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-Test.getter:                                 /* Function: Test.getter */
+Test.getter@0:                               /* Function: Test.getter */
     push { fp }
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
@@ -53,7 +53,7 @@ Test.getter:                                 /* Function: Test.getter */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    bl Test.getter                           /* Evaluate Expression */
+    bl Test.getter@0                         /* Evaluate Expression */
     ldr r0, [fp, #-8]                        /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2

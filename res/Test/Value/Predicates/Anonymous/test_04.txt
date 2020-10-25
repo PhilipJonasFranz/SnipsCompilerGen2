@@ -20,14 +20,14 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-lambda_f:                                    /* Function address getter for predication */
+lambda_f@0:                                  /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-f:                                           /* Function: f */
+f@0:                                         /* Function: f */
     mul r0, r0, r0
     bx lr
     
-map:                                         /* Function: map */
+map@2:                                       /* Function: map */
     push { r4, lr }
     mov r4, r1
     add lr, pc, #8
@@ -36,9 +36,9 @@ map:                                         /* Function: map */
     
 main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_f
+    b lambda_f@0
     mov r10, #0
     mov r1, r0
     mov r0, #10
-    b map                                    /* Call map */
+    b map@2                                  /* Call map */
     

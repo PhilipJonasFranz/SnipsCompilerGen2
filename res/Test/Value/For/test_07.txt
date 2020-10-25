@@ -16,7 +16,7 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
     b main
-smallest:                                    /* Function: smallest */
+smallest@0:                                  /* Function: smallest */
     sub sp, sp, #16
     stmea sp, {r3-r6}
     mov r3, r0
@@ -24,19 +24,19 @@ smallest:                                    /* Function: smallest */
     mov r2, #0
     ldr r5, [r2, r3, lsl #2]
     mov r6, #0
-smallest.L1: 
+smallest@0.L1: 
     cmp r6, r4
-    bge smallest.L2
+    bge smallest@0.L2
     lsl r2, r6, #2
     ldr r0, [r2, r3, lsl #2]
     cmp r0, r5
-    bge smallest.L3
+    bge smallest@0.L3
     lsl r2, r6, #2
     ldr r5, [r2, r3, lsl #2]
-smallest.L3: 
+smallest@0.L3: 
     add r6, r6, #1
-    b smallest.L1
-smallest.L2: 
+    b smallest@0.L1
+smallest@0.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6}
     bx lr
@@ -54,7 +54,7 @@ main:                                        /* Function: main */
     mov r1, #5
     sub r0, fp, #20
     lsr r0, r0, #2
-    bl smallest                              /* Call smallest */
+    bl smallest@0                            /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

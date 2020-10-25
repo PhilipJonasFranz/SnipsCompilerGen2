@@ -44,7 +44,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L1_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_@8.L1_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -125,7 +125,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L1_HEAP_START: .word HEAP_START
+.POOL0_@8.L1_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -151,7 +151,7 @@ init_P0:                                     /* Function: init, Provisos: C.A */
     add sp, sp, #8
     bx lr
     
-C.A.get:                                     /* Function: C.A.get */
+C.A.get@1:                                   /* Function: C.A.get */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
@@ -164,6 +164,6 @@ main:                                        /* Function: main */
     mov r0, #2
     push { r0 }
     bl init_P0                               /* Call init */
-    bl C.A.get                               /* Call C.A.get */
+    bl C.A.get@1                             /* Call C.A.get */
     pop { pc }
     

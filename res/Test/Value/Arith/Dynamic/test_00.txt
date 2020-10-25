@@ -11,15 +11,15 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-foo:                                         /* Function: foo */
+foo@0:                                       /* Function: foo */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
     
 main:                                        /* Function: main */
     push { lr }
-    bl foo                                   /* Evaluate Expression */
+    bl foo@0                                 /* Evaluate Expression */
     mov r3, r0
-    bl foo                                   /* Call foo */
+    bl foo@0                                 /* Call foo */
     mul r0, r3, r0
     pop { pc }
     

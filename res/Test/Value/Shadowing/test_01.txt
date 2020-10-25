@@ -26,7 +26,7 @@ x: .word 10
     
 .text
     b main
-Getter.get:                                  /* Function: Getter.get */
+Getter.get@0:                                /* Function: Getter.get */
     push { r3 }
     mov r3, r0
     mov r0, #1
@@ -36,5 +36,5 @@ Getter.get:                                  /* Function: Getter.get */
     bx lr
     
 main:                                        /* Function: main */
-    b Getter.get                             /* Call Getter.get */
+    b Getter.get@0                           /* Call Getter.get */
     

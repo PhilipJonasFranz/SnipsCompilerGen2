@@ -34,7 +34,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_@5.L2_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -115,7 +115,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L2_HEAP_START: .word HEAP_START
+.POOL0_@5.L2_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -141,7 +141,7 @@ init_P0:                                     /* Function: init, Provisos: A<INT>
     add sp, sp, #8
     bx lr
     
-B.incr_P1:                                   /* Function: B.incr, Provisos: INT */
+B.incr@0_P1:                                 /* Function: B.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]
@@ -157,7 +157,7 @@ main:                                        /* Function: main */
     push { r0 }
     bl init_P0                               /* Call init */
     mov r3, r0
-    bl B.incr_P1                             /* Call B.incr */
+    bl B.incr@0_P1                           /* Call B.incr */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     pop { pc }

@@ -19,13 +19,13 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-Test.calc:                                   /* Function: Test.calc */
+Test.calc@0:                                 /* Function: Test.calc */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
     
-Test.getter:                                 /* Function: Test.getter */
-    b Test.calc                              /* Evaluate Expression */
+Test.getter@1:                               /* Function: Test.getter */
+    b Test.calc@0                            /* Evaluate Expression */
     
 main:                                        /* Function: main */
-    b Test.getter                            /* Evaluate Expression */
+    b Test.getter@1                          /* Evaluate Expression */
     

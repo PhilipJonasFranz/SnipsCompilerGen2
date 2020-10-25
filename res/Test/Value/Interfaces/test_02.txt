@@ -54,30 +54,30 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-Inter.L1:                                    /* Interface : Inter */
+Inter@4.L1:                                  /* Interface : Inter */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
-    beq Inter.L2
+    beq Inter@4.L2
     cmp r10, #2
     moveq r10, #8
-Inter.L2: 
+Inter@4.L2: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
     add pc, pc, r10
-    b X.get
-    b X.set
-    b Y.get
-    b Y.set
+    b X.get@2
+    b X.set@3
+    b Y.get@4
+    b Y.set@5
     
-X.get:                                       /* Function: X.get */
+X.get@2:                                     /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-X.set:                                       /* Function: X.set */
+X.set@3:                                     /* Function: X.set */
     mov r10, #0
     push { r3 }
     mov r3, r0
@@ -87,14 +87,14 @@ X.set:                                       /* Function: X.set */
     pop { r3 }
     bx lr
     
-Y.get:                                       /* Function: Y.get */
+Y.get@4:                                     /* Function: Y.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
     bx lr
     
-Y.set:                                       /* Function: Y.set */
+Y.set@5:                                     /* Function: Y.set */
     mov r10, #0
     push { r3 }
     mov r3, r0
@@ -121,25 +121,25 @@ main:                                        /* Function: main */
     lsr r4, r0, #2
 /* 25 + 10 = 35 */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
     mov r5, r0
     mov r0, r4                               /* Load parameters */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
     add r5, r5, r0
     mov r1, #12
     mov r0, r3
     mov r12, #4
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
     mov r1, #4
     mov r0, r4
     mov r12, #4
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
 /* 35 + 12 + 16 = 63 */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
     add r6, r5, r0
     mov r0, r4                               /* Load parameters */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter@4.L1                            /* Branch to relay table of Inter */
     add r0, r6, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

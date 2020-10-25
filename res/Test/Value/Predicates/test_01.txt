@@ -39,16 +39,16 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
     b main
-lambda_sortPred:                             /* Function address getter for predication */
+lambda_sortPred@0:                           /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-sortPred:                                    /* Function: sortPred */
+sortPred@0:                                  /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
     
-sort:                                        /* Function: sort */
+sort@2:                                      /* Function: sort */
     sub sp, sp, #32
     stmea sp, {r3-r9, lr}
     mov r3, r0
@@ -56,15 +56,15 @@ sort:                                        /* Function: sort */
     mov r5, r2
     cmp r1, #1
     ldmfdle sp!, {r3-r9, pc}
-sort.L3:                                     /* Evaluate condition */
+sort@2.L3:                                   /* Evaluate condition */
     mov r0, #1
     cmp r0, #0
     ldmfdeq sp!, {r3-r9, pc}
     mov r6, #1
     mov r7, #1
-sort.L6: 
+sort@2.L6: 
     cmp r7, r4
-    bge sort.L7
+    bge sort@2.L7
     add r1, r3, r7
     sub r0, r1, #1
     ldr r8, [r10, r0, lsl #2]                /* Load from address */
@@ -75,22 +75,22 @@ sort.L6:
     add lr, pc, #8
     mov pc, r5
     cmp r0, #0
-    beq sort.L8
+    beq sort@2.L8
     mov r6, #0
     add r1, r3, r7
     sub r0, r1, #1
     str r9, [r10, r0, lsl #2]
     add r0, r3, r7
     str r8, [r10, r0, lsl #2]
-sort.L8: 
+sort@2.L8: 
     add r7, r7, #1
-    b sort.L6
-sort.L7: 
+    b sort@2.L6
+sort@2.L7: 
     cmp r6, #0
-    beq sort.L10
+    beq sort@2.L10
     ldmfd sp!, {r3-r9, pc}
-sort.L10: 
-    b sort.L3
+sort@2.L10: 
+    b sort@2.L3
     ldmfd sp!, {r3-r9, pc}
     
 main:                                        /* Function: main */
@@ -105,7 +105,7 @@ main:                                        /* Function: main */
     mov r1, #6
     stmfd sp!, {r0, r1}
     add r10, pc, #8                          /* Load parameters */
-    b lambda_sortPred
+    b lambda_sortPred@0
     mov r10, #0
     push { r0 }
     mov r0, #5
@@ -113,7 +113,7 @@ main:                                        /* Function: main */
     sub r0, fp, #20
     lsr r0, r0, #2
     ldmfd sp!, {r1, r2}
-    bl sort                                  /* Call sort */
+    bl sort@2                                /* Call sort */
     lsl r2, r3, #2
     sub r0, fp, #20
     ldr r0, [r0, r2]

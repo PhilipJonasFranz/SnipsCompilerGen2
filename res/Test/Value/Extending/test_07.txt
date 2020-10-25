@@ -36,7 +36,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-X.create_P1:                                 /* Function: X.create, Provisos: BOOL */
+X.create@0_P1:                               /* Function: X.create, Provisos: BOOL */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
     mov fp, sp
@@ -56,13 +56,13 @@ X.create_P1:                                 /* Function: X.create, Provisos: BO
     mov r10, #0
     bx lr
     
-Y.create_P0:                                 /* Function: Y.create, Provisos: BOOL */
+Y.create@1_P0:                               /* Function: Y.create, Provisos: BOOL */
     sub sp, sp, #12
     stmea sp, {r5, fp, lr}
     mov fp, sp
     mov r5, r2
     push { r5 }
-    bl X.create_P1                           /* Call X.create */
+    bl X.create@0_P1                         /* Call X.create */
     add sp, sp, #4
     mov r0, #2
     push { r0 }
@@ -85,7 +85,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #15
     ldmfd sp!, {r1, r2}
-    bl Y.create_P0                           /* Call Y.create */
+    bl Y.create@1_P0                         /* Call Y.create */
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
     add r0, r0, r2

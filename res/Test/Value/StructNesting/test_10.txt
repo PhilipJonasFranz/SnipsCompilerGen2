@@ -40,7 +40,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_@3.L2_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -121,7 +121,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L2_HEAP_START: .word HEAP_START
+.POOL0_@3.L2_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -147,7 +147,7 @@ init_P0:                                     /* Function: init, Provisos: Y | X 
     add sp, sp, #8
     bx lr
     
-Y.incr:                                      /* Function: Y.incr */
+Y.incr@0:                                    /* Function: Y.incr */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r2, [r1]
@@ -155,10 +155,10 @@ Y.incr:                                      /* Function: Y.incr */
     str r0, [r1]                             /* Store value to struct field */
     bx lr
     
-X.relay:                                     /* Function: X.relay */
+X.relay@1:                                   /* Function: X.relay */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    b Y.incr                                 /* Call Y.incr */
+    b Y.incr@0                               /* Call Y.incr */
     
 main:                                        /* Function: main */
     push { lr }
@@ -172,7 +172,7 @@ main:                                        /* Function: main */
     push { r0 }
     bl init_P0                               /* Call init */
     mov r3, r0
-    bl X.relay                               /* Call X.relay */
+    bl X.relay@1                             /* Call X.relay */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]
     lsl r1, r1, #2

@@ -25,29 +25,29 @@ TESTCASES
 OUTPUT
 /* --test_09.txt */
     b main
-lambda_sortPred:                             /* Function address getter for predication */
+lambda_sortPred@0:                           /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-sortPred:                                    /* Function: sortPred */
+sortPred@0:                                  /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
     
-cast:                                        /* Function: cast */
+cast@3:                                      /* Function: cast */
     bx lr
     
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_sortPred
+    b lambda_sortPred@0
     mov r10, #0
     push { r0 }
     mov r0, #1
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
-    bl cast                                  /* Call cast */
+    bl cast@3                                /* Call cast */
     mov r3, r0
     mov r1, #10
     mov r0, #11

@@ -15,22 +15,22 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-getDiff_P0:                                  /* Function: getDiff, Provisos: INT, INT */
+getDiff@0_P0:                                /* Function: getDiff, Provisos: INT, INT */
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0
     mov r4, r1
     mov r5, r0
     cmp r5, #0
-    bne getDiff.L1
+    bne getDiff@0.L1
     mov r0, r4                               /* Evaluate Expression */
     ldmfd sp!, {r3-r5, pc}
-getDiff.L1: 
+getDiff@0.L1: 
     sub r1, r3, #1
     mov r0, r4
-    bl getDiff_P0                            /* Call getDiff */
+    bl getDiff@0_P0                          /* Call getDiff */
     ldmfd sp!, {r3-r5, pc}
     
 main:                                        /* Function: main */
-    b getDiff_P0                             /* Call getDiff */
+    b getDiff@0_P0                           /* Call getDiff */
     

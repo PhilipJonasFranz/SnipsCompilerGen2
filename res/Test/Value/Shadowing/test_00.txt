@@ -19,9 +19,9 @@ x: .word 10
     
 .text
     b main
-get:                                         /* Function: get */
+get@0:                                       /* Function: get */
     bx lr
     
 main:                                        /* Function: main */
-    b get                                    /* Call get */
+    b get@0                                  /* Call get */
     

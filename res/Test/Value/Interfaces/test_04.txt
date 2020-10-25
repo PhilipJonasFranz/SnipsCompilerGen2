@@ -29,11 +29,11 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-Inter.L6_P0:                                 /* Interface : Inter, Provisos: INT,  */
+Inter@2.L6_P0:                               /* Interface : Inter, Provisos: INT,  */
     mov r12, #0
-    b X.get_P3
+    b X.get@1_P3
     
-X.get_P3:                                    /* Function: X.get, Provisos: INT | BOOL */
+X.get@1_P3:                                  /* Function: X.get, Provisos: INT | BOOL */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -55,10 +55,10 @@ main:                                        /* Function: main */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L6_P0                           /* Branch to relay table of Inter */
+    bl Inter@2.L6_P0                         /* Branch to relay table of Inter */
     mov r5, r0
     mov r0, r4                               /* Load parameters */
-    bl Inter.L6_P0                           /* Branch to relay table of Inter */
+    bl Inter@2.L6_P0                         /* Branch to relay table of Inter */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

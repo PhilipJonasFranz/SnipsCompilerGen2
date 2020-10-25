@@ -19,7 +19,7 @@ TESTCASES
 OUTPUT
 /* --test_17.txt */
     b main
-get:                                         /* Function: get */
+get@0:                                       /* Function: get */
     push { r3, r4 }
     mov r3, r0
     mov r4, r1
@@ -61,7 +61,7 @@ main:                                        /* Function: main */
     sub r0, fp, #40
     lsr r0, r0, #2
     mov r1, r3
-    bl get                                   /* Call get */
+    bl get@0                                 /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

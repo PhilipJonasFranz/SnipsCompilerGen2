@@ -23,21 +23,21 @@ TESTCASES
 OUTPUT
 /* --test_00.txt */
     b main
-lambda_add5:                                 /* Function address getter for predication */
+lambda_add5@0:                               /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-add5:                                        /* Function: add5 */
+add5@0:                                      /* Function: add5 */
     add r0, r0, #5
     bx lr
     
-lambda_add10:                                /* Function address getter for predication */
+lambda_add10@1:                              /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-add10:                                       /* Function: add10 */
+add10@1:                                     /* Function: add10 */
     add r0, r0, #10
     bx lr
     
-foo:                                         /* Function: foo */
+foo@3:                                       /* Function: foo */
     push { r4, lr }
     mov r4, r1
     add lr, pc, #8
@@ -49,15 +49,15 @@ main:                                        /* Function: main */
     cmp r1, #0
     beq main.L0
     add r10, pc, #8
-    b lambda_add10
+    b lambda_add10@1
     mov r10, #0
     b main.L1
 main.L0: 
     add r10, pc, #8
-    b lambda_add5
+    b lambda_add5@0
     mov r10, #0
 main.L1: 
     mov r1, r0
     mov r0, r3
-    b foo                                    /* Call foo */
+    b foo@3                                  /* Call foo */
     

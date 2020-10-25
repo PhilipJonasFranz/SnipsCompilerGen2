@@ -13,10 +13,10 @@ TESTCASES
 OUTPUT
 /* --test_05.txt */
     b main
-foo_P0:                                      /* Function: foo, Provisos: INT */
+foo@0_P0:                                    /* Function: foo, Provisos: INT */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
     
 main:                                        /* Function: main */
-    b foo_P0                                 /* Evaluate Expression */
+    b foo@0_P0                               /* Evaluate Expression */
     

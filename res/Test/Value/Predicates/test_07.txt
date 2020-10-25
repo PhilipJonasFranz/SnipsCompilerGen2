@@ -19,16 +19,16 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
     b main
-lambda_sortPred:                             /* Function address getter for predication */
+lambda_sortPred@0:                           /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-sortPred:                                    /* Function: sortPred */
+sortPred@0:                                  /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
     
-get:                                         /* Function: get */
+get@2:                                       /* Function: get */
     push { r3, lr }
     mov r3, r0
     mov r1, #10
@@ -36,17 +36,17 @@ get:                                         /* Function: get */
     add lr, pc, #8
     mov pc, r3
     cmp r0, #0
-    beq get.L0
+    beq get@2.L0
     mov r0, #12                              /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
-get.L0: 
+get@2.L0: 
     mov r0, #25                              /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
     
 main:                                        /* Function: main */
 /* Context check predicate at this location */
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_sortPred
+    b lambda_sortPred@0
     mov r10, #0
-    b get                                    /* Call get */
+    b get@2                                  /* Call get */
     

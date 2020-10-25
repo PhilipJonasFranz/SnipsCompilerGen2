@@ -22,12 +22,12 @@ Baz.x: .word 16
     
 .text
     b main
-Foo.get:                                     /* Function: Foo.get */
-    ldr r0, .POOL0_L0_Baz.x                  /* Evaluate Expression */
+Foo.get@0:                                   /* Function: Foo.get */
+    ldr r0, .POOL0_@0.L0_Baz.x               /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_L0_Baz.x: .word Baz.x
+.POOL0_@0.L0_Baz.x: .word Baz.x
     
 main:                                        /* Function: main */
-    b Foo.get                                /* Evaluate Expression */
+    b Foo.get@0                              /* Evaluate Expression */
     

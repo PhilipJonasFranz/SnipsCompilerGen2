@@ -26,10 +26,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-lambda_id:                                   /* Function address getter for predication */
+lambda_id@0:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-id:                                          /* Function: id */
+id@0:                                        /* Function: id */
     push { fp }
     mov fp, sp
     ldr r0, [fp, #8]                         /* Evaluate Expression */
@@ -51,7 +51,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_id
+    b lambda_id@0
     mov r10, #0
     push { r0 }
     ldr r4, [fp, #-4]

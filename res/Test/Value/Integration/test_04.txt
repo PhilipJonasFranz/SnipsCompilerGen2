@@ -16,7 +16,7 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-sarrus:                                      /* Function: sarrus */
+sarrus@0:                                    /* Function: sarrus */
     ldr r0, [sp]
     ldr r2, [sp, #16]
     mul r0, r0, r2
@@ -79,7 +79,7 @@ main:                                        /* Function: main */
     sub r0, fp, #28
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    bl sarrus                                /* Call sarrus */
+    bl sarrus@0                              /* Call sarrus */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

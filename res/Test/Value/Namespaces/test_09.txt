@@ -42,7 +42,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L11_HEAP_START            /* Evaluate Expression */
+    ldr r0, .POOL0_@1.L11_HEAP_START         /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -123,7 +123,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L11_HEAP_START: .word HEAP_START
+.POOL0_@1.L11_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -229,7 +229,7 @@ init_P6:                                     /* Provisos: Tree.TreeNode<INT> */
 /* A single list entry, contains a pointer to the next node */
 /* and a value. */
 /* Wraps the list head and tail. */
-List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, Provisos: INT */
+List.LinkedList.add@10_P3:                   /* Function: List.LinkedList.add, Provisos: INT */
     mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
@@ -237,7 +237,7 @@ List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, P
     mov r4, r1
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL1_L10_NULL                  /* Load null address */
+    ldr r0, .POOL1_@1.L10_NULL               /* Load null address */
     push { r0 }
     mov r0, #1
     push { r0 }
@@ -245,92 +245,92 @@ List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, P
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L10_NULL                  /* Load null address */
+    ldr r1, .POOL1_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.add.L1
+    bne List.LinkedList.add@10.L1
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    b List.LinkedList.add.L0
-List.LinkedList.add.L1: 
+    b List.LinkedList.add@10.L0
+List.LinkedList.add@10.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r5, [r1, #4]                         /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.add.L0: 
+List.LinkedList.add@10.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #12
     ldr r0, [r1]
     add r2, r0, #1
     str r2, [r1]
     ldmfd sp!, {r3-r5, pc}
-.POOL1_L10_NULL: .word NULL
+.POOL1_@1.L10_NULL: .word NULL
     
-List.LinkedList.get_P9:                      /* Function: List.LinkedList.get, Provisos: INT */
+List.LinkedList.get@11_P9:                   /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
     mov r4, r1
     cmp r1, #0
-    bge List.LinkedList.get.L0
+    bge List.LinkedList.get@11.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
+    b List.LinkedList.get@11.L7
+List.LinkedList.get@11.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
+List.LinkedList.get@11.L3:                   /* Evaluate condition */
     cmp r4, #0
-    beq List.LinkedList.get.L4
+    beq List.LinkedList.get@11.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L10_NULL                  /* Load null address */
+    ldr r1, .POOL2_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.get.L5
+    bne List.LinkedList.get@11.L5
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
+    b List.LinkedList.get@11.L7
+List.LinkedList.get@11.L5: 
 /* Jump to next */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
+    b List.LinkedList.get@11.L3
+List.LinkedList.get@11.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get.L7: 
+List.LinkedList.get@11.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL2_L10_NULL: .word NULL
+.POOL2_@1.L10_NULL: .word NULL
     
-List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
+List.LinkedList.create@26_P1:                /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL3_L10_NULL                  /* Load null address */
-    ldr r2, .POOL3_L10_NULL                  /* Load null address */
+    ldr r1, .POOL3_@1.L10_NULL               /* Load null address */
+    ldr r2, .POOL3_@1.L10_NULL               /* Load null address */
     stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL3_L10_NULL: .word NULL
+.POOL3_@1.L10_NULL: .word NULL
     
 /* [BASE-PACKAGE] */
 /*  */
 /* This package contains the utility to create a binary */
 /* search tree. */
 /* A tree node that has a left and right child and holds a value. */
-Tree.TreeNode.insert_P7:                     /* Function: Tree.TreeNode.insert, Provisos: INT */
+Tree.TreeNode.insert@28_P7:                  /* Function: Tree.TreeNode.insert, Provisos: INT */
     sub sp, sp, #28
     stmea sp, {r3-r8, lr}
     mov r3, r0
@@ -338,24 +338,24 @@ Tree.TreeNode.insert_P7:                     /* Function: Tree.TreeNode.insert, 
     mov r5, r2
 /* Initialize new node with null pointers and given value */
     push { r5 }
-    ldr r0, .POOL4_L10_NULL                  /* Load null address */
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+    ldr r0, .POOL4_@1.L10_NULL               /* Load null address */
+    ldr r1, .POOL4_@1.L10_NULL               /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #3
     push { r0 }
     bl init_P6                               /* Call init */
     mov r6, r0
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+    ldr r1, .POOL4_@1.L10_NULL               /* Load null address */
     cmp r3, r1
-    bne Tree.TreeNode.insert.L1
+    bne Tree.TreeNode.insert@28.L1
 /* Tree is empty */
     mov r0, r6                               /* Evaluate Expression */
     ldmfd sp!, {r3-r8, pc}
-Tree.TreeNode.insert.L1: 
+Tree.TreeNode.insert@28.L1: 
     mov r0, r3                               /* Evaluate Expression */
     mov r7, r3
-Tree.TreeNode.insert.L4:                     /* Evaluate condition */
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+Tree.TreeNode.insert@28.L4:                  /* Evaluate condition */
+    ldr r1, .POOL4_@1.L10_NULL               /* Load null address */
     cmp r7, r1
     ldmfdeq sp!, {r3-r8, pc}
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -365,59 +365,59 @@ Tree.TreeNode.insert.L4:                     /* Evaluate condition */
     mov pc, r4
     mov r8, r0
     cmp r8, #0
-    bne Tree.TreeNode.insert.L7
+    bne Tree.TreeNode.insert@28.L7
 /* Value already in tree. */
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r8, pc}
-Tree.TreeNode.insert.L7: 
+Tree.TreeNode.insert@28.L7: 
     cmp r8, #1
-    bne Tree.TreeNode.insert.L8
+    bne Tree.TreeNode.insert@28.L8
 /* Left leaf is null, insert here */
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+    ldr r1, .POOL4_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne Tree.TreeNode.insert.L10
+    bne Tree.TreeNode.insert@28.L10
     lsl r1, r7, #2                           /* Convert to bytes */
     str r6, [r1, #4]                         /* Store value to struct field */
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r8, pc}
-Tree.TreeNode.insert.L10: 
+Tree.TreeNode.insert@28.L10: 
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r7, [r1, #4]                         /* Load field from struct */
-    b Tree.TreeNode.insert.L6
-Tree.TreeNode.insert.L8: 
+    b Tree.TreeNode.insert@28.L6
+Tree.TreeNode.insert@28.L8: 
 /* Right leaf is null, insert here */
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    ldr r1, .POOL4_L10_NULL                  /* Load null address */
+    ldr r1, .POOL4_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne Tree.TreeNode.insert.L14
+    bne Tree.TreeNode.insert@28.L14
     lsl r1, r7, #2                           /* Convert to bytes */
     str r6, [r1, #8]                         /* Store value to struct field */
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r8, pc}
-Tree.TreeNode.insert.L14: 
+Tree.TreeNode.insert@28.L14: 
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r7, [r1, #8]                         /* Load field from struct */
-Tree.TreeNode.insert.L6: 
-    b Tree.TreeNode.insert.L4
+Tree.TreeNode.insert@28.L6: 
+    b Tree.TreeNode.insert@28.L4
     ldmfd sp!, {r3-r8, pc}
-.POOL4_L10_NULL: .word NULL
+.POOL4_@1.L10_NULL: .word NULL
     
-Tree.TreeNode.delete_P8:                     /* Function: Tree.TreeNode.delete, Provisos: INT */
+Tree.TreeNode.delete@32_P8:                  /* Function: Tree.TreeNode.delete, Provisos: INT */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
     mov r4, r1
     mov r5, r2
 /* Found leaf */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne Tree.TreeNode.delete.L0
-    ldr r0, .POOL5_L10_NULL                  /* Evaluate Expression */
+    bne Tree.TreeNode.delete@32.L0
+    ldr r0, .POOL5_@1.L10_NULL               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
-Tree.TreeNode.delete.L0: 
+Tree.TreeNode.delete@32.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #12]                        /* Load field from struct */
     mov r0, r5
@@ -426,59 +426,59 @@ Tree.TreeNode.delete.L0:
     mov r6, r0
     mvn r1, #0
     cmp r6, r1
-    bne Tree.TreeNode.delete.L3
+    bne Tree.TreeNode.delete@32.L3
     push { r5 }
     push { r4 }
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.delete_P8               /* Call Tree.TreeNode.delete */
+    bl Tree.TreeNode.delete@32_P8            /* Call Tree.TreeNode.delete */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
-    b Tree.TreeNode.delete.L2
-Tree.TreeNode.delete.L3: 
+    b Tree.TreeNode.delete@32.L2
+Tree.TreeNode.delete@32.L3: 
     cmp r6, #1
-    bne Tree.TreeNode.delete.L4
+    bne Tree.TreeNode.delete@32.L4
     push { r5 }
     push { r4 }
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.delete_P8               /* Call Tree.TreeNode.delete */
+    bl Tree.TreeNode.delete@32_P8            /* Call Tree.TreeNode.delete */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
-    b Tree.TreeNode.delete.L2
-Tree.TreeNode.delete.L4: 
+    b Tree.TreeNode.delete@32.L2
+Tree.TreeNode.delete@32.L4: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne Tree.TreeNode.delete.L7
+    bne Tree.TreeNode.delete@32.L7
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     ldmfd sp!, {r3-r6, pc}
-Tree.TreeNode.delete.L7: 
+Tree.TreeNode.delete@32.L7: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    bne Tree.TreeNode.delete.L8
+    bne Tree.TreeNode.delete@32.L8
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldmfd sp!, {r3-r6, pc}
-Tree.TreeNode.delete.L8: 
+Tree.TreeNode.delete@32.L8: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #8]                         /* Load field from struct */
-Tree.TreeNode.delete.L11:                    /* Evaluate condition */
+Tree.TreeNode.delete@32.L11:                 /* Evaluate condition */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL5_L10_NULL                  /* Load null address */
+    ldr r1, .POOL5_@1.L10_NULL               /* Load null address */
     cmp r0, r1
-    beq Tree.TreeNode.delete.L12
+    beq Tree.TreeNode.delete@32.L12
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
-    b Tree.TreeNode.delete.L11
-Tree.TreeNode.delete.L12: 
+    b Tree.TreeNode.delete@32.L11
+Tree.TreeNode.delete@32.L12: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -490,90 +490,90 @@ Tree.TreeNode.delete.L12:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.delete_P8               /* Call Tree.TreeNode.delete */
+    bl Tree.TreeNode.delete@32_P8            /* Call Tree.TreeNode.delete */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
-Tree.TreeNode.delete.L2: 
+Tree.TreeNode.delete@32.L2: 
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
-.POOL5_L10_NULL: .word NULL
+.POOL5_@1.L10_NULL: .word NULL
     
-Tree.TreeNode.create_P5:                     /* Function: Tree.TreeNode.create, Provisos: INT */
+Tree.TreeNode.create@33_P5:                  /* Function: Tree.TreeNode.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize the root with null pointers and the given value */
     push { r3 }
-    ldr r0, .POOL6_L10_NULL                  /* Load null address */
-    ldr r1, .POOL6_L10_NULL                  /* Load null address */
+    ldr r0, .POOL6_@1.L10_NULL               /* Load null address */
+    ldr r1, .POOL6_@1.L10_NULL               /* Load null address */
     stmfd sp!, {r0, r1}
     mov r0, #3
     push { r0 }
     bl init_P6                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL6_L10_NULL: .word NULL
+.POOL6_@1.L10_NULL: .word NULL
     
-lambda_relation:                             /* Function address getter for predication */
+lambda_relation@34:                          /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-relation:                                    /* Function: relation */
+relation@34:                                 /* Function: relation */
     push { r3, r4 }
     mov r3, r0
     mov r4, r1
     cmp r0, r1
-    bne relation.L0
+    bne relation@34.L0
     mov r0, #0
-    b relation.L3
-relation.L0: 
+    b relation@34.L3
+relation@34.L0: 
     cmp r3, r4
-    bge relation.L2
+    bge relation@34.L2
     mvn r0, #0
-    b relation.L3
-relation.L2: 
+    b relation@34.L3
+relation@34.L2: 
     mov r0, #1
-relation.L3: 
+relation@34.L3: 
     ldmfd sp!, {r3, r4}
     bx lr
     
 main:                                        /* Function: main */
     push { lr }
     mov r0, #0                               /* Evaluate Expression */
-    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
+    bl List.LinkedList.create@26_P1          /* Call List.LinkedList.create */
     mov r3, r0
     mov r1, #10
     mov r0, r3
-    bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
+    bl List.LinkedList.add@10_P3             /* Call List.LinkedList.add */
     mov r0, #10                              /* Evaluate Expression */
-    bl Tree.TreeNode.create_P5               /* Call Tree.TreeNode.create */
+    bl Tree.TreeNode.create@33_P5            /* Call Tree.TreeNode.create */
     mov r4, r0
     mov r0, #5                               /* Load parameters */
     push { r0 }
     add r10, pc, #8
-    b lambda_relation
+    b lambda_relation@34
     mov r10, #0
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.insert_P7               /* Call Tree.TreeNode.insert */
+    bl Tree.TreeNode.insert@28_P7            /* Call Tree.TreeNode.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     add r10, pc, #8
-    b lambda_relation
+    b lambda_relation@34
     mov r10, #0
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.insert_P7               /* Call Tree.TreeNode.insert */
+    bl Tree.TreeNode.insert@28_P7            /* Call Tree.TreeNode.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
     add r10, pc, #8
-    b lambda_relation
+    b lambda_relation@34
     mov r10, #0
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
-    bl Tree.TreeNode.delete_P8               /* Call Tree.TreeNode.delete */
+    bl Tree.TreeNode.delete@32_P8            /* Call Tree.TreeNode.delete */
     mov r1, #0
     mov r0, r3
-    bl List.LinkedList.get_P9                /* Call List.LinkedList.get */
+    bl List.LinkedList.get@11_P9             /* Call List.LinkedList.get */
     pop { pc }
     

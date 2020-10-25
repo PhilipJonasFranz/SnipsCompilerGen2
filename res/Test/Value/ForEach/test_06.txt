@@ -22,7 +22,7 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
     b main
-incr:                                        /* Function: incr */
+incr@0:                                      /* Function: incr */
     push { r3 }
     mov r3, r0
     ldr r1, [r10, r0, lsl #2]                /* Load from address */
@@ -32,7 +32,7 @@ incr:                                        /* Function: incr */
     pop { r3 }
     bx lr
     
-smallest:                                    /* Function: smallest */
+smallest@2:                                  /* Function: smallest */
     sub sp, sp, #28
     stmea sp, {r3-r7, fp, lr}
     mov fp, sp
@@ -42,23 +42,23 @@ smallest:                                    /* Function: smallest */
     mov r6, #0
     mov r7, #0
     push { r7 }
-smallest.L1: 
+smallest@2.L1: 
     cmp r4, r6
-    beq smallest.L2
+    beq smallest@2.L2
     add r0, r3, r6
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     str r0, [fp, #-4]
     sub r0, fp, #4                           /* Load parameters */
     lsr r0, r0, #2
-    bl incr                                  /* Call incr */
+    bl incr@0                                /* Call incr */
     ldr r0, [fp, #-4]
     cmp r0, r5
-    bge smallest.L3
+    bge smallest@2.L3
     ldr r5, [fp, #-4]                        /* Evaluate Expression */
-smallest.L3: 
+smallest@2.L3: 
     add r6, r6, #1
-    b smallest.L1
-smallest.L2: 
+    b smallest@2.L1
+smallest@2.L2: 
     add sp, sp, #4                           /* Reset stack, remove iterator and counter */
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
@@ -77,7 +77,7 @@ main:                                        /* Function: main */
     mov r1, #5
     sub r0, fp, #20
     lsr r0, r0, #2
-    bl smallest                              /* Call smallest */
+    bl smallest@2                            /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

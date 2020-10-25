@@ -42,7 +42,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L9_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_@0.L9_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -123,7 +123,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L9_HEAP_START: .word HEAP_START
+.POOL0_@0.L9_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -235,10 +235,10 @@ free.L2:
 /* A single list entry, contains a pointer to the next node */
 /* and a value. */
 /* Wraps the list head and tail. */
-lambda_List.LinkedList.add_P3:               /* Function address getter for predication */
+lambda_List.LinkedList.add@10_P3:            /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, Provisos: INT */
+List.LinkedList.add@10_P3:                   /* Function: List.LinkedList.add, Provisos: INT */
     mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
@@ -246,7 +246,7 @@ List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, P
     mov r4, r1
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL1_L8_NULL                   /* Load null address */
+    ldr r0, .POOL1_@0.L8_NULL                /* Load null address */
     push { r0 }
     mov r0, #1
     push { r0 }
@@ -254,145 +254,145 @@ List.LinkedList.add_P3:                      /* Function: List.LinkedList.add, P
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L8_NULL                   /* Load null address */
+    ldr r1, .POOL1_@0.L8_NULL                /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.add.L1
+    bne List.LinkedList.add@10.L1
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    b List.LinkedList.add.L0
-List.LinkedList.add.L1: 
+    b List.LinkedList.add@10.L0
+List.LinkedList.add@10.L1: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r5, [r1, #4]                         /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.add.L0: 
+List.LinkedList.add@10.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #12
     ldr r0, [r1]
     add r2, r0, #1
     str r2, [r1]
     ldmfd sp!, {r3-r5, pc}
-.POOL1_L8_NULL: .word NULL
+.POOL1_@0.L8_NULL: .word NULL
     
-List.LinkedList.get_P6:                      /* Function: List.LinkedList.get, Provisos: INT */
+List.LinkedList.get@11_P6:                   /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
     mov r4, r1
     cmp r1, #0
-    bge List.LinkedList.get.L0
+    bge List.LinkedList.get@11.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
+    b List.LinkedList.get@11.L7
+List.LinkedList.get@11.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
+List.LinkedList.get@11.L3:                   /* Evaluate condition */
     cmp r4, #0
-    beq List.LinkedList.get.L4
+    beq List.LinkedList.get@11.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L8_NULL                   /* Load null address */
+    ldr r1, .POOL2_@0.L8_NULL                /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.get.L5
+    bne List.LinkedList.get@11.L5
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
+    b List.LinkedList.get@11.L7
+List.LinkedList.get@11.L5: 
 /* Jump to next */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r0, r4
     sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
+    b List.LinkedList.get@11.L3
+List.LinkedList.get@11.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get.L7: 
+List.LinkedList.get@11.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL2_L8_NULL: .word NULL
+.POOL2_@0.L8_NULL: .word NULL
     
-List.LinkedList.clear_P5:                    /* Function: List.LinkedList.clear, Provisos: INT */
+List.LinkedList.clear@22_P5:                 /* Function: List.LinkedList.clear, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
-List.LinkedList.clear.L1:                    /* Evaluate condition */
-    ldr r1, .POOL3_L8_NULL                   /* Load null address */
+List.LinkedList.clear@22.L1:                 /* Evaluate condition */
+    ldr r1, .POOL3_@0.L8_NULL                /* Load null address */
     cmp r4, r1
-    beq List.LinkedList.clear.L2
+    beq List.LinkedList.clear@22.L2
     mov r0, r4                               /* Load parameters */
     bl free                                  /* Call free */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
-    b List.LinkedList.clear.L1
-List.LinkedList.clear.L2: 
-    ldr r0, .POOL3_L8_NULL                   /* Evaluate Expression */
+    b List.LinkedList.clear@22.L1
+List.LinkedList.clear@22.L2: 
+    ldr r0, .POOL3_@0.L8_NULL                /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
-    ldr r0, .POOL3_L8_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL3_@0.L8_NULL                /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3, r4, pc}
-.POOL3_L8_NULL: .word NULL
+.POOL3_@0.L8_NULL: .word NULL
     
-List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT */
+List.LinkedList.create@26_P1:                /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL4_L8_NULL                   /* Load null address */
-    ldr r2, .POOL4_L8_NULL                   /* Load null address */
+    ldr r1, .POOL4_@0.L8_NULL                /* Load null address */
+    ldr r2, .POOL4_@0.L8_NULL                /* Load null address */
     stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL4_L8_NULL: .word NULL
+.POOL4_@0.L8_NULL: .word NULL
     
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #20
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
-    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
-    ldr r1, .POOL5_L7_list0                  /* Load from .data section */
+    bl List.LinkedList.create@26_P1          /* Call List.LinkedList.create */
+    ldr r1, .POOL5_@0.L7_list0               /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r1, #12
-    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_@0.L7_list0               /* Load from .data section */
     ldr r0, [r0]
-    bl List.LinkedList.add_P3                /* Call List.LinkedList.add */
-    ldr r0, .POOL5_L7_list0                  /* Load parameters */
+    bl List.LinkedList.add@10_P3             /* Call List.LinkedList.add */
+    ldr r0, .POOL5_@0.L7_list0               /* Load parameters */
     ldr r0, [r0]
-    bl List.LinkedList.clear_P5              /* Call List.LinkedList.clear */
+    bl List.LinkedList.clear@22_P5           /* Call List.LinkedList.clear */
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_List.LinkedList.add_P3
+    b lambda_List.LinkedList.add@10_P3
     mov r10, #0
     mov r3, r0
     mov r1, #30
-    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_@0.L7_list0               /* Load from .data section */
     ldr r0, [r0]
     add lr, pc, #8
     mov pc, r3
     mov sp, fp                               /* Reset the stack after anonymous call */
     mov r1, #0
-    ldr r0, .POOL5_L7_list0                  /* Load from .data section */
+    ldr r0, .POOL5_@0.L7_list0               /* Load from .data section */
     ldr r0, [r0]
-    bl List.LinkedList.get_P6                /* Call List.LinkedList.get */
+    bl List.LinkedList.get@11_P6             /* Call List.LinkedList.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL5_L7_list0: .word list0
+.POOL5_@0.L7_list0: .word list0
     

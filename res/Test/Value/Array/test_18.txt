@@ -27,7 +27,7 @@ TESTCASES
 OUTPUT
 /* --test_18.txt */
     b main
-foo:                                         /* Function: foo */
+foo@0:                                       /* Function: foo */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
     mov fp, sp
@@ -91,7 +91,7 @@ main:                                        /* Function: main */
     push { r4 }
     mov r0, r3
     ldmfd sp!, {r1, r2}
-    bl foo                                   /* Call foo */
+    bl foo@0                                 /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

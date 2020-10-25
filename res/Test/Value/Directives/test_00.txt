@@ -59,7 +59,7 @@ __op_div.L2:
     ldmfd sp!, {r3-r6}
     bx lr
     
-foo:                                         /* Function: foo */
+foo@0:                                       /* Function: foo */
     lsl r0, r0, #2
     bx lr
     
@@ -73,7 +73,7 @@ main.L0:
     mov r0, #2                               /* Evaluate Expression */
     push { r0 }
     mov r0, r3                               /* Load parameters */
-    bl foo                                   /* Call foo */
+    bl foo@0                                 /* Call foo */
     pop { r1 }
     bl __op_div                              /* Call __op_div */
     pop { pc }

@@ -77,7 +77,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L3_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_@2.L3_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -158,7 +158,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L3_HEAP_START: .word HEAP_START
+.POOL0_@2.L3_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -186,7 +186,7 @@ init_P0:                                     /* Function: init, Provisos: C.A<IN
     add sp, sp, #12
     bx lr
     
-C.A.incr_P2:                                 /* Function: C.A.incr, Provisos: INT */
+C.A.incr@0_P2:                               /* Function: C.A.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r2, [r1]
@@ -194,7 +194,7 @@ C.A.incr_P2:                                 /* Function: C.A.incr, Provisos: IN
     str r0, [r1]                             /* Store value to struct field */
     bx lr
     
-C.A.pipe_P1:                                 /* Function: C.A.pipe, Provisos: INT */
+C.A.pipe@3_P1:                               /* Function: C.A.pipe, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
@@ -212,21 +212,21 @@ C.A.pipe_P1:                                 /* Function: C.A.pipe, Provisos: IN
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
     
-lambda_Predicates.add5:                      /* Function address getter for predication */
+lambda_Predicates.add5@5:                    /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-Predicates.add5:                             /* Function: Predicates.add5 */
+Predicates.add5@5:                           /* Function: Predicates.add5 */
     add r0, r0, #5
     bx lr
     
-lambda_Predicates.mul:                       /* Function address getter for predication */
+lambda_Predicates.mul@6:                     /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-Predicates.mul:                              /* Function: Predicates.mul */
+Predicates.mul@6:                            /* Function: Predicates.mul */
     mul r0, r0, r1
     bx lr
     
-set:                                         /* Function: set */
+set@7:                                       /* Function: set */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
@@ -252,15 +252,15 @@ main:                                        /* Function: main */
 /* a->r = 4 */
     mov r1, #4
     mov r0, r3
-    bl set                                   /* Call set */
+    bl set@7                                 /* Call set */
     add r10, pc, #8                          /* Load parameters */
-    b lambda_Predicates.add5
+    b lambda_Predicates.add5@5
     mov r10, #0
     mov r1, r0
     mov r0, r3
-    bl C.A.pipe_P1                           /* Call C.A.pipe */
+    bl C.A.pipe@3_P1                         /* Call C.A.pipe */
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_Predicates.mul
+    b lambda_Predicates.mul@6
     mov r10, #0
     mov r4, r0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -280,7 +280,7 @@ main:                                        /* Function: main */
     str r0, [r1]
 /* Call from B inherited nested function */
     mov r0, r3                               /* Load parameters */
-    bl C.A.incr_P2                           /* Call C.A.incr */
+    bl C.A.incr@0_P2                         /* Call C.A.incr */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */

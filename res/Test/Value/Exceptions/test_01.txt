@@ -56,7 +56,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-get:                                         /* Function: get */
+get@0:                                       /* Function: get */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
     mov fp, sp
@@ -64,18 +64,18 @@ get:                                         /* Function: get */
     mov r4, r1
     mov r5, r2
     cmp r1, #2
-    ble get.L2
+    ble get@0.L2
     push { r5 }
     push { r4 }
     mov r0, #2
     push { r0 }
     mov r12, #2                              /* Signal thrown exception */
     mov r0, #12
-    b get.L0                                 /* Exception thrown, branch to escape target */
-get.L2: 
+    b get@0.L0                               /* Exception thrown, branch to escape target */
+get@0.L2: 
     add r0, r3, r4
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-get.L0: 
+get@0.L0: 
     cmp r12, #0
     mov r2, sp
     mov sp, fp
@@ -87,7 +87,7 @@ get.L0:
     mov r10, #0
     bx lr
     
-throw:                                       /* Function: throw */
+throw@1:                                     /* Function: throw */
     push { fp }
     mov fp, sp
     mov r0, #99
@@ -118,7 +118,7 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     mov r4, #0
     push { sp }
-    bl throw                                 /* Call throw */
+    bl throw@1                               /* Call throw */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */
     mov r0, #3                               /* Evaluate Expression */
@@ -127,7 +127,7 @@ main:                                        /* Function: main */
     sub r0, fp, #12
     lsr r0, r0, #2
     ldmfd sp!, {r1, r2}
-    bl get                                   /* Call get */
+    bl get@0                                 /* Call get */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */
     mov r4, r0

@@ -14,7 +14,7 @@ TESTCASES
 OUTPUT
 /* --test_12.txt */
     b main
-add:                                         /* Function: add */
+add@0:                                       /* Function: add */
     ldr r0, [sp]
     ldr r2, [sp, #4]
     add r0, r0, r2
@@ -39,7 +39,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     ldr r0, [fp, #-16]
     push { r0 }
-    bl add                                   /* Call add */
+    bl add@0                                 /* Call add */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     
