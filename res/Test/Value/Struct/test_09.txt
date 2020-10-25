@@ -34,7 +34,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_@0.L4_HEAP_START          /* Evaluate Expression */
+    ldr r0, .POOL0_L4_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -115,7 +115,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_@0.L4_HEAP_START: .word HEAP_START
+.POOL0_L4_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -150,20 +150,20 @@ init_P2:                                     /* Function: init, Provisos: List.L
     add sp, sp, #20
     bx lr
     
-List.LinkedList.create@26_P1:                /* Function: List.LinkedList.create, Provisos: INT* */
+List.LinkedList.create_P1:                   /* Function: List.LinkedList.create, Provisos: INT* */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL1_@0.L3_NULL                /* Load null address */
-    ldr r2, .POOL1_@0.L3_NULL                /* Load null address */
+    ldr r1, .POOL1_L3_NULL                   /* Load null address */
+    ldr r2, .POOL1_L3_NULL                   /* Load null address */
     stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
     bl init_P2                               /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL1_@0.L3_NULL: .word NULL
+.POOL1_L3_NULL: .word NULL
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -171,10 +171,10 @@ main:                                        /* Function: main */
     mov r0, #20                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL2_@0.L3_NULL                /* Evaluate Expression */
-    bl List.LinkedList.create@26_P1          /* Call List.LinkedList.create */
+    ldr r0, .POOL2_L3_NULL                   /* Evaluate Expression */
+    bl List.LinkedList.create_P1             /* Call List.LinkedList.create */
     mov r0, #0                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL2_@0.L3_NULL: .word NULL
+.POOL2_L3_NULL: .word NULL
     

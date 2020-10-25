@@ -15,23 +15,23 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
     b main
-bar@0:                                       /* Function: bar */
+bar:                                         /* Function: bar */
     mov r0, #6                               /* Evaluate Expression */
     bx lr
     
-foo@1:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     push { r3, lr }
-    bl bar@0                                 /* Evaluate Expression */
+    bl bar                                   /* Evaluate Expression */
     mov r3, r0
-    bl bar@0                                 /* Call bar */
+    bl bar                                   /* Call bar */
     mul r0, r3, r0
     ldmfd sp!, {r3, pc}
     
 main:                                        /* Function: main */
     push { lr }
-    bl foo@1                                 /* Evaluate Expression */
+    bl foo                                   /* Evaluate Expression */
     mov r3, r0
-    bl foo@1                                 /* Call foo */
+    bl foo                                   /* Call foo */
     add r0, r3, r0
     pop { pc }
     

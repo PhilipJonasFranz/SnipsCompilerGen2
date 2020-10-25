@@ -34,7 +34,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-Data.X.create@0:                             /* Function: Data.X.create */
+Data.X.create:                               /* Function: Data.X.create */
     push { fp }
     mov fp, sp
     push { r0 }
@@ -54,7 +54,7 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #15                              /* Evaluate Expression */
-    bl Data.X.create@0                       /* Call Data.X.create */
+    bl Data.X.create                         /* Call Data.X.create */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}

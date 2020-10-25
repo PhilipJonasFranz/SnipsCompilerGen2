@@ -18,7 +18,7 @@ TESTCASES
 OUTPUT
 /* --test_19.txt */
     b main
-set@0:                                       /* Function: set */
+set:                                         /* Function: set */
     push { r3 }
     mov r3, r0
 /* Set m [0] [1] */
@@ -57,7 +57,7 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #24                          /* Load parameters */
     lsr r0, r0, #2
-    bl set@0                                 /* Call set */
+    bl set                                   /* Call set */
     ldr r0, [fp, #-12]
     ldr r2, [fp, #-4]
     add r0, r0, r2

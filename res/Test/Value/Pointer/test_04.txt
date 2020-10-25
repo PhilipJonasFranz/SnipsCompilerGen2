@@ -14,7 +14,7 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-forEach@0:                                   /* Function: forEach */
+forEach:                                     /* Function: forEach */
     ldr r0, [r10, r1, lsl #2]                /* Load from address */
     bx lr
     
@@ -28,7 +28,7 @@ main:                                        /* Function: main */
     sub r0, fp, #8
     lsr r0, r0, #2
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
-    bl forEach@0                             /* Call forEach */
+    bl forEach                               /* Call forEach */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

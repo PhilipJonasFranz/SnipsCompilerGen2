@@ -32,14 +32,14 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    ldr r1, .POOL0_@1.L0_Foo.Baz.x           /* Load from .data section */
+    ldr r1, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     ldr r1, [r1]
     add r0, r1, #8
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r1, [fp, #-4]                        /* Load field from struct */
-    ldr r2, .POOL0_@1.L0_Foo.Baz.x           /* Load from .data section */
+    ldr r2, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL0_@1.L0_Foo.Baz.x: .word Foo.Baz.x
+.POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
     

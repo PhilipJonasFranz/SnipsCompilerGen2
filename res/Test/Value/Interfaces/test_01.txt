@@ -36,20 +36,20 @@ TESTCASES
 OUTPUT
 /* --test_01.txt */
     b main
-Inter@2.L1:                                  /* Interface : Inter */
+Inter.L1:                                    /* Interface : Inter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
-    b X.get@2
-    b X.set@3
+    b X.get
+    b X.set
     
-X.get@2:                                     /* Function: X.get */
+X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-X.set@3:                                     /* Function: X.set */
+X.set:                                       /* Function: X.set */
     mov r10, #0
     push { r3 }
     mov r3, r0
@@ -69,14 +69,14 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter@2.L1                            /* Branch to relay table of Inter */
+    bl Inter.L1                              /* Branch to relay table of Inter */
     mov r4, r0
     mov r1, #15
     mov r0, r3
     mov r12, #4
-    bl Inter@2.L1                            /* Branch to relay table of Inter */
+    bl Inter.L1                              /* Branch to relay table of Inter */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter@2.L1                            /* Branch to relay table of Inter */
+    bl Inter.L1                              /* Branch to relay table of Inter */
     add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

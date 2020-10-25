@@ -45,36 +45,36 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
     b main
-Inter@2.L1:                                  /* Interface : Inter */
+Inter.L1:                                    /* Interface : Inter */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
-    beq Inter@2.L2
+    beq Inter.L2
     cmp r10, #2
     moveq r10, #4
-Inter@2.L2: 
+Inter.L2: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
     add pc, pc, r10
-    b X.get@1
-    b Y.get@2
+    b X.get
+    b Y.get
     
-X.get@1:                                     /* Function: X.get */
+X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-Y.get@2:                                     /* Function: Y.get */
+Y.get:                                       /* Function: Y.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
     bx lr
     
-process@3:                                   /* Function: process */
-    b Inter@2.L1                             /* Branch to relay table of Inter */
+process:                                     /* Function: process */
+    b Inter.L1                               /* Branch to relay table of Inter */
     
 main:                                        /* Function: main */
     push { fp, lr }
@@ -99,7 +99,7 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, r4
 main.L1: 
-    bl process@3                             /* Call process */
+    bl process                               /* Call process */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

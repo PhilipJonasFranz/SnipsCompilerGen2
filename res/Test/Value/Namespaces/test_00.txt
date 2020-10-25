@@ -16,8 +16,8 @@ Test.x: .word 10
     
 .text
 main:                                        /* Function: main */
-    ldr r0, .POOL0_@1.L0_Test.x              /* Evaluate Expression */
+    ldr r0, .POOL0_L0_Test.x                 /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_@1.L0_Test.x: .word Test.x
+.POOL0_L0_Test.x: .word Test.x
     

@@ -21,18 +21,18 @@ TESTCASES
 OUTPUT
 /* --test_05.txt */
     b main
-bar@0:                                       /* Function: bar */
+bar:                                         /* Function: bar */
     push { r4 }
     add r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
     pop { r4 }
     bx lr
     
-foo@1:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r5, lr}
     mov r3, r0
-    bl bar@0                                 /* Call bar */
+    bl bar                                   /* Call bar */
     add r5, r3, r0
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3, r5, pc}
@@ -41,7 +41,7 @@ main:                                        /* Function: main */
     push { lr }
     mov r3, r0
     add r0, r0, #4
-    bl foo@1                                 /* Call foo */
+    bl foo                                   /* Call foo */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
     pop { pc }

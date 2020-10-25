@@ -14,17 +14,17 @@ TESTCASES
 OUTPUT
 /* --test_05.txt */
     b main
-lambda_get@0_P0:                             /* Function address getter for predication */
+lambda_get_P0:                               /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-get@0_P0:                                    /* Function: get, Provisos: INT */
+get_P0:                                      /* Function: get, Provisos: INT */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
     
 main:                                        /* Function: main */
     push { lr }
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get@0_P0
+    b lambda_get_P0
     mov r10, #0
     mov r5, r0
     add lr, pc, #8                           /* Evaluate Expression */

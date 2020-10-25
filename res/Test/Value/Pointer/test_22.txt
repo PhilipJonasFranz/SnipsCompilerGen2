@@ -17,7 +17,7 @@ TESTCASES
 OUTPUT
 /* --test_22.txt */
     b main
-addr@0:                                      /* Function: addr */
+addr:                                        /* Function: addr */
     push { fp }
     mov fp, sp
     push { r0 }                              /* Push declaration on stack, referenced by addressof. */
@@ -38,7 +38,7 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
-    bl addr@0                                /* Call addr */
+    bl addr                                  /* Call addr */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

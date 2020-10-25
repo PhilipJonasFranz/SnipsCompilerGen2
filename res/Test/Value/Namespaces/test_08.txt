@@ -11,11 +11,11 @@ TESTCASES
 OUTPUT
 /* --test_08.txt */
     b main
-Test.foo@0:                                  /* Function: Test.foo */
+Test.foo:                                    /* Function: Test.foo */
     lsl r0, r0, #2
     bx lr
     
 main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
-    b Test.foo@0                             /* Call Test.foo */
+    b Test.foo                               /* Call Test.foo */
     

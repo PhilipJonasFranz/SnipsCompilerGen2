@@ -20,16 +20,16 @@ TESTCASES
 OUTPUT
 /* --test_14.txt */
     b main
-get@0:                                       /* Function: get */
+get:                                         /* Function: get */
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
     
-shift@1:                                     /* Function: shift */
+shift:                                       /* Function: shift */
     push { r3, lr }
     mov r3, r0
     add r3, r0, r1
     mov r0, r3                               /* Evaluate Expression */
-    bl get@0                                 /* Call get */
+    bl get                                   /* Call get */
     ldmfd sp!, {r3, pc}
     
 main:                                        /* Function: main */
@@ -45,7 +45,7 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     lsr r0, r0, #2
     mov r1, r3
-    bl shift@1                               /* Call shift */
+    bl shift                                 /* Call shift */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

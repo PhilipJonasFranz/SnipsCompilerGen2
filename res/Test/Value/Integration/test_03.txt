@@ -15,7 +15,7 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-vecProd@0:                                   /* Function: vecProd */
+vecProd:                                     /* Function: vecProd */
     ldr r0, [sp, #12]
     ldr r2, [sp]
     mul r1, r0, r2
@@ -47,7 +47,7 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    bl vecProd@0                             /* Call vecProd */
+    bl vecProd                               /* Call vecProd */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

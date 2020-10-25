@@ -17,11 +17,11 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
     b main
-bar@0:                                       /* Function: bar */
+bar:                                         /* Function: bar */
     add r0, r0, #3
     bx lr
     
-foo@1:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     lsl r0, r0, #1
     bx lr
     
@@ -29,10 +29,10 @@ main:                                        /* Function: main */
     push { lr }
     mov r3, r0
     mov r0, r1                               /* Evaluate Expression */
-    bl foo@1                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r5, r0
     mov r0, r3                               /* Load parameters */
-    bl bar@0                                 /* Call bar */
+    bl bar                                   /* Call bar */
     add r0, r5, r0
     pop { pc }
     

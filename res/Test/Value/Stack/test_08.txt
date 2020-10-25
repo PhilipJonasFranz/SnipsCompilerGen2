@@ -22,7 +22,7 @@ TESTCASES
 OUTPUT
 /* --test_08.txt */
     b main
-foo@0:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     add r0, r0, r1
     bx lr
     
@@ -33,39 +33,39 @@ main:                                        /* Function: main */
     mov r4, r1
     mov r5, r2
     mov r1, #0
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r6, r0
     mov r1, #1
     mov r0, r3
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r7, r0
     mov r1, #2
     mov r0, r4
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r3, r0
     mov r1, #3
     mov r0, r4
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r8, r0
     mov r1, #4
     mov r0, r5
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r4, r0
     mov r1, #5
     mov r0, r5
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r9, r0
     mov r0, #6                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
     pop { r1 }
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r5, r0
     mov r0, #7                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
     pop { r1 }
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     add r1, r6, r7
     add r1, r1, r3
     add r1, r1, r8

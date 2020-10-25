@@ -23,7 +23,7 @@ vec: .skip 16
     mov r1, #3
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL0_@0.L0_vec                 /* Load from .data section */
+    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -33,11 +33,11 @@ vec: .skip 16
     str r0, [r1, #12]
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
-    ldr r1, .POOL0_@0.L0_vec                 /* Load data section address */
+    ldr r1, .POOL0_L0_vec                    /* Load data section address */
     ldr r0, [r1, #4]
     ldr r2, [r1]
     stmfd sp!, {r0, r2}
     ldr r0, [sp]
     bx lr
-.POOL0_@0.L0_vec: .word vec
+.POOL0_L0_vec: .word vec
     

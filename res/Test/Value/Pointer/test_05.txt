@@ -13,7 +13,7 @@ TESTCASES
 OUTPUT
 /* --test_05.txt */
     b main
-get@0:                                       /* Function: get */
+get:                                         /* Function: get */
     add r0, r0, r1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
@@ -32,7 +32,7 @@ main:                                        /* Function: main */
     lsr r1, r0, #2
     add r0, r1, #2
     mov r1, r3
-    bl get@0                                 /* Call get */
+    bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

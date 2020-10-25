@@ -14,7 +14,7 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-foo@0:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     lsl r2, r0, #2
     add r0, sp, #0
     ldr r0, [r0, r2]
@@ -33,7 +33,7 @@ main:                                        /* Function: main */
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
     mov r0, r3
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

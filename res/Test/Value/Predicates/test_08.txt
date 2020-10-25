@@ -21,10 +21,10 @@ TESTCASES
 OUTPUT
 /* --test_08.txt */
     b main
-lambda_sortPred@0:                           /* Function address getter for predication */
+lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-sortPred@0:                                  /* Function: sortPred */
+sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
@@ -34,7 +34,7 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_sortPred@0
+    b lambda_sortPred
     mov r10, #0
     push { r0 }
     mov r0, #1

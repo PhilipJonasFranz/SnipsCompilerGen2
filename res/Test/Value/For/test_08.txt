@@ -20,7 +20,7 @@ TESTCASES
 OUTPUT
 /* --test_08.txt */
     b main
-smallest@0:                                  /* Function: smallest */
+smallest:                                    /* Function: smallest */
     sub sp, sp, #16
     stmea sp, {r3-r6}
     mov r3, r0
@@ -28,25 +28,25 @@ smallest@0:                                  /* Function: smallest */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r6, #0
-smallest@0.L1: 
+smallest.L1: 
     cmp r6, r4
-    bge smallest@0.L2
+    bge smallest.L2
     lsl r1, r3, #2                           /* Convert to bytes */
     lsl r2, r6, #2
     lsl r2, r2, #1
     add r1, r1, r2
     ldr r0, [r1, #4]                         /* Load field from struct */
     cmp r0, r5
-    bge smallest@0.L3
+    bge smallest.L3
     lsl r1, r3, #2                           /* Convert to bytes */
     lsl r2, r6, #2
     lsl r2, r2, #1
     add r1, r1, r2
     ldr r5, [r1, #4]                         /* Load field from struct */
-smallest@0.L3: 
+smallest.L3: 
     add r6, r6, #1
-    b smallest@0.L1
-smallest@0.L2: 
+    b smallest.L1
+smallest.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6}
     bx lr
@@ -77,7 +77,7 @@ main:                                        /* Function: main */
     mov r1, #5
     sub r0, fp, #40
     lsr r0, r0, #2
-    bl smallest@0                            /* Call smallest */
+    bl smallest                              /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

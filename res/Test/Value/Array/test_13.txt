@@ -16,7 +16,7 @@ TESTCASES
 OUTPUT
 /* --test_13.txt */
     b main
-add@0:                                       /* Function: add */
+add:                                         /* Function: add */
     ldr r0, [sp]
     ldr r2, [sp, #4]
     add r0, r0, r2
@@ -79,7 +79,7 @@ main.L0:                                     /* Copy memory section with loop */
     push { r0 }
     b main.L0
 main.L1: 
-    bl add@0                                 /* Call add */
+    bl add                                   /* Call add */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

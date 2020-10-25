@@ -22,7 +22,7 @@ TESTCASES
 OUTPUT
 /* --test_18.txt */
     b main
-set@0:                                       /* Function: set */
+set:                                         /* Function: set */
     push { r3 }
     mov r3, r0
     mov r0, #8                               /* Evaluate Expression */
@@ -35,12 +35,12 @@ set@0:                                       /* Function: set */
     pop { r3 }
     bx lr
     
-get@1:                                       /* Function: get */
+get:                                         /* Function: get */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r4, r1
-    bl set@0                                 /* Call set */
+    bl set                                   /* Call set */
     ldr r1, [r10, r3, lsl #2]                /* Load from address */
     add r0, r1, r4
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
@@ -78,7 +78,7 @@ main:                                        /* Function: main */
     sub r0, fp, #40
     lsr r0, r0, #2
     mov r1, r3
-    bl get@1                                 /* Call get */
+    bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

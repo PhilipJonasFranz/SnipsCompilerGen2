@@ -37,7 +37,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_@29.L2_HEAP_START         /* Evaluate Expression */
+    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -118,7 +118,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_@29.L2_HEAP_START: .word HEAP_START
+.POOL0_L2_HEAP_START: .word HEAP_START
     
 /* Reserves a memory section using resv, assigns the given value */
 /* to this memory section, and returns a pointer to the new memory */
@@ -144,7 +144,7 @@ init_P0:                                     /* Function: init, Provisos: X<INT>
     add sp, sp, #8
     bx lr
     
-X.pipe@1_P1:                                 /* Function: X.pipe, Provisos: INT */
+X.pipe_P1:                                   /* Function: X.pipe, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
@@ -162,10 +162,10 @@ X.pipe@1_P1:                                 /* Function: X.pipe, Provisos: INT 
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
     
-lambda_add5@2:                               /* Function address getter for predication */
+lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-add5@2:                                      /* Function: add5 */
+add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
     
@@ -182,11 +182,11 @@ main:                                        /* Function: main */
     bl init_P0                               /* Call init */
     mov r3, r0
     add r10, pc, #8                          /* Load parameters */
-    b lambda_add5@2
+    b lambda_add5
     mov r10, #0
     mov r1, r0
     mov r0, r3
-    bl X.pipe@1_P1                           /* Call X.pipe */
+    bl X.pipe_P1                             /* Call X.pipe */
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}

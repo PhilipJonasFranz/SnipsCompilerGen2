@@ -18,7 +18,7 @@ TESTCASES
 OUTPUT
 /* --test_11.txt */
     b main
-set@0:                                       /* Function: set */
+set:                                         /* Function: set */
     push { r3, fp }
     mov fp, sp
     mov r3, r0
@@ -55,7 +55,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     sub r0, fp, #16
     lsr r0, r0, #2
-    bl set@0                                 /* Call set */
+    bl set                                   /* Call set */
     mov r2, #0                               /* Evaluate Expression */
     lsl r0, r3, #3
     add r2, r2, r0

@@ -14,14 +14,14 @@ OUTPUT
 /* --test_11.txt */
     b main
     
-lambda_ANON2@3:                              /* Function address getter for predication */
+lambda_ANON2:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-ANON2@3:                                     /* Function: ANON2 */
+ANON2:                                       /* Function: ANON2 */
     add r0, r0, #12
     bx lr
     
-process@1_P0:                                /* Function: process, Provisos: INT */
+process_P0:                                  /* Function: process, Provisos: INT */
     push { r4, lr }
     mov r4, r1
     add lr, pc, #8
@@ -30,9 +30,9 @@ process@1_P0:                                /* Function: process, Provisos: INT
     
 main:                                        /* Function: main */
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_ANON2@3
+    b lambda_ANON2
     mov r10, #0
     mov r1, r0
     mov r0, #5
-    b process@1_P0                           /* Call process */
+    b process_P0                             /* Call process */
     

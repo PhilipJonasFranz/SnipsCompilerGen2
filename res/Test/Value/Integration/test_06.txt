@@ -28,7 +28,7 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
     b main
-mult@0:                                      /* Function: mult */
+mult:                                        /* Function: mult */
     sub sp, sp, #28
     stmea sp, {r3-r8, fp}
     mov fp, sp
@@ -42,20 +42,20 @@ mult@0:                                      /* Function: mult */
     stmfd sp!, {r0, r1}
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
-mult@0.L1: 
+mult.L1: 
     cmp r5, #2
-    bge mult@0.L2
+    bge mult.L2
     mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
-mult@0.L4: 
+mult.L4: 
     cmp r6, #2
-    bge mult@0.L5
+    bge mult.L5
     mov r7, #0
     mov r0, #0                               /* Evaluate Expression */
     mov r8, #0
-mult@0.L7: 
+mult.L7: 
     cmp r8, #2
-    bge mult@0.L8
+    bge mult.L8
     mov r2, #0                               /* Evaluate Expression */
     lsl r0, r5, #3
     add r2, r2, r0
@@ -74,8 +74,8 @@ mult@0.L7:
     mul r2, r1, r2
     add r7, r7, r2
     add r8, r8, #1
-    b mult@0.L7
-mult@0.L8: 
+    b mult.L7
+mult.L8: 
     mov r2, #0                               /* Calculate offset of sub structure */
     lsl r0, r5, #3
     add r2, r2, r0
@@ -84,11 +84,11 @@ mult@0.L8:
     sub r0, fp, #16
     str r7, [r0, r2]
     add r6, r6, #1
-    b mult@0.L4
-mult@0.L5: 
+    b mult.L4
+mult.L5: 
     add r5, r5, #1
-    b mult@0.L1
-mult@0.L2: 
+    b mult.L1
+mult.L2: 
     mov r2, #0                               /* Evaluate Expression */
     lsl r0, r3, #3
     add r2, r2, r0
@@ -130,7 +130,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r3
     mov r1, r4
-    bl mult@0                                /* Call mult */
+    bl mult                                  /* Call mult */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

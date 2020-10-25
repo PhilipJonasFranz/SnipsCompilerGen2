@@ -33,10 +33,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-lambda_f@0:                                  /* Function address getter for predication */
+lambda_f:                                    /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-f@0:                                         /* Function: f */
+f:                                           /* Function: f */
     push { r3, fp }
     mov fp, sp
     mov r3, r0
@@ -57,7 +57,7 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_f@0
+    b lambda_f
     mov r10, #0
     mov r4, r0
     mov r5, r0

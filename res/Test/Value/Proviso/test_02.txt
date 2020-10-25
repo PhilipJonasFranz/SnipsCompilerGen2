@@ -13,10 +13,10 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-toInt@0_P0:                                  /* Function: toInt, Provisos: BOOL */
+toInt_P0:                                    /* Function: toInt, Provisos: BOOL */
     bx lr
     
 main:                                        /* Function: main */
     mov r0, #1                               /* Evaluate Expression */
-    b toInt@0_P0                             /* Call toInt */
+    b toInt_P0                               /* Call toInt */
     

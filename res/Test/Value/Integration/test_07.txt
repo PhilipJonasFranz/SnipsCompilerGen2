@@ -62,7 +62,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_@1.L0_HEAP_START          /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -143,7 +143,7 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_@1.L0_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START
     
 /* Multiplicate the given matricies. Both matricies have to have the given */
 /* dimension. Returns a pointer to the resulting matrix. */
@@ -218,7 +218,7 @@ __mat_mult.L2:
     add sp, sp, #4
     bx lr
     
-allocMatrix@1:                               /* Function: allocMatrix */
+allocMatrix:                                 /* Function: allocMatrix */
     sub sp, sp, #24
     stmea sp, {r3-r7, lr}
     mov r3, r0
@@ -227,13 +227,13 @@ allocMatrix@1:                               /* Function: allocMatrix */
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r6, #0
-allocMatrix@1.L1: 
+allocMatrix.L1: 
     cmp r6, r4
-    bge allocMatrix@1.L2
+    bge allocMatrix.L2
     mov r7, #0
-allocMatrix@1.L4: 
+allocMatrix.L4: 
     cmp r7, r3
-    bge allocMatrix@1.L5
+    bge allocMatrix.L5
     mla r0, r6, r4, r7
     mul r2, r6, r4
     add r1, r5, r2
@@ -243,11 +243,11 @@ allocMatrix@1.L4:
     pop { r0 }
     str r0, [r1]
     add r7, r7, #1
-    b allocMatrix@1.L4
-allocMatrix@1.L5: 
+    b allocMatrix.L4
+allocMatrix.L5: 
     add r6, r6, #1
-    b allocMatrix@1.L1
-allocMatrix@1.L2: 
+    b allocMatrix.L1
+allocMatrix.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r7, pc}
     
@@ -256,11 +256,11 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r1, #3
     mov r0, #3
-    bl allocMatrix@1                         /* Call allocMatrix */
+    bl allocMatrix                           /* Call allocMatrix */
     mov r4, r0
     mov r1, #3
     mov r0, #3
-    bl allocMatrix@1                         /* Call allocMatrix */
+    bl allocMatrix                           /* Call allocMatrix */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     push { r0 }

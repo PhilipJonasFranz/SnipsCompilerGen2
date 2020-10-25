@@ -20,7 +20,7 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-foo@0:                                       /* Function: foo */
+foo:                                         /* Function: foo */
     add r0, r0, #2
     bx lr
     
@@ -35,13 +35,13 @@ main.L1:                                     /* Evaluate condition */
     cmp r3, #5
     ble main.L3
     mov r0, r4                               /* Evaluate Expression */
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     mov r4, r0
 main.L3: 
     cmp r3, #2
     bge main.L5
     mov r0, r4                               /* Evaluate Expression */
-    bl foo@0                                 /* Call foo */
+    bl foo                                   /* Call foo */
     sub r4, r0, #3
 main.L5: 
     sub r3, r3, #1

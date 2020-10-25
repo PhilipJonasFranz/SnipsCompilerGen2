@@ -46,17 +46,17 @@ TESTCASES
 OUTPUT
 /* --test_07.txt */
     b main
-Storage.X.getValue@0_P2:                     /* Function: Storage.X.getValue, Provisos: INT */
+Storage.X.getValue_P2:                       /* Function: Storage.X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-Storage.X.getType@1_P0:                      /* Function: Storage.X.getType, Provisos: INT */
+Storage.X.getType_P0:                        /* Function: Storage.X.getType, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     bx lr
     
-Storage.X.setValue@2_P1:                     /* Function: Storage.X.setValue, Provisos: INT */
+Storage.X.setValue_P1:                       /* Function: Storage.X.setValue, Provisos: INT */
     push { r3 }
     mov r3, r0
     mov r0, r1                               /* Evaluate Expression */
@@ -76,14 +76,14 @@ main:                                        /* Function: main */
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Load parameters */
-    bl Storage.X.getType@1_P0                /* Call Storage.X.getType */
+    bl Storage.X.getType_P0                  /* Call Storage.X.getType */
     cmp r0, #0
     bne main.L1
     mov r1, #4
     mov r0, r3
-    bl Storage.X.setValue@2_P1               /* Call Storage.X.setValue */
+    bl Storage.X.setValue_P1                 /* Call Storage.X.setValue */
     mov r0, r3                               /* Evaluate Expression */
-    bl Storage.X.getValue@0_P2               /* Call Storage.X.getValue */
+    bl Storage.X.getValue_P2                 /* Call Storage.X.getValue */
     b main.L3
 main.L1: 
     mov r0, #2                               /* Evaluate Expression */

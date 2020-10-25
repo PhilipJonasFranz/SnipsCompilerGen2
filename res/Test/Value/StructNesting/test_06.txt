@@ -23,7 +23,7 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
     b main
-Storage.X.get@0_P0:                          /* Function: Storage.X.get, Provisos: INT */
+Storage.X.get_P0:                            /* Function: Storage.X.get, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
@@ -41,11 +41,11 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #16
     lsr r0, r0, #2
-    bl Storage.X.get@0_P0                    /* Call Storage.X.get */
+    bl Storage.X.get_P0                      /* Call Storage.X.get */
     mov r3, r0
     sub r0, fp, #8
     lsr r0, r0, #2
-    bl Storage.X.get@0_P0                    /* Call Storage.X.get */
+    bl Storage.X.get_P0                      /* Call Storage.X.get */
     add r0, r3, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
