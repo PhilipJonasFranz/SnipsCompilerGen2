@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
@@ -241,8 +242,8 @@ public class ContextChecker {
 					throw new CTX_EXC(f.getSource(), Const.MAIN_CANNOT_HOLD_PROVISOS);
 				
 				/* Check for duplicate function name */
-				for (Function f0 : p.functions) {
-					if (f0.path.build().equals(f.path.build())) 
+				for (Function f0 : this.functions) {
+					if (Function.signatureMatch(f0, f, false)) 
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 				
@@ -1433,7 +1434,11 @@ public class ContextChecker {
 	 */
 	public TYPE checkCall(Callee c) throws CTX_EXC {
 		
-		Function f = this.linkFunction(c);
+		/* Check here to get types for linking */
+		for (Expression e : c.getParams())
+			e.check(this);
+		
+		Function f = this.linkFunction(c, c.getParams().stream().map(x -> x.getType()).collect(Collectors.toList()));
 		
 		if (c.isNestedCall()) {
 			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT) {
@@ -1720,7 +1725,7 @@ public class ContextChecker {
 				}
 			}
 			
-			lambda = this.findFunction(r.path, r.getSource(), true, prefix);
+			lambda = this.findFunction(r.path, r.getSource(), true, prefix, null);
 			
 			if (r.base != null) {
 				STRUCT s = (STRUCT) r.base.check(this).getCoreType();
@@ -2213,11 +2218,7 @@ public class ContextChecker {
 	 * @return The found function.
 	 * @throws CTX_EXC Thrown if no or multiple matches for the function are found.
 	 */
-	public Function findFunction(NamespacePath path, Source source, boolean isPredicate, String prefix) throws CTX_EXC {
-		/* Search through registered functions, match entire path */
-		for (Function f0 : this.functions) 
-			if (f0.path.build().equals(path.build())) 
-				return f0;
+	public Function findFunction(NamespacePath path, Source source, boolean isPredicate, String prefix, List<TYPE> types) throws CTX_EXC {
 		
 		/* Collect functions that match this namespace path. */
 		List<Function> funcs = new ArrayList();
@@ -2260,6 +2261,24 @@ public class ContextChecker {
 				if (f0.path.build().endsWith(prefix + "." + path.build()))
 					return f0;
 			
+			/* Check for match with parameters */
+			if (types != null) {
+				List<Function> filtered = new ArrayList();
+				for (Function f0 : funcs) {
+					if (f0.parameters.size() == types.size()) {
+						boolean match = true;
+						for (int i = 0; i < types.size(); i++)
+							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
+						
+						if (match)
+							filtered.add(f0);
+					}
+				}
+				
+				if (filtered.size() == 1)
+					return filtered.get(0);
+			}
+			
 			for (Function f0 : funcs) s += f0.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			
@@ -2277,14 +2296,14 @@ public class ContextChecker {
 	 * @return The found function.
 	 * @throws CTX_EXC Thrown if the callee has provisos in a predicate call, or if the function cannot be found.
 	 */
-	public Function linkFunction(Callee c) throws CTX_EXC {
+	public Function linkFunction(Callee c, List<TYPE> types) throws CTX_EXC {
 		List<TYPE> proviso = c.getProviso();
 
 		/* Extract path from typedef for more extensive function searching */
 		String prefix = (c.isNestedCall())? this.getPath(c.getParams().get(0)) : "";
 		
 		/* Find the called function */
-		Function f = this.findFunction(c.getPath(), c.getCallee().getSource(), false, prefix);
+		Function f = this.findFunction(c.getPath(), c.getCallee().getSource(), false, prefix, types);
 		
 		Declaration anonTarget = null;
 		

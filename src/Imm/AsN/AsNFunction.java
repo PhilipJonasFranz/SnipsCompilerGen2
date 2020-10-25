@@ -163,7 +163,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Create the function head label */
-			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).provisoPostfix;
+			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {

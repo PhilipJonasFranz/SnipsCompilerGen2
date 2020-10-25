@@ -1,0 +1,36 @@
+SOURCE
+int get(int x, int y) {
+	return x + y;
+}
+
+int get(int x) {
+	return x * 2;
+}
+
+int main() {
+	return get(10) + get(5, 1);
+}
+TESTCASES
+26
+OUTPUT
+/* --test_00.txt */
+    b main@2
+get@0:                                       /* Function: get */
+    add r0, r0, r1
+    bx lr
+    
+get@1:                                       /* Function: get */
+    lsl r0, r0, #1
+    bx lr
+    
+main@2:                                      /* Function: main */
+    push { lr }
+    mov r0, #10                              /* Evaluate Expression */
+    bl get@1                                 /* Call get */
+    mov r3, r0
+    mov r1, #1
+    mov r0, #5
+    bl get@0                                 /* Call get */
+    add r0, r3, r0
+    pop { pc }
+    

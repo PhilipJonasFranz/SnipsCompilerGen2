@@ -251,7 +251,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			else {
 				hasCalls |= f.wasCalled;
 				
-				target += post;
+				target += "@" + f0.UID + post;
 				
 				/* Final label to function with proviso postfix */
 				ASMLabel functionLabel = new ASMLabel(target);

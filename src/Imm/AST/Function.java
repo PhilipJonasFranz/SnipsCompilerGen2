@@ -100,6 +100,8 @@ public class Function extends CompoundStatement {
 	
 	public ReturnStatement noReturn = null;
 	
+	public int UID = LabelUtil.getUID();
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
@@ -326,7 +328,10 @@ public class Function extends CompoundStatement {
 			signalsTypes.add(t.clone());
 		
 		/* Clone the function signature */
-		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+
+		f.UID = this.UID;
+		return f;
 	}
 	
 	/**
@@ -389,6 +394,10 @@ public class Function extends CompoundStatement {
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
 		
 		return match;
+	}
+	
+	public String buildCallLabel(List<TYPE> provisos) {
+		return this.path.build() + "@" + this.UID + this.getProvisoPostfix(provisos);
 	}
 
 	public Function clone() {
