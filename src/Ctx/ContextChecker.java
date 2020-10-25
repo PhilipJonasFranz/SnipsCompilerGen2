@@ -2297,6 +2297,9 @@ public class ContextChecker {
 		for (Function f0 : funcs) 
 			if (f0.path.build().endsWith(prefix + "." + path.build()))
 				return f0;
+
+		/* At this point, functions can only be differentiated by the parameters. All require the UID in the label. */
+		funcs.stream().forEach(x -> x.requireUIDInLabel = true);
 		
 		/* Check for match with parameters */
 		if (types != null) {

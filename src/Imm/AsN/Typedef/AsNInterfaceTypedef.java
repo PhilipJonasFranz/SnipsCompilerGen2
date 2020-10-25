@@ -47,6 +47,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		/* Set as function prefix, so label gen creates label with name reflecting the interface */
 		LabelUtil.funcPrefix = def.path.build();
+		LabelUtil.funcUID = -1;
 		
 		/* Create relay table */
 		intf.tableHead = new ASMLabel(LabelUtil.getLabel());
@@ -251,7 +252,10 @@ public class AsNInterfaceTypedef extends AsNNode {
 			else {
 				hasCalls |= f.wasCalled;
 				
-				target += "@" + f0.UID + post;
+				if (f.requireUIDInLabel)
+					target += "@" + f0.UID;
+				
+				target += post;
 				
 				/* Final label to function with proviso postfix */
 				ASMLabel functionLabel = new ASMLabel(target);

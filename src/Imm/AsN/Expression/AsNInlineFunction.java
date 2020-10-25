@@ -47,7 +47,7 @@ public class AsNInlineFunction extends AsNExpression {
 		ifunc.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8)));
 		
 		/* Construct label name for function lambda target with provided provisos */
-		String label = "lambda_" + i.inlineFunction.path.build() + "@" + i.inlineFunction.UID;
+		String label = "lambda_" + i.inlineFunction.path.build() + ((i.inlineFunction.requireUIDInLabel)? "@" + i.inlineFunction.UID : "");
 		
 		/* Branch to the lambda target of the function with a sys jump to obtain the address */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(label)));

@@ -77,7 +77,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		LabelUtil.reset();
 		LabelUtil.funcPrefix = f.path.build();
-		LabelUtil.funcUID = f.UID;
+		LabelUtil.funcUID = (f.requireUIDInLabel)? f.UID : -1;
 		
 		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelUtil.getLabel());
 		

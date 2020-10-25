@@ -102,6 +102,8 @@ public class Function extends CompoundStatement {
 	
 	public int UID = LabelUtil.getUID();
 	
+	public boolean requireUIDInLabel = false;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
@@ -400,7 +402,7 @@ public class Function extends CompoundStatement {
 		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
 		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 
 									 this.path.build().equals("resv")|| this.path.build().equals("free")|| 
-									 this.path.build().equals("init")|| this.path.build().equals("hsize"))? "" : "@" + this.UID)
+									 this.path.build().equals("init")|| this.path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "@" + this.UID)
 				+ this.getProvisoPostfix(provisos);
 	}
 

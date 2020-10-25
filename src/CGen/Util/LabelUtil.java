@@ -27,7 +27,7 @@ public class LabelUtil {
 	public static String getLabel() {
 		return funcPrefix + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
 							  funcPrefix.equals("resv") || funcPrefix.equals("free") || 
-							  funcPrefix.equals("init") || funcPrefix.equals("hsize"))? "" : "@"  + funcUID)
+							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "@"  + funcUID)
 				+ ".L" + c++;
 	}
 	
@@ -50,6 +50,7 @@ public class LabelUtil {
 		c = 0;
 		p = 0;
 		funcPrefix = "";
+		funcUID = -1;
 		n = 0;
 	}
 	
