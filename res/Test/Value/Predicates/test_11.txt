@@ -4,7 +4,7 @@ T process<T>(T v, func T -> T pred) {
 }
 
 int main() {
-	return process<int>(5, $::(int x -> int) : {
+	return process<int>(5, (int x -> int) : {
 		return x + 12;
 	});
 }

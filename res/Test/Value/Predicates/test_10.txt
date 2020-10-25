@@ -4,7 +4,7 @@ int process(int v, func int -> int pred) {
 }
 
 int main() {
-	return process(5, $::(int x -> int) : {
+	return process(5, (int x -> int) : {
 		return x + 12;
 	});
 }

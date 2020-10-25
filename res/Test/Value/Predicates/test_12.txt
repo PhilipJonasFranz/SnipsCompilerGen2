@@ -1,6 +1,6 @@
 SOURCE
 int main() {
-	func int -> int pred = $::(int x -> int) : { return x + 10; };
+	func int -> int pred = (int x -> int) : { return x + 10; };
 	return pred(3);
 }
 TESTCASES

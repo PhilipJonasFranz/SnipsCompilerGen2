@@ -71,8 +71,6 @@ public class Scanner {
 	protected ScannableToken [] scannables = {
 			new ScannableToken("(",			TokenType.LPAREN,		ACC_STATE.NONE,			""),
 			new ScannableToken(")",			TokenType.RPAREN,		ACC_STATE.NONE,			""),
-			new ScannableToken("@",			TokenType.AT,			ACC_STATE.NONE,			""),
-			new ScannableToken("$",			TokenType.DOLLAR,		ACC_STATE.NONE,			""),
 			new ScannableToken("{",			TokenType.LBRACE,		ACC_STATE.NONE,			""),
 			new ScannableToken("}",			TokenType.RBRACE,		ACC_STATE.NONE,			""),
 			new ScannableToken("[",			TokenType.LBRACKET,		ACC_STATE.NONE,			""),

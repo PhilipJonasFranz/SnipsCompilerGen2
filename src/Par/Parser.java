@@ -1387,11 +1387,28 @@ public class Parser {
 	}
 	
 	public Expression parseInlineFunction() throws PARSE_EXC {
-		if (current.type == TokenType.DOLLAR) {
-			accept();
-			accept(TokenType.COLON);
-			accept(TokenType.COLON);
+		/*
+		 * Check if the structure lying ahead is an inline function. This can be determined by
+		 * traversing forward until the bracket balance is zero. Then check if a : { follows. For example:
+		 * 
+		 * ( ... ( ... ) ... ) : { ...
+		 */
+		boolean inlineCheck = current.type == TokenType.LPAREN;
+		int bbalance = 1;
+		for (int i = 0; i < this.tokenStream.size(); i++) {
+			if (bbalance == 0) {
+				inlineCheck &= tokenStream.get(i).type == TokenType.COLON;
+				inlineCheck &= tokenStream.get(i + 1).type == TokenType.LBRACE;
+				break;
+			}
 			
+			if (tokenStream.get(i).type == TokenType.LPAREN)
+				bbalance++;
+			else if (tokenStream.get(i).type == TokenType.RPAREN) 
+				bbalance--;
+		}
+		
+		if (inlineCheck) {
 			accept(TokenType.LPAREN);
 			
 			List<Declaration> params = new ArrayList();

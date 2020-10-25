@@ -53,8 +53,6 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
-		DOLLAR("$"),
-		AT("@"),
 		BACKSL("\\"),
 		EOF("<EOF>"),
 		
