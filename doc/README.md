@@ -823,6 +823,20 @@ During compile time, the constructor of the extended struct is searched and repl
 
 ### Function Overloading
 
+Functions can be overloaded, or in other words, can have the same name, while having different parameter types. For Example:
+
+```c
+  int get() {
+    ...
+  }
+  
+  int get(bool b) {
+    ...
+  }
+```
+
+In the example, the function name `get` is overloaded by two functions. The function signatures differ, meaning either the return type or parameter types differ. It is required that the function can be clearly identified by the given name, which is the name and the parameters. Function overloading is available within struct typedefs, interface typedefs and regular function scopes.
+
 ### Auto Proviso
 
 ### Placeholder Atoms
