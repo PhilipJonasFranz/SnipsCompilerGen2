@@ -25,14 +25,32 @@ import Util.Source;
 public class Function extends CompoundStatement {
 
 			/* ---< NESTED >--- */
+	/**
+	 * A proviso mapping is used to store a unique mapping that was
+	 * applied to this function or ressource. The mapping stores a unique
+	 * postfix, return type and the provided proviso types. All types are
+	 * stored as copies and proviso free.
+	 */
 	public class ProvisoMapping {
 		
+				/* ---< FIELDS >--- */
+		/** 
+		 * The unique proviso postfix for this mapping.
+		 */
 		public String provisoPostfix;
 		
+		/**
+		 * The return type of the function when this mapping is applied to it.
+		 */
 		public TYPE returnType;
 		
+		/**
+		 * The provided proviso types.
+		 */
 		public List<TYPE> provisoMapping;
 		
+		
+				/* ---< CONSTRUCTORS >--- */
 		public ProvisoMapping(String provisoPostfix, TYPE returnType, List<TYPE> provisoMapping) {
 			this.provisoPostfix = provisoPostfix;
 			this.returnType = returnType;
@@ -83,25 +101,58 @@ public class Function extends CompoundStatement {
 	 */
 	public MODIFIER modifier = MODIFIER.SHARED;
 	
+	/**
+	 * The return type of this function. May contain provisos.
+	 */
 	private TYPE returnType;
 	
+	/**
+	 * The parameters of this function.
+	 */
 	public List<Declaration> parameters;
 	
+	/**
+	 * The types this function signals.
+	 */
 	public List<TYPE> signalsTypes;
 	
 	/* Flags for lambda targeting */
 	public Declaration lambdaDeclaration;
 	
+	/**
+	 * Set to true when a function predicate targets this
+	 * function. Will cause a lambda target to be injected
+	 * during the casting process.
+	 */
 	public boolean isLambdaTarget = false;
 	
+	/**
+	 * Set to true when this function is used as a function
+	 * head, or is capsuled within a FUNC type.
+	 */
 	public boolean isLambdaHead = false;
 	
+	/**
+	 * Set to true when at least one return statement
+	 * within the body of the function has a return value.
+	 */
 	public boolean hasReturn = false;
 	
+	/**
+	 * Set during context checking. Used to make sure that at least
+	 * one return statement. 
+	 */
 	public ReturnStatement noReturn = null;
 	
+	/**
+	 * Unique ID of this function.
+	 */
 	public int UID = LabelUtil.getUID();
 	
+	/**
+	 * If set to true, the '...@UID' will be included in the function
+	 * head asm label.
+	 */
 	public boolean requireUIDInLabel = false;
 	
 	
@@ -118,10 +169,9 @@ public class Function extends CompoundStatement {
 		
 		this.provisosTypes = proviso;
 		
-		if (path.build().equals("main")) {
+		if (path.build().equals("main")) 
 			/* Add default mapping */
 			this.addProvisoMapping(null, new ArrayList());
-		}
 	}
 	
 	
@@ -193,7 +243,7 @@ public class Function extends CompoundStatement {
 	}
 
 	
-			/* --- PROVISO RELATED >--- */
+			/* ---< PROVISO RELATED >--- */
 	/**
 	 * Set given context to the function, including parameters, return type and body.
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
@@ -270,6 +320,49 @@ public class Function extends CompoundStatement {
 	}
 	
 	/**
+	 * Adds a new proviso mapping to this function if the given proviso mapping
+	 * does not exist already.
+	 * @param returnType The return type of the new mapping.
+	 * @param context The proviso types of the new mapping.
+	 */
+	public void addProvisoMapping(TYPE returnType, List<TYPE> context) {
+		/* Proviso mapping already exists, just return */
+		if (this.containsMapping(context)) return;
+		else {
+			/* Add proviso mapping, create new proviso postfix for mapping */
+			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
+			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
+		}
+	}
+	
+	/**
+	 * Translates this function from the source proviso space to the target proviso space.<br>
+	 * <br>
+	 * When to use this function: A function nested in struct type A is re-located to type B. B extends A.<br>
+	 * Then the function needs to be proviso translated, with f.translate(A.provisos, B.provisos).<br>
+	 * <br>
+	 * This will cause the functions provisos to be adjusted to the provisos in B.<br>
+	 * <br>
+	 * Note: Only does this to the functions signature, not the body.
+	 * 
+	 * @param source The proviso heads of the ressource where the function was located
+	 * @param target The proviso heads of the ressource where the function is re-located to
+	 */
+	public void translateProviso(List<TYPE> source, List<TYPE> target) {
+		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
+		
+		for (int i = 0; i < this.provisosTypes.size(); i++)
+			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
+		
+		for (Declaration d : this.parameters)
+			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
+		
+		// TODO: Also translate body
+	}
+	
+	
+			/* ---< METHOD >--- */
+	/**
 	 * Returns the return type that corresponds to the given mapping.
 	 * @param map The proviso map which is matched to the registered proviso maps to get the return type from.
 	 * @return The return type.
@@ -284,22 +377,6 @@ public class Function extends CompoundStatement {
 		}
 		
 		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
-	}
-	
-	/**
-	 * Adds a new proviso mapping to this function if the given proviso mapping
-	 * does not exist already.
-	 * @param returnType The return type of the new mapping.
-	 * @param context The proviso types of the new mapping.
-	 */
-	public void addProvisoMapping(TYPE returnType, List<TYPE> context) {
-		/* Proviso mapping already exists, just return */
-		if (this.containsMapping(context)) return;
-		else {
-			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
-			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
-		}
 	}
 	
 	/**
@@ -334,31 +411,6 @@ public class Function extends CompoundStatement {
 
 		f.UID = this.UID;
 		return f;
-	}
-	
-	/**
-	 * Translates this function from the source proviso space to the target proviso space.<br>
-	 * <br>
-	 * When to use this function: A function nested in struct type A is re-located to type B. B extends A.<br>
-	 * Then the function needs to be proviso translated, with f.translate(A.provisos, B.provisos).<br>
-	 * <br>
-	 * This will cause the functions provisos to be adjusted to the provisos in B.<br>
-	 * <br>
-	 * Note: Only does this to the functions signature, not the body.
-	 * 
-	 * @param source The proviso heads of the ressource where the function was located
-	 * @param target The proviso heads of the ressource where the function is re-located to
-	 */
-	public void translateProviso(List<TYPE> source, List<TYPE> target) {
-		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
-		
-		for (int i = 0; i < this.provisosTypes.size(); i++)
-			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
-		
-		for (Declaration d : this.parameters)
-			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
-		
-		// TODO: Also translate body
 	}
 	
 	/**
@@ -402,6 +454,14 @@ public class Function extends CompoundStatement {
 		return match;
 	}
 	
+	/**
+	 * Builds the string that this function can be called with. The label will contain:<br>
+	 * - The name of the function<br>
+	 * - '@UID'<br>
+	 * - The proviso postfix<br>
+	 * @param provisos The proviso mapping to determine the proviso postfix.
+	 * @return The generated string.
+	 */
 	public String buildCallLabel(List<TYPE> provisos) {
 		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
 		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 

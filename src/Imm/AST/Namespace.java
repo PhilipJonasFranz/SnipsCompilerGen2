@@ -10,13 +10,27 @@ import Util.NamespacePath;
 import Util.Source;
 
 /**
- * This class represents a superclass for all AST-Nodes.
+ * The namespace node is used to capsule multiple program
+ * elements within a single namespace.
+ * 
+ * All namespace are flattened by the namespace processor
+ * before context-checking, so the pipeline does not need
+ * support for the namespace node.
  */
 public class Namespace extends SyntaxElement {
 
 			/* ---< FIELDS >--- */
+	/**
+	 * The relative namespace path of this namespace. If for example
+	 * this namespace 'B' lies in another namespace 'A', this field will
+	 * be set to a namespace path representing 'B'. The full namespace
+	 * path for the contained ressources is constructed in the namespace-processor.
+	 */
 	public NamespacePath path;
 	
+	/**
+	 * Program elements contained within this namespace.
+	 */
 	public List<SyntaxElement> programElements;
 	
 	

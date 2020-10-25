@@ -14,7 +14,9 @@ import Util.Source;
 public abstract class SyntaxElement {
 
 			/* ---< FIELDS >--- */
-	/** The Tab width when pretty printing [NON-CRITICAL] */
+	/** 
+	 * The Tab width when pretty printing. 
+	 */
 	protected int printDepthStep = 4;
 	
 	/**
@@ -60,7 +62,8 @@ public abstract class SyntaxElement {
 	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
 	
 	/** 
-	 * Create a padding of spaces with the width w 
+	 * Create a padding of spaces with the given length.
+	 * For example w=3 -> '   '.
 	 */
 	public String pad(int w) {
 		String pad = "";

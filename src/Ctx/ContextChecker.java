@@ -12,7 +12,6 @@ import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Namespace;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.AddressOf;
@@ -257,10 +256,6 @@ public class ContextChecker {
 				
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisosTypes.isEmpty()) f.check(this);
-			}
-			else if (s instanceof Namespace) {
-				p.namespaces.add((Namespace) s);
-				s.check(this);
 			}
 			else s.check(this);
 			
