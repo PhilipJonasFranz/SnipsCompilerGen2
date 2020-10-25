@@ -484,6 +484,17 @@ public class ContextChecker {
 			f.definedInInterface = e;
 			
 			if (f.modifier != MODIFIER.STATIC) {
+
+				/* Dynamically add-in the struct head provisos, if not present already */
+				for (TYPE t : e.proviso) {
+					boolean found = false;
+					for (TYPE t0 : f.provisosTypes)
+						found |= t0.isEqual(t);
+					
+					/* Add the proviso to the function signature */
+					if (!found) f.provisosTypes.add(t.clone());
+				}
+				
 				/* Add to a pool of nested functions */
 				this.nestedFunctions.add(f);
 			 

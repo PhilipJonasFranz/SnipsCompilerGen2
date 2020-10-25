@@ -1,0 +1,81 @@
+SOURCE
+interface Getter<T> {
+	T get();
+	
+	T get(bool b);
+}
+
+struct X<V> : Getter<V> {
+	V val;
+	
+	V get() {
+		return self->val;
+	}
+	
+	V get(bool mult) {
+		return (mult)? self->val * 2 : 2;
+	}
+}
+
+int main(bool b) {
+	X<int> x = X<int>::(10);
+	Getter<int> g = &x;
+	
+	return g.get() + g.get(b);
+}
+TESTCASES
+0 12
+1 30
+OUTPUT
+/* --test_04.txt */
+    b main
+Getter.L5_P0:                                /* Interface : Getter, Provisos: INT,  */
+    add r10, r12, #4
+    mov r12, #0
+    add pc, pc, r10
+    b X.get@2_P2
+    b X.get@3_P3
+    
+X.get@2_P2:                                  /* Function: X.get, Provisos: INT */
+    mov r10, #0
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+    
+X.get@3_P3:                                  /* Function: X.get, Provisos: INT */
+    mov r10, #0
+    push { r3 }
+    mov r3, r0
+    cmp r1, #0
+    beq X.get@3.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]                         /* Load field from struct */
+    lsl r0, r1, #1
+    b X.get@3.L1
+X.get@3.L0: 
+    mov r0, #2
+X.get@3.L1: 
+    pop { r3 }
+    bx lr
+    
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    mov r0, #1
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r4, r0, #2
+    mov r0, r4                               /* Evaluate Expression */
+    bl Getter.L5_P0                          /* Branch to relay table of Getter */
+    mov r5, r0
+    mov r0, r4
+    mov r1, r3
+    mov r12, #4
+    bl Getter.L5_P0                          /* Branch to relay table of Getter */
+    add r0, r5, r0
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+    
