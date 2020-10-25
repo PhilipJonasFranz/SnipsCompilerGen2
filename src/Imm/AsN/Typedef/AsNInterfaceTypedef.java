@@ -27,10 +27,11 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Typedef.InterfaceTypedef;
-import Imm.AST.Typedef.StructTypedef;
 import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 
 public class AsNInterfaceTypedef extends AsNNode {
 
@@ -220,15 +221,36 @@ public class AsNInterfaceTypedef extends AsNNode {
 		for (Function f : typedef.functions) {
 			Function f0 = null;
 			
+			/* Find the interface type the given struct typedef has implemented */
+			INTERFACE inter = null;
+			for (TYPE t : def.implemented) {
+				if (((INTERFACE) t).getTypedef().equals(typedef)) {
+					inter = (INTERFACE) t;
+				}
+			}
+				
+			/* 
+			 * Create a signature clone of the searched function and translate 
+			 * it to the passed provisos in the struct typedef. This is required 
+			 * to match proviso types in the signature match.
+			 */
+			Function signature = f.cloneSignature();
+			signature.translateProviso(typedef.proviso, inter.proviso);
+			
 			/*
 			 * Search function from interface in struct typedef, and set reference to it.
 			 * This is done since the acutal proviso mappings of this function are stored
 			 * in the function located in the struct typedef, and not in the function in
 			 * the interface typedef.
 			 */
-			for (int i = 0; i < def.functions.size(); i++)
-				if (def.functions.get(i).path.getLast().equals(f.path.getLast()))
-					f0 = def.functions.get(i);
+			for (int i = 0; i < def.functions.size(); i++) {
+				Function sfunc = def.functions.get(i);
+				if (Function.signatureMatch(signature, sfunc, false, false))
+					f0 = sfunc;
+			}
+			
+			/* Make sure the function was found */
+			assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
 			
 			/* Branch to function */
 			String target = f0.path.build();

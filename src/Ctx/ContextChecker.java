@@ -244,7 +244,7 @@ public class ContextChecker {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				for (Function f0 : this.functions) 
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false)) 
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true)) 
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				
 				STRUCT.useProvisoFreeInCheck = true;
@@ -380,7 +380,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false))
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 			}
@@ -439,7 +439,7 @@ public class ContextChecker {
 				for (int i = 0; i < e.functions.size(); i++) {
 					Function structFunction = e.functions.get(i);
 					
-					if (Function.signatureMatch(structFunction, ftranslated, false)) {
+					if (Function.signatureMatch(structFunction, ftranslated, false, true)) {
 						/* Add default context to make sure it is casted */
 						if (structFunction.provisosTypes.isEmpty())
 							structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
@@ -489,7 +489,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()))
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 			}
@@ -2301,8 +2301,7 @@ public class ContextChecker {
 				prefixMatchers.add(f0);
 		
 		/* Only one prefix matcher, found our function */
-		if (prefixMatchers.size() == 1)
-			return prefixMatchers.get(0);
+		if (prefixMatchers.size() == 1) return prefixMatchers.get(0);
 
 		
 		/* At this point, functions can only be differentiated by the parameters. All require the UID in the label. */
@@ -2323,8 +2322,26 @@ public class ContextChecker {
 				}
 			}
 			
-			if (filtered.size() == 1)
-				return filtered.get(0);
+			if (filtered.size() == 1) return filtered.get(0);
+		}
+		
+
+		/* Check for match with parameters and prefix matches */
+		if (types != null) {
+			List<Function> filtered = new ArrayList();
+			for (Function f0 : prefixMatchers) {
+				if (f0.parameters.size() == types.size()) {
+					boolean match = true;
+					for (int i = 0; i < types.size(); i++) 
+						if (types.get(i) != null) 
+							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
+					
+					if (match)
+						filtered.add(f0);
+				}
+			}
+			
+			if (filtered.size() == 1) return filtered.get(0);
 		}
 		
 		/* No match for the given functions, or multiple matches. */

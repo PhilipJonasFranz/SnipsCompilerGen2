@@ -36,6 +36,7 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
@@ -173,20 +174,21 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
 		if (f != null && f.definedInInterface != null) {
-			AsNInterfaceTypedef def = (AsNInterfaceTypedef) f.definedInInterface.castedNode;
+			InterfaceTypedef inter = f.definedInInterface;
+			AsNInterfaceTypedef def = (AsNInterfaceTypedef) inter.castedNode;
 			
 			/* Move the index in the interface typedef of the function * 4 in R12 */
-			for (int i = 0; i < f.definedInInterface.functions.size(); i++)
-				if (f.definedInInterface.functions.get(i).path.getLast().equals(f.path.getLast())) {
+			for (int i = 0; i < inter.functions.size(); i++)
+				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
 					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
 					break;
 				}
 			
 			String postfix = "";
 			
-			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
+			for (InterfaceProvisoMapping provisoMap : inter.registeredMappings) {
 				if (ProvisoUtil.mappingIsEqualProvisoFree(provisoMap.providedHeadProvisos, provisos)) {
-					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
+					if (inter.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
 						break;
 					
 					postfix = provisoMap.provisoPostfix;
@@ -207,7 +209,7 @@ public class AsNFunctionCall extends AsNStatement {
 			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);
 			
 			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
-			branch.comment = new ASMComment("Branch to relay table of " + f.definedInInterface.path.build());
+			branch.comment = new ASMComment("Branch to relay table of " + inter.path.build());
 			call.instructions.add(branch);
 		}
 		else if ((f != null && f.isLambdaHead) || anonCall != null) {
