@@ -100,6 +100,10 @@ public class Function extends CompoundStatement {
 	
 	public ReturnStatement noReturn = null;
 	
+	public int UID = LabelUtil.getUID();
+	
+	public boolean requireUIDInLabel = false;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
@@ -326,7 +330,10 @@ public class Function extends CompoundStatement {
 			signalsTypes.add(t.clone());
 		
 		/* Clone the function signature */
-		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+
+		f.UID = this.UID;
+		return f;
 	}
 	
 	/**
@@ -360,9 +367,12 @@ public class Function extends CompoundStatement {
 	 * @param f0 The first function.
 	 * @param f1 The second function to match against the first.
 	 * @param matchParamNames If set to true, the name of the parameter names will be matched as well.
-	 * @return True iff the signatures match.
+	 * @param useProvisoFreeParams If set to true, when comparing the parameter types, the types will be compared proviso free.
+	 * 		This might cause a crash when using this functionality in early stages, for example before its possible to set
+	 * 		a context.
+	 * @return True iff the signatures match with the specified flags.
 	 */
-	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames) {
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams) {
 		boolean match = true;
 		
 		/* Match function name, not namespace path */
@@ -380,7 +390,8 @@ public class Function extends CompoundStatement {
 				/* Also match names if flag is set */
 				if (matchParamNames) match &= d0.path.getLast().equals(d1.path.getLast());
 				
-				match &= d0.getType().isEqual(d1.getType());
+				if (useProvisoFreeParams) match &= d0.getType().isEqual(d1.getType());
+				else match &= d0.getRawType().isEqual(d1.getRawType());
 			}
 		}
 		else match = false;
@@ -389,6 +400,14 @@ public class Function extends CompoundStatement {
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
 		
 		return match;
+	}
+	
+	public String buildCallLabel(List<TYPE> provisos) {
+		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
+		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 
+									 this.path.build().equals("resv")|| this.path.build().equals("free")|| 
+									 this.path.build().equals("init")|| this.path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "@" + this.UID)
+				+ this.getProvisoPostfix(provisos);
 	}
 
 	public Function clone() {

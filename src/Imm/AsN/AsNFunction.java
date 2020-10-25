@@ -77,6 +77,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		LabelUtil.reset();
 		LabelUtil.funcPrefix = f.path.build();
+		LabelUtil.funcUID = (f.requireUIDInLabel)? f.UID : -1;
 		
 		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelUtil.getLabel());
 		
@@ -163,7 +164,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Create the function head label */
-			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).provisoPostfix;
+			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {

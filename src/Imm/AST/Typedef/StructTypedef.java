@@ -166,7 +166,7 @@ public class StructTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false))
+					if (Function.signatureMatch(fs, f0, false, true))
 						override = true;
 				
 				if (!override) {

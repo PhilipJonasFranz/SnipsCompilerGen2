@@ -1,0 +1,34 @@
+SOURCE
+int get(bool x) {
+	return (int) x;
+}
+
+int get(int x) {
+	return x * 2;
+}
+
+int main() {
+	return get(10) + get(true);
+}
+TESTCASES
+21
+OUTPUT
+/* --test_01.txt */
+    b main
+get@0:                                       /* Function: get */
+    bx lr
+    
+get@1:                                       /* Function: get */
+    lsl r0, r0, #1
+    bx lr
+    
+main:                                        /* Function: main */
+    push { lr }
+    mov r0, #10                              /* Evaluate Expression */
+    bl get@1                                 /* Call get */
+    mov r3, r0
+    mov r0, #1                               /* Load parameters */
+    bl get@0                                 /* Call get */
+    add r0, r3, r0
+    pop { pc }
+    
