@@ -18,19 +18,29 @@ import Util.Source;
 public class Declaration extends Statement {
 
 			/* ---< FIELDS >--- */
-	/** The visibility modifer of this declaration. Can only be applied to global declarations. */
+	/** 
+	 * The visibility modifer of this declaration. Can only be applied to global declarations. 
+	 */
 	public MODIFIER modifier;
 	
-	/** The namespace path of this declaration. */
+	/** 
+	 * The namespace path of this declaration. 
+	 */
 	public NamespacePath path;
 	
-	/** The effective type of this declaration. */
+	/** 
+	 * The effective type of this declaration. 
+	 */
 	private TYPE type;
 	
-	/** The initial value of this declaration. */
+	/** 
+	 * The initial value of this declaration. 
+	 */
 	public Expression value;
 	
-	/** The last statement that accessed this Declaration. */
+	/** 
+	 * The last statement that accessed this Declaration. 
+	 */
 	public Statement last = null;
 	
 	
