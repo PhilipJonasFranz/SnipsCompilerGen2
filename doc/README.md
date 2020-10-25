@@ -12,6 +12,7 @@
   - [Data Statements](#data-statements)
   - [Flow Statements](#flow-statements)
 - [Program Elements](#program-elements)
+  - [Global Variables](#global-variables)
   - [Function](#function)
   - [Interface Typedef](#interface-typedef)
   - [Struct Typedef](#struct-typedef)
@@ -25,6 +26,12 @@
    - [Visibility Modifiers](#visibility-modifiers)
    - [Parameter Covering](#parameter-covering)
    - [Struct Nesting](#struct-nesting)
+- [Further Reading](#further-reading)
+   - [Function Overloading](#function-overloading)
+   - [Auto Proviso](#auto-proviso)
+   - [Placeholder Atoms](#placeholder-atoms)
+   - [Register Atoms](#register-atoms)
+   - [Predicates and Inline Functions](#predicates-and-inline-functions)
 
 ## Type System
 
@@ -255,6 +262,16 @@ The continue statement causes the program to jump to the end of the current loop
 
 ## Program Elements
 
+### Global Variables
+
+Global variables can be created by writing a declaration outside of a function, struct or interface scope. Global variables can be capsuled within namespaces, and can be accessed from everywhere with the corresponding namespace path. Global Variables can have visibility modifiers. The variable can have an initial value as well, like so:
+
+```c
+  restricted int globalVar = 10;
+```
+
+The value is evaluated and set during the programs startup, in the order of the apearance of the global variables. This is true for included variables as well. The only exception to this is that functions that may be called in the expression of the initial value may not signal any exceptions.
+
 ### Function
 
 A function is the largest building block of a program. It consists out of a function signature and a body. The signature looks like this:
@@ -286,7 +303,7 @@ Function signatures can have proviso heads, which mean they can provide provisos
 An interface typedef defines a new interface and provides an anchor for a new interface type based on this typedef. The syntax of an interface typedef is:
 
 ```c
-  interface [Name]<[Proviso]> {
+  interface [Name]<[Proviso]> : [Interfaces] {
   
     [Function Signature];
   
@@ -295,7 +312,7 @@ An interface typedef defines a new interface and provides an anchor for a new in
   }
 ```
 
-As we can see, an interface typedef starts with the keyword `interface`, followed by the interface name, and a list of optional provisos. The body of the typedef contains multiple function signatures with semicolons at the end. The head provisos of the typedef are passed to the contained function signatures.
+As we can see, an interface typedef starts with the keyword `interface`, followed by the interface name, and a list of optional provisos. The interface typedef can implement multiple interfaces as well, which will simply cause the functions of the other interfaces to be copied to this interface typedef. The body of the typedef contains multiple function signatures with semicolons at the end. The head provisos of the typedef are passed to the contained function signatures.
 
 For example, the `Iterable<T>` interface from the included library:
 
@@ -801,3 +818,15 @@ In the constructor of the struct `Point3D` we call explicitly to the constructor
 ```
 
 During compile time, the constructor of the extended struct is searched and replaces the `super()` construct.
+
+## Further Reading
+
+### Function Overloading
+
+### Auto Proviso
+
+### Placeholder Atoms
+
+### Register Atoms
+
+### Predicates and Inline Functions
