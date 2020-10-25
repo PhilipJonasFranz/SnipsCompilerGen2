@@ -380,7 +380,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()))
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false))
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 			}
@@ -2293,11 +2293,18 @@ public class ContextChecker {
 			/* Found one match, return this match */
 			return funcs.get(0);
 		
+		
 		/* Check for match with prefix */
+		List<Function> prefixMatchers = new ArrayList();
 		for (Function f0 : funcs) 
 			if (f0.path.build().endsWith(prefix + "." + path.build()))
-				return f0;
+				prefixMatchers.add(f0);
+		
+		/* Only one prefix matcher, found our function */
+		if (prefixMatchers.size() == 1)
+			return prefixMatchers.get(0);
 
+		
 		/* At this point, functions can only be differentiated by the parameters. All require the UID in the label. */
 		funcs.stream().forEach(x -> x.requireUIDInLabel = true);
 		
@@ -2320,6 +2327,7 @@ public class ContextChecker {
 				return filtered.get(0);
 		}
 		
+		/* No match for the given functions, or multiple matches. */
 		return null;
 	}
 	
