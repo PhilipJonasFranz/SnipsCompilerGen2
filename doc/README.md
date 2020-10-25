@@ -311,6 +311,36 @@ For example, the `Iterable<T>` interface from the included library:
   }
 ```
 
+#### Instantiating an Interface
+
+Instantiating an interface has some different rules that common instantiations. In order to create a new interface, it is required to assign a pointer to a struct to it that implements this interface. For example:
+
+```c
+  LinkedList<int>* list = LinkedList::create<int>(0);
+  Collection<int>* c = &list;
+```
+
+In the example, a new instance of a linked list is created. The type of the list implements the interface Collection. So, by creating a pointer to the list, we can use it as a new interface instance.
+
+#### Calling an Interface
+
+Calling a function of the interface acts like calling a [nested Function](#struct-nesting). Lets add to the example:
+
+```c
+  Collection<int> c = &list;
+  
+  // Call a method in the interface
+  c.add(14);
+  
+  // Creating a pointer to the interface
+  Collection<int>* c0 = &c;
+  
+  // Call a method in the interface and deref c0.
+  return c0->get(0);
+```
+
+In the example we call a method in the interface directley, as well via a pointer to an interface. Note the use of `.` and `->` in the call syntax: Using `.` will cause the value the expression `c` evaluates to to be used directley. Using `->` will cause the value to be treated as a pointer, so after loading `c0`, this value will be derefed, and the resulting value will be used. Using `.` and `->` incorrectly can cause the program to behave unexpectedly.
+
 ### Struct Typedef
 
 A struct typedef defines a new struct union and provides an anchor for a new struct type based on this typedef. The syntax of a struct typedef is:
