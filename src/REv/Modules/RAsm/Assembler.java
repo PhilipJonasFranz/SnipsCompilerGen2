@@ -341,7 +341,7 @@ public class Assembler {
 						app += cond;
 						app += "101";
 						app += link;
-						app += Assembler.toBinaryStringLength(sp [1], 24);
+						app += Assembler.toBinaryStringLength(sp [1], 24, in.get(i).getLine());
 					}
 				}
 				else if (sp [0].startsWith("mrs")) {
@@ -377,7 +377,7 @@ public class Assembler {
 					app += "0000"; // Rn
 					app += getReg(sp [1]); //Rd
 					if (sp [sp.length - 1].startsWith("#")) {
-						app += toBinaryStringLength(sp [sp.length - 1].substring(1), 5);
+						app += toBinaryStringLength(sp [sp.length - 1].substring(1), 5, in.get(i).getLine());
 						app += shift;
 						app += "0";
 					}
@@ -407,7 +407,7 @@ public class Assembler {
 					app += getReg(sp [1]); // Rd
 					if (sp [2].contains("#")) { // Immediate value
 						app += "0000"; // TODO: ror
-						app += toBinaryStringLength(sp [2].substring(1), 8);	
+						app += toBinaryStringLength(sp [2].substring(1), 8, in.get(i).getLine());	
 					}
 					else { // Register Source
 						if (sp.length > 3) {
@@ -438,7 +438,7 @@ public class Assembler {
 					app += getReg(sp [1]); // Rd
 					if (sp [3].contains("#")) {
 						app += "0000"; // TODO: Ror
-						app += toBinaryStringLength(sp [3].substring(1), 8);
+						app += toBinaryStringLength(sp [3].substring(1), 8, in.get(i).getLine());
 					}
 					else {
 						if (sp.length > 4) {
@@ -572,7 +572,7 @@ public class Assembler {
 							imm = "0";
 							int base = locations.get(labelSplit [0]);
 							if (labelSplit.length == 2)base += Integer.parseInt(labelSplit [1]);
-							immV = Assembler.toBinaryStringLength("" + (base - (i << 2) + ((labelData)? 4 : 0)), 12);
+							immV = Assembler.toBinaryStringLength("" + (base - (i << 2) + ((labelData)? 4 : 0)), 12, in.get(i).getLine());
 							rn = "1111";
 						}
 						else {
@@ -596,7 +596,7 @@ public class Assembler {
 								upDown = "0";
 								val = -val;
 							}
-							immV = toBinaryStringLength("" + val, 12);
+							immV = toBinaryStringLength("" + val, 12, in.get(i).getLine());
 						}
 						else {
 							if (sp.length > 5)shift = getShiftBin(sp [4] + " " + sp [5]);
@@ -624,7 +624,7 @@ public class Assembler {
 								upDown = "0";
 								val = -val;
 							}
-							immV = toBinaryStringLength("" + val, 12);
+							immV = toBinaryStringLength("" + val, 12, in.get(i).getLine());
 						}
 						else {
 							if (sp.length > 5) shift = getShiftBin(sp [4] + " " + sp [5].substring(0, sp [5].length() - 1));
@@ -654,7 +654,7 @@ public class Assembler {
 								upDown = "0";
 								val = -val;
 							}
-							immV = toBinaryStringLength("" + val, 12);
+							immV = toBinaryStringLength("" + val, 12, in.get(i).getLine());
 						}
 						else if (sp.length > 3) {
 							if (sp.length > 5) {
@@ -672,7 +672,7 @@ public class Assembler {
 						}
 						else {
 							imm = "0";
-							immV = toBinaryStringLength("0", 12);
+							immV = toBinaryStringLength("0", 12, in.get(i).getLine());
 						}
 					}
 					
@@ -780,12 +780,13 @@ public class Assembler {
 	
 	/**
 	 * [Shift Type] [Imm/Reg] -> 0100100...
+	 * @throws Exception 
 	 */
-	public static String getShiftBin(String s) {
+	public static String getShiftBin(String s) throws Exception {
 		String [] sp = s.split(" ");
 		String shift = "00000000";
 		if (sp [1].startsWith("#")) {
-			shift = toBinaryStringLength(sp [1].substring(1), 5);
+			shift = toBinaryStringLength(sp [1].substring(1), 5, -1);
 			shift += getShift(sp [0]);
 			shift += "0";
 		}
@@ -806,11 +807,15 @@ public class Assembler {
 	/*
 	 * [num] -> |bin(num)| = w
 	 */
-	public static String toBinaryStringLength(String num, int w) {
+	public static String toBinaryStringLength(String num, int w, int line) throws Exception {
+		try {
 		int [] b = Util.toBinary(Integer.parseInt(num));
 		String app = "";
 		for (int i = 0; i < w; i++)app = b [31 - i] + app;
 		return app;
+		} catch (NumberFormatException e) {
+			throw new Exception("Bad parse input, line " + line);
+		}
 	}
 	
 	

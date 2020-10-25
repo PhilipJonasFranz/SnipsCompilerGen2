@@ -397,7 +397,11 @@ public class Function extends CompoundStatement {
 	}
 	
 	public String buildCallLabel(List<TYPE> provisos) {
-		return this.path.build() + "@" + this.UID + this.getProvisoPostfix(provisos);
+		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
+		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 
+									 this.path.build().equals("resv")|| this.path.build().equals("free")|| 
+									 this.path.build().equals("init")|| this.path.build().equals("hsize"))? "" : "@" + this.UID)
+				+ this.getProvisoPostfix(provisos);
 	}
 
 	public Function clone() {

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
@@ -242,10 +241,13 @@ public class ContextChecker {
 					throw new CTX_EXC(f.getSource(), Const.MAIN_CANNOT_HOLD_PROVISOS);
 				
 				/* Check for duplicate function name */
-				for (Function f0 : this.functions) {
-					if (Function.signatureMatch(f0, f, false)) 
+				STRUCT.useProvisoFreeInCheck = false;
+				
+				for (Function f0 : this.functions) 
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false)) 
 						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
-				}
+				
+				STRUCT.useProvisoFreeInCheck = true;
 				
 				/* 
 				 * Add the function to the function pool here already, 
@@ -1434,11 +1436,17 @@ public class ContextChecker {
 	 */
 	public TYPE checkCall(Callee c) throws CTX_EXC {
 		
+		List<TYPE> types = new ArrayList();
 		/* Check here to get types for linking */
-		for (Expression e : c.getParams())
-			e.check(this);
+		for (Expression e : c.getParams()) {
+			try {
+				types.add(e.check(this).clone());
+			} catch (Exception exc) {
+				types.add(null);
+			}
+		}
 		
-		Function f = this.linkFunction(c, c.getParams().stream().map(x -> x.getType()).collect(Collectors.toList()));
+		Function f = this.linkFunction(c, types);
 		
 		if (c.isNestedCall()) {
 			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT) {
@@ -2223,26 +2231,37 @@ public class ContextChecker {
 		/* Collect functions that match this namespace path. */
 		List<Function> funcs = new ArrayList();
 		
+		/* Filter on exact namespace path match */
+		for (Function f : this.functions) 
+			if (f.path.build().equals(path.build())) 
+				funcs.add(f);
+		
+		Function f0 = this.filterFromFunctions(funcs, path, prefix, types);
+		if (f0 != null) return f0;
+		
+		funcs.clear();
+		
 		/* Search through the registered function declarations, but only match the end of the namespace path */
-		for (Function f0 : this.functions) 
-			if (f0.path.build().endsWith(path.build())) {
-				String p0 = f0.path.build();
+		for (Function f : this.functions) {
+			if (f.path.build().endsWith(path.build())) {
+				String p0 = f.path.build();
 				String p1 = path.build();
 				
 				if (p0.length() == p1.length() || p0.substring(0, p0.length() - p1.length()).endsWith("."))
-					funcs.add(f0);
+					funcs.add(f);
 			}
-		
+		}
+			
 		/* Search through predicate declarations */
 		if (!this.currentFunction.isEmpty()) for (Declaration d : this.currentFunction.peek().parameters) {
 			if (d.getType() instanceof FUNC) {
-				FUNC f0 = (FUNC) d.getType();
+				FUNC f = (FUNC) d.getType();
 				
-				if (f0.funcHead != null) 
-					f0.funcHead.lambdaDeclaration = d;
+				if (f.funcHead != null) 
+					f.funcHead.lambdaDeclaration = d;
 				
 				if (d.path.getLast().equals(path.getLast())) 
-					funcs.add(f0.funcHead);
+					funcs.add(f.funcHead);
 			}
 		}
 		
@@ -2253,37 +2272,52 @@ public class ContextChecker {
 			/* Found one match, return this match */
 			return funcs.get(0);
 		else {
+			Function f = this.filterFromFunctions(funcs, path, prefix, types);
+			if (f != null) return f;
+			
 			/* Multiple results, cannot determine correct one, throw an exception */
 			String s = "";
 			
-			/* Check for match with prefix */
-			for (Function f0 : funcs) 
-				if (f0.path.build().endsWith(prefix + "." + path.build()))
-					return f0;
-			
-			/* Check for match with parameters */
-			if (types != null) {
-				List<Function> filtered = new ArrayList();
-				for (Function f0 : funcs) {
-					if (f0.parameters.size() == types.size()) {
-						boolean match = true;
-						for (int i = 0; i < types.size(); i++)
-							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
-						
-						if (match)
-							filtered.add(f0);
-					}
-				}
-				
-				if (filtered.size() == 1)
-					return filtered.get(0);
-			}
-			
-			for (Function f0 : funcs) s += f0.path.build() + ", ";
+			for (Function f1 : funcs) s += f1.path.build() + ", ";
 			s = s.substring(0, s.length() - 2);
 			
 			throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path.build(), s);
 		}
+	}
+	
+	public Function filterFromFunctions(List<Function> funcs, NamespacePath path, String prefix, List<TYPE> types) {
+		if (funcs.isEmpty()) 
+			/* Return if there is only one result */
+			return null;
+		else if (funcs.size() == 1) 
+			/* Found one match, return this match */
+			return funcs.get(0);
+		
+		/* Check for match with prefix */
+		for (Function f0 : funcs) 
+			if (f0.path.build().endsWith(prefix + "." + path.build()))
+				return f0;
+		
+		/* Check for match with parameters */
+		if (types != null) {
+			List<Function> filtered = new ArrayList();
+			for (Function f0 : funcs) {
+				if (f0.parameters.size() == types.size()) {
+					boolean match = true;
+					for (int i = 0; i < types.size(); i++) 
+						if (types.get(i) != null) 
+							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
+					
+					if (match)
+						filtered.add(f0);
+				}
+			}
+			
+			if (filtered.size() == 1)
+				return filtered.get(0);
+		}
+		
+		return null;
 	}
 	
 	/**

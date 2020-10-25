@@ -18,12 +18,17 @@ public class LabelUtil {
 	/** Current function prefix */
 	public static String funcPrefix = "";
 	
+	public static int funcUID = -1;
+	
 			/* ---< METHODS >--- */
 	/**
 	 * Returns a new unique label. 
 	 */
 	public static String getLabel() {
-		return funcPrefix + ".L" + c++;
+		return funcPrefix + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
+							  funcPrefix.equals("resv") || funcPrefix.equals("free") || 
+							  funcPrefix.equals("init") || funcPrefix.equals("hsize"))? "" : "@"  + funcUID)
+				+ ".L" + c++;
 	}
 	
 	public static String getProvisoPostfix() {
