@@ -1395,15 +1395,26 @@ public class Parser {
 		 */
 		boolean inlineCheck = current.type == TokenType.LPAREN;
 		int bbalance = 1;
-		for (int i = 0; i < this.tokenStream.size(); i++) {
+		boolean allowLparen = false;
+		if (inlineCheck) for (int i = 0; i < this.tokenStream.size(); i++) {
 			if (bbalance == 0) {
 				inlineCheck &= tokenStream.get(i).type == TokenType.COLON;
 				inlineCheck &= tokenStream.get(i + 1).type == TokenType.LBRACE;
 				break;
 			}
 			
-			if (tokenStream.get(i).type == TokenType.LPAREN)
-				bbalance++;
+			if (current.type == TokenType.FUNC)
+				allowLparen = true;
+			else if (tokenStream.get(i).type == TokenType.LPAREN) {
+				if (allowLparen)
+					bbalance++;
+				else {
+					inlineCheck = false;
+					break;
+				}
+				
+				allowLparen = false;
+			}
 			else if (tokenStream.get(i).type == TokenType.RPAREN) 
 				bbalance--;
 		}
