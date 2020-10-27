@@ -32,6 +32,7 @@
    - [Placeholder Atoms](#placeholder-atoms)
    - [Register Atoms](#register-atoms)
    - [Predicates and Inline Functions](#predicates-and-inline-functions)
+   - [Variable Shadowing](#variable-shadowing)
 
 ## Type System
 
@@ -978,3 +979,28 @@ Usual predicates require a function defined somewhere in the code. We can preven
 With this syntax we create an anonymous inline function. This function is casted like a regular function outside of the function where it is defined, but only access to this function is only given by the expression itself. These function have names like `ANON2`. In the syntax, we provide function parameters, return type and body.
 
 Like normal predicates, these functions may not signal exceptions.
+
+### Variable Shadowing
+
+Variable names can be shadowed when a variable with the same name lies in a different scope. For example:
+
+```c
+  int x = 10;
+  
+  struct S {
+    int x;
+  }
+  
+  int get(S x) {
+    if (true) {
+      S* s = &x;
+      int x = 2;
+      s->x <<= 1;
+    }
+    return x.x;
+  }
+```
+
+In the example, the name `x` is shadowed multiple times. In the top scope, a global variable is defined. Then, a function parameter is defined, and finally a variable inside the function. When using the variable name `x` in the program, the variable with the name `x` in the highest scope is used. Highest in the sense of 'most capsuled' scope. Shadowing will produce warnings, but is safe to use.
+
+The only restriction to shadowing obviously is having two variables with the same name in the same scope.
