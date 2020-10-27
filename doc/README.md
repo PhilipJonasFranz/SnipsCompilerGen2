@@ -855,6 +855,28 @@ Auto proviso is a feature that attempts to automatically map missing proviso typ
 
 In the example we have a function with one type parameter `T`. In the `main` function, we call the function with the argument `10`, which is obviously of the type `INT`. We leave out the required type parameters in the call syntax. Now, behind the scenes, it is attempted to create an auto-mapping: Looking through the arguments, it is clear that the parameter in the function head `v` with type `T` is mapped to the first call argument type `INT`. So, we can reverse map the missing proviso with `INT`. 
 
+```c
+  T* get<T>(T* v) {
+    ...
+  }
+  
+  int main() {
+    return get<>((int*) 10);
+  }
+```
+
+The mapping even works when the type parameter is capsuled within other types, like in the pointer in the example above. Note the nessesity of casting the value `10` to an `INT*` in the call. This is needed so the mapper recognizes the type `INT` in the type `INT*` compared to the target type `T*`. Not casting to the pointer will result in an error message: `Cannot auto-map proviso 'PROVISO<T>', not used by parameter`. 
+
+Additionally, a few requirements have to be met in order that a valid auto-mapping can be determined:
+
+- The mapping of the type parameters has to be non-ambigous, one type parameter may not share multiple mapped types
+- All required parameter types have to be used by the arguments. If one type parameter cannot be mapped, the mapping fails
+
+With the auto-proviso functionality, some interesting conclusions can be made:
+
+- When calling a struct nested function that has no additional provisos except the struct provisos, auto proviso will always succeed, since the implicit self reference always carries all required provisos
+- The call syntax `<>` can be left out
+
 ### Placeholder Atoms
 
 ### Register Atoms
