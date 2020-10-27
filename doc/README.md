@@ -915,8 +915,8 @@ Register atoms are a way to directley read-out the value of a register at this m
 
 With this, we read out R3 at the current execution. The following registers can be read out:
 
-- r0 to r15
-- fp, sp, lr, pc
+- `r0` to `r15`
+- `fp`, `sp`, `lr`, `pc`
 
 Reading out registers requires a vast amount of delicacy and a deep understanding of the underlying mechanics of the translation of the compiler. Most generally, this feature can be used as a semi-random number generator or to read out function parameters directly.
 
