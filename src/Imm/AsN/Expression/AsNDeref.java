@@ -70,7 +70,7 @@ public class AsNDeref extends AsNExpression {
 				ref.instructions.add(new ASMPushStack(new RegOp(target)));
 				
 				/* Push dummy values on stack */
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 		}
 		

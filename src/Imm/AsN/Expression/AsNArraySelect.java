@@ -77,7 +77,7 @@ public class AsNArraySelect extends AsNExpression {
 			StackUtil.copyToStackFromAddress(select, s.getType().wordsize());
 			
 			/* Push dummy values on the stack */
-			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
+			st.pushDummies(s.getType().wordsize());
 		}
 		else {
 			/* Load single value into R0 */

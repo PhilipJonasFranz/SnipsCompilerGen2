@@ -160,7 +160,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			}
 			else {
 				m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			
 			r.free(0);

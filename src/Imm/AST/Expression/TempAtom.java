@@ -14,9 +14,14 @@ import Util.Source;
 public class TempAtom extends Expression {
 
 			/* ---< FIELDS >--- */
+	/**
+	 * The expression which evaluates the value the stack is filled with.
+	 */
 	public Expression base;
 	
-	/* The type this placeholder atom replaces */
+	/**
+	 * The type this placeholder atom replaces.
+	 */
 	public TYPE inheritType;
 	
 	

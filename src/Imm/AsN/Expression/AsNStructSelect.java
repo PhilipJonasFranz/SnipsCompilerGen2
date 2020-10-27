@@ -60,7 +60,7 @@ public class AsNStructSelect extends AsNExpression {
 					StackUtil.copyToStackFromAddress(sel, s.getType().wordsize());
 					
 					/* Create dummy stack entries for newly copied struct on stack */
-					for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
+					st.pushDummies(s.getType().wordsize());
 				}
 				else {
 					/* Load in register */

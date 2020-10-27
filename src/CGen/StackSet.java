@@ -265,6 +265,22 @@ public class StackSet {
 	}
 	
 	/**
+	 * Pushes dummy R0 registers on the stack, with the amount
+	 * given by the amount argument.
+	 */
+	public void pushDummies(int amount) {
+		for (int i = 0; i < amount; i++)
+			this.push(REG.R0);
+	}
+	
+	/**
+	 * Pushes a single R0 dummy on the stack.
+	 */
+	public void pushDummy() {
+		this.push(REG.R0);
+	}
+	
+	/**
 	 * Returns the distance in bytes from the FP/LR base to the newest pushed
 	 * SP register. Used for try/watch construct. Returns the distance in bytes or -1.
 	 */

@@ -36,16 +36,17 @@ public class AsNStructureInit extends AsNExpression {
 		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
 			TempAtom a = (TempAtom) s.elements.get(0);
 			if (a.base == null) {
-				/* Absolute placeholder */
+				
+				/* Size of the memory section that the placeholder covers in words */
 				int size = s.structType.wordsize();
 				
-				if (!CompilerDriver.disableStructSIDHeaders)
-					size--;
+				/* One word is covered by the SID */
+				if (!CompilerDriver.disableStructSIDHeaders) size--;
 				
+				/* Make space on stack */
 				init.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 				
-				for (int i = 0; i < size; i++)
-					st.push(REG.R0);
+				st.pushDummies(size);
 				
 				if (!CompilerDriver.disableStructSIDHeaders) {
 					/* Load SID header */
@@ -53,7 +54,7 @@ public class AsNStructureInit extends AsNExpression {
 					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 					
 					/* Push dummy for SID header */
-					st.push(REG.R0);
+					st.pushDummy();
 				}
 				
 				return init;
@@ -92,7 +93,7 @@ public class AsNStructureInit extends AsNExpression {
 					regs = 0;
 				}
 				
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			else if (elements.get(i) instanceof TempAtom) {
 				TempAtom atom = (TempAtom) elements.get(i);
@@ -116,7 +117,7 @@ public class AsNStructureInit extends AsNExpression {
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
 				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
 					node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
-					st.push(REG.R0);
+					st.pushDummy();
 				}
 			}
 		}
@@ -143,7 +144,7 @@ public class AsNStructureInit extends AsNExpression {
 			node.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(struct.getTypedef().SID)));
 			
 			/* Push dummy for SID header */
-			st.push(REG.R0);
+			st.pushDummy();
 			regs++;
 		}
 		

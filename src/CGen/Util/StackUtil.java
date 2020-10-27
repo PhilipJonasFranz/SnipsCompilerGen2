@@ -128,9 +128,7 @@ public class StackUtil {
 				offset -= 4;
 			}
 			
-			if (r0) {
-				node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-			}
+			if (r0) node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
@@ -192,7 +190,7 @@ public class StackUtil {
 					regs = 0;
 				}
 				offset -= 4;
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			
 			AsNStructureInit.flush(regs, node);
@@ -218,7 +216,7 @@ public class StackUtil {
 					AsNStructureInit.flush(regs, node);
 					regs = 0;
 				}
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 		}
 		/* Origin is in local stack */
@@ -237,7 +235,7 @@ public class StackUtil {
 					regs = 0;
 				}
 				offset += 4;
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			
 			AsNStructureInit.flush(regs, node);
