@@ -962,6 +962,8 @@ Like discussed previously, the compiler makes the assumption about an anonymous 
 
 Also, it is important to note is that predicates may not signal exceptions.
 
+Predicates can be compared like regular variables, returning `true` if they point to the same function.
+
 #### Inline Functions
 
 Usual predicates require a function defined somewhere in the code. We can prevent this by using an inline function:
