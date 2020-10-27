@@ -874,10 +874,36 @@ Additionally, a few requirements have to be met in order that a valid auto-mappi
 
 With the auto-proviso functionality, some interesting conclusions can be made:
 
-- When calling a struct nested function that has no additional provisos except the struct provisos, auto proviso will always succeed, since the implicit self reference always carries all required provisos
-- The call syntax `<>` can be left out
+- When calling a struct nested function that has no additional provisos except the struct provisos, auto proviso will always succeed, since the implicit `self` reference always carries all required provisos
+- In the call syntax, `<>` can be left out
 
 ### Placeholder Atoms
+
+Placeholder atoms are a way to generate default values of variable size. For example:
+
+```c
+  struct X {
+    int [2] arr;
+    int x0;
+  }
+  
+  int main() {
+    X x = X::(...);
+  }
+```
+
+In the example, we use the `...` syntax as a placeholder to fill in all struct field values automatically. This special version simply skips the amount of words the covered fields are large, in this case 3. The struct initialization in assembly then boils down to subtracting the amount of words times four and pushing the SID if enabled. This is a very efficient and quick method to create a struct if no concrete values are available at the moment.
+
+Placeholder atoms can also be used to initialize fields with a starting value:
+
+```c
+  int main() {
+    int a = 2;
+    X x = X::((a++)...);
+  }
+```
+
+By providing a value before the placeholder, we effectiveley 'fill' the covered memory space with this value. So in this example, we fill three memory words with the value `3`. The expression is evaluated once at the start, and the value is used repeadetley. Placeholder atoms are available for declarations and structure initializations.
 
 ### Register Atoms
 
