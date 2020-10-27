@@ -907,4 +907,53 @@ By providing a value before the placeholder, we effectiveley 'fill' the covered 
 
 ### Register Atoms
 
+Register atoms are a way to directley read-out the value of a register at this moment. This can be done with the following syntax:
+
+```c
+  int val = #r3;
+```
+
+With this, we read out R3 at the current execution. The following registers can be read out:
+
+- r0 to r15
+- fp, sp, lr, pc
+
+Reading out registers requires a vast amount of delicacy and a deep understanding of the underlying mechanics of the translation of the compiler. Most generally, this feature can be used as a semi-random number generator or to read out function parameters directly.
+
 ### Predicates and Inline Functions
+
+Predicates and inline functions are a way to pass a function as a parameter or variable to another part of the code, and execute it there. It allows for great flexebility and code re-usability. Lets have a look at this example:
+
+```c
+  bool isEqual(int x, int y) {
+    return x == y;
+  }
+  
+  int process(func pred, int x, int y) {
+    return (int) pred(x, y);
+  }
+
+  int main() {
+    func pred = isEqual;
+    return process(pred, 10, 12);
+  }
+```
+
+In this example, we create a predicate with the function address of `isEqual`. Then we pass this function to the function `process` with parameters, and in this function, call the predicate and return its return value. This is one of the most basic usages of predicates.
+
+When we compile this code however, we get two warnings:
+
+- Unsafe operation, predicate 'pred' is anonymous
+- Using implicit anonymous type INT
+
+Lets look at the first one. The predicate is anonymous. This means that we did not provide the compiler information about the function signature of the passed predicate. This means the compiler assumes we know what we are doing and blindly loads the parameters as we list them. This is in no way problematic, but this way does not guarantee us type-safety and error reports when something goes wrong. We can de-anonymize the predicate by adding in a signature for it:
+
+```c
+  int process(func (int, int) -> bool pred, int x, int y) {
+    return (int) pred(x, y);
+  }
+```
+
+With this we simply tell the compiler that our predicate will take two `INT` parameters, and will return a `BOOL` value. This way the compiler can check if we actually provide the correct parameters to the call and handle the return type correctly. Also, this way we minimize the possibility of stack shifts. Lets think about a predicate that returns an array. This array would be loaded on the stack and returned over the stack. If the predicate was anonymous, the compiler assumes a `VOID` return type into `R0`. And just like that, we have a 'ghosted' array on our stack. This may cause addressing issues, and may even crash the entire program. So - its is always best practice - to pass a function signature to the compiler. Also, we notice our second warning is gone. What is this all about?
+
+Like discussed previously, the compiler makes the assumption about an anonymous predicate, that it returns a `VOID` type into `R0`. The implicit anonymous type comes about the casting expression that casts the call return type to an `INT`. During context checking, the compiler uses this casting to set the return type of the funtion to the casted type. So, we could cast to an `INT`-Array to prevent the issue we had earlier. This provides type safety on the output, but not on the inputted arguments. For full type safety, a predicate function signature is needed.
