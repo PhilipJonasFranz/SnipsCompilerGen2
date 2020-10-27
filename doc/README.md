@@ -922,6 +922,8 @@ Reading out registers requires a vast amount of delicacy and a deep understandin
 
 ### Predicates and Inline Functions
 
+#### Introduction to Predicates
+
 Predicates and inline functions are a way to pass a function as a parameter or variable to another part of the code, and execute it there. It allows for great flexebility and code re-usability. Lets have a look at this example:
 
 ```c
@@ -957,3 +959,20 @@ Lets look at the first one. The predicate is anonymous. This means that we did n
 With this we simply tell the compiler that our predicate will take two `INT` parameters, and will return a `BOOL` value. This way the compiler can check if we actually provide the correct parameters to the call and handle the return type correctly. Also, this way we minimize the possibility of stack shifts. Lets think about a predicate that returns an array. This array would be loaded on the stack and returned over the stack. If the predicate was anonymous, the compiler assumes a `VOID` return type into `R0`. And just like that, we have a 'ghosted' array on our stack. This may cause addressing issues, and may even crash the entire program. So - its is always best practice - to pass a function signature to the compiler. Also, we notice our second warning is gone. What is this all about?
 
 Like discussed previously, the compiler makes the assumption about an anonymous predicate, that it returns a `VOID` type into `R0`. The implicit anonymous type comes about the casting expression that casts the call return type to an `INT`. During context checking, the compiler uses this casting to set the return type of the funtion to the casted type. So, we could cast to an `INT`-Array to prevent the issue we had earlier. This provides type safety on the output, but not on the inputted arguments. For full type safety, a predicate function signature is needed.
+
+Also, it is important to note is that predicates may not signal exceptions.
+
+#### Inline Functions
+
+Usual predicates require a function defined somewhere in the code. We can prevent this by using an inline function:
+
+```c
+  int main() {
+    func pred = (int x, int y -> bool) : { return x == y; };
+    return process(pred, 10, 12);
+  }
+```
+
+With this syntax we create an anonymous inline function. This function is casted like a regular function outside of the function where it is defined, but only access to this function is only given by the expression itself. These function have names like `ANON2`. In the syntax, we provide function parameters, return type and body.
+
+Like normal predicates, these functions may not signal exceptions.
