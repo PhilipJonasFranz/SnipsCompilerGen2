@@ -837,9 +837,23 @@ Functions can be overloaded, or in other words, can have the same name, while ha
   }
 ```
 
-In the example, the function name `get` is overloaded by two functions. The function signatures differ, meaning either the return type or parameter types differ. It is required that the function can be clearly identified by the given name, which is the name and the parameters. Function overloading is available within struct typedefs, interface typedefs and regular function scopes.
+In the example, the function name `get` is overloaded by two functions. The function signatures differ, meaning either the return type or parameter types differ. It is required that the function can be clearly identified by the given name, which is the name and the parameters. Function overloading is available within struct typedefs, interface typedefs and the regular program space.
 
 ### Auto Proviso
+
+Auto proviso is a feature that attempts to automatically map missing proviso types by mapping the types of parameters to the actual proviso types. For example:
+
+```c
+  T get<T>(T v) {
+    ...
+  }
+  
+  int main() {
+    return get<>(10);
+  }
+```
+
+In the example we have a function with one type parameter `T`. In the `main` function, we call the function with the argument `10`, which is obviously of the type `INT`. We leave out the required type parameters in the call syntax. Now, behind the scenes, it is attempted to create an auto-mapping: Looking through the arguments, it is clear that the parameter in the function head `v` with type `T` is mapped to the first call argument type `INT`. So, we can reverse map the missing proviso with `INT`. 
 
 ### Placeholder Atoms
 
