@@ -945,8 +945,8 @@ In this example, we create a predicate with the function address of `isEqual`. T
 
 When we compile this code however, we get two warnings:
 
-- Unsafe operation, predicate 'pred' is anonymous
-- Using implicit anonymous type INT
+- `Unsafe operation, predicate 'pred' is anonymous`
+- `Using implicit anonymous type INT`
 
 Lets look at the first one. The predicate is anonymous. This means that we did not provide the compiler information about the function signature of the passed predicate. This means the compiler assumes we know what we are doing and blindly loads the parameters as we list them. This is in no way problematic, but this way does not guarantee us type-safety and error reports when something goes wrong. We can de-anonymize the predicate by adding in a signature for it:
 
