@@ -1,0 +1,57 @@
+SOURCE
+int get() {
+	return 10;
+}
+
+int get2() {
+	return 10;
+}
+
+int main(bool pick) {
+	func p1 = get;
+	func p2 = (pick)? get2 : get;
+	return (int) (p1 == p2);
+}
+TESTCASES
+0 1
+1 0
+OUTPUT
+/* --test_13.txt */
+    b main
+lambda_get:                                  /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+get:                                         /* Function: get */
+    mov r0, #10                              /* Evaluate Expression */
+    bx lr
+    
+lambda_get2:                                 /* Function address getter for predication */
+    add r0, pc, #8
+    mov pc, r10
+get2:                                        /* Function: get2 */
+    mov r0, #10                              /* Evaluate Expression */
+    bx lr
+    
+main:                                        /* Function: main */
+    mov r3, r0
+    add r10, pc, #8                          /* Evaluate Expression */
+    b lambda_get
+    mov r10, #0
+    mov r4, r0
+    cmp r3, #0
+    beq main.L0
+    add r10, pc, #8
+    b lambda_get2
+    mov r10, #0
+    b main.L1
+main.L0: 
+    add r10, pc, #8
+    b lambda_get
+    mov r10, #0
+main.L1: 
+    mov r5, r0
+    cmp r4, r5
+    moveq r0, #1
+    movne r0, #0
+    bx lr
+    
