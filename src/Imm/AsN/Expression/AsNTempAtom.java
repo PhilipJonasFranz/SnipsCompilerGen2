@@ -14,7 +14,6 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
@@ -72,75 +71,53 @@ public class AsNTempAtom extends AsNExpression {
 		else {
 			if (a.base.getType().wordsize() > 1) {
 
-				/*
-				 * TODO:
-				 * 
-				 * Decrement SP, load structure, but offsetted by one so it starts at the SID.
-				 * The copy the structure as often as required, but stop when hitting the base.
+				int wordsToStore = a.getType().wordsize() - a.base.getType().wordsize();
+				if (pushSID) wordsToStore--;
+				
+				/* 
+				 * Aligns the stack so that when casting the base, the top of 
+				 * the base is aligned to the head of the final memory section 
 				 */
+				atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(wordsToStore * 4)));
 				
-				/* Amount of times the structure defined by the base expression has to be copied */
-				int range = a.inheritType.wordsize() / a.base.getType().wordsize();
-				
+				st.pushDummies(wordsToStore);
+			
 				/* Cast the base expression once */
 				atom.instructions.addAll(AsNExpression.cast(a.base, r, map, st).getInstructions());
 				
-				ASMLabel start = null;
-				
-				ASMLabel end = null;
-				
-				/* 
-				 * If the structure needs to be copied multiple times, inject a check that compares
-				 * against a counter that counts the times the structure has been copied already.
-				 */
-				if (range > 2) {
-					ASMMov mov = new ASMMov(new RegOp(REG.R1), new ImmOp(0));
-					mov.comment = new ASMComment("Copy substructure with loop " + (range - 1) + " times");
-					atom.instructions.add(mov);
+				if (wordsToStore > 0) {
+					/* Points to start of base in stack */
+					atom.instructions.add(new ASMMov(new RegOp(REG.R2), new RegOp(REG.SP)));
 					
-					start = new ASMLabel(LabelUtil.getLabel());
+					/* Counter that keeps track of how many words still need to be copied */
+					atom.instructions.add(new ASMMov(new RegOp(REG.R1), new ImmOp(wordsToStore)));
 					
-					end = new ASMLabel(LabelUtil.getLabel());
+					ASMLabel start = new ASMLabel(LabelUtil.getLabel());
 					
+					ASMLabel end = new ASMLabel(LabelUtil.getLabel());
+					
+					/* Start of loop */
 					atom.instructions.add(start);
 					
-					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(range - 1)));
-					
+					/* Counter is zero, branch to end */
+					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(0)));
 					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(end)));
-				}
-				
-				/* Copy the stack section sequentially */
-				for (int k = 0; k < a.base.getType().wordsize(); k++) {
-					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp(k * 4)));
-					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp((k - a.base.getType().wordsize()) * 4)));
-				}
-				
-				/* Decrement the stack pointer by the size of the copied structure */
-				atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(a.base.getType().wordsize() * 4)));
-				
-				/* Increment the counter and jump to the loop start */
-				if (range - 1 > 1) {
-					atom.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(1)));
+					
+					/* Load current dataword */
+					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R2)));
+					
+					/* Store the word below the end of the complete structure */
+					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R2), new ImmOp(a.base.getType().wordsize() * 4)));
+					
+					/* Slide down to next data word */
+					atom.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new ImmOp(4)));
+					
+					/* Decrement counter */
+					atom.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(1)));
 					
 					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(start)));
 					
 					atom.instructions.add(end);
-				}
-				
-				/* 
-				 * Push dummies on the stack, but only range - 1 times the size, 
-				 * since once the dummies were pushed during casting. 
-				 */
-				st.pushDummies((range - 1) * a.base.getType().wordsize());
-				
-				/* If required, replace top word on the stack with the SID */
-				if (pushSID) {
-					
-					// TODO: This leaves out the top word of the structure cut-off */
-					
-					/* Insert SID */
-					atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(SID)));
-					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.SP)));
 				}
 			}
 			/* Base is one word large */

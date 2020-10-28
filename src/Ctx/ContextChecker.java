@@ -699,7 +699,7 @@ public class ContextChecker {
 				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
 		
 		/* Absolute placeholder case */
-		if (e.elements.size() == 1 && e.elements.size() != e.structType.getNumberOfFields() && e.elements.get(0) instanceof TempAtom && ((TempAtom) e.elements.get(0)).base == null) {
+		if (e.elements.size() == 1 && e.elements.get(0) instanceof TempAtom) {
 			TempAtom a = (TempAtom) e.elements.get(0);
 			a.inheritType = e.structType;
 			a.check(this);
@@ -2020,7 +2020,7 @@ public class ContextChecker {
 		return a.getType();
 	}
 	
-	public TYPE checkPlaceholderAtom(TempAtom a) throws CTX_EXC {
+	public TYPE checkTempAtom(TempAtom a) throws CTX_EXC {
 		
 		/* Override the type type of the base */
 		a.setType(a.inheritType);
@@ -2028,7 +2028,7 @@ public class ContextChecker {
 		if (a.base != null) {
 			TYPE t = a.base.check(this);
 			
-			if (a.inheritType.wordsize() % t.wordsize() != 0 || t.wordsize() > a.inheritType.wordsize()) 
+			if (t.wordsize() > a.inheritType.wordsize()) 
 				throw new CTX_EXC(a.getSource(), Const.TYPE_CANNOT_BE_ALIGNED_TO, t.provisoFree().typeString(), a.inheritType.provisoFree().typeString());
 		}
 		

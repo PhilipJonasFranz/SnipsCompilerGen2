@@ -44,7 +44,7 @@ public class TempAtom extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		TYPE t = ctx.checkPlaceholderAtom(this);
+		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
 			throw new CTX_EXC(this.getSource(), "Placeholder atom is not available at this location");

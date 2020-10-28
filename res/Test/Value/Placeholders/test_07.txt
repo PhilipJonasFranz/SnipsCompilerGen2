@@ -29,24 +29,22 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r4, #1
 /* Loads a copy of K three times */
-    mov r0, #1                               /* Evaluate Expression */
+    sub sp, sp, #24                          /* Evaluate Expression */
+    mov r0, #1
     add r4, r0, #1
     push { r0 }
     push { r4 }
     mov r0, #1
     push { r0 }
-    mov r1, #0                               /* Copy substructure with loop 2 times */
+    mov r2, sp
+    mov r1, #6
 main.L0: 
-    cmp r1, #2
+    cmp r1, #0
     beq main.L1
-    ldr r0, [sp]
-    str r0, [sp, #-12]
-    ldr r0, [sp, #4]
-    str r0, [sp, #-8]
-    ldr r0, [sp, #8]
-    str r0, [sp, #-4]
-    sub sp, sp, #12
-    add r1, r1, #1
+    ldr r0, [r2]
+    str r0, [r2, #12]
+    add r2, r2, #4
+    sub r1, r1, #1
     b main.L0
 main.L1: 
     lsl r2, r3, #2
