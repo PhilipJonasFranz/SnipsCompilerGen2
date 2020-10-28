@@ -920,16 +920,14 @@ We can take this functionality even further, by using multi-word expressions to 
 
 This will result in the base being repeatedley loaded. The initialized struct will look like this:
 
- | Stack Top |
- | --------- |
- | SID       |
- |  1        |
- |  2        |
- |  3        |
- |  1        |
- |  2        |
- | ...       |
- 
+ | SID |
+ | --- |
+ |  1  |
+ |  2  |
+ |  3  |
+ |  1  |
+ |  2  |
+
  As we can see, the array expression was loaded behind the struct id, and then repeated until the bounds of the memory section from the struct were reached. This can be used to initialize structs with a pattern.
  
 ### Register Atoms
