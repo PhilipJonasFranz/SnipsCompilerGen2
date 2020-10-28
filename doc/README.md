@@ -906,6 +906,32 @@ Placeholder atoms can also be used to initialize fields with a starting value:
 
 By providing a value before the placeholder, we effectiveley 'fill' the covered memory space with this value. So in this example, we fill three memory words with the value `3`. The expression is evaluated once at the start, and the value is used repeadetley. Placeholder atoms are available for declarations and structure initializations.
 
+We can take this functionality even further, by using multi-word expressions to use to fill the memory:
+
+```c
+  struct X {
+    int [5] arr;
+  }
+  
+  int main() {
+    X x = X::(({1, 2, 3})...);
+  }
+```
+
+This will result in the base being repeatedley loaded. The initialized struct will look like this:
+
+ | Stack Top |
+ | --------- |
+ | SID       |
+ |  1        |
+ |  2        |
+ |  3        |
+ |  1        |
+ |  2        |
+ | ...       |
+ 
+ As we can see, the array expression was loaded behind the struct id, and then repeated until the bounds of the memory section from the struct were reached. This can be used to initialize structs with a pattern.
+ 
 ### Register Atoms
 
 Register atoms are a way to directley read-out the value of a register at this moment. This can be done with the following syntax:
