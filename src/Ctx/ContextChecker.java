@@ -44,6 +44,8 @@ import Imm.AST.Expression.Boolean.BoolBinaryExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
+import Imm.AST.Lhs.ArraySelectLhsId;
+import Imm.AST.Lhs.LhsId;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.AssignWriteback;
@@ -1014,6 +1016,8 @@ public class ContextChecker {
 		f.counter.check(this);
 		f.counterRef.check(this);
 		
+		LhsId iteratorWritebackLhs = null;
+		
 		if (refType instanceof POINTER) {
 			POINTER p = (POINTER) refType;
 			
@@ -1032,6 +1036,10 @@ public class ContextChecker {
 			
 			f.range = new Mul(f.range, new Atom(new INT("" + itType.wordsize()), f.shadowRef.getSource()), f.range.getSource());
 			f.range.check(this);
+			
+			if (f.writeBackIterator) 
+				/* Construct the lhs that uses a pointer deref to store the iterator */
+				iteratorWritebackLhs = new PointerLhsId(f.shadowRef.clone(), f.iterator.getSource());
 		}
 		else if (refType instanceof ARRAY) {
 			ARRAY a = (ARRAY) refType;
@@ -1045,8 +1053,23 @@ public class ContextChecker {
 			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
 			
 			f.select.check(this);
+			
+			if (f.writeBackIterator) 
+				/* Construct the lhs that uses an array select to store the iterator */
+				iteratorWritebackLhs = new ArraySelectLhsId(f.select.clone(), f.iterator.getSource());	
 		}
 		else throw new CTX_EXC(f.getSource(), Const.ONLY_AVAILABLE_FOR_POINTERS_AND_ARRAYS, refType.provisoFree().typeString());
+		
+		if (f.writeBackIterator) {
+			/* Construct an id-ref that points to the iterator */
+			IDRef ref = new IDRef(f.iterator.path, f.iterator.getSource());
+			
+			/* Create the assignment */
+			f.writeback = new Assignment(ASSIGN_ARITH.NONE, iteratorWritebackLhs, ref, f.iterator.getSource());
+			
+			/* Check the expression to link all ressources */
+			f.writeback.check(this);
+		}
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
