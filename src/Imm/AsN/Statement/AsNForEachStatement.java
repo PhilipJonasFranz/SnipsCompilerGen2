@@ -107,7 +107,8 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* Load the range, automatically calculates range * iterator word size */
 			f.instructions.addAll(AsNExpression.cast(a.range, r, map, st).getInstructions());
 			
-			f.loadCounter(r, st, a, 1);
+			/* Load counter */
+			f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 1).getInstructions());
 			
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
@@ -129,7 +130,8 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 
 					AsNStructSelect.injectAddressLoader(f, sel, r, map, st, false);
 					
-					f.loadCounter(r, st, a, 0);
+					/* Load counter */
+					f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 0).getInstructions());
 					
 					/* Multiply counter with word size */
 					if (a.counter.getType().wordsize() > 1) {
@@ -185,6 +187,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		/* Add jump for continue statements to use as target */
 		f.instructions.add(continueJump);
+		
+		/* Write back the value of the iterator into the base */
+		if (a.writeBackIterator) {
+			
+		}
 		
 		/* Free all declarations in scope */
 		popDeclarationScope(f, a, r, st, true);
@@ -250,23 +257,6 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		f.freeDecs(r, a);
 		return f;
-	}
-	
-	public void loadCounter(RegSet r, StackSet st, ForEachStatement f, int target) {
-		/* Increment Counter */
-		if (r.declarationLoaded(f.counter)) {
-			/* In Reg Set */
-			int loc = r.declarationRegLocation(f.counter);
-			if (loc != target)
-				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(loc)));
-		}
-		else if (st.getDeclarationInStackByteOffset(f.counter) != -1) {
-			/* On Stack */
-			int off = st.getDeclarationInStackByteOffset(f.counter);
-		
-			this.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
-		}
-		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 
