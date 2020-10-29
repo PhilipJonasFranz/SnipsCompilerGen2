@@ -36,11 +36,20 @@ public class ForEachStatement extends CompoundStatement {
 	/** ArraySelect used when data is retrieved from an array */
 	public ArraySelect select;
 	
+	/**
+	 * If set to true, the value of the iterator is written back into
+	 * the data source after the loop body.
+	 */
+	public boolean writeBackIterator = false;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public ForEachStatement(Declaration iterator, Expression shadowRef, Expression range, List<Statement> body, Source source) {
+	public ForEachStatement(Declaration iterator, boolean writeBackIterator, Expression shadowRef, Expression range, List<Statement> body, Source source) {
 		super(body, source);
+		
 		this.iterator = iterator;
+		this.writeBackIterator = writeBackIterator;
+		
 		this.shadowRef = shadowRef;
 		
 		this.range = range;
@@ -71,7 +80,7 @@ public class ForEachStatement extends CompoundStatement {
 	}
 
 	public Statement clone() {
-		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
+		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.writeBackIterator, this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
 		if (this.select != null)
 			f.select = (ArraySelect) this.select.clone();
 		

@@ -14,10 +14,14 @@ import Util.Source;
 public class ForStatement extends ConditionalCompoundStatement {
 
 			/* ---< FIELDS >--- */
-	/** The declaration of the iterator. */
+	/** 
+	 * The declaration of the iterator. 
+	 */
 	public Declaration iterator;
 	
-	/** The iterator increment statement. */
+	/** 
+	 * The iterator increment statement. 
+	 */
 	public Statement increment;
 	
 	

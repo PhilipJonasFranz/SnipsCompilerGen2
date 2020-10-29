@@ -1045,13 +1045,19 @@ public class Parser {
 		this.scopes.push(new ArrayList());
 		
 		Source source = accept(TokenType.FOR).source();
-		accept(TokenType.LPAREN);
+		
+		boolean writeBackIterator = false;
+		if (current.type == TokenType.LBRACKET) {
+			accept();
+			writeBackIterator = true;
+		}
+		else accept(TokenType.LPAREN);
 		
 		TYPE itType = this.parseType();
 		Token itId = accept(TokenType.IDENTIFIER);
 		
-		if (current.type == TokenType.COLON) 
-			return this.parseForEach(itType, itId);
+		if (current.type == TokenType.COLON || writeBackIterator) 
+			return this.parseForEach(itType, itId, writeBackIterator);
 		
 		accept(TokenType.LET);
 		
@@ -1075,7 +1081,7 @@ public class Parser {
 		return new ForStatement(iterator, condition, increment, body, source);
 	}
 	
-	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
+	protected Statement parseForEach(TYPE itType, Token itId, boolean writeBackIterator) throws PARSE_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.source());
@@ -1092,11 +1098,12 @@ public class Parser {
 			range = this.parseExpression();
 		}
 		
-		accept(TokenType.RPAREN);
+		if (writeBackIterator) accept(TokenType.RBRACKET);
+		else accept(TokenType.RPAREN);
 		
 		List<Statement> body = this.parseCompoundStatement(false);
 		
-		return new ForEachStatement(iterator, shadowRef, range, body, itId.source());
+		return new ForEachStatement(iterator, writeBackIterator, shadowRef, range, body, itId.source());
 	}
 	
 	protected WhileStatement parseWhile() throws PARSE_EXC {
