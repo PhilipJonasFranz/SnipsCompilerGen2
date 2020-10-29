@@ -1,0 +1,18 @@
+SOURCE
+int main() {
+	int [4] arr = {5, 3, 2, 6};
+	
+	for (int i : arr)
+		i += 10;
+		
+	for [int i : arr]
+		i += 10;
+	
+	int sum = 0;
+	for (int i : arr) 
+		sum += i;
+		
+	return sum;
+}
+TESTCASES
+56
