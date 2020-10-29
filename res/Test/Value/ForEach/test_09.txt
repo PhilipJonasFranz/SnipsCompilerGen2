@@ -1,0 +1,15 @@
+SOURCE
+int main() {
+	int [10] arr = ...;
+	
+	int c = 0;
+	for [int i : arr] {
+		if (c < 2) i = 1;
+		else i = arr [c - 1] + arr [c - 2];
+		c++;
+	}
+	
+	return arr [9];
+}
+TESTCASES
+55
