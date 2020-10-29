@@ -1,13 +1,10 @@
 package Imm.AsN.Statement.Lhs;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -48,8 +45,7 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 				id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
 				
 				/* Create injector, new result is in R0 */
-				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
-				id.instructions.addAll(inj);
+				id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
 			}
 			
 			/* Store value to location */

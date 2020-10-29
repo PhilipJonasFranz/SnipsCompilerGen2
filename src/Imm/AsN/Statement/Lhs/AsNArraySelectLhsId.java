@@ -1,13 +1,10 @@
 package Imm.AsN.Statement.Lhs;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
@@ -69,13 +66,12 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				id.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R0)));
 				
 				/* Create assign injector */
-				List<ASMInstruction> inj = id.buildInjector(lhs.assign, 1, 2, true, true);
-				id.instructions.addAll(inj);
+				id.instructions.addAll(id.buildInjector(lhs.assign, 1, 2, true, true));
 			}
-			else {
+			else 
 				/* Pop the value off the stack */
 				id.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
-			}
+			
 			st.popXWords(1);
 			
 			/* Store at target location */

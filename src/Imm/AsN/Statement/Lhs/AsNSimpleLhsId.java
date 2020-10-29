@@ -1,14 +1,11 @@
 package Imm.AsN.Statement.Lhs;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
@@ -49,8 +46,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			
 			/* Create the injection, use direct targeting of register */
 			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				List<ASMInstruction> inj = id.buildInjector(lhs.assign, reg, 0, true, false);
-				id.instructions.addAll(inj);
+				id.instructions.addAll(id.buildInjector(lhs.assign, reg, 0, true, false));
 			}
 			else id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
 		}
@@ -67,17 +63,15 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
 					
 					/* Injector will calculate assignment arith into R0 */
-					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
-					id.instructions.addAll(inj);
+					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
 				}
 				
 				/* Store computed to memory */
 				id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
-			else {
+			else 
 				/* Copy the value on the stack to the desired location */
 				StackUtil.copyToAddressFromStack(ref.origin.getType().wordsize(), id, st);
-			}
 		}
 		/* Store to stack */
 		else {
@@ -89,8 +83,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 							new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 					
 					/* R1 can be overwritten, offset is known */
-					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, false);
-					id.instructions.addAll(inj);
+					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, false));
 				}
 				
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
