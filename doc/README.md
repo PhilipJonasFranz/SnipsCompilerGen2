@@ -220,15 +220,37 @@ The for loop can repeats the same code section multiple times, based on the iter
 
 #### For-Each Loop
 
-The for-each loop can, like the for loop, iterate over a code section, but has automatic iterator wiring. The loop can iterate over an array with fixed length, or over a pointer. In this case, the loop requires a second range parameter, that defines the length of the array. In each iteration, the current value is loaded into the iterator. The iterator value is not written back to the source, so modifications to the iterator do not change the data source.
+The for-each loop can, like the for loop, iterate over a code section, but has automatic iterator wiring. The loop can iterate over an array with fixed length, or over a pointer. In this case, the loop requires a second range parameter, that defines the length of the array. In each iteration, the current value is loaded into the iterator. For example:
 
 ```c
+  // Iterate over fixed size array
   for (int i : array) ...
   
+  // Iterate over array via pointer with range
   for (int i : p, 10) ...
   
+  // Iterate over array within struct with fixed size
   for (int i : s->arr) ...
 ```
+
+In all of these examples, changes made to the iterator `i` within the loops body are not written back into the data source. This can be enabled by using brackets instead of parenthesis:
+
+```c
+  for [int i : array] ...
+  
+  for [int i : p, 10] ...
+  
+  for [int i : s->arr] ...
+```
+
+Changes made to the iterator will result in the data source be modified. For example:
+
+```c
+  int [5] arr = {1, 5, 2, 1, 3};
+  for [int i : arr] i += 10;
+```
+
+The code will increment each value in the array by `10`, resulting in the array `{11, 15, 12, 11, 13}`. If no changes were made to the iterator or the changes made are not supposed to be written back, it is recommended to use the basic version of the for-Each loop, since it can be more performant.
 
 #### While Loop
 

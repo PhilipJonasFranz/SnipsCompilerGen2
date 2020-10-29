@@ -16,31 +16,69 @@ import Util.NamespacePath;
 import Util.Source;
 
 /**
- * This class represents a superclass for all AST-Nodes.
+ * The for-Each loop iterates over a defined data set of fixed
+ * size or with a given range. For each iteration, a new data-set
+ * is loaded into the iterator variable, and the body is executed
+ * with the current value of the iterator.
+ * 
+ * If enabled, the iterator is written back into the data source after
+ * the each loop body execution. This can be enabled by using brackets
+ * instead of parenthesis in the syntax.
  */
 public class ForEachStatement extends CompoundStatement {
 
 			/* ---< FIELDS >--- */
+	/**
+	 * Expression that selects the data from the data source.
+	 */
+	public Expression shadowRef;
+	
 	/** The declaration of the iterator. */
 	public Declaration iterator;
 	
+	/**
+	 * Internal counter with UID, keeps track of loop iterations.
+	 */
 	public Declaration counter;
 	
-	/** Reference to the counter of the for-Each Statement */
+	/** 
+	 * Reference to the counter of the for-Each Statement 
+	 */
 	public IDRef counterRef;
 	
-	public Expression shadowRef;
-	
+	/**
+	 * The expression that evaluates to the range this for-each
+	 * loop should loop to.
+	 */
 	public Expression range;
 	
 	/** ArraySelect used when data is retrieved from an array */
 	public ArraySelect select;
 	
+	/**
+	 * If set to true, the value of the iterator is written back into
+	 * the data source after the loop body.
+	 */
+	public boolean writeBackIterator = false;
+	
+	/**
+	 * This assignment is set to a statement that represents
+	 * the writeback of the iterator to the data target.
+	 * 
+	 * The assignment depends on the type of the selection the
+	 * iterator data is retrieved in the first place. The assignment
+	 * is generated automatically during CTX.
+	 */
+	public Assignment writeback;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public ForEachStatement(Declaration iterator, Expression shadowRef, Expression range, List<Statement> body, Source source) {
+	public ForEachStatement(Declaration iterator, boolean writeBackIterator, Expression shadowRef, Expression range, List<Statement> body, Source source) {
 		super(body, source);
+		
 		this.iterator = iterator;
+		this.writeBackIterator = writeBackIterator;
+		
 		this.shadowRef = shadowRef;
 		
 		this.range = range;
@@ -71,7 +109,7 @@ public class ForEachStatement extends CompoundStatement {
 	}
 
 	public Statement clone() {
-		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
+		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.writeBackIterator, this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
 		if (this.select != null)
 			f.select = (ArraySelect) this.select.clone();
 		

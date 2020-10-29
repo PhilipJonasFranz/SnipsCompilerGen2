@@ -850,6 +850,7 @@ public class ASMOptimizer {
 				ASMPushStack push = null;
 				if (body.instructions.get(i - 1) instanceof ASMPushStack) push = (ASMPushStack) body.instructions.get(i - 1);
 				
+				/* Found FP/SP exchange */
 				if (mov.target.reg == REG.FP && mov.op1 instanceof RegOp && ((RegOp) mov.op1).reg == REG.SP) {
 					boolean clear = true;
 					ASMMov mov0 = null;
@@ -860,7 +861,6 @@ public class ASMOptimizer {
 						if (body.instructions.get(a) instanceof ASMMov) {
 							mov0 = (ASMMov) body.instructions.get(a);
 							if (mov0.target.reg == REG.SP && mov0.op1 instanceof RegOp && ((RegOp) mov0.op1).reg == REG.FP) {
-								mov0 = (ASMMov) body.instructions.get(a);
 								break;
 							}
 						}
@@ -873,6 +873,14 @@ public class ASMOptimizer {
 						else if (body.instructions.get(a) instanceof ASMBranch && ((ASMBranch) body.instructions.get(a)).type == BRANCH_TYPE.BL) {
 							clear = false;
 							break;
+						}
+						else if (body.instructions.get(a) instanceof ASMSub) {
+							ASMSub sub = (ASMSub) body.instructions.get(a);
+							
+							if (sub.target.reg == REG.SP && sub.op0.reg == REG.SP) {
+								clear = false;
+								break;
+							}
 						}
 					}
 					

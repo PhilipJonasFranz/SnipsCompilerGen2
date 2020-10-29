@@ -1,0 +1,172 @@
+DESCRIPTION
+Tests for-each loop iterator writeback using pointer access.
+SOURCE
+int fib(int n) {
+	int* arr = resv(n);
+	
+	int c = 0;
+	for [int i : arr, n] {
+		if (c < 2) i = 1;
+		else i = *(arr + c - 1) + *(arr + c - 2);
+		c++;
+	}
+	
+	return *(arr + n - 1);
+}
+
+int main(int n) {
+	return fib(n);
+}
+TESTCASES
+1 1
+2 1
+3 2
+4 3
+5 5
+8 21
+10 55
+OUTPUT
+/* --test_10.txt */
+.data
+HEAP_START: .word 0
+    
+.text
+    b main
+/* Reseve a memory block with given size + 1. The block size has to be increased */
+/* by one to accomodate the block metadata. The function returns a void pointer to */
+/* the start of the reserved memory section + 1. This means the pointer points to */
+/* the start of the memory thats actually supposed to be used. */
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+/* Add block header to size */
+    add r3, r0, #1
+/* Get reference to heap start */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+/* Memory Section is allocated or free */
+/* Load block size from memory */
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+/* Defragment Heap */
+resv.L6:                                     /* Evaluate condition */
+    mov r0, #1
+    cmp r0, #0
+    beq resv.L7
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L10
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+/* All structures to end are free */
+    b resv.L7
+resv.L10: 
+    add r5, r5, r6
+/* Add to current size */
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+/* Write defragmented size to heap */
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+/* Memory location is free, check size */
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+/* Fits */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L19
+resv.L15: 
+    cmp r5, r3
+    ble resv.L16
+/* Rest, subtract size, store at offset */
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L19
+resv.L16: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+/* Memory section is allocated, skip */
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+/* End reached, create new block */
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L19: 
+    ldmfd sp!, {r3-r6}
+    bx lr
+.POOL0_L0_HEAP_START: .word HEAP_START
+    
+fib:                                         /* Function: fib */
+    sub sp, sp, #24
+    stmea sp, {r3-r7, lr}
+    mov r3, r0
+    bl resv                                  /* Call resv */
+    mov r4, r0
+    mov r5, #0
+    mov r6, #0
+    mov r7, #0
+fib.L1: 
+    cmp r3, r6
+    beq fib.L2
+    add r0, r4, r6
+    ldr r7, [r10, r0, lsl #2]                /* Load from address */
+    cmp r5, #2
+    bge fib.L4
+    mov r0, #1                               /* Evaluate Expression */
+    mov r7, #1
+    b fib.L3
+fib.L4: 
+    add r1, r4, r5
+    sub r0, r1, #1
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    add r1, r4, r5
+    push { r0 }
+    sub r0, r1, #2
+    pop { r1 }
+    ldr r2, [r10, r0, lsl #2]                /* Load from address */
+    add r7, r1, r2
+fib.L3: 
+    add r5, r5, #1
+    add r0, r4, r6
+    str r7, [r10, r0, lsl #2]
+    add r6, r6, #1
+    b fib.L1
+fib.L2: 
+    add r1, r4, r3
+    sub r0, r1, #1
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    ldmfd sp!, {r3-r7, pc}
+    
+main:                                        /* Function: main */
+    b fib                                    /* Call fib */
+    

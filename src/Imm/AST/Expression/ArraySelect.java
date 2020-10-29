@@ -60,7 +60,7 @@ public class ArraySelect extends Expression {
 		return this.shadowRef;
 	}
 
-	public Expression clone() {
+	public ArraySelect clone() {
 		List<Expression> eclone = new ArrayList();
 		for (Expression e : this.selection) eclone.add(e.clone());
 		
