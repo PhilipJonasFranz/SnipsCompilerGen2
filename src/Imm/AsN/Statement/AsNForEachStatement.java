@@ -188,9 +188,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		/* Add jump for continue statements to use as target */
 		f.instructions.add(continueJump);
 		
-		/* Write back the value of the iterator into the base */
+		
 		if (a.writeBackIterator) 
+			/* Write back the value of the iterator into the base */
 			f.instructions.addAll(AsNAssignment.cast(a.writeback, r, map, st).getInstructions());
+		
 		
 		/* Free all declarations in scope */
 		popDeclarationScope(f, a, r, st, true);
