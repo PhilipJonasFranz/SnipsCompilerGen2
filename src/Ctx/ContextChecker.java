@@ -281,7 +281,7 @@ public class ContextChecker {
 	public TYPE checkFunction(Function f) throws CTX_EXC {
 		/* Proviso Types are already set at this point */
 		
-		scopes.push(new Scope(scopes.peek()));
+		scopes.push(new Scope(this.scopes.get(0)));
 		
 		this.signalStack.push(new ArrayList());
 		this.watchpointStack.push(f);
