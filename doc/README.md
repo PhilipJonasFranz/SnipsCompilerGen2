@@ -220,7 +220,7 @@ The for loop can repeats the same code section multiple times, based on the iter
 
 #### For-Each Loop
 
-The for-each loop can, like the for loop, iterate over a code section, but has automatic iterator wiring. The loop can iterate over an array with fixed length, or over a pointer. In this case, the loop requires a second range parameter, that defines the length of the array. In each iteration, the current value is loaded into the iterator. For example:
+The for-each loop can, like the for loop, iterate over a code section, but has automatic iterator wiring. The loop can iterate over an array with fixed length or over a pointer. In this case, the loop requires a second range parameter, that defines the length of the array. In each iteration, the current value is loaded into the iterator. For example:
 
 ```c
   // Iterate over fixed size array
@@ -357,7 +357,7 @@ Instantiating an interface has some different rules that common instantiations. 
 
 ```c
   LinkedList<int>* list = LinkedList::create<int>(0);
-  Collection<int>* c = &list;
+  Collection<int>* c = list;
 ```
 
 In the example, a new instance of a linked list is created. The type of the list implements the interface Collection. So, by creating a pointer to the list, we can use it as a new interface instance.
@@ -367,7 +367,7 @@ In the example, a new instance of a linked list is created. The type of the list
 Calling a function of the interface acts like calling a [nested Function](#struct-nesting). Lets add to the example:
 
 ```c
-  Collection<int> c = &list;
+  Collection<int> c = list;
   
   // Call a method in the interface
   c.add(14);
