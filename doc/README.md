@@ -357,7 +357,8 @@ Instantiating an interface has some different rules that common instantiations. 
 
 ```c
   LinkedList<int>* list = LinkedList::create<int>(0);
-  Collection<int>* c = list;
+  Collection<int> c = list;
+  Collection<int>* c0 = &list;
 ```
 
 In the example, a new instance of a linked list is created. The type of the list implements the interface Collection. So, by creating a pointer to the list, we can use it as a new interface instance.
