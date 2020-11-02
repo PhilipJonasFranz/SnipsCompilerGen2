@@ -33,7 +33,7 @@
    - [Register Atoms](#register-atoms)
    - [Predicates and Inline Functions](#predicates-and-inline-functions)
    - [Variable Shadowing](#variable-shadowing)
-
+   - [Dont care arrays](#dont-care-arrays)
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
@@ -1050,3 +1050,5 @@ Variable names can be shadowed when a variable with the same name lies in a diff
 In the example, the name `x` is shadowed multiple times. In the top scope, a global variable is defined. Then, a function parameter is defined, and finally a variable inside the function. When using the variable name `x` in the program, the variable with the name `x` in the highest scope is used. Highest in the sense of 'most capsuled' scope. Shadowing will produce warnings, but is safe to use.
 
 The only restriction to shadowing obviously is having two variables with the same name in the same scope.
+
+### Don't care arrays
