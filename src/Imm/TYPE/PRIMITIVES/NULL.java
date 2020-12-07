@@ -1,9 +1,7 @@
 package Imm.TYPE.PRIMITIVES;
 
-import Exc.SNIPS_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
-import Res.Const;
 
 public class NULL extends PRIMITIVE<Object> {
 	
@@ -21,7 +19,8 @@ public class NULL extends PRIMITIVE<Object> {
 	}
 	
 	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXC(Const.CANNOT_GET_SOURCE_CODE_REPRESENTATION, this.typeString());
+		// TODO: Implement mechanism that replaces this with the address of the nullpointer
+		return "NULL";
 	}
 	
 	public int wordsize() {

@@ -1986,7 +1986,9 @@ public class ContextChecker {
 			select.idRef = (IDRef) ref;
 		}
 		else if (select.getShadowRef() instanceof StructSelect) {
-			ref = (StructSelect) select.getShadowRef();
+			StructSelect ref0 = (StructSelect) select.getShadowRef();
+			select.idRef = (IDRef) ref0.selector;
+			ref = ref0;
 		}
 		else throw new CTX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_FROM_VARIABLE_REF);
 		
