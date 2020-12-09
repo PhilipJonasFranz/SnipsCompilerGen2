@@ -8,6 +8,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -34,6 +35,9 @@ public class StructSelectLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		TYPE t = ctx.checkStructSelect(this.select);
 		if (this.select.selector instanceof IDRef) {
 			IDRef ref = (IDRef) this.select.selector;
@@ -43,6 +47,8 @@ public class StructSelectLhsId extends LhsId {
 			ArraySelect sel = (ArraySelect) this.select.selector;
 			this.origin = sel.idRef.origin;
 		}
+		
+		CompilerDriver.lastSource = temp;
 		return t;
 	}
 

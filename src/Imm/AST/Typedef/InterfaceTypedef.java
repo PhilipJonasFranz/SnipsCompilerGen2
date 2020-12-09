@@ -13,6 +13,7 @@ import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -190,7 +191,13 @@ public class InterfaceTypedef extends SyntaxElement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkInterfaceTypedef(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkInterfaceTypedef(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

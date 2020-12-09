@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -32,8 +33,13 @@ public class ArraySelectLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		TYPE t = ctx.checkArraySelect(this.selection);
 		this.origin = this.selection.idRef.origin;
+		
+		CompilerDriver.lastSource = temp;
 		return t;
 	}
 

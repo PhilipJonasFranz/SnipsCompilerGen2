@@ -5,6 +5,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -27,7 +28,13 @@ public class DefaultStatement extends CompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkDefaultStatement(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkDefaultStatement(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public Statement clone() {

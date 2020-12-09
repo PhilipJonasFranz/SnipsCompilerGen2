@@ -7,6 +7,7 @@ import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -39,7 +40,13 @@ public class IDRef extends Expression {
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkIDRef(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkIDRef(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

@@ -9,6 +9,7 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -37,12 +38,17 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		if (!(this.shadowDeref instanceof Deref)) {
 			throw new CTX_EXC(this.getSource(), "Left hand identifer is not a dereference");
 		}
 		else this.deref = (Deref) this.shadowDeref;
 		
 		this.expressionType = deref.check(ctx);
+		
+		CompilerDriver.lastSource = temp;
 		return this.expressionType;
 	}
 

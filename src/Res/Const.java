@@ -212,7 +212,7 @@ public class Const {
 	
 	public static final String ATTEMPTED_TO_GET_WORDSIZE_OF_PROVISO_WITHOUT_CONTEXT = "INTERNAL : Attempted to get word size of PROVISO %s without context!";
 	
-	public static final String CANNOT_FREE_CONTEXTLESS_PROVISO = "Cannot free contextless proviso: %s";
+	public static final String CANNOT_FREE_CONTEXTLESS_PROVISO = "Cannot free contextless proviso %s at %s";
 	
 	public static final String CAN_ONLY_APPLY_TO_IDREF = "Can only apply to id reference";
 	

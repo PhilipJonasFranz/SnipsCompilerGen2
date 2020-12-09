@@ -8,6 +8,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -47,7 +48,13 @@ public class RegisterAtom extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkRegisterAtom(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkRegisterAtom(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

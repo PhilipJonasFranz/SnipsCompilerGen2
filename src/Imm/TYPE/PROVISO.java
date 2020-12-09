@@ -1,5 +1,6 @@
 package Imm.TYPE;
 
+import Ctx.ContextChecker;
 import Exc.SNIPS_EXC;
 import Res.Const;
 import Snips.CompilerDriver;
@@ -96,6 +97,7 @@ public class PROVISO extends TYPE<Void> {
 		if (this.context != null) return this.context.wordsize();
 		else if (this.defaultContext != null) return this.defaultContext.wordsize();
 		else {
+			ContextChecker.progress.abort();
 			throw new SNIPS_EXC(Const.ATTEMPTED_TO_GET_WORDSIZE_OF_PROVISO_WITHOUT_CONTEXT, this.placeholderName);
 		}
 	}
@@ -114,7 +116,10 @@ public class PROVISO extends TYPE<Void> {
 	public TYPE provisoFree() {
 		if (this.hasContext())
 			return this.getContext().clone();
-		else throw new SNIPS_EXC(Const.CANNOT_FREE_CONTEXTLESS_PROVISO, this.placeholderName);
+		else {
+			ContextChecker.progress.abort();
+			throw new SNIPS_EXC(Const.CANNOT_FREE_CONTEXTLESS_PROVISO, this.placeholderName, CompilerDriver.lastSource.getSourceMarker());
+		}
 	}
 
 	public TYPE remapProvisoName(String name, TYPE newType) {

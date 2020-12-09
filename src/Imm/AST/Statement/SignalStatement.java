@@ -8,6 +8,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -41,11 +42,18 @@ public class SignalStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		if (this.shadowRef instanceof StructureInit) {
 			this.exceptionInit = (StructureInit) this.shadowRef;
 		}
 		else throw new CTX_EXC(this.getSource(), "Expected structure init, but got " + this.shadowRef.getClass().getName());
-		return ctx.checkSignal(this);
+		
+		TYPE t = ctx.checkSignal(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

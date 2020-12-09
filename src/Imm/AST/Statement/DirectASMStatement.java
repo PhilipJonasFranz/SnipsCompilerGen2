@@ -8,6 +8,7 @@ import Exc.CTX_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
 
@@ -55,7 +56,13 @@ public class DirectASMStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkDirectASMStatement(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkDirectASMStatement(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {

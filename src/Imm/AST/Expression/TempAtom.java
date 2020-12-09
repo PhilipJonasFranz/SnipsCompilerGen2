@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -44,11 +45,15 @@ public class TempAtom extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
 			throw new CTX_EXC(this.getSource(), "Placeholder atom is not available at this location");
 		
+		CompilerDriver.lastSource = temp;
 		return t;
 	}
 

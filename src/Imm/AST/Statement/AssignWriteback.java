@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -37,7 +38,13 @@ public class AssignWriteback extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkAssignWriteback(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkAssignWriteback(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {

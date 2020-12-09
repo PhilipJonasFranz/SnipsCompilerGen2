@@ -7,6 +7,7 @@ import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Lhs.LhsId;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -63,7 +64,13 @@ public class Assignment extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkAssignment(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkAssignment(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {

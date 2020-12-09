@@ -16,6 +16,7 @@ import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Res.Const;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -211,7 +212,13 @@ public class Function extends CompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkFunction(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkFunction(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	/** 

@@ -84,6 +84,24 @@ public class CompilerDriver {
 	
 	
 			/* --- STATS >--- */
+	public enum PIPE_STAGE {
+		PREP("Pre-Processor"),
+		SCAN("Scanner"),
+		PARS("Parser"),
+		IMPM("Import Manager"),
+		NAMM("Namespace Manager"),
+		CTEX("Context Checker"),
+		CGEN("Code Generation"),
+		OPT1("ASM Optimizer");
+		
+		String name;
+		
+		PIPE_STAGE(String name) {
+			this.name = name;
+		}
+		
+	}
+	
 	/* Documents the occurred compression rates */
 	public static List<Double> compressions = new ArrayList();
 	
@@ -109,6 +127,10 @@ public class CompilerDriver {
 	public static XMLNode sys_config;
 	
 	public Exception thrownException = null;
+	
+	public static PIPE_STAGE currentStage = null;
+	
+	public static Source lastSource = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES >--- */
@@ -242,11 +264,15 @@ public class CompilerDriver {
 			log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
 			
 					/* --- PRE-PROCESSING --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.PREP;
 			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
 			List<LineObject> preCode = preProcess.getProcessed();
 			
 			
 					/* --- SCANNING --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.SCAN;
 			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
 			Scanner scanner = new Scanner(preCode, scan_progress);
 			List<Token> deque = scanner.scan();
@@ -254,6 +280,8 @@ public class CompilerDriver {
 			
 			
 					/* --- PARSING --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.PARS;
 			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
 			Parser parser = new Parser(deque, parse_progress);
 			SyntaxElement AST = parser.parse();
@@ -261,6 +289,8 @@ public class CompilerDriver {
 			
 			
 					/* --- PROCESS IMPORTS >--- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.IMPM;
 			Program p = (Program) AST;
 			p.fileName = inputFile.getPath();
 			if (!referencedLibaries.isEmpty()) {
@@ -281,6 +311,8 @@ public class CompilerDriver {
 			
 			
 					/* ---< NAMESPACE MANAGER --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.NAMM;
 			NamespaceProcessor nameProc = new NamespaceProcessor();
 			nameProc.process((Program) AST);
 			
@@ -288,6 +320,8 @@ public class CompilerDriver {
 			
 			
 					/* ---< CONTEXT CHECKING --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.CTEX;
 			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
 			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
 			ctx.check();
@@ -297,6 +331,8 @@ public class CompilerDriver {
 			
 			
 					/* ---< CODE GENERATION --- */
+			lastSource = null;
+			currentStage = PIPE_STAGE.CGEN;
 			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
 			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
 
@@ -314,6 +350,9 @@ public class CompilerDriver {
 			
 					/* --- OPTIMIZING --- */
 			if (!disableOptimizer) {
+				lastSource = null;
+				currentStage = PIPE_STAGE.OPT1;
+				
 				double before = body.getInstructions().size();
 				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
 				
@@ -370,7 +409,21 @@ public class CompilerDriver {
 			/* Exception is not ordinary and internal, print message and stack trace */
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
 			if (printErrors || !customExc) e.printStackTrace();
-			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
+			if (!customExc) {
+				log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
+				
+				/* Give rough estimate where error occurred */
+				
+				String approx = "Pipeline Stage: " + currentStage.name + ", ";
+				
+				if (lastSource != null) 
+					approx += "at location estimate: " + lastSource.getSourceMarker();
+				else
+					approx = approx.substring(0, approx.length() - 2);
+				
+				log.add(new Message(approx, LogPoint.Type.FAIL));
+				
+			}
 		
 			this.thrownException = e;
 			

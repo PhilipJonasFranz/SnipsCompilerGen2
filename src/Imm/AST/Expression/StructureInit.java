@@ -8,6 +8,7 @@ import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Snips.CompilerDriver;
 import Util.Source;
 
 public class StructureInit extends Expression {
@@ -43,7 +44,13 @@ public class StructureInit extends Expression {
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkStructureInit(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkStructureInit(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

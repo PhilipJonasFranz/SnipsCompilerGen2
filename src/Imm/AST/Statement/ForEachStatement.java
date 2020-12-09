@@ -12,6 +12,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -105,7 +106,13 @@ public class ForEachStatement extends CompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkForEachStatement(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkForEachStatement(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public Statement clone() {

@@ -11,6 +11,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -70,7 +71,13 @@ public class InlineCall extends Expression implements Callee {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkCall(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkCall(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

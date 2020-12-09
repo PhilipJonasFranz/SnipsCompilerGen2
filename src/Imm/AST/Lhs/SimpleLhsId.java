@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -32,8 +33,13 @@ public class SimpleLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
 		TYPE t = ctx.checkIDRef(this.ref);
 		this.origin = this.ref.origin;
+		
+		CompilerDriver.lastSource = temp;
 		return t;
 	}
 

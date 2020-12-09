@@ -5,6 +5,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 public class StructSelect extends Expression {
@@ -39,7 +40,13 @@ public class StructSelect extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkStructSelect(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkStructSelect(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {

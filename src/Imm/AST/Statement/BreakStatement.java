@@ -5,6 +5,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -33,7 +34,13 @@ public class BreakStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkBreak(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkBreak(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {

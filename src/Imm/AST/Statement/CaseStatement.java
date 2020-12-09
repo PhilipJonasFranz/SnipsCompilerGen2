@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 /**
@@ -33,7 +34,13 @@ public class CaseStatement extends ConditionalCompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkCaseStatement(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkCaseStatement(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 
 	public Statement clone() {

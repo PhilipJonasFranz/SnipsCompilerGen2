@@ -5,6 +5,7 @@ import Exc.CTX_EXC;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 public class Compare extends BinaryExpression {
@@ -39,7 +40,13 @@ public class Compare extends BinaryExpression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkCompare(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkCompare(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public BinaryExpression clone() {

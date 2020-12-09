@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Snips.CompilerDriver;
 import Util.Source;
 
 public class Ternary extends Expression {
@@ -39,7 +40,13 @@ public class Ternary extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkTernary(this);
+		Source temp = CompilerDriver.lastSource;
+		CompilerDriver.lastSource = this.getSource();
+		
+		TYPE t = ctx.checkTernary(this);
+		
+		CompilerDriver.lastSource = temp;
+		return t;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTX_EXC {
