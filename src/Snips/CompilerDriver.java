@@ -254,7 +254,7 @@ public class CompilerDriver {
 		try {
 			/* Recieved no source code */
 			if (code == null) 
-				throw new SNIPS_EXC("SNIPS -> Input is null!");
+				throw new SNIPS_EXC("SNIPS -> Input file not found! Make sure to use absolute filepaths.");
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", LogPoint.Type.INFO));
