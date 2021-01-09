@@ -124,7 +124,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			int loc = r.declarationRegLocation(a.iterator);
 			
 			if (a.select != null) {
-				if (a.select.idRef == null && a.select.getShadowRef() instanceof StructSelect) {
+				if (a.select.getShadowRef() instanceof StructSelect) {
 					
 					StructSelect sel = (StructSelect) a.select.getShadowRef();
 
