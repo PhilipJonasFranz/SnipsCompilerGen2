@@ -1467,11 +1467,12 @@ public class ContextChecker {
 		
 		List<TYPE> types = new ArrayList();
 		/* Check here to get types for linking */
-		for (Expression e : c.getParams()) {
+		for (int i = 0; i < c.getParams().size(); i++) {
+			Expression e = c.getParams().get(i);
 			try {
 				types.add(e.check(this).clone());
 			} catch (Exception exc) {
-				types.add(null);
+				throw new CTX_EXC(e.getSource(), "Failed to check parameter " + (i + 1) + " or function call " + c.getPath().build());
 			}
 		}
 		

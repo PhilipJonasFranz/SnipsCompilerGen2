@@ -241,7 +241,7 @@ public class Scanner {
 		/**
 		 * Read a single char, append it to the buffer and check the state.
 		 */
-		public void readChar(char c, int i, int a, String fileName) {
+		public void readChar(char c, int lineNumber, int columnNumber, String fileName) {
 			if (this.buffer.isEmpty() && ("" + c).trim().equals("")) return;
 			else {
 				if (this.state != ACC_STATE.COMMENT && this.state != ACC_STATE.CHARLIT && this.state != ACC_STATE.STRINGLIT) 
@@ -250,9 +250,9 @@ public class Scanner {
 				this.buffer += c;
 				
 				boolean b = true;
-				while (b) b = this.checkState(i, a, fileName);
+				while (b) b = this.checkState(lineNumber, columnNumber, fileName);
 				
-				this.lastLine = i;
+				this.lastLine = lineNumber;
 			}
 		}
 		

@@ -392,14 +392,12 @@ public class ASMOptimizer {
 								for (int a = 0; a < ldrs.size(); a++) 
 									body.instructions.remove(i - 2);
 								
-								MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFA;
-								
 								if (start < 0) 
 									body.instructions.add(i - 2, new ASMSub(new RegOp(REG.R0), new RegOp(base), new ImmOp(-start)));
 								else 
 									body.instructions.add(i - 2, new ASMAdd(new RegOp(REG.R0), new RegOp(base), new ImmOp(start)));
 									
-								ASMMemBlock block = new ASMMemBlock(mode, false, new RegOp(REG.R0), regs, null);
+								ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.LDMFA, false, new RegOp(REG.R0), regs, null);
 							
 								body.instructions.add(i - 1, block);
 							}
@@ -440,9 +438,7 @@ public class ASMOptimizer {
 				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 					body.instructions.set(i, new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(push.operands.size() * 4)));
 					
-					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMEA;
-					
-					ASMMemBlock block = new ASMMemBlock(mode, false, new RegOp(REG.SP), push.operands, push.cond);
+					ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
 					body.instructions.add(i + 1, block);
 				}
 				else {
@@ -451,9 +447,7 @@ public class ASMOptimizer {
 					for (RegOp r : push.operands) ops.add(0, r);
 					
 					if (ASMMemBlock.checkInOrder(ops) && push.operands.size() > 1) {
-						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.STMFD;
-						
-						ASMMemBlock block = new ASMMemBlock(mode, true, new RegOp(REG.SP), ops, push.cond);
+						ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
 						body.instructions.set(i, block);
 					}
 				}
@@ -462,10 +456,7 @@ public class ASMOptimizer {
 				ASMPopStack pop = (ASMPopStack) body.instructions.get(i);
 				
 				if (ASMMemBlock.checkInOrder(pop.operands) && pop.operands.size() > 1) {
-					MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMFD;
-					
-					ASMMemBlock block = new ASMMemBlock(mode, true, new RegOp(REG.SP), pop.operands, pop.cond);
-
+					ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
 					body.instructions.set(i, block);
 				}
 				else {
@@ -476,9 +467,7 @@ public class ASMOptimizer {
 					if (ASMMemBlock.checkInOrder(ops) && pop.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 						body.instructions.set(i, new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(ops.size() * 4)));
 						
-						MEM_BLOCK_MODE mode = MEM_BLOCK_MODE.LDMEA;
-						
-						ASMMemBlock block = new ASMMemBlock(mode, false, new RegOp(REG.SP), ops, pop.cond);
+						ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
 						body.instructions.add(i + 1, block);
 					}
 				}

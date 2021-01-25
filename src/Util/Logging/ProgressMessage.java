@@ -12,6 +12,8 @@ public class ProgressMessage {
 	
 	protected int maxProgress;
 	
+	private boolean aborted = false;
+	
 	public ProgressMessage(String message, int maxProgress, Type type) {
 		this.message = message;
 		this.messageType = type;
@@ -85,13 +87,16 @@ public class ProgressMessage {
 	 * Prints out all remaining dots and a 'ERROR!' message at the end.
 	 */
 	public void abort() {
-		if (!CompilerDriver.silenced) {
-			while (printed < this.maxProgress) {
-				System.out.print(".");
-				printed++;
+		if (!aborted) {
+			aborted = true;
+			if (!CompilerDriver.silenced) {
+				while (printed < this.maxProgress) {
+					System.out.print(".");
+					printed++;
+				}
+				
+				System.out.println("ERROR!");
 			}
-			
-			System.out.println("ERROR!");
 		}
 	}
 	
