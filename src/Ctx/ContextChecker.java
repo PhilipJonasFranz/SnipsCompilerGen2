@@ -1472,7 +1472,17 @@ public class ContextChecker {
 			try {
 				types.add(e.check(this).clone());
 			} catch (Exception exc) {
-				throw new CTX_EXC(e.getSource(), "Failed to check parameter " + (i + 1) + " or function call " + c.getPath().build());
+				/* 
+				 * A temp atom cannot determine its inherited type at this location,
+				 * since the function is required for this. But this loop has to be
+				 * executed before the linking takes place. When checking the temp atom,
+				 * an exception will be thrown. This is not a major problem, since in
+				 * the most cases, it is solved later on.
+				 */
+				if (!(e instanceof TempAtom))
+					throw new CTX_EXC(e.getSource(), "Failed to check parameter " + (i + 1) + " or function call " + c.getPath().build());
+				else
+					types.add(null);
 			}
 		}
 		
