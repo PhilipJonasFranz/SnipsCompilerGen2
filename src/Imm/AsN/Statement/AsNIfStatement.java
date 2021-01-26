@@ -27,16 +27,20 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		while (currentIf != null) {
 			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
 		
+			COND cond = COND.NO;
+			
 			/* Else If Statement */
 			if (currentIf.condition != null) {
-				COND cond = injectConditionEvaluation(if0, AsNExpression.cast(currentIf.condition, r, map, st));
+				cond = injectConditionEvaluation(if0, AsNExpression.cast(currentIf.condition, r, map, st), currentIf.condition);
 				
-				if (currentIf.elseStatement != null) 
-					/* Condition was false, jump to else */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
-				else 
-					/* Condition was false, no else, skip body */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
+				if (cond != COND.NO) {
+					if (currentIf.elseStatement != null) 
+						/* Condition was false, jump to else */
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
+					else 
+						/* Condition was false, no else, skip body */
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
+				}
 			}
 			
 			/* Add Body */
@@ -47,6 +51,8 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endTarget)));
 				if0.instructions.add(elseTarget);
 			}
+			
+			if (cond == COND.NO) break;
 			
 			currentIf = currentIf.elseStatement;
 		}

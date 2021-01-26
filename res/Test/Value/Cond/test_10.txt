@@ -1,0 +1,14 @@
+SOURCE
+int main() {
+	int a = 10;
+	if (true) a = 20;
+	return a;
+}
+TESTCASES
+20
+OUTPUT
+/* --test_10.txt */
+main:                                        /* Function: main */
+    mov r0, #20                              /* Evaluate Expression */
+    bx lr
+    

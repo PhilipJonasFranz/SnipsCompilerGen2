@@ -10,6 +10,8 @@ import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.AST.Expression.Atom;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.ConditionalCompoundStatement;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AST.Statement.ForStatement;
@@ -18,6 +20,7 @@ import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.TYPE.PRIMITIVES.BOOL;
 import Res.Const;
 
 public abstract class AsNConditionalCompoundStatement extends AsNCompoundStatement {
@@ -60,8 +63,17 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	 * the returned condition is the negation of the condition of this expression, since we
 	 * want to check if the condition is false.
 	 */
-	public static COND injectConditionEvaluation(AsNNode node, AsNExpression expr) {
+	public static COND injectConditionEvaluation(AsNNode node, AsNExpression expr, Expression expr0) {
 		COND cond = COND.EQ;
+		
+		if (expr0 instanceof Atom) {
+			Atom at = (Atom) expr0;
+			
+			if (at.getType() instanceof BOOL) {
+				boolean value = (boolean) at.getType().value;
+				if (value) return COND.NO;
+			}
+		}
 		
 		if (expr instanceof AsNCmp) {
 			AsNCmp com = (AsNCmp) expr;

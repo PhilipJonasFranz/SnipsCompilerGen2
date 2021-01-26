@@ -32,10 +32,11 @@ public class AsNTernary extends AsNExpression {
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(t.condition, r, map, st);
 		
-		COND cond = AsNConditionalCompoundStatement.injectConditionEvaluation(tern, expr);
+		COND cond = AsNConditionalCompoundStatement.injectConditionEvaluation(tern, expr, t.condition);
 		
 		/* Condition was false, no else, skip first result */
-		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(loadFalse)));
+		if (cond != COND.NO)
+			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(loadFalse)));
 		
 		/* Load true result */
 		tern.instructions.addAll(AsNExpression.cast(t.leftOperand, r, map, st).getInstructions());
@@ -43,11 +44,13 @@ public class AsNTernary extends AsNExpression {
 		/* Branch to end */
 		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(end)));
 		
-		/* False Target */
-		tern.instructions.add(loadFalse);
-		
-		/* Load false result */
-		tern.instructions.addAll(AsNExpression.cast(t.rightOperand, r, map, st).getInstructions());
+		if (cond != COND.NO) {
+			/* False Target */
+			tern.instructions.add(loadFalse);
+			
+			/* Load false result */
+			tern.instructions.addAll(AsNExpression.cast(t.rightOperand, r, map, st).getInstructions());
+		}
 		
 		/* Add end */
 		tern.instructions.add(end);

@@ -10,7 +10,7 @@ public class Cond {
 		EQ, NE, CS, CC,
 		MI, PL, VS, VC,
 		HI, LS, GE, LT,
-		GT, LE, AL
+		GT, LE, AL, NO;
 	}
 	
 	
