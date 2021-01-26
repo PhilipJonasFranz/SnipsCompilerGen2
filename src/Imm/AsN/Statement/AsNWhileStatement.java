@@ -13,8 +13,10 @@ import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
 import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Operands.LabelOp;
+import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.PRIMITIVES.BOOL;
 
 public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
@@ -30,10 +32,22 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
 		w.breakJump = new ASMLabel(LabelUtil.getLabel());
 		
-		COND cond =	injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st));
+		boolean injectConditionCheck = true;
 		
-		/* Condition was false, no else, skip body */
-		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
+		if (a.condition instanceof Atom) {
+			Atom at = (Atom) a.condition;
+			if (at.getType() instanceof BOOL) {
+				boolean value = (boolean) at.getType().value;
+				if (value) injectConditionCheck = false;
+			}
+		}
+		
+		if (injectConditionCheck) {
+			COND cond =	injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st));
+			
+			/* Condition was false, no else, skip body */
+			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
+		}
 		
 		/* Add Body */
 		w.addBody(a, r, map, st);
