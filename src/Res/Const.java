@@ -186,6 +186,8 @@ public class Const {
 	
 	public static final String DIRECT_ASM_HAS_NO_OUTPUTS = "Direct ASM Operation has no explicit outputs, %s";
 	
+	public static final String FAILED_TO_CHECK_PARAMETER = "Failed to check parameter %d or function call %s";
+	
 	
 			/* ---< PROVISO RELATED >--- */
 	public static final String NO_MAPPING_EQUAL_TO_GIVEN_MAPPING = "No mapping is equal to the given mapping!";

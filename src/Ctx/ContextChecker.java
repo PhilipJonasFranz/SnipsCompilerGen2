@@ -1480,7 +1480,7 @@ public class ContextChecker {
 				 * the most cases, it is solved later on.
 				 */
 				if (!(e instanceof TempAtom))
-					throw new CTX_EXC(e.getSource(), "Failed to check parameter " + (i + 1) + " or function call " + c.getPath().build());
+					throw new CTX_EXC(e.getSource(), Const.FAILED_TO_CHECK_PARAMETER, i + 1, c.getPath().build());
 				else
 					types.add(null);
 			}
