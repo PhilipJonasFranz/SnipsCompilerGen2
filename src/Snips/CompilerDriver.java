@@ -66,6 +66,7 @@ public class CompilerDriver {
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
+		buildObjectFileOnly = 			true,	/* Builds the object file only and adds include directives.		*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
@@ -585,6 +586,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
+				else if (args [i].equals("-obj")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -613,6 +615,7 @@ public class CompilerDriver {
 				"-ofs      : Optimize for Filesize, slight performance hit",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
+				"-obj      : Build object file only, required additional linking",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"

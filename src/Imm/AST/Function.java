@@ -337,7 +337,7 @@ public class Function extends CompoundStatement {
 		if (this.containsMapping(context)) return;
 		else {
 			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
+			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix(context);
 			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
 		}
 	}

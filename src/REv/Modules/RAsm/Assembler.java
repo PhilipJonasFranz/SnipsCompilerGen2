@@ -462,10 +462,10 @@ public class Assembler {
 					app += "" + acc; // Accumulate
 					app += (sp [0].startsWith("s"))? "1" : "0"; // s
 					app += getReg(sp [1]); // Rd
-					app += (sp.length > 4)? getReg(sp [4]) : "0000"; //Rn
-					app += getReg(sp [3]); //Rs
+					app += (sp.length > 4)? getReg(sp [4]) : "0000"; // Rn
+					app += getReg(sp [3]); // Rs
 					app += "1001";
-					app += getReg(sp [2]); //Rm
+					app += getReg(sp [2]); // Rm
 				}
 				else if (sp [0].startsWith("ldm") || sp [0].startsWith("stm")) {
 					/* Block Memory Op Code */
@@ -522,7 +522,7 @@ public class Assembler {
 						if (sp [k].startsWith("{")) sp [k] = sp [k].substring(1);
 						
 						if (toInt(sp [k]) != -1) {
-							regListCode = replaceChar(regListCode, "1".charAt(0), 15 - toInt(sp [k]));
+							regListCode = replaceChar(regListCode, '1', 15 - toInt(sp [k]));
 						}
 						else {
 							String [] sp0 = sp [k].split("-");
@@ -530,7 +530,7 @@ public class Assembler {
 							int e = toInt(sp0 [1].trim());
 							
 							for (int z = s; z <= e; z++) 
-								regListCode = replaceChar(regListCode, "1".charAt(0), 15 - z);
+								regListCode = replaceChar(regListCode, '1', 15 - z);
 						}
 					}
 					
@@ -759,7 +759,7 @@ public class Assembler {
 		int [] [] code = new int [instr.size()] [32];
 		if (!in.isEmpty())try {
 			for (int i = 0; i < instr.size(); i++) {
-				if (instr.get(i).equals(""))continue;
+				if (instr.get(i).equals("")) continue;
 				String [] sp = instr.get(i).split("");
 				for (int a = 0; a < 32; a++)code [i] [31 - a] = Integer.parseInt(sp [a]);
 			}

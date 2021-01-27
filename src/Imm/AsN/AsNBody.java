@@ -19,6 +19,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
@@ -51,6 +52,7 @@ import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Snips.CompilerDriver;
+import Util.Source;
 import Util.Logging.ProgressMessage;
 
 public class AsNBody extends AsNNode {
@@ -188,6 +190,9 @@ public class AsNBody extends AsNNode {
 	
 		ASMLabel mainLabel = null;
 		
+		/* Include imports that are already contained in the output */
+		List<String> ext = new ArrayList();
+		
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
 			if (s instanceof Function) {
@@ -207,8 +212,7 @@ public class AsNBody extends AsNNode {
 					}
 				}
 				
-				body.instructions.addAll(ins);
-				body.instructions.add(new ASMSeperator());
+				body.injectASM(ins, ext, s.getSource());
 			}
 			else if (s instanceof StructTypedef) {
 				/* Cast all functions defined in the struct typedef */
@@ -229,16 +233,16 @@ public class AsNBody extends AsNNode {
 						}
 					}
 					
-					body.instructions.addAll(ins);
-					body.instructions.add(new ASMSeperator());
+					body.injectASM(ins, ext, s.getSource());
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
 				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
-				body.instructions.addAll(def.getInstructions());
+				body.injectASM(def.getInstructions(), ext, s.getSource());
 			}
 			else if (s instanceof Comment) {
-				body.instructions.addAll(AsNComment.cast((Comment) s, null, map, null).getInstructions());
+				AsNComment com = AsNComment.cast((Comment) s, null, map, null);
+				body.injectASM(com.getInstructions(), ext, s.getSource());
 			}
 			
 			done++;
@@ -394,6 +398,27 @@ public class AsNBody extends AsNNode {
 		progress.incProgress(1);
 		
 		return body;
+	}
+	
+	/**
+	 * Adds the generated assembly to the body or inserts an include directive, that
+	 * can be processed by the linker.
+	 * 
+	 * @param ins The generated assembly
+	 * @param ext A list of already included files
+	 * @param s The source of the ressource that generated the assembly
+	 */
+	private void injectASM(List<ASMInstruction> ins, List<String> ext, Source s) {
+		if (!CompilerDriver.buildObjectFileOnly || CompilerDriver.inputFile.getAbsolutePath().endsWith(s.sourceFile)) 
+			this.instructions.addAll(ins);
+		else {
+			if (!ext.contains(s.sourceFile)) {
+				this.instructions.add(new ASMDirective(".include " + s.sourceFile));
+				ext.add(s.sourceFile);
+			}
+		}
+		
+		this.instructions.add(new ASMSeperator());
 	}
 	
 	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {

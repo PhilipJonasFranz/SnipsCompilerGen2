@@ -126,7 +126,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(newMapping), clone);
 		this.registeredMappings.add(mapping);
 		
 		String s = "";
