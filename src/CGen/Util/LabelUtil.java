@@ -40,8 +40,8 @@ public class LabelUtil {
 	 * this pattern. This pattern will contain the wordsizes of the given
 	 * context. This will make it easy to determine if a context is suitable
 	 * for another one, by comparing the word sizes of the types.
-	 * @param context
-	 * @return
+	 * @param context The context of the mapping
+	 * @return A string that reflects this mapping.
 	 */
 	public static String getProvisoPostfix(List<TYPE> context) {
 		String p = "_P_";

@@ -53,8 +53,15 @@ public class AsNFunction extends AsNCompoundStatement {
 	public Function source;
 	
 	public ASMLabel copyLoopEscape;
+
+	/* 
+	 * List that contains all the names of the proviso calls that were already translated.
+	 * This is used to check wether to translate the current proviso mapping again. The name
+	 * would be the same since it was changed up below.
+	 */
+	public List<String> translated = new ArrayList();
 	
-	
+
 			/* ---< METHODS >--- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
@@ -130,21 +137,14 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
-		/* 
-		 * List that contains all the names of the proviso calls that were already translated.
-		 * This is used to check wether to translate the current proviso mapping again. The name
-		 * would be the same since it was changed up below.
-		 */
-		List<String> translated = new ArrayList();
-		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
-			else translated.add(f.provisosCalls.get(k).provisoPostfix);
+			if (func.translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
+			else func.translated.add(f.provisosCalls.get(k).provisoPostfix);
 			
 			/* Set the current proviso call scheme if its not the default scheme */
 			if (!f.provisosCalls.get(k).provisoPostfix.equals("")) 

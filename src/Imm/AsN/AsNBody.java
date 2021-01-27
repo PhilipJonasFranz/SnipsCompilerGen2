@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import CGen.MemoryMap;
@@ -68,6 +69,9 @@ public class AsNBody extends AsNNode {
 	public static LiteralUtil literalManager;
 	
 	public static List<ASMInstruction> instructionAppenix = new ArrayList();
+	
+	public HashMap<String, List<ASMInstruction>> external = new HashMap();
+	
 	
 			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
@@ -199,20 +203,20 @@ public class AsNBody extends AsNNode {
 				/* Cast a single function */
 				
 				st = new StackSet();
-				List<ASMInstruction> ins = AsNFunction.cast((Function) s, new RegSet(), map, st).getInstructions();
+				AsNFunction func = AsNFunction.cast((Function) s, new RegSet(), map, st);
 				
 				/* Ensure that stack was emptied, so no stack shift at compile time occurred */
 				assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
 				
-				if (!ins.isEmpty()) {
+				if (!func.getInstructions().isEmpty()) {
 					/* Patch Branch to Main Function */
 					if (((Function) s).path.build().equals("main")) {
-						((LabelOp) branch.target).patch((ASMLabel) ins.get(0));
-						mainLabel = (ASMLabel) ins.get(0);
+						((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(0));
+						mainLabel = (ASMLabel) func.getInstructions().get(0);
 					}
 				}
 				
-				body.injectASM(ins, ext, s.getSource());
+				body.injectASM(func.getInstructions(), ext, s.getSource(), func.source.path.build(), func.translated.stream().toArray(String []::new));
 			}
 			else if (s instanceof StructTypedef) {
 				/* Cast all functions defined in the struct typedef */
@@ -220,29 +224,29 @@ public class AsNBody extends AsNNode {
 				
 				for (Function f : def.functions) {
 					st = new StackSet();
-					List<ASMInstruction> ins = AsNFunction.cast(f, new RegSet(), map, st).getInstructions();
+					AsNFunction func = AsNFunction.cast(f, new RegSet(), map, st);
 					
 					/* Ensure that stack was emptied, so no stack shift at compile time occurred */
 					assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
 					
-					if (!ins.isEmpty()) {
+					if (!func.getInstructions().isEmpty()) {
 						/* Patch Branch to Main Function */
 						if (f.path.build().equals("main")) {
-							((LabelOp) branch.target).patch((ASMLabel) ins.get(0));
-							mainLabel = (ASMLabel) ins.get(0);
+							((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(0));
+							mainLabel = (ASMLabel) func.getInstructions().get(0);
 						}
 					}
 					
-					body.injectASM(ins, ext, s.getSource());
+					body.injectASM(func.getInstructions(), ext, s.getSource(), func.source.path.build(), func.translated.stream().toArray(String []::new));
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
 				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
-				body.injectASM(def.getInstructions(), ext, s.getSource());
+				body.injectASM(def.getInstructions(), ext, s.getSource(), "");
 			}
 			else if (s instanceof Comment) {
 				AsNComment com = AsNComment.cast((Comment) s, null, map, null);
-				body.injectASM(com.getInstructions(), ext, s.getSource());
+				body.injectASM(com.getInstructions(), ext, s.getSource(), "");
 			}
 			
 			done++;
@@ -408,13 +412,20 @@ public class AsNBody extends AsNNode {
 	 * @param ext A list of already included files
 	 * @param s The source of the ressource that generated the assembly
 	 */
-	private void injectASM(List<ASMInstruction> ins, List<String> ext, Source s) {
-		if (!CompilerDriver.buildObjectFileOnly || CompilerDriver.inputFile.getAbsolutePath().endsWith(s.sourceFile)) 
+	private void injectASM(List<ASMInstruction> ins, List<String> ext, Source s, String prefix, String...incLabels) {
+		if (!CompilerDriver.buildObjectFileOnly || CompilerDriver.inputFile.getAbsolutePath().endsWith(s.sourceFile)) {
 			this.instructions.addAll(ins);
+		}
 		else {
-			if (!ext.contains(s.sourceFile)) {
-				this.instructions.add(new ASMDirective(".include " + s.sourceFile));
-				ext.add(s.sourceFile);
+			for (String incLabel : incLabels) {
+				if (!ext.contains(s.sourceFile + "@" + prefix + incLabel)) {
+					this.instructions.add(new ASMDirective(".include " + s.sourceFile + "@" + prefix + incLabel));
+					ext.add(s.sourceFile + "@" + prefix + incLabel);
+				}
+			}
+			
+			if (!this.external.containsKey(s.sourceFile)) {
+				this.external.put(s.sourceFile, ins);
 			}
 		}
 		

@@ -17,6 +17,7 @@ import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.ASMInstruction;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
@@ -393,6 +394,22 @@ public class CompilerDriver {
 			for (int i = 1; i < output.size(); i++) {
 				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
 					output.remove(i-- - 1);
+			}
+		
+			for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) {
+				String path = PreProcessor.resolveToPath(entry.getKey());
+				
+				if (path.endsWith(".sn")) {
+					System.out.println(new Message("SNIPS -> Dumping Artifact: " + entry.getKey(), LogPoint.Type.INFO).getMessage());
+					
+					List<String> artifact = new ArrayList();
+					for (ASMInstruction ins : entry.getValue()) artifact.add(ins.build());
+					
+					path = path.substring(0, path.length() - 2) + "s";
+					Util.writeInFile(artifact, path);
+				}
+				else log.add(new Message("SNIPS -> Failed to resolve artifact path: " + entry.getKey(), LogPoint.Type.WARN));
+				
 			}
 			
 			if (imm) {

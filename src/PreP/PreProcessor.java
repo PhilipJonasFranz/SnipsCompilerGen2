@@ -124,4 +124,29 @@ public class PreProcessor {
 		return code;
 	}
 	
+	public static String resolveToPath(String filePath) {
+		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
+			String [] v = c.value.split(":");
+			if (v [0].equals(filePath)) {
+				return "release\\" + v [1];
+			}
+		}
+		
+		File file = new File(filePath);
+		
+		/* Read from file */
+		List<String> code = Util.readFile(file);
+		
+		if (code != null) return filePath;
+		else {
+			file = new File("release\\" + filePath);
+			code = Util.readFile(file);
+		}
+		
+		if (code != null) {
+			return "release\\" + filePath;
+		}
+		else return CompilerDriver.inputFile.getParent() + "\\" + filePath;
+	}
+	
 } 
