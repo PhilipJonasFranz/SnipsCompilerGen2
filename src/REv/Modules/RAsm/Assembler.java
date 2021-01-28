@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import REv.Modules.Tools.Util;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
+import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
 public class Assembler {
@@ -20,7 +21,7 @@ public class Assembler {
 	
 	static List<Message> log = new ArrayList();
 	
-	public static int [] [] assemble(List<String> input, boolean silent, boolean printBinary) {
+	public static int [] [] assemble(List<String> input, boolean silent, boolean printBinary) throws Exception {
 		boolean silent0 = CompilerDriver.silenced;
 		CompilerDriver.silenced = silent;
 		
@@ -287,6 +288,8 @@ public class Assembler {
 		
 		/* Set to true when switching sections for the first time */
 		boolean sectionSwitch = false;
+		
+		Exception error = null;
 		
 		// Generate Code
 		if (!in.isEmpty())for (int i = 0; i < in.size(); i++) {
@@ -745,15 +748,17 @@ public class Assembler {
 			
 				if (addLine) {
 					app = app.trim();
-					if (!app.equals("") && printBinary)System.out.println(app + ": " + in.get(i).getInstruction());
+					if (!app.equals("") && printBinary) System.out.println(app + ": " + in.get(i).getInstruction());
 					instr.add(app);
 				}
 			} catch (Exception e) {
-				System.out.println("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine());
-				e.printStackTrace();
+				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
+				error = e;
 			}
 		}
+		
+		if (error != null) throw error;
 		
 		// To Integer Arrays
 		int [] [] code = new int [instr.size()] [32];

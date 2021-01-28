@@ -72,9 +72,13 @@ public class AsNBody extends AsNNode {
 	
 	public HashMap<String, List<ASMInstruction>> external = new HashMap();
 	
+	public static List<ASMInstruction> asmHeader = new ArrayList();
+	
 	
 			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
+		asmHeader.clear();
+		
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralUtil();
 		
@@ -91,10 +95,12 @@ public class AsNBody extends AsNNode {
 		Date today = Calendar.getInstance().getTime();        
 		String todayAsString = df.format(today);
 		
-		body.instructions.add(new ASMComment("--" + CompilerDriver.inputFile.getName() + ((CompilerDriver.includeMetaInformation)? ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString : "")));
-		if (CompilerDriver.includeMetaInformation) body.instructions.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
-											 ", Optimizer: " + ((!CompilerDriver.disableOptimizer)? "Enabled" : "Disabled") + 
-											 ", Modifiers: " + ((!CompilerDriver.disableModifiers)? "Enabled" : "Disabled")));
+		asmHeader.add(new ASMComment("--" + CompilerDriver.inputFile.getName() + ((CompilerDriver.includeMetaInformation)? ", Snips Version: " + CompilerDriver.sys_config.getValue("Version") + ", Date: " + todayAsString : "")));
+		if (CompilerDriver.includeMetaInformation) {
+			asmHeader.add(new ASMComment(" SID-Headers: " + ((!CompilerDriver.disableStructSIDHeaders)? "Enabled" : "Disabled") + 
+				", Optimizer: " + ((!CompilerDriver.disableOptimizer)? "Enabled" : "Disabled") + 
+				", Modifiers: " + ((!CompilerDriver.disableModifiers)? "Enabled" : "Disabled")));
+		}
 		
 		/* Create .data section annotation */
 		ASMSectionAnnotation data = new ASMSectionAnnotation(SECTION.DATA);
@@ -426,6 +432,14 @@ public class AsNBody extends AsNNode {
 			
 			if (!this.external.containsKey(s.sourceFile)) {
 				this.external.put(s.sourceFile, ins);
+			}
+			else {
+				List<ASMInstruction> ins0 = this.external.get(s.sourceFile);
+				
+				if (!(ins0.get(ins0.size() - 1) instanceof ASMSeperator))
+					ins0.add(new ASMSeperator());
+				
+				ins0.addAll(ins);
 			}
 		}
 		

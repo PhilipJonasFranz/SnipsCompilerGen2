@@ -13,8 +13,10 @@ import java.util.stream.Stream;
 
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
+import Exc.LNK_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
+import Lnk.Linker;
 import REv.CPU.ProcessorUnit;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -68,7 +70,7 @@ public class TestDriver {
 	public boolean printResult = false;
 	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -190,6 +192,8 @@ public class TestDriver {
 					headMessage.flush();
 					printedHead = true;
 				}
+				
+				CompilerDriver.silenced = false;
 				test.getSecond().stream().forEach(x -> x.flush());
 			}
 			
@@ -314,6 +318,8 @@ public class TestDriver {
 			else buffer.add(new Message("Test finished successfully.", LogPoint.Type.INFO, true));
 		
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			/* Test crashed */
 			buffer.add(new Message("-> Test " + file + " ran into an error!", LogPoint.Type.FAIL, true));
 			resCnt.peek().crashed++;
@@ -388,6 +394,17 @@ public class TestDriver {
 			File file = new File(path);
 			List<String> compile = cd.compile(new File(path), code);
 
+			List<String> copy = new ArrayList();
+			for (String s : compile) copy.add("" + s);
+			
+			try {
+				Linker.linkProgram(compile);
+			} catch (LNK_EXC e) {
+				cd.setBurstMode(false, false);
+				buffer.add(new Message("Error when linking output!", LogPoint.Type.FAIL, true));
+				return new Result(RET_TYPE.CRASH, 0, 0);
+			}
+			
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
@@ -400,7 +417,7 @@ public class TestDriver {
 				/* Write output */
 				if (writebackResults) {
 					content.add("OUTPUT");
-					content.addAll(compile);
+					content.addAll(copy);
 					Util.writeInFile(content, path);
 				}
 			}
@@ -418,7 +435,22 @@ public class TestDriver {
 				
 				boolean assemblyMessages = false;
 				XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
-				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+				
+				ProcessorUnit pcu0 = null;
+				
+				try {
+					pcu0 = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+				} catch (Exception e) {
+					buffer.add(new Message("Error generating assembly!", LogPoint.Type.FAIL, true));
+					e.printStackTrace();
+					
+					buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
+				
+				ProcessorUnit pcu = pcu0;
 				
 				/* Setup parameters in registers and stack */
 				if (sp.length > 1) {

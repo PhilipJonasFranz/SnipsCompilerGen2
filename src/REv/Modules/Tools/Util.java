@@ -72,7 +72,7 @@ public class Util {
     	return result;
     }
     
-	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) {
+	public static ProcessorUnit buildEnvironmentFromXML(XMLNode head, List<String> asmIn, boolean silent) throws Exception {
 		/* Load devices */
 		XMLNode devices = head.getNode("Devices");
 		List<Device> deviceList = new ArrayList();

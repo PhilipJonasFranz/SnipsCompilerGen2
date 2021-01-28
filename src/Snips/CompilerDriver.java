@@ -67,7 +67,7 @@ public class CompilerDriver {
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
-		buildObjectFileOnly = 			true,	/* Builds the object file only and adds include directives.		*/
+		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
@@ -355,15 +355,7 @@ public class CompilerDriver {
 				lastSource = null;
 				currentStage = PIPE_STAGE.OPT1;
 				
-				double before = body.getInstructions().size();
-				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
-				
-				ASMOptimizer opt = new ASMOptimizer();
-				opt.optimize(body);
-			
-				aopt_progress.finish();
-				
-				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
+				double rate = this.optimizeInstructionList(body.instructions);
 				
 				if (!expectError) {
 					compressions.add(rate);
@@ -373,28 +365,14 @@ public class CompilerDriver {
 				}
 				
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
+				
+				for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) 
+					this.optimizeInstructionList(entry.getValue());
 			}
 			
 			
 					/* --- OUTPUT BUILDING --- */
-			output = new ArrayList();
-			
-			/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
-			output = body.getInstructions().stream().filter(x -> ((x instanceof ASMComment)? enableComments : true)).map(x -> {
-				
-				/* Count instruction types */
-				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
-				else ins_p.put(x.getClass().getName(), 1);
-				
-				/* Build instruction with or without comment */
-				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
-			}).collect(Collectors.toList());
-		
-			/* Remove double empty lines */
-			for (int i = 1; i < output.size(); i++) {
-				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
-					output.remove(i-- - 1);
-			}
+			output = this.buildOutput(body.instructions, false);
 		
 			for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) {
 				String path = PreProcessor.resolveToPath(entry.getKey());
@@ -402,8 +380,7 @@ public class CompilerDriver {
 				if (path.endsWith(".sn")) {
 					System.out.println(new Message("SNIPS -> Dumping Artifact: " + entry.getKey(), LogPoint.Type.INFO).getMessage());
 					
-					List<String> artifact = new ArrayList();
-					for (ASMInstruction ins : entry.getValue()) artifact.add(ins.build());
+					List<String> artifact = this.buildOutput(entry.getValue(), true);
 					
 					path = path.substring(0, path.length() - 2) + "s";
 					Util.writeInFile(artifact, path);
@@ -466,6 +443,44 @@ public class CompilerDriver {
 			Util.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
 		}
+		
+		return output;
+	}
+	
+	public double optimizeInstructionList(List<ASMInstruction> ins) {
+		double before = ins.size();
+		ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
+		
+		ASMOptimizer opt = new ASMOptimizer();
+		opt.optimize(ins);
+	
+		aopt_progress.finish();
+		
+		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
+	}
+	
+	public List<String> buildOutput(List<ASMInstruction> ins, boolean isArtifact) {
+		List<String> output = new ArrayList();
+		
+		/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
+		output = ins.stream().filter(x -> ((x instanceof ASMComment)? (!isArtifact && enableComments) : true)).map(x -> {
+			
+			/* Count instruction types */
+			if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
+			else ins_p.put(x.getClass().getName(), 1);
+			
+			/* Build instruction with or without comment */
+			return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
+		}).collect(Collectors.toList());
+	
+		/* Remove double empty lines */
+		for (int i = 1; i < output.size(); i++) {
+			if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
+				output.remove(i-- - 1);
+		}
+		
+		for (int i = 0; i < AsNBody.asmHeader.size(); i++)
+			output.add(i, AsNBody.asmHeader.get(i).build());
 		
 		return output;
 	}

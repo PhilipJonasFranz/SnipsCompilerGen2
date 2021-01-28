@@ -96,7 +96,7 @@ public class PreProcessor {
 		return this.process;
 	}
 	
-	public List<String> getFile(String filePath) {
+	public static List<String> getFile(String filePath) {
 		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
 			String [] v = c.value.split(":");
 			if (v [0].equals(filePath)) {
@@ -128,7 +128,7 @@ public class PreProcessor {
 		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
 			String [] v = c.value.split(":");
 			if (v [0].equals(filePath)) {
-				return "release\\" + v [1];
+				return "release/" + v [1];
 			}
 		}
 		
@@ -139,14 +139,14 @@ public class PreProcessor {
 		
 		if (code != null) return filePath;
 		else {
-			file = new File("release\\" + filePath);
+			file = new File("release/" + filePath);
 			code = Util.readFile(file);
 		}
 		
 		if (code != null) {
-			return "release\\" + filePath;
+			return "release/" + filePath;
 		}
-		else return CompilerDriver.inputFile.getParent() + "\\" + filePath;
+		else return CompilerDriver.inputFile.getParent() + "/" + filePath;
 	}
 	
 } 
