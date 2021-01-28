@@ -19,7 +19,7 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-K.X.getValue_P0:                             /* Function: K.X.getValue, Provisos: INT */
+K.X.getValue_P_1:                            /* Function: K.X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
@@ -33,7 +33,7 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
-    bl K.X.getValue_P0                       /* Call K.X.getValue */
+    bl K.X.getValue_P_1                      /* Call K.X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

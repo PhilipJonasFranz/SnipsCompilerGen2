@@ -66,10 +66,7 @@ HEAP_START: .word 0
     
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
+    
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -77,7 +74,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L3_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -155,12 +152,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L3_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START
     
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P0:                                     /* Function: init, Provisos: C.A<INT> */
+init_P_3:                                    /* Function: init, Provisos: C.A<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -183,7 +177,7 @@ init_P0:                                     /* Function: init, Provisos: C.A<IN
     add sp, sp, #12
     bx lr
     
-C.A.incr_P2:                                 /* Function: C.A.incr, Provisos: INT */
+C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r2, [r1]
@@ -191,7 +185,7 @@ C.A.incr_P2:                                 /* Function: C.A.incr, Provisos: IN
     str r0, [r1]                             /* Store value to struct field */
     bx lr
     
-C.A.pipe_P1:                                 /* Function: C.A.pipe, Provisos: INT */
+C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
@@ -244,7 +238,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
-    bl init_P0                               /* Call init */
+    bl init_P_3                              /* Call init */
     mov r3, r0
 /* a->r = 4 */
     mov r1, #4
@@ -255,7 +249,7 @@ main:                                        /* Function: main */
     mov r10, #0
     mov r1, r0
     mov r0, r3
-    bl C.A.pipe_P1                           /* Call C.A.pipe */
+    bl C.A.pipe_P_1                          /* Call C.A.pipe */
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_Predicates.mul
     mov r10, #0
@@ -277,7 +271,7 @@ main:                                        /* Function: main */
     str r0, [r1]
 /* Call from B inherited nested function */
     mov r0, r3                               /* Load parameters */
-    bl C.A.incr_P2                           /* Call C.A.incr */
+    bl C.A.incr_P_1                          /* Call C.A.incr */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     lsl r1, r3, #2                           /* Convert to bytes */

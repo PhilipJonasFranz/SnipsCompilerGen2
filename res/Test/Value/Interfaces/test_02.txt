@@ -54,14 +54,14 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-Inter.L1:                                    /* Interface : Inter */
+Inter.L0:                                    /* Interface : Inter */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
-    beq Inter.L2
+    beq Inter.L1
     cmp r10, #2
     moveq r10, #8
-Inter.L2: 
+Inter.L1: 
     add r10, r10, r12
     add r10, r10, #4
     mov r12, #0
@@ -121,25 +121,25 @@ main:                                        /* Function: main */
     lsr r4, r0, #2
 /* 25 + 10 = 35 */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov r5, r0
     mov r0, r4                               /* Load parameters */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     add r5, r5, r0
     mov r1, #12
     mov r0, r3
     mov r12, #4
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov r1, #4
     mov r0, r4
     mov r12, #4
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
 /* 35 + 12 + 16 = 63 */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     add r6, r5, r0
     mov r0, r4                               /* Load parameters */
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     add r0, r6, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

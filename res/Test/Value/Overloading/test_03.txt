@@ -29,7 +29,7 @@ TESTCASES
 OUTPUT
 /* --test_03.txt */
     b main
-Getter.L1:                                   /* Interface : Getter */
+Getter.L0:                                   /* Interface : Getter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -69,12 +69,12 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
-    bl Getter.L1                             /* Branch to relay table of Getter */
+    bl Getter.L0                             /* Branch to relay table of Getter */
     mov r5, r0
     mov r0, r4
     mov r1, r3
     mov r12, #4
-    bl Getter.L1                             /* Branch to relay table of Getter */
+    bl Getter.L0                             /* Branch to relay table of Getter */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

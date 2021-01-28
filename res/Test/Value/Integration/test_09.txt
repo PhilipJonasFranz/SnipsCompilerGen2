@@ -35,9 +35,6 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-/* Frees the memory block the given pointer points to. The pointer object will keep */
-/* the memory address, but the memory block will not be registered to be used anymore and */
-/* thus can be overwritten. */
 free:                                        /* Function: free */
     sub sp, sp, #12
     stmea sp, {r3, r4, r6}
@@ -120,10 +117,6 @@ __op_mod.L14:
     ldmfd sp!, {r3-r7}
     bx lr
     
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -131,7 +124,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L5_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -209,12 +202,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L5_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START
     
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P1:                                     /* Function: init, Provisos: Queue.CyclicQueue<INT[2]> */
+init_P_8:                                    /* Function: init, Provisos: Queue.CyclicQueue<INT[2]> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -253,19 +243,7 @@ init_P1:                                     /* Function: init, Provisos: Queue.
     add sp, sp, #32
     bx lr
     
-/* [BASE-PACKAGE] */
-/*  */
-/* This package contains the interface definition for an iterable struct. */
-/* The interface creates data access and exchange points, so data can be */
-/* read and written. */
-/* This package contains the utility to create and use */
-/* a circular queue. */
-/* The cyclic queue capsules a pointer to a storage location for */
-/* the contained values, indexes for the head and tail, as well as the */
-/* maximum size of the queue. Finally the queue has a isEmpty flag, */
-/* that is used to determine wether the queue is full or empty when */
-/* the head index is the same as the tail index. */
-Queue.CyclicQueue.destroy_P4:                /* Function: Queue.CyclicQueue.destroy, Provisos: INT[2] */
+Queue.CyclicQueue.destroy_P_2:               /* Function: Queue.CyclicQueue.destroy, Provisos: INT[2] */
     push { r3, lr }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -275,7 +253,7 @@ Queue.CyclicQueue.destroy_P4:                /* Function: Queue.CyclicQueue.dest
     bl free                                  /* Call free */
     ldmfd sp!, {r3, pc}
     
-Queue.CyclicQueue.enqueue_P2:                /* Function: Queue.CyclicQueue.enqueue, Provisos: INT[2] */
+Queue.CyclicQueue.enqueue_P_2:               /* Function: Queue.CyclicQueue.enqueue, Provisos: INT[2] */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -343,7 +321,7 @@ Queue.CyclicQueue.enqueue.L3:
     add sp, sp, #8
     bx lr
     
-Queue.CyclicQueue.dequeue_P3:                /* Function: Queue.CyclicQueue.dequeue, Provisos: INT[2] */
+Queue.CyclicQueue.dequeue_P_2:               /* Function: Queue.CyclicQueue.dequeue, Provisos: INT[2] */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -410,7 +388,7 @@ Queue.CyclicQueue.dequeue.L5:
     mov r10, #0
     bx lr
     
-Queue.CyclicQueue.create_P0:                 /* Function: Queue.CyclicQueue.create, Provisos: INT[2] */
+Queue.CyclicQueue.create_P_2:                /* Function: Queue.CyclicQueue.create, Provisos: INT[2] */
     sub sp, sp, #16
     stmea sp, {r3, r4, fp, lr}
     mov fp, sp
@@ -432,7 +410,7 @@ Queue.CyclicQueue.create_P0:                 /* Function: Queue.CyclicQueue.crea
     push { r4 }
     mov r0, #1
     push { r0 }
-    bl init_P1                               /* Call init */
+    bl init_P_8                              /* Call init */
     mov sp, fp
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #8
@@ -445,25 +423,25 @@ main:                                        /* Function: main */
     mov r1, #0
     stmfd sp!, {r0, r1}
     mov r0, #3
-    bl Queue.CyclicQueue.create_P0           /* Call Queue.CyclicQueue.create */
+    bl Queue.CyclicQueue.create_P_2          /* Call Queue.CyclicQueue.create */
     mov r3, r0
     mov r0, #4                               /* Load parameters */
     mov r1, #3
     stmfd sp!, {r0, r1}
     mov r0, r3
-    bl Queue.CyclicQueue.enqueue_P2          /* Call Queue.CyclicQueue.enqueue */
+    bl Queue.CyclicQueue.enqueue_P_2         /* Call Queue.CyclicQueue.enqueue */
     mov r0, #3                               /* Load parameters */
     mov r1, #9
     stmfd sp!, {r0, r1}
     mov r0, r3
-    bl Queue.CyclicQueue.enqueue_P2          /* Call Queue.CyclicQueue.enqueue */
+    bl Queue.CyclicQueue.enqueue_P_2         /* Call Queue.CyclicQueue.enqueue */
     mov r0, r3                               /* Load parameters */
-    bl Queue.CyclicQueue.dequeue_P3          /* Call Queue.CyclicQueue.dequeue */
+    bl Queue.CyclicQueue.dequeue_P_2         /* Call Queue.CyclicQueue.dequeue */
     add sp, sp, #8
     mov r0, r3                               /* Evaluate Expression */
-    bl Queue.CyclicQueue.dequeue_P3          /* Call Queue.CyclicQueue.dequeue */
+    bl Queue.CyclicQueue.dequeue_P_2         /* Call Queue.CyclicQueue.dequeue */
     mov r0, r3                               /* Load parameters */
-    bl Queue.CyclicQueue.destroy_P4          /* Call Queue.CyclicQueue.destroy */
+    bl Queue.CyclicQueue.destroy_P_2         /* Call Queue.CyclicQueue.destroy */
     ldr r0, [fp, #-8]
     ldr r2, [fp, #-4]
     add r0, r0, r2

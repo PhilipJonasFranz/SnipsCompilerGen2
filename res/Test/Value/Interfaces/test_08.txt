@@ -35,10 +35,7 @@ HEAP_START: .word 0
     
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
+    
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -46,7 +43,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L13_HEAP_START            /* Evaluate Expression */
+    ldr r0, .POOL0_L1_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -124,12 +121,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L13_HEAP_START: .word HEAP_START
+.POOL0_L1_HEAP_START: .word HEAP_START
     
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P7:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
+init_P_5:                                    /* Function: init, Provisos: List.LinkedList<INT> |  */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -159,7 +153,7 @@ init_P7:                                     /* Function: init, Provisos: List.L
     add sp, sp, #20
     bx lr
     
-init_P9:                                     /* Provisos: List.ListNode<INT> */
+init_P_3:                                    /* Provisos: List.ListNode<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -182,40 +176,17 @@ init_P9:                                     /* Provisos: List.ListNode<INT> */
     add sp, sp, #12
     bx lr
     
-/* [BASE-PACKAGE] */
-/*  */
-/* This package contains the interface definition for an iterable struct. */
-/* The interface creates data access and exchange points, so data can be */
-/* read and written. */
-/* Interface for a collection. A collection has to include the methods: */
-/* - size */
-/* - get(int) */
-/* - set(int, T) */
-/* - add(T) */
-/* - remove(int) */
-/* A collection provides an abstract interface for a database or data storage */
-/* and the endpoints to access the data. */
-Collection.L0_P1:                            /* Interface : Collection, Provisos: INT,  */
+Collection.L0_P_1:                           /* Interface : Collection, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
-    b List.LinkedList.size_P3
-    b List.LinkedList.get_P4
-    b List.LinkedList.set_P10
-    b List.LinkedList.add_P8
+    b List.LinkedList.size_P_1
+    b List.LinkedList.get_P_1
+    b List.LinkedList.set_P_1
+    b List.LinkedList.add_P_1
     add r10, r10, r10                        /* Function was not called, use as placeholder */
     
-/* [BASE-PACKAGE] */
-/*  */
-/* Using the serializable interface, structs can be converted */
-/* into string format. */
-/* This package contains the utility to create a linked-list, */
-/* insert and remove values from it, as well as some functions */
-/* that give information about the state of the list. */
-/* A single list entry, contains a pointer to the next node */
-/* and a value. */
-/* Wraps the list head and tail. */
-List.LinkedList.add_P8:                      /* Function: List.LinkedList.add, Provisos: INT */
+List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
@@ -223,15 +194,15 @@ List.LinkedList.add_P8:                      /* Function: List.LinkedList.add, P
     mov r4, r1
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL1_L12_NULL                  /* Load null address */
+    ldr r0, .POOL1_L0_NULL                   /* Load null address */
     push { r0 }
     mov r0, #1
     push { r0 }
-    bl init_P9                               /* Call init */
+    bl init_P_3                              /* Call init */
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L12_NULL                  /* Load null address */
+    ldr r1, .POOL1_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -254,9 +225,9 @@ List.LinkedList.add.L0:
     add r2, r0, #1
     str r2, [r1]
     ldmfd sp!, {r3-r5, pc}
-.POOL1_L12_NULL: .word NULL
+.POOL1_L0_NULL: .word NULL
     
-List.LinkedList.get_P4:                      /* Function: List.LinkedList.get, Provisos: INT */
+List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
@@ -275,7 +246,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L12_NULL                  /* Load null address */
+    ldr r1, .POOL2_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -294,9 +265,9 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL2_L12_NULL: .word NULL
+.POOL2_L0_NULL: .word NULL
     
-List.LinkedList.set_P10:                     /* Function: List.LinkedList.set, Provisos: INT */
+List.LinkedList.set_P_1:                     /* Function: List.LinkedList.set, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r4-r6}
@@ -309,7 +280,7 @@ List.LinkedList.set.L1:                      /* Evaluate condition */
     beq List.LinkedList.set.L2
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L12_NULL                  /* Load null address */
+    ldr r1, .POOL3_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.set.L3
     b List.LinkedList.set.L5
@@ -327,34 +298,34 @@ List.LinkedList.set.L2:
 List.LinkedList.set.L5: 
     ldmfd sp!, {r4-r6}
     bx lr
-.POOL3_L12_NULL: .word NULL
+.POOL3_L0_NULL: .word NULL
     
-List.LinkedList.size_P3:                     /* Function: List.LinkedList.size, Provisos: INT */
+List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     bx lr
     
-List.LinkedList.create_P6:                   /* Function: List.LinkedList.create, Provisos: INT */
+List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL4_L12_NULL                  /* Load null address */
-    ldr r2, .POOL4_L12_NULL                  /* Load null address */
+    ldr r1, .POOL4_L0_NULL                   /* Load null address */
+    ldr r2, .POOL4_L0_NULL                   /* Load null address */
     stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
-    bl init_P7                               /* Call init */
+    bl init_P_5                              /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL4_L12_NULL: .word NULL
+.POOL4_L0_NULL: .word NULL
     
 getSum:                                      /* Function: getSum */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
-    bl Collection.L0_P1                      /* Branch to relay table of Collection */
+    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -364,7 +335,7 @@ getSum.L1:
     mov r0, r3
     mov r1, r6
     mov r12, #4
-    bl Collection.L0_P1                      /* Branch to relay table of Collection */
+    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
     add r5, r5, r0
     add r6, r6, #1
     b getSum.L1
@@ -375,17 +346,17 @@ getSum.L2:
 main:                                        /* Function: main */
     push { lr }
     mov r0, #0                               /* Evaluate Expression */
-    bl List.LinkedList.create_P6             /* Call List.LinkedList.create */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r4, r0
     mov r1, #15
     mov r0, r4
-    bl List.LinkedList.add_P8                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r1, #6
     mov r0, r4
-    bl List.LinkedList.add_P8                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r1, #2
     mov r0, r4
-    bl List.LinkedList.add_P8                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r5, r4
     mov r0, #9                               /* Load parameters */
     push { r0 }
@@ -394,7 +365,7 @@ main:                                        /* Function: main */
     mov r0, r5
     ldmfd sp!, {r1, r2}
     mov r12, #8
-    bl Collection.L0_P1                      /* Branch to relay table of Collection */
+    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
     mov r0, r5                               /* Evaluate Expression */
     bl getSum                                /* Call getSum */
     pop { pc }

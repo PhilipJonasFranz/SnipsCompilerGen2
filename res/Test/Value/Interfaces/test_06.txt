@@ -28,7 +28,10 @@ TESTCASES
 OUTPUT
 /* --test_06.txt */
     b main
-Inter.L1:                                    /* Interface : Inter */
+Inter.L0:                                    /* Interface : Inter */
+    b X.get
+    
+X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
@@ -47,7 +50,7 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
     ldr r0, [r10, r3, lsl #2]
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

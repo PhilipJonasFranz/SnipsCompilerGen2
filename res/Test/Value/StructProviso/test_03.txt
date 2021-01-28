@@ -28,10 +28,7 @@ HEAP_START: .word 0
     
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
+    
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}

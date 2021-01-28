@@ -27,10 +27,7 @@ HEAP_START: .word 0
     
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
+    
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -38,7 +35,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L1_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -116,9 +113,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L1_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START
     
-insert_P0:                                   /* Function: insert, Provisos: INT */
+insert_P_1:                                  /* Function: insert, Provisos: INT */
     mov r0, #4                               /* Evaluate Expression */
     b resv                                   /* Call resv */
     
@@ -144,7 +141,7 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     mov r1, #15
     mov r0, r3
-    bl insert_P0                             /* Call insert */
+    bl insert_P_1                            /* Call insert */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     pop { pc }

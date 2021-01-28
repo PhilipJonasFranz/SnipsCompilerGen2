@@ -37,10 +37,7 @@ HEAP_START: .word 0
     
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
+    
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -48,7 +45,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L5_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -126,12 +123,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L5_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START
     
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P1:                                     /* Function: init, Provisos: B<INT> */
+init_P_3:                                    /* Function: init, Provisos: B<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -154,7 +148,7 @@ init_P1:                                     /* Function: init, Provisos: B<INT>
     add sp, sp, #12
     bx lr
     
-Getter.L2_P0:                                /* Interface : Getter, Provisos: INT,  */
+Getter.L2_P_1:                               /* Interface : Getter, Provisos: INT,  */
     ldr r10, [r10, r0, lsl #2]
     cmp r10, #1
     moveq r10, #0
@@ -166,16 +160,16 @@ Getter.L3:
     add r10, r10, #4
     mov r12, #0
     add pc, pc, r10
-    b A.get_P2
-    b B.get_P3
+    b A.get_P_1
+    b B.get_P_1
     
-A.get_P2:                                    /* Function: A.get, Provisos: INT */
+A.get_P_1:                                   /* Function: A.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-B.get_P3:                                    /* Function: B.get, Provisos: INT */
+B.get_P_1:                                   /* Function: B.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
@@ -188,7 +182,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #2
     push { r0 }
-    bl init_P1                               /* Call init */
-    bl Getter.L2_P0                          /* Branch to relay table of Getter */
+    bl init_P_3                              /* Call init */
+    bl Getter.L2_P_1                         /* Branch to relay table of Getter */
     pop { pc }
     

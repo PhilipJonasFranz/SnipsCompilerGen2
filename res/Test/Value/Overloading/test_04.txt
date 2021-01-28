@@ -29,20 +29,20 @@ TESTCASES
 OUTPUT
 /* --test_04.txt */
     b main
-Getter.L5_P0:                                /* Interface : Getter, Provisos: INT,  */
+Getter.L0_P_1:                               /* Interface : Getter, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
-    b X.get@2_P2
-    b X.get@3_P3
+    b X.get@2_P_1
+    b X.get@3_P_1
     
-X.get@2_P2:                                  /* Function: X.get, Provisos: INT */
+X.get@2_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
-X.get@3_P3:                                  /* Function: X.get, Provisos: INT */
+X.get@3_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     push { r3 }
     mov r3, r0
@@ -69,12 +69,12 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
-    bl Getter.L5_P0                          /* Branch to relay table of Getter */
+    bl Getter.L0_P_1                         /* Branch to relay table of Getter */
     mov r5, r0
     mov r0, r4
     mov r1, r3
     mov r12, #4
-    bl Getter.L5_P0                          /* Branch to relay table of Getter */
+    bl Getter.L0_P_1                         /* Branch to relay table of Getter */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

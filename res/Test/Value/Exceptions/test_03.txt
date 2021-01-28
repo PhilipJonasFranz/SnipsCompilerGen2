@@ -63,8 +63,6 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-/* Loads the size of the memory block that given pointer points to. */
-/* The pointer must point on a heap object for the method to work. */
 hsize:                                       /* Function: hsize */
     push { r3 }
     mov r3, r0
@@ -76,10 +74,6 @@ hsize:                                       /* Function: hsize */
     pop { r3 }
     bx lr
     
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}

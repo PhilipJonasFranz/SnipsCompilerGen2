@@ -21,7 +21,7 @@ ANON2:                                       /* Function: ANON2 */
     add r0, r0, #12
     bx lr
     
-process_P0:                                  /* Function: process, Provisos: INT */
+process_P_1:                                 /* Function: process, Provisos: INT */
     push { r4, lr }
     mov r4, r1
     add lr, pc, #8
@@ -34,5 +34,5 @@ main:                                        /* Function: main */
     mov r10, #0
     mov r1, r0
     mov r0, #5
-    b process_P0                             /* Call process */
+    b process_P_1                            /* Call process */
     

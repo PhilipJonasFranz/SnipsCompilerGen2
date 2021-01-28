@@ -17,7 +17,7 @@ TESTCASES
 OUTPUT
 /* --test_02.txt */
     b main
-X.getValue_P0:                               /* Function: X.getValue, Provisos: INT */
+X.getValue_P_1:                              /* Function: X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
@@ -31,7 +31,7 @@ main:                                        /* Function: main */
     push { r0 }
     sub r0, fp, #8                           /* Load parameters */
     lsr r0, r0, #2
-    bl X.getValue_P0                         /* Call X.getValue */
+    bl X.getValue_P_1                        /* Call X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
     

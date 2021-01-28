@@ -52,10 +52,6 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -63,7 +59,7 @@ resv:                                        /* Function: resv */
 /* Add block header to size */
     add r3, r0, #1
 /* Get reference to heap start */
-    ldr r0, .POOL0_L19_HEAP_START            /* Evaluate Expression */
+    ldr r0, .POOL0_L1_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -141,12 +137,9 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL0_L19_HEAP_START: .word HEAP_START
+.POOL0_L1_HEAP_START: .word HEAP_START
     
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P3:                                     /* Function: init, Provisos: List.LinkedList<INT> |  */
+init_P_5:                                    /* Function: init, Provisos: List.LinkedList<INT> |  */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -176,7 +169,7 @@ init_P3:                                     /* Function: init, Provisos: List.L
     add sp, sp, #20
     bx lr
     
-init_P5:                                     /* Provisos: List.ListNode<INT> |  */
+init_P_3:                                    /* Provisos: List.ListNode<INT> |  */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -199,7 +192,7 @@ init_P5:                                     /* Provisos: List.ListNode<INT> |  
     add sp, sp, #12
     bx lr
     
-init_P7:                                     /* Provisos: Streamable.Stream<INT> */
+init_P_2:                                    /* Provisos: Streamable.Stream<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
     mov fp, sp
@@ -220,9 +213,6 @@ init_P7:                                     /* Provisos: Streamable.Stream<INT>
     add sp, sp, #8
     bx lr
     
-/* Frees the memory block the given pointer points to. The pointer object will keep */
-/* the memory address, but the memory block will not be registered to be used anymore and */
-/* thus can be overwritten. */
 free:                                        /* Function: free */
     sub sp, sp, #12
     stmea sp, {r3, r4, r6}
@@ -251,40 +241,17 @@ free.L2:
     ldmfd sp!, {r3, r4, r6}
     bx lr
     
-/* [BASE-PACKAGE] */
-/*  */
-/* This package contains the interface definition for an iterable struct. */
-/* The interface creates data access and exchange points, so data can be */
-/* read and written. */
-/* Interface for a collection. A collection has to include the methods: */
-/* - size */
-/* - get(int) */
-/* - set(int, T) */
-/* - add(T) */
-/* - remove(int) */
-/* A collection provides an abstract interface for a database or data storage */
-/* and the endpoints to access the data. */
-Collection.L5_P1:                            /* Interface : Collection, Provisos: INT,  */
+Collection.L5_P_1:                           /* Interface : Collection, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
-    b List.LinkedList.size_P10
-    b List.LinkedList.get_P12
-    b List.LinkedList.set_P14
-    b List.LinkedList.add_P4
-    b List.LinkedList.remove_P17
+    b List.LinkedList.size_P_1
+    b List.LinkedList.get_P_1
+    b List.LinkedList.set_P_1
+    b List.LinkedList.add_P_1
+    b List.LinkedList.remove_P_1
     
-/* [BASE-PACKAGE] */
-/*  */
-/* Using the serializable interface, structs can be converted */
-/* into string format. */
-/* This package contains the utility to create a linked-list, */
-/* insert and remove values from it, as well as some functions */
-/* that give information about the state of the list. */
-/* A single list entry, contains a pointer to the next node */
-/* and a value. */
-/* Wraps the list head and tail. */
-List.LinkedList.add_P4:                      /* Function: List.LinkedList.add, Provisos: INT */
+List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
@@ -292,15 +259,15 @@ List.LinkedList.add_P4:                      /* Function: List.LinkedList.add, P
     mov r4, r1
 /* Initialize the new List Node, set the next pointer to null */
     push { r4 }
-    ldr r0, .POOL1_L18_NULL                  /* Load null address */
+    ldr r0, .POOL1_L0_NULL                   /* Load null address */
     push { r0 }
     mov r0, #1
     push { r0 }
-    bl init_P5                               /* Call init */
+    bl init_P_3                              /* Call init */
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L18_NULL                  /* Load null address */
+    ldr r1, .POOL1_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -323,9 +290,9 @@ List.LinkedList.add.L0:
     add r2, r0, #1
     str r2, [r1]
     ldmfd sp!, {r3-r5, pc}
-.POOL1_L18_NULL: .word NULL
+.POOL1_L0_NULL: .word NULL
     
-List.LinkedList.get_P12:                     /* Function: List.LinkedList.get, Provisos: INT */
+List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
@@ -344,7 +311,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L18_NULL                  /* Load null address */
+    ldr r1, .POOL2_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -363,9 +330,9 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL2_L18_NULL: .word NULL
+.POOL2_L0_NULL: .word NULL
     
-List.LinkedList.set_P14:                     /* Function: List.LinkedList.set, Provisos: INT */
+List.LinkedList.set_P_1:                     /* Function: List.LinkedList.set, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r4-r6}
@@ -378,7 +345,7 @@ List.LinkedList.set.L1:                      /* Evaluate condition */
     beq List.LinkedList.set.L2
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L18_NULL                  /* Load null address */
+    ldr r1, .POOL3_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.set.L3
     b List.LinkedList.set.L5
@@ -396,15 +363,15 @@ List.LinkedList.set.L2:
 List.LinkedList.set.L5: 
     ldmfd sp!, {r4-r6}
     bx lr
-.POOL3_L18_NULL: .word NULL
+.POOL3_L0_NULL: .word NULL
     
-List.LinkedList.size_P10:                    /* Function: List.LinkedList.size, Provisos: INT */
+List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     bx lr
     
-List.LinkedList.remove_P17:                  /* Function: List.LinkedList.remove, Provisos: INT */
+List.LinkedList.remove_P_1:                  /* Function: List.LinkedList.remove, Provisos: INT */
     mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
@@ -420,7 +387,7 @@ List.LinkedList.remove.L0:
 /* Remove first element */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L18_NULL                  /* Load null address */
+    ldr r1, .POOL4_L0_NULL                   /* Load null address */
     cmp r0, r1
     ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -436,7 +403,7 @@ List.LinkedList.remove.L0:
     ldr r0, [r1, #8]                         /* Load field from struct */
     cmp r0, r5
     bne List.LinkedList.remove.L6
-    ldr r0, .POOL4_L18_NULL                  /* Evaluate Expression */
+    ldr r0, .POOL4_L0_NULL                   /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
 List.LinkedList.remove.L6: 
@@ -454,7 +421,7 @@ List.LinkedList.remove.L10:                  /* Evaluate condition */
     ble List.LinkedList.remove.L11
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L18_NULL                  /* Load null address */
+    ldr r1, .POOL4_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L13
     ldmfd sp!, {r3-r5, pc}
@@ -468,7 +435,7 @@ List.LinkedList.remove.L11:
 /* Out of bounds */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L18_NULL                  /* Load null address */
+    ldr r1, .POOL4_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L16
     ldmfd sp!, {r3-r5, pc}
@@ -477,14 +444,14 @@ List.LinkedList.remove.L16:
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL4_L18_NULL                  /* Load null address */
+    ldr r1, .POOL4_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L19
 /* Element to remove is last element in list */
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    ldr r0, .POOL4_L18_NULL                  /* Evaluate Expression */
+    ldr r0, .POOL4_L0_NULL                   /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -504,37 +471,31 @@ List.LinkedList.remove.L19:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r3, [r1, #4]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL4_L18_NULL: .word NULL
+.POOL4_L0_NULL: .word NULL
     
-List.LinkedList.create_P2:                   /* Function: List.LinkedList.create, Provisos: INT */
+List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
 /* Initialize list, set pointers to null */
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL5_L18_NULL                  /* Load null address */
-    ldr r2, .POOL5_L18_NULL                  /* Load null address */
+    ldr r1, .POOL5_L0_NULL                   /* Load null address */
+    ldr r2, .POOL5_L0_NULL                   /* Load null address */
     stmfd sp!, {r0-r2}
     mov r0, #2
     push { r0 }
-    bl init_P3                               /* Call init */
+    bl init_P_5                              /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL5_L18_NULL: .word NULL
+.POOL5_L0_NULL: .word NULL
     
-/* Contains the utility to create a stream from an collection */
-/* interface and to modify the data behind the interface with */
-/* predicates. */
-/* A stream capsules an Iterable interface, that contains the */
-/* data. Within the typedef, a range of functions are defined */
-/* to modify the data using predicates. */
-Streamable.Stream.forEach_P8:                /* Function: Streamable.Stream.forEach, Provisos: INT */
+Streamable.Stream.forEach_P_1:               /* Function: Streamable.Stream.forEach, Provisos: INT */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
     mov r4, r1
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     mov r5, r0
     mov r6, #0
 Streamable.Stream.forEach.L1: 
@@ -544,7 +505,7 @@ Streamable.Stream.forEach.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r6
     mov r12, #4
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     add lr, pc, #8
     mov pc, r4
     push { r0 }
@@ -553,14 +514,14 @@ Streamable.Stream.forEach.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldmfd sp!, {r1, r2}
     mov r12, #8
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     add r6, r6, #1
     b Streamable.Stream.forEach.L1
 Streamable.Stream.forEach.L2: 
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
     
-Streamable.Stream.filter_P15:                /* Function: Streamable.Stream.filter, Provisos: INT */
+Streamable.Stream.filter_P_1:                /* Function: Streamable.Stream.filter, Provisos: INT */
     sub sp, sp, #24
     stmea sp, {r3-r7, lr}
     mov r3, r0
@@ -568,7 +529,7 @@ Streamable.Stream.filter_P15:                /* Function: Streamable.Stream.filt
     mov r5, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     mov r6, r0
     mov r7, #0
 Streamable.Stream.filter.L1: 
@@ -578,7 +539,7 @@ Streamable.Stream.filter.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r7
     mov r12, #4
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     add lr, pc, #8
     mov pc, r4
     cmp r0, #0
@@ -590,7 +551,7 @@ Streamable.Stream.filter.L1:
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r5
     mov r12, #16
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     sub r5, r5, #1
 Streamable.Stream.filter.L3: 
     mov r0, r5
@@ -601,7 +562,7 @@ Streamable.Stream.filter.L2:
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3-r7, pc}
     
-Streamable.Stream.create_P6:                 /* Function: Streamable.Stream.create, Provisos: INT */
+Streamable.Stream.create_P_1:                /* Function: Streamable.Stream.create, Provisos: INT */
     push { fp }
     mov fp, sp
     push { r0 }
@@ -644,20 +605,20 @@ main:                                        /* Function: main */
     push { lr }
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */
-    bl List.LinkedList.create_P2             /* Call List.LinkedList.create */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r4, r0
     mov r1, #10
     mov r0, r4
-    bl List.LinkedList.add_P4                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r1, #5
     mov r0, r4
-    bl List.LinkedList.add_P4                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r1, #2
     mov r0, r4
-    bl List.LinkedList.add_P4                /* Call List.LinkedList.add */
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
     mov r0, r4                               /* Evaluate Expression */
-    bl Streamable.Stream.create_P6           /* Call Streamable.Stream.create */
-    bl init_P7                               /* Call init */
+    bl Streamable.Stream.create_P_1          /* Call Streamable.Stream.create */
+    bl init_P_2                              /* Call init */
     mov r4, r0
     add r10, pc, #8                          /* Load parameters */
     b lambda_not20
@@ -670,15 +631,15 @@ main:                                        /* Function: main */
     mov r10, #0
     mov r1, r0
     mov r0, r4
-    bl Streamable.Stream.forEach_P8          /* Call Streamable.Stream.forEach */
+    bl Streamable.Stream.forEach_P_1         /* Call Streamable.Stream.forEach */
     pop { r1 }
-    bl Streamable.Stream.forEach_P8          /* Call Streamable.Stream.forEach */
+    bl Streamable.Stream.forEach_P_1         /* Call Streamable.Stream.forEach */
     pop { r1 }
-    bl Streamable.Stream.filter_P15          /* Call Streamable.Stream.filter */
+    bl Streamable.Stream.filter_P_1          /* Call Streamable.Stream.filter */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r3
     mov r12, #4
-    bl Collection.L5_P1                      /* Branch to relay table of Collection */
+    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
     pop { pc }
     
