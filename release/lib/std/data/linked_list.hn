@@ -1,0 +1,34 @@
+#include<collection.sn>
+#include<serializable.sn>
+
+namespace List {
+
+	restricted struct ListNode<T> {
+		ListNode<T>* next;
+		T value;
+	}
+	
+	restricted struct LinkedList<T> : Collection<T>, Serializable {
+		ListNode<T>* head;
+		ListNode<T>* tail;
+		int size;
+		T defValue;
+		
+		shared void add(T x);
+		shared T get(int i);
+		shared void set(int i, T value);
+		shared void destroy<T:void>();
+		shared bool contains(func (T, T) -> bool pred, T x);
+		shared ListNode<T>* find(func (T, T) -> bool pred, T x);
+		shared int size<T:void>();
+		shared int count<T:void>();
+		shared int indexOf<T:void>(ListNode<void>* n);
+		shared void remove<T:void>(int i);
+		shared void clear<T:void>();
+		shared bool isEmpty<T:void>();
+		shared char* serialize();
+		static void* deserialize<T:void>(char* str);
+		static LinkedList<T>* create<T>(T defValue);
+	}
+
+} 

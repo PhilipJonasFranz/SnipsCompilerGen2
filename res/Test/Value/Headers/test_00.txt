@@ -1,0 +1,10 @@
+SOURCE
+#include<linked_list.hn>
+
+int main() {
+	LinkedList<int>* list = LinkedList::create<int>(0);
+	list->add(10);
+	return list->get(0);
+}
+TESTCASES
+10

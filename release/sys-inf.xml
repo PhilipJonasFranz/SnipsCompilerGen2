@@ -1,7 +1,13 @@
 <Inf>
 	<Version>v.4.5.0</Version>
 	<Library>
+		<Alias>resv.sn:lib/mem/resv.sn</Alias>
+		<Alias>free.sn:lib/mem/free.sn</Alias>
+		<Alias>init.sn:lib/mem/init.sn</Alias>
+		<Alias>hsize.sn:lib/mem/hsize.sn</Alias>
+		
 		<Alias>linked_list.sn:lib/std/data/linked_list.sn</Alias>
+		<Alias>linked_list.hn:lib/std/data/linked_list.hn</Alias>
 		<Alias>binary_tree.sn:lib/std/data/binary_tree.sn</Alias>
 		<Alias>stack.sn:lib/std/data/stack.sn</Alias>
 		<Alias>queue.sn:lib/std/data/queue.sn</Alias>

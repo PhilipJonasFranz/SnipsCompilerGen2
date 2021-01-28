@@ -20,7 +20,6 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
@@ -419,17 +418,10 @@ public class AsNBody extends AsNNode {
 	 * @param s The source of the ressource that generated the assembly
 	 */
 	private void injectASM(List<ASMInstruction> ins, List<String> ext, Source s, String prefix, String...incLabels) {
-		if (!CompilerDriver.buildObjectFileOnly || CompilerDriver.inputFile.getAbsolutePath().endsWith(s.sourceFile)) {
-			this.instructions.addAll(ins);
-		}
-		else {
-			for (String incLabel : incLabels) {
-				if (!ext.contains(s.sourceFile + "@" + prefix + incLabel)) {
-					this.instructions.add(new ASMDirective(".include " + s.sourceFile + "@" + prefix + incLabel));
-					ext.add(s.sourceFile + "@" + prefix + incLabel);
-				}
-			}
-			
+		
+		this.instructions.addAll(ins);
+		
+		if (CompilerDriver.buildArtifactsRecurse && !CompilerDriver.inputFile.getAbsolutePath().endsWith(s.sourceFile)) {
 			if (!this.external.containsKey(s.sourceFile)) {
 				this.external.put(s.sourceFile, ins);
 			}

@@ -277,8 +277,9 @@ public class Function extends CompoundStatement {
 			d.setContext(clone);
 		
 		/* Apply to body */
-		for (Statement s : this.body) 
-			s.setContext(clone);
+		if (this.body != null)
+			for (Statement s : this.body) 
+				s.setContext(clone);
 		
 		/* Get proviso free of header provisos and return type copy */
 		for (int i = 0; i < clone.size(); i++)
@@ -480,9 +481,11 @@ public class Function extends CompoundStatement {
 	public Function clone() {
 		Function f = this.cloneSignature();
 		
-		List<Statement> clone = new ArrayList();
-		for (Statement s : this.body) clone.add(s.clone());
-		f.body = clone;
+		if (this.body != null) {
+			List<Statement> clone = new ArrayList();
+			for (Statement s : this.body) clone.add(s.clone());
+			f.body = clone;
+		}
 		
 		return f;
 	}

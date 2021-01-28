@@ -41,6 +41,7 @@ import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
+import Util.Logging.LogPoint.Type;
 
 public class CompilerDriver {
 
@@ -61,6 +62,7 @@ public class CompilerDriver {
 		useTerminalColors = 			true, 	/* ANSI-Escape codes are used in the console. 					*/
 		silenced = 						true,	/* Less or no messages are printed to the console. 				*/
 		imm = 							false,	/* Immediates like the AST are printed.							*/
+		out = 							false,	/* Print final output.											*/
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
 		disableOptimizer = 				false,	/* The optimizer module is skipped in the pipeline.				*/
@@ -68,6 +70,7 @@ public class CompilerDriver {
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
+		buildArtifactsRecurse = 		false,	/* Builds all artifacts in the input and saves them.			*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
@@ -270,6 +273,8 @@ public class CompilerDriver {
 			currentStage = PIPE_STAGE.PREP;
 			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
 			List<LineObject> preCode = preProcess.getProcessed();
+			if (CompilerDriver.buildArtifactsRecurse) 
+				new Message("Recompiling " + PreProcessor.artifactsIncluded + " artifacts", Type.INFO);
 			
 			
 					/* --- SCANNING --- */
@@ -374,22 +379,30 @@ public class CompilerDriver {
 					/* --- OUTPUT BUILDING --- */
 			output = this.buildOutput(body.instructions, false);
 		
-			for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) {
-				String path = PreProcessor.resolveToPath(entry.getKey());
-				
-				if (path.endsWith(".sn")) {
-					System.out.println(new Message("SNIPS -> Dumping Artifact: " + entry.getKey(), LogPoint.Type.INFO).getMessage());
+			
+					/* --- LINKING --- */
+			if (!CompilerDriver.buildObjectFileOnly)
+				Lnk.Linker.linkProgram(output);
+			
+			
+					/* --- BUILD AND DUMP ARTIFACTS --- */
+			if (buildArtifactsRecurse) {
+				for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) {
+					String path = PreProcessor.resolveToPath(entry.getKey());
 					
-					List<String> artifact = this.buildOutput(entry.getValue(), true);
-					
-					path = path.substring(0, path.length() - 2) + "s";
-					Util.writeInFile(artifact, path);
+					if (path.endsWith(".sn")) {
+						new Message("SNIPS -> Dumping Artifact: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
+						
+						List<String> artifact = this.buildOutput(entry.getValue(), true);
+						
+						path = path.substring(0, path.length() - 2) + "s";
+						Util.writeInFile(artifact, path);
+					}
+					else log.add(new Message("SNIPS -> Failed to resolve artifact path: " + entry.getKey(), LogPoint.Type.WARN));
 				}
-				else log.add(new Message("SNIPS -> Failed to resolve artifact path: " + entry.getKey(), LogPoint.Type.WARN));
-				
 			}
 			
-			if (imm) {
+			if (imm || out) {
 				log.add(new Message("SNIPS -> Outputted Code:", LogPoint.Type.INFO));
 				output.stream().forEach(x -> System.out.println(printDepth + x));
 			}
@@ -619,6 +632,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-obj")) 	disableStructSIDHeaders = true;
+				else if (args [i].equals("-R")) 	buildArtifactsRecurse = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -648,6 +662,7 @@ public class CompilerDriver {
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-obj      : Build object file only, required additional linking",
+				"-R        : Build all required artifacts and save them",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"

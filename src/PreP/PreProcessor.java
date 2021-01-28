@@ -39,6 +39,8 @@ public class PreProcessor {
 	
 	public List<String> imported = new ArrayList();
 	
+	public static int artifactsIncluded = 0;
+	
 	/**
 	 * Create new instance, convert code input into LineObject representation
 	 */
@@ -62,6 +64,12 @@ public class PreProcessor {
 					String path = s.substring(1, s.length() - 1);
 					
 					this.process.remove(i);
+					
+					/* Swap out header with .sn file */
+					if ((CompilerDriver.buildArtifactsRecurse || !CompilerDriver.buildObjectFileOnly) && path.endsWith(".hn")) {
+						path = path.substring(0, path.length() - 2) + "sn";
+						artifactsIncluded++;
+					}
 					
 					if (!this.imported.contains(path)) {
 						try {

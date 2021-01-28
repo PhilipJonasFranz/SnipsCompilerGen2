@@ -501,8 +501,6 @@ public class Parser {
 			}
 			
 			def.functions.add(f);
-
-			accept(TokenType.SEMICOLON);
 		}
 		
 		accept(TokenType.RBRACE);
@@ -613,7 +611,9 @@ public class Parser {
 			}
 		}
 		
-		List<Statement> body = (parseHeadOnly)? new ArrayList() : this.parseCompoundStatement(true);
+		List<Statement> body = null;
+		if (current.type == TokenType.SEMICOLON) accept();
+		else if (!parseHeadOnly) body = this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);

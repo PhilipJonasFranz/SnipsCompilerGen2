@@ -14,6 +14,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -42,8 +43,12 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import PreP.PreProcessor;
 import Res.Const;
+import Snips.CompilerDriver;
 import Util.Pair;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 public class AsNFunction extends AsNCompoundStatement {
 
@@ -138,6 +143,32 @@ public class AsNFunction extends AsNCompoundStatement {
 		}
 		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
+			
+			/* 
+			 * Body is null, insert include directive instead, or build 
+			 * object file only and this function is not from the main file
+			 */
+			if (f.body == null || (CompilerDriver.buildObjectFileOnly && 
+					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
+				
+				/* Replace .hn with .sn in artifact link */
+				String source = f.getSource().sourceFile;
+				if (source.endsWith(".hn")) source = source.substring(0, source.length() - 2) + "sn";
+				
+				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).provisoPostfix));
+				
+				/* Check if required artifact exists */
+				String mappedPath = PreProcessor.resolveToPath(source);
+				if (mappedPath.endsWith(".sn")) mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
+				
+				if (PreProcessor.getFile(mappedPath) == null) {
+					new Message("Artifact '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("To create the missing artifact, use -R to recompile artifacts recursiveley", Type.WARN);
+				}
+				
+				continue;
+			}
+			
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();

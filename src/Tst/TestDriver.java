@@ -70,7 +70,7 @@ public class TestDriver {
 	public boolean printResult = false;
 	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = true;
+	public boolean writebackResults = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -395,14 +395,21 @@ public class TestDriver {
 			List<String> compile = cd.compile(new File(path), code);
 
 			List<String> copy = new ArrayList();
-			for (String s : compile) copy.add("" + s);
 			
-			try {
-				Linker.linkProgram(compile);
-			} catch (LNK_EXC e) {
-				cd.setBurstMode(false, false);
-				buffer.add(new Message("Error when linking output!", LogPoint.Type.FAIL, true));
-				return new Result(RET_TYPE.CRASH, 0, 0);
+			if (compile != null) {
+				for (String s : compile) copy.add("" + s);
+				
+				try {
+					Linker.linkProgram(compile);
+				} catch (LNK_EXC e) {
+					cd.setBurstMode(false, false);
+					buffer.add(new Message("Error when linking output: " + e.getMessage(), LogPoint.Type.FAIL, true));
+					
+					buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
 			}
 			
 			cd.setBurstMode(false, false);

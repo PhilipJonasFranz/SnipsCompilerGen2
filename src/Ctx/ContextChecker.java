@@ -310,9 +310,11 @@ public class ContextChecker {
 		
 		/* Check body */
 		this.currentFunction.push(f);
-		for (Statement s : f.body) {
-			currentStatement = s;
-			s.check(this);
+		if (f.body != null) {
+			for (Statement s : f.body) {
+				currentStatement = s;
+				s.check(this);
+			}
 		}
 		this.currentFunction.pop();
 		

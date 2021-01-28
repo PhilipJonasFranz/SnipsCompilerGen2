@@ -1,5 +1,6 @@
 package Lnk;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Exc.LNK_EXC;
@@ -10,6 +11,8 @@ import Util.Logging.Message;
 public class Linker {
 
 	public static void linkProgram(List<String> asm) throws LNK_EXC {
+		List<String> included = new ArrayList();
+		
 		for (int i = 0; i < asm.size(); i++) {
 			String line = asm.get(i);
 			
@@ -25,10 +28,15 @@ public class Linker {
 				String mappedPath = PreProcessor.resolveToPath(filePath);
 				mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
 				
+				if (included.contains(mappedPath)) continue;
+				else included.add(mappedPath);
+				
+				asm.remove(i);
+				
 				List<String> lines = PreProcessor.getFile(mappedPath);
 				
 				if (lines == null) {
-					throw new LNK_EXC("Failed to locate include target %s", filePath);
+					throw new LNK_EXC("Failed to locate include target %s", mappedPath);
 				}
 				else {
 					boolean found = false;
@@ -38,7 +46,6 @@ public class Linker {
 						if (lines.get(a).trim().startsWith(label + ":")) {
 							/* Found position in artifact */
 							found = true;
-							asm.remove(i);
 							
 							int cnt = i;
 							
