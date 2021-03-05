@@ -96,8 +96,10 @@ public class AsNStructSelect extends AsNExpression {
 			 * 
 			 * This is done by setting this flag to true. It overrides the addressLoader flag, since
 			 * they are having the same goal, which is loading the location of the substructure.
+			 * 
+			 * The same principle goes for the global memory.
 			 */
-			boolean isInStack = false;
+			boolean isInStack = false, isInGlobalMemory = false;
 			
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
@@ -138,6 +140,8 @@ public class AsNStructSelect extends AsNExpression {
 				
 				/* Load data label */
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
+			
+				isInGlobalMemory = true;
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			
@@ -149,7 +153,7 @@ public class AsNStructSelect extends AsNExpression {
 			 * 
 			 * The addressLoader flag is overridden by the isInStack flag.
 			 */
-			if ((addressLoader || isInStack) && ref.getType() instanceof POINTER) 
+			if ((addressLoader || isInStack || isInGlobalMemory) && ref.getType() instanceof POINTER) 
 				node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
 		}
 		else if (base instanceof ArraySelect) {
