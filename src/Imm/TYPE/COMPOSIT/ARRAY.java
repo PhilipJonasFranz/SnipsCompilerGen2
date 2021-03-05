@@ -69,7 +69,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public String typeString() {
-		String s = this.coreType.typeString().split(":") [0] + "[" + this.getLength() + "]";
+		String s = this.elementType.typeString().split(":") [0] + "[" + this.getLength() + "]";
 		TYPE t = this.elementType;
 		while (t instanceof ARRAY) {
 			s += "[" + ((ARRAY) t).getLength() + "]";
@@ -107,6 +107,10 @@ public class ARRAY extends COMPOSIT {
 	
 	public TYPE getCoreType() {
 		return this.coreType;
+	}
+	
+	public TYPE getContainedType() {
+		return this.elementType;
 	}
 
 	public TYPE provisoFree() {

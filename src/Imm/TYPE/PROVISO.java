@@ -105,6 +105,10 @@ public class PROVISO extends TYPE<Void> {
 	public TYPE getCoreType() {
 		return (this.context != null)? this.context.getCoreType() : ((this.defaultContext != null)? this.defaultContext : this);
 	}
+	
+	public TYPE getContainedType() {
+		return this;
+	}
 
 	public PROVISO clone() {
 		PROVISO p = new PROVISO(this.placeholderName);

@@ -93,6 +93,10 @@ public class INTERFACE extends COMPOSIT {
 		/* Struct acts as its own type, so its is own core type. */
 		return this;
 	}
+	
+	public TYPE getContainedType() {
+		return this;
+	}
 
 	public INTERFACE clone() {
 		List<TYPE> prov0 = new ArrayList();

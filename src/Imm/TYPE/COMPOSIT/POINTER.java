@@ -99,6 +99,10 @@ public class POINTER extends COMPOSIT {
 		}
 		return this.coreType;
 	}
+	
+	public TYPE getContainedType() {
+		return this.targetType;
+	}
 
 	public TYPE provisoFree() {
 		POINTER p = (POINTER) this.clone();

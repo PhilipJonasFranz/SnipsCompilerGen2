@@ -66,6 +66,11 @@ public abstract class TYPE<T> {
 	public abstract TYPE getCoreType();
 	
 	/**
+	 * Returns the contained type of a type, for example INT [] -> INT.
+	 */
+	public abstract TYPE getContainedType();
+	
+	/**
 	 * Creates a disjunct copy of this type.
 	 */
 	public abstract TYPE clone();

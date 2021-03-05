@@ -213,6 +213,10 @@ public class STRUCT extends COMPOSIT {
 		/* Struct acts as its own type, so its is own core type. */
 		return this;
 	}
+	
+	public TYPE getContainedType() {
+		return this;
+	}
 
 	public STRUCT clone() {
 		List<TYPE> prov0 = new ArrayList();
