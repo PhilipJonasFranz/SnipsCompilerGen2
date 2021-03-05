@@ -1,7 +1,6 @@
 package Imm.TYPE.PRIMITIVES;
 
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.POINTER;
 
 public class NULL extends PRIMITIVE<Object> {
 	
@@ -11,7 +10,7 @@ public class NULL extends PRIMITIVE<Object> {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		return type instanceof POINTER || type instanceof NULL;
+		return type.isPointer() || type.isNull();
 	}
 	
 	public String typeString() {

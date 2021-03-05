@@ -23,12 +23,12 @@ public class CHAR extends PRIMITIVE<Character> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof CHAR;
 		}

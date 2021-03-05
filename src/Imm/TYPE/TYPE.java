@@ -1,6 +1,14 @@
 package Imm.TYPE;
 
 import Exc.SNIPS_EXC;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.COMPOSIT.COMPOSIT;
+import Imm.TYPE.COMPOSIT.INTERFACE;
+import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.PRIMITIVES.PRIMITIVE;
+import Imm.TYPE.PRIMITIVES.VOID;
 
 public abstract class TYPE<T> {
 
@@ -106,5 +114,34 @@ public abstract class TYPE<T> {
 	public abstract TYPE remapProvisoName(String name, TYPE newType);
 	
 	public abstract TYPE mappable(TYPE mapType, String searchedProviso);
+	
+	
+	public boolean isPointer() { return this instanceof POINTER; };
+	
+	public boolean isArray() { return this instanceof ARRAY; };
+	
+	public boolean isStruct() { return this instanceof STRUCT; };
+	
+	public boolean isInterface() { return this instanceof INTERFACE; };
+	
+	public boolean isPrimitive() { return this instanceof PRIMITIVE; };
+	
+	public boolean isComposit() { return this instanceof COMPOSIT; };
+	
+	public boolean isVoid() { return this instanceof VOID; };
+	
+	public boolean isNull() { return this instanceof NULL; };
+	
+	public boolean isProviso() { return this instanceof PROVISO; };
+	
+	/**
+	 * Returns true if this type is either a PRIMITIVE, POINTER or INTERFACE type.
+	 */
+	public boolean isRegType() { return this.isPrimitive() || this.isPointer() || this.isInterface(); };
+	
+	/**
+	 * Returns true if this type is either an ARRAY or STRUCT.
+	 */
+	public boolean isStackType() { return this.isArray() || this.isStruct(); };
 	
 } 

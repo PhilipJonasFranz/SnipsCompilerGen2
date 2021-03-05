@@ -39,7 +39,6 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Res.Const;
@@ -537,7 +536,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
-			if (dec.getType().wordsize() == 1 && r < 3 && !(dec.getType() instanceof STRUCT)) {
+			if (dec.getType().wordsize() == 1 && r < 3 && !dec.getType().isStruct()) {
 				/* Load in register */
 				mapping.add(new Pair(dec, r));
 				r++;

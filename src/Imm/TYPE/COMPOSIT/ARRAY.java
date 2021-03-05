@@ -6,7 +6,6 @@ import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Imm.TYPE.PRIMITIVES.VOID;
 
 public class ARRAY extends COMPOSIT {
 
@@ -52,17 +51,17 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			if (p.hasContext()) return this.isEqual(p.getContext());
 			else return false;
 		}
-		if (type instanceof ARRAY) {
+		if (type.isArray()) {
 			ARRAY array = (ARRAY) type;
 			return this.elementType.isEqual(array.elementType) && this.getLength() == array.getLength();
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			return this.getCoreType().isEqual(type.getCoreType());
 		}
 		else return false;
@@ -71,7 +70,7 @@ public class ARRAY extends COMPOSIT {
 	public String typeString() {
 		String s = this.elementType.typeString().split(":") [0] + "[" + this.getLength() + "]";
 		TYPE t = this.elementType;
-		while (t instanceof ARRAY) {
+		while (t.isArray()) {
 			s += "[" + ((ARRAY) t).getLength() + "]";
 			t = ((ARRAY) t).elementType;
 		}
@@ -126,7 +125,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof ARRAY) {
+		if (mapType.isArray()) {
 			ARRAY arr = (ARRAY) mapType;
 			return this.elementType.mappable(arr.elementType, searchedProviso);
 		}

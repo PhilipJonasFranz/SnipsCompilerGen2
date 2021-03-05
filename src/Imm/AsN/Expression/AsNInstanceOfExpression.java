@@ -16,7 +16,6 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.InstanceofExpression;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 
 public class AsNInstanceOfExpression extends AsNExpression {
@@ -44,10 +43,10 @@ public class AsNInstanceOfExpression extends AsNExpression {
 		 * up in R0 or on the stack.
 		 */
 		TYPE t = iof.expression.getType();
-		while (t instanceof POINTER) {
+		while (t.isPointer()) {
 			s.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
 			s.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
-			t = ((POINTER) t).targetType;
+			t = t.getContainedType();
 		}
 		
 		/* Expression ended up on the stack, load first word in R0 */

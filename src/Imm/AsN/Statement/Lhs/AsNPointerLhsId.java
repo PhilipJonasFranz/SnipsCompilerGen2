@@ -17,8 +17,6 @@ import Imm.AST.Expression.Deref;
 import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 
 public class AsNPointerLhsId extends AsNLhsId {
 
@@ -30,7 +28,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		Deref dref = lhs.deref;
 		
 		/* Store single cell, push value in R0 */
-		if (lhs.expressionType instanceof PRIMITIVE || lhs.expressionType instanceof POINTER) 
+		if (lhs.expressionType.isRegType()) 
 			id.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 		
 		r.free(0);
@@ -41,7 +39,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		/* Convert to bytes */
 		id.instructions.add(new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R0), new ImmOp(2)));
 		
-		if (lhs.assign.value.getType() instanceof PRIMITIVE || lhs.assign.value.getType() instanceof POINTER) {
+		if (lhs.assign.value.getType().isRegType()) {
 			id.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
 			
 			/* Create assign injector */

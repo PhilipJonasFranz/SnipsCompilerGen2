@@ -16,7 +16,6 @@ import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNArraySelect;
 import Imm.AsN.Expression.AsNArraySelect.SELECT_TYPE;
-import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNArraySelectLhsId extends AsNLhsId {
 
@@ -28,7 +27,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 		ArraySelect select = lhs.selection;
 		
 		/* Assign sub Array */
-		if (select.getType() instanceof ARRAY) {
+		if (select.getType().isArray()) {
 			/* Save to param Stack */
 			if (st.getParameterByteOffset(select.idRef.origin) != -1) 
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.PARAM_SUB, id, select, r, map, st);
@@ -40,7 +39,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SUB, id, select, r, map, st);
 		
 			/* Data is on stack, copy to location */
-			StackUtil.copyToAddressFromStack(((ARRAY) select.getType()).wordsize(), id, st);
+			StackUtil.copyToAddressFromStack(select.getType().wordsize(), id, st);
 		}
 		/* Assign single array cell */
 		else {

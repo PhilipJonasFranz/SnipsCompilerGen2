@@ -2,9 +2,6 @@ package Imm.TYPE.COMPOSIT;
 
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.PRIMITIVES.NULL;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
 
 public class POINTER extends COMPOSIT {
@@ -21,17 +18,17 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type instanceof NULL) return true;
-		if (type.getCoreType() instanceof VOID || this.getCoreType() instanceof VOID) return true;
-		if (type instanceof POINTER) {
+		if (type.isNull()) return true;
+		if (type.getCoreType().isVoid() || this.getCoreType().isVoid()) return true;
+		if (type.isPointer()) {
 			POINTER pointer = (POINTER) type;
-			if (pointer.targetType instanceof STRUCT && this.targetType instanceof STRUCT) {
+			if (pointer.targetType.isStruct() && this.targetType.isStruct()) {
 				STRUCT s = (STRUCT) this.targetType;
 				return s.isEqualExtended(pointer.targetType);
 			}
 			else return this.targetType.isEqual(pointer.targetType);
 		}
-		else if (type instanceof PROVISO) {
+		else if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			if (p.hasContext()) return this.isEqual(p.getContext());
 			else return false;
@@ -43,7 +40,7 @@ public class POINTER extends COMPOSIT {
 	}
 	
 	public String typeString() {
-		if (this.targetType instanceof STRUCT) {
+		if (this.targetType.isStruct()) {
 			STRUCT s = (STRUCT) this.targetType;
 			String t = ((s.getTypedef() != null)? s.typeString() : "?") + "*";
 			if (CompilerDriver.printProvisoTypes) t += s.getProvisoString();
@@ -70,7 +67,7 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public TYPE clone() {
-		if (this.targetType instanceof STRUCT) {
+		if (this.targetType.isStruct()) {
 			/* 
 			 * Cannot clone the struct pointer since it may be recursive, but can guarantee that
 			 * it can point to itself.
@@ -88,13 +85,13 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public TYPE getCoreType() {
-		if (targetType instanceof PRIMITIVE) {
+		if (targetType.isPrimitive()) {
 			this.coreType = targetType;
 		}
-		else if (targetType instanceof COMPOSIT) {
+		else if (targetType.isComposit()) {
 			this.coreType = ((COMPOSIT) targetType).getCoreType();
 		}
-		else if (this.targetType instanceof PROVISO) {
+		else if (this.targetType.isProviso()) {
 			this.coreType = this.targetType.getCoreType();
 		}
 		return this.coreType;
@@ -117,7 +114,7 @@ public class POINTER extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof POINTER) {
+		if (mapType.isPointer()) {
 			POINTER p = (POINTER) mapType;
 			return this.targetType.mappable(p.targetType, searchedProviso);
 		}

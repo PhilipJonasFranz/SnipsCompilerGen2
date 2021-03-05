@@ -11,8 +11,6 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.Atom;
 import Imm.AsN.AsNBody;
-import Imm.TYPE.PRIMITIVES.NULL;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Snips.CompilerDriver;
 
 public class AsNAtom extends AsNExpression {
@@ -25,10 +23,10 @@ public class AsNAtom extends AsNExpression {
 		r.free(0);
 		
 		/* Make sure only primitives can be in an atom */
-		assert(a.getType() instanceof PRIMITIVE || a.getType() instanceof NULL);
+		assert(a.getType().isPrimitive() || a.getType().isNull());
 		
 		/* Load value of null pointer */
-		if (a.getType() instanceof NULL) {
+		if (a.getType().isNull()) {
 			/* Load value from memory */
 			ASMDataLabel nullPtr = map.resolve(CompilerDriver.NULL_PTR);
 				

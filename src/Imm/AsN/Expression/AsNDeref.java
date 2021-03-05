@@ -54,7 +54,7 @@ public class AsNDeref extends AsNExpression {
 				 * could be stored at this location. Since we load the struct, polymorphism is not available anymore, and thus we need to overwrite
 				 * the stored SID with the actual SID of the struct type.
 				 */
-				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType() instanceof STRUCT && !CompilerDriver.disableStructSIDHeaders) {
+				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct() && !CompilerDriver.disableStructSIDHeaders) {
 					STRUCT s = (STRUCT) a.getType().getCoreType();
 					
 					ASMMov mov = new ASMMov(new RegOp(target), new ImmOp(s.getTypedef().SID));

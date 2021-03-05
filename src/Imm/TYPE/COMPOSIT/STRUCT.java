@@ -8,7 +8,6 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
@@ -29,8 +28,8 @@ public class STRUCT extends COMPOSIT {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof INTERFACE) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isInterface()) {
 			INTERFACE i = (INTERFACE) type;
 			for (INTERFACE def : this.typedef.implemented)
 				if (i.getTypedef().equals(def.getTypedef())) {
@@ -39,7 +38,7 @@ public class STRUCT extends COMPOSIT {
 			
 			return false;
 		}
-		if (type instanceof STRUCT) {
+		if (type.isStruct()) {
 			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
@@ -63,8 +62,8 @@ public class STRUCT extends COMPOSIT {
 	 * The passed types acts in this case as the child of this type.
 	 */
 	public boolean isEqualExtended(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof STRUCT) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isStruct()) {
 			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = this.typedef;
@@ -98,7 +97,7 @@ public class STRUCT extends COMPOSIT {
 	 * true if given type is a struct and this struct extends from it.
 	 */
 	public boolean isPolymorphTo(TYPE t) {
-		if (t instanceof STRUCT) {
+		if (t.isStruct()) {
 			STRUCT s = (STRUCT) t;
 			
 			StructTypedef sDef = this.typedef;
@@ -241,7 +240,7 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof STRUCT) {
+		if (mapType.isStruct()) {
 			STRUCT s = (STRUCT) mapType;
 			if (s.getTypedef().SID == this.getTypedef().SID) {
 				/* Missing provisos */

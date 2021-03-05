@@ -19,7 +19,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TempAtom;
 import Imm.AsN.AsNNode;
-import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 
@@ -115,7 +114,7 @@ public class AsNStructureInit extends AsNExpression {
 				node.instructions.addAll(AsNExpression.cast(elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
+				if (!elements.get(i).getType().isStackType()) {
 					node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
 					st.pushDummy();
 				}

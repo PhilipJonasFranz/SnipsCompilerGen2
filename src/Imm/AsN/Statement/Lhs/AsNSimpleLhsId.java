@@ -25,10 +25,6 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Res.Const;
 
 public class AsNSimpleLhsId extends AsNLhsId {
@@ -75,7 +71,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		}
 		/* Store to stack */
 		else {
-			if (ref.origin.getType() instanceof PRIMITIVE || ref.origin.getType() instanceof POINTER) {
+			if (ref.origin.getType().isRegType()) {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
 				
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
@@ -89,9 +85,9 @@ public class AsNSimpleLhsId extends AsNLhsId {
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
 					new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
-			else if (ref.origin.getType() instanceof ARRAY || ref.origin.getType() instanceof STRUCT) {
+			else if (ref.origin.getType().isStackType()) {
 				/* 
-				 * Use light variations of the addressing injector from AsNElementSelect, since we 
+				 * Use slight variations of the addressing injector from AsNElementSelect, since we 
 				 * dont have to add the sum to the sub structure.
 				 */
 				

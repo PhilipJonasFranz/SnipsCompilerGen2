@@ -82,7 +82,6 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
-import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Res.Const;
@@ -301,7 +300,7 @@ public class ContextChecker {
 		
 		for (Declaration d : f.parameters) {
 			d.check(this);
-			if (d.getType().getCoreType() instanceof VOID && !CompilerDriver.disableWarnings) 
+			if (d.getType().getCoreType().isVoid() && !CompilerDriver.disableWarnings) 
 				messages.add(new Message(String.format(Const.UNCHECKED_TYPE_VOID, new VOID().typeString(), d.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
@@ -453,7 +452,7 @@ public class ContextChecker {
 			}
 		}
 		
-		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		Optional<TYPE> opt = e.proviso.stream().filter(x -> !x.isProviso()).findFirst();
 		
 		if (opt.isPresent())
 			throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
@@ -543,7 +542,7 @@ public class ContextChecker {
 			}
 		}
 		
-		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+		Optional<TYPE> opt = e.proviso.stream().filter(x -> !x.isProviso()).findFirst();
 		
 		if (opt.isPresent())
 			throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
@@ -697,7 +696,7 @@ public class ContextChecker {
 			e.elements.get(0).check(this);
 		
 		/* Check that type that is covering is a struct type */
-		if (extension != null && covered && !(e.elements.get(0).getType() instanceof STRUCT)) 
+		if (extension != null && covered && !(e.elements.get(0).getType().isStruct())) 
 				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
 		
 		/* Absolute placeholder case */
@@ -733,7 +732,7 @@ public class ContextChecker {
 				}
 				
 				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof TempAtom)) {
-					if (valType instanceof POINTER || strType instanceof POINTER) 
+					if (valType.isPointer() || strType.isPointer()) 
 						CompilerDriver.printProvisoTypes = true;
 					
 					throw new CTX_EXC(e.getSource(), Const.ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE, i + 1, valType.provisoFree().typeString(), strType.provisoFree().typeString());
@@ -774,7 +773,7 @@ public class ContextChecker {
 				}
 				
 				if (!valType.isEqual(strType) && !(e.elements.get(i) instanceof TempAtom)) {
-					if (valType instanceof POINTER || strType instanceof POINTER) 
+					if (valType.isPointer() || strType.isPointer()) 
 						CompilerDriver.printProvisoTypes = true;
 					
 					throw new CTX_EXC(e.getSource(), Const.ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE, i + 1, valType.provisoFree().typeString(), strType.provisoFree().typeString());
@@ -826,7 +825,7 @@ public class ContextChecker {
 		
 		/* First selections does deref, this means that the base must be a pointer */
 		if (e.deref) {
-			if (type instanceof POINTER) {
+			if (type.isPointer()) {
 				POINTER p0 = (POINTER) type;
 				type = p0.targetType;
 			}
@@ -838,7 +837,7 @@ public class ContextChecker {
 		while (true) {
 			selection.setType(type.clone());
 			
-			if (type instanceof STRUCT) {
+			if (type.isStruct()) {
 				STRUCT struct = (STRUCT) type;
 					
 				if (selection instanceof StructSelect) {
@@ -850,13 +849,11 @@ public class ContextChecker {
 						type = findAndLinkField(struct, ref);
 						
 						if (sel0.deref) {
-							if (!(type instanceof POINTER)) 
+							if (!type.isPointer()) 
 								throw new CTX_EXC(selection.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree().typeString());
-							else {
+							else 
 								/* Unwrap pointer, selection does dereference */
-								POINTER p0 = (POINTER) type;
-								type = p0.targetType;
-							}
+								type = type.getContainedType();
 						}
 						
 						ref.setType(type.clone());
@@ -901,8 +898,8 @@ public class ContextChecker {
 					}
 					
 					TYPE type0 = type;
-					if (type0 instanceof POINTER) 
-						type0 = ((POINTER) type0).targetType;
+					if (type0.isPointer()) 
+						type0 = type0.getContainedType();
 					
 					ref.setType(type.clone());
 					
@@ -1018,7 +1015,7 @@ public class ContextChecker {
 		
 		LhsId iteratorWritebackLhs = null;
 		
-		if (refType instanceof POINTER) {
+		if (refType.isPointer()) {
 			POINTER p = (POINTER) refType;
 			
 			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
@@ -1041,7 +1038,7 @@ public class ContextChecker {
 				/* Construct the lhs that uses a pointer deref to store the iterator */
 				iteratorWritebackLhs = new PointerLhsId(f.shadowRef.clone(), f.iterator.getSource());
 		}
-		else if (refType instanceof ARRAY) {
+		else if (refType.isArray()) {
 			ARRAY a = (ARRAY) refType;
 			
 			if (!a.elementType.isEqual(itType))
@@ -1152,7 +1149,7 @@ public class ContextChecker {
 			}
 			
 			if (!t.isEqual(d.getType()) || d.getType().wordsize() != t.wordsize()) {
-				if (t instanceof POINTER || d.getType() instanceof POINTER) 
+				if (t.isPointer() || d.getType().isPointer()) 
 					CompilerDriver.printProvisoTypes = true;
 				
 				if (this.checkPolymorphViolation(t, d.getType())) 
@@ -1176,13 +1173,13 @@ public class ContextChecker {
 		this.declarations.add(d);
 		
 		/* If the type is a struct, make sure all required provisos are present */
-		if (d.getType().getCoreType() instanceof STRUCT) {
+		if (d.getType().getCoreType().isStruct()) {
 			STRUCT s = (STRUCT) d.getType().getCoreType();
 			s.checkProvisoPresent(d.getSource());
 		}
 
 		/* If the type is an interface, make sure the modifier is not violated */
-		if (d.getType().getCoreType() instanceof INTERFACE) { 
+		if (d.getType().getCoreType().isInterface()) { 
 			INTERFACE i = (INTERFACE) d.getType().getCoreType();
 			
 			/* Check for modifier restrictions */
@@ -1213,7 +1210,7 @@ public class ContextChecker {
 		
 		/* If target type is a pointer, only the core types have to match */
 		if (!targetType.isEqual(t) || (targetType.wordsize() != t.wordsize() && a.lhsId instanceof SimpleLhsId)) {
-			if (targetType instanceof POINTER || t instanceof POINTER) 
+			if (targetType.isPointer() || t.isPointer()) 
 				CompilerDriver.printProvisoTypes = true;
 			
 			if (this.checkPolymorphViolation(t, targetType)) 
@@ -1259,7 +1256,7 @@ public class ContextChecker {
 			throw new CTX_EXC(s.condition.getSource(), Const.SWITCH_COND_MUST_BE_VARIABLE);
 		
 		TYPE type = s.condition.check(this);
-		if (!(type instanceof PRIMITIVE)) 
+		if (!type.isPrimitive()) 
 			throw new CTX_EXC(s.condition.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 		
 		if (s.defaultStatement == null) 
@@ -1350,10 +1347,10 @@ public class ContextChecker {
 		TYPE left = b.getLeft().check(this);
 		TYPE right = b.getRight().check(this);
 		
-		if (left instanceof NULL) 
+		if (left.isNull()) 
 			throw new CTX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
-		if (right instanceof NULL) 
+		if (right.isNull()) 
 			throw new CTX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (b.left instanceof ArrayInit) 
@@ -1369,13 +1366,13 @@ public class ContextChecker {
 			throw new CTX_EXC(b.left.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, right.provisoFree().typeString());
 		}
 		
-		if (left instanceof POINTER) {
+		if (left.isPointer()) {
 			if (!(right.getCoreType() instanceof INT)) 
 				throw new CTX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), right.provisoFree().typeString());
 			
 			b.setType(left);
 		}
-		else if (right instanceof POINTER) {
+		else if (right.isPointer()) {
 			if (!(left.getCoreType() instanceof INT)) 
 				throw new CTX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), left.provisoFree().typeString());
 			
@@ -1425,7 +1422,7 @@ public class ContextChecker {
 	public TYPE checkUnaryExpression(UnaryExpression u) throws CTX_EXC {
 		TYPE op = u.getOperand().check(this);
 		
-		if (op instanceof NULL) 
+		if (op.isNull()) 
 			throw new CTX_EXC(u.getOperand().getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (u.getOperand() instanceof ArrayInit) 
@@ -1489,7 +1486,7 @@ public class ContextChecker {
 		Function f = this.linkFunction(c, types);
 		
 		if (c.isNestedCall()) {
-			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT) {
+			if (c.getParams().get(0).check(this).getCoreType().isStruct()) {
 				STRUCT s = (STRUCT) c.getParams().get(0).check(this).getCoreType();
 				
 				boolean found = false;
@@ -1541,7 +1538,7 @@ public class ContextChecker {
 			}
 			
 			/* Generate warning if instance is not a pointer, but is derefed in call */
-			if (c.isNestedDeref() && !(c.getParams().get(0).getType() instanceof POINTER))
+			if (c.isNestedDeref() && !c.getParams().get(0).getType().isPointer())
 				if (!CompilerDriver.disableWarnings) 
 					this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, c.getParams().get(0).getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
@@ -1564,7 +1561,7 @@ public class ContextChecker {
 			else if (c.getCallee() instanceof FunctionCall && c.getBaseRef() != null) {
 				TYPE t = c.getBaseRef().check(this);
 				
-				if (!(t.getCoreType() instanceof STRUCT)) 
+				if (!t.getCoreType().isStruct()) 
 					throw new CTX_EXC(c.getCallee().getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
 				
 				STRUCT s = (STRUCT) t.getCoreType();
@@ -1651,10 +1648,10 @@ public class ContextChecker {
 				TYPE paramType = c.getParams().get(a).check(this);
 				
 				if (!paramType.isEqual(functionParamType)) {
-					if (paramType instanceof POINTER || functionParamType instanceof POINTER) 
+					if (paramType.isPointer() || functionParamType.isPointer()) 
 						CompilerDriver.printProvisoTypes = true;
 					
-					if (paramType.getCoreType() instanceof STRUCT) {
+					if (paramType.getCoreType().isStruct()) {
 						STRUCT s = (STRUCT) paramType.getCoreType();
 						s.checkProvisoPresent(c.getParams().get(a).getSource());
 					}
@@ -1674,7 +1671,7 @@ public class ContextChecker {
 				if (f.provisosTypes.isEmpty() || !f.containsMapping(c.getProviso())) 
 					c.setType(f.getReturnType().clone());
 				
-				if (c.getType() instanceof VOID && !f.hasReturn) 
+				if (c.getType().isVoid() && !f.hasReturn) 
 					throw new CTX_EXC(c.getCallee().getSource(), Const.EXPECTED_RETURN_VALUE);
 			}
 		}
@@ -1696,7 +1693,7 @@ public class ContextChecker {
 		 * an interface is not available. An interface is a pointer by itself,
 		 * and thus we do not need the extra address reference.
 		 */
-		if (c.isNestedCall() && c.getParams().get(0).getType().getCoreType() instanceof INTERFACE && c.getParams().get(0) instanceof AddressOf) {
+		if (c.isNestedCall() && c.getParams().get(0).getType().getCoreType().isInterface() && c.getParams().get(0) instanceof AddressOf) {
 			AddressOf aof = (AddressOf) c.getParams().get(0);
 			c.getParams().set(0, aof.expression);
 		}
@@ -1763,11 +1760,11 @@ public class ContextChecker {
 				TYPE t = r.base.check(this);
 				
 				/* Extract prefix from ressource */
-				if (t.getCoreType() instanceof STRUCT) {
+				if (t.getCoreType().isStruct()) {
 					STRUCT s = (STRUCT) t.getCoreType();
 					prefix = s.getTypedef().path.getLast();
 				}
-				else if (t.getCoreType() instanceof INTERFACE) {
+				else if (t.getCoreType().isInterface()) {
 					INTERFACE i = (INTERFACE) t.getCoreType();
 					prefix = i.getTypedef().path.getLast();
 				}
@@ -1859,7 +1856,7 @@ public class ContextChecker {
 		if (CompilerDriver.disableStructSIDHeaders) 
 			throw new CTX_EXC(iof.getSource(), Const.SID_DISABLED_NO_INSTANCEOF);
 		
-		if (!(iof.instanceType instanceof STRUCT)) 
+		if (!iof.instanceType.isStruct()) 
 			throw new CTX_EXC(iof.getSource(), Const.EXPECTED_STRUCT_TYPE, iof.instanceType.provisoFree().typeString());
 		
 		iof.setType(new BOOL());
@@ -1899,17 +1896,16 @@ public class ContextChecker {
 		TYPE t = deref.expression.check(this);
 		
 		/* Dereference pointer or primitive type */
-		if (t instanceof PRIMITIVE) 
+		if (t.isPrimitive()) 
 			/* Set to core type */
 			deref.setType(t.getCoreType());
-		else if (t instanceof POINTER) {
-			POINTER p = (POINTER) t;
-			deref.setType(p.targetType);
+		else if (t.isPointer()) {
+			deref.setType(t.getContainedType());
 		}
 		else throw new CTX_EXC(deref.expression.getSource(), Const.CANNOT_DEREF_TYPE, t.provisoFree().typeString());
 		
 		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
-		if (t instanceof PRIMITIVE) {
+		if (t.isPrimitive()) {
 			if (!CompilerDriver.disableWarnings) 
 				this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, deref.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
@@ -1934,7 +1930,7 @@ public class ContextChecker {
 		}
 		
 		/* Allow only casting to equal word sizes or from or to void types */
-		if ((t != null && t.wordsize() != tc.castType.wordsize()) && !(tc.castType.getCoreType() instanceof VOID || t instanceof VOID)) 
+		if ((t != null && t.wordsize() != tc.castType.wordsize()) && !(tc.castType.getCoreType().isVoid() || t.isVoid())) 
 			throw new CTX_EXC(tc.getSource(), Const.CANNOT_CAST_TO, t.provisoFree().typeString(), tc.castType.provisoFree().typeString());
 		
 		tc.setType(tc.castType);
@@ -1948,7 +1944,8 @@ public class ContextChecker {
 			
 			TYPE t = ref.check(this);
 			
-			if (!(t instanceof PRIMITIVE)) throw new CTX_EXC(i.idRef.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+			if (!t.isPrimitive()) 
+				throw new CTX_EXC(i.idRef.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 			
 			i.setType(t);
 		}
@@ -1964,7 +1961,8 @@ public class ContextChecker {
 			
 			TYPE t = ref.check(this);
 			
-			if (!(t instanceof PRIMITIVE)) throw new CTX_EXC(i.select.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+			if (!t.isPrimitive()) 
+				throw new CTX_EXC(i.select.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 			
 			i.setType(t);
 		}
@@ -1974,7 +1972,8 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkAssignWriteback(AssignWriteback i) throws CTX_EXC {
-		if (i.reference instanceof IDRefWriteback || i.reference instanceof StructSelectWriteback) i.reference.check(this);
+		if (i.reference instanceof IDRefWriteback || i.reference instanceof StructSelectWriteback) 
+			i.reference.check(this);
 		else throw new CTX_EXC(i.getSource(), Const.CAN_ONLY_APPLY_TO_IDREF);
 		return null;
 	}
@@ -2006,7 +2005,7 @@ public class ContextChecker {
 		TYPE type0 = ref.check(this);
 		
 		/* If pointer, unwrap it */
-		TYPE chain = (type0 instanceof POINTER)? ((POINTER) type0).targetType : type0;
+		TYPE chain = (type0.isPointer())? type0.getContainedType() : type0;
 		
 		/* Check selection chain */
 		for (int i = 0; i < select.selection.size(); i++) {
@@ -2015,9 +2014,9 @@ public class ContextChecker {
 				throw new CTX_EXC(select.selection.get(i).getSource(), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree().typeString());
 			else {
 				/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
-				if (!(chain instanceof ARRAY || (i == 0 && (type0 instanceof POINTER || chain instanceof VOID)))) 
+				if (!(chain.isArray() || (i == 0 && (type0.isPointer() || chain.isVoid())))) 
 					throw new CTX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
-				else if (chain instanceof ARRAY) {
+				else if (chain.isArray()) {
 					ARRAY arr = (ARRAY) chain;
 					
 					if (select.selection.get(i) instanceof Atom) {
@@ -2030,14 +2029,11 @@ public class ContextChecker {
 					chain = arr.elementType;
 				}
 				else {
-					if (type0 instanceof POINTER) {
-						POINTER p = (POINTER) type0;
-						chain = p.targetType;
+					if (type0.isPointer()) {
+						chain = type0.getContainedType();
 					}
 					else {
 						/* When selecting from void, type will stay void */
-						VOID v = (VOID) chain;
-						chain = v;
 					}
 					
 					if (select.selection.size() > 1) 
@@ -2046,7 +2042,7 @@ public class ContextChecker {
 			}
 		}
 		
-		if (type0 instanceof POINTER) chain = new POINTER(chain);
+		if (type0.isPointer()) chain = new POINTER(chain);
 		
 		select.setType(chain);
 		return select.getType();
@@ -2229,11 +2225,11 @@ public class ContextChecker {
 	 * @throws CTX_EXC
 	 */
 	public boolean checkPolymorphViolation(TYPE child, TYPE target) {
-		if (!(target instanceof STRUCT)) return false;
+		if (!target.isStruct()) return false;
 		
-		if (!(child instanceof STRUCT)) return false;
+		if (!child.isStruct()) return false;
 		
-		if (child.getCoreType() instanceof STRUCT) {
+		if (child.getCoreType().isStruct()) {
 			if (((STRUCT) child.getCoreType()).isPolymorphTo(target) && 
 				!((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef())) {
 				return true;
@@ -2454,7 +2450,7 @@ public class ContextChecker {
 	 * @return The extracted and built namespace path.
 	 */
 	public String getPath(Expression e) throws CTX_EXC {
-		if (e.check(this).getCoreType() instanceof STRUCT) {
+		if (e.check(this).getCoreType().isStruct()) {
 			STRUCT s = (STRUCT) e.check(this).getCoreType();
 			return s.getTypedef().path.build();
 		}

@@ -7,7 +7,6 @@ import Ctx.Util.ProvisoUtil;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Snips.CompilerDriver;
 
 public class INTERFACE extends COMPOSIT {
@@ -30,8 +29,8 @@ public class INTERFACE extends COMPOSIT {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof INTERFACE) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isInterface()) {
 			INTERFACE intf = (INTERFACE) type;
 			
 			if (intf.getTypedef().equals(this.typedef)) {
@@ -121,7 +120,7 @@ public class INTERFACE extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof INTERFACE) {
+		if (mapType.isInterface()) {
 			INTERFACE s = (INTERFACE) mapType;
 			if (s.getTypedef().equals(this.getTypedef())) {
 				for (int i = 0; i < this.proviso.size(); i++) {

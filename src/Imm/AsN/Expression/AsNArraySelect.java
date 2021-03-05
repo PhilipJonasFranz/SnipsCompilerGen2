@@ -99,7 +99,7 @@ public class AsNArraySelect extends AsNExpression {
 			node.instructions.add(sum);
 			
 			ARRAY superType = null;
-			if (s.idRef.getType() instanceof POINTER) {
+			if (s.idRef.getType().isPointer()) {
 				superType = (ARRAY) ((POINTER) s.idRef.getType()).targetType;
 			}
 			else superType = (ARRAY) s.idRef.origin.getType();
@@ -123,7 +123,7 @@ public class AsNArraySelect extends AsNExpression {
 				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R0)));
 				
 				/* Next element in chain */
-				if (!(superType.elementType instanceof ARRAY)) break;
+				if (!superType.elementType.isArray()) break;
 				else superType = (ARRAY) superType.elementType;
 			}
 		}
@@ -139,7 +139,7 @@ public class AsNArraySelect extends AsNExpression {
 			 * assume we deref and select an index in this expression.
 			 */
 			TYPE targetType = s.idRef.getType().getContainedType();
-			if (s.idRef.getType() instanceof POINTER && targetType instanceof ARRAY) 
+			if (s.idRef.getType().isPointer() && targetType.isArray()) 
 				targetType = targetType.getContainedType();
 		
 			/* Multiply with type wordsize */

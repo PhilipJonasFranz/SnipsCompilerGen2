@@ -22,12 +22,12 @@ public class ENUM extends PRIMITIVE<String> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			if (p.getCoreType() instanceof ENUM) {
 				ENUM e0 = (ENUM) p.getCoreType();

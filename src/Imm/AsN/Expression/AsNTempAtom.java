@@ -32,7 +32,7 @@ public class AsNTempAtom extends AsNExpression {
 		AsNTempAtom atom = new AsNTempAtom();
 		a.castedNode = atom;
 
-		int SID = (a.getType() instanceof STRUCT)? ((STRUCT) a.inheritType).getTypedef().SID : -1;
+		int SID = (a.getType().isStruct())? ((STRUCT) a.inheritType).getTypedef().SID : -1;
 		boolean pushSID = SID != -1 && !CompilerDriver.disableStructSIDHeaders;
 		
 		/* Free as many regs as needed */

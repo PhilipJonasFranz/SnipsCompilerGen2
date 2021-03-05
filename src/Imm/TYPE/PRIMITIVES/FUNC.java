@@ -28,12 +28,12 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof FUNC;
 		}
@@ -56,7 +56,6 @@ public class FUNC extends PRIMITIVE<Function> {
 	}
 	
 	public CTX_EXC getInequality(FUNC func, Source source) {
-
 		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXC(source, Const.MISSMATCHING_ARGUMENT_NUMBER, this.funcHead.parameters.size(), func.funcHead.parameters.size());
 		else {
 			for (int i = 0; i < this.funcHead.parameters.size(); i++) {

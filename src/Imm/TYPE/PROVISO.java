@@ -23,8 +23,8 @@ public class PROVISO extends TYPE<Void> {
 	
 			/* ---< METHODS >--- */
 	public void setContext(TYPE type) {
-		if (type instanceof PROVISO) {
-			while (type instanceof PROVISO) {
+		if (type.isProviso()) {
+			while (type.isProviso()) {
 				type = ((PROVISO) type).getContext();
 			}
 		}
@@ -33,7 +33,7 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public TYPE getContext() {
-		if (this.context instanceof PROVISO) {
+		if (this.context.isProviso()) {
 			PROVISO p = (PROVISO) this.context;
 			if (p.hasContext()) return p.getContext();
 			else return p;
@@ -59,7 +59,7 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (type instanceof PROVISO) {
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.placeholderName.equals(this.placeholderName);
 		}
