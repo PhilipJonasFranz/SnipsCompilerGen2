@@ -36,10 +36,12 @@ import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
 import Util.Util;
-import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
+import XMLParser.MalformedXMLException;
+import XMLParser.XMLParser;
+import XMLParser.XMLParser.XMLNode;
 
 public class CompilerDriver {
 
@@ -209,7 +211,13 @@ public class CompilerDriver {
 		/* Read Configuration */
 		List<String> conf = Util.readFile(new File("release\\sys-inf.xml"));
 		if (conf == null) conf = Util.readFile(new File("sys-inf.xml"));
-		sys_config  = new XMLNode(conf);
+		
+		try {
+			sys_config = XMLParser.parse(conf);
+		} catch (MalformedXMLException e) {
+			new Message("Failed to parse compiler system configuration!", LogPoint.Type.INFO);
+			System.exit(0);
+		}
 	}
 	
 	/**
@@ -462,8 +470,8 @@ public class CompilerDriver {
 		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
-			for (XMLNode c : sys_config.getNode("Library").children) {
-				String [] v = c.value.split(":");
+			for (XMLNode c : sys_config.getNode("Library").getChildren()) {
+				String [] v = c.getValue().split(":");
 				if (v [0].equals(filePath)) 
 					filePath = v [1];
 			}

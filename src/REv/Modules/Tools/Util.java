@@ -6,7 +6,7 @@ import java.util.List;
 import REv.CPU.ProcessorUnit;
 import REv.Devices.Device;
 import REv.Modules.RAsm.Assembler;
-import Util.XMLParser.XMLNode;
+import XMLParser.XMLParser.XMLNode;
 
 public class Util {
 
@@ -76,8 +76,8 @@ public class Util {
 		/* Load devices */
 		XMLNode devices = head.getNode("Devices");
 		List<Device> deviceList = new ArrayList();
-		for (XMLNode device : devices.children) {
-			String [] s = device.value.split(",");
+		for (XMLNode device : devices.getChildren()) {
+			String [] s = device.getValue().split(",");
 			
 			/* Build static device */
 			Device d = new Device(s [0].trim(), Integer.parseInt(s [2].trim()), Integer.parseInt(s [3].trim()), Integer.parseInt(s [4].trim()));

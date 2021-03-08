@@ -10,9 +10,9 @@ import Res.Const;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
-import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
+import XMLParser.XMLParser.XMLNode;
 
 public class PreProcessor {
 
@@ -97,8 +97,8 @@ public class PreProcessor {
 	}
 	
 	public List<String> getFile(String filePath) {
-		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
-			String [] v = c.value.split(":");
+		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").getChildren()) {
+			String [] v = c.getValue().split(":");
 			if (v [0].equals(filePath)) {
 				filePath = v [1];
 			}

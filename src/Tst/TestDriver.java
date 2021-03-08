@@ -19,11 +19,12 @@ import REv.CPU.ProcessorUnit;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
-import Util.XMLParser;
-import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
+import XMLParser.MalformedXMLException;
+import XMLParser.XMLParser;
+import XMLParser.XMLParser.XMLNode;
 
 public class TestDriver {
 
@@ -417,7 +418,15 @@ public class TestDriver {
 				String [] sp = cases.get(i).split(" ");
 				
 				boolean assemblyMessages = false;
-				XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
+				XMLNode head = null;
+				
+				try {
+					head = XMLParser.parse(new File("res\\Test\\config.xml"));
+				} catch (MalformedXMLException e) {
+					new Message("Failed to parse LLVM xml configuration!", LogPoint.Type.FAIL);
+					System.exit(0);
+				}
+				
 				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
 				
 				/* Setup parameters in registers and stack */
