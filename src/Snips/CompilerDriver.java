@@ -360,7 +360,7 @@ public class CompilerDriver {
 				lastSource = null;
 				currentStage = PIPE_STAGE.OPT1;
 				
-				double rate = this.optimizeInstructionList(body.instructions);
+				double rate = this.optimizeInstructionList(body.instructions, true);
 				
 				if (!expectError) {
 					compressions.add(rate);
@@ -372,7 +372,7 @@ public class CompilerDriver {
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
 				
 				for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) 
-					this.optimizeInstructionList(entry.getValue());
+					this.optimizeInstructionList(entry.getValue(), false);
 			}
 			
 			
@@ -460,14 +460,18 @@ public class CompilerDriver {
 		return output;
 	}
 	
-	public double optimizeInstructionList(List<ASMInstruction> ins) {
+	public double optimizeInstructionList(List<ASMInstruction> ins, boolean isMainFile) {
 		double before = ins.size();
-		ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
+		
+		ProgressMessage aopt_progress = null;
+		
+		if (isMainFile)
+			aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
 		
 		ASMOptimizer opt = new ASMOptimizer();
 		opt.optimize(ins);
 	
-		aopt_progress.finish();
+		if (isMainFile) aopt_progress.finish();
 		
 		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
 	}
@@ -631,7 +635,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
-				else if (args [i].equals("-obj")) 	disableStructSIDHeaders = true;
+				else if (args [i].equals("-obj")) 	buildObjectFileOnly = true;
 				else if (args [i].equals("-R")) 	buildArtifactsRecurse = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;

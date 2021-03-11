@@ -9,6 +9,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMMemBlock;
 import Imm.ASM.Memory.ASMMemBlock.MEM_BLOCK_MODE;
@@ -519,6 +520,9 @@ public class ASMOptimizer {
 			/* Better safe than sorry */
 			return true;
 		}
+		else if (ins instanceof ASMDirective) {
+			return false;
+		}
 		else throw new SNIPS_EXC("Cannot check if instruction overwrites register: " + ins.getClass().getName());
 	}
 	
@@ -571,6 +575,9 @@ public class ASMOptimizer {
 		else if (ins instanceof ASMHardcode) {
 			/* Better safe than sorry */
 			return true;
+		}
+		else if (ins instanceof ASMDirective) {
+			return false;
 		}
 		else throw new SNIPS_EXC("Cannot check if instruction reads register: " + ins.getClass().getName());
 	}

@@ -28,10 +28,11 @@ public class Linker {
 				String mappedPath = PreProcessor.resolveToPath(filePath);
 				mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
 				
-				if (included.contains(mappedPath)) continue;
-				else included.add(mappedPath);
+				asm.set(i, " ");
+				i++;
 				
-				asm.remove(i);
+				if (included.contains(incPath)) continue;
+				else included.add(incPath);
 				
 				List<String> lines = PreProcessor.getFile(mappedPath);
 				
@@ -43,26 +44,36 @@ public class Linker {
 					
 					/* Search import */
 					for (int a = 0; a < lines.size(); a++) {
-						if (lines.get(a).trim().startsWith(label + ":")) {
+						if (lines.get(a).trim().startsWith(".global " + label)) {
 							/* Found position in artifact */
 							found = true;
 							
 							int cnt = i;
 							
 							while (true) {
-								if (a >= lines.size() || lines.get(a).trim().equals("")) break;
-								else asm.add(cnt++, lines.get(a++));
+								/* Copy contents until EOF is reached, or until a new .global directive is seen */
+								if (a >= lines.size() || (cnt > i && lines.get(a).contains(".global"))) break;
+								
+								asm.add(cnt++, lines.get(a++));
 							}
 							
-							new Message("Resolved '" + label + "' to " + (cnt - a) + " lines in '" + mappedPath + "'", Type.INFO);
+							new Message("Resolved '" + label + "' to " + (cnt - a) + " lines from '" + mappedPath + "'", Type.INFO);
 							break;
 						}
 					}
 					
-					if (!found) new Message("Failed to locate '" + label + "' in '" + mappedPath + "'", Type.FAIL);
+					if (!found) 
+						new Message("Failed to locate '" + label + "' in '" + mappedPath + "'", Type.FAIL);
 				}
 			}
 		}
+		
+		for (int i = 1; i < asm.size(); i++) {
+			if (asm.get(i).trim().isEmpty() && asm.get(i - 1).trim().isEmpty()) {
+				asm.remove(i);
+				i--;
+			}
+		} 
 	}
 	
 }

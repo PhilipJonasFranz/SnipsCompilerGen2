@@ -148,7 +148,8 @@ public class AsNFunction extends AsNCompoundStatement {
 			 * Body is null, insert include directive instead, or build 
 			 * object file only and this function is not from the main file
 			 */
-			if (f.body == null || (CompilerDriver.buildObjectFileOnly && 
+			if (!CompilerDriver.buildArtifactsRecurse && 
+					(f.body == null || 
 					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
 				
 				/* Replace .hn with .sn in artifact link */
@@ -162,6 +163,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				if (mappedPath.endsWith(".sn")) mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
 				
 				if (PreProcessor.getFile(mappedPath) == null) {
+					AsNBody.progress.abort();
 					new Message("Artifact '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);
 					new Message("To create the missing artifact, use -R to recompile artifacts recursiveley", Type.WARN);
 				}
@@ -236,6 +238,9 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			label.comment = new ASMComment(com);
 			
+			/* Add .global label */
+			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+			func.instructions.add(globalFunction);
 			
 			/* Add function label */
 			func.instructions.add(label);

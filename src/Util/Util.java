@@ -21,7 +21,7 @@ public class Util {
 	public static List<String> readFile(File file) {
 		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {
 			return s.collect(Collectors.toList());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			return null;
 		}
 	}

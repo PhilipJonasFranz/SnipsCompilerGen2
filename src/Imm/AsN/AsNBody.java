@@ -216,8 +216,8 @@ public class AsNBody extends AsNNode {
 				if (!func.getInstructions().isEmpty()) {
 					/* Patch Branch to Main Function */
 					if (((Function) s).path.build().equals("main")) {
-						((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(0));
-						mainLabel = (ASMLabel) func.getInstructions().get(0);
+						((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(1));
+						mainLabel = (ASMLabel) func.getInstructions().get(1);
 					}
 				}
 				
