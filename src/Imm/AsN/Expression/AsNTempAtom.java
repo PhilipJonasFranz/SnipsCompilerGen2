@@ -22,6 +22,7 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.TempAtom;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 
@@ -32,8 +33,8 @@ public class AsNTempAtom extends AsNExpression {
 		AsNTempAtom atom = new AsNTempAtom();
 		a.castedNode = atom;
 
-		int SID = (a.getType() instanceof STRUCT)? ((STRUCT) a.inheritType).getTypedef().SID : -1;
-		boolean pushSID = SID != -1 && !CompilerDriver.disableStructSIDHeaders;
+		StructTypedef def = (a.getType() instanceof STRUCT)? ((STRUCT) a.inheritType).getTypedef() : null;
+		boolean pushSID = def != null && !CompilerDriver.disableStructSIDHeaders;
 		
 		/* Free as many regs as needed */
 		if (a.base == null || (a.base != null && a.base.getType().wordsize() == 1 && a.inheritType.wordsize() == 1))
@@ -53,7 +54,9 @@ public class AsNTempAtom extends AsNExpression {
 					atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp((a.getType().wordsize() - 1) * 4)));
 					
 					/* Insert SID */
-					atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(SID)));
+					if (def != null) def.loadSIDInReg(atom, REG.R0);
+					else atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(-1)));
+					
 					atom.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 				}
 				else 
@@ -135,9 +138,12 @@ public class AsNTempAtom extends AsNExpression {
 					
 					int regs = 0;
 					for (int i = 0; i < a.inheritType.wordsize(); i++) {
+						
 						/* If the inherited type is a struct and SIDs are enabled and this is the last word to be pushed, override value to SID */
-						if (pushSID && i == a.inheritType.wordsize() - 1) 
-							atom.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(SID)));
+						if (pushSID && i == a.inheritType.wordsize() - 1) {
+							if (def != null) def.loadSIDInReg(atom, new RegOp(regs).reg);
+							else atom.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(-1)));
+						}
 						
 						if (regs == 3) {
 							AsNStructureInit.flush(regs, atom);

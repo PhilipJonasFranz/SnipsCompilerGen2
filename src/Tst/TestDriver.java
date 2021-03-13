@@ -17,6 +17,7 @@ import Exc.LNK_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
 import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -70,7 +71,7 @@ public class TestDriver {
 	public boolean printResult = false;
 	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -400,12 +401,12 @@ public class TestDriver {
 				for (String s : compile) copy.add("" + s);
 				
 				try {
-					Linker.linkProgram(compile);
+					LinkerUnit originUnit = Linker.parseLinkerUnit(compile);
+					Linker.linkProgram(originUnit);
+					compile = originUnit.build();
 				} catch (LNK_EXC e) {
 					cd.setBurstMode(false, false);
 					buffer.add(new Message("Error when linking output: " + e.getMessage(), LogPoint.Type.FAIL, true));
-					
-					buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
 					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					
 					return new Result(RET_TYPE.CRASH, 0, 0);

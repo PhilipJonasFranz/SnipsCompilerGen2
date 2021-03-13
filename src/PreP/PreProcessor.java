@@ -39,7 +39,7 @@ public class PreProcessor {
 	
 	public List<String> imported = new ArrayList();
 	
-	public static int artifactsIncluded = 0;
+	public static int modulesIncluded = 0;
 	
 	/**
 	 * Create new instance, convert code input into LineObject representation
@@ -66,9 +66,9 @@ public class PreProcessor {
 					this.process.remove(i);
 					
 					/* Swap out header with .sn file */
-					if ((CompilerDriver.buildArtifactsRecurse || !CompilerDriver.buildObjectFileOnly) && path.endsWith(".hn")) {
+					if ((CompilerDriver.buildModulesRecurse || !CompilerDriver.buildObjectFileOnly) && path.endsWith(".hn")) {
 						path = path.substring(0, path.length() - 2) + "sn";
-						artifactsIncluded++;
+						modulesIncluded++;
 					}
 					
 					if (!this.imported.contains(path)) {

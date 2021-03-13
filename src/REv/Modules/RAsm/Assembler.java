@@ -726,7 +726,10 @@ public class Assembler {
 							int [] num = Util.toBinary(imm);
 							for (int a : num)app = a + app;
 						} catch (NumberFormatException e) {
-							if (!locations.containsKey(sp [1])) new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], LogPoint.Type.FAIL);
+							if (locations.get(sp [1]) == null) {
+								throw new Exception("Unknown label in line " + in.get(i).getLine() + ": " + sp [1]);
+							}
+							
 							int [] num = Util.toBinary(locations.get(sp [1]));
 							for (int a : num)app = a + app;
 						}
@@ -737,8 +740,11 @@ public class Assembler {
 							int [] num = Util.toBinary((sp.length > 1 && !sp [1].equals(""))? Integer.parseInt(sp [1]) : 0);
 							for (int a : num)app = a + app;
 						} catch (Exception e) {
-							new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
-							new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
+							int [] num = Util.toBinary(locations.get(sp [1]));
+							for (int a : num)app = a + app;
+							
+							//new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
+							//new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
 						}
 					}
 				}

@@ -21,11 +21,11 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDOfExpression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
-import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -1820,26 +1820,37 @@ public class Parser {
 			
 			return sof;
 		}
-		else return this.parseInstanceOf();
+		else return this.parseIDOf();
 	}
 	
 	/**
-	 * Parses a sizeof operation between two operands. The parsed pattern is:<br>
+	 * Parses a sizeof operation for a single operand. The parsed pattern is:<br>
 	 * <br>
-	 * 		<code>EXPRESSIONinstanceofTYPE</code>
+	 * 		<code>idof(TYPE)</code>
 	 */
-	protected Expression parseInstanceOf() throws PARSE_EXC {
-		Expression iof = this.parseAddressOf();
-		
-		if (current.type == TokenType.INSTANCEOF) {
+	protected Expression parseIDOf() throws PARSE_EXC {
+		if (current.type == TokenType.IDOF) {
+			Expression iof = null;
+			
 			Source source = accept().source();
+			accept(TokenType.LPAREN);
 			
-			TYPE type = this.parseType();
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
 			
-			iof = new InstanceofExpression(iof, type, source);
+			/* Size of Type */
+			if (current.type.group() == TokenGroup.TYPE) {
+				TYPE type = this.parseType();
+				iof = new IDOfExpression(type, source);
+			}
+			
+			accept(TokenType.RPAREN);
+			
+			return iof;
 		}
-		
-		return iof;
+		else return this.parseAddressOf();
 	}
 	
 	/**
@@ -2323,6 +2334,9 @@ public class Parser {
 		else if (name.equals("init")) {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+		}
+		else if (name.equals("isa")) {
+			CompilerDriver.driver.referencedLibaries.add("lib/mem/isa.sn");
 		}
 		else if (name.equals("free")) {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");

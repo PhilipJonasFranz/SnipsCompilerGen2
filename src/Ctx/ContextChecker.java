@@ -22,11 +22,11 @@ import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDOfExpression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
-import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -211,9 +211,6 @@ public class ContextChecker {
 			/* ---< AST Check MethodS >--- */
 	public TYPE check() throws CTX_EXC {
 		this.checkProgram((Program) AST);
-		
-		/* Assigns each struct typedef a unique SID */
-		this.setupSIDs();
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
@@ -1855,24 +1852,22 @@ public class ContextChecker {
 		return init.getType();
 	}
 	
-	public TYPE checkInstanceofExpression(InstanceofExpression iof) throws CTX_EXC {
-		iof.expression.check(this);
-		
-		if (CompilerDriver.disableStructSIDHeaders) 
-			throw new CTX_EXC(iof.getSource(), Const.SID_DISABLED_NO_INSTANCEOF);
-		
-		if (!(iof.instanceType instanceof STRUCT)) 
-			throw new CTX_EXC(iof.getSource(), Const.EXPECTED_STRUCT_TYPE, iof.instanceType.provisoFree().typeString());
-		
-		iof.setType(new BOOL());
-		return iof.getType();
-	}
-	
 	public TYPE checkSizeOfType(SizeOfType sot) throws CTX_EXC {
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(sot.sizeType, this.currentFunction.peek().provisosTypes);
 		
 		sot.setType(new INT());
+		return sot.getType();
+	}
+	
+	public TYPE checkIDOfExpression(IDOfExpression sot) throws CTX_EXC {
+		if (!this.currentFunction.isEmpty()) 
+			ProvisoUtil.mapNTo1(sot.type, this.currentFunction.peek().provisosTypes);
+		
+		if (!(sot.type instanceof STRUCT)) 
+			throw new CTX_EXC(sot.getSource(), Const.EXPECTED_STRUCT_TYPE, sot.type.typeString());
+		
+		sot.setType(new VOID());
 		return sot.getType();
 	}
 	
@@ -2463,31 +2458,6 @@ public class ContextChecker {
 		else {
 			INTERFACE s = (INTERFACE) e.check(this).getCoreType();
 			return s.getTypedef().path.build();
-		}
-	}
-	
-	/* 
-	 * Initiates the SID propagation process. This process will
-	 * assign each struct typedef a unique ID, in a way that makes
-	 * it easy to check if a struct type is a child of another one.
-	 */
-	public void setupSIDs() {
-		if (!this.tLStructs.isEmpty()) {
-			int SIDStart = 1;
-			if (this.tLStructs.size() == 1) 
-				this.tLStructs.get(0).propagateSIDs(SIDStart, null);
-			else {
-				/* Apply to first n - 1 */
-				for (int i = 1; i < this.tLStructs.size(); i++) { 
-					SIDStart = this.tLStructs.get(i - 1).propagateSIDs(SIDStart, this.tLStructs.get(i));
-					
-					/* Set neighbour of n - 1 to n */
-					this.tLStructs.get(i - 1).SIDNeighbour = this.tLStructs.get(i);
-				}
-				
-				/* Apply to last */
-				this.tLStructs.get(this.tLStructs.size() - 1).propagateSIDs(SIDStart, null);
-			}
 		}
 	}
 	

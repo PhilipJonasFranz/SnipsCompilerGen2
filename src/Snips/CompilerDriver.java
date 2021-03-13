@@ -26,7 +26,10 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.AsN.AsNTranslationUnit;
 import Imm.TYPE.PRIMITIVES.INT;
+import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
 import Par.Parser;
 import Par.Scanner;
 import Par.Token;
@@ -39,9 +42,9 @@ import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
+import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
-import Util.Logging.LogPoint.Type;
 
 public class CompilerDriver {
 
@@ -70,7 +73,7 @@ public class CompilerDriver {
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
-		buildArtifactsRecurse = 		false,	/* Builds all artifacts in the input and saves them.			*/
+		buildModulesRecurse = 			true,	/* Builds all modules in the input and saves them.				*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
@@ -271,10 +274,10 @@ public class CompilerDriver {
 					/* --- PRE-PROCESSING --- */
 			lastSource = null;
 			currentStage = PIPE_STAGE.PREP;
-			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
+			PreProcessor preProcess = new PreProcessor(code, inputFile.getPath());
 			List<LineObject> preCode = preProcess.getProcessed();
-			if (CompilerDriver.buildArtifactsRecurse) 
-				new Message("Recompiling " + PreProcessor.artifactsIncluded + " artifacts", Type.INFO);
+			if (CompilerDriver.buildModulesRecurse) 
+				new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
 			
 			
 					/* --- SCANNING --- */
@@ -371,35 +374,39 @@ public class CompilerDriver {
 				
 				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
 				
-				for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) 
-					this.optimizeInstructionList(entry.getValue(), false);
+				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+					this.optimizeInstructionList(entry.getValue().textSection, false);
 			}
 			
 			
 					/* --- OUTPUT BUILDING --- */
-			output = this.buildOutput(body.instructions, false);
+			output = this.buildOutput(body.originUnit.buildTranslationUnit(), false);
 		
 			
-					/* --- LINKING --- */
-			if (!CompilerDriver.buildObjectFileOnly)
-				Lnk.Linker.linkProgram(output);
-			
-			
-					/* --- BUILD AND DUMP ARTIFACTS --- */
-			if (buildArtifactsRecurse) {
-				for (Entry<String, List<ASMInstruction>> entry : body.external.entrySet()) {
+					/* --- BUILD AND DUMP MODULES --- */
+			if (buildModulesRecurse) {
+				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 					String path = PreProcessor.resolveToPath(entry.getKey());
 					
 					if (path.endsWith(".sn")) {
-						new Message("SNIPS -> Dumping Artifact: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
+						new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
 						
-						List<String> artifact = this.buildOutput(entry.getValue(), true);
+						List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
 						
 						path = path.substring(0, path.length() - 2) + "s";
-						Util.writeInFile(artifact, path);
+						Util.writeInFile(module, path);
 					}
-					else log.add(new Message("SNIPS -> Failed to resolve artifact path: " + entry.getKey(), LogPoint.Type.WARN));
+					else log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
 				}
+			}
+			
+			/* --- LINKING --- */
+			if (!CompilerDriver.buildObjectFileOnly) {
+				LinkerUnit originUnit = Linker.parseLinkerUnit(output);
+				Lnk.Linker.linkProgram(originUnit);
+				output = originUnit.build();
+				Linker.link_progress.finish();
+				Linker.buffer.stream().forEach(x -> x.flush());
 			}
 			
 			if (imm || out) {
@@ -476,11 +483,11 @@ public class CompilerDriver {
 		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
 	}
 	
-	public List<String> buildOutput(List<ASMInstruction> ins, boolean isArtifact) {
+	public List<String> buildOutput(List<ASMInstruction> ins, boolean isModule) {
 		List<String> output = new ArrayList();
 		
 		/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
-		output = ins.stream().filter(x -> ((x instanceof ASMComment)? (!isArtifact && enableComments) : true)).map(x -> {
+		output = ins.stream().filter(x -> ((x instanceof ASMComment)? (!isModule && enableComments) : true)).map(x -> {
 			
 			/* Count instruction types */
 			if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
@@ -495,9 +502,6 @@ public class CompilerDriver {
 			if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
 				output.remove(i-- - 1);
 		}
-		
-		for (int i = 0; i < AsNBody.asmHeader.size(); i++)
-			output.add(i, AsNBody.asmHeader.get(i).build());
 		
 		return output;
 	}
@@ -636,7 +640,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-obj")) 	buildObjectFileOnly = true;
-				else if (args [i].equals("-R")) 	buildArtifactsRecurse = true;
+				else if (args [i].equals("-R")) 	buildModulesRecurse = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -666,7 +670,7 @@ public class CompilerDriver {
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-obj      : Build object file only, required additional linking",
-				"-R        : Build all required artifacts and save them",
+				"-R        : Build all required modules and save them",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"
@@ -704,7 +708,7 @@ public class CompilerDriver {
 			
 			int [] map = new int [100];
 			for (double d : compressions) {
-				map [(int) d - 1]++;
+				map [(int) d]++;
 			}
 			
 			int m = 0;
@@ -799,7 +803,6 @@ public class CompilerDriver {
 		heap_referenced = false;
 		null_referenced = false;
 		expectError = false;
-		AsNBody.instructionAppenix.clear();
 	}
 	
 } 

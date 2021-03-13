@@ -148,24 +148,24 @@ public class AsNFunction extends AsNCompoundStatement {
 			 * Body is null, insert include directive instead, or build 
 			 * object file only and this function is not from the main file
 			 */
-			if (!CompilerDriver.buildArtifactsRecurse && 
+			if (!CompilerDriver.buildModulesRecurse && 
 					(f.body == null || 
 					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
 				
-				/* Replace .hn with .sn in artifact link */
+				/* Replace .hn with .sn in module link */
 				String source = f.getSource().sourceFile;
 				if (source.endsWith(".hn")) source = source.substring(0, source.length() - 2) + "sn";
 				
 				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).provisoPostfix));
 				
-				/* Check if required artifact exists */
+				/* Check if required module exists */
 				String mappedPath = PreProcessor.resolveToPath(source);
 				if (mappedPath.endsWith(".sn")) mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
 				
 				if (PreProcessor.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
-					new Message("Artifact '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);
-					new Message("To create the missing artifact, use -R to recompile artifacts recursiveley", Type.WARN);
+					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
 				}
 				
 				continue;
