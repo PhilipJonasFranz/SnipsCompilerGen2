@@ -11,12 +11,13 @@ TESTCASES
 1 0 9
 1 1 2
 OUTPUT
-/* --test_25.txt */
 .data
 vec: .skip 16
-    
+
 .text
+.global main
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
     mov r0, #0
@@ -62,4 +63,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     bx lr
 .POOL0_L0_vec: .word vec
-    

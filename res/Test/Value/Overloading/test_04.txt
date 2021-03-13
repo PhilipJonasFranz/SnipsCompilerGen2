@@ -27,8 +27,12 @@ TESTCASES
 0 12
 1 30
 OUTPUT
-/* --test_04.txt */
+.data
+X: .word 0
+
+.text
     b main
+    
 Getter.L0_P_1:                               /* Interface : Getter, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
@@ -36,12 +40,14 @@ Getter.L0_P_1:                               /* Interface : Getter, Provisos: IN
     b X.get@2_P_1
     b X.get@3_P_1
     
+.global X.get@2_P_1
 X.get@2_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
+.global X.get@3_P_1
 X.get@3_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     push { r3 }
@@ -58,13 +64,14 @@ X.get@3.L1:
     pop { r3 }
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
@@ -78,4 +85,4 @@ main:                                        /* Function: main */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_X: .word X

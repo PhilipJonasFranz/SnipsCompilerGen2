@@ -18,8 +18,11 @@ int main() {
 TESTCASES
 78
 OUTPUT
-/* --test_05.txt */
+.data
+.text
     b main
+    
+.global det
 det:                                         /* Function: det */
     ldr r0, [sp]
     ldr r2, [sp, #16]
@@ -59,6 +62,7 @@ det:                                         /* Function: det */
     add sp, sp, #36
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -86,4 +90,3 @@ main:                                        /* Function: main */
     bl det                                   /* Call det */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

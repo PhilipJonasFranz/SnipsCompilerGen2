@@ -13,15 +13,21 @@ int main(int k) {
 TESTCASES
 5
 OUTPUT
-/* --test_01.txt */
+.data
+Test: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     sub sp, sp, #8                           /* Evaluate Expression */
-    mov r0, #1
+    ldr r0, .POOL0_Test
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     bx lr
-    
+.POOL0_Test: .word Test

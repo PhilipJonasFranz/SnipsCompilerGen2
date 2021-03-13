@@ -44,18 +44,25 @@ int main() {
 TESTCASES
 4
 OUTPUT
-/* --test_07.txt */
+.data
+Storage.X: .word 0
+
+.text
     b main
+    
+.global Storage.X.getValue_P_1
 Storage.X.getValue_P_1:                      /* Function: Storage.X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
+.global Storage.X.getType_P_1
 Storage.X.getType_P_1:                       /* Function: Storage.X.getType, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     bx lr
     
+.global Storage.X.setValue_P_1
 Storage.X.setValue_P_1:                      /* Function: Storage.X.setValue, Provisos: INT */
     push { r3 }
     mov r3, r0
@@ -65,13 +72,14 @@ Storage.X.setValue_P_1:                      /* Function: Storage.X.setValue, Pr
     pop { r3 }
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #12
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .POOL0_Storage.X
     push { r0 }
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
@@ -90,4 +98,4 @@ main.L1:
 main.L3: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_Storage.X: .word Storage.X

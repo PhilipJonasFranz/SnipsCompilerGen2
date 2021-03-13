@@ -17,15 +17,19 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_00.txt */
+.data
+.text
     b main
+    
+.global Test.calc
 Test.calc:                                   /* Function: Test.calc */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
     
+.global Test.getter
 Test.getter:                                 /* Function: Test.getter */
     b Test.calc                              /* Evaluate Expression */
     
+.global main
 main:                                        /* Function: main */
     b Test.getter                            /* Evaluate Expression */
-    

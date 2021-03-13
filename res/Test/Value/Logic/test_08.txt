@@ -12,7 +12,11 @@ TESTCASES
 1 1 0 3 0
 1 1 1 2 1
 OUTPUT
-/* --test_08.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     adds r1, r1, #0
     movne r1, #1
@@ -41,4 +45,3 @@ main:                                        /* Function: main */
     movne r0, r1
     moveq r0, #0
     bx lr
-    

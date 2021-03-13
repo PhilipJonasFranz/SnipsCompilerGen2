@@ -11,12 +11,16 @@ int main() {
 TESTCASES
 5
 OUTPUT
-/* --test_00.txt */
+.data
+.text
     b main
+    
+.global get_P_1
 get_P_1:                                     /* Function: get, Provisos: INT | BOOL */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     bl get_P_1                               /* Evaluate Expression */
@@ -30,4 +34,3 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #2
     pop { pc }
-    

@@ -9,8 +9,11 @@ TESTCASES
 5 2
 6 0
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global __op_mod
 __op_mod:                                    /* Function: __op_mod */
     sub sp, sp, #20
     stmea sp, {r3-r7}
@@ -64,8 +67,8 @@ __op_mod.L12:
 __op_mod.L14: 
     ldmfd sp!, {r3-r7}
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     mov r1, #3
     b __op_mod
-    

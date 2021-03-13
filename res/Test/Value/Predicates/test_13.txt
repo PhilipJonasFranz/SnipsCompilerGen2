@@ -16,11 +16,14 @@ TESTCASES
 0 1
 1 0
 OUTPUT
-/* --test_13.txt */
+.data
+.text
     b main
+    
 lambda_get:                                  /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global get
 get:                                         /* Function: get */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
@@ -28,10 +31,12 @@ get:                                         /* Function: get */
 lambda_get2:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global get2
 get2:                                        /* Function: get2 */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     add r10, pc, #8                          /* Evaluate Expression */
@@ -54,4 +59,3 @@ main.L1:
     moveq r0, #1
     movne r0, #0
     bx lr
-    

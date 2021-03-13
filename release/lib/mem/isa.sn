@@ -1,0 +1,12 @@
+/*
+ * Check if the first struct-ID is a child of
+ * the second struct-ID. This is done by reverse-traversing
+ * the inheritance symbol table, that is dynamically
+ * created when linking the executable. The id of a struct can
+ * be obtained with idof(TYPE).
+ */
+shared bool isa(void* child, void* parent) {
+	if (child == 0) return false;
+	if (child == parent) return true;
+	return isa(*(child >> 2), parent);
+}

@@ -18,12 +18,16 @@ TESTCASES
 2 9
 3 1
 OUTPUT
-/* --test_14.txt */
+.data
+.text
     b main
+    
+.global get
 get:                                         /* Function: get */
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
     
+.global shift
 shift:                                       /* Function: shift */
     push { r3, lr }
     mov r3, r0
@@ -32,6 +36,7 @@ shift:                                       /* Function: shift */
     bl get                                   /* Call get */
     ldmfd sp!, {r3, pc}
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -48,4 +53,3 @@ main:                                        /* Function: main */
     bl shift                                 /* Call shift */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

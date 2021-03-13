@@ -17,12 +17,14 @@ int main() {
 TESTCASES
 26
 OUTPUT
-/* --test_01.txt */
 .data
 Foo.Baz.x: .word 10
 Bar.x: .word 15
-    
+
 .text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     ldr r0, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     ldr r0, [r0]
@@ -37,4 +39,3 @@ main:                                        /* Function: main */
     bx lr
 .POOL0_L1_Bar.x: .word Bar.x
 .POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
-    

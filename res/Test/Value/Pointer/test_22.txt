@@ -15,8 +15,13 @@ int main() {
 TESTCASES
 4093
 OUTPUT
-/* --test_22.txt */
+.data
+X: .word 0
+
+.text
     b main
+    
+.global addr
 addr:                                        /* Function: addr */
     push { fp }
     mov fp, sp
@@ -29,16 +34,17 @@ addr:                                        /* Function: addr */
     pop { fp }
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     bl addr                                  /* Call addr */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_X: .word X

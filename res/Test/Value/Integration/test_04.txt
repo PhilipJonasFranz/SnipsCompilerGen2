@@ -14,8 +14,11 @@ int main() {
 TESTCASES
 78
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global sarrus
 sarrus:                                      /* Function: sarrus */
     ldr r0, [sp]
     ldr r2, [sp, #16]
@@ -55,6 +58,7 @@ sarrus:                                      /* Function: sarrus */
     add sp, sp, #36
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -82,4 +86,3 @@ main:                                        /* Function: main */
     bl sarrus                                /* Call sarrus */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -17,17 +17,21 @@ int main() {
 TESTCASES
 12
 OUTPUT
-/* --test_07.txt */
+.data
+.text
     b main
+    
 lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global sortPred
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
     
+.global get
 get:                                         /* Function: get */
     push { r3, lr }
     mov r3, r0
@@ -43,10 +47,10 @@ get.L0:
     mov r0, #25                              /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
     
+.global main
 main:                                        /* Function: main */
 /* Context check predicate at this location */
     add r10, pc, #8                          /* Evaluate Expression */
     b lambda_sortPred
     mov r10, #0
     b get                                    /* Call get */
-    

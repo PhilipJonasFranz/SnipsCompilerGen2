@@ -16,8 +16,11 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_20.txt */
+.data
+.text
     b main
+    
+.global set
 set:                                         /* Function: set */
 /* Set m [0] [1] */
     mov r0, #8                               /* Evaluate Expression */
@@ -37,6 +40,7 @@ set:                                         /* Function: set */
     add sp, sp, #8
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -61,4 +65,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

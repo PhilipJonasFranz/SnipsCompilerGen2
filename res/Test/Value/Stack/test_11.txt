@@ -30,8 +30,11 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 62
 OUTPUT
-/* --test_11.txt */
+.data
+.text
     b main
+    
+.global bar
 bar:                                         /* Function: bar */
     mul r0, r0, r1
     mov r1, r2
@@ -41,6 +44,7 @@ bar:                                         /* Function: bar */
     add sp, sp, #4
     bx lr
     
+.global fooRec
 fooRec:                                      /* Function: fooRec */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
@@ -57,9 +61,11 @@ fooRec.L1:
     add r0, r0, #1
     ldmfd sp!, {r3, r4, pc}
     
+.global foo
 foo:                                         /* Function: foo */
     b fooRec                                 /* Call fooRec */
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -121,4 +127,3 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

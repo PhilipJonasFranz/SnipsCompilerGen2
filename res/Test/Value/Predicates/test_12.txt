@@ -6,16 +6,19 @@ int main() {
 TESTCASES
 13
 OUTPUT
-/* --test_12.txt */
+.data
+.text
     b main
     
 lambda_ANON1:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global ANON1
 ANON1:                                       /* Function: ANON1 */
     add r0, r0, #10
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     add r10, pc, #8                          /* Evaluate Expression */
@@ -26,4 +29,3 @@ main:                                        /* Function: main */
     add lr, pc, #8
     mov pc, r3
     pop { pc }
-    

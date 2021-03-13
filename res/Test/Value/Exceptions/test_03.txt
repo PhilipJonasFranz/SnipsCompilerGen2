@@ -46,53 +46,28 @@ TESTCASES
 10 9
 11 9
 OUTPUT
-/* --test_03.txt */
 .data
 HEAP_START: .word 0
-    
+Exception: .word 0
+
 .text
     b main
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
     
-hsize:                                       /* Function: hsize */
-    push { r3 }
-    mov r3, r0
-/* Jump to block head */
-    sub r3, r0, #1
-/* Load Block Size and return */
-    ldr r1, [r10, r3, lsl #2]                /* Load from address */
-    sub r0, r1, #1
-    pop { r3 }
-    bx lr
-    
+.global resv
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
     mov r3, r0
-/* Add block header to size */
     add r3, r0, #1
-/* Get reference to heap start */
     ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
     cmp r0, #0
     beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
     ldr r5, [r10, r4, lsl #2]                /* Load from address */
     cmp r5, #0
     bge resv.L4
-/* Defragment Heap */
 resv.L6:                                     /* Evaluate condition */
     sub r0, r4, r5
     ldr r6, [r10, r0, lsl #2]                /* Load from address */
@@ -104,15 +79,12 @@ resv.L9:
     bne resv.L10
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
-/* All structures to end are free */
     b resv.L7
 resv.L10: 
     add r5, r5, r6
-/* Add to current size */
     b resv.L6
 resv.L7: 
     str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
     cmp r5, #0
     bne resv.L12
     mov r0, #0                               /* Evaluate Expression */
@@ -122,18 +94,15 @@ resv.L7:
     pop { r0 }
     str r0, [r1]
 resv.L12: 
-/* Memory location is free, check size */
     rsb r5, r5, #0
     cmp r5, r3
     bne resv.L15
-/* Fits */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
     b resv.L19
 resv.L15: 
     cmp r5, r3
     ble resv.L16
-/* Rest, subtract size, store at offset */
     sub r5, r5, r3
     str r3, [r10, r4, lsl #2]
     rsb r0, r5, #0
@@ -148,19 +117,39 @@ resv.L16:
     add r4, r4, r5
     b resv.L3
 resv.L4: 
-/* Memory section is allocated, skip */
     add r4, r4, r5
 resv.L3: 
     b resv.L1
 resv.L2: 
-/* End reached, create new block */
     str r3, [r10, r4, lsl #2]
     add r0, r4, #1
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
 .POOL0_L0_HEAP_START: .word HEAP_START
+
+.global hsize
+hsize:                                       /* Function: hsize */
+    push { r3 }
+    mov r3, r0
+    sub r3, r0, #1
+    ldr r1, [r10, r3, lsl #2]                /* Load from address */
+    sub r0, r1, #1
+    pop { r3 }
+    bx lr
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
     
+.global checkThreshold
 checkThreshold:                              /* Function: checkThreshold */
     sub sp, sp, #32
     stmea sp, {r3-r8, fp, lr}
@@ -179,9 +168,9 @@ checkThreshold.L2:
     cmp r8, r4
     blt checkThreshold.L5
     push { r8 }
-    mov r0, #1
+    ldr r0, .POOL1_Exception
     push { r0 }
-    mov r12, #1                              /* Signal thrown exception */
+    ldr r12, .POOL1_Exception
     mov r0, #8
     b checkThreshold.L0                      /* Exception thrown, branch to escape target */
 checkThreshold.L5: 
@@ -205,7 +194,9 @@ checkThreshold.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL1_Exception: .word Exception
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -246,7 +237,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    cmp r12, #1
+    ldr r12, .POOL2_Exception
     bne main.L2
     add r1, r1, #8
     mov r0, #8
@@ -260,4 +251,4 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL2_Exception: .word Exception

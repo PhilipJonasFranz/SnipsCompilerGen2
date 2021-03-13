@@ -8,7 +8,10 @@ TESTCASES
 3 3
 -1 -1
 OUTPUT
-/* --test_00.txt */
-main:                                        /* Function: main */
+.data
+.text
     bx lr
     
+.global main
+main:                                        /* Function: main */
+    bx lr

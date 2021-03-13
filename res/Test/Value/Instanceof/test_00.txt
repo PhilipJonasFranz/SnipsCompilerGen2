@@ -10,23 +10,53 @@ struct B {
 int main() {
 	A a = A::(10);
 	void* p = &a;
-	return (int) (p instanceof A);
+	return (int) isa(*p, idof(A));
 }
 TESTCASES
 1
 OUTPUT
-/* --test_00.txt */
+.data
+A: .word 0
+B: .word 0
+
+.text
+    b main
+    
+.global isa
+isa:                                         /* Function: isa */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
+    mov r3, r0
+    mov r4, r1
+    cmp r0, #0
+    bne isa.L0
+    mov r0, #0                               /* Evaluate Expression */
+    ldmfd sp!, {r3, r4, pc}
+isa.L0: 
+    cmp r3, r4
+    bne isa.L2
+    mov r0, #1                               /* Evaluate Expression */
+    ldmfd sp!, {r3, r4, pc}
+isa.L2: 
+    lsr r0, r3, #2
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    mov r1, r4
+    bl isa                                   /* Call isa */
+    ldmfd sp!, {r3, r4, pc}
+
+.global main
 main:                                        /* Function: main */
+    push { fp, lr }
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_A
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
-    ldr r0, [r10, r3, lsl #2]
-    cmp r0, #1
-    movne r0, #0
+    ldr r1, .POOL0_A                         /* Evaluate Expression */
+    ldr r0, [r10, r3, lsl #2]                /* Load from address */
+    bl isa                                   /* Call isa */
     mov sp, fp
-    bx lr
-    
+    ldmfd sp!, {fp, pc}
+.POOL0_A: .word A

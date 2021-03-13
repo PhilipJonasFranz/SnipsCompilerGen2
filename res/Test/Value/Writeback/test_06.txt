@@ -14,7 +14,11 @@ TESTCASES
 3 6
 4 10
 OUTPUT
-/* --test_06.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, #0
@@ -35,4 +39,3 @@ main.L1:
 main.L2: 
     ldr r0, [sp]                             /* Evaluate Expression */
     bx lr
-    

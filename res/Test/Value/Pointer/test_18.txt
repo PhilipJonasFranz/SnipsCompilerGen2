@@ -20,8 +20,11 @@ TESTCASES
 2 13
 3 4
 OUTPUT
-/* --test_18.txt */
+.data
+.text
     b main
+    
+.global set
 set:                                         /* Function: set */
     push { r3 }
     mov r3, r0
@@ -35,6 +38,7 @@ set:                                         /* Function: set */
     pop { r3 }
     bx lr
     
+.global get
 get:                                         /* Function: get */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
@@ -53,6 +57,7 @@ get:                                         /* Function: get */
     add r0, r1, r2
     ldmfd sp!, {r3, r4, pc}
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -81,4 +86,3 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

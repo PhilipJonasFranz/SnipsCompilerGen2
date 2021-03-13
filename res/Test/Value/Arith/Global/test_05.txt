@@ -20,20 +20,22 @@ TESTCASES
 1 15
 -2 -30
 OUTPUT
-/* --test_05.txt */
 .data
 sw: .word 1
 s0: .skip 12
 s1: .skip 12
-    
+S: .word 0
+
 .text
+.global main
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
     mov r0, #5
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .POOL0_S
     ldr r1, .POOL0_L1_s0                     /* Load from .data section */
     str r0, [r1]
     pop { r0 }
@@ -49,7 +51,7 @@ s1: .skip 12
     ldr r1, .POOL0_L1_s0                     /* Load field location */
     ldr r0, [r1, #8]                         /* Load field from struct */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_S
     push { r0 }
     b main.L3
 main.L2: 
@@ -79,4 +81,4 @@ main:                                        /* Function: main */
 .POOL0_L2_s1: .word s1
 .POOL0_L0_sw: .word sw
 .POOL0_L1_s0: .word s0
-    
+.POOL0_S: .word S

@@ -17,7 +17,13 @@ int main() {
 TESTCASES
 16
 OUTPUT
-/* --test_07.txt */
+.data
+X: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #6                               /* Evaluate Expression */
@@ -26,7 +32,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     mov r0, #5
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r0, fp, #20                          /* Evaluate Expression */
     lsr r3, r0, #2
@@ -48,4 +54,4 @@ main.L2:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     bx lr
-    
+.POOL0_X: .word X

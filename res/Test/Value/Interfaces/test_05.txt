@@ -79,101 +79,16 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_05.txt */
 .data
 NULL: .word 0
 HEAP_START: .word 0
-    
+List.ListNode: .word 0
+List.LinkedList: .word 0
+
 .text
     b main
     
-resv:                                        /* Function: resv */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-/* Add block header to size */
-    add r3, r0, #1
-/* Get reference to heap start */
-    ldr r0, .POOL0_L1_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-/* Defragment Heap */
-resv.L6:                                     /* Evaluate condition */
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L10
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-/* All structures to end are free */
-    b resv.L7
-resv.L10: 
-    add r5, r5, r6
-/* Add to current size */
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-/* Memory location is free, check size */
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-/* Fits */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L19
-resv.L15: 
-    cmp r5, r3
-    ble resv.L16
-/* Rest, subtract size, store at offset */
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L19
-resv.L16: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-/* Memory section is allocated, skip */
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-/* End reached, create new block */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L19: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL0_L1_HEAP_START: .word HEAP_START
-    
+.global init_P_3
 init_P_3:                                    /* Function: init, Provisos: List.ListNode<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
@@ -196,7 +111,82 @@ init_P_3:                                    /* Function: init, Provisos: List.L
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #12
     bx lr
-    
+
+.global resv
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
+    mov r3, r0
+    add r3, r0, #1
+    ldr r0, .POOL4_L1_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #0
+    beq resv.L2
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+resv.L6:                                     /* Evaluate condition */
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L10
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+    b resv.L7
+resv.L10: 
+    add r5, r5, r6
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L19
+resv.L15: 
+    cmp r5, r3
+    ble resv.L16
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L19
+resv.L16: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L19: 
+    ldmfd sp!, {r3-r6}
+    bx lr
+.POOL4_L1_HEAP_START: .word HEAP_START
+
 List.Iterable.L2_P_1:                        /* Interface : List.Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
@@ -204,21 +194,22 @@ List.Iterable.L2_P_1:                        /* Interface : List.Iterable, Provi
     b List.LinkedList.size_P_1
     b List.LinkedList.get_P_1
     
+.global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r3, r0
     mov r4, r1
     push { r4 }
-    ldr r0, .POOL1_L0_NULL                   /* Load null address */
+    ldr r0, .POOL0_L0_NULL                   /* Load null address */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_List.ListNode
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r1, .POOL0_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -236,8 +227,10 @@ List.LinkedList.add.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL1_L0_NULL: .word NULL
+.POOL0_List.ListNode: .word List.ListNode
+.POOL0_L0_NULL: .word NULL
     
+.global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
     sub sp, sp, #12
@@ -257,7 +250,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L0_NULL                   /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -275,8 +268,9 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL2_L0_NULL: .word NULL
+.POOL1_L0_NULL: .word NULL
     
+.global List.LinkedList.size_P_1
 List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, Provisos: INT */
     mov r10, #0
     push { r3, r4 }
@@ -286,7 +280,7 @@ List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, 
     mov r0, #0                               /* Evaluate Expression */
     mov r3, #0
 List.LinkedList.size.L1:                     /* Evaluate condition */
-    ldr r1, .POOL3_L0_NULL                   /* Load null address */
+    ldr r1, .POOL2_L0_NULL                   /* Load null address */
     cmp r4, r1
     beq List.LinkedList.size.L2
     lsl r1, r4, #2                           /* Convert to bytes */
@@ -298,16 +292,17 @@ List.LinkedList.size.L2:
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4}
     bx lr
-.POOL3_L0_NULL: .word NULL
+.POOL2_L0_NULL: .word NULL
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
-    ldr r1, .POOL4_L0_NULL                   /* Load null address */
-    ldr r2, .POOL4_L0_NULL                   /* Load null address */
+    ldr r1, .POOL3_L0_NULL                   /* Load null address */
+    ldr r2, .POOL3_L0_NULL                   /* Load null address */
     stmfd sp!, {r0-r2}
-    mov r0, #2
+    ldr r0, .POOL3_List.LinkedList
     push { r0 }
     mov r1, #12
     sub r0, fp, #16
@@ -342,5 +337,5 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL4_L0_NULL: .word NULL
-    
+.POOL3_List.LinkedList: .word List.LinkedList
+.POOL3_L0_NULL: .word NULL

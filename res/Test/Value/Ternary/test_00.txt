@@ -10,7 +10,11 @@ TESTCASES
 4 10
 5 10
 OUTPUT
-/* --test_00.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     cmp r0, #3
     bne main.L0
@@ -19,4 +23,3 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #10
     bx lr
-    

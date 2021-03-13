@@ -8,7 +8,11 @@ int main() {
 TESTCASES
 39
 OUTPUT
-/* --test_16.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #4                               /* Evaluate Expression */
@@ -26,4 +30,3 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]
     add r0, r0, r2
     bx lr
-    

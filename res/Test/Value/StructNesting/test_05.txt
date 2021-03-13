@@ -34,8 +34,13 @@ int main() {
 TESTCASES
 8
 OUTPUT
-/* --test_05.txt */
+.data
+Storage.X: .word 0
+
+.text
     b main
+    
+.global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
     push { r3 }
     mov r3, r0
@@ -45,20 +50,23 @@ Storage.X.set_P_1:                           /* Function: Storage.X.set, Proviso
     pop { r3 }
     bx lr
     
+.global Storage.X.get_P_1
 Storage.X.get_P_1:                           /* Function: Storage.X.get, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
+.global Storage.X.id_P_1
 Storage.X.id_P_1:                            /* Function: Storage.X.id, Provisos: INT */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_Storage.X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -75,4 +83,4 @@ main:                                        /* Function: main */
     bl Storage.X.get_P_1                     /* Call Storage.X.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_Storage.X: .word Storage.X

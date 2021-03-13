@@ -24,8 +24,12 @@ TESTCASES
 0 15
 2 21
 OUTPUT
-/* --test_09.txt */
+.data
+Bar: .word 0
+
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -37,13 +41,14 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
+.global baz
 baz:                                         /* Function: baz */
     push { fp }
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     mov r1, #3
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .POOL0_Bar
     push { r0 }
     sub r0, fp, #4
     ldmfa r0, {r0-r2}
@@ -57,7 +62,9 @@ baz:                                         /* Function: baz */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL0_Bar: .word Bar
     
+.global foo
 foo:                                         /* Function: foo */
     push { r3, fp }
     mov fp, sp
@@ -78,6 +85,7 @@ foo:                                         /* Function: foo */
     mov r10, #0
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -95,4 +103,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

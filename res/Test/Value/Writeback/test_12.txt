@@ -12,13 +12,19 @@ int main() {
 TESTCASES
 22
 OUTPUT
-/* --test_12.txt */
+.data
+X: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r1, fp, #4                           /* Load field location */
     ldr r0, [r1]
@@ -29,4 +35,4 @@ main:                                        /* Function: main */
     lsl r2, r1, #1
     add r0, r0, r2
     bx lr
-    
+.POOL0_X: .word X

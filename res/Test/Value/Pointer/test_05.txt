@@ -11,13 +11,17 @@ TESTCASES
 0 3
 1 4
 OUTPUT
-/* --test_05.txt */
+.data
+.text
     b main
+    
+.global get
 get:                                         /* Function: get */
     add r0, r0, r1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -35,4 +39,3 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -18,12 +18,16 @@ TESTCASES
 15 19
 0 0
 OUTPUT
-/* --test_03.txt */
+.data
+.text
     b main
+    
+.global foo
 foo:                                         /* Function: foo */
     add r0, r0, #2
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -49,4 +53,3 @@ main.L5:
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     pop { pc }
-    

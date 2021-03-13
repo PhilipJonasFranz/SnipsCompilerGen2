@@ -21,16 +21,19 @@ int main() {
 TESTCASES
 28
 OUTPUT
-/* --test_07.txt */
 .data
 Foo.Baz.x: .word 10
-    
+Foo.Bar: .word 0
+
 .text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_Foo.Bar
     push { r0 }
     ldr r1, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
     ldr r1, [r1]
@@ -42,4 +45,4 @@ main:                                        /* Function: main */
     add r0, r1, r2
     bx lr
 .POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
-    
+.POOL0_Foo.Bar: .word Foo.Bar

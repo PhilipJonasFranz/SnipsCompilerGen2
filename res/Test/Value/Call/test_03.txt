@@ -16,12 +16,16 @@ TESTCASES
 0 8
 6 26
 OUTPUT
-/* --test_03.txt */
+.data
+.text
     b main
+    
+.global bar
 bar:                                         /* Function: bar */
     mov r0, #2                               /* Evaluate Expression */
     bx lr
     
+.global foo
 foo:                                         /* Function: foo */
     push { r3, lr }
     mov r3, r0
@@ -29,6 +33,7 @@ foo:                                         /* Function: foo */
     mul r0, r3, r0
     ldmfd sp!, {r3, pc}
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -37,4 +42,3 @@ main:                                        /* Function: main */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
     pop { pc }
-    

@@ -12,8 +12,11 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_12.txt */
+.data
+.text
     b main
+    
+.global add
 add:                                         /* Function: add */
     ldr r0, [sp]
     ldr r2, [sp, #4]
@@ -25,6 +28,7 @@ add:                                         /* Function: add */
     add sp, sp, #16
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -42,4 +46,3 @@ main:                                        /* Function: main */
     bl add                                   /* Call add */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -43,8 +43,13 @@ TESTCASES
 3 99
 4 99
 OUTPUT
-/* --test_01.txt */
+.data
+ContextException: .word 0
+Exception: .word 0
+
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -56,6 +61,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
+.global get
 get:                                         /* Function: get */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
@@ -67,9 +73,9 @@ get:                                         /* Function: get */
     ble get.L2
     push { r5 }
     push { r4 }
-    mov r0, #2
+    ldr r0, .POOL0_Exception
     push { r0 }
-    mov r12, #2                              /* Signal thrown exception */
+    ldr r12, .POOL0_Exception
     mov r0, #12
     b get.L0                                 /* Exception thrown, branch to escape target */
 get.L2: 
@@ -86,15 +92,17 @@ get.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL0_Exception: .word Exception
     
+.global throw
 throw:                                       /* Function: throw */
     push { fp }
     mov fp, sp
     mov r0, #99
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL1_ContextException
     push { r0 }
-    mov r12, #1                              /* Signal thrown exception */
+    ldr r12, .POOL1_ContextException
     mov r0, #8
     cmp r12, #0
     mov r2, sp
@@ -106,7 +114,9 @@ throw:                                       /* Function: throw */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL1_ContextException: .word ContextException
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -138,7 +148,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    cmp r12, #2
+    ldr r12, .POOL2_Exception
     bne main.L2
     add r1, r1, #12
     mov r0, #12
@@ -153,7 +163,7 @@ main.L0:
     mov r12, #0
     b main.L3
 main.L2: 
-    cmp r12, #1
+    ldr r12, .POOL2_ContextException
     bne main.L3
     add r1, r1, #8
     mov r0, #8
@@ -167,4 +177,5 @@ main.L3:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL2_ContextException: .word ContextException
+.POOL2_Exception: .word Exception

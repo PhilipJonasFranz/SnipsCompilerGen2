@@ -72,102 +72,239 @@ int main() {
 TESTCASES
 18
 OUTPUT
-/* --test_08.txt */
 .data
+List.ListNode: .word 0
+List.LinkedList: .word 0
 arr: .skip 8
 NULL: .word 0
 HEAP_START: .word 0
-    
+GameObject.Items.Inventory: .word 0
+GameObject.Player: .word 0
+Util.Tuple2: .word 0
+Util.Container: .word 0
+
 .text
     b main_init
     
-resv:                                        /* Function: resv */
+.global List.LinkedList.add_P_1
+List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #16
-    stmea sp, {r3-r6}
+    stmea sp, {r3-r5, lr}
     mov r3, r0
-/* Add block header to size */
-    add r3, r0, #1
-/* Get reference to heap start */
-    ldr r0, .POOL0_L2_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-/* Defragment Heap */
-resv.L6:                                     /* Evaluate condition */
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L10
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-/* All structures to end are free */
-    b resv.L7
-resv.L10: 
-    add r5, r5, r6
-/* Add to current size */
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
+    mov r4, r1
+    push { r4 }
+    ldr r0, .POOL0_L1_NULL                   /* Load null address */
     push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-/* Memory location is free, check size */
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-/* Fits */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L19
-resv.L15: 
-    cmp r5, r3
-    ble resv.L16
-/* Rest, subtract size, store at offset */
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
+    ldr r0, .POOL0_List.ListNode
     push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L19
-resv.L16: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-/* Memory section is allocated, skip */
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-/* End reached, create new block */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L19: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL0_L2_HEAP_START: .word HEAP_START
+    bl init_P_3                              /* Call init */
+    mov r5, r0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL0_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.add.L1
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #4]                         /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #8]                         /* Store value to struct field */
+    b List.LinkedList.add.L0
+List.LinkedList.add.L1: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #8]
+    lsl r1, r1, #2
+    str r5, [r1, #4]                         /* Store value to struct field */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #8]                         /* Store value to struct field */
+List.LinkedList.add.L0: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    add r1, r1, #12
+    ldr r0, [r1]
+    add r2, r0, #1
+    str r2, [r1]
+    ldmfd sp!, {r3-r5, pc}
+.POOL0_List.ListNode: .word List.ListNode
+.POOL0_L1_NULL: .word NULL
     
+.global List.LinkedList.get_P_1
+List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
+    mov r10, #0
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
+    mov r3, r0
+    mov r4, r1
+    cmp r1, #0
+    bge List.LinkedList.get.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #16]                        /* Load field from struct */
+    b List.LinkedList.get.L7
+List.LinkedList.get.L0: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+List.LinkedList.get.L3:                      /* Evaluate condition */
+    cmp r4, #0
+    beq List.LinkedList.get.L4
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.get.L5
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #16]                        /* Load field from struct */
+    b List.LinkedList.get.L7
+List.LinkedList.get.L5: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    mov r0, r4
+    sub r4, r4, #1
+    b List.LinkedList.get.L3
+List.LinkedList.get.L4: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+List.LinkedList.get.L7: 
+    ldmfd sp!, {r3-r5}
+    bx lr
+.POOL1_L1_NULL: .word NULL
+    
+.global List.LinkedList.remove_P_1
+List.LinkedList.remove_P_1:                  /* Function: List.LinkedList.remove, Provisos: INT */
+    mov r10, #0
+    sub sp, sp, #16
+    stmea sp, {r3-r5, lr}
+    mov r3, r0
+    mov r4, r1
+    cmp r1, #0
+    bge List.LinkedList.remove.L0
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.remove.L0: 
+    cmp r4, #0
+    bne List.LinkedList.remove.L3
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL2_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    ldmfdeq sp!, {r3-r5, pc}
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]
+    lsl r1, r1, #2
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r0, [r1, #8]                         /* Load field from struct */
+    cmp r0, r5
+    bne List.LinkedList.remove.L6
+    ldr r0, .POOL2_L1_NULL                   /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #8]                         /* Store value to struct field */
+List.LinkedList.remove.L6: 
+    mov r0, r5                               /* Load parameters */
+    bl free                                  /* Call free */
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.remove.L3: 
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    mov r0, r4
+    sub r4, r4, #1
+List.LinkedList.remove.L10:                  /* Evaluate condition */
+    cmp r4, #0
+    ble List.LinkedList.remove.L11
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL2_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.remove.L13
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.remove.L13: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    mov r0, r4
+    sub r4, r4, #1
+    b List.LinkedList.remove.L10
+List.LinkedList.remove.L11: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL2_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.remove.L16
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.remove.L16: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]
+    lsl r1, r1, #2
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    ldr r1, .POOL2_L1_NULL                   /* Load null address */
+    cmp r0, r1
+    bne List.LinkedList.remove.L19
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bl free                                  /* Call free */
+    ldr r0, .POOL2_L1_NULL                   /* Evaluate Expression */
+    lsl r1, r5, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    mov r0, r5                               /* Evaluate Expression */
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r5, [r1, #8]                         /* Store value to struct field */
+    ldmfd sp!, {r3-r5, pc}
+List.LinkedList.remove.L19: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]
+    lsl r1, r1, #2
+    ldr r3, [r1, #4]                         /* Load field from struct */
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bl free                                  /* Call free */
+    mov r0, r3                               /* Evaluate Expression */
+    lsl r1, r5, #2                           /* Convert to bytes */
+    str r3, [r1, #4]                         /* Store value to struct field */
+    ldmfd sp!, {r3-r5, pc}
+.POOL2_L1_NULL: .word NULL
+    
+.global List.LinkedList.create_P_1
+List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
+    push { r3, lr }
+    mov r3, r0
+    push { r3 }
+    mov r0, #0
+    ldr r1, .POOL3_L1_NULL                   /* Load null address */
+    ldr r2, .POOL3_L1_NULL                   /* Load null address */
+    stmfd sp!, {r0-r2}
+    ldr r0, .POOL3_List.LinkedList
+    push { r0 }
+    bl init_P_5                              /* Call init */
+    ldmfd sp!, {r3, pc}
+.POOL3_List.LinkedList: .word List.LinkedList
+.POOL3_L1_NULL: .word NULL
+
+.global free
+free:                                        /* Function: free */
+    sub sp, sp, #12
+    stmea sp, {r3, r4, r6}
+    mov r3, r0
+    sub r3, r0, #1
+    ldr r4, [r10, r3, lsl #2]                /* Load from address */
+    rsb r0, r4, #0
+    str r0, [r10, r3, lsl #2]
+    add r6, r3, r4
+free.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r6, lsl #2]                /* Load from address */
+    cmp r0, #0
+    bge free.L2
+    ldr r4, [r10, r6, lsl #2]                /* Load from address */
+    ldr r1, [r10, r3, lsl #2]                /* Load from address */
+    add r0, r1, r4
+    str r0, [r10, r3, lsl #2]
+    sub r6, r6, r4
+    b free.L1
+free.L2: 
+    ldmfd sp!, {r3, r4, r6}
+    bx lr
+
+.global init_P_5
 init_P_5:                                    /* Function: init, Provisos: List.LinkedList<INT> |  */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
@@ -198,6 +335,7 @@ init_P_5:                                    /* Function: init, Provisos: List.L
     add sp, sp, #20
     bx lr
     
+.global init_P_3
 init_P_3:                                    /* Provisos: List.ListNode<INT> */
     sub sp, sp, #12
     stmea sp, {r3, fp, lr}
@@ -220,233 +358,83 @@ init_P_3:                                    /* Provisos: List.ListNode<INT> */
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #12
     bx lr
-    
-free:                                        /* Function: free */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, r6}
+
+.global resv
+resv:                                        /* Function: resv */
+    sub sp, sp, #16
+    stmea sp, {r3-r6}
     mov r3, r0
-/* Jump to block head */
-    sub r3, r0, #1
-/* Load Block Size */
-    ldr r4, [r10, r3, lsl #2]                /* Load from address */
-/* Store negated block size */
-    rsb r0, r4, #0
-    str r0, [r10, r3, lsl #2]
-    add r6, r3, r4
-free.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r6, lsl #2]                /* Load from address */
+    add r3, r0, #1
+    ldr r0, .POOL4_L2_HEAP_START             /* Evaluate Expression */
+    lsr r4, r0, #2
+resv.L1:                                     /* Evaluate condition */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
     cmp r0, #0
-    bge free.L2
-    ldr r4, [r10, r6, lsl #2]                /* Load from address */
-/* Add size to freed block */
-    ldr r1, [r10, r3, lsl #2]                /* Load from address */
-    add r0, r1, r4
-    str r0, [r10, r3, lsl #2]
-/* Shift pointer to next block */
-    sub r6, r6, r4
-    b free.L1
-free.L2: 
-    ldmfd sp!, {r3, r4, r6}
+    beq resv.L2
+    ldr r5, [r10, r4, lsl #2]                /* Load from address */
+    cmp r5, #0
+    bge resv.L4
+resv.L6:                                     /* Evaluate condition */
+    sub r0, r4, r5
+    ldr r6, [r10, r0, lsl #2]                /* Load from address */
+    cmp r6, #0
+    ble resv.L9
+    b resv.L7
+resv.L9: 
+    cmp r6, #0
+    bne resv.L10
+    mov r0, #0                               /* Evaluate Expression */
+    mov r5, #0
+    b resv.L7
+resv.L10: 
+    add r5, r5, r6
+    b resv.L6
+resv.L7: 
+    str r5, [r10, r4, lsl #2]
+    cmp r5, #0
+    bne resv.L12
+    mov r0, #0                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+resv.L12: 
+    rsb r5, r5, #0
+    cmp r5, r3
+    bne resv.L15
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+    b resv.L19
+resv.L15: 
+    cmp r5, r3
+    ble resv.L16
+    sub r5, r5, r3
+    str r3, [r10, r4, lsl #2]
+    rsb r0, r5, #0
+    push { r0 }
+    add r0, r4, r3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    add r0, r4, #1
+    b resv.L19
+resv.L16: 
+    add r4, r4, r5
+    b resv.L3
+resv.L4: 
+    add r4, r4, r5
+resv.L3: 
+    b resv.L1
+resv.L2: 
+    str r3, [r10, r4, lsl #2]
+    add r0, r4, #1
+resv.L19: 
+    ldmfd sp!, {r3-r6}
     bx lr
-    
-List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #16
-    stmea sp, {r3-r5, lr}
-    mov r3, r0
-    mov r4, r1
-/* Initialize the new List Node, set the next pointer to null */
-    push { r4 }
-    ldr r0, .POOL1_L1_NULL                   /* Load null address */
-    push { r0 }
-    mov r0, #1
-    push { r0 }
-    bl init_P_3                              /* Call init */
-    mov r5, r0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.add.L1
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    b List.LinkedList.add.L0
-List.LinkedList.add.L1: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r1, [r1, #8]
-    lsl r1, r1, #2
-    str r5, [r1, #4]                         /* Store value to struct field */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.add.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]
-    add r2, r0, #1
-    str r2, [r1]
-    ldmfd sp!, {r3-r5, pc}
-.POOL1_L1_NULL: .word NULL
-    
-List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #12
-    stmea sp, {r3-r5}
-    mov r3, r0
-    mov r4, r1
-    cmp r1, #0
-    bge List.LinkedList.get.L0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.get.L4
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get.L5
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
-/* Jump to next */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get.L7: 
-    ldmfd sp!, {r3-r5}
-    bx lr
-.POOL2_L1_NULL: .word NULL
-    
-List.LinkedList.remove_P_1:                  /* Function: List.LinkedList.remove, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #16
-    stmea sp, {r3-r5, lr}
-    mov r3, r0
-    mov r4, r1
-/* Out of bounds */
-    cmp r1, #0
-    bge List.LinkedList.remove.L0
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L0: 
-    cmp r4, #0
-    bne List.LinkedList.remove.L3
-/* Remove first element */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    ldmfdeq sp!, {r3-r5, pc}
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r1, [r1, #4]
-    lsl r1, r1, #2
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-/* Only one element in list */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
-    cmp r0, r5
-    bne List.LinkedList.remove.L6
-    ldr r0, .POOL3_L1_NULL                   /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.remove.L6: 
-    mov r0, r5                               /* Load parameters */
-    bl free                                  /* Call free */
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L3: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-/* Jump to element before element to remove */
-List.LinkedList.remove.L10:                  /* Evaluate condition */
-    cmp r4, #0
-    ble List.LinkedList.remove.L11
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.remove.L13
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L13: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.remove.L10
-List.LinkedList.remove.L11: 
-/* Out of bounds */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.remove.L16
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L16: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r1, [r1, #4]
-    lsl r1, r1, #2
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL3_L1_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.remove.L19
-/* Element to remove is last element in list */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    bl free                                  /* Call free */
-    ldr r0, .POOL3_L1_NULL                   /* Evaluate Expression */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r5, [r1, #8]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
-List.LinkedList.remove.L19: 
-/* Cut out element and set next pointers */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r1, [r1, #4]
-    lsl r1, r1, #2
-    ldr r3, [r1, #4]                         /* Load field from struct */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    bl free                                  /* Call free */
-    mov r0, r3                               /* Evaluate Expression */
-    lsl r1, r5, #2                           /* Convert to bytes */
-    str r3, [r1, #4]                         /* Store value to struct field */
-    ldmfd sp!, {r3-r5, pc}
-.POOL3_L1_NULL: .word NULL
-    
-List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
-    push { r3, lr }
-    mov r3, r0
-/* Initialize list, set pointers to null */
-    push { r3 }
-    mov r0, #0
-    ldr r1, .POOL4_L1_NULL                   /* Load null address */
-    ldr r2, .POOL4_L1_NULL                   /* Load null address */
-    stmfd sp!, {r0-r2}
-    mov r0, #2
-    push { r0 }
-    bl init_P_5                              /* Call init */
-    ldmfd sp!, {r3, pc}
-.POOL4_L1_NULL: .word NULL
-    
+.POOL4_L2_HEAP_START: .word HEAP_START
+
+.global GameObject.Items.set
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
     push { r4, r6 }
     mov r4, r1
@@ -457,6 +445,7 @@ GameObject.Items.set:                        /* Function: GameObject.Items.set *
     ldmfd sp!, {r4, r6}
     bx lr
     
+.global GameObject.Items.get
 GameObject.Items.get:                        /* Function: GameObject.Items.get */
     push { r4, r5 }
     mov r4, r1
@@ -466,6 +455,14 @@ GameObject.Items.get:                        /* Function: GameObject.Items.get *
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     ldmfd sp!, {r4, r5}
     bx lr
+    
+/* A tuple containing two different value types */
+    
+/* A contianer containing a value */
+    
+/* Inital Player data */
+    
+.global main
     
 /* Initialize the global variables */
 main_init: 
@@ -490,7 +487,7 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl resv                                  /* Call resv */
     push { r0 }
-    mov r0, #3
+    ldr r0, .POOL5_GameObject.Items.Inventory
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -506,7 +503,7 @@ main:                                        /* Function: main */
     ldr r0, .POOL5_L0_arr                    /* Load data section address */
     ldr r0, [r0]
     push { r0 }
-    mov r0, #4
+    ldr r0, .POOL5_GameObject.Player
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -521,15 +518,15 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
-    mov r0, #5
+    ldr r0, .POOL5_Util.Tuple2
     push { r0 }
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     mov r1, #1
-    mov r2, #5
+    ldr r2, .POOL5_Util.Tuple2
     stmfd sp!, {r0-r2}
-    mov r0, #5
+    ldr r0, .POOL5_Util.Tuple2
     push { r0 }
     ldr r0, [fp, #-24]                       /* Load field from struct */
     ldr r2, [fp, #-20]                       /* Load field from struct */
@@ -537,13 +534,13 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r0, r2
     push { r0 }
-    mov r0, #6
+    ldr r0, .POOL5_Util.Container
     push { r0 }
     ldr r0, [fp, #-36]                       /* Evaluate Expression */
     ldr r1, [fp, #-40]
     stmfd sp!, {r0, r1}
     push { r4 }
-    mov r0, #5
+    ldr r0, .POOL5_Util.Tuple2
     push { r0 }
 /* Set item at index 1 to 5 */
     ldr r0, [fp, #-36]                       /* Load field from struct */
@@ -582,5 +579,8 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.POOL5_Util.Container: .word Util.Container
+.POOL5_Util.Tuple2: .word Util.Tuple2
+.POOL5_GameObject.Player: .word GameObject.Player
+.POOL5_GameObject.Items.Inventory: .word GameObject.Items.Inventory
 .POOL5_L0_arr: .word arr
-    

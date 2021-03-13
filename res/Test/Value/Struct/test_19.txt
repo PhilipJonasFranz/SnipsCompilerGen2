@@ -13,12 +13,18 @@ int main() {
 TESTCASES
 48
 OUTPUT
-/* --test_19.txt */
+.data
+A: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_A
     push { r0 }
     sub r1, fp, #4
     ldr r2, [r1]
@@ -35,4 +41,4 @@ main:                                        /* Function: main */
     str r0, [r1]                             /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bx lr
-    
+.POOL0_A: .word A

@@ -9,9 +9,8 @@ TESTCASES
 OUTPUT
 .data
 Global.globalVar: .word 10
-    
+
 .text
-    
     b main
     
 .global Global.foo

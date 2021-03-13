@@ -13,7 +13,11 @@ int main() {
 TESTCASES
 16
 OUTPUT
-/* --test_24.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r3, #5
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
@@ -28,4 +32,3 @@ main:                                        /* Function: main */
     ldr r1, [sp]                             /* Evaluate Expression */
     add r0, r1, r4
     bx lr
-    

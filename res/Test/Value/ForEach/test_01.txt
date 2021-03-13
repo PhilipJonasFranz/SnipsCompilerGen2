@@ -9,7 +9,11 @@ int main() {
 TESTCASES
 22
 OUTPUT
-/* --test_01.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #6                               /* Evaluate Expression */
@@ -37,4 +41,3 @@ main.L2:
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     bx lr
-    

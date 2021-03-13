@@ -26,23 +26,29 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_06.txt */
+.data
+X: .word 0
+
+.text
     b main
+    
 Inter.L0:                                    /* Interface : Inter */
     b X.get
     
+.global X.get
 X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -53,4 +59,4 @@ main:                                        /* Function: main */
     bl Inter.L0                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_X: .word X

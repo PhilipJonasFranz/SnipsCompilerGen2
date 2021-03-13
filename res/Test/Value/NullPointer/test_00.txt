@@ -7,8 +7,13 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_00.txt */
+.data
 NULL: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     ldr r3, .POOL0_L0_NULL                   /* Evaluate Expression */
     ldr r1, .POOL0_L0_NULL                   /* Load null address */
@@ -20,4 +25,3 @@ main.L1:
     mov r0, #5                               /* Evaluate Expression */
     bx lr
 .POOL0_L0_NULL: .word NULL
-    

@@ -13,12 +13,16 @@ int main() {
 TESTCASES
 128
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global baz
 baz:                                         /* Function: baz */
     lsl r0, r0, #1
     bx lr
     
+.global foo
 foo:                                         /* Function: foo */
     push { lr }
     mov r0, #4                               /* Evaluate Expression */
@@ -27,6 +31,7 @@ foo:                                         /* Function: foo */
     mul r0, r1, r0
     pop { pc }
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     bl foo                                   /* Evaluate Expression */
@@ -34,4 +39,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     add r0, r3, r0
     pop { pc }
-    
