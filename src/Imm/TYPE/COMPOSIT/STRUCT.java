@@ -239,7 +239,7 @@ public class STRUCT extends COMPOSIT {
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
 		if (mapType instanceof STRUCT) {
 			STRUCT s = (STRUCT) mapType;
-			if (s.getTypedef().equals(this.getTypedef())) {
+			if (s.isPolymorphTo(this)) {
 				/* Missing provisos */
 				if (this.proviso.size() != s.proviso.size())
 					return null;

@@ -365,17 +365,21 @@ public class CompilerDriver {
 				
 				double rate = this.optimizeInstructionList(body.instructions, true);
 				
+				
+				
+				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
+				
+				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+					rate += this.optimizeInstructionList(entry.getValue().textSection, false);
+				
+				rate /= AsNBody.translationUnits.size();
+				
 				if (!expectError) {
 					compressions.add(rate);
 				
 					if (rate < c_min) c_min = rate;
 					if (rate > c_max) c_max = rate;
 				}
-				
-				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
-				
-				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
-					this.optimizeInstructionList(entry.getValue().textSection, false);
 			}
 			
 			
@@ -803,6 +807,7 @@ public class CompilerDriver {
 		heap_referenced = false;
 		null_referenced = false;
 		expectError = false;
+		AsNBody.translationUnits.clear();
 	}
 	
 } 

@@ -306,10 +306,10 @@ public class AsNBody extends AsNNode {
 			for (int i = 0; i < text.size(); i++) {
 				if (text.get(i).equals(mainLabel)) {
 					/* Remove seperator before main function */
-					if (text.get(i - 1) instanceof ASMSeperator) text.remove(i - 1);
+					if (text.get(i) instanceof ASMSeperator) text.remove(i);
 					
 					/* Inject global init code */
-					text.addAll(i - 1, globalsInit);
+					text.addAll(i, globalsInit);
 					
 					/* Relay start branch to init block */
 					((LabelOp) branch.target).label = initLabel;
@@ -319,7 +319,8 @@ public class AsNBody extends AsNNode {
 		}
 		
 		/* Routine was not used, remove */
-		if (!AsNBody.usedStackCopyRoutine) body.originUnit.textSection.removeAll(routine);
+		if (!AsNBody.usedStackCopyRoutine) 
+			body.originUnit.textSection.removeAll(routine);
 		
 		/* Build the literal pool labels for all created translation units */
 		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
