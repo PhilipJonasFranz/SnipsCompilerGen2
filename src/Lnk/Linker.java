@@ -90,7 +90,9 @@ public class Linker {
 	public static List<String> linkProgram(LinkerUnit unit) throws LNK_EXC {
 		List<String> included = new ArrayList();
 		
-		for (String imp : unit.imports) {
+		for (int i = unit.imports.size() - 1; i >= 0; i--) {
+			String imp = unit.imports.get(i);
+			
 			String incPath = imp.trim().split(" ") [1];
 			String [] sp = incPath.split("@");
 			
