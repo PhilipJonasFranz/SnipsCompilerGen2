@@ -15,6 +15,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.CGEN_EXC;
 import Exc.CTX_EXC;
+import Exc.LNK_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
@@ -73,7 +74,7 @@ public class CompilerDriver {
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
-		buildModulesRecurse = 			true,	/* Builds all modules in the input and saves them.				*/
+		buildModulesRecurse = 			false,	/* Builds all modules in the input and saves them.				*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
 			
@@ -279,6 +280,11 @@ public class CompilerDriver {
 			if (CompilerDriver.buildModulesRecurse) 
 				new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
 			
+			if (imm) {
+				log.add(new Message("SNIPS -> Pre-Processed Code:", LogPoint.Type.INFO));
+				preCode.stream().forEach(x -> System.out.println(printDepth + x.line));
+			}
+			
 			
 					/* --- SCANNING --- */
 			lastSource = null;
@@ -392,19 +398,21 @@ public class CompilerDriver {
 				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 					String path = PreProcessor.resolveToPath(entry.getKey());
 					
-					if (path.endsWith(".sn")) {
-						new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
+					/* Build main file seperately */
+					String excludeMainPath = path.substring(0, path.length() - 1) + "s";
+					if (path.equals(excludeMainPath)) continue;
+					
+					new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
 						
-						List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
-						
-						path = path.substring(0, path.length() - 2) + "s";
-						Util.writeInFile(module, path);
-					}
-					else log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
+					List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
+					
+					boolean write = Util.writeInFile(module, path);
+					if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
 				}
 			}
 			
-			/* --- LINKING --- */
+			
+					/* --- LINKING --- */
 			if (!CompilerDriver.buildObjectFileOnly) {
 				LinkerUnit originUnit = Linker.parseLinkerUnit(output);
 				Lnk.Linker.linkProgram(originUnit);
@@ -423,7 +431,7 @@ public class CompilerDriver {
 				instructionsGenerated += output.size();
 		
 		} catch (Exception e) {
-			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
+			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof LNK_EXC) || (e instanceof SNIPS_EXC);
 			
 			/* Exception is not ordinary and internal, print message and stack trace */
 			if (!customExc) log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
@@ -643,7 +651,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
-				else if (args [i].equals("-obj")) 	buildObjectFileOnly = true;
+				else if (args [i].equals("-o")) 	buildObjectFileOnly = true;
 				else if (args [i].equals("-R")) 	buildModulesRecurse = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
@@ -673,7 +681,7 @@ public class CompilerDriver {
 				"-ofs      : Optimize for Filesize, slight performance hit",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
-				"-obj      : Build object file only, required additional linking",
+				"-o        : Build object file only, required additional linking",
 				"-R        : Build all required modules and save them",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",

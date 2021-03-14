@@ -67,6 +67,8 @@ public class AsNBody extends AsNNode {
 	
 	public AsNTranslationUnit originUnit;
 	
+	private static String originPath;
+	
 	
 			/* ---< METHODS >--- */
 	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
@@ -79,7 +81,8 @@ public class AsNBody extends AsNNode {
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		
-		body.originUnit = new AsNTranslationUnit(CompilerDriver.inputFile.getPath());
+		originPath = Util.Util.toASMPath(CompilerDriver.inputFile.getPath());
+		body.originUnit = new AsNTranslationUnit(originPath);
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
 		MemoryMap map = new MemoryMap();
@@ -400,20 +403,23 @@ public class AsNBody extends AsNNode {
 	 * @param source The source of the ressource that generated the assembly
 	 */
 	public static void addToTranslationUnit(List<ASMInstruction> ins, Source source, SECTION section) {
+		String path = Util.Util.toASMPath(source.sourceFile);
+		
+		/* Add file import to origin translation unit imports */
 		if (!source.sourceFile.equals(CompilerDriver.inputFile.getPath())) {
-			AsNTranslationUnit unit = AsNBody.translationUnits.get(CompilerDriver.inputFile.getPath());
-			if (!unit.imports.contains(source.sourceFile)) {
-				unit.imports.add(source.sourceFile);
+			AsNTranslationUnit unit = AsNBody.translationUnits.get(AsNBody.originPath);
+			if (!unit.imports.contains(path)) {
+				unit.imports.add(path);
 			}
 		}
-		
-		if (!AsNBody.translationUnits.containsKey(source.sourceFile)) {
-			AsNTranslationUnit unit = new AsNTranslationUnit(source.sourceFile);
+			
+		if (!AsNBody.translationUnits.containsKey(path)) {
+			AsNTranslationUnit unit = new AsNTranslationUnit(path);
 			AsNBody.translationUnits.put(unit.sourceFile, unit);
 			unit.append(ins, section);
 		}
 		else {
-			AsNTranslationUnit unit = AsNBody.translationUnits.get(source.sourceFile);
+			AsNTranslationUnit unit = AsNBody.translationUnits.get(path);
 			unit.append(ins, section);
 		}
 	}

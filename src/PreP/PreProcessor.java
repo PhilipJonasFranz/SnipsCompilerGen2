@@ -12,6 +12,7 @@ import Util.Source;
 import Util.Util;
 import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
+import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
 public class PreProcessor {
@@ -65,26 +66,29 @@ public class PreProcessor {
 					
 					this.process.remove(i);
 					
-					/* Swap out header with .sn file */
-					if ((CompilerDriver.buildModulesRecurse || !CompilerDriver.buildObjectFileOnly) && path.endsWith(".hn")) {
-						path = path.substring(0, path.length() - 2) + "sn";
-						modulesIncluded++;
+					/* 
+					 * Recompiling all modules and we include header, this means we also have
+					 * to load in the .sn counterpart.
+					 */
+					if (CompilerDriver.buildModulesRecurse && path.endsWith(".hn")) {
+						String modPath = path.substring(0, path.length() - 2) + "sn";
+						if (getFile(modPath) != null) 
+							this.includeLines(modPath, imports, i);
 					}
 					
-					if (!this.imported.contains(path)) {
-						try {
-							List<String> lines = getFile(path);
-							for (int a = 0; a < lines.size(); a++) 
-								this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
-							
-							imports.push(path);
-							
-							this.imported.add(path);
-						} catch (NullPointerException e) {
-							throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
-						}
+					/* 
+					 * Loading module from .sn file, check if a header exists, 
+					 * and if yes, load it. This is nessesary since the header may
+					 * include struct typedefs etc.
+					 */
+					if (path.endsWith(".sn")) {
+						String modPath = path.substring(0, path.length() - 2) + "hn";
+						if (getFile(modPath) != null) 
+							this.includeLines(modPath, imports, i);
 					}
 					
+					/* Load originally included file */
+					this.includeLines(path, imports, i);
 					i--;
 				} 
 				else {
@@ -102,6 +106,26 @@ public class PreProcessor {
 			this.process.get(i).line = this.process.get(i).line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);
 		
 		return this.process;
+	}
+	
+	public void includeLines(String path, Stack<String> imports, int i) {
+		if (!this.imported.contains(path)) {
+			try {
+				List<String> lines = getFile(path);
+				for (int a = 0; a < lines.size(); a++) 
+					this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
+				
+				imports.push(path);
+				
+				this.imported.add(path);
+				
+				modulesIncluded++;
+				if (CompilerDriver.buildModulesRecurse)
+					new Message("Recompiling module: " + path, Type.INFO);
+			} catch (NullPointerException e) {
+				throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
+			}
+		}
 	}
 	
 	public static List<String> getFile(String filePath) {
@@ -135,8 +159,9 @@ public class PreProcessor {
 	public static String resolveToPath(String filePath) {
 		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
 			String [] v = c.value.split(":");
-			if (v [0].equals(filePath)) {
-				return "release/" + v [1];
+			String modPath = Util.toASMPath(v [0]);
+			if (modPath.equals(filePath)) {
+				return "release/" + Util.toASMPath(v [1]);
 			}
 		}
 		

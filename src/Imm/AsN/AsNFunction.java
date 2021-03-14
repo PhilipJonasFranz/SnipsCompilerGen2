@@ -47,6 +47,7 @@ import PreP.PreProcessor;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.Pair;
+import Util.Util;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
@@ -153,15 +154,12 @@ public class AsNFunction extends AsNCompoundStatement {
 					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
 				
 				/* Replace .hn with .sn in module link */
-				String source = f.getSource().sourceFile;
-				if (source.endsWith(".hn")) source = source.substring(0, source.length() - 2) + "sn";
+				String source = Util.toASMPath(f.getSource().sourceFile);
 				
 				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).provisoPostfix));
 				
 				/* Check if required module exists */
 				String mappedPath = PreProcessor.resolveToPath(source);
-				if (mappedPath.endsWith(".sn")) mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
-				
 				if (PreProcessor.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
 					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);

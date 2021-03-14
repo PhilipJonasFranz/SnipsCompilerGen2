@@ -99,7 +99,6 @@ public class Linker {
 			if (sp.length > 1) label = sp [1];
 			
 			String mappedPath = PreProcessor.resolveToPath(filePath);
-			mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
 			
 			if (included.contains(incPath)) continue;
 			else included.add(incPath);
@@ -151,72 +150,6 @@ public class Linker {
 		}
 		
 		return included;
-		
-		/*for (int i = 0; i < asm.size(); i++) {
-			String line = asm.get(i);
-			
-			if (line.contains(".include")) {
-				// Found asm include directive
-				
-				String incPath = line.trim().split(" ") [1];
-				String [] sp = incPath.split("@");
-				
-				String filePath = sp [0];
-				String label = null;
-				if (sp.length > 1) label = sp [1];
-				
-				String mappedPath = PreProcessor.resolveToPath(filePath);
-				mappedPath = mappedPath.substring(0, mappedPath.length() - 2) + "s";
-				
-				asm.set(i, " ");
-				i++;
-				
-				if (included.contains(incPath)) continue;
-				else included.add(incPath);
-				
-				List<String> lines = PreProcessor.getFile(mappedPath);
-				
-				if (lines == null) {
-					throw new LNK_EXC("Failed to locate include target %s", mappedPath);
-				}
-				else {
-					boolean found = false;
-					
-					// Search import
-					for (int a = 0; a < lines.size(); a++) {
-						if (label == null || lines.get(a).trim().startsWith(".global " + label)) {
-							// Found position in module
-							found = true;
-							
-							int cnt = i;
-							
-							while (true) {
-								// Copy contents until EOF is reached, or until a new .global directive is seen
-								if (a >= lines.size() || (cnt > i && lines.get(a).contains(".global"))) break;
-								
-								asm.add(cnt++, lines.get(a++));
-							}
-							
-							buffer.add(new Message("Resolved '" + label + "' to " + (cnt - i) + " lines from '" + mappedPath + "'", Type.INFO, true));
-							break;
-						}
-					}
-					
-					if (!found) 
-						buffer.add(new Message("Failed to locate '" + label + "' in '" + mappedPath + "'", Type.FAIL, true));
-				}
-			}
-		}
-		
-		for (int i = 1; i < asm.size(); i++) {
-			if (asm.get(i).trim().isEmpty() && asm.get(i - 1).trim().isEmpty()) {
-				asm.remove(i);
-				i--;
-			}
-		}
-		
-		link_progress.finish();
-		buffer.stream().forEach(x -> x.flush());*/
 	}
 	
 }

@@ -375,6 +375,11 @@ public class Parser {
 					
 					InterfaceTypedef def = this.getInterfaceTypedef(ext0, source);
 					
+					if (def == null) {
+						this.progress.abort();
+						throw new SNIPS_EXC("Unknown extension: %s in " + source.getSourceMarker(), ext0.build());
+					}
+					
 					implemented.add(new INTERFACE(def, this.parseProviso()));
 					
 					if (current.type == TokenType.COMMA)

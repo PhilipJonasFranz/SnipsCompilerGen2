@@ -242,8 +242,18 @@ public class ContextChecker {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				for (Function f0 : this.functions) 
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true)) 
-						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true)) {
+						/* 
+						 * Already seen function has no body, this function has body,
+						 * so already seen function is from a header file, this function
+						 * is from a target file.
+						 */
+						if (f0.body == null && f.body != null) {
+							this.functions.remove(f0);
+							break;
+						}
+						else throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+					}
 				
 				STRUCT.useProvisoFreeInCheck = true;
 				
