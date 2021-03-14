@@ -14,12 +14,14 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_03.txt */
 .data
 Foo.x: .word 10
 Foo.y: .word 15
-    
+
 .text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     ldr r1, .POOL0_L0_Foo.x                  /* Evaluate Expression */
     ldr r1, [r1]
@@ -29,4 +31,3 @@ main:                                        /* Function: main */
     bx lr
 .POOL0_L1_Foo.y: .word Foo.y
 .POOL0_L0_Foo.x: .word Foo.x
-    

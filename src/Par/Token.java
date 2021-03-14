@@ -79,7 +79,7 @@ public class Token {
 		CASE("case"),
 		DEFAULT("default"),
 		SIZEOF("sizeof"),
-		INSTANCEOF("instanceof"),
+		IDOF("idof"),
 		RETURN("return"),
 		ASM("asm"),
 		INTERFACE("interface"),

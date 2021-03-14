@@ -24,8 +24,13 @@ int main() {
 TESTCASES
 82
 OUTPUT
-/* --test_08.txt */
+.data
+X: .word 0
+Y: .word X
+
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -37,6 +42,7 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
+.global X.create_P_1_1
 X.create_P_1_1:                              /* Function: X.create, Provisos: BOOL, BOOL */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
@@ -47,7 +53,7 @@ X.create_P_1_1:                              /* Function: X.create, Provisos: BO
     push { r5 }
     push { r4 }
     push { r3 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -58,7 +64,9 @@ X.create_P_1_1:                              /* Function: X.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL0_X: .word X
     
+.global Y.create_P_1
 Y.create_P_1:                                /* Function: Y.create, Provisos: BOOL */
     sub sp, sp, #20
     stmea sp, {r3-r5, fp, lr}
@@ -74,7 +82,7 @@ Y.create_P_1:                                /* Function: Y.create, Provisos: BO
     ldmfd sp!, {r1, r2}
     bl X.create_P_1_1                        /* Call X.create */
     add sp, sp, #4
-    mov r0, #2
+    ldr r0, .POOL1_Y
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -86,7 +94,9 @@ Y.create_P_1:                                /* Function: Y.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL1_Y: .word Y
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -108,4 +118,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

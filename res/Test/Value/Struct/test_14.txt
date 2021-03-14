@@ -20,26 +20,33 @@ TESTCASES
 1 6
 2 8
 OUTPUT
-/* --test_14.txt */
+.data
+Data: .word 0
+Cap: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #2
+    ldr r0, .POOL0_Cap
     push { r0 }
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #2
+    ldr r0, .POOL0_Cap
     push { r0 }
     mov r0, #4                               /* Evaluate Expression */
     push { r0 }
     lsl r0, r3, #1
     push { r0 }
     push { r3 }
-    mov r0, #2
+    ldr r0, .POOL0_Cap
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_Data
     push { r0 }
     ldr r0, [fp, #-12]                       /* Load field from struct */
     cmp r0, #0
@@ -53,4 +60,5 @@ main.L0:
 main.L1: 
     mov sp, fp
     bx lr
-    
+.POOL0_Data: .word Data
+.POOL0_Cap: .word Cap

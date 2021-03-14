@@ -27,15 +27,19 @@ public class Util {
 	}
 
 	/** Writes in given file path, each string in a seperate file. */
-	public static void writeInFile(List<String> content, String filePath) {
-		try (FileWriter w = new FileWriter(filePath)) {
+	public static boolean writeInFile(List<String> content, String filePath) {
+		File file = new File(filePath);
+		try (FileWriter w = new FileWriter(file.getPath())) {
 			for (String s : content) {
 				w.write(s);
 				w.write(System.getProperty("line.separator"));
 			}
 		} catch (IOException e) {
-			new Message("Could not write in file: " + filePath, Type.FAIL);
+			e.printStackTrace();
+			return false;
 		}
+		
+		return true;
 	}
 	
 	public static String formatNum(long num) {
@@ -72,6 +76,12 @@ public class Util {
 		
 		/* Field not found, or not externalized */
 		return "UNKNOWN_FIELD";
+	}
+	
+	public static String toASMPath(String path) {
+		if (path.endsWith(".sn") || path.endsWith(".hn")) 
+			path = path.substring(0, path.length() - 2) + "s";
+		return path;
 	}
     
 } 

@@ -17,7 +17,11 @@ TESTCASES
 2 1 0
 2 2 4
 OUTPUT
-/* --test_11.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
@@ -44,4 +48,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-    

@@ -3,6 +3,7 @@
 	<Library>
 		<Alias>resv.sn:lib/mem/resv.sn</Alias>
 		<Alias>free.sn:lib/mem/free.sn</Alias>
+		<Alias>isa.sn:lib/mem/isa.sn</Alias>
 		<Alias>init.sn:lib/mem/init.sn</Alias>
 		<Alias>hsize.sn:lib/mem/hsize.sn</Alias>
 		

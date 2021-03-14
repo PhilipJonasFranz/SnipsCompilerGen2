@@ -8,8 +8,11 @@ TESTCASES
 1 0 1
 1 1 2
 OUTPUT
-/* --test_03.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     add r0, r0, r1
     bx lr
-    

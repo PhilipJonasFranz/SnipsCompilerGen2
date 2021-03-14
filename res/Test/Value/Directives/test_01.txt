@@ -10,8 +10,24 @@ TESTCASES
 1 2
 2 6
 OUTPUT
-/* --test_01.txt */
+.data
+.text
     b main
+    
+.global foo
+foo:                                         /* Function: foo */
+    push { lr }
+    bl bar                                   /* Call bar */
+    mov r1, #2
+    mul r0, r1, r0
+    pop { pc }
+
+.global bar
+bar:                                         /* Function: bar */
+    lsl r0, r0, #1
+    bx lr
+
+.global __op_div
 __op_div:                                    /* Function: __op_div */
     sub sp, sp, #16
     stmea sp, {r3-r6}
@@ -58,18 +74,8 @@ __op_div.L2:
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6}
     bx lr
-    
-bar:                                         /* Function: bar */
-    lsl r0, r0, #1
-    bx lr
-    
-foo:                                         /* Function: foo */
-    push { lr }
-    bl bar                                   /* Call bar */
-    mov r1, #2
-    mul r0, r1, r0
-    pop { pc }
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -84,4 +90,3 @@ main.L0:
     pop { r1 }
     bl __op_div                              /* Call __op_div */
     pop { pc }
-    

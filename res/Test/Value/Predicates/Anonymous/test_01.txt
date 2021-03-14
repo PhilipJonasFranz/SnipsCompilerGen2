@@ -13,8 +13,10 @@ TESTCASES
 0 5
 1 3
 OUTPUT
-/* --test_01.txt */
+.data
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -29,6 +31,7 @@ _routine_stack_copy_end_:
 lambda_id:                                   /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global id
 id:                                          /* Function: id */
     push { fp }
     mov fp, sp
@@ -46,6 +49,7 @@ id:                                          /* Function: id */
     mov r10, #0
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -65,4 +69,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

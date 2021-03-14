@@ -14,8 +14,11 @@ int main() {
 TESTCASES
 2
 OUTPUT
-/* --test_05.txt */
+.data
+.text
     b main
+    
+.global smallest
 smallest:                                    /* Function: smallest */
     sub sp, sp, #20
     stmea sp, {r3-r7}
@@ -41,6 +44,7 @@ smallest.L2:
     ldmfd sp!, {r3-r7}
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -57,4 +61,3 @@ main:                                        /* Function: main */
     bl smallest                              /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

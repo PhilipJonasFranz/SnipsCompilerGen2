@@ -12,12 +12,16 @@ TESTCASES
 1 1
 2 2
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global forEach
 forEach:                                     /* Function: forEach */
     ldr r0, [r10, r1, lsl #2]                /* Load from address */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -31,4 +35,3 @@ main:                                        /* Function: main */
     bl forEach                               /* Call forEach */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

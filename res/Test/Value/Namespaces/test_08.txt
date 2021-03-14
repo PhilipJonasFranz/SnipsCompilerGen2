@@ -9,13 +9,16 @@ int main() {
 TESTCASES
 40
 OUTPUT
-/* --test_08.txt */
+.data
+.text
     b main
+    
+.global Test.foo
 Test.foo:                                    /* Function: Test.foo */
     lsl r0, r0, #2
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     b Test.foo                               /* Call Test.foo */
-    

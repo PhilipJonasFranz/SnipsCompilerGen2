@@ -15,9 +15,15 @@ TESTCASES
 0 2
 2 4
 OUTPUT
-/* --test_00.txt */
+.data
+.text
     b main
     
+/* Comment A */
+    
+/* Comment B */
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
 /* Comment C */
@@ -28,3 +34,4 @@ main:                                        /* Function: main */
     mov r0, r3                               /* Evaluate Expression */
     bx lr
     
+/* Final Comment */

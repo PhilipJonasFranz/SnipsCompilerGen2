@@ -21,15 +21,20 @@ int main() {
 TESTCASES
 20
 OUTPUT
-/* --test_21.txt */
+.data
+X: .word 0
+Y: .word 0
+
+.text
     b main
     
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    mov r1, #1
+    ldr r1, .POOL0_X
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .POOL0_Y
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -39,4 +44,5 @@ main:                                        /* Function: main */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov sp, fp
     bx lr
-    
+.POOL0_Y: .word Y
+.POOL0_X: .word X

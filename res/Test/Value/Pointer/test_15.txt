@@ -15,8 +15,11 @@ TESTCASES
 0 9
 1 1
 OUTPUT
-/* --test_15.txt */
+.data
+.text
     b main
+    
+.global get
 get:                                         /* Function: get */
     push { r3 }
     mov r3, r0
@@ -25,6 +28,7 @@ get:                                         /* Function: get */
     pop { r3 }
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -43,4 +47,3 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

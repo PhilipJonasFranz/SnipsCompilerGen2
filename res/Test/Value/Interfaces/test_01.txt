@@ -34,8 +34,12 @@ int main() {
 TESTCASES
 40
 OUTPUT
-/* --test_01.txt */
+.data
+X: .word 0
+
+.text
     b main
+    
 Inter.L0:                                    /* Interface : Inter */
     add r10, r12, #4
     mov r12, #0
@@ -43,12 +47,14 @@ Inter.L0:                                    /* Interface : Inter */
     b X.get
     b X.set
     
+.global X.get
 X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
     
+.global X.set
 X.set:                                       /* Function: X.set */
     mov r10, #0
     push { r3 }
@@ -59,12 +65,13 @@ X.set:                                       /* Function: X.set */
     pop { r3 }
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -80,4 +87,4 @@ main:                                        /* Function: main */
     add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_X: .word X

@@ -20,12 +20,16 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 48
 OUTPUT
-/* --test_08.txt */
+.data
+.text
     b main
+    
+.global foo
 foo:                                         /* Function: foo */
     add r0, r0, r1
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -77,4 +81,3 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

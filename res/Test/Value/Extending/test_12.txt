@@ -19,8 +19,14 @@ int main() {
 TESTCASES
 29
 OUTPUT
-/* --test_12.txt */
+.data
+A: .word 0
+B: .word A
+
+.text
     b main
+    
+.global B.incr_P_1
 B.incr_P_1:                                  /* Function: B.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
@@ -29,12 +35,13 @@ B.incr_P_1:                                  /* Function: B.incr, Provisos: INT 
     str r2, [r1]
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #14                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_A
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -46,4 +53,4 @@ main:                                        /* Function: main */
     add r0, r1, r4
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.POOL0_A: .word A

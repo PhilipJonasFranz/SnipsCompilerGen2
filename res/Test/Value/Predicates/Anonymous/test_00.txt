@@ -15,15 +15,19 @@ TESTCASES
 0 5
 1 6
 OUTPUT
-/* --test_00.txt */
+.data
+.text
     b main
+    
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global add5
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
     
+.global get
 get:                                         /* Function: get */
     push { r4, lr }
     mov r4, r1
@@ -31,6 +35,7 @@ get:                                         /* Function: get */
     mov pc, r4
     ldmfd sp!, {r4, pc}
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -44,4 +49,3 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

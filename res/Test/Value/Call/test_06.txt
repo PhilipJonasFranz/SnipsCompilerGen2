@@ -15,16 +15,21 @@ TESTCASES
 1 4 12
 3 5 16
 OUTPUT
-/* --test_06.txt */
+.data
+.text
     b main
+    
+.global bar
 bar:                                         /* Function: bar */
     add r0, r0, #3
     bx lr
     
+.global foo
 foo:                                         /* Function: foo */
     lsl r0, r0, #1
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -35,4 +40,3 @@ main:                                        /* Function: main */
     bl bar                                   /* Call bar */
     add r0, r5, r0
     pop { pc }
-    

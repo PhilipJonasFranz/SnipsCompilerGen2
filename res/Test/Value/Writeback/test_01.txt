@@ -8,7 +8,11 @@ TESTCASES
 -1 1
 2 4
 OUTPUT
-/* --test_01.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     add r3, r0, #1
@@ -18,4 +22,3 @@ main:                                        /* Function: main */
     mov r2, r0
     mov r0, r3                               /* Evaluate Expression */
     bx lr
-    

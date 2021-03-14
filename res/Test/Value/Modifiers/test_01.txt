@@ -19,8 +19,12 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_01.txt */
+.data
+Test.S: .word 0
+
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -32,13 +36,14 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
     
+.global Test.getter
 Test.getter:                                 /* Function: Test.getter */
     push { fp }
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .POOL0_Test.S
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -49,7 +54,9 @@ Test.getter:                                 /* Function: Test.getter */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
+.POOL0_Test.S: .word Test.S
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -59,4 +66,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

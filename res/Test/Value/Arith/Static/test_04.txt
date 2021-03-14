@@ -5,8 +5,11 @@ int main() {
 TESTCASES
 55
 OUTPUT
-/* --test_04.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r0, #55
     bx lr
-    

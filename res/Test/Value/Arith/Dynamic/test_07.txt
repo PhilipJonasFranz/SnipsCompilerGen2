@@ -5,7 +5,11 @@ int main(int a) {
 TESTCASES
 4 1
 OUTPUT
-/* --test_07.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     lsl r1, r0, #1
@@ -14,4 +18,3 @@ main:                                        /* Function: main */
     sub r2, r3, r2
     add r0, r0, r2
     bx lr
-    

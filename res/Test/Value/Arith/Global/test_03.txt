@@ -11,13 +11,15 @@ TESTCASES
 3 3
 4 4
 OUTPUT
-/* --test_03.txt */
 .data
 x: .word 3
 y: .word 1
 z: .word 0
-    
+
 .text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     ldr r0, .POOL0_L1_y                      /* Evaluate Expression */
@@ -42,4 +44,3 @@ main.L0:
 .POOL0_L0_x: .word x
 .POOL0_L2_z: .word z
 .POOL0_L1_y: .word y
-    

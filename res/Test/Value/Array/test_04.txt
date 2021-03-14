@@ -17,8 +17,11 @@ TESTCASES
 1 32
 2 33
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global bar
 bar:                                         /* Function: bar */
     ldr r0, [sp]
     ldr r2, [sp, #4]
@@ -28,6 +31,7 @@ bar:                                         /* Function: bar */
     add sp, sp, #12
     bx lr
     
+.global foo
 foo:                                         /* Function: foo */
     push { fp, lr }
     mov fp, sp
@@ -47,6 +51,7 @@ foo:                                         /* Function: foo */
     add sp, sp, #24
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -69,4 +74,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

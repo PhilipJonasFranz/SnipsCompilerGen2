@@ -207,7 +207,7 @@ public class Function extends CompoundStatement {
 		
 		System.out.println(" " + this.toString().split("@") [1]);
 		
-		if (rec) for (Statement s : body) 
+		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 

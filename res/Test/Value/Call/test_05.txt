@@ -19,8 +19,11 @@ TESTCASES
 0 10
 5 25
 OUTPUT
-/* --test_05.txt */
+.data
+.text
     b main
+    
+.global bar
 bar:                                         /* Function: bar */
     push { r4 }
     add r4, r0, #2
@@ -28,6 +31,7 @@ bar:                                         /* Function: bar */
     pop { r4 }
     bx lr
     
+.global foo
 foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r5, lr}
@@ -37,6 +41,7 @@ foo:                                         /* Function: foo */
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3, r5, pc}
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -45,4 +50,3 @@ main:                                        /* Function: main */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
     pop { pc }
-    

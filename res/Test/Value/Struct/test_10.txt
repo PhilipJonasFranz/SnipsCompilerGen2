@@ -12,16 +12,22 @@ TESTCASES
 1 2
 2 4
 OUTPUT
-/* --test_10.txt */
+.data
+Data: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     lsl r0, r0, #1
     push { r0 }
     push { r3 }
-    mov r0, #1
+    ldr r0, .POOL0_Data
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     bx lr
-    
+.POOL0_Data: .word Data

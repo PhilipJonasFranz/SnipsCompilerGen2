@@ -15,7 +15,6 @@ import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -173,7 +172,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 					
 					/* Generate the SID-to-Index mapper */
 					for (StructTypedef struct : def.implementers) {
-						intf.instructions.add(new ASMCmp(new RegOp(REG.R10), new ImmOp(struct.SID)));
+						struct.loadSIDInReg(intf, REG.R10);
 						intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
 						intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
 					}

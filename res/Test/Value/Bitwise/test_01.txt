@@ -12,8 +12,11 @@ TESTCASES
 1 2 3
 5 2 7
 OUTPUT
-/* --test_01.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     orr r0, r0, r1
     bx lr
-    

@@ -18,27 +18,35 @@ TESTCASES
 1 5
 5 13
 OUTPUT
-/* --test_00.txt */
+.data
+Point2D: .word 0
+Line2D: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     add r0, r0, #1
     push { r0 }
     push { r3 }
-    mov r0, #1
+    ldr r0, .POOL0_Point2D
     push { r0 }
     mov r2, #3
     mul r0, r3, r2
     push { r0 }
     add r0, r3, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_Point2D
     push { r0 }
-    mov r0, #2
+    ldr r0, .POOL0_Line2D
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     ldr r2, [fp, #-20]                       /* Load field from struct */
     add r0, r0, r2
     mov sp, fp
     bx lr
-    
+.POOL0_Line2D: .word Line2D
+.POOL0_Point2D: .word Point2D

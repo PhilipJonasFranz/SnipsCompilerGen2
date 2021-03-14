@@ -7,7 +7,11 @@ char main() {
 TESTCASES
 50
 OUTPUT
-/* --test_00.txt */
+.data
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov r0, #49                              /* Evaluate Expression */
     mov r3, #49
@@ -17,4 +21,3 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, r3                               /* Evaluate Expression */
     bx lr
-    

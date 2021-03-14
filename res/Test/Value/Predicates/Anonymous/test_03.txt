@@ -20,8 +20,10 @@ int main() {
 TESTCASES
 55
 OUTPUT
-/* --test_03.txt */
+.data
+.text
     b main
+    
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -36,6 +38,7 @@ _routine_stack_copy_end_:
 lambda_f:                                    /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global f
 f:                                           /* Function: f */
     push { r3, fp }
     mov fp, sp
@@ -53,6 +56,7 @@ f:                                           /* Function: f */
     mov r10, #0
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -79,4 +83,3 @@ main.L2:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

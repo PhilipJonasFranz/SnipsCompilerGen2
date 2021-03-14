@@ -17,16 +17,23 @@ int main() {
 TESTCASES
 27
 OUTPUT
-/* --test_07.txt */
+.data
+Test: .word 0
+MainTest: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
     mov r0, #8
     mov r1, #3
-    mov r2, #1
+    ldr r2, .POOL0_Test
     stmfd sp!, {r0-r2}
-    mov r0, #2
+    ldr r0, .POOL0_MainTest
     push { r0 }
     mov r0, #9                               /* Evaluate Expression */
     str r0, [fp, #-12]                       /* Store value to struct field */
@@ -37,4 +44,5 @@ main:                                        /* Function: main */
     lsl r2, r1, #1
     add r0, r0, r2
     bx lr
-    
+.POOL0_MainTest: .word MainTest
+.POOL0_Test: .word Test

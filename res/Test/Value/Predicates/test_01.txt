@@ -37,17 +37,21 @@ TESTCASES
 3 6
 4 8
 OUTPUT
-/* --test_01.txt */
+.data
+.text
     b main
+    
 lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
+.global sortPred
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
     
+.global sort
 sort:                                        /* Function: sort */
     sub sp, sp, #32
     stmea sp, {r3-r9, lr}
@@ -90,6 +94,7 @@ sort.L10:
     b sort.L3
     ldmfd sp!, {r3-r9, pc}
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -116,4 +121,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -19,23 +19,33 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_03.txt */
+.data
+Foo: .word 0
+Nib: .word 0
+Data: .word 0
+
+.text
+    b main
+    
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    mov r1, #1
+    ldr r1, .POOL0_Foo
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .POOL0_Nib
     push { r0 }
     mov r0, #5
-    mov r1, #1
+    ldr r1, .POOL0_Foo
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .POOL0_Nib
     push { r0 }
-    mov r0, #3
+    ldr r0, .POOL0_Data
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-    
+.POOL0_Data: .word Data
+.POOL0_Nib: .word Nib
+.POOL0_Foo: .word Foo

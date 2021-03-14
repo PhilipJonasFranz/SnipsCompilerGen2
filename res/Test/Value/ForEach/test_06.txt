@@ -20,8 +20,11 @@ int main() {
 TESTCASES
 6
 OUTPUT
-/* --test_06.txt */
+.data
+.text
     b main
+    
+.global incr
 incr:                                        /* Function: incr */
     push { r3 }
     mov r3, r0
@@ -32,6 +35,7 @@ incr:                                        /* Function: incr */
     pop { r3 }
     bx lr
     
+.global smallest
 smallest:                                    /* Function: smallest */
     sub sp, sp, #28
     stmea sp, {r3-r7, fp, lr}
@@ -65,6 +69,7 @@ smallest.L2:
     mov sp, fp
     ldmfd sp!, {r3-r7, fp, pc}
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -81,4 +86,3 @@ main:                                        /* Function: main */
     bl smallest                              /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

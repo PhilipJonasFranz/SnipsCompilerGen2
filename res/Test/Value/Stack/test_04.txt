@@ -15,12 +15,16 @@ TESTCASES
 1 2 3 4 5 55
 2 2 2 2 2 20
 OUTPUT
-/* --test_04.txt */
+.data
+.text
     b main
+    
+.global sq
 sq:                                          /* Function: sq */
     mul r0, r0, r0
     bx lr
     
+.global sqsum
 sqsum:                                       /* Function: sqsum */
     sub sp, sp, #20
     stmea sp, {r4-r6, fp, lr}
@@ -47,6 +51,7 @@ sqsum:                                       /* Function: sqsum */
     add sp, sp, #8
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -64,4 +69,3 @@ main:                                        /* Function: main */
     bl sqsum                                 /* Call sqsum */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

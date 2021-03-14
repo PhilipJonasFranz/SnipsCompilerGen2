@@ -12,8 +12,11 @@ TESTCASES
 1 2
 2 3
 OUTPUT
-/* --test_02.txt */
+.data
+.text
     b main
+    
+.global foo
 foo:                                         /* Function: foo */
     lsl r2, r0, #2
     add r0, sp, #0
@@ -21,6 +24,7 @@ foo:                                         /* Function: foo */
     add sp, sp, #12
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -36,4 +40,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

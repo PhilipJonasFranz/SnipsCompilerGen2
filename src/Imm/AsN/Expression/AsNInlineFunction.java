@@ -11,6 +11,7 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
@@ -41,7 +42,7 @@ public class AsNInlineFunction extends AsNExpression {
 		LabelUtil.funcPrefix = currentPrefix;
 		LabelUtil.funcUID = currentUID;
 		
-		AsNBody.instructionAppenix.addAll(funcCast.getInstructions());
+		AsNBody.addToTranslationUnit(funcCast.getInstructions(), i.getSource(), SECTION.TEXT);
 		
 		/* Create return address in R10, used to return from sys jump */
 		ifunc.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8)));

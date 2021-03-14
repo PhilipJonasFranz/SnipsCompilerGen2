@@ -28,25 +28,27 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_04.txt */
 .data
 Foo.x: .word 15
 Foo.Baz.x: .word 10
-    
+Foo.Bar: .word 0
+
 .text
     b main
     
+.global Foo.get
 Foo.get:                                     /* Function: Foo.get */
     ldr r0, [sp, #4]                         /* Load field from struct */
     add sp, sp, #8
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .POOL0_Foo.Bar
     push { r0 }
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     ldr r1, [fp, #-8]
@@ -59,4 +61,4 @@ main:                                        /* Function: main */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .POOL0_L1_Foo.Baz.x: .word Foo.Baz.x
-    
+.POOL0_Foo.Bar: .word Foo.Bar

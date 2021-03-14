@@ -20,15 +20,16 @@ TESTCASES
 1 1
 2 2
 OUTPUT
-/* --test_01.txt */
 .data
 x: .word 10
-    
+
 .text
     b main
+    
+.global Getter.get
 Getter.get:                                  /* Function: Getter.get */
     bx lr
     
+.global main
 main:                                        /* Function: main */
     b Getter.get                             /* Call Getter.get */
-    

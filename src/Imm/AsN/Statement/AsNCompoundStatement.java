@@ -22,11 +22,11 @@ import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDOfExpression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
-import Imm.AST.Expression.InstanceofExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -315,10 +315,6 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			SizeOfExpression soe = (SizeOfExpression) e;
 			return hasAddressReference(soe.expression, dec);
 		}
-		else if (e instanceof InstanceofExpression) {
-			InstanceofExpression iof = (InstanceofExpression) e;
-			return hasAddressReference(iof.expression, dec);
-		}
 		else if (e instanceof TypeCast) {
 			TypeCast tc = (TypeCast) e;
 			return hasAddressReference(tc.expression, dec);
@@ -336,7 +332,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			if (a.base == null) return false;
 			else return hasAddressReference(a.base, dec);
 		}
-		else if (e instanceof InlineFunction || e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof StructSelect) {
+		else if (e instanceof InlineFunction || e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof IDOfExpression || e instanceof StructSelect) {
 			return false;
 		}
 		else if (e instanceof StructSelectWriteback) {

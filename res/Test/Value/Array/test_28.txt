@@ -15,12 +15,13 @@ TESTCASES
 1 0 9
 1 1 2
 OUTPUT
-/* --test_28.txt */
 .data
 vec: .skip 16
-    
+
 .text
     b main_init
+    
+.global foo
 foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
@@ -53,6 +54,8 @@ foo:                                         /* Function: foo */
     ldmfd sp!, {r3, r4, fp}
     add sp, sp, #16
     bx lr
+    
+.global main
     
 /* Initialize the global variables */
 main_init: 
@@ -89,4 +92,3 @@ main:                                        /* Function: main */
     mov r1, r4
     b foo                                    /* Call foo */
 .POOL0_L0_vec: .word vec
-    

@@ -16,8 +16,11 @@ TESTCASES
 8 21
 10 55
 OUTPUT
-/* --test_00.txt */
+.data
+.text
     b main
+    
+.global fib
 fib:                                         /* Function: fib */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
@@ -35,6 +38,6 @@ fib.L1:
     add r0, r4, r0
     ldmfd sp!, {r3, r4, pc}
     
+.global main
 main:                                        /* Function: main */
     b fib                                    /* Call fib */
-    

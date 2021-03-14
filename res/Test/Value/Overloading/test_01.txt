@@ -13,15 +13,20 @@ int main() {
 TESTCASES
 21
 OUTPUT
-/* --test_01.txt */
+.data
+.text
     b main
+    
+.global get@0
 get@0:                                       /* Function: get */
     bx lr
     
+.global get@1
 get@1:                                       /* Function: get */
     lsl r0, r0, #1
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
@@ -31,4 +36,3 @@ main:                                        /* Function: main */
     bl get@0                                 /* Call get */
     add r0, r3, r0
     pop { pc }
-    

@@ -6,9 +6,15 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTX_EXC;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
+import Imm.AsN.AsNNode;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -48,12 +54,7 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	/* 
-	 * SID is assigned during context checking, in order to allow for efficient instanceof expressions.
-	 */
-	public int SID;
-	
-	public StructTypedef SIDNeighbour;
+	public ASMDataLabel SIDLabel;
 	
 	public class StructProvisoMapping {
 		
@@ -181,35 +182,6 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	/**
-	 * Assign SIDs and neighbours to the StructTypedefs based on the location
-	 * in the extension tree. SIDs are unique, as well as the neighbours.
-	 */
-	public int propagateSIDs(int start, StructTypedef neighbour) {
-		this.SID = start;
-		start++;
-		this.SIDNeighbour = neighbour;
-		
-		if (!this.extenders.isEmpty()) {
-			if (this.extenders.size() == 1) 
-				start = this.extenders.get(0).propagateSIDs(start, neighbour);
-			else {
-				/* Apply to first n - 1 */
-				for (int i = 1; i < this.extenders.size(); i++) { 
-					start = this.extenders.get(i - 1).propagateSIDs(start, this.extenders.get(i));
-					
-					/* Set neighbour of n - 1 to n */
-					this.extenders.get(i - 1).SIDNeighbour = this.extenders.get(i);
-				}
-				
-				/* Apply to last */
-				this.extenders.get(this.extenders.size() - 1).propagateSIDs(start, neighbour);
-			}
-		}
-		
-		return start;
-	}
-	
-	/**
 	 * Request the declaration whiches name matches given path. Select the mapping
 	 * that corresponds to given proviso types. If no such mapping exists, a new one
 	 * is created.
@@ -281,7 +253,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">";
+		String s = this.pad(d) + "Struct Typedef<" + this.path.build() + ">";
 		
 		if (this.extension != null)
 			s += ":extends:" + this.extension.path.build() + ",";
@@ -324,6 +296,11 @@ public class StructTypedef extends SyntaxElement {
 
 	public void setContext(List<TYPE> context) throws CTX_EXC {
 		return;
+	}
+	
+	public void loadSIDInReg(AsNNode node, REG reg) {
+		LabelOp operand = new LabelOp(this.SIDLabel);
+		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
 	}
 
 } 

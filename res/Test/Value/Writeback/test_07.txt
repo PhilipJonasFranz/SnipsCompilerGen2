@@ -14,13 +14,15 @@ TESTCASES
 3 6
 4 10
 OUTPUT
-/* --test_07.txt */
 .data
 s: .word 0
-    
+
 .text
     b main
     
+/* In global memory */
+    
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, #0
@@ -39,4 +41,3 @@ main.L2:
     ldr r0, [r0]
     bx lr
 .POOL0_L0_s: .word s
-    

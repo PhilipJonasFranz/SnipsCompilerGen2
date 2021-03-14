@@ -20,13 +20,17 @@ TESTCASES
 1 2 3
 2 2 5
 OUTPUT
-/* --test_07.txt */
+.data
+.text
     b main
+    
+.global set
 set:                                         /* Function: set */
     add r0, r0, r2
     str r1, [r10, r0, lsl #2]
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -48,4 +52,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -15,8 +15,11 @@ TESTCASES
 1 0 9
 1 1 8
 OUTPUT
-/* --test_12.txt */
+.data
+.text
     b main
+    
+.global set
 set:                                         /* Function: set */
     push { r3, fp }
     mov fp, sp
@@ -38,6 +41,7 @@ set:                                         /* Function: set */
     add sp, sp, #16
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -67,4 +71,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

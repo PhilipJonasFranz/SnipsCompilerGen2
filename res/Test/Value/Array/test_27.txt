@@ -14,8 +14,11 @@ TESTCASES
 1 0 9
 1 1 2
 OUTPUT
-/* --test_27.txt */
+.data
+.text
     b main
+    
+.global foo
 foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
@@ -49,6 +52,7 @@ foo:                                         /* Function: foo */
     add sp, sp, #16
     bx lr
     
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -70,4 +74,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
