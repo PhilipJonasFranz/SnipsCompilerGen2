@@ -47,58 +47,18 @@ List.LinkedList.add.L0:
 .POOL0_List.ListNode: .word List.ListNode
 .POOL0_L0_NULL: .word NULL
     
-.global List.LinkedList.get_P_1
-List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
-    mov r10, #0
-    sub sp, sp, #12
-    stmea sp, {r3-r5}
-    mov r3, r0
-    mov r4, r1
-    cmp r1, #0
-    bge List.LinkedList.get.L0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.get.L4
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get.L5
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #16]                        /* Load field from struct */
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get.L7: 
-    ldmfd sp!, {r3-r5}
-    bx lr
-.POOL1_L0_NULL: .word NULL
-    
 .global List.LinkedList.create_P_1
 List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL2_L0_NULL                   /* Load null address */
-    ldr r2, .POOL2_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r2, .POOL1_L0_NULL                   /* Load null address */
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL2_List.LinkedList
+    ldr r0, .POOL1_List.LinkedList
     push { r0 }
     bl init_P_5                              /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL2_List.LinkedList: .word List.LinkedList
-.POOL2_L0_NULL: .word NULL
+.POOL1_List.LinkedList: .word List.LinkedList
+.POOL1_L0_NULL: .word NULL

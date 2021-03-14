@@ -29,7 +29,7 @@ int main() {
 	
 	Root r0 = *r;
 	
-	if (isa(*((void) r), idof(Root))) return 1 + r0.x;
+	if (isa(&r0, idof(Root))) return 1 + r0.x;
 	else return r0.x;
 }
 TESTCASES
@@ -46,27 +46,35 @@ Root2: .word 0
 .text
     b main
     
-.global isa
-isa:                                         /* Function: isa */
+.global isar
+isar:                                        /* Function: isar */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r3, r0
     mov r4, r1
     cmp r0, #0
-    bne isa.L0
+    bne isar.L0
     mov r0, #0                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4, pc}
-isa.L0: 
+isar.L0: 
     cmp r3, r4
-    bne isa.L2
+    bne isar.L2
     mov r0, #1                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4, pc}
-isa.L2: 
+isar.L2: 
     lsr r0, r3, #2
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     mov r1, r4
-    bl isa                                   /* Call isa */
+    bl isar                                  /* Call isar */
     ldmfd sp!, {r3, r4, pc}
+    
+.global isa
+isa:                                         /* Function: isa */
+    push { r3, lr }
+    mov r3, r0
+    ldr r0, [r10, r3, lsl #2]                /* Load from address */
+    bl isar                                  /* Call isar */
+    ldmfd sp!, {r3, pc}
 
 .global main
 main:                                        /* Function: main */
@@ -85,7 +93,8 @@ main:                                        /* Function: main */
     ldr r0, .POOL0_Root
     push { r0 }
     ldr r1, .POOL0_Root                      /* Load parameters */
-    ldr r0, [r10, r3, lsl #2]                /* Load from address */
+    sub r0, fp, #20
+    lsr r0, r0, #2
     bl isa                                   /* Call isa */
     cmp r0, #0
     beq main.L1

@@ -6,7 +6,7 @@ Map.HashMap: .word 0
 .text
     
 .global Map.tupleKeyMatcher_P_1_1
-Map.tupleKeyMatcher_P_1_1:                   /* Function: Map.tupleKeyMatcher, Provisos: INT, INT */
+Map.tupleKeyMatcher_P_1_1:                   /* Function: Map.tupleKeyMatcher, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r3, r0
@@ -37,7 +37,7 @@ Map.tupleKeyMatcher.L5:
     bx lr
     
 .global Map.HashMap.put_P_1_1
-Map.HashMap.put_P_1_1:                       /* Function: Map.HashMap.put, Provisos: INT, INT */
+Map.HashMap.put_P_1_1:                       /* Function: Map.HashMap.put, Provisos: CHAR, BOOL | INT, INT */
     sub sp, sp, #24
     stmea sp, {r3-r6, fp, lr}
     mov fp, sp
@@ -91,7 +91,7 @@ Map.HashMap.put.L0:
 .POOL0_L0_NULL: .word NULL
     
 .global Map.HashMap.replace_P_1_1
-Map.HashMap.replace_P_1_1:                   /* Function: Map.HashMap.replace, Provisos: INT, INT */
+Map.HashMap.replace_P_1_1:                   /* Function: Map.HashMap.replace, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #24
     stmea sp, {r3-r6, fp, lr}
     mov fp, sp
@@ -238,7 +238,7 @@ Map.HashMap.get.L8:
 .POOL2_L0_NULL: .word NULL
     
 .global Map.HashMap.remove_P_1_1
-Map.HashMap.remove_P_1_1:                    /* Function: Map.HashMap.remove, Provisos: INT, INT */
+Map.HashMap.remove_P_1_1:                    /* Function: Map.HashMap.remove, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #20
     stmea sp, {r3-r5, fp, lr}
     mov fp, sp
@@ -308,7 +308,7 @@ Map.HashMap.remove.L0:
 .POOL3_L0_NULL: .word NULL
     
 .global Map.HashMap.create_P_1_1
-Map.HashMap.create_P_1_1:                    /* Function: Map.HashMap.create, Provisos: INT, INT */
+Map.HashMap.create_P_1_1:                    /* Function: Map.HashMap.create, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
@@ -342,3 +342,4 @@ Map.HashMap.create.L2:
     ldmfd sp!, {r3-r6, pc}
 .POOL4_Map.HashMap: .word Map.HashMap
 .POOL4_L0_NULL: .word NULL
+    

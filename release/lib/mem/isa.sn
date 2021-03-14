@@ -5,8 +5,16 @@
  * created when linking the executable. The id of a struct can
  * be obtained with idof(TYPE).
  */
-shared bool isa(void* child, void* parent) {
+shared bool isar(void* child, void* parent) {
 	if (child == 0) return false;
 	if (child == parent) return true;
-	return isa(*(child >> 2), parent);
+	return isar(*(child >> 2), parent);
+}
+
+/*
+ * Check if the given reference to a struct is
+ * an instanceof the given struct.
+ */
+shared bool isa(void* child, void* parent) {
+	return isar(*child, parent);
 }
