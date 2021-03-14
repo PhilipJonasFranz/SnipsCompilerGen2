@@ -76,6 +76,9 @@ public class PreProcessor {
 							this.includeLines(modPath, imports, i);
 					}
 					
+					/* Load originally included file */
+					this.includeLines(path, imports, i);
+					
 					/* 
 					 * Loading module from .sn file, check if a header exists, 
 					 * and if yes, load it. This is nessesary since the header may
@@ -87,8 +90,6 @@ public class PreProcessor {
 							this.includeLines(modPath, imports, i);
 					}
 					
-					/* Load originally included file */
-					this.includeLines(path, imports, i);
 					i--;
 				} 
 				else {
