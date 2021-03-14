@@ -43,10 +43,8 @@ public class AsNTranslationUnit extends AsNNode {
 			this.textSection.addAll(instructions);
 		}
 		else if (section == SECTION.DATA) {
-			if (!dataSection.isEmpty() && !(dataSection.get(dataSection.size() - 1) instanceof ASMSeperator))
-				dataSection.add(new ASMSeperator());
-			
-			this.dataSection.addAll(instructions);
+			this.dataSection.addAll(0, instructions);
+			dataSection.add(instructions.size(), new ASMSeperator());
 		}
 	}
 	

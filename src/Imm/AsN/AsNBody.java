@@ -129,21 +129,6 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
-		if (CompilerDriver.null_referenced) {
-			Declaration nullPtr = CompilerDriver.NULL_PTR;
-			
-			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
-			body.originUnit.append(dataEntry, SECTION.DATA);
-			
-			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
-			globalVarReferences.add(reference);
-			
-			/* Add declaration to global memory */
-			map.add(nullPtr, reference);
-		}
-		
 		if (CompilerDriver.heap_referenced) {
 			Declaration heap = CompilerDriver.HEAP_START;
 			
@@ -157,6 +142,21 @@ public class AsNBody extends AsNNode {
 			
 			/* Add declaration to global memory */
 			map.add(heap, reference);
+		}
+		
+		if (CompilerDriver.null_referenced) {
+			Declaration nullPtr = CompilerDriver.NULL_PTR;
+			
+			/* Create instruction for .data Section */
+			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
+			body.originUnit.append(dataEntry, SECTION.DATA);
+			
+			/* Create address reference instruction for .text section */
+			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
+			globalVarReferences.add(reference);
+			
+			/* Add declaration to global memory */
+			map.add(nullPtr, reference);
 		}
 		
 		/* Branch to main Function if main function is not first function, patch target later */

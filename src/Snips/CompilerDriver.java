@@ -397,10 +397,10 @@ public class CompilerDriver {
 			if (buildModulesRecurse) {
 				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 					String path = PreProcessor.resolveToPath(entry.getKey());
-					
+
 					/* Build main file seperately */
-					String excludeMainPath = path.substring(0, path.length() - 1) + "s";
-					if (path.equals(excludeMainPath)) continue;
+					String excludeMainPath = Util.toASMPath(inputFile.getPath());
+					if (entry.getKey().equals(excludeMainPath)) continue;
 					
 					new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
 						

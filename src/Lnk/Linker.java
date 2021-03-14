@@ -119,7 +119,7 @@ public class Linker {
 			if (label == null) {
 				unit.textSection.addAll(3, importedUnit.textSection);
 				if (!importedUnit.textSection.isEmpty()) unit.textSection.add(3 + importedUnit.textSection.size(), "");
-				buffer.add(new Message("Resolved '" + mappedPath + "' to " + importedUnit.textSection.size() + " lines from '" + mappedPath + "'", Type.INFO, true));
+				buffer.add(new Message("LINK -> Resolved '" + mappedPath + "' to " + importedUnit.textSection.size() + " lines from '" + mappedPath + "'", Type.INFO, true));
 			}
 			else {
 				boolean found = false;
@@ -139,13 +139,13 @@ public class Linker {
 							unit.textSection.add(cnt++, lines.get(a++));
 						}
 						
-						buffer.add(new Message("Resolved '" + label + "' to " + (cnt - 3) + " lines from '" + mappedPath + "'", Type.INFO, true));
+						buffer.add(new Message("LINK -> Resolved '" + label + "' to " + (cnt - 3) + " lines from '" + mappedPath + "'", Type.INFO, true));
 						break;
 					}
 				}
 				
 				if (!found) 
-					buffer.add(new Message("Failed to locate '" + label + "' in '" + mappedPath + "'", Type.FAIL, true));
+					buffer.add(new Message("LINK -> Failed to locate '" + label + "' in '" + mappedPath + "'", Type.FAIL, true));
 			}
 		}
 		
