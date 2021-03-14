@@ -93,7 +93,16 @@ public class Linker {
 		for (int i = unit.imports.size() - 1; i >= 0; i--) {
 			String imp = unit.imports.get(i);
 			
-			String incPath = imp.trim().split(" ") [1];
+			String [] impSp = imp.trim().split(" ");
+			
+			boolean isMaybeInclude = false;
+			
+			String incPath = impSp [1];
+			if (impSp [1].equals("maybe")) {
+				incPath = impSp [2];
+				isMaybeInclude = true;
+			}
+			
 			String [] sp = incPath.split("@");
 			
 			String filePath = sp [0];
@@ -108,8 +117,12 @@ public class Linker {
 			/* Recursive linking */
 			List<String> lines = PreProcessor.getFile(mappedPath);
 			
-			if (lines == null) 
-				throw new LNK_EXC("Failed to locate include target %s", mappedPath);
+			if (lines == null) {
+				if (isMaybeInclude)
+					continue;
+				else
+					throw new LNK_EXC("Failed to locate include target %s", mappedPath);
+			}
 			
 			LinkerUnit importedUnit = Linker.parseLinkerUnit(lines);
 			importedUnit.sourceFile = mappedPath;
@@ -118,8 +131,18 @@ public class Linker {
 			unit.dataSection.addAll(0, importedUnit.dataSection);
 			
 			if (label == null) {
-				unit.textSection.addAll(3, importedUnit.textSection);
-				if (!importedUnit.textSection.isEmpty()) unit.textSection.add(3 + importedUnit.textSection.size(), "");
+				if (unit.textSection.size() > 4)
+					unit.textSection.addAll(3, importedUnit.textSection);
+				else
+					unit.textSection.addAll(importedUnit.textSection);
+				
+				if (!importedUnit.textSection.isEmpty()) {
+					if (unit.textSection.size() > 4)
+						unit.textSection.add(3 + importedUnit.textSection.size(), "");
+					else
+						unit.textSection.add(importedUnit.textSection.size(), "");
+				}
+				
 				buffer.add(new Message("LINK -> Resolved '" + mappedPath + "' to " + importedUnit.textSection.size() + " lines from '" + mappedPath + "'", Type.INFO, true));
 			}
 			else {

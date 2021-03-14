@@ -47,8 +47,10 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
+import PreP.PreProcessor;
 import Snips.CompilerDriver;
 import Util.Source;
+import Util.Util;
 import Util.Logging.ProgressMessage;
 
 public class AsNBody extends AsNNode {
@@ -81,7 +83,7 @@ public class AsNBody extends AsNNode {
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		
-		originPath = Util.Util.toASMPath(CompilerDriver.inputFile.getPath());
+		originPath = Util.toASMPath(CompilerDriver.inputFile.getPath());
 		body.originUnit = new AsNTranslationUnit(originPath);
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
@@ -129,35 +131,35 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
-		if (CompilerDriver.heap_referenced) {
-			Declaration heap = CompilerDriver.HEAP_START;
-			
-			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(heap.path.build(), new MemoryWordOp(heap.value));
-			body.originUnit.append(dataEntry, SECTION.DATA);
-			
-			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntry));
-			globalVarReferences.add(reference);
-			
-			/* Add declaration to global memory */
-			map.add(heap, reference);
-		}
+				/* --- INSERT NULL POINTER DATALABEL --- */
+		Declaration heap = CompilerDriver.HEAP_START;
 		
-		if (CompilerDriver.null_referenced) {
-			Declaration nullPtr = CompilerDriver.NULL_PTR;
+		/* Create instruction for .data Section */
+		ASMDataLabel dataEntryHeap = new ASMDataLabel(heap.path.build(), new MemoryWordOp(heap.value));
+		body.originUnit.append(dataEntryHeap, SECTION.DATA);
+		
+		/* Create address reference instruction for .text section */
+		ASMDataLabel heapReference = new ASMDataLabel(LabelUtil.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntryHeap));
+		globalVarReferences.add(heapReference);
+		
+		/* Add declaration to global memory */
+		map.add(heap, heapReference);
+		
+		
+				/* --- INSERT NULL POINTER DATALABEL --- */
+		Declaration nullPtr = CompilerDriver.NULL_PTR;
 			
-			/* Create instruction for .data Section */
-			ASMDataLabel dataEntry = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
-			body.originUnit.append(dataEntry, SECTION.DATA);
-			
-			/* Create address reference instruction for .text section */
-			ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntry));
-			globalVarReferences.add(reference);
-			
-			/* Add declaration to global memory */
-			map.add(nullPtr, reference);
-		}
+		/* Create instruction for .data Section */
+		ASMDataLabel dataEntryNull = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
+		body.originUnit.append(dataEntryNull, SECTION.DATA);
+		
+		/* Create address reference instruction for .text section */
+		ASMDataLabel nullReference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntryNull));
+		globalVarReferences.add(nullReference);
+		
+		/* Add declaration to global memory */
+		map.add(nullPtr, nullReference);
+		
 		
 		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp());
@@ -325,6 +327,43 @@ public class AsNBody extends AsNNode {
 		if (!AsNBody.usedStackCopyRoutine) 
 			body.originUnit.textSection.removeAll(routine);
 		
+		/* Add all system libraries that were used */
+		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
+	
+			AsNTranslationUnit unit = entry.getValue();
+			
+			/* Imports made by the source of this translation unit */
+			List<String> imports = PreProcessor.importsPerFile.get(entry.getValue().sourceFile);
+			
+			/* Add imports to translation unit */
+			if (imports != null) {
+				for (String imp : imports) {
+					if (!unit.imports.contains(imp)) {
+						unit.imports.add(imp);
+					}
+				}
+			}
+			
+			if (unit.sourceFile.equals(AsNBody.originPath)) {
+				List<String> referenced = new ArrayList();
+				
+				referenced.add("maybe free.s");
+				referenced.add("maybe hsize.s");
+				referenced.add("maybe init.s");
+				referenced.add("maybe isa.s");
+				referenced.add("maybe resv.s");
+				
+				referenced.add("maybe __op_mod.s");
+				referenced.add("maybe __op_div.s");
+				
+				for (String imp : referenced) {
+					if (!unit.imports.contains(imp)) {
+						unit.imports.add(imp);
+					}
+				}
+			}
+		}
+		
 		/* Build the literal pool labels for all created translation units */
 		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
 			body.buildLiteralPools(entry.getValue().textSection, map);
@@ -403,15 +442,7 @@ public class AsNBody extends AsNNode {
 	 * @param source The source of the ressource that generated the assembly
 	 */
 	public static void addToTranslationUnit(List<ASMInstruction> ins, Source source, SECTION section) {
-		String path = Util.Util.toASMPath(source.sourceFile);
-		
-		/* Add file import to origin translation unit imports */
-		if (!source.sourceFile.equals(CompilerDriver.inputFile.getPath())) {
-			AsNTranslationUnit unit = AsNBody.translationUnits.get(AsNBody.originPath);
-			if (!unit.imports.contains(path)) {
-				unit.imports.add(path);
-			}
-		}
+		String path = Util.toASMPath(source.sourceFile);
 			
 		if (!AsNBody.translationUnits.containsKey(path)) {
 			AsNTranslationUnit unit = new AsNTranslationUnit(path);

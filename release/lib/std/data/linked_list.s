@@ -1,3 +1,6 @@
+.include serializable.s
+.include collection.s
+    
 .data
 List.LinkedList: .word 0
     

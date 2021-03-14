@@ -76,8 +76,9 @@ public class CompilerDriver {
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
 		buildModulesRecurse = 			false,	/* Builds all modules in the input and saves them.				*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
-		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
-			
+		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
+		linkOnly = 						false;	/* Only link the given input							 		*/
+		
 	
 			/* --- DEBUG --- */
 	public static boolean
@@ -270,146 +271,150 @@ public class CompilerDriver {
 				code.stream().forEach(x -> System.out.println(printDepth + x));
 			}
 			
-			log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
-			
-					/* --- PRE-PROCESSING --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.PREP;
-			PreProcessor preProcess = new PreProcessor(code, inputFile.getPath());
-			List<LineObject> preCode = preProcess.getProcessed();
-			if (CompilerDriver.buildModulesRecurse) 
-				new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
-			
-			if (imm) {
-				log.add(new Message("SNIPS -> Pre-Processed Code:", LogPoint.Type.INFO));
-				preCode.stream().forEach(x -> System.out.println(printDepth + x.line));
-			}
-			
-			
-					/* --- SCANNING --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.SCAN;
-			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
-			Scanner scanner = new Scanner(preCode, scan_progress);
-			List<Token> deque = scanner.scan();
-			scan_progress.finish();
-			
-			
-					/* --- PARSING --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.PARS;
-			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
-			Parser parser = new Parser(deque, parse_progress);
-			SyntaxElement AST = parser.parse();
-			parse_progress.finish();
-			
-			
-					/* --- PROCESS IMPORTS >--- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.IMPM;
-			Program p = (Program) AST;
-			p.fileName = inputFile.getPath();
-			if (!referencedLibaries.isEmpty()) {
-				List<Program> dependencies = this.addDependencies();
+			if (!linkOnly) {
+				log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
 				
-				/* Print out imported libaries */
-				if (printAllImports)
-					for (SyntaxElement s : dependencies) 
-						log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
-				
-				/* Add libaries to AST, duplicates were already filtered */
-				int c = 0;
-				for (Program p0 : dependencies) {
-					for (SyntaxElement s : p0.programElements) 
-						p.programElements.add(c++, s);
-				}
-			}
-			
-			
-					/* ---< NAMESPACE MANAGER --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.NAMM;
-			NamespaceProcessor nameProc = new NamespaceProcessor();
-			nameProc.process((Program) AST);
-			
-			if (imm) AST.print(4, true);
-			
-			
-					/* ---< CONTEXT CHECKING --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.CTEX;
-			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
-			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
-			ctx.check();
-		
-			ctx_progress.finish();
-			if (imm) AST.print(4, true);
-			
-			
-					/* ---< CODE GENERATION --- */
-			lastSource = null;
-			currentStage = PIPE_STAGE.CGEN;
-			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
-			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
-
-			/* Remove comments left over by removed functions */
-			for (int i = 1; i < body.instructions.size(); i++) {
-				if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
-					body.instructions.remove(i - 1);
-					i -= 2;
-					if (i < 1) i = 1;
-				}
-			}
-			
-			cgen_progress.finish();
-			
-			
-					/* --- OPTIMIZING --- */
-			if (!disableOptimizer) {
+						/* --- PRE-PROCESSING --- */
 				lastSource = null;
-				currentStage = PIPE_STAGE.OPT1;
+				currentStage = PIPE_STAGE.PREP;
+				PreProcessor preProcess = new PreProcessor(code, inputFile.getPath());
+				List<LineObject> preCode = preProcess.getProcessed();
+				if (CompilerDriver.buildModulesRecurse) 
+					new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
 				
-				double rate = this.optimizeInstructionList(body.instructions, true);
-				
-				
-				
-				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
-				
-				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
-					rate += this.optimizeInstructionList(entry.getValue().textSection, false);
-				
-				rate /= AsNBody.translationUnits.size();
-				
-				if (!expectError) {
-					compressions.add(rate);
-				
-					if (rate < c_min) c_min = rate;
-					if (rate > c_max) c_max = rate;
+				if (imm) {
+					log.add(new Message("SNIPS -> Pre-Processed Code:", LogPoint.Type.INFO));
+					preCode.stream().forEach(x -> System.out.println(printDepth + x.line));
 				}
-			}
-			
-			
-					/* --- OUTPUT BUILDING --- */
-			output = this.buildOutput(body.originUnit.buildTranslationUnit(), false);
-		
-			
-					/* --- BUILD AND DUMP MODULES --- */
-			if (buildModulesRecurse) {
-				for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
-					String path = PreProcessor.resolveToPath(entry.getKey());
-
-					/* Build main file seperately */
-					String excludeMainPath = Util.toASMPath(inputFile.getPath());
-					if (entry.getKey().equals(excludeMainPath)) continue;
+				
+				
+						/* --- SCANNING --- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.SCAN;
+				ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
+				Scanner scanner = new Scanner(preCode, scan_progress);
+				List<Token> deque = scanner.scan();
+				scan_progress.finish();
+				
+				
+						/* --- PARSING --- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.PARS;
+				ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
+				Parser parser = new Parser(deque, parse_progress);
+				SyntaxElement AST = parser.parse();
+				parse_progress.finish();
+				
+				
+						/* --- PROCESS IMPORTS >--- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.IMPM;
+				Program p = (Program) AST;
+				p.fileName = inputFile.getPath();
+				if (!referencedLibaries.isEmpty()) {
+					List<Program> dependencies = this.addDependencies();
 					
-					new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
+					/* Print out imported libaries */
+					if (printAllImports)
+						for (SyntaxElement s : dependencies) 
+							log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
+					
+					/* Add libaries to AST, duplicates were already filtered */
+					int c = 0;
+					for (Program p0 : dependencies) {
+						for (SyntaxElement s : p0.programElements) 
+							p.programElements.add(c++, s);
+					}
+				}
+				
+				
+						/* ---< NAMESPACE MANAGER --- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.NAMM;
+				NamespaceProcessor nameProc = new NamespaceProcessor();
+				nameProc.process((Program) AST);
+				
+				if (imm) AST.print(4, true);
+				
+				
+						/* ---< CONTEXT CHECKING --- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.CTEX;
+				ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
+				ContextChecker ctx = new ContextChecker(AST, ctx_progress);
+				ctx.check();
+			
+				ctx_progress.finish();
+				if (imm) AST.print(4, true);
+				
+				
+						/* ---< CODE GENERATION --- */
+				lastSource = null;
+				currentStage = PIPE_STAGE.CGEN;
+				ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
+				AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
+	
+				/* Remove comments left over by removed functions */
+				for (int i = 1; i < body.instructions.size(); i++) {
+					if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
+						body.instructions.remove(i - 1);
+						i -= 2;
+						if (i < 1) i = 1;
+					}
+				}
+				
+				cgen_progress.finish();
+				
+				
+						/* --- OPTIMIZING --- */
+				if (!disableOptimizer) {
+					lastSource = null;
+					currentStage = PIPE_STAGE.OPT1;
+					
+					double rate = this.optimizeInstructionList(body.instructions, true);
+					
+					
+					
+					log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
+					
+					for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+						rate += this.optimizeInstructionList(entry.getValue().textSection, false);
+					
+					rate /= AsNBody.translationUnits.size();
+					
+					if (!expectError) {
+						compressions.add(rate);
+					
+						if (rate < c_min) c_min = rate;
+						if (rate > c_max) c_max = rate;
+					}
+				}
+				
+				
+						/* --- OUTPUT BUILDING --- */
+				output = this.buildOutput(body.originUnit.buildTranslationUnit(), false);
+			
+				
+						/* --- BUILD AND DUMP MODULES --- */
+				if (buildModulesRecurse) {
+					for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
+						String path = PreProcessor.resolveToPath(entry.getKey());
+	
+						/* Build main file seperately */
+						String excludeMainPath = Util.toASMPath(inputFile.getPath());
+						if (entry.getKey().equals(excludeMainPath)) continue;
 						
-					List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
-					
-					boolean write = Util.writeInFile(module, path);
-					if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
+						new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
+							
+						List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
+						
+						boolean write = Util.writeInFile(module, path);
+						if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
+					}
 				}
 			}
+			else 
+				output = code;
 			
 			
 					/* --- LINKING --- */
@@ -463,7 +468,7 @@ public class CompilerDriver {
 		
 		/* Compilation finished ... */
 		if (err > 0) silenced = false;
-		log.add(new Message("Compilation " + 
+		log.add(new Message("Operation " + 
 				/* ... successfully */
 				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
 				/* ... with errors */
@@ -653,6 +658,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-o")) 	buildObjectFileOnly = true;
 				else if (args [i].equals("-R")) 	buildModulesRecurse = true;
+				else if (args [i].equals("-L")) 	linkOnly = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;
 					silenced = false;
@@ -683,6 +689,7 @@ public class CompilerDriver {
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-o        : Build object file only, required additional linking",
 				"-R        : Build all required modules and save them",
+				"-L        : Link the given assembly file. Requires the input file to be a .s file.",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"
@@ -816,6 +823,7 @@ public class CompilerDriver {
 		null_referenced = false;
 		expectError = false;
 		AsNBody.translationUnits.clear();
+		PreProcessor.importsPerFile.clear();
 	}
 	
 } 

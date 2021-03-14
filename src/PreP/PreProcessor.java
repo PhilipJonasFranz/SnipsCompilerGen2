@@ -2,6 +2,7 @@ package PreP;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -17,6 +18,8 @@ import Util.Logging.Message;
 
 public class PreProcessor {
 
+	public static HashMap<String, List<String>> importsPerFile = new HashMap();
+	
 	public class LineObject {
 		
 				/* ---< FIELDS >--- */
@@ -64,6 +67,19 @@ public class PreProcessor {
 				if (s.startsWith("<") && s.endsWith(">")) {
 					String path = s.substring(1, s.length() - 1);
 					
+					/* Keep track which imports were made by which file */
+					String asmPath = Util.toASMPath(this.process.get(i).fileName);
+					List<String> importsFromFile = new ArrayList();
+					if (importsPerFile.containsKey(asmPath))
+						importsFromFile = importsPerFile.get(asmPath);
+					else
+						importsPerFile.put(asmPath, importsFromFile);
+					
+					String imp = Util.toASMPath(path);
+					if (!importsFromFile.contains(imp))
+						importsFromFile.add(imp);
+					
+					/* Remove import from source, replace with imported lines */
 					this.process.remove(i);
 					
 					/* 

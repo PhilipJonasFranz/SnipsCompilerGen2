@@ -58,8 +58,8 @@ public class AsNTranslationUnit extends AsNNode {
 		
 		/* Add imports */
 		if (!this.imports.isEmpty()) {
-			for (String i : this.imports) 
-				out.add(new ASMDirective(".include " + i));
+			for (int i = this.imports.size() - 1; i >= 0; i--) 
+				out.add(new ASMDirective(".include " + this.imports.get(i)));
 			
 			out.add(new ASMSeperator());
 		}
