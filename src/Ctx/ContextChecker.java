@@ -200,6 +200,8 @@ public class ContextChecker {
 	 */
 	protected List<StructTypedef> tLStructs = new ArrayList();
 	
+	protected List<StructTypedef> structTypedefs = new ArrayList();
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
@@ -266,7 +268,16 @@ public class ContextChecker {
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisosTypes.isEmpty()) f.check(this);
 			}
-			else s.check(this);
+			else {
+				s.check(this);
+				
+				if (s instanceof StructTypedef) {
+					if (!this.structTypedefs.contains(s)) {
+						p.programElements.remove(i);
+						i--;
+					}
+				}
+			}
 			
 			if (progress != null) 
 				progress.incProgress((double) i / p.programElements.size());
@@ -361,121 +372,159 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTX_EXC {
-		/* Make sure at least one field is in the struct */
-		if (e.getFields().isEmpty())
-			throw new CTX_EXC(e.getSource(), Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
 		
-		for (Function f : e.functions) {
-			
-			if (f.modifier != MODIFIER.STATIC) {
-				
-				/* Dynamically add-in the struct head provisos, if not present already */
-				if (!e.inheritedFunctions.contains(f)) {
-					for (TYPE t : e.proviso) {
-						boolean found = false;
-						for (TYPE t0 : f.provisosTypes)
-							found |= t0.isEqual(t);
-						
-						/* Add the proviso to the function signature */
-						if (!found) f.provisosTypes.add(t.clone());
-					}
-				}
-				
-				/* Add to a pool of nested functions */
-				this.nestedFunctions.add(f);
-			 
-				/* Check for duplicate function name */
-				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
-						throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
-				}
-			}
-			
-			/* 
-			 * Add the function to the function pool here already, 
-			 * since through recursion the same function may be called. 
-			 */
-			this.functions.add(f);
-			
-			if (f.provisosTypes.isEmpty()) 
-				f.check(this);
-			
-			if (f.modifier != MODIFIER.STATIC) {
-				/* Check if all required provisos are present */
-				List<TYPE> missing = new ArrayList();
-				
-				for (TYPE t : e.proviso) 
-					missing.add(t.clone());
-				
-				for (int i = 0; i < missing.size(); i++) {
-					for (int a = 0; a < f.provisosTypes.size(); a++) {
-						if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) f.provisosTypes.get(a)).placeholderName)) {
-							missing.remove(i);
-							i--;
-							break;
+		boolean useProvisoFree = STRUCT.useProvisoFreeInCheck;
+		STRUCT.useProvisoFreeInCheck = false;
+		
+		/*
+		 * Check if this typedef is the implementation of an existing typedef.
+		 * If yes, move the function bodies to the exsiting typedef.
+		 */
+		boolean addedToHeaderDef = false;
+		for (StructTypedef def : this.structTypedefs) {
+			if (def.path.build().equals(e.path.build())) {
+				for (int i = 0; i < def.functions.size(); i++) {
+					Function f = def.functions.get(i);
+					if (f.body == null) {
+						for (int a = 0; a < e.functions.size(); a++) {
+							Function f0 = e.functions.get(a);
+							if (Function.signatureMatch(f0, f, false, false)) {
+								f.body = f0.body;
+								break;
+							}
 						}
 					}
 				}
 				
-				/* 
-				 * There are provisos missing and the function is not inherited, throw an error. 
-				 * If the function is inherited, the same check has been done to the function by
-				 * the parent, so we dont need to check it here.
-				 */
-				if (!missing.isEmpty() && !e.inheritedFunctions.contains(f)) {
-					String s = "";
-					for (TYPE t : missing) s += t.typeString() + ", ";
-					s = s.substring(0, s.length() - 2);
-					
-					throw new CTX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path.build(), s);
-				}
+				addedToHeaderDef = true;
 			}
 		}
 		
-		/* Make sure implemented interface requirements are satisfied */
-		for (INTERFACE inter : e.implemented) {
-			
-			for (Function f : inter.getTypedef().functions) {
+		/*
+		 * We only need to check all this if this is not an implementation,
+		 * since the implementation has already been tested.
+		 */
+		if (!addedToHeaderDef) {
+			for (Function f : e.functions) {
 				
-				Function ftranslated = f.cloneSignature();
-				
-				ftranslated.translateProviso(inter.getTypedef().proviso, inter.proviso);
-				
-				boolean found = false;
-				for (int i = 0; i < e.functions.size(); i++) {
-					Function structFunction = e.functions.get(i);
+				if (f.modifier != MODIFIER.STATIC) {
 					
-					if (Function.signatureMatch(structFunction, ftranslated, false, true)) {
-						/* Add default context to make sure it is casted */
-						if (structFunction.provisosTypes.isEmpty())
-							structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
-						
-						structFunction.requireR10Reset = true;
-						
-						found = true;
-						break;
+					/* Dynamically add-in the struct head provisos, if not present already */
+					if (!e.inheritedFunctions.contains(f)) {
+						for (TYPE t : e.proviso) {
+							boolean found = false;
+							for (TYPE t0 : f.provisosTypes)
+								found |= t0.isEqual(t);
+							
+							/* Add the proviso to the function signature */
+							if (!found) f.provisosTypes.add(t.clone());
+						}
+					}
+					
+					/* Add to a pool of nested functions */
+					this.nestedFunctions.add(f);
+				 
+					/* Check for duplicate function name */
+					for (Function f0 : this.functions) {
+						if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
+							throw new CTX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 					}
 				}
 				
-				if (!found) 
-					throw new CTX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.getTypedef().path.build());
+				/* 
+				 * Add the function to the function pool here already, 
+				 * since through recursion the same function may be called. 
+				 */
+				this.functions.add(f);
+				
+				if (f.provisosTypes.isEmpty()) 
+					f.check(this);
+				
+				if (f.modifier != MODIFIER.STATIC) {
+					/* Check if all required provisos are present */
+					List<TYPE> missing = new ArrayList();
+					
+					for (TYPE t : e.proviso) 
+						missing.add(t.clone());
+					
+					for (int i = 0; i < missing.size(); i++) {
+						for (int a = 0; a < f.provisosTypes.size(); a++) {
+							if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) f.provisosTypes.get(a)).placeholderName)) {
+								missing.remove(i);
+								i--;
+								break;
+							}
+						}
+					}
+					
+					/* 
+					 * There are provisos missing and the function is not inherited, throw an error. 
+					 * If the function is inherited, the same check has been done to the function by
+					 * the parent, so we dont need to check it here.
+					 */
+					if (!missing.isEmpty() && !e.inheritedFunctions.contains(f)) {
+						String s = "";
+						for (TYPE t : missing) s += t.typeString() + ", ";
+						s = s.substring(0, s.length() - 2);
+						
+						throw new CTX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path.build(), s);
+					}
+				}
 			}
+			
+			/* Make sure implemented interface requirements are satisfied */
+			for (INTERFACE inter : e.implemented) {
+				
+				for (Function f : inter.getTypedef().functions) {
+					
+					Function ftranslated = f.cloneSignature();
+					
+					ftranslated.translateProviso(inter.getTypedef().proviso, inter.proviso);
+					
+					boolean found = false;
+					for (int i = 0; i < e.functions.size(); i++) {
+						Function structFunction = e.functions.get(i);
+						
+						if (Function.signatureMatch(structFunction, ftranslated, false, true)) {
+							/* Add default context to make sure it is casted */
+							if (structFunction.provisosTypes.isEmpty())
+								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
+							
+							structFunction.requireR10Reset = true;
+							
+							found = true;
+							break;
+						}
+					}
+					
+					if (!found) 
+						throw new CTX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.getTypedef().path.build());
+				}
+			}
+			
+			Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+			
+			if (opt.isPresent())
+				throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
+			
+			if (e.extension != null && e.extension.proviso.size() != e.extProviso.size()) 
+				throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS_EXTENSION, e.extension.self.provisoFree().typeString(), e.extension.proviso.size(), e.extProviso.size());
+			
+			/* 
+			 * Add to topLevelStructExtenders, since this typedef is the root
+			 * of an extension tree, and is used to assign SIDs.
+			 */
+			if (e.extension == null)
+				this.tLStructs.add(e);
+			
+			this.structTypedefs.add(e);
+			
+			/* Make sure at least one field is in the struct */
+			if (e.getFields().isEmpty())
+				throw new CTX_EXC(e.getSource(), Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
 		}
 		
-		Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
-		
-		if (opt.isPresent())
-			throw new CTX_EXC(e.getSource(), Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree().typeString());
-		
-		if (e.extension != null && e.extension.proviso.size() != e.extProviso.size()) 
-			throw new CTX_EXC(e.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS_EXTENSION, e.extension.self.provisoFree().typeString(), e.extension.proviso.size(), e.extProviso.size());
-		
-		/* 
-		 * Add to topLevelStructExtenders, since this typedef is the root
-		 * of an extension tree, and is used to assign SIDs.
-		 */
-		if (e.extension == null)
-			this.tLStructs.add(e);
+		STRUCT.useProvisoFreeInCheck = useProvisoFree;
 		
 		/* Set the declarations in the struct type */
 		return new VOID();

@@ -114,6 +114,8 @@ import Util.Logging.ProgressMessage;
  */
 public class Parser {
 
+	public static Parser instance;
+	
 	/** List of tokens that were created by the scanner */
 	protected List<Token> tokenStream;
 	
@@ -127,7 +129,7 @@ public class Parser {
 	List<Pair<NamespacePath, Function>> functions = new ArrayList();
 	
 	/** Active Struct Ids */
-	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
+	public List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
 	/** Active Interface Ids */
 	List<Pair<NamespacePath, InterfaceTypedef>> interfaceIds = new ArrayList();
@@ -163,6 +165,8 @@ public class Parser {
 		
 		current = tokenStream.get(0);
 		tokenStream.remove(0);
+		
+		Parser.instance = this;
 	}
 	
 	/**
@@ -395,6 +399,16 @@ public class Parser {
 		 * such a declaration is parsed.
 		 */
 		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, implemented, extProviso, mod, source);
+		
+		/*
+		 * In preparation that this struct might be the implementation of a struct typedef
+		 * that was included from the header, we already have to take action here to ensure
+		 * references from here on out are correct. So, we check if there is already a typedef
+		 * that has the same namespace path. If there is no such typedef, we use the current one.
+		 */
+		StructTypedef head = this.getStructTypedef(def.path, def.getSource());
+		if (head == null) head = def;
+		
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
@@ -434,8 +448,13 @@ public class Parser {
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
 				
 				if (f.modifier != MODIFIER.STATIC) {
-					/* Inject Self Reference */
-					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+					/* 
+					 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
+					 * of a header, that we use the local variable 'head', that holds a reference to it.
+					 * This is important because later when context checking, the correct struct typedef 
+					 * reference is present and type comparisons work accordingly. 
+					 */
+					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
 					f.parameters.add(0, self);
 				}
 				
@@ -2462,15 +2481,9 @@ public class Parser {
 				defs.add(p.getSecond());
 
 		if (defs.isEmpty()) return null;
-		else if (defs.size() == 1) {
-			return defs.get(0);
-		}
 		else {
-			String s = "";
-			for (StructTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
-			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+			// TODO Make sure only one header and one implementation exists
+			return defs.get(0);
 		}
 	}
 	

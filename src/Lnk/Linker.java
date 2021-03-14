@@ -108,9 +108,8 @@ public class Linker {
 			/* Recursive linking */
 			List<String> lines = PreProcessor.getFile(mappedPath);
 			
-			if (lines == null) {
+			if (lines == null) 
 				throw new LNK_EXC("Failed to locate include target %s", mappedPath);
-			}
 			
 			LinkerUnit importedUnit = Linker.parseLinkerUnit(lines);
 			importedUnit.sourceFile = mappedPath;
@@ -126,16 +125,16 @@ public class Linker {
 			else {
 				boolean found = false;
 				
-				// Search import
+				/* Search import */
 				for (int a = 0; a < lines.size(); a++) {
 					if (label == null || lines.get(a).trim().startsWith(".global " + label)) {
-						// Found position in module
+						/* Found position in module */
 						found = true;
 						
 						int cnt = 3;
 						
 						while (true) {
-							// Copy contents until EOF is reached, or until a new .global directive is seen
+							/* Copy contents until EOF is reached, or until a new .global directive is seen */
 							if (a >= lines.size() || (cnt > 3 && lines.get(a).contains(".global"))) break;
 							
 							unit.textSection.add(cnt++, lines.get(a++));

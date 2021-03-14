@@ -1,0 +1,212 @@
+#include<collection.sn>
+#include<serializable.sn>
+
+namespace List {
+
+	restricted struct LinkedList<T> : Collection<T>, Serializable {
+		
+		shared void add(T x) {
+			/* Initialize the new List Node, set the next pointer to null */
+			ListNode<T>* n = init<>(ListNode<T>::(null, x));
+		
+			if (self->head == null) {
+				self->head = n;
+				self->tail = n;
+			}
+			else {
+				self->tail->next = n;
+				self->tail = n;
+			}	
+			
+			self->size++;
+		}
+		
+		shared T get(int i) {
+			if (i < 0) return self->defValue;
+		
+			ListNode<T>* n = self->head;
+			while (i != 0) {
+				if (n->next == null) return self->defValue;
+				
+				/* Jump to next */
+				n = n->next;
+				i--;
+			}
+			
+			return n->value;	
+		}
+		
+		shared void set(int i, T value) {
+			ListNode<T>* n = self->head;
+			while (i != 0) {
+				if (n->next == null) return;
+				
+				/* Jump to next */
+				n = n->next;
+				i--;
+			}
+			
+			n->value = value;
+		}
+		
+		shared void destroy<T:void>() {
+			ListNode<void>* n = self->head;
+			while (n != null) {
+				free(n);
+				n = n->next;
+			}
+			free(self);
+		}
+		
+		shared bool contains(func (T, T) -> bool pred, T x) {
+			ListNode<T>* n = self->head;
+			while (true) {
+				if (n == null) return false;
+				
+				/* Value found */
+				if (pred(x, n->value)) return true;
+				
+				/* Jump to next */
+				n = n->next;
+			}
+		}
+		
+		shared ListNode<T>* find(func (T, T) -> bool pred, T x) {
+			ListNode<T>* n = self->head;
+			while (n != null) {
+				/* 
+				 * If the predicate matches given value, 
+				 * the searched value was found.
+				 */
+				if (pred(x, n->value)) return n;
+				
+				/* Jump to next */
+				n = n->next;
+			}
+
+			/* Not found */
+			return null;
+		}
+		
+		shared int size<T:void>() {
+			return self->size;
+		}
+		
+		shared int count<T:void>() {
+			ListNode<void>* n = self->head;
+			int size = 0;
+			while (n != null) {
+				n = n->next;
+				size++;
+			}
+			
+			self->size = size;
+			return size;
+		}
+		
+		shared int indexOf<T:void>(ListNode<void>* n) {
+			/* Start iterating at head of list */
+			ListNode<void>* n0 = self->head;
+			
+			/* Current index */
+			int i = 0;
+			
+			while (n0 != null) {
+				/* Addresses match, node found, return current index */
+				if (n0 == n) return i;
+				else {
+					/* Jump to next node */
+					n0 = n0->next;
+					i++;
+				}
+			}
+			
+			/* Node is not part of the list. */
+			return -1;
+		}
+		
+		shared void remove<T:void>(int i) {
+			/* Out of bounds */
+			if (i < 0) return;
+			
+			if (i == 0) {
+				/* Remove first element */
+				if (self->head != null) {
+					ListNode<void>* n = self->head;
+					self->head = self->head->next;
+					
+					/* Only one element in list */
+					if (self->tail == n) self->tail = null;
+					
+					free(n);
+				}
+				
+				return;
+			}
+			else {
+				ListNode<T>* n = self->head;
+				i--;
+				
+				/* Jump to element before element to remove */
+				while (i > 0) {
+					if (n->next == null) return;
+					else {
+						n = n->next;
+						i--;
+					}
+				}
+				
+				/* Out of bounds */
+				if (n->next == null) return;
+				else {
+					if (n->next->next == null) {
+						/* Element to remove is last element in list */
+						free(n->next);
+						n->next = null;
+						self->tail = n;
+					}
+					else {
+						/* Cut out element and set next pointers */
+						ListNode<void>* next = n->next->next;
+						free(n->next);
+						n->next = next;
+					}
+					return;
+				}
+			}
+		}
+		
+		shared void clear<T:void>() {
+			ListNode<void>* n = self->head;
+			while (n != null) {
+				free(n);
+				n = n->next;
+			}
+			
+			self->head = null;
+			self->tail = null;
+			
+			return;
+		}
+		
+		shared bool isEmpty<T:void>() {
+			return self->head == null;
+		}
+		
+		shared char* serialize() {
+			// TODO
+			return null;
+		}
+		
+		static void* deserialize<T:void>(char* str) {
+			return null;
+		}
+	
+		static LinkedList<T>* create<T>(T defValue) {
+			/* Initialize list, set pointers to null */
+			return init<>(LinkedList<T>::(null, null, 0, defValue));
+		}
+		
+	}
+	
+} 
