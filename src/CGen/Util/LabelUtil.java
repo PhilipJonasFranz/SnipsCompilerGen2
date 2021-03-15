@@ -1,5 +1,6 @@
 package CGen.Util;
 
+import java.util.HashMap;
 import java.util.List;
 
 import Imm.TYPE.TYPE;
@@ -12,9 +13,6 @@ public class LabelUtil {
 			/* ---< FIELDS >--- */
 	/** Internal counter used to create labels */
 	private static int c = 0;
-	
-	/** Literal Pool number */
-	private static int p = 0;
 	
 	/** Unique ID number */
 	private static int n = 0;
@@ -63,7 +61,7 @@ public class LabelUtil {
 	 */
 	public static void reset() {
 		c = 0;
-		p = 0;
+		poolLabels.clear();
 		funcPrefix = "";
 		funcUID = -1;
 		n = 0;
@@ -76,8 +74,20 @@ public class LabelUtil {
 		return getLabel() + "_" + name;
 	}
 	
-	public static String literalPoolPrefix() {
-		return ".POOL" + p++ + "_";
+	private static HashMap<String, Integer> poolLabels = new HashMap();
+	
+	public static String literalPoolPrefix(String fileName) {
+		int p = 0;
+		
+		if (poolLabels.containsKey(fileName))
+			p = poolLabels.get(fileName);
+		else
+			poolLabels.put(fileName, p);
+		
+		String label = ".POOL@" + fileName.hashCode() + "_" + p++ + "_";
+		poolLabels.replace(fileName, p);
+		
+		return label;
 	}
 	
 	public static String getAnonLabel() {

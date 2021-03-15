@@ -361,31 +361,43 @@ public class AsNBody extends AsNNode {
 		
 		/* Build the literal pool labels for all created translation units */
 		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
-			body.buildLiteralPools(entry.getValue().textSection, map);
+			body.buildLiteralPools(entry.getValue().textSection, map, entry.getValue().sourceFile);
 		
 		progress.incProgress(1);
 		return body;
 	}
 	
-	private void buildLiteralPools(List<ASMInstruction> text, MemoryMap map) {
+	private void buildLiteralPools(List<ASMInstruction> text, MemoryMap map, String fileName) {
 		/* Manage and create Literal Pools */
 		List<ASMLdrLabel> buffer = new ArrayList();
+		
+		int maxDist = 0;
+		
 		for (int i = 0; i < text.size(); i++) {
+			
+			boolean hasAnotherBranchAhead = false;
+			for (int a = i + 1; a < text.size(); a++) {
+				if (text.get(a) instanceof ASMBranch && 
+						((ASMBranch) text.get(a)).type == BRANCH_TYPE.BX) {
+					hasAnotherBranchAhead = true;
+					break;
+				}
+			}
+			
 			/* Collect ASMLdrLabel instructions in buffer, insert them after next bx instruction */
 			if (text.get(i) instanceof ASMLdrLabel) {
 				ASMLdrLabel load = (ASMLdrLabel) text.get(i);
 				buffer.add(load);
+				maxDist = i;
 			}
-			else if (text.get(i) instanceof ASMBranch) {
+			else if (text.get(i) instanceof ASMBranch && (i - maxDist > 1024 || !hasAnotherBranchAhead)) {
 				ASMBranch b = (ASMBranch) text.get(i);
-				
-				// TODO: Implement Filter to only flush buffer after 4k of text
 				
 				if (b.type == BRANCH_TYPE.BX) {
 					/* Flush buffer here */
 					if (!buffer.isEmpty()) {
 						/* Create a new prefix for this literal pool */
-						String prefix = LabelUtil.literalPoolPrefix();
+						String prefix = LabelUtil.literalPoolPrefix(fileName);
 						
 						List<String> added = new ArrayList();
 						
