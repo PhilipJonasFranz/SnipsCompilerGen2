@@ -339,7 +339,7 @@ public class AsNBody extends AsNNode {
 				}
 			}
 			
-			if (unit.sourceFile.equals(AsNBody.originPath) && !CompilerDriver.buildModulesRecurse) {
+			if (unit.sourceFile.equals(AsNBody.originPath)) {
 				List<String> referenced = new ArrayList();
 				
 				referenced.add("maybe free.s");
