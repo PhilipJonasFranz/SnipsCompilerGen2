@@ -202,6 +202,8 @@ public class ContextChecker {
 	
 	protected List<StructTypedef> structTypedefs = new ArrayList();
 	
+	protected StructTypedef reCheckTypedef = null;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
@@ -272,9 +274,31 @@ public class ContextChecker {
 				s.check(this);
 				
 				if (s instanceof StructTypedef) {
+					StructTypedef typedef = (StructTypedef) s;
+					
 					if (!this.structTypedefs.contains(s)) {
 						p.programElements.remove(i);
 						i--;
+					}
+					
+					/* 
+					 * The last checked typedef was the implementation of another typedef,
+					 * its ressources have now been moved to the typedef in this.reCheckTypedef.
+					 * We need to re-check this typedef to make sure all references etc. are set.
+					 */
+					if (this.reCheckTypedef != null) {
+						
+						/* Interface typedef still contains both typedefs, remove implementation */
+						for (INTERFACE intf : typedef.implemented) 
+							intf.getTypedef().implementers.remove(typedef);
+						
+						/* Remove all added functions to prevent duplicate error */
+						this.functions.removeAll(this.reCheckTypedef.functions);
+						this.nestedFunctions.removeAll(this.reCheckTypedef.functions);
+						
+						/* Simply re-check */
+						this.reCheckTypedef.check(this);
+						this.reCheckTypedef = null;
 					}
 				}
 			}
@@ -382,7 +406,7 @@ public class ContextChecker {
 		 */
 		boolean addedToHeaderDef = false;
 		for (StructTypedef def : this.structTypedefs) {
-			if (def.path.build().equals(e.path.build())) {
+			if (def.path.build().equals(e.path.build()) && !def.equals(e)) {
 				for (int i = 0; i < def.functions.size(); i++) {
 					Function f = def.functions.get(i);
 					if (f.body == null) {
@@ -396,6 +420,7 @@ public class ContextChecker {
 					}
 				}
 				
+				this.reCheckTypedef = def;
 				addedToHeaderDef = true;
 			}
 		}
@@ -514,10 +539,11 @@ public class ContextChecker {
 			 * Add to topLevelStructExtenders, since this typedef is the root
 			 * of an extension tree, and is used to assign SIDs.
 			 */
-			if (e.extension == null)
+			if (e.extension == null && this.tLStructs.contains(e))
 				this.tLStructs.add(e);
 			
-			this.structTypedefs.add(e);
+			if (!this.structTypedefs.contains(e))
+				this.structTypedefs.add(e);
 			
 			/* Make sure at least one field is in the struct */
 			if (e.getFields().isEmpty())
