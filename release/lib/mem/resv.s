@@ -6,7 +6,7 @@ resv:                                        /* Function: resv */
     stmea sp, {r3-r6}
     mov r3, r0
     add r3, r0, #1
-    ldr r0, .POOL3_L1_HEAP_START             /* Evaluate Expression */
+    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -73,4 +73,4 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL3_L1_HEAP_START: .word HEAP_START
+.POOL0_L0_HEAP_START: .word HEAP_START

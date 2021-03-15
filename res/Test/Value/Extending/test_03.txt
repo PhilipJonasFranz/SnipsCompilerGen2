@@ -22,9 +22,11 @@ TESTCASES
 93
 OUTPUT
 .data
-Base: .word 0
-Root: .word Base
 A: .word Root
+Root: .word Base
+Base: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

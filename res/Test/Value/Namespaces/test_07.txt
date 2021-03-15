@@ -22,8 +22,10 @@ TESTCASES
 28
 OUTPUT
 .data
-Foo.Baz.x: .word 10
 Foo.Bar: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+Foo.Baz.x: .word 10
 
 .text
     b main

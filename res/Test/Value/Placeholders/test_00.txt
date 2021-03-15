@@ -12,6 +12,8 @@ TESTCASES
 OUTPUT
 .data
 Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

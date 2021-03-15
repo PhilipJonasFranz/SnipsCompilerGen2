@@ -27,8 +27,10 @@ TESTCASES
 2 4
 OUTPUT
 .data
-x: .word 10
 S: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+x: .word 10
 
 .text
     b main

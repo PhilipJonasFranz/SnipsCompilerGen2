@@ -36,11 +36,13 @@ TESTCASES
 OUTPUT
 .data
 X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main
     
-Inter.L0:                                    /* Interface : Inter */
+Inter.L2:                                    /* Interface : Inter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -76,14 +78,14 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    bl Inter.L2                              /* Branch to relay table of Inter */
     mov r4, r0
     mov r1, #15
     mov r0, r3
     mov r12, #4
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    bl Inter.L2                              /* Branch to relay table of Inter */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    bl Inter.L2                              /* Branch to relay table of Inter */
     add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}

@@ -16,9 +16,11 @@ TESTCASES
 46
 OUTPUT
 .data
-Foo.k: .word 10
-Foo.x: .word 20
+NULL: .word 0
+HEAP_START: .word 0
 Foo.Bar.x: .word 16
+Foo.x: .word 20
+Foo.k: .word 10
 
 .text
     b main

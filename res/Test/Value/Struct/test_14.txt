@@ -21,8 +21,10 @@ TESTCASES
 2 8
 OUTPUT
 .data
-Data: .word 0
 Cap: .word 0
+Data: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

@@ -1,3 +1,5 @@
+.include linked_list.s
+    
 .text
     
 .global String.equals

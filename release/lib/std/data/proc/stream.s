@@ -1,3 +1,6 @@
+.include collection.s
+.include iterable.s
+    
 .data
 Streamable.Stream: .word 0
     
@@ -84,7 +87,7 @@ Streamable.Stream.create_P_1:                /* Function: Streamable.Stream.crea
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL5_Streamable.Stream
+    ldr r0, .POOL6_Streamable.Stream
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -95,4 +98,4 @@ Streamable.Stream.create_P_1:                /* Function: Streamable.Stream.crea
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL5_Streamable.Stream: .word Streamable.Stream
+.POOL6_Streamable.Stream: .word Streamable.Stream

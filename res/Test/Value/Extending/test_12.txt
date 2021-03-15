@@ -20,8 +20,10 @@ TESTCASES
 29
 OUTPUT
 .data
-A: .word 0
 B: .word A
+A: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

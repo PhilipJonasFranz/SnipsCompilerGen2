@@ -25,11 +25,13 @@ TESTCASES
 OUTPUT
 .data
 X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main
     
-Inter.L0:                                    /* Interface : Inter */
+Inter.L2:                                    /* Interface : Inter */
     b X.get
     
 .global X.get
@@ -50,7 +52,7 @@ main:                                        /* Function: main */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    bl Inter.L2                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .POOL0_X: .word X

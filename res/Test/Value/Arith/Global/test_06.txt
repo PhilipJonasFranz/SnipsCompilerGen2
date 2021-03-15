@@ -17,11 +17,16 @@ TESTCASES
 -2 -36
 OUTPUT
 .data
-s0: .skip 24
 S: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+s0: .skip 24
 
 .text
+    b main_init
+    
 .global main
+    
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #12

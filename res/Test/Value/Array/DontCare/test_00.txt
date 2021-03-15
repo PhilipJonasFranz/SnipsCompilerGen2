@@ -15,12 +15,13 @@ int main(int b) {
 TESTCASES
 0 10
 1 1
-4 104
 5 10
 6 5
 OUTPUT
 .data
 Point: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

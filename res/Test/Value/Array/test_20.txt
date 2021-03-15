@@ -10,10 +10,15 @@ TESTCASES
 2 5
 OUTPUT
 .data
+NULL: .word 0
+HEAP_START: .word 0
 vec: .skip 12
 
 .text
+    b main_init
+    
 .global main
+    
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #12

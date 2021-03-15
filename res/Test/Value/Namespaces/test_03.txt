@@ -15,8 +15,10 @@ TESTCASES
 25
 OUTPUT
 .data
-Foo.x: .word 10
+NULL: .word 0
+HEAP_START: .word 0
 Foo.y: .word 15
+Foo.x: .word 10
 
 .text
     b main

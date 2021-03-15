@@ -11,14 +11,14 @@ Tree.TreeNode.insert_P_1:                    /* Function: Tree.TreeNode.insert, 
     mov r4, r1
     mov r5, r2
     push { r5 }
-    ldr r0, .POOL1_L0_NULL                   /* Load null address */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r0, .POOL1_L1_NULL                   /* Load null address */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     ldr r0, .POOL1_Tree.TreeNode
     push { r0 }
     bl init_P_4                              /* Call init */
     mov r6, r0
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
     cmp r3, r1
     bne Tree.TreeNode.insert.L1
     mov r0, r6                               /* Evaluate Expression */
@@ -27,7 +27,7 @@ Tree.TreeNode.insert.L1:
     mov r0, r3                               /* Evaluate Expression */
     mov r7, r3
 Tree.TreeNode.insert.L4:                     /* Evaluate condition */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
     cmp r7, r1
     ldmfdeq sp!, {r3-r8, pc}
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -45,7 +45,7 @@ Tree.TreeNode.insert.L7:
     bne Tree.TreeNode.insert.L8
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.TreeNode.insert.L10
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -59,7 +59,7 @@ Tree.TreeNode.insert.L10:
 Tree.TreeNode.insert.L8: 
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    ldr r1, .POOL1_L0_NULL                   /* Load null address */
+    ldr r1, .POOL1_L1_NULL                   /* Load null address */
     cmp r0, r1
     bne Tree.TreeNode.insert.L14
     lsl r1, r7, #2                           /* Convert to bytes */
@@ -73,19 +73,19 @@ Tree.TreeNode.insert.L6:
     b Tree.TreeNode.insert.L4
     ldmfd sp!, {r3-r8, pc}
 .POOL1_Tree.TreeNode: .word Tree.TreeNode
-.POOL1_L0_NULL: .word NULL
+.POOL1_L1_NULL: .word NULL
     
 .global Tree.TreeNode.create_P_1
 Tree.TreeNode.create_P_1:                    /* Function: Tree.TreeNode.create, Provisos: INT */
     push { r3, lr }
     mov r3, r0
     push { r3 }
-    ldr r0, .POOL2_L0_NULL                   /* Load null address */
-    ldr r1, .POOL2_L0_NULL                   /* Load null address */
+    ldr r0, .POOL2_L1_NULL                   /* Load null address */
+    ldr r1, .POOL2_L1_NULL                   /* Load null address */
     stmfd sp!, {r0, r1}
     ldr r0, .POOL2_Tree.TreeNode
     push { r0 }
     bl init_P_4                              /* Call init */
     ldmfd sp!, {r3, pc}
 .POOL2_Tree.TreeNode: .word Tree.TreeNode
-.POOL2_L0_NULL: .word NULL
+.POOL2_L1_NULL: .word NULL

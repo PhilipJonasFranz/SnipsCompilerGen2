@@ -19,8 +19,10 @@ TESTCASES
 5 13
 OUTPUT
 .data
-Point2D: .word 0
 Line2D: .word 0
+Point2D: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

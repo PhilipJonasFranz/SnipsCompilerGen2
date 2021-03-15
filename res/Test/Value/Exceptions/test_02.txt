@@ -53,8 +53,10 @@ TESTCASES
 4 11
 OUTPUT
 .data
-ContextException: .word 0
 Exception: .word 0
+ContextException: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

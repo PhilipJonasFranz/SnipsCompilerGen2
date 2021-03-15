@@ -1,3 +1,5 @@
+.include iterable.s
+    
 .data
 Queue.CyclicQueue: .word 0
     

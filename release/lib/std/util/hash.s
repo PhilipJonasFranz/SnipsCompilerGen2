@@ -6,7 +6,7 @@ Hash.hash:                                   /* Function: Hash.hash */
     stmea sp, {r3-r7}
     mov r3, r0
     mov r4, r1
-    ldr r5, .POOL9_LIT_5381                  /* Evaluate Expression */
+    ldr r5, .POOL4_LIT_5381                  /* Evaluate Expression */
     mov r6, #0
 Hash.hash.L1: 
     cmp r6, r4
@@ -24,4 +24,4 @@ Hash.hash.L2:
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r7}
     bx lr
-.POOL9_LIT_5381: .word 5381
+.POOL4_LIT_5381: .word 5381

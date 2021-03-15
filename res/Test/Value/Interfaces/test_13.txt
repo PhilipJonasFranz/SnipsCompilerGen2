@@ -42,177 +42,7 @@ HEAP_START: .word 0
 .text
     b main
     
-.global resv
-resv:                                        /* Function: resv */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-    add r3, r0, #1
-    ldr r0, .POOL3_L1_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-resv.L6:                                     /* Evaluate condition */
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L10
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-    b resv.L7
-resv.L10: 
-    add r5, r5, r6
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L19
-resv.L15: 
-    cmp r5, r3
-    ble resv.L16
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L19
-resv.L16: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L19: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL3_L1_HEAP_START: .word HEAP_START
-
-.global isar
-isar:                                        /* Function: isar */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
-    mov r3, r0
-    mov r4, r1
-    cmp r0, #0
-    bne isar.L0
-    mov r0, #0                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
-isar.L0: 
-    cmp r3, r4
-    bne isar.L2
-    mov r0, #1                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
-isar.L2: 
-    lsr r0, r3, #2
-    ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    mov r1, r4
-    bl isar                                  /* Call isar */
-    ldmfd sp!, {r3, r4, pc}
-    
-.global isa
-isa:                                         /* Function: isa */
-    push { r3, lr }
-    mov r3, r0
-    ldr r0, [r10, r3, lsl #2]                /* Load from address */
-    bl isar                                  /* Call isar */
-    ldmfd sp!, {r3, pc}
-
-.global init_P_5
-init_P_5:                                    /* Function: init, Provisos: List.LinkedList<INT> |  */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #28
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    ldr r0, [fp, #16]
-    ldr r1, [fp, #12]
-    stmfd sp!, {r0, r1}
-    pop { r0 }
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    pop { r0 }
-    str r0, [r1, #12]
-    pop { r0 }
-    str r0, [r1, #16]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #20
-    bx lr
-    
-.global init_P_3
-init_P_3:                                    /* Provisos: List.ListNode<INT> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #20
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    pop { r0 }
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #12
-    bx lr
-
-.global hsize
-hsize:                                       /* Function: hsize */
-    push { r3 }
-    mov r3, r0
-    sub r3, r0, #1
-    ldr r1, [r10, r3, lsl #2]                /* Load from address */
-    sub r0, r1, #1
-    pop { r3 }
-    bx lr
-
-GetSet.L0_P_1:                               /* Interface : GetSet, Provisos: INT,  */
+GetSet.L2_P_1:                               /* Interface : GetSet, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -242,18 +72,18 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL1_A
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r3, r0
-    bl GetSet.L0_P_1                         /* Branch to relay table of GetSet */
+    bl GetSet.L2_P_1                         /* Branch to relay table of GetSet */
     mov r4, r0
     mov r1, #20
     mov r0, r3
     mov r12, #4
-    bl GetSet.L0_P_1                         /* Branch to relay table of GetSet */
+    bl GetSet.L2_P_1                         /* Branch to relay table of GetSet */
     mov r0, r3                               /* Evaluate Expression */
-    bl GetSet.L0_P_1                         /* Branch to relay table of GetSet */
+    bl GetSet.L2_P_1                         /* Branch to relay table of GetSet */
     add r0, r4, r0
     pop { pc }
-.POOL0_A: .word A
+.POOL1_A: .word A

@@ -28,11 +28,13 @@ TESTCASES
 OUTPUT
 .data
 X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main
     
-Inter.L0:                                    /* Interface : Inter */
+Inter.L2:                                    /* Interface : Inter */
     b X.get
     
 .global X.get
@@ -56,7 +58,7 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
     ldr r0, [r10, r3, lsl #2]
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    bl Inter.L2                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .POOL0_X: .word X

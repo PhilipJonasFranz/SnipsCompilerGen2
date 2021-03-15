@@ -27,6 +27,9 @@ TESTCASES
 3 2 4 5 25
 OUTPUT
 .data
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
     b main
     
