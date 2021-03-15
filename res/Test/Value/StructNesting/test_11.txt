@@ -134,7 +134,7 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #12
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL1_C.A
+    ldr r0, .POOL@1102342447_0_C.A
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r3, r0
@@ -179,4 +179,4 @@ main:                                        /* Function: main */
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
     pop { pc }
-.POOL1_C.A: .word C.A
+.POOL@1102342447_0_C.A: .word C.A

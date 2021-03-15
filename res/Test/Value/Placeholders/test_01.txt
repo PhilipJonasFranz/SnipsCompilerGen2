@@ -25,11 +25,11 @@ HEAP_START: .word 0
 main:                                        /* Function: main */
     mov fp, sp
     sub sp, sp, #8                           /* Evaluate Expression */
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@-1433300915_0_Test
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@-1433300915_0_Test: .word Test

@@ -53,7 +53,7 @@ main:                                        /* Function: main */
     b lambda_sortPred
     mov r10, #0
     push { r0 }
-    ldr r0, .POOL0_K
+    ldr r0, .POOL@564117713_0_K
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bl cast                                  /* Call cast */
@@ -71,4 +71,4 @@ main.L0:
 main.L2: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_K: .word K
+.POOL@564117713_0_K: .word K

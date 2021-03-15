@@ -52,7 +52,7 @@ X.create:                                    /* Function: X.create */
     mov r4, r1
     push { r4 }
     push { r3 }
-    ldr r0, .POOL0_X
+    ldr r0, .POOL@-1497854169_0_X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -63,7 +63,6 @@ X.create:                                    /* Function: X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_X: .word X
     
 .global Y.create
 Y.create:                                    /* Function: Y.create */
@@ -74,7 +73,7 @@ Y.create:                                    /* Function: Y.create */
     push { r5 }
     bl X.create                              /* Call X.create */
     add sp, sp, #4
-    ldr r0, .POOL1_Y
+    ldr r0, .POOL@-1497854169_0_Y
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -85,7 +84,6 @@ Y.create:                                    /* Function: Y.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_Y: .word Y
     
 .global main
 main:                                        /* Function: main */
@@ -105,3 +103,5 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.POOL@-1497854169_0_Y: .word Y
+.POOL@-1497854169_0_X: .word X

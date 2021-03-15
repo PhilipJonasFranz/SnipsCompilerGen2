@@ -30,12 +30,12 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_Base
+    ldr r0, .POOL@-1502471774_0_Base
     push { r0 }
     mov r0, #15                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_Extend
+    ldr r0, .POOL@-1502471774_0_Extend
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-12]                       /* Load field from struct */
@@ -43,5 +43,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.POOL0_Extend: .word Extend
-.POOL0_Base: .word Base
+.POOL@-1502471774_0_Extend: .word Extend
+.POOL@-1502471774_0_Base: .word Base

@@ -43,7 +43,7 @@ main.L0:
     sub r1, r1, #1
     b main.L0
 main.L1: 
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@-1430530352_0_Test
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-16]                       /* Store value to struct field */
@@ -54,4 +54,4 @@ main.L1:
     add r0, r0, r2
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@-1430530352_0_Test: .word Test

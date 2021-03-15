@@ -26,7 +26,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@495373993_0_A
     push { r0 }
     sub r1, fp, #4
     ldr r2, [r1]
@@ -43,4 +43,4 @@ main:                                        /* Function: main */
     str r0, [r1]                             /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bx lr
-.POOL0_A: .word A
+.POOL@495373993_0_A: .word A

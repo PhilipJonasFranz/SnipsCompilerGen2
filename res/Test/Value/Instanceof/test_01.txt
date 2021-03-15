@@ -74,8 +74,8 @@ HEAP_START: .word 0
     
 .global main
 main:                                        /* Function: main */
-    ldr r1, .POOL0_A                         /* Evaluate Expression */
-    ldr r0, .POOL0_C
+    ldr r1, .POOL@1319858265_0_A             /* Evaluate Expression */
+    ldr r0, .POOL@1319858265_0_C
     b isa                                    /* Call isa */
-.POOL0_C: .word C
-.POOL0_A: .word A
+.POOL@1319858265_0_C: .word C
+.POOL@1319858265_0_A: .word A

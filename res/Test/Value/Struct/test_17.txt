@@ -33,13 +33,13 @@ main:                                        /* Function: main */
     mov r1, #5
     mov r2, #4
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL0_Data
+    ldr r0, .POOL@493526951_0_Data
     push { r0 }
     mov r0, #3
     mov r1, #2
     mov r2, #1
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL0_Data
+    ldr r0, .POOL@493526951_0_Data
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-24]                       /* Store value to struct field */
@@ -53,4 +53,4 @@ main:                                        /* Function: main */
     ldr r0, [r1, r2]                         /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL0_Data: .word Data
+.POOL@493526951_0_Data: .word Data

@@ -27,9 +27,9 @@ main:                                        /* Function: main */
     lsl r0, r0, #1
     push { r0 }
     push { r3 }
-    ldr r0, .POOL0_Data
+    ldr r0, .POOL@487062304_0_Data
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL0_Data: .word Data
+.POOL@487062304_0_Data: .word Data

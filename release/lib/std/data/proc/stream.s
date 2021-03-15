@@ -87,7 +87,7 @@ Streamable.Stream.create_P_1:                /* Function: Streamable.Stream.crea
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL6_Streamable.Stream
+    ldr r0, .POOL@1790932357_0_Streamable.Stream
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -98,4 +98,4 @@ Streamable.Stream.create_P_1:                /* Function: Streamable.Stream.crea
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL6_Streamable.Stream: .word Streamable.Stream
+.POOL@1790932357_0_Streamable.Stream: .word Streamable.Stream

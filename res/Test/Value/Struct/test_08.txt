@@ -30,7 +30,7 @@ main:                                        /* Function: main */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #3
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL1_Test
+    ldr r0, .POOL@465821321_0_Test
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -46,4 +46,4 @@ main:                                        /* Function: main */
     ldr r2, [r1, #8]                         /* Load field from struct */
     add r0, r0, r2
     pop { pc }
-.POOL1_Test: .word Test
+.POOL@465821321_0_Test: .word Test

@@ -37,11 +37,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_K.X
+    ldr r0, .POOL@1075560338_0_K.X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     bl K.X.getValue_P_1                      /* Call K.X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_K.X: .word K.X
+.POOL@1075560338_0_K.X: .word K.X

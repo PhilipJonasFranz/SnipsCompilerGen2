@@ -72,7 +72,7 @@ C.B.create_P_1:                              /* Function: C.B.create, Provisos: 
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL1_C.B
+    ldr r0, .POOL@-1473842623_0_C.B
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -83,7 +83,6 @@ C.B.create_P_1:                              /* Function: C.B.create, Provisos: 
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_C.B: .word C.B
     
 .global C.A.incr_P_1
 C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: INT */
@@ -118,7 +117,7 @@ C.A.create_P_1:                              /* Function: C.A.create, Provisos: 
     push { r4 }
     bl C.B.create_P_1                        /* Call C.B.create */
     add sp, sp, #4
-    ldr r0, .POOL2_C.A
+    ldr r0, .POOL@-1473842623_0_C.A
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -129,7 +128,6 @@ C.A.create_P_1:                              /* Function: C.A.create, Provisos: 
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL2_C.A: .word C.A
     
 .global main
 main:                                        /* Function: main */
@@ -156,3 +154,5 @@ main:                                        /* Function: main */
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
     pop { pc }
+.POOL@-1473842623_0_C.A: .word C.A
+.POOL@-1473842623_0_C.B: .word C.B

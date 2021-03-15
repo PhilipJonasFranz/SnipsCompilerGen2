@@ -64,23 +64,23 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #4                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1023613013_0_A
     push { r0 }
     mov r0, #2
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1023613013_0_A
     push { r0 }
     mov r0, #7
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1023613013_0_A
     push { r0 }
     mov r0, #3
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1023613013_0_A
     push { r0 }
     mov r0, #5
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1023613013_0_A
     push { r0 }
     mov r1, #5
     sub r0, fp, #40
@@ -88,4 +88,4 @@ main:                                        /* Function: main */
     bl smallest                              /* Call smallest */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_A: .word A
+.POOL@-1023613013_0_A: .word A

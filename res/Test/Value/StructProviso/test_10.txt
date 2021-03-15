@@ -46,14 +46,14 @@ main:                                        /* Function: main */
     sub r0, fp, #24                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
-    ldr r0, .POOL0_Nib
+    ldr r0, .POOL@911014048_0_Nib
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r0 }
-    ldr r0, .POOL0_Nib
+    ldr r0, .POOL@911014048_0_Nib
     push { r0 }
-    ldr r0, .POOL0_Data
+    ldr r0, .POOL@911014048_0_Data
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
@@ -73,5 +73,5 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     bx lr
-.POOL0_Data: .word Data
-.POOL0_Nib: .word Nib
+.POOL@911014048_0_Data: .word Data
+.POOL@911014048_0_Nib: .word Nib

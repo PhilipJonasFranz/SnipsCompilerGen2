@@ -25,11 +25,11 @@ Test.var: .word 14
     
 .global Test.getter
 Test.getter:                                 /* Function: Test.getter */
-    ldr r0, .POOL0_L0_Test.var               /* Evaluate Expression */
+    ldr r0, .POOL@1325336728_0_L0_Test.var   /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_L0_Test.var: .word Test.var
     
 .global main
 main:                                        /* Function: main */
     b Test.getter                            /* Evaluate Expression */
+.POOL@1325336728_0_L0_Test.var: .word Test.var

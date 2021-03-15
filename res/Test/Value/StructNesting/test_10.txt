@@ -52,11 +52,11 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL1_Y
+    ldr r0, .POOL@1101418926_0_Y
     push { r0 }
     bl init_P_2                              /* Call init */
     push { r0 }
-    ldr r0, .POOL1_X
+    ldr r0, .POOL@1101418926_0_X
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r3, r0
@@ -66,5 +66,5 @@ main:                                        /* Function: main */
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     pop { pc }
-.POOL1_X: .word X
-.POOL1_Y: .word Y
+.POOL@1101418926_0_X: .word X
+.POOL@1101418926_0_Y: .word Y

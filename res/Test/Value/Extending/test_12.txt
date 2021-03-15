@@ -43,7 +43,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #14                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1471995581_0_A
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -55,4 +55,4 @@ main:                                        /* Function: main */
     add r0, r1, r4
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_A: .word A
+.POOL@-1471995581_0_A: .word A

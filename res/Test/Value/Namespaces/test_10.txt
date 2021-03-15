@@ -39,12 +39,12 @@ HEAP_START: .word 0
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    ldr r1, .POOL0_Name1.B
+    ldr r1, .POOL@421274819_0_Name1.B
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_Name0.C
+    ldr r0, .POOL@421274819_0_Name0.C
     push { r0 }
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r2, #20
     bx lr
-.POOL0_Name0.C: .word Name0.C
-.POOL0_Name1.B: .word Name1.B
+.POOL@421274819_0_Name0.C: .word Name0.C
+.POOL@421274819_0_Name1.B: .word Name1.B

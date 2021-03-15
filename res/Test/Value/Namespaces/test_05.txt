@@ -27,15 +27,15 @@ Foo.k: .word 10
     
 .global main
 main:                                        /* Function: main */
-    ldr r1, .POOL0_L0_Foo.k                  /* Evaluate Expression */
+    ldr r1, .POOL@397263273_0_L0_Foo.k       /* Evaluate Expression */
     ldr r1, [r1]
-    ldr r2, .POOL0_L2_Foo.Bar.x              /* Load from .data section */
+    ldr r2, .POOL@397263273_0_L2_Foo.Bar.x   /* Load from .data section */
     ldr r2, [r2]
     add r1, r1, r2
-    ldr r2, .POOL0_L1_Foo.x                  /* Load from .data section */
+    ldr r2, .POOL@397263273_0_L1_Foo.x       /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL0_L1_Foo.x: .word Foo.x
-.POOL0_L2_Foo.Bar.x: .word Foo.Bar.x
-.POOL0_L0_Foo.k: .word Foo.k
+.POOL@397263273_0_L1_Foo.x: .word Foo.x
+.POOL@397263273_0_L2_Foo.Bar.x: .word Foo.Bar.x
+.POOL@397263273_0_L0_Foo.k: .word Foo.k

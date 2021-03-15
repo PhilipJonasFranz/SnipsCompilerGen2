@@ -55,16 +55,16 @@ main:                                        /* Function: main */
     mov r0, #1                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1501548253_0_A
     push { r0 }
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
-    ldr r0, .POOL0_Root
+    ldr r0, .POOL@-1501548253_0_Root
     push { r0 }
-    ldr r1, .POOL0_Root                      /* Load parameters */
+    ldr r1, .POOL@-1501548253_0_Root         /* Load parameters */
     sub r0, fp, #20
     lsr r0, r0, #2
     bl isa                                   /* Call isa */
@@ -78,5 +78,5 @@ main.L1:
 main.L3: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_Root: .word Root
-.POOL0_A: .word A
+.POOL@-1501548253_0_Root: .word Root
+.POOL@-1501548253_0_A: .word A

@@ -47,7 +47,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_X
+    ldr r0, .POOL@-2067305210_0_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -55,4 +55,4 @@ main:                                        /* Function: main */
     bl Inter.L2                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_X: .word X
+.POOL@-2067305210_0_X: .word X

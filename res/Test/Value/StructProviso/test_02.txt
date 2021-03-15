@@ -40,7 +40,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .POOL1_TreeNode
+    ldr r0, .POOL@884231939_0_TreeNode
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -58,7 +58,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .POOL1_TreeNode
+    ldr r0, .POOL@884231939_0_TreeNode
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -76,7 +76,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .POOL1_TreeNode
+    ldr r0, .POOL@884231939_0_TreeNode
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -91,4 +91,4 @@ main:                                        /* Function: main */
     ldr r2, [r1, #12]                        /* Load field from struct */
     add r0, r0, r2
     pop { pc }
-.POOL1_TreeNode: .word TreeNode
+.POOL@884231939_0_TreeNode: .word TreeNode

@@ -45,7 +45,7 @@ Data.X.create:                               /* Function: Data.X.create */
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL0_Data.X
+    ldr r0, .POOL@1326260249_0_Data.X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -56,7 +56,6 @@ Data.X.create:                               /* Function: Data.X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_Data.X: .word Data.X
     
 .global main
 main:                                        /* Function: main */
@@ -67,3 +66,4 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.POOL@1326260249_0_Data.X: .word Data.X

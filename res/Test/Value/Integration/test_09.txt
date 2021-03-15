@@ -184,14 +184,14 @@ Queue.CyclicQueue.create_P_2:                /* Function: Queue.CyclicQueue.crea
     ldr r1, [fp, #16]
     stmfd sp!, {r0, r1}
     push { r4 }
-    ldr r0, .POOL1_Queue.CyclicQueue
+    ldr r0, .POOL@655171286_0_Queue.CyclicQueue
     push { r0 }
     bl init_P_8                              /* Call init */
     mov sp, fp
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #8
     bx lr
-.POOL1_Queue.CyclicQueue: .word Queue.CyclicQueue
+.POOL@655171286_0_Queue.CyclicQueue: .word Queue.CyclicQueue
 
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

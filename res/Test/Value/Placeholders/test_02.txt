@@ -31,7 +31,7 @@ main:                                        /* Function: main */
     mov r0, #4
     mov r1, #4
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@-1432377394_0_Test
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-8]                        /* Store value to struct field */
@@ -44,4 +44,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@-1432377394_0_Test: .word Test

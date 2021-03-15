@@ -31,16 +31,16 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #8
     push { r0 }
-    ldr r0, .POOL0_Nib
+    ldr r0, .POOL@460280195_0_Nib
     push { r0 }
     mov r0, #2
     push { r0 }
-    ldr r0, .POOL0_Nib
+    ldr r0, .POOL@460280195_0_Nib
     push { r0 }
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@460280195_0_Test
     push { r0 }
     ldr r0, [fp, #-8]                        /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
-.POOL0_Nib: .word Nib
+.POOL@460280195_0_Test: .word Test
+.POOL@460280195_0_Nib: .word Nib

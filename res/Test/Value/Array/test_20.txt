@@ -28,7 +28,7 @@ main_init:
     mvn r0, #1
     push { r0 }
     mov r0, #3
-    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
+    ldr r1, .POOL@1496411313_0_L0_vec        /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -37,7 +37,7 @@ main_init:
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     lsl r2, r0, #2
-    ldr r0, .POOL0_L0_vec                    /* Load data section address */
+    ldr r0, .POOL@1496411313_0_L0_vec        /* Load data section address */
     ldr r0, [r0, r2]
     bx lr
-.POOL0_L0_vec: .word vec
+.POOL@1496411313_0_L0_vec: .word vec

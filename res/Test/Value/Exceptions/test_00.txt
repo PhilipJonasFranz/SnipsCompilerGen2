@@ -63,9 +63,9 @@ get:                                         /* Function: get */
     ble get.L2
     push { r5 }
     push { r4 }
-    ldr r0, .POOL0_Exception
+    ldr r0, .POOL@-1699398224_0_Exception
     push { r0 }
-    ldr r12, .POOL0_Exception
+    ldr r12, .POOL@-1699398224_0_Exception
     mov r0, #12
     b get.L0                                 /* Exception thrown, branch to escape target */
 get.L2: 
@@ -82,7 +82,6 @@ get.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_Exception: .word Exception
     
 .global main
 main:                                        /* Function: main */
@@ -112,7 +111,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .POOL1_Exception
+    ldr r12, .POOL@-1699398224_0_Exception
     bne main.L2
     add r1, r1, #12
     mov r0, #12
@@ -129,4 +128,4 @@ main.L2:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL1_Exception: .word Exception
+.POOL@-1699398224_0_Exception: .word Exception

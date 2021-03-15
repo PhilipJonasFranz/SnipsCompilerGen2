@@ -35,7 +35,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@516614976_0_Test
     push { r0 }
     sub r1, fp, #16                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
@@ -48,4 +48,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@516614976_0_Test: .word Test

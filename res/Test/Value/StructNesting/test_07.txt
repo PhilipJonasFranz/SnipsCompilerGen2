@@ -81,7 +81,7 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #12
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_Storage.X
+    ldr r0, .POOL@1079254422_0_Storage.X
     push { r0 }
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
@@ -100,4 +100,4 @@ main.L1:
 main.L3: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL0_Storage.X: .word Storage.X
+.POOL@1079254422_0_Storage.X: .word Storage.X

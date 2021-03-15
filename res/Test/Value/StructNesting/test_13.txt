@@ -34,9 +34,9 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_B
+    ldr r0, .POOL@1104189489_0_B
     push { r0 }
     bl init_P_2                              /* Call init */
     bl B.get_P_1                             /* Call B.get */
     pop { pc }
-.POOL0_B: .word B
+.POOL@1104189489_0_B: .word B

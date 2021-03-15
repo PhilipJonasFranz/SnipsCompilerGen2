@@ -35,16 +35,16 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_Foo.Bar
+    ldr r0, .POOL@399110315_0_Foo.Bar
     push { r0 }
-    ldr r1, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
+    ldr r1, .POOL@399110315_0_L0_Foo.Baz.x   /* Load from .data section */
     ldr r1, [r1]
     add r0, r1, #8
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r1, [fp, #-4]                        /* Load field from struct */
-    ldr r2, .POOL0_L0_Foo.Baz.x              /* Load from .data section */
+    ldr r2, .POOL@399110315_0_L0_Foo.Baz.x   /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL0_L0_Foo.Baz.x: .word Foo.Baz.x
-.POOL0_Foo.Bar: .word Foo.Bar
+.POOL@399110315_0_L0_Foo.Baz.x: .word Foo.Baz.x
+.POOL@399110315_0_Foo.Bar: .word Foo.Bar

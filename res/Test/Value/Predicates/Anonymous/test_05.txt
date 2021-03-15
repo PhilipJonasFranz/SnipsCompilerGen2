@@ -34,10 +34,9 @@ lambda_f:                                    /* Function address getter for pred
 .global f
 f:                                           /* Function: f */
     mul r0, r0, r0
-    ldr r1, .POOL0_L0_r
+    ldr r1, .POOL@-1816193410_0_L0_r
     str r0, [r1]
     bx lr
-.POOL0_L0_r: .word r
     
 .global map
 map:                                         /* Function: map */
@@ -56,7 +55,7 @@ main:                                        /* Function: main */
     mov r1, r0
     mov r0, #10
     bl map                                   /* Call map */
-    ldr r0, .POOL1_L0_r                      /* Evaluate Expression */
+    ldr r0, .POOL@-1816193410_0_L0_r         /* Evaluate Expression */
     ldr r0, [r0]
     pop { pc }
-.POOL1_L0_r: .word r
+.POOL@-1816193410_0_L0_r: .word r

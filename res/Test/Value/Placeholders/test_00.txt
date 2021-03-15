@@ -23,11 +23,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #3                               /* Evaluate Expression */
     mov r1, #3
-    ldr r2, .POOL0_Test
+    ldr r2, .POOL@-1434224436_0_Test
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@-1434224436_0_Test
     push { r0 }
     ldr r0, [fp, #-8]                        /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@-1434224436_0_Test: .word Test

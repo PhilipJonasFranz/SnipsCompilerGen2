@@ -42,7 +42,7 @@ main:                                        /* Function: main */
     add r4, r0, #1
     push { r0 }
     push { r4 }
-    ldr r0, .POOL0_K
+    ldr r0, .POOL@-1427759789_0_K
     push { r0 }
     mov r2, sp
     mov r1, #6
@@ -60,4 +60,4 @@ main.L1:
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-.POOL0_K: .word K
+.POOL@-1427759789_0_K: .word K

@@ -55,7 +55,7 @@ X.create_P_1_1:                              /* Function: X.create, Provisos: BO
     push { r5 }
     push { r4 }
     push { r3 }
-    ldr r0, .POOL0_X
+    ldr r0, .POOL@-1494160085_0_X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -66,7 +66,6 @@ X.create_P_1_1:                              /* Function: X.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_X: .word X
     
 .global Y.create_P_1_1
 Y.create_P_1_1:                              /* Function: Y.create, Provisos: BOOL, CHAR */
@@ -84,7 +83,7 @@ Y.create_P_1_1:                              /* Function: Y.create, Provisos: BO
     ldmfd sp!, {r1, r2}
     bl X.create_P_1_1                        /* Call X.create */
     add sp, sp, #4
-    ldr r0, .POOL1_Y
+    ldr r0, .POOL@-1494160085_0_Y
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -96,7 +95,6 @@ Y.create_P_1_1:                              /* Function: Y.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_Y: .word Y
     
 .global main
 main:                                        /* Function: main */
@@ -120,3 +118,5 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.POOL@-1494160085_0_Y: .word Y
+.POOL@-1494160085_0_X: .word X

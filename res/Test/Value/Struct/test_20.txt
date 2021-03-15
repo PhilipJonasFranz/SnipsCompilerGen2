@@ -29,7 +29,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
-    ldr r0, .POOL0_Test
+    ldr r0, .POOL@515691455_0_Test
     push { r0 }
     sub r1, fp, #8                           /* Evaluate Expression */
     lsl r2, r3, #2
@@ -38,4 +38,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-.POOL0_Test: .word Test
+.POOL@515691455_0_Test: .word Test

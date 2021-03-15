@@ -26,11 +26,11 @@ Baz.x: .word 16
     
 .global Foo.get
 Foo.get:                                     /* Function: Foo.get */
-    ldr r0, .POOL0_L0_Baz.x                  /* Evaluate Expression */
+    ldr r0, .POOL@398186794_0_L0_Baz.x       /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_L0_Baz.x: .word Baz.x
     
 .global main
 main:                                        /* Function: main */
     b Foo.get                                /* Evaluate Expression */
+.POOL@398186794_0_L0_Baz.x: .word Baz.x

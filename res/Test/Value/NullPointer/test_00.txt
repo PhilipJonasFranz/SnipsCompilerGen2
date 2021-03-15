@@ -16,8 +16,8 @@ HEAP_START: .word 0
     
 .global main
 main:                                        /* Function: main */
-    ldr r3, .POOL0_L1_NULL                   /* Evaluate Expression */
-    ldr r1, .POOL0_L1_NULL                   /* Load null address */
+    ldr r3, .POOL@-1448351984_0_L1_NULL      /* Evaluate Expression */
+    ldr r1, .POOL@-1448351984_0_L1_NULL      /* Load null address */
     cmp r3, r1
     bne main.L1
     mov r0, #10                              /* Evaluate Expression */
@@ -25,4 +25,4 @@ main:                                        /* Function: main */
 main.L1: 
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-.POOL0_L1_NULL: .word NULL
+.POOL@-1448351984_0_L1_NULL: .word NULL

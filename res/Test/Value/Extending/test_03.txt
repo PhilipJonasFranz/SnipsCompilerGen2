@@ -40,7 +40,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     mov r0, #65
     push { r0 }
-    ldr r0, .POOL0_A
+    ldr r0, .POOL@-1499701211_0_A
     push { r0 }
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
@@ -50,4 +50,4 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r0, r2
     bx lr
-.POOL0_A: .word A
+.POOL@-1499701211_0_A: .word A

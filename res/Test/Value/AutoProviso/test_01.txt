@@ -23,10 +23,10 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL0_S
+    ldr r0, .POOL@-246640344_0_S
     push { r0 }
     bl init_P_2                              /* Call init */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     pop { pc }
-.POOL0_S: .word S
+.POOL@-246640344_0_S: .word S

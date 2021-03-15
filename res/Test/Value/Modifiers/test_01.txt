@@ -45,7 +45,7 @@ Test.getter:                                 /* Function: Test.getter */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_Test.S
+    ldr r0, .POOL@1324413207_0_Test.S
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -56,7 +56,6 @@ Test.getter:                                 /* Function: Test.getter */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_Test.S: .word Test.S
     
 .global main
 main:                                        /* Function: main */
@@ -68,3 +67,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.POOL@1324413207_0_Test.S: .word Test.S

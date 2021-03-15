@@ -84,9 +84,9 @@ checkThreshold.L2:
     cmp r8, r4
     blt checkThreshold.L5
     push { r8 }
-    ldr r0, .POOL1_Exception
+    ldr r0, .POOL@-1696627661_0_Exception
     push { r0 }
-    ldr r12, .POOL1_Exception
+    ldr r12, .POOL@-1696627661_0_Exception
     mov r0, #8
     b checkThreshold.L0                      /* Exception thrown, branch to escape target */
 checkThreshold.L5: 
@@ -110,7 +110,6 @@ checkThreshold.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_Exception: .word Exception
     
 .global main
 main:                                        /* Function: main */
@@ -153,7 +152,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .POOL2_Exception
+    ldr r12, .POOL@-1696627661_0_Exception
     bne main.L2
     add r1, r1, #8
     mov r0, #8
@@ -167,4 +166,4 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL2_Exception: .word Exception
+.POOL@-1696627661_0_Exception: .word Exception

@@ -26,7 +26,7 @@ main:                                        /* Function: main */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL0_X
+    ldr r0, .POOL@1761607425_0_X
     push { r0 }
     sub r1, fp, #4                           /* Load field location */
     ldr r0, [r1]
@@ -37,4 +37,4 @@ main:                                        /* Function: main */
     lsl r2, r1, #1
     add r0, r0, r2
     bx lr
-.POOL0_X: .word X
+.POOL@1761607425_0_X: .word X

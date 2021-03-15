@@ -39,14 +39,14 @@ main:                                        /* Function: main */
     mov r0, #9
     mov r1, #8
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL1_Nib
+    ldr r0, .POOL@463050758_0_Nib
     push { r0 }
     mov r0, #9
     mov r1, #2
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL1_Nib
+    ldr r0, .POOL@463050758_0_Nib
     push { r0 }
-    ldr r0, .POOL1_Test
+    ldr r0, .POOL@463050758_0_Test
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -76,5 +76,5 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL1_Test: .word Test
-.POOL1_Nib: .word Nib
+.POOL@463050758_0_Test: .word Test
+.POOL@463050758_0_Nib: .word Nib

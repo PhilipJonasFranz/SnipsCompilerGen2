@@ -72,7 +72,7 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL1_A
+    ldr r0, .POOL@-2035905496_0_A
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r3, r0
@@ -86,4 +86,4 @@ main:                                        /* Function: main */
     bl GetSet.L2_P_1                         /* Branch to relay table of GetSet */
     add r0, r4, r0
     pop { pc }
-.POOL1_A: .word A
+.POOL@-2035905496_0_A: .word A

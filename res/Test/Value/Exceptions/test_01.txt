@@ -75,9 +75,9 @@ get:                                         /* Function: get */
     ble get.L2
     push { r5 }
     push { r4 }
-    ldr r0, .POOL0_Exception
+    ldr r0, .POOL@-1698474703_0_Exception
     push { r0 }
-    ldr r12, .POOL0_Exception
+    ldr r12, .POOL@-1698474703_0_Exception
     mov r0, #12
     b get.L0                                 /* Exception thrown, branch to escape target */
 get.L2: 
@@ -94,7 +94,6 @@ get.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL0_Exception: .word Exception
     
 .global throw
 throw:                                       /* Function: throw */
@@ -102,9 +101,9 @@ throw:                                       /* Function: throw */
     mov fp, sp
     mov r0, #99
     push { r0 }
-    ldr r0, .POOL1_ContextException
+    ldr r0, .POOL@-1698474703_0_ContextException
     push { r0 }
-    ldr r12, .POOL1_ContextException
+    ldr r12, .POOL@-1698474703_0_ContextException
     mov r0, #8
     cmp r12, #0
     mov r2, sp
@@ -116,7 +115,6 @@ throw:                                       /* Function: throw */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_ContextException: .word ContextException
     
 .global main
 main:                                        /* Function: main */
@@ -150,7 +148,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .POOL2_Exception
+    ldr r12, .POOL@-1698474703_0_Exception
     bne main.L2
     add r1, r1, #12
     mov r0, #12
@@ -165,7 +163,7 @@ main.L0:
     mov r12, #0
     b main.L3
 main.L2: 
-    ldr r12, .POOL2_ContextException
+    ldr r12, .POOL@-1698474703_0_ContextException
     bne main.L3
     add r1, r1, #8
     mov r0, #8
@@ -179,5 +177,5 @@ main.L3:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL2_ContextException: .word ContextException
-.POOL2_Exception: .word Exception
+.POOL@-1698474703_0_ContextException: .word ContextException
+.POOL@-1698474703_0_Exception: .word Exception

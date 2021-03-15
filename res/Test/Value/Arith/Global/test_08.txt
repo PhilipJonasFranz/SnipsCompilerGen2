@@ -43,15 +43,15 @@ List.LinkedList.add_P_3:                     /* Function: List.LinkedList.add, P
     add r0, fp, #24
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL0_L2_NULL                   /* Load null address */
+    ldr r0, .POOL@1321795593_0_L2_NULL       /* Load null address */
     push { r0 }
-    ldr r0, .POOL0_List.ListNode
+    ldr r0, .POOL@1321795593_0_List.ListNode
     push { r0 }
     bl init_P_5                              /* Call init */
     mov r4, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL0_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -77,8 +77,6 @@ List.LinkedList.add.L0:
     ldmfd sp!, {r3, r4, fp, lr}
     add sp, sp, #12
     bx lr
-.POOL0_List.ListNode: .word List.ListNode
-.POOL0_L2_NULL: .word NULL
     
 .global List.LinkedList.get_P_3
 List.LinkedList.get_P_3:                     /* Function: List.LinkedList.get, Provisos: X<INT> */
@@ -106,7 +104,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -141,7 +139,6 @@ List.LinkedList.get.L7:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL1_L2_NULL: .word NULL
     
 .global List.LinkedList.create_P_3
 List.LinkedList.create_P_3:                  /* Function: List.LinkedList.create, Provisos: X<INT> */
@@ -151,18 +148,19 @@ List.LinkedList.create_P_3:                  /* Function: List.LinkedList.create
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
     mov r0, #0
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
-    ldr r2, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
+    ldr r2, .POOL@1321795593_0_L2_NULL       /* Load null address */
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL2_List.LinkedList
+    ldr r0, .POOL@1321795593_0_List.LinkedList
     push { r0 }
     bl init_P_7                              /* Call init */
     mov sp, fp
     ldmfd sp!, {fp, lr}
     add sp, sp, #12
     bx lr
-.POOL2_List.LinkedList: .word List.LinkedList
-.POOL2_L2_NULL: .word NULL
+.POOL@1321795593_0_List.LinkedList: .word List.LinkedList
+.POOL@1321795593_0_List.ListNode: .word List.ListNode
+.POOL@1321795593_0_L2_NULL: .word NULL
 
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
@@ -185,10 +183,10 @@ main_init:
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
     mov r1, #0
-    ldr r2, .POOL4_X
+    ldr r2, .POOL@685564359_0_X
     stmfd sp!, {r0-r2}
     bl List.LinkedList.create_P_3            /* Call List.LinkedList.create */
-    ldr r1, .POOL4_L0_buffer                 /* Load from .data section */
+    ldr r1, .POOL@685564359_0_L0_buffer      /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
 main:                                        /* Function: main */
@@ -197,17 +195,17 @@ main:                                        /* Function: main */
     mov r0, #20                              /* Load parameters */
     mov r1, #0
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL4_X
+    ldr r0, .POOL@685564359_0_X
     push { r0 }
-    ldr r0, .POOL4_L0_buffer                 /* Load from .data section */
+    ldr r0, .POOL@685564359_0_L0_buffer      /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.add_P_3               /* Call List.LinkedList.add */
     mov r1, #0
-    ldr r0, .POOL4_L0_buffer                 /* Load from .data section */
+    ldr r0, .POOL@685564359_0_L0_buffer      /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.get_P_3               /* Call List.LinkedList.get */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL4_L0_buffer: .word buffer
-.POOL4_X: .word X
+.POOL@685564359_0_L0_buffer: .word buffer
+.POOL@685564359_0_X: .word X

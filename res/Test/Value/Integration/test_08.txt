@@ -95,15 +95,15 @@ List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, P
     mov r3, r0
     mov r4, r1
     push { r4 }
-    ldr r0, .POOL0_L2_NULL                   /* Load null address */
+    ldr r0, .POOL@1321795593_0_L2_NULL       /* Load null address */
     push { r0 }
-    ldr r0, .POOL0_List.ListNode
+    ldr r0, .POOL@1321795593_0_List.ListNode
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r5, r0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL0_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.add.L1
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -126,8 +126,6 @@ List.LinkedList.add.L0:
     add r2, r0, #1
     str r2, [r1]
     ldmfd sp!, {r3-r5, pc}
-.POOL0_List.ListNode: .word List.ListNode
-.POOL0_L2_NULL: .word NULL
     
 .global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
@@ -149,7 +147,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL1_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -167,7 +165,6 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-.POOL1_L2_NULL: .word NULL
     
 .global List.LinkedList.remove_P_1
 List.LinkedList.remove_P_1:                  /* Function: List.LinkedList.remove, Provisos: INT */
@@ -184,7 +181,7 @@ List.LinkedList.remove.L0:
     bne List.LinkedList.remove.L3
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     ldmfdeq sp!, {r3-r5, pc}
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -199,7 +196,7 @@ List.LinkedList.remove.L0:
     ldr r0, [r1, #8]                         /* Load field from struct */
     cmp r0, r5
     bne List.LinkedList.remove.L6
-    ldr r0, .POOL2_L2_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL@1321795593_0_L2_NULL       /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
 List.LinkedList.remove.L6: 
@@ -216,7 +213,7 @@ List.LinkedList.remove.L10:                  /* Evaluate condition */
     ble List.LinkedList.remove.L11
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L13
     ldmfd sp!, {r3-r5, pc}
@@ -229,7 +226,7 @@ List.LinkedList.remove.L13:
 List.LinkedList.remove.L11: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L16
     ldmfd sp!, {r3-r5, pc}
@@ -238,13 +235,13 @@ List.LinkedList.remove.L16:
     ldr r1, [r1, #4]
     lsl r1, r1, #2
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL2_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.remove.L19
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bl free                                  /* Call free */
-    ldr r0, .POOL2_L2_NULL                   /* Evaluate Expression */
+    ldr r0, .POOL@1321795593_0_L2_NULL       /* Evaluate Expression */
     lsl r1, r5, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     mov r0, r5                               /* Evaluate Expression */
@@ -263,7 +260,6 @@ List.LinkedList.remove.L19:
     lsl r1, r5, #2                           /* Convert to bytes */
     str r3, [r1, #4]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.POOL2_L2_NULL: .word NULL
     
 .global List.LinkedList.create_P_1
 List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT */
@@ -271,15 +267,16 @@ List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create
     mov r3, r0
     push { r3 }
     mov r0, #0
-    ldr r1, .POOL3_L2_NULL                   /* Load null address */
-    ldr r2, .POOL3_L2_NULL                   /* Load null address */
+    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
+    ldr r2, .POOL@1321795593_0_L2_NULL       /* Load null address */
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL3_List.LinkedList
+    ldr r0, .POOL@1321795593_0_List.LinkedList
     push { r0 }
     bl init_P_5                              /* Call init */
     ldmfd sp!, {r3, pc}
-.POOL3_List.LinkedList: .word List.LinkedList
-.POOL3_L2_NULL: .word NULL
+.POOL@1321795593_0_List.LinkedList: .word List.LinkedList
+.POOL@1321795593_0_List.ListNode: .word List.ListNode
+.POOL@1321795593_0_L2_NULL: .word NULL
 
 .global GameObject.Items.set
 GameObject.Items.set:                        /* Function: GameObject.Items.set */
@@ -319,7 +316,7 @@ main_init:
     mov r1, #5
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL5_L0_arr                    /* Load from .data section */
+    ldr r1, .POOL@1630028086_0_L0_arr        /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -334,7 +331,7 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl resv                                  /* Call resv */
     push { r0 }
-    ldr r0, .POOL5_GameObject.Items.Inventory
+    ldr r0, .POOL@1630028086_0_GameObject.Items.Inventory
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -344,13 +341,13 @@ main:                                        /* Function: main */
     bl resv                                  /* Call resv */
     mov r4, r0
     push { r3 }
-    ldr r0, .POOL5_L0_arr                    /* Load data section address */
+    ldr r0, .POOL@1630028086_0_L0_arr        /* Load data section address */
     ldr r0, [r0, #4]
     push { r0 }
-    ldr r0, .POOL5_L0_arr                    /* Load data section address */
+    ldr r0, .POOL@1630028086_0_L0_arr        /* Load data section address */
     ldr r0, [r0]
     push { r0 }
-    ldr r0, .POOL5_GameObject.Player
+    ldr r0, .POOL@1630028086_0_GameObject.Player
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -365,15 +362,15 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
-    ldr r0, .POOL5_Util.Tuple2
+    ldr r0, .POOL@1630028086_0_Util.Tuple2
     push { r0 }
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     mov r1, #1
-    ldr r2, .POOL5_Util.Tuple2
+    ldr r2, .POOL@1630028086_0_Util.Tuple2
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL5_Util.Tuple2
+    ldr r0, .POOL@1630028086_0_Util.Tuple2
     push { r0 }
     ldr r0, [fp, #-24]                       /* Load field from struct */
     ldr r2, [fp, #-20]                       /* Load field from struct */
@@ -381,13 +378,13 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r0, r2
     push { r0 }
-    ldr r0, .POOL5_Util.Container
+    ldr r0, .POOL@1630028086_0_Util.Container
     push { r0 }
     ldr r0, [fp, #-36]                       /* Evaluate Expression */
     ldr r1, [fp, #-40]
     stmfd sp!, {r0, r1}
     push { r4 }
-    ldr r0, .POOL5_Util.Tuple2
+    ldr r0, .POOL@1630028086_0_Util.Tuple2
     push { r0 }
 /* Set item at index 1 to 5 */
     ldr r0, [fp, #-36]                       /* Load field from struct */
@@ -426,8 +423,8 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL5_Util.Container: .word Util.Container
-.POOL5_Util.Tuple2: .word Util.Tuple2
-.POOL5_GameObject.Player: .word GameObject.Player
-.POOL5_GameObject.Items.Inventory: .word GameObject.Items.Inventory
-.POOL5_L0_arr: .word arr
+.POOL@1630028086_0_Util.Container: .word Util.Container
+.POOL@1630028086_0_Util.Tuple2: .word Util.Tuple2
+.POOL@1630028086_0_GameObject.Player: .word GameObject.Player
+.POOL@1630028086_0_GameObject.Items.Inventory: .word GameObject.Items.Inventory
+.POOL@1630028086_0_L0_arr: .word arr

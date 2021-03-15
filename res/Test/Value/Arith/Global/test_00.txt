@@ -21,8 +21,8 @@ x: .word 3
 .global main
 main:                                        /* Function: main */
     mov r1, r0                               /* Evaluate Expression */
-    ldr r2, .POOL0_L0_x                      /* Load from .data section */
+    ldr r2, .POOL@678176191_0_L0_x           /* Load from .data section */
     ldr r2, [r2]
     mul r0, r1, r2
     bx lr
-.POOL0_L0_x: .word x
+.POOL@678176191_0_L0_x: .word x

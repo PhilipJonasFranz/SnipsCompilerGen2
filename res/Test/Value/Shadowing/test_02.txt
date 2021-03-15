@@ -55,7 +55,7 @@ X.get:                                       /* Function: X.get */
 .global main
 main:                                        /* Function: main */
     push { r0 }
-    ldr r0, .POOL0_S
+    ldr r0, .POOL@-485195298_0_S
     push { r0 }
     b X.get                                  /* Call X.get */
-.POOL0_S: .word S
+.POOL@-485195298_0_S: .word S
