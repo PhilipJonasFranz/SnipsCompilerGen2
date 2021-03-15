@@ -276,17 +276,14 @@ public class ContextChecker {
 				if (s instanceof StructTypedef) {
 					StructTypedef typedef = (StructTypedef) s;
 					
-					if (!this.structTypedefs.contains(s)) {
-						p.programElements.remove(i);
-						i--;
-					}
-					
 					/* 
 					 * The last checked typedef was the implementation of another typedef,
 					 * its ressources have now been moved to the typedef in this.reCheckTypedef.
 					 * We need to re-check this typedef to make sure all references etc. are set.
 					 */
 					if (this.reCheckTypedef != null) {
+						p.programElements.remove(i);
+						i--;
 						
 						/* Interface typedef still contains both typedefs, remove implementation */
 						for (INTERFACE intf : typedef.implemented) 

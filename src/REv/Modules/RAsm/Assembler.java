@@ -234,9 +234,13 @@ public class Assembler {
 					if (!in.get(i).getInstruction().contains(".word") && !in.get(i).getInstruction().contains(".skip")) {
 						// [label]: -> remove line
 						String label = in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1);
-						if (locations.containsKey(label))new Message("Multiple labels with similar name: " + label, LogPoint.Type.FAIL);
-						if (label.equals(""))new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
-						locations.put(in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1), i * 4);
+						
+						if (locations.containsKey(label)) new Message("Multiple labels with similar name: " + label, LogPoint.Type.FAIL);
+						if (label.equals("")) new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
+						if (label == null || label.equals("null")) 
+							new Message("Found bad label: '" + label + "' in line " + in.get(i).line, LogPoint.Type.FAIL);
+						
+						locations.put(label, i * 4);
 						in.remove(i);
 						i--;
 					}
@@ -280,7 +284,8 @@ public class Assembler {
 				if (in.get(i).getInstruction().startsWith("bl") || (in.get(i).instruction.startsWith("b") && !in.get(i).getInstruction().startsWith("bx"))) {
 					// bl there -> bl [x], x = address there
 					String [] sp = in.get(i).getInstruction().split(" ");
-					if (!locations.containsKey(sp [1]))
+					
+					if (!locations.containsKey(sp [1]) || locations.get(sp [1]) == null)
 						 log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL));
 					
 					sp [1] = "" + locations.get(sp [1]);
@@ -765,9 +770,13 @@ public class Assembler {
 					instr.add(app);
 				}
 			} catch (Exception e) {
-				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);
+				boolean silenced = CompilerDriver.silenced;
+				CompilerDriver.silenced = false;
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
+				log.stream().forEach(x -> x.flush());
+				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);
 				error = e;
+				CompilerDriver.silenced = silenced;
 			}
 		}
 		
@@ -832,7 +841,7 @@ public class Assembler {
 			for (int i = 0; i < w; i++)app = b [31 - i] + app;
 			return app;
 		} catch (NumberFormatException e) {
-			throw new Exception("Bad parse input, line " + line);
+			throw new Exception("Bad parse input, line " + line + ": " + num);
 		}
 	}
 	

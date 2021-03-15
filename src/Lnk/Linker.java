@@ -111,6 +111,11 @@ public class Linker {
 			
 			String mappedPath = PreProcessor.resolveToPath(filePath);
 			
+			if (mappedPath.equals(unit.sourceFile)) {
+				buffer.add(new Message("LINK -> Found self-import in file '" + unit.sourceFile + "'", Type.WARN));
+				continue;
+			}
+			
 			if (included.contains(incPath)) continue;
 			else included.add(incPath);
 			

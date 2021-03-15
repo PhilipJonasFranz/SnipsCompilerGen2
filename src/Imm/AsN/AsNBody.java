@@ -296,14 +296,8 @@ public class AsNBody extends AsNNode {
 			}
 			else globalsInit.add(new ASMPopStack(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2), new RegOp(REG.FP), new RegOp(REG.LR)));
 			
-			/* Only main function present, dont need branch */
-			if (p.programElements.stream().filter(x -> x instanceof Function).count() == 1 && !AsNBody.usedStackCopyRoutine) {
-				body.originUnit.textSection.remove(branch);
-			}
-			else {
-				/* Add seperator before init block to other functions */
-				globalsInit.add(0, new ASMSeperator());
-			}
+			/* Add seperator before init block to other functions */
+			globalsInit.add(0, new ASMSeperator());
 			
 			List<ASMInstruction> text = body.originUnit.textSection;
 			
@@ -317,7 +311,8 @@ public class AsNBody extends AsNNode {
 					text.addAll(i, globalsInit);
 					
 					/* Relay start branch to init block */
-					((LabelOp) branch.target).label = initLabel;
+					((LabelOp) branch.target).patch(initLabel);
+					
 					break;
 				}
 			}
@@ -344,7 +339,7 @@ public class AsNBody extends AsNNode {
 				}
 			}
 			
-			if (unit.sourceFile.equals(AsNBody.originPath)) {
+			if (unit.sourceFile.equals(AsNBody.originPath) && !CompilerDriver.buildModulesRecurse) {
 				List<String> referenced = new ArrayList();
 				
 				referenced.add("maybe free.s");
