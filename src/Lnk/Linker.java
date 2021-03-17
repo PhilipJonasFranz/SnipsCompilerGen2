@@ -6,7 +6,6 @@ import java.util.List;
 import Exc.LNK_EXC;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import PreP.PreProcessor;
-import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -14,6 +13,8 @@ import Util.Logging.ProgressMessage;
 public class Linker {
 
 	public static class LinkerUnit {
+		
+		public long versionID = 0;
 		
 		public String sourceFile;
 		
@@ -28,19 +29,30 @@ public class Linker {
 			
 			List<String> output = new ArrayList();
 			
-			output.add(".data");
-			for (String s : this.dataSection)
-				if (!s.trim().equals(""))
-					output.add(s);
+			output.add(".version " + this.versionID);
+			output.add("");
 			
-			if (!this.dataSection.isEmpty())
+			for (String imp : this.imports) 
+				output.add(imp);
+			if (!this.imports.isEmpty())
 				output.add("");
 			
-			output.add(".text");
+			if (!this.dataSection.isEmpty()) {
+				output.add(".data");
+				for (String s : this.dataSection)
+					if (!s.trim().equals(""))
+						output.add(s);
 			
-			for (int i = 0; i < this.textSection.size(); i++) {
-				if (i == 0 && this.textSection.get(i).trim().equals("")) continue;
-				output.add(this.textSection.get(i));
+				output.add("");
+			}
+			
+			if (!this.textSection.isEmpty()) {
+				output.add(".text");
+				
+				for (int i = 0; i < this.textSection.size(); i++) {
+					if (i == 0 && this.textSection.get(i).trim().equals("")) continue;
+					output.add(this.textSection.get(i));
+				}
 			}
 			
 			for (int i = 1; i < output.size(); i++) {
@@ -66,7 +78,10 @@ public class Linker {
 		
 		SECTION section = SECTION.TEXT;
 		for (String line : asm) {
-			if (line.startsWith(".data"))
+			if (line.startsWith(".version")) {
+				unit.versionID = Long.parseLong(line.split(" ") [1]);
+			}
+			else if (line.startsWith(".data"))
 				section = SECTION.DATA;
 			else if (line.startsWith(".text"))
 				section = SECTION.TEXT;
@@ -83,7 +98,7 @@ public class Linker {
 		return unit;
 	}
 	
-	public static ProgressMessage link_progress = new ProgressMessage("LINK -> Starting", 30, LogPoint.Type.INFO);
+	public static ProgressMessage link_progress = null;
 	
 	public static List<Message> buffer = new ArrayList();
 	

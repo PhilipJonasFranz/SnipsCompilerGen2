@@ -19,6 +19,7 @@ import Exc.LNK_EXC;
 import Exc.PARSE_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
@@ -392,7 +393,7 @@ public class CompilerDriver {
 				
 				
 						/* --- OUTPUT BUILDING --- */
-				output = this.buildOutput(body.originUnit.buildTranslationUnit(), false);
+				output = this.buildOutput(body.originUnit, false);
 			
 				
 						/* --- BUILD AND DUMP MODULES --- */
@@ -404,9 +405,7 @@ public class CompilerDriver {
 						String excludeMainPath = Util.toASMPath(inputFile.getPath());
 						if (entry.getKey().equals(excludeMainPath)) continue;
 						
-						new Message("SNIPS -> Dumping Module: " + entry.getKey(), LogPoint.Type.INFO).getMessage();
-							
-						List<String> module = this.buildOutput(entry.getValue().buildTranslationUnit(), true);
+						List<String> module = this.buildOutput(entry.getValue(), true);
 						
 						boolean write = Util.writeInFile(module, path);
 						if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
@@ -419,6 +418,7 @@ public class CompilerDriver {
 			
 					/* --- LINKING --- */
 			if (!CompilerDriver.buildObjectFileOnly) {
+				Linker.link_progress = new ProgressMessage("LINK -> Starting", 30, LogPoint.Type.INFO);
 				LinkerUnit originUnit = Linker.parseLinkerUnit(output);
 				Lnk.Linker.linkProgram(originUnit);
 				output = originUnit.build();
@@ -500,24 +500,104 @@ public class CompilerDriver {
 		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
 	}
 	
-	public List<String> buildOutput(List<ASMInstruction> ins, boolean isModule) {
+	public List<String> buildOutput(AsNTranslationUnit unit, boolean isModule) {
+		
+		List<ASMInstruction> unitBuild = unit.buildTranslationUnit();
 		List<String> output = new ArrayList();
 		
-		/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
-		output = ins.stream().filter(x -> ((x instanceof ASMComment)? (!isModule && enableComments) : true)).map(x -> {
+		boolean isMainFile = unit.sourceFile.equals(Util.toASMPath(inputFile.getPath()));
+		
+		if (unit.hasVersionChanged() || isMainFile) {
 			
-			/* Count instruction types */
-			if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
-			else ins_p.put(x.getClass().getName(), 1);
+			/* 
+			 * The version has changed, this means that all exsisting module assembly has become invalid.
+			 * So we have to delete all existing asssembly and re-build the module from scratch.
+			 */
 			
-			/* Build instruction with or without comment */
-			return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
-		}).collect(Collectors.toList());
-	
-		/* Remove double empty lines */
-		for (int i = 1; i < output.size(); i++) {
-			if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
-				output.remove(i-- - 1);
+			if (!isMainFile)
+				new Message("SNIPS -> Module changed: '" + unit.sourceFile + "'", Type.INFO);
+			
+			/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
+			output = unitBuild.stream().filter(x -> ((x instanceof ASMComment)? (!isModule && enableComments) : true)).map(x -> {
+				
+				/* Count instruction types */
+				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
+				else ins_p.put(x.getClass().getName(), 1);
+				
+				/* Build instruction with or without comment */
+				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
+			}).collect(Collectors.toList());
+		
+			/* Remove double empty lines */
+			for (int i = 1; i < output.size(); i++) {
+				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
+					output.remove(i-- - 1);
+			}
+		}
+		else {
+			
+			/* 
+			 * Version has not changed, this means we can keep all existing assembly source.
+			 * This means we have to merge the new assembly with the existing module unit.
+			 */
+			
+			int changes = 0;
+			
+			LinkerUnit existingUnit = unit.existingUnit;
+			
+			/* Output is patched existing unit */
+			output = existingUnit.build();
+			
+			/* Imports */
+			existingUnit.imports.clear();
+			existingUnit.imports.addAll(unit.imports);
+			
+			/* Data Section */
+			existingUnit.dataSection.clear();
+			for (ASMInstruction dataIns : unit.dataSection)
+				existingUnit.dataSection.add(dataIns.build());
+			
+			/* Text Section */
+			for (int i = 0; i < unitBuild.size(); i++) {
+				ASMInstruction ins = unitBuild.get(i);
+				 
+				if (ins instanceof ASMDirective) {
+					ASMDirective dir = (ASMDirective) ins;
+					if (dir.hardCode.startsWith(".global")) {
+						/* Found function head */
+						boolean found = false;
+						for (String s : output) {
+							if (s.equals(dir.hardCode)) {
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found) {
+							changes++;
+							
+							output.add("");
+							
+							for (int a = i; a < unitBuild.size(); a++) {
+								ASMInstruction ins0 = unitBuild.get(a);
+								
+								if (!ins0.equals(dir) && ins0 instanceof ASMDirective) {
+									ASMDirective dir0 = (ASMDirective) ins0;
+									if (dir0.hardCode.startsWith(".global")) {
+										i = a - 1;
+										break;
+									}
+								}
+								else output.add(ins0.build());
+							}
+						}
+					}
+				}
+			}
+			
+			if (changes > 0)
+				new Message("SNIPS -> Updating module '" + unit.sourceFile + "', made " + changes + " change" + ((changes > 1)? "s" : ""), Type.INFO);
+			
 		}
 		
 		return output;
@@ -657,6 +737,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-o")) 	buildObjectFileOnly = true;
+				else if (args [i].equals("-r")) 	buildModulesRecurse = true;
 				else if (args [i].equals("-R")) 	buildModulesRecurse = true;
 				else if (args [i].equals("-L")) 	linkOnly = true;
 				else if (args [i].equals("-log")) {
@@ -688,7 +769,8 @@ public class CompilerDriver {
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-o        : Build object file only, required additional linking",
-				"-R        : Build all required modules and save them",
+				"-r        : Re-build all changed required modules and save them",
+				"-R        : Force to re-build all required modules and save them",
 				"-L        : Link the given assembly file. Requires the input file to be a .s file.",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",

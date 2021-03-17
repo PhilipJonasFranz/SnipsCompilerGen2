@@ -176,7 +176,13 @@ public class PreProcessor {
 	public static String resolveToPath(String filePath) {
 		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
 			String [] v = c.value.split(":");
-			String modPath = Util.toASMPath(v [0]);
+			
+			String modPath = v [0];
+			if (modPath.equals(filePath)) {
+				return "release/" + v [1];
+			}
+			
+			modPath = Util.toASMPath(v [0]);
 			if (modPath.equals(filePath)) {
 				return "release/" + Util.toASMPath(v [1]);
 			}

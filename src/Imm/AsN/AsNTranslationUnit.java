@@ -1,5 +1,6 @@
 package Imm.AsN;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,9 +9,17 @@ import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Structural.ASMSeperator;
+import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
+import PreP.PreProcessor;
+import Util.Util;
 
 public class AsNTranslationUnit extends AsNNode {
 
+	public LinkerUnit existingUnit;
+	
+	public long versionID = 0;
+	
 	public String sourceFile;
 	
 	public List<String> imports = new ArrayList();
@@ -21,6 +30,15 @@ public class AsNTranslationUnit extends AsNNode {
 	
 	public AsNTranslationUnit(String sourceFile) {
 		this.sourceFile = sourceFile;
+		
+		String mappedPath = PreProcessor.resolveToPath(sourceFile);
+		List<String> existingModule = Util.readFile(new File(mappedPath));
+		if (existingModule != null) 
+			this.existingUnit = Linker.parseLinkerUnit(existingModule);
+	}
+	
+	public boolean hasVersionChanged() {
+		return existingUnit == null || (existingUnit != null && existingUnit.versionID != this.versionID);
 	}
 	
 	/**
@@ -55,6 +73,9 @@ public class AsNTranslationUnit extends AsNNode {
 	 */
 	public List<ASMInstruction> buildTranslationUnit() {
 		List<ASMInstruction> out = new ArrayList();
+		
+		out.add(new ASMDirective(".version " + this.versionID));
+		out.add(new ASMSeperator());
 		
 		/* Add imports */
 		if (!this.imports.isEmpty()) {

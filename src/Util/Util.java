@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import PreP.PreProcessor;
 import Res.Const;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
@@ -82,6 +83,21 @@ public class Util {
 		if (path.endsWith(".sn") || path.endsWith(".hn")) 
 			path = path.substring(0, path.length() - 2) + "s";
 		return path;
+	}
+	
+	public static long computeHashSum(String path) {
+		long sum = 0;
+		
+		String mappedPath = PreProcessor.resolveToPath(path);
+		List<String> lines = Util.readFile(new File(mappedPath));
+		
+		if (lines != null) {
+			for (String s : lines) 
+				sum += s.hashCode();
+		}
+		else new Message("Failed to locate file '" + path + "', cannot compute hashsum.", Type.WARN);
+		
+		return sum;
 	}
     
 } 

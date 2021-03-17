@@ -85,6 +85,7 @@ public class AsNBody extends AsNNode {
 		
 		originPath = Util.toASMPath(CompilerDriver.inputFile.getPath());
 		body.originUnit = new AsNTranslationUnit(originPath);
+		body.originUnit.versionID = Util.computeHashSum(CompilerDriver.inputFile.getPath());
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
 		MemoryMap map = new MemoryMap();
@@ -371,26 +372,14 @@ public class AsNBody extends AsNNode {
 		/* Manage and create Literal Pools */
 		List<ASMLdrLabel> buffer = new ArrayList();
 		
-		int maxDist = 0;
-		
 		for (int i = 0; i < text.size(); i++) {
-			
-			boolean hasAnotherBranchAhead = false;
-			for (int a = i + 1; a < text.size(); a++) {
-				if (text.get(a) instanceof ASMBranch && 
-						((ASMBranch) text.get(a)).type == BRANCH_TYPE.BX) {
-					hasAnotherBranchAhead = true;
-					break;
-				}
-			}
 			
 			/* Collect ASMLdrLabel instructions in buffer, insert them after next bx instruction */
 			if (text.get(i) instanceof ASMLdrLabel) {
 				ASMLdrLabel load = (ASMLdrLabel) text.get(i);
 				buffer.add(load);
-				maxDist = i;
 			}
-			else if (text.get(i) instanceof ASMBranch && (i - maxDist > 1024 || !hasAnotherBranchAhead)) {
+			else if (text.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) text.get(i);
 				
 				if (b.type == BRANCH_TYPE.BX) {
@@ -453,6 +442,7 @@ public class AsNBody extends AsNNode {
 			
 		if (!AsNBody.translationUnits.containsKey(path)) {
 			AsNTranslationUnit unit = new AsNTranslationUnit(path);
+			unit.versionID = Util.computeHashSum(source.sourceFile);
 			AsNBody.translationUnits.put(unit.sourceFile, unit);
 			unit.append(ins, section);
 		}
