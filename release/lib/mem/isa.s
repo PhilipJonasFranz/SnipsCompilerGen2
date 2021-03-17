@@ -1,3 +1,5 @@
+.version 4730757688
+
 .text
     
 .global isar

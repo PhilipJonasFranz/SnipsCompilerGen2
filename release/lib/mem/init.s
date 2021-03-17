@@ -1,3 +1,5 @@
+.version 2750349890
+
 .text
     
 .global init_P_5
