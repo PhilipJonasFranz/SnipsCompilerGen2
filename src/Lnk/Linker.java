@@ -46,6 +46,10 @@ public class Linker {
 				output.add("");
 			}
 			
+			while (!this.textSection.isEmpty() && this.textSection.get(0).trim().equals("")) {
+				this.textSection.remove(0);
+			}
+			
 			if (!this.textSection.isEmpty() && !(this.textSection.size() == 1 && this.textSection.get(0).trim().equals(""))) {
 				output.add(".text");
 				
