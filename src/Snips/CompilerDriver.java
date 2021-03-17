@@ -75,6 +75,7 @@ public class CompilerDriver {
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
 		buildModulesRecurse = 			false,	/* Builds all modules in the input and saves them.				*/
+		pruneModules = 					false,	/* Prune all exisiting modules and start from scratch.			*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
 		linkOnly = 						false;	/* Only link the given input							 		*/
@@ -368,12 +369,15 @@ public class CompilerDriver {
 		
 		boolean isMainFile = unit.sourceFile.equals(Util.toASMPath(inputFile.getPath()));
 		
-		if (unit.hasVersionChanged() || isMainFile) {
+		if (unit.hasVersionChanged() || isMainFile || pruneModules) {
 			
 			/* 
 			 * The version has changed, this means that all exsisting module assembly has become invalid.
 			 * So we have to delete all existing asssembly and re-build the module from scratch.
 			 */
+			
+			if (!isMainFile && !unit.hasVersionChanged())
+				new Message("SNIPS -> Pruned module '" + unit.sourceFile + "'", Type.INFO);
 			
 			if (!isMainFile)
 				new Message("SNIPS -> Module changed: '" + unit.sourceFile + "'", Type.INFO);
@@ -734,7 +738,10 @@ public class CompilerDriver {
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
 				else if (args [i].equals("-o")) 	buildObjectFileOnly = true;
 				else if (args [i].equals("-r")) 	buildModulesRecurse = true;
-				else if (args [i].equals("-R")) 	buildModulesRecurse = true;
+				else if (args [i].equals("-R")) {
+													buildModulesRecurse = true;
+													pruneModules = true;
+				}
 				else if (args [i].equals("-L")) 	linkOnly = true;
 				else if (args [i].equals("-log")) {
 					logoPrinted = false;

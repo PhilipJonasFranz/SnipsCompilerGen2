@@ -146,7 +146,8 @@ public class Assembler {
 				if (in.get(i).getInstruction().equals(".text")) {
 					mode = MODE.TEXT;
 				}
-				if (in.get(i).getInstruction().startsWith(".global")) {
+				if (in.get(i).getInstruction().startsWith(".global") ||
+						in.get(i).getInstruction().startsWith(".version")) {
 					in.remove(i);
 					i--;
 					continue;

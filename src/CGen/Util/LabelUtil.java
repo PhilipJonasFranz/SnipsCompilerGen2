@@ -22,12 +22,18 @@ public class LabelUtil {
 	
 	public static int funcUID = -1;
 	
+	public static String currentContext = null;
+	
 			/* ---< METHODS >--- */
 	/**
 	 * Returns a new unique label. 
 	 */
 	public static String getLabel() {
-		return funcPrefix + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
+		String prov = "";
+		if (currentContext != null)
+			prov = currentContext;
+			
+		return funcPrefix + prov + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
 							  funcPrefix.equals("resv") || funcPrefix.equals("free") || 
 							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "@"  + funcUID)
 				+ ".L" + c++;

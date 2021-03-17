@@ -319,10 +319,6 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
-		/* Routine was not used, remove */
-		if (!AsNBody.usedStackCopyRoutine) 
-			body.originUnit.textSection.removeAll(routine);
-		
 		/* Add all system libraries that were used */
 		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 	

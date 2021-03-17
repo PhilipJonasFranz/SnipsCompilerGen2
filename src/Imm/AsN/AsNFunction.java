@@ -169,6 +169,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				continue;
 			}
 			
+			LabelUtil.currentContext = f.provisosCalls.get(k).provisoPostfix;
+			
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
@@ -463,6 +465,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
+			
+			LabelUtil.currentContext = null;
 		}
 		
 		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
