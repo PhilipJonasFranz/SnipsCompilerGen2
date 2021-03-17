@@ -73,13 +73,6 @@ public class LabelUtil {
 		n = 0;
 	}
 	
-	/**
-	 * Adds a prefix to given name which consists of a new unique label and _.
-	 */
-	public static String mapToAddressName(String name) {
-		return getLabel() + "_" + name;
-	}
-	
 	private static HashMap<String, Integer> poolLabels = new HashMap();
 	
 	public static String literalPoolPrefix(String fileName) {
@@ -90,7 +83,7 @@ public class LabelUtil {
 		else
 			poolLabels.put(fileName, p);
 		
-		String label = ".POOL@" + fileName.hashCode() + "_" + p++ + "_";
+		String label = ".P" + Math.abs((fileName + p++).hashCode()) + "_";
 		poolLabels.replace(fileName, p);
 		
 		return label;

@@ -121,7 +121,7 @@ public class AsNBody extends AsNNode {
 				AsNBody.addToTranslationUnit(dataEntry, s.getSource(), SECTION.DATA);
 				
 				/* Create address reference instruction for .text section */
-				ASMDataLabel reference = new ASMDataLabel(LabelUtil.mapToAddressName(dec.path.build()), new MemoryWordRefOp(entry));
+				ASMDataLabel reference = new ASMDataLabel(dec.path.build(), new MemoryWordRefOp(entry));
 				globalVarReferences.add(reference);
 				
 				/* Add declaration to global memory */
@@ -140,7 +140,7 @@ public class AsNBody extends AsNNode {
 		body.originUnit.append(dataEntryHeap, SECTION.DATA);
 		
 		/* Create address reference instruction for .text section */
-		ASMDataLabel heapReference = new ASMDataLabel(LabelUtil.mapToAddressName(heap.path.build()), new MemoryWordRefOp(dataEntryHeap));
+		ASMDataLabel heapReference = new ASMDataLabel(heap.path.build(), new MemoryWordRefOp(dataEntryHeap));
 		globalVarReferences.add(heapReference);
 		
 		/* Add declaration to global memory */
@@ -155,7 +155,7 @@ public class AsNBody extends AsNNode {
 		body.originUnit.append(dataEntryNull, SECTION.DATA);
 		
 		/* Create address reference instruction for .text section */
-		ASMDataLabel nullReference = new ASMDataLabel(LabelUtil.mapToAddressName(nullPtr.path.build()), new MemoryWordRefOp(dataEntryNull));
+		ASMDataLabel nullReference = new ASMDataLabel(nullPtr.path.build(), new MemoryWordRefOp(dataEntryNull));
 		globalVarReferences.add(nullReference);
 		
 		/* Add declaration to global memory */
