@@ -93,6 +93,7 @@ public class TestDriver {
 		CompilerDriver.includeMetaInformation = false;
 		
 		CompilerDriver.buildModulesRecurse = true;
+		CompilerDriver.buildObjectFileOnly = true;
 		
 		/* Experimental Flags */
 		//CompilerDriver.optimizeFileSize = true;

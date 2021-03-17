@@ -193,6 +193,8 @@ public class Linker {
 			}
 		}
 		
+		unit.imports.clear();
+		
 		return included;
 	}
 	
