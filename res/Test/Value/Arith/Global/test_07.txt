@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version -2419241929
+.version -1288189402
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -36,13 +36,22 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
-
 list0: .skip 4
 
 .text
     b main_init
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 
@@ -52,17 +61,17 @@ main_init:
     stmea sp, {r0-r2, fp, lr}
     mov r0, #0                               /* Load parameters */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
-    ldr r1, .POOL@684640838_0_L0_list0       /* Load from .data section */
+    ldr r1, .P250970454_list0                /* Load from .data section */
     str r0, [r1]
     ldmfd sp!, {r0-r2, fp, lr}
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r1, #12
-    ldr r0, .POOL@684640838_0_L0_list0       /* Load from .data section */
+    ldr r0, .P250970454_list0                /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
-    ldr r0, .POOL@684640838_0_L0_list0       /* Load parameters */
+    ldr r0, .P250970454_list0                /* Load parameters */
     ldr r0, [r0]
     bl List.LinkedList.clear_P_1             /* Call List.LinkedList.clear */
     add r10, pc, #8                          /* Evaluate Expression */
@@ -70,15 +79,15 @@ main:                                        /* Function: main */
     mov r10, #0
     mov r3, r0
     mov r1, #30
-    ldr r0, .POOL@684640838_0_L0_list0       /* Load from .data section */
+    ldr r0, .P250970454_list0                /* Load from .data section */
     ldr r0, [r0]
     add lr, pc, #8
     mov pc, r3
     mov sp, fp                               /* Reset the stack after anonymous call */
     mov r1, #0
-    ldr r0, .POOL@684640838_0_L0_list0       /* Load from .data section */
+    ldr r0, .P250970454_list0                /* Load from .data section */
     ldr r0, [r0]
     bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@684640838_0_L0_list0: .word list0
+.P250970454_list0: .word list0

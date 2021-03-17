@@ -6,7 +6,6 @@
 Queue.CyclicQueue: .word 0
 
 .text
-
 .global Queue.CyclicQueue.destroy_P_2
 Queue.CyclicQueue.destroy_P_2:               /* Function: Queue.CyclicQueue.destroy, Provisos: INT[2] */
     push { r3, lr }

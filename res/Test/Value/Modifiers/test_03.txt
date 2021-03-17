@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 11165146817
+.version 11422591035
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -33,9 +33,7 @@ OUTPUT
 
 .data
 Data.X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
@@ -57,7 +55,7 @@ Data.X.create:                               /* Function: Data.X.create */
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL@1326260249_0_Data.X
+    ldr r0, .P1835605193_Data.X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -68,7 +66,7 @@ Data.X.create:                               /* Function: Data.X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@1326260249_0_Data.X: .word Data.X
+.P1835605193_Data.X: .word Data.X
 
 .global main
 main:                                        /* Function: main */

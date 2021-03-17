@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 46
 OUTPUT
-.version 14943665975
+.version 12361481406
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,29 +27,36 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
-
 Foo.Bar.x: .word 16
-
 Foo.x: .word 20
-
 Foo.k: .word 10
 
 .text
     b main
 
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
 .global main
 main:                                        /* Function: main */
-    ldr r1, .POOL@397263273_0_L0_Foo.k       /* Evaluate Expression */
+    ldr r1, .P569740377_Foo.k                /* Evaluate Expression */
     ldr r1, [r1]
-    ldr r2, .POOL@397263273_0_L2_Foo.Bar.x   /* Load from .data section */
+    ldr r2, .P569740377_Foo.Bar.x            /* Load from .data section */
     ldr r2, [r2]
     add r1, r1, r2
-    ldr r2, .POOL@397263273_0_L1_Foo.x       /* Load from .data section */
+    ldr r2, .P569740377_Foo.x                /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL@397263273_0_L1_Foo.x: .word Foo.x
-.POOL@397263273_0_L2_Foo.Bar.x: .word Foo.Bar.x
-.POOL@397263273_0_L0_Foo.k: .word Foo.k
+.P569740377_Foo.x: .word Foo.x
+.P569740377_Foo.Bar.x: .word Foo.Bar.x
+.P569740377_Foo.k: .word Foo.k

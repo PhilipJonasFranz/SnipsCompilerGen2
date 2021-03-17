@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 93
 OUTPUT
-.version 11247497880
+.version 11221344569
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -33,17 +33,24 @@ OUTPUT
 
 .data
 A: .word Root
-
 Root: .word Base
-
 Base: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -54,7 +61,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     mov r0, #65
     push { r0 }
-    ldr r0, .POOL@-1499701211_0_A
+    ldr r0, .P753902763_A
     push { r0 }
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
@@ -64,4 +71,4 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r0, r2
     bx lr
-.POOL@-1499701211_0_A: .word A
+.P753902763_A: .word A

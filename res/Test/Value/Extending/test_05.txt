@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 26
 OUTPUT
-.version 26445536888
+.version 32205764920
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -35,11 +35,8 @@ OUTPUT
 
 .data
 Y: .word X
-
 X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
@@ -65,7 +62,7 @@ X.create:                                    /* Function: X.create */
     mov r4, r1
     push { r4 }
     push { r3 }
-    ldr r0, .POOL@-1497854169_0_X
+    ldr r0, .P811161065_X
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -76,7 +73,7 @@ X.create:                                    /* Function: X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@-1497854169_0_X: .word X
+.P811161065_X: .word X
 
 .global Y.create
 Y.create:                                    /* Function: Y.create */
@@ -87,7 +84,7 @@ Y.create:                                    /* Function: Y.create */
     push { r5 }
     bl X.create                              /* Call X.create */
     add sp, sp, #4
-    ldr r0, .POOL@-1497854169_1_Y
+    ldr r0, .P811161066_Y
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -98,7 +95,7 @@ Y.create:                                    /* Function: Y.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@-1497854169_1_Y: .word Y
+.P811161066_Y: .word Y
 
 .global main
 main:                                        /* Function: main */

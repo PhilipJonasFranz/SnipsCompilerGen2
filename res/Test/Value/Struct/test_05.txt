@@ -18,7 +18,7 @@ int main() {
 TESTCASES
 14
 OUTPUT
-.version -11257271790
+.version -7350481715
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -30,15 +30,23 @@ OUTPUT
 
 .data
 Test: .word 0
-
 Nib: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -52,14 +60,14 @@ main:                                        /* Function: main */
     mov r0, #9
     mov r1, #8
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@463050758_0_Nib
+    ldr r0, .P1469671658_Nib
     push { r0 }
     mov r0, #9
     mov r1, #2
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@463050758_0_Nib
+    ldr r0, .P1469671658_Nib
     push { r0 }
-    ldr r0, .POOL@463050758_0_Test
+    ldr r0, .P1469671658_Test
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -89,5 +97,5 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@463050758_0_Test: .word Test
-.POOL@463050758_0_Nib: .word Nib
+.P1469671658_Test: .word Test
+.P1469671658_Nib: .word Nib

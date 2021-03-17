@@ -11,7 +11,7 @@ TESTCASES
 0 10
 1 20
 OUTPUT
-.version 21404657314
+.version 19161683025
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -23,13 +23,22 @@ OUTPUT
 
 .data
 Test: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -37,11 +46,11 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #20                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@517538497_0_Test
+    ldr r0, .P1136175729_Test
     push { r0 }
     mov r0, #10
     push { r0 }
-    ldr r0, .POOL@517538497_0_Test
+    ldr r0, .P1136175729_Test
     push { r0 }
     sub r1, fp, #16                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
@@ -51,4 +60,4 @@ main:                                        /* Function: main */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL@517538497_0_Test: .word Test
+.P1136175729_Test: .word Test

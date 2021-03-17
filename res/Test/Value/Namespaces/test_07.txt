@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 28
 OUTPUT
-.version 18385393260
+.version 17545463627
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -33,31 +33,39 @@ OUTPUT
 
 .data
 Foo.Bar: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
-
 Foo.Baz.x: .word 10
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@399110315_0_Foo.Bar
+    ldr r0, .P512482075_Foo.Bar
     push { r0 }
-    ldr r1, .POOL@399110315_0_L0_Foo.Baz.x   /* Load from .data section */
+    ldr r1, .P512482075_Foo.Baz.x            /* Load from .data section */
     ldr r1, [r1]
     add r0, r1, #8
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r1, [fp, #-4]                        /* Load field from struct */
-    ldr r2, .POOL@399110315_0_L0_Foo.Baz.x   /* Load from .data section */
+    ldr r2, .P512482075_Foo.Baz.x            /* Load from .data section */
     ldr r2, [r2]
     add r0, r1, r2
     bx lr
-.POOL@399110315_0_L0_Foo.Baz.x: .word Foo.Baz.x
-.POOL@399110315_0_Foo.Bar: .word Foo.Bar
+.P512482075_Foo.Baz.x: .word Foo.Baz.x
+.P512482075_Foo.Bar: .word Foo.Bar

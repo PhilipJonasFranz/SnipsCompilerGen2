@@ -27,7 +27,7 @@ int main() {
 TESTCASES
 24
 OUTPUT
-.version 21167011316
+.version 15533968517
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -39,15 +39,23 @@ OUTPUT
 
 .data
 C.A: .word C.B
-
 C.B: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global C.A.get
 C.A.get:                                     /* Function: C.A.get */
@@ -61,9 +69,9 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@1103265968_0_C.A
+    ldr r0, .P158493312_C.A
     push { r0 }
     bl init_P_2                              /* Call init */
     bl C.A.get                               /* Call C.A.get */
     pop { pc }
-.POOL@1103265968_0_C.A: .word C.A
+.P158493312_C.A: .word C.A

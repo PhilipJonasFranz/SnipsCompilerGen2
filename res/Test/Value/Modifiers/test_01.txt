@@ -19,7 +19,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 6738490103
+.version 3915511449
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -31,9 +31,7 @@ OUTPUT
 
 .data
 Test.S: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
@@ -57,7 +55,7 @@ Test.getter:                                 /* Function: Test.getter */
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@1324413207_0_Test.S
+    ldr r0, .P1892863495_Test.S
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -68,7 +66,7 @@ Test.getter:                                 /* Function: Test.getter */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@1324413207_0_Test.S: .word Test.S
+.P1892863495_Test.S: .word Test.S
 
 .global main
 main:                                        /* Function: main */

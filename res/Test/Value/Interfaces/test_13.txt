@@ -34,7 +34,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 11333703622
+.version 9176132439
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -46,13 +46,22 @@ OUTPUT
 
 .data
 A: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 GetSet.L2_P_1:                               /* Interface : GetSet, Provisos: INT,  */
     add r10, r12, #4
@@ -84,7 +93,7 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@-2035905496_0_A
+    ldr r0, .P1311439112_A
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r3, r0
@@ -98,4 +107,4 @@ main:                                        /* Function: main */
     bl GetSet.L2_P_1                         /* Branch to relay table of GetSet */
     add r0, r4, r0
     pop { pc }
-.POOL@-2035905496_0_A: .word A
+.P1311439112_A: .word A

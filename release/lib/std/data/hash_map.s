@@ -8,7 +8,6 @@ Map.HashMap: .word 0
 Map.MapEntry: .word 0
 
 .text
-
 .global Map.tupleKeyMatcher_P_1_1
 Map.tupleKeyMatcher_P_1_1:                   /* Function: Map.tupleKeyMatcher, Provisos: INT, INT | CHAR, BOOL */
     sub sp, sp, #12

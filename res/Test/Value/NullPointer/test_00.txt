@@ -7,7 +7,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 18423838205
+.version 18305651736
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -19,16 +19,26 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
 
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
 .global main
 main:                                        /* Function: main */
-    ldr r3, .POOL@-1448351984_0_L1_NULL      /* Evaluate Expression */
-    ldr r1, .POOL@-1448351984_0_L1_NULL      /* Load null address */
+    ldr r3, .P1949238496_NULL                /* Evaluate Expression */
+    ldr r1, .P1949238496_NULL                /* Load null address */
     cmp r3, r1
     bne main.L1
     mov r0, #10                              /* Evaluate Expression */
@@ -36,4 +46,4 @@ main:                                        /* Function: main */
 main.L1: 
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-.POOL@-1448351984_0_L1_NULL: .word NULL
+.P1949238496_NULL: .word NULL

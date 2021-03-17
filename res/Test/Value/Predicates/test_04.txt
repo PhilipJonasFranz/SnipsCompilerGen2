@@ -19,7 +19,7 @@ TESTCASES
 0 5
 1 4
 OUTPUT
-.version 12809987975
+.version 11463834562
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -31,11 +31,21 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 lambda_add5_P_1:                             /* Function address getter for predication */
     add r0, pc, #8
@@ -45,9 +55,9 @@ add5_P_1:                                    /* Function: add5, Provisos: INT | 
     push { r3 }
     mov r3, r0
     cmp r0, #0
-    beq add5.L0
+    beq add5_P_1.L0
     sub r3, r3, #2
-add5.L0: 
+add5_P_1.L0: 
     add r0, r3, #5
     pop { r3 }
     bx lr

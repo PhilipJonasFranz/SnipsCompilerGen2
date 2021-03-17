@@ -34,7 +34,7 @@ int main() {
 TESTCASES
 40
 OUTPUT
-.version 16134771528
+.version 21853285569
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -46,15 +46,24 @@ OUTPUT
 
 .data
 X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
 
-Inter.L2:                                    /* Interface : Inter */
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+Inter.L0:                                    /* Interface : Inter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
@@ -85,20 +94,20 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@-2066381689_0_X
+    ldr r0, .P366677129_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L2                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov r4, r0
     mov r1, #15
     mov r0, r3
     mov r12, #4
-    bl Inter.L2                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L2                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-2066381689_0_X: .word X
+.P366677129_X: .word X

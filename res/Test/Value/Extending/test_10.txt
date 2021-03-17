@@ -47,7 +47,7 @@ int main() {
 TESTCASES
 19
 OUTPUT
-.version 31580285002
+.version 30188145642
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -59,11 +59,8 @@ OUTPUT
 
 .data
 C.A: .word C.B
-
 C.B: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
@@ -85,7 +82,7 @@ C.B.create_P_1:                              /* Function: C.B.create, Provisos: 
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .POOL@-1473842623_0_C.B
+    ldr r0, .P1555518991_C.B
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -96,7 +93,7 @@ C.B.create_P_1:                              /* Function: C.B.create, Provisos: 
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@-1473842623_0_C.B: .word C.B
+.P1555518991_C.B: .word C.B
 
 .global C.A.incr_P_1
 C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: INT */
@@ -131,7 +128,7 @@ C.A.create_P_1:                              /* Function: C.A.create, Provisos: 
     push { r4 }
     bl C.B.create_P_1                        /* Call C.B.create */
     add sp, sp, #4
-    ldr r0, .POOL@-1473842623_1_C.A
+    ldr r0, .P1555518992_C.A
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -142,7 +139,7 @@ C.A.create_P_1:                              /* Function: C.A.create, Provisos: 
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.POOL@-1473842623_1_C.A: .word C.A
+.P1555518992_C.A: .word C.A
 
 .global main
 main:                                        /* Function: main */

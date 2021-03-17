@@ -14,7 +14,7 @@ TESTCASES
 3 6
 4 10
 OUTPUT
-.version 8005772519
+.version 11844524374
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -26,13 +26,22 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
-
 s: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 /* In global memory */
 
@@ -44,14 +53,14 @@ main.L1:
     cmp r4, r3
     bge main.L2
     add r0, r4, #1
-    ldr r1, .POOL@1737595879_0_L0_s
+    ldr r1, .P1969102551_s
     ldr r2, [r1]
     add r0, r2, r0
     str r0, [r1]
     add r4, r4, #1
     b main.L1
 main.L2: 
-    ldr r0, .POOL@1737595879_0_L0_s          /* Evaluate Expression */
+    ldr r0, .P1969102551_s                   /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL@1737595879_0_L0_s: .word s
+.P1969102551_s: .word s

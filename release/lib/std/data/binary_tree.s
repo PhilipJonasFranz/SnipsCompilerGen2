@@ -4,7 +4,6 @@
 Tree.TreeNode: .word 0
 
 .text
-    
 .global Tree.TreeNode.insert_P_1
 Tree.TreeNode.insert_P_1:                    /* Function: Tree.TreeNode.insert, Provisos: INT */
     sub sp, sp, #28

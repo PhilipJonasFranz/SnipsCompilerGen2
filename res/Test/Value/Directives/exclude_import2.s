@@ -3,7 +3,6 @@
 .include res\Test\Value\Directives\exclude_import3.s
 
 .text
-
 .global foo
 foo:                                         /* Function: foo */
     push { lr }

@@ -1,7 +1,6 @@
 .version 4730757688
 
 .text
-    
 .global isar
 isar:                                        /* Function: isar */
     sub sp, sp, #12
@@ -23,7 +22,7 @@ isar.L2:
     mov r1, r4
     bl isar                                  /* Call isar */
     ldmfd sp!, {r3, r4, pc}
-    
+
 .global isa
 isa:                                         /* Function: isa */
     push { r3, lr }

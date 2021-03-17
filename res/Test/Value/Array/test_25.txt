@@ -11,7 +11,7 @@ TESTCASES
 1 0 9
 1 1 2
 OUTPUT
-.version 16081825802
+.version 12525628769
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -23,13 +23,22 @@ OUTPUT
 
 .data
 NULL: .word 0
-
 HEAP_START: .word 0
-
 vec: .skip 16
 
 .text
     b main_init
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 
@@ -44,7 +53,7 @@ main_init:
     mov r1, #3
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL@1501028918_0_L0_vec        /* Load from .data section */
+    ldr r1, .P712743750_vec                  /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -63,7 +72,7 @@ main:                                        /* Function: main */
     mov r1, #1
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL@1501028918_0_L0_vec
+    ldr r1, .P712743750_vec
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -76,7 +85,7 @@ main:                                        /* Function: main */
     add r2, r2, r0
     lsl r0, r4, #2
     add r2, r2, r0
-    ldr r0, .POOL@1501028918_0_L0_vec        /* Load data section address */
+    ldr r0, .P712743750_vec                  /* Load data section address */
     ldr r0, [r0, r2]
     bx lr
-.POOL@1501028918_0_L0_vec: .word vec
+.P712743750_vec: .word vec

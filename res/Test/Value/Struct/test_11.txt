@@ -23,7 +23,7 @@ TESTCASES
 1 6
 2 8
 OUTPUT
-.version 2185822060
+.version 2426022095
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -35,15 +35,23 @@ OUTPUT
 
 .data
 Data: .word 0
-
 Capsule: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global create_P_2
 create_P_2:                                  /* Function: create, Provisos: INT[2] */
@@ -59,11 +67,11 @@ main:                                        /* Function: main */
     mov r0, #4                               /* Evaluate Expression */
     mov r1, #3
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@487985825_0_Capsule
+    ldr r0, .P2052308561_Capsule
     push { r0 }
     lsl r0, r3, #1
     push { r0 }
-    ldr r0, .POOL@487985825_0_Data
+    ldr r0, .P2052308561_Data
     lsl r1, r4, #2
     str r0, [r1]
     str r3, [r1, #4]
@@ -81,5 +89,5 @@ main:                                        /* Function: main */
     ldr r2, [r1, #20]                        /* Load field from struct */
     add r0, r0, r2
     pop { pc }
-.POOL@487985825_0_Data: .word Data
-.POOL@487985825_0_Capsule: .word Capsule
+.P2052308561_Data: .word Data
+.P2052308561_Capsule: .word Capsule

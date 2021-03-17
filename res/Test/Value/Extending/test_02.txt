@@ -44,7 +44,7 @@ int main() {
 TESTCASES
 23
 OUTPUT
-.version -10739201293
+.version -19324211236
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -56,17 +56,24 @@ OUTPUT
 
 .data
 C: .word A
-
 A: .word Root
-
 Root: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -75,9 +82,9 @@ main:                                        /* Function: main */
     mov r0, #12                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@-1500624732_0_A
+    ldr r0, .P725273612_A
     push { r0 }
-    ldr r1, .POOL@-1500624732_0_C            /* Load parameters */
+    ldr r1, .P725273612_C                    /* Load parameters */
     sub r0, fp, #12
     lsr r0, r0, #2
     bl isa                                   /* Call isa */
@@ -91,11 +98,11 @@ main.L0:
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
-    ldr r0, .POOL@-1500624732_0_Root
+    ldr r0, .P725273612_Root
 /* Since polymorphism is only available through pointers, */
 /* r0 is not an instance of A anymore */
     push { r0 }
-    ldr r1, .POOL@-1500624732_0_A            /* Load parameters */
+    ldr r1, .P725273612_A                    /* Load parameters */
     sub r0, fp, #20
     lsr r0, r0, #2
     bl isa                                   /* Call isa */
@@ -105,7 +112,7 @@ main.L0:
     b main.L10
 main.L2: 
     mov r4, #0
-    ldr r1, .POOL@-1500624732_0_Root         /* Load parameters */
+    ldr r1, .P725273612_Root                 /* Load parameters */
     mov r0, r3
     bl isa                                   /* Call isa */
     cmp r0, #0
@@ -114,7 +121,7 @@ main.L2:
     add r0, r2, #1
     add r4, r4, r0
 main.L4: 
-    ldr r1, .POOL@-1500624732_0_A            /* Load parameters */
+    ldr r1, .P725273612_A                    /* Load parameters */
     mov r0, r3
     bl isa                                   /* Call isa */
     cmp r0, #0
@@ -123,7 +130,7 @@ main.L4:
     ldr r0, [r1, #8]                         /* Load field from struct */
     add r4, r4, r0
 main.L6: 
-    ldr r1, .POOL@-1500624732_0_C            /* Load parameters */
+    ldr r1, .P725273612_C                    /* Load parameters */
     mov r0, r3
     bl isa                                   /* Call isa */
     cmp r0, #0
@@ -134,6 +141,6 @@ main.L8:
 main.L10: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1500624732_0_Root: .word Root
-.POOL@-1500624732_0_C: .word C
-.POOL@-1500624732_0_A: .word A
+.P725273612_Root: .word Root
+.P725273612_C: .word C
+.P725273612_A: .word A

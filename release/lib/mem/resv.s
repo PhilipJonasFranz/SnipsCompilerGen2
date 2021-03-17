@@ -1,14 +1,13 @@
 .version 702634318
 
 .text
-    
 .global resv
 resv:                                        /* Function: resv */
     sub sp, sp, #16
     stmea sp, {r3-r6}
     mov r3, r0
     add r3, r0, #1
-    ldr r0, .POOL@-934427557_0_L1_HEAP_START /* Evaluate Expression */
+    ldr r0, .P1097516853_HEAP_START          /* Evaluate Expression */
     lsr r4, r0, #2
 resv.L1:                                     /* Evaluate condition */
     ldr r0, [r10, r4, lsl #2]                /* Load from address */
@@ -75,4 +74,4 @@ resv.L2:
 resv.L19: 
     ldmfd sp!, {r3-r6}
     bx lr
-.POOL@-934427557_0_L1_HEAP_START: .word HEAP_START
+.P1097516853_HEAP_START: .word HEAP_START

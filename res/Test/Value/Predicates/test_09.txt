@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 13563044252
+.version 10126303357
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -35,13 +35,22 @@ OUTPUT
 
 .data
 K: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
@@ -65,7 +74,7 @@ main:                                        /* Function: main */
     b lambda_sortPred
     mov r10, #0
     push { r0 }
-    ldr r0, .POOL@564117713_0_K
+    ldr r0, .P307779967_K
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bl cast                                  /* Call cast */
@@ -83,4 +92,4 @@ main.L0:
 main.L2: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@564117713_0_K: .word K
+.P307779967_K: .word K

@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 15645310425
+.version 15241821306
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,13 +27,22 @@ OUTPUT
 
 .data
 X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global X.getValue_P_1
 X.getValue_P_1:                              /* Function: X.getValue, Provisos: INT */
@@ -47,11 +56,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@1074636817_0_X
+    ldr r0, .P1045996993_X
     push { r0 }
     sub r0, fp, #8                           /* Load parameters */
     lsr r0, r0, #2
     bl X.getValue_P_1                        /* Call X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@1074636817_0_X: .word X
+.P1045996993_X: .word X

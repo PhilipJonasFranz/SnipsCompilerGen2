@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 16143023142
+.version 13951622915
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -35,15 +35,24 @@ OUTPUT
 
 .data
 X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
 
-Inter.L2:                                    /* Interface : Inter */
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+Inter.L0:                                    /* Interface : Inter */
     b X.get
 
 .global X.get
@@ -59,12 +68,12 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@-2067305210_0_X
+    ldr r0, .P338047978_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L2                              /* Branch to relay table of Inter */
+    bl Inter.L0                              /* Branch to relay table of Inter */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-2067305210_0_X: .word X
+.P338047978_X: .word X

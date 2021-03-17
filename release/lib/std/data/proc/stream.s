@@ -7,7 +7,6 @@
 Streamable.Stream: .word 0
 
 .text
-
 .global Streamable.Stream.forEach_P_1
 Streamable.Stream.forEach_P_1:               /* Function: Streamable.Stream.forEach, Provisos: INT */
     sub sp, sp, #20

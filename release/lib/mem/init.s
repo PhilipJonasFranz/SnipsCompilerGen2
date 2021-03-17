@@ -1,7 +1,6 @@
 .version 2750349890
 
 .text
-    
 .global init_P_5
 init_P_5:                                    /* Function: init, Provisos: List.LinkedList<INT> |  */
     sub sp, sp, #12
@@ -32,7 +31,7 @@ init_P_5:                                    /* Function: init, Provisos: List.L
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #20
     bx lr
-    
+
 .global init_P_3
 init_P_3:                                    /* Provisos: List.ListNode<INT> */
     sub sp, sp, #12
@@ -113,7 +112,7 @@ init_P_7:
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #28
     bx lr
-    
+
 .global init_P_1
 init_P_1: 
     sub sp, sp, #12
@@ -151,7 +150,7 @@ init_P_4:
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #16
     bx lr
-    
+
 .global init_P_6
 init_P_6: 
     sub sp, sp, #12
@@ -184,7 +183,7 @@ init_P_6:
     ldmfd sp!, {r3, fp, lr}
     add sp, sp, #24
     bx lr
-    
+
 .global init_P_8
 init_P_8: 
     sub sp, sp, #12

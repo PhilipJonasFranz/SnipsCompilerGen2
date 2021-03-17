@@ -34,7 +34,7 @@ int main() {
 TESTCASES
 8
 OUTPUT
-.version 22986185914
+.version 20121751563
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -46,13 +46,22 @@ OUTPUT
 
 .data
 Storage.X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
@@ -80,7 +89,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@1077407380_0_Storage.X
+    ldr r0, .P960109540_Storage.X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -97,4 +106,4 @@ main:                                        /* Function: main */
     bl Storage.X.get_P_1                     /* Call Storage.X.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@1077407380_0_Storage.X: .word Storage.X
+.P960109540_Storage.X: .word Storage.X

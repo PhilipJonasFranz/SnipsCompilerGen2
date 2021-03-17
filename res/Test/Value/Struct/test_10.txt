@@ -12,7 +12,7 @@ TESTCASES
 1 2
 2 4
 OUTPUT
-.version 10533175102
+.version 10338087131
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -24,13 +24,22 @@ OUTPUT
 
 .data
 Data: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -39,9 +48,9 @@ main:                                        /* Function: main */
     lsl r0, r0, #1
     push { r0 }
     push { r3 }
-    ldr r0, .POOL@487062304_0_Data
+    ldr r0, .P2080937712_Data
     push { r0 }
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     bx lr
-.POOL@487062304_0_Data: .word Data
+.P2080937712_Data: .word Data

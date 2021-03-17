@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 26
 OUTPUT
-.version 12915486934
+.version 8769281431
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,15 +27,23 @@ OUTPUT
 
 .data
 Y: .word X
-
 X: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -45,10 +53,10 @@ main:                                        /* Function: main */
     mov r0, #10
     mov r1, #15
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@-1498777690_0_X
+    ldr r0, .P782531914_X
     push { r0 }
     add sp, sp, #4
-    ldr r0, .POOL@-1498777690_0_Y
+    ldr r0, .P782531914_Y
     push { r0 }
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
@@ -56,5 +64,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.POOL@-1498777690_0_Y: .word Y
-.POOL@-1498777690_0_X: .word X
+.P782531914_Y: .word Y
+.P782531914_X: .word X

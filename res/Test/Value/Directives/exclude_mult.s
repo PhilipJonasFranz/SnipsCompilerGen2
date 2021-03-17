@@ -4,7 +4,6 @@
 .include res\Test\Value\Directives\exclude_import3.s
 
 .text
-
 .global mult
 mult:                                        /* Function: mult */
     sub sp, sp, #28

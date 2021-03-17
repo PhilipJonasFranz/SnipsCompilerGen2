@@ -3,7 +3,6 @@
 .include linked_list.s
 
 .text
-
 .global String.equals
 String.equals:                               /* Function: String.equals */
     sub sp, sp, #24

@@ -16,7 +16,7 @@ int main() {
 TESTCASES
 37
 OUTPUT
-.version 13619991355
+.version 14971877372
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -28,27 +28,35 @@ OUTPUT
 
 .data
 Extend: .word Base
-
 Base: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .POOL@-1502471774_0_Base
+    ldr r0, .P668015310_Base
     push { r0 }
     mov r0, #15                              /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@-1502471774_0_Extend
+    ldr r0, .P668015310_Extend
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-12]                       /* Load field from struct */
@@ -56,5 +64,5 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.POOL@-1502471774_0_Extend: .word Extend
-.POOL@-1502471774_0_Base: .word Base
+.P668015310_Extend: .word Extend
+.P668015310_Base: .word Base

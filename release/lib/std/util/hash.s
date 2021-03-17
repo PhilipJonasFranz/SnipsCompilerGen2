@@ -1,7 +1,6 @@
 .version 2654335383
 
 .text
-    
 .global Hash.hash
 Hash.hash:                                   /* Function: Hash.hash */
     sub sp, sp, #20

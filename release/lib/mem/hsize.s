@@ -1,7 +1,6 @@
 .version 2597775093
 
 .text
-    
 .global hsize
 hsize:                                       /* Function: hsize */
     push { r3 }

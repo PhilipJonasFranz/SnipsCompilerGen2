@@ -1,7 +1,6 @@
 .version -324703324
 
 .text
-    
 .global free
 free: 
     sub sp, sp, #12

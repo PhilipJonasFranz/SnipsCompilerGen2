@@ -16,7 +16,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 15741097875
+.version 21717357060
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -28,13 +28,22 @@ OUTPUT
 
 .data
 TreeNode: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -49,7 +58,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .POOL@883308418_0_TreeNode
+    ldr r0, .P1612757230_TreeNode
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -64,10 +73,10 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .POOL@883308418_0_TreeNode
+    ldr r0, .P1612757230_TreeNode
     push { r0 }
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@883308418_0_TreeNode: .word TreeNode
+.P1612757230_TreeNode: .word TreeNode

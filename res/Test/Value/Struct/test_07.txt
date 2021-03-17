@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 27
 OUTPUT
-.version 16964472783
+.version 11037362228
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -29,15 +29,23 @@ OUTPUT
 
 .data
 MainTest: .word 0
-
 Test: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -46,9 +54,9 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #8
     mov r1, #3
-    ldr r2, .POOL@464897800_0_Test
+    ldr r2, .P1526929960_Test
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL@464897800_0_MainTest
+    ldr r0, .P1526929960_MainTest
     push { r0 }
     mov r0, #9                               /* Evaluate Expression */
     str r0, [fp, #-12]                       /* Store value to struct field */
@@ -59,5 +67,5 @@ main:                                        /* Function: main */
     lsl r2, r1, #1
     add r0, r0, r2
     bx lr
-.POOL@464897800_0_MainTest: .word MainTest
-.POOL@464897800_0_Test: .word Test
+.P1526929960_MainTest: .word MainTest
+.P1526929960_Test: .word Test

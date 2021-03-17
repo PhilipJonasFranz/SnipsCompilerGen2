@@ -35,7 +35,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-.version -4231777433
+.version -1302459018
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -47,23 +47,27 @@ OUTPUT
 
 .data
 Root2: .word 0
-
 C: .word A
-
 D: .word B
-
 B: .word Root
-
 A: .word Root
-
 Root: .word 0
-
 NULL: .word 0
-
 HEAP_START: .word 0
 
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -72,16 +76,16 @@ main:                                        /* Function: main */
     mov r0, #1                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@-1501548253_0_A
+    ldr r0, .P696644461_A
     push { r0 }
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
-    ldr r0, .POOL@-1501548253_0_Root
+    ldr r0, .P696644461_Root
     push { r0 }
-    ldr r1, .POOL@-1501548253_0_Root         /* Load parameters */
+    ldr r1, .P696644461_Root                 /* Load parameters */
     sub r0, fp, #20
     lsr r0, r0, #2
     bl isa                                   /* Call isa */
@@ -95,5 +99,5 @@ main.L1:
 main.L3: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1501548253_0_Root: .word Root
-.POOL@-1501548253_0_A: .word A
+.P696644461_Root: .word Root
+.P696644461_A: .word A
