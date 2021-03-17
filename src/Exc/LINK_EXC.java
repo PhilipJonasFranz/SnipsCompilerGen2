@@ -8,7 +8,7 @@ import Util.Logging.Message;
 /**
  * Thrown when the user input led to an illegal combination of components.
  */
-public class LNK_EXC extends Exception {
+public class LINK_EXC extends Exception {
 
 	private static final long serialVersionUID = 5791314197219757362L;
 
@@ -16,7 +16,7 @@ public class LNK_EXC extends Exception {
 	
 	Object [] format;
 	
-	public LNK_EXC(String message, Object...format) {
+	public LINK_EXC(String message, Object...format) {
 		this.message = message;
 		this.format = format;
 		

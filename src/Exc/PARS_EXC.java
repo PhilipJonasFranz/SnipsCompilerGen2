@@ -10,7 +10,7 @@ import Util.Logging.Message;
  * Thrown when the parser encounters a token that is not expected by the Snips Language Grammar.
  * This error can only occur in combination with a bad user input.
  */
-public class PARSE_EXC extends Exception {
+public class PARS_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
@@ -20,7 +20,7 @@ public class PARSE_EXC extends Exception {
 	
 	Source location;
 	
-	public PARSE_EXC(Source source, TokenType actual, TokenType...expected) {
+	public PARS_EXC(Source source, TokenType actual, TokenType...expected) {
 		this.location = source;
 		this.actual = actual;
 		this.expected = expected;

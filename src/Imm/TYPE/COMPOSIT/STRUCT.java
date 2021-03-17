@@ -3,7 +3,7 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
@@ -135,9 +135,9 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
-	public void checkProvisoPresent(Source source) throws CTX_EXC {
+	public void checkProvisoPresent(Source source) throws CTEX_EXC {
 		if (this.proviso.size() != this.typedef.proviso.size())
-			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
+			throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
 	}
 	
 	/**

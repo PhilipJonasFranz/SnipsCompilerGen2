@@ -8,7 +8,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -98,7 +98,7 @@ public class AsNFunctionCall extends AsNStatement {
 		if (f != null) {
 			try {
 				f.setContext(provisos);
-			} catch (CTX_EXC e) {
+			} catch (CTEX_EXC e) {
 				e.printStackTrace();
 			}
 		}

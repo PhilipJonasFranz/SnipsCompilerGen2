@@ -9,7 +9,7 @@ import CGen.StackSet;
 import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -71,9 +71,9 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* ---< METHODS >--- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
-	 * @throws CTX_EXC 
+	 * @throws CTEX_EXC 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTX_EXC {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTEX_EXC {
 		AsNFunction func = new AsNFunction();
 		f.castedNode = func;
 		func.source = f;

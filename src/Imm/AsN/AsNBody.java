@@ -12,7 +12,7 @@ import CGen.Util.LabelUtil;
 import CGen.Util.LiteralUtil;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -73,7 +73,7 @@ public class AsNBody extends AsNNode {
 	
 	
 			/* ---< METHODS >--- */
-	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTX_EXC {
+	public static AsNBody cast(Program p, ProgressMessage progress) throws CGEN_EXC, CTEX_EXC {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralUtil();
 		

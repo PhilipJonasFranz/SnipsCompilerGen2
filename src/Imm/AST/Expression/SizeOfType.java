@@ -4,7 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -35,7 +35,7 @@ public class SizeOfType extends Expression {
 		System.out.println(this.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -45,7 +45,7 @@ public class SizeOfType extends Expression {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
 	}
 

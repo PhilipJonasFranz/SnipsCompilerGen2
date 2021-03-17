@@ -6,7 +6,7 @@ import java.util.List;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
@@ -211,7 +211,7 @@ public class Function extends CompoundStatement {
 			s.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -256,9 +256,9 @@ public class Function extends CompoundStatement {
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
 	 * new proviso-free mapping and store it in the proviso calls.
 	 */
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (context.size() != this.provisosTypes.size()) 
-			throw new CTX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
+			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
 		
 		ProvisoUtil.mapNToN(this.provisosTypes, context);
 

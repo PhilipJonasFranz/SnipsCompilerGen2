@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
 import Res.Const;
 import Snips.CompilerDriver;
@@ -55,13 +55,13 @@ public class Scope {
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
-	public void addDeclaration(Declaration dec, boolean checkDups) throws CTX_EXC {
+	public void addDeclaration(Declaration dec, boolean checkDups) throws CTEX_EXC {
 		if (checkDups) this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
-	public Message addDeclaration(Declaration dec) throws CTX_EXC {
+	public Message addDeclaration(Declaration dec) throws CTEX_EXC {
 		Message m = this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
 		return m;
@@ -71,9 +71,9 @@ public class Scope {
 	 * Check if this scope or any of the parent scopes contains a declaration with the identifier
 	 * of the given declaration. Throws a CTX_EXCEPTION if this is the case.
 	 */
-	public Message checkDuplicate(Declaration dec) throws CTX_EXC {
+	public Message checkDuplicate(Declaration dec) throws CTEX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
-			throw new CTX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path.build());
+			throw new CTEX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path.build());
 		}
 		else {
 			if (this.parentScope != null) {
@@ -89,7 +89,7 @@ public class Scope {
 		return null;
 	}
 	
-	private Declaration checkDuplicateRec(Declaration dec) throws CTX_EXC {
+	private Declaration checkDuplicateRec(Declaration dec) throws CTEX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
 			return this.declarations.get(dec.path.build()).first;
 		}
@@ -104,9 +104,9 @@ public class Scope {
 	/** 
 	 * Returns the declaration with given field name from this scope or any of the parent scopes. 
 	 * Returns null if the field is not found.
-	 * @throws CTX_EXC 
+	 * @throws CTEX_EXC 
 	 */
-	public Declaration getField(NamespacePath path, Source source) throws CTX_EXC {
+	public Declaration getField(NamespacePath path, Source source) throws CTEX_EXC {
 		if (path != null && this.declarations.containsKey(path.build())) {
 			return this.declarations.get(path.build()).first;
 		}
@@ -129,16 +129,16 @@ public class Scope {
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
 					else if (decs.isEmpty()) {
-						throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
+						throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 					}
 					else {
 						String s = "";
 						for (Declaration d0 : decs) s += d0.path.build() + ", ";
 						s = s.substring(0, s.length() - 2);
-						throw new CTX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
+						throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
 					}
 				}
-				else throw new CTX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
+				else throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 			}
 		}
 	}

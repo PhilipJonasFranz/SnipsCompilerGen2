@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
-import Exc.LNK_EXC;
-import Exc.PARSE_EXC;
+import Exc.CTEX_EXC;
+import Exc.LINK_EXC;
+import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
@@ -137,7 +137,7 @@ public class TestDriver {
 		testPackage(head);
 		
 		/* Print out ASM-OPT stats */
-		CompilerDriver.printAverageCompression();
+		Util.printStats(CompilerDriver.driver);
 		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
@@ -353,7 +353,7 @@ public class TestDriver {
 				
 				cd.setBurstMode(false, false);
 				
-				Exception e = cd.getException();
+				Exception e = cd.thrownException;
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
@@ -367,10 +367,10 @@ public class TestDriver {
 					/* Figure out exception field value */
 					if (e instanceof SNIPS_EXC) 
 						msg = ((SNIPS_EXC) e).getExcFieldName();
-					else if (e instanceof CTX_EXC) 
-						msg = ((CTX_EXC) e).getExcFieldName();
-					else if (e instanceof PARSE_EXC) 
-						msg = ((PARSE_EXC) e).getExcFieldName();
+					else if (e instanceof CTEX_EXC) 
+						msg = ((CTEX_EXC) e).getExcFieldName();
+					else if (e instanceof PARS_EXC) 
+						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
 					else {
@@ -407,7 +407,7 @@ public class TestDriver {
 					LinkerUnit originUnit = Linker.parseLinkerUnit(compile);
 					Linker.linkProgram(originUnit);
 					compile = originUnit.build();
-				} catch (LNK_EXC e) {
+				} catch (LINK_EXC e) {
 					cd.setBurstMode(false, false);
 					buffer.add(new Message("Error when linking output: " + e.getMessage(), LogPoint.Type.FAIL, true));
 					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));

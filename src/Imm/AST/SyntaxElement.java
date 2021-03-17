@@ -3,7 +3,7 @@ package Imm.AST;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -54,12 +54,12 @@ public abstract class SyntaxElement {
 	 * Also applies context recursiveley to the entire subtree.
 	 * @param context The provided Context.
 	 */
-	public abstract void setContext(List<TYPE> context) throws CTX_EXC;
+	public abstract void setContext(List<TYPE> context) throws CTEX_EXC;
 	
 	/**
 	 * Visitor relay for context checking
 	 */
-	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
+	public abstract TYPE check(ContextChecker ctx) throws CTEX_EXC;
 	
 	/** 
 	 * Create a padding of spaces with the given length.

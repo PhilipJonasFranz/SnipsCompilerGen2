@@ -6,7 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
@@ -98,7 +98,7 @@ public class FunctionCall extends Statement implements Callee {
 			e.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -108,7 +108,7 @@ public class FunctionCall extends Statement implements Callee {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.anonTarget == null) {
 			for (int i = 0; i < this.proviso.size(); i++) 
 				ProvisoUtil.mapNTo1(this.proviso.get(i), context);

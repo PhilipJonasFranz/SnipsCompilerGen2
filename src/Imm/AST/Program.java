@@ -3,7 +3,7 @@ package Imm.AST;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -42,7 +42,7 @@ public class Program extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		return ctx.check();
 	}
 

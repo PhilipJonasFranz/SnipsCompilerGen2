@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -46,7 +46,7 @@ public class ArraySelect extends Expression {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -56,7 +56,7 @@ public class ArraySelect extends Expression {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		this.shadowRef.setContext(context);
 		for (Expression e : this.selection) {
 			e.setContext(context);

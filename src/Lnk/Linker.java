@@ -3,7 +3,7 @@ package Lnk;
 import java.util.ArrayList;
 import java.util.List;
 
-import Exc.LNK_EXC;
+import Exc.LINK_EXC;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import PreP.PreProcessor;
 import Util.Logging.LogPoint.Type;
@@ -46,7 +46,7 @@ public class Linker {
 				output.add("");
 			}
 			
-			if (!this.textSection.isEmpty()) {
+			if (!this.textSection.isEmpty() && !(this.textSection.size() == 1 && this.textSection.get(0).trim().equals(""))) {
 				output.add(".text");
 				
 				for (int i = 0; i < this.textSection.size(); i++) {
@@ -102,7 +102,7 @@ public class Linker {
 	
 	public static List<Message> buffer = new ArrayList();
 	
-	public static List<String> linkProgram(LinkerUnit unit) throws LNK_EXC {
+	public static List<String> linkProgram(LinkerUnit unit) throws LINK_EXC {
 		List<String> included = new ArrayList();
 		
 		for (int i = unit.imports.size() - 1; i >= 0; i--) {
@@ -141,7 +141,7 @@ public class Linker {
 				if (isMaybeInclude)
 					continue;
 				else
-					throw new LNK_EXC("Failed to locate include target %s", mappedPath);
+					throw new LINK_EXC("Failed to locate include target %s", mappedPath);
 			}
 			
 			LinkerUnit importedUnit = Linker.parseLinkerUnit(lines);
@@ -163,7 +163,7 @@ public class Linker {
 						unit.textSection.add(importedUnit.textSection.size(), "");
 				}
 				
-				buffer.add(new Message("LINK -> Resolved '" + mappedPath + "' to " + importedUnit.textSection.size() + " lines from '" + mappedPath + "'", Type.INFO, true));
+				buffer.add(new Message("LINK -> Resolved '" + incPath + "' to " + importedUnit.textSection.size() + " lines from '" + mappedPath + "'", Type.INFO, true));
 			}
 			else {
 				boolean found = false;
@@ -183,7 +183,7 @@ public class Linker {
 							unit.textSection.add(cnt++, lines.get(a++));
 						}
 						
-						buffer.add(new Message("LINK -> Resolved '" + label + "' to " + (cnt - 3) + " lines from '" + mappedPath + "'", Type.INFO, true));
+						buffer.add(new Message("LINK -> Resolved '" + incPath + "' to " + (cnt - 3) + " lines from '" + mappedPath + "'", Type.INFO, true));
 						break;
 					}
 				}

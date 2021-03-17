@@ -6,7 +6,7 @@ import java.util.List;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode.MODIFIER;
@@ -190,7 +190,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			f.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -200,7 +200,7 @@ public class InterfaceTypedef extends SyntaxElement {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
 

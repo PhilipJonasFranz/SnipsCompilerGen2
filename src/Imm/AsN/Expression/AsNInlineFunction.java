@@ -5,7 +5,7 @@ import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
@@ -35,7 +35,7 @@ public class AsNInlineFunction extends AsNExpression {
 		
 		try {
 			funcCast = AsNFunction.cast(i.inlineFunction, new RegSet(), map, new StackSet());
-		} catch (CTX_EXC e) {
+		} catch (CTEX_EXC e) {
 			throw new CGEN_EXC(i.getSource(), "Failed to cast inline function: " + e.getMessage());
 		}
 		
