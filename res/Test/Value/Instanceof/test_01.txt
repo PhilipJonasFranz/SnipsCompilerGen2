@@ -53,25 +53,48 @@ int main() {
 TESTCASES
 1
 OUTPUT
+.version -11082672329
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 AY: .word 0
+
 J: .word G
+
 I: .word G
+
 H: .word G
+
 G: .word A
+
 F: .word E
+
 E: .word A
+
 D: .word B
+
 C: .word B
+
 B: .word A
+
 A: .word 0
+
 AX: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     ldr r1, .POOL@1319858265_0_A             /* Evaluate Expression */

@@ -53,15 +53,28 @@ int main() {
 TESTCASES
 12
 OUTPUT
+.version 42098687251
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 List.LinkedList: .word 0
+
 List.ListNode: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     sub sp, sp, #16
@@ -95,7 +108,9 @@ List.LinkedList.add.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-    
+.POOL@1076483859_0_List.ListNode: .word List.ListNode
+.POOL@1076483859_0_L1_NULL: .word NULL
+
 .global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
     sub sp, sp, #12
@@ -115,7 +130,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL@1076483859_0_L1_NULL       /* Load null address */
+    ldr r1, .POOL@1076483859_1_L1_NULL       /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -133,17 +148,20 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-    
+.POOL@1076483859_1_L1_NULL: .word NULL
+
 .global List.create_P_1
 List.create_P_1:                             /* Function: List.create, Provisos: INT */
     push { r0 }
-    ldr r0, .POOL@1076483859_0_L1_NULL       /* Load null address */
-    ldr r1, .POOL@1076483859_0_L1_NULL       /* Load null address */
+    ldr r0, .POOL@1076483859_2_L1_NULL       /* Load null address */
+    ldr r1, .POOL@1076483859_2_L1_NULL       /* Load null address */
     stmfd sp!, {r0, r1}
-    ldr r0, .POOL@1076483859_0_List.LinkedList
+    ldr r0, .POOL@1076483859_2_List.LinkedList
     push { r0 }
     b init_P_4                               /* Call init */
-    
+.POOL@1076483859_2_List.LinkedList: .word List.LinkedList
+.POOL@1076483859_2_L1_NULL: .word NULL
+
 .global main
 main:                                        /* Function: main */
     push { lr }
@@ -157,6 +175,3 @@ main:                                        /* Function: main */
     mov r0, r3
     bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
     pop { pc }
-.POOL@1076483859_0_List.LinkedList: .word List.LinkedList
-.POOL@1076483859_0_List.ListNode: .word List.ListNode
-.POOL@1076483859_0_L1_NULL: .word NULL

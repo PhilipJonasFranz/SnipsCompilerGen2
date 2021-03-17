@@ -15,16 +15,30 @@ int main() {
 TESTCASES
 46
 OUTPUT
+.version 14943665975
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
+
 Foo.Bar.x: .word 16
+
 Foo.x: .word 20
+
 Foo.k: .word 10
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     ldr r1, .POOL@397263273_0_L0_Foo.k       /* Evaluate Expression */

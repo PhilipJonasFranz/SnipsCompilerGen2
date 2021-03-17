@@ -15,20 +15,32 @@ int main() {
 TESTCASES
 10
 OUTPUT
+.version 21031934396
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global X.getValue_P_1
 X.getValue_P_1:                              /* Function: X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

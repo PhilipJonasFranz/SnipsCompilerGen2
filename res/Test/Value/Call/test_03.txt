@@ -16,18 +16,29 @@ TESTCASES
 0 8
 6 26
 OUTPUT
+.version 12292497650
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global bar
 bar:                                         /* Function: bar */
     mov r0, #2                               /* Evaluate Expression */
     bx lr
-    
+
 .global foo
 foo:                                         /* Function: foo */
     push { r3, lr }
@@ -35,7 +46,7 @@ foo:                                         /* Function: foo */
     bl bar                                   /* Evaluate Expression */
     mul r0, r3, r0
     ldmfd sp!, {r3, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

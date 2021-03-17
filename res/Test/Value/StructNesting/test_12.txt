@@ -27,22 +27,35 @@ int main() {
 TESTCASES
 24
 OUTPUT
+.version 21167011316
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 C.A: .word C.B
+
 C.B: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global C.A.get
 C.A.get:                                     /* Function: C.A.get */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

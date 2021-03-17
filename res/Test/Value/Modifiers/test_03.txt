@@ -21,14 +21,26 @@ int main() {
 TESTCASES
 15
 OUTPUT
+.version 11165146817
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Data.X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -39,7 +51,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 .global Data.X.create
 Data.X.create:                               /* Function: Data.X.create */
     push { fp }
@@ -56,7 +68,8 @@ Data.X.create:                               /* Function: Data.X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@1326260249_0_Data.X: .word Data.X
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -66,4 +79,3 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@1326260249_0_Data.X: .word Data.X

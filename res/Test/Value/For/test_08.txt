@@ -18,14 +18,26 @@ int main() {
 TESTCASES
 2
 OUTPUT
+.version 33386848613
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 A: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global smallest
 smallest:                                    /* Function: smallest */
     sub sp, sp, #16
@@ -57,7 +69,7 @@ smallest.L2:
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6}
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

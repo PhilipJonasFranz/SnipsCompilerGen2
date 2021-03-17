@@ -15,13 +15,24 @@ TESTCASES
 4 24
 5 120
 OUTPUT
+.version 6473228482
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global fac
 fac:                                         /* Function: fac */
     push { r3, lr }
@@ -35,7 +46,7 @@ fac.L1:
     bl fac                                   /* Call fac */
     mul r0, r0, r3
     ldmfd sp!, {r3, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     b fac                                    /* Call fac */

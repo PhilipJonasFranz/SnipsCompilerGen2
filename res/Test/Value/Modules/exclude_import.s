@@ -1,6 +1,8 @@
+.version -78712150
+
 .data
 Global.globalVar: .word 10
-    
+
 .text
 .global Global.foo
 Global.foo:                                  /* Function: Global.foo */

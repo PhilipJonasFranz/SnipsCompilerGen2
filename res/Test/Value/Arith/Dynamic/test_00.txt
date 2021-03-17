@@ -9,18 +9,29 @@ int main() {
 TESTCASES
 100
 OUTPUT
+.version 9523125243
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global foo
 foo:                                         /* Function: foo */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

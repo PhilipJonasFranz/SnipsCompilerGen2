@@ -60,15 +60,28 @@ int main() {
 TESTCASES
 121
 OUTPUT
+.version 24737823949
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 C.A: .word C.B
+
 C.B: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global C.A.incr_P_1
 C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -77,7 +90,7 @@ C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: IN
     add r0, r2, #1
     str r0, [r1]                             /* Store value to struct field */
     bx lr
-    
+
 .global C.A.pipe_P_1
 C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: INT */
     sub sp, sp, #12
@@ -96,7 +109,7 @@ C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: IN
     pop { r0 }
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
-    
+
 lambda_Predicates.add5:                      /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -104,7 +117,7 @@ lambda_Predicates.add5:                      /* Function address getter for pred
 Predicates.add5:                             /* Function: Predicates.add5 */
     add r0, r0, #5
     bx lr
-    
+
 lambda_Predicates.mul:                       /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -112,7 +125,7 @@ lambda_Predicates.mul:                       /* Function address getter for pred
 Predicates.mul:                              /* Function: Predicates.mul */
     mul r0, r0, r1
     bx lr
-    
+
 .global set
 set:                                         /* Function: set */
     sub sp, sp, #12
@@ -127,7 +140,7 @@ set:                                         /* Function: set */
     ldr r0, [r1, #8]                         /* Load field from struct */
     str r4, [r10, r0, lsl #2]
     ldmfd sp!, {r3, r4, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

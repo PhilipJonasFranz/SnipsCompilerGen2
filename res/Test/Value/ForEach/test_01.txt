@@ -9,13 +9,24 @@ int main() {
 TESTCASES
 22
 OUTPUT
+.version 7856329261
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     mov fp, sp

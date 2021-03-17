@@ -13,13 +13,24 @@ TESTCASES
 0 5
 1 3
 OUTPUT
+.version 12184901323
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -30,7 +41,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 lambda_id:                                   /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -51,7 +62,7 @@ id:                                          /* Function: id */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

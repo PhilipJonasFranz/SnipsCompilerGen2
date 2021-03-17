@@ -34,28 +34,40 @@ int main() {
 TESTCASES
 30
 OUTPUT
+.version 11333703622
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 A: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 GetSet.L2_P_1:                               /* Interface : GetSet, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b A.get_P_1
     b A.set_P_1
-    
+
 .global A.get_P_1
 A.get_P_1:                                   /* Function: A.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
 .global A.set_P_1
 A.set_P_1:                                   /* Function: A.set, Provisos: INT */
     mov r10, #0
@@ -66,7 +78,7 @@ A.set_P_1:                                   /* Function: A.set, Provisos: INT *
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

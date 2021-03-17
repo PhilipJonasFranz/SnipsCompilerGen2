@@ -10,25 +10,24 @@ TESTCASES
 1 2
 2 6
 OUTPUT
+.version 9038000574
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+.include res\Test\Value\Directives\exclude_import2.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
-.global foo
-foo:                                         /* Function: foo */
-.global bar
-bar:                                         /* Function: bar */
-    lsl r0, r0, #1
-    bx lr
-
-    push { lr }
-    bl bar                                   /* Call bar */
-    mov r1, #2
-    mul r0, r1, r0
-    pop { pc }
 
 .global main
 main:                                        /* Function: main */

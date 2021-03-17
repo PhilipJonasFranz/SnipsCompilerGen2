@@ -16,13 +16,24 @@ int main(int a) {
 TESTCASES
 2
 OUTPUT
+.version 13822409476
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global create
 create:                                      /* Function: create */
     push { r3, lr }
@@ -45,7 +56,7 @@ create:                                      /* Function: create */
     str r0, [r1]
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

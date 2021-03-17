@@ -17,15 +17,28 @@ int main() {
 TESTCASES
 15
 OUTPUT
+.version 19622594401
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 B: .word A
+
 A: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global B.incr_P_1
 B.incr_P_1:                                  /* Function: B.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -34,7 +47,7 @@ B.incr_P_1:                                  /* Function: B.incr, Provisos: INT 
     add r2, r0, #1
     str r2, [r1]
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

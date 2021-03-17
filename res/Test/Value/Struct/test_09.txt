@@ -16,31 +16,24 @@ TESTCASES
 2 0 0
 2 1 0
 OUTPUT
+.version 10193752466
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+.include linked_list.s
+
 .data
-List.LinkedList: .word 0
-List.ListNode: .word 0
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
-.global List.LinkedList.create_P_1
-    
-List.LinkedList.create_P_1:                  /* Function: List.LinkedList.create, Provisos: INT* */
-    push { r3, lr }
-    mov r3, r0
-    push { r3 }
-    mov r0, #0
-    ldr r1, .POOL@1321795593_0_L1_NULL       /* Load null address */
-    ldr r2, .POOL@1321795593_0_L1_NULL       /* Load null address */
-    stmfd sp!, {r0-r2}
-    ldr r0, .POOL@1321795593_0_List.LinkedList
-    push { r0 }
-    bl init_P_5                              /* Call init */
-    ldmfd sp!, {r3, pc}
-.POOL@1321795593_0_List.LinkedList: .word List.LinkedList
-.POOL@1321795593_0_L1_NULL: .word NULL
 
 .global main
 main:                                        /* Function: main */

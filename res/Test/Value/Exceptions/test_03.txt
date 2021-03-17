@@ -46,14 +46,26 @@ TESTCASES
 10 9
 11 9
 OUTPUT
+.version 23307591875
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Exception: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -64,7 +76,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 .global checkThreshold
 checkThreshold:                              /* Function: checkThreshold */
     sub sp, sp, #32
@@ -110,7 +122,8 @@ checkThreshold.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1696627661_0_Exception: .word Exception
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -152,7 +165,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .POOL@-1696627661_0_Exception
+    ldr r12, .POOL@-1696627661_1_Exception
     bne main.L2
     add r1, r1, #8
     mov r0, #8
@@ -166,4 +179,4 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1696627661_0_Exception: .word Exception
+.POOL@-1696627661_1_Exception: .word Exception

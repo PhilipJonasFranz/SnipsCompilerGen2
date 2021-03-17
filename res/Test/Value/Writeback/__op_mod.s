@@ -1,3 +1,5 @@
+.version 0
+
 .text
 .global __op_mod
 __op_mod:                                    /* Function: __op_mod */

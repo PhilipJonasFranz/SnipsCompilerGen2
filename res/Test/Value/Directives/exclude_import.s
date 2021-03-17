@@ -1,3 +1,5 @@
+.version 1500315629
+
 .text
 .global foo
 foo:                                         /* Function: foo */

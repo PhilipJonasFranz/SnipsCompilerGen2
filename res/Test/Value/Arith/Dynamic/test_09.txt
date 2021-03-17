@@ -24,14 +24,26 @@ TESTCASES
 0 15
 2 21
 OUTPUT
+.version 9505377562
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Bar: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -42,7 +54,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 .global baz
 baz:                                         /* Function: baz */
     push { fp }
@@ -64,7 +76,8 @@ baz:                                         /* Function: baz */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1472592974_0_Bar: .word Bar
+
 .global foo
 foo:                                         /* Function: foo */
     push { r3, fp }
@@ -85,7 +98,7 @@ foo:                                         /* Function: foo */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -104,4 +117,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1472592974_0_Bar: .word Bar

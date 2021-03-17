@@ -45,17 +45,28 @@ TESTCASES
 7 90
 8 111
 OUTPUT
+.version 41736274353
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* Multiplicate the given matricies. Both matricies have to have the given */
-    
+
 /* dimension. Returns a pointer to the resulting matrix. */
-    
+
 .global __mat_mult
 __mat_mult:                                  /* Function: __mat_mult */
     sub sp, sp, #36
@@ -127,7 +138,7 @@ __mat_mult.L2:
     ldmfd sp!, {r3-r9, fp, lr}
     add sp, sp, #4
     bx lr
-    
+
 .global allocMatrix
 allocMatrix:                                 /* Function: allocMatrix */
     sub sp, sp, #24
@@ -161,7 +172,7 @@ allocMatrix.L5:
 allocMatrix.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r7, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

@@ -10,14 +10,26 @@ TESTCASES
 2 6
 5 15
 OUTPUT
+.version 13795580281
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
+
 x: .word 3
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     mov r1, r0                               /* Evaluate Expression */

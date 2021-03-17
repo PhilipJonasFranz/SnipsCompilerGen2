@@ -30,13 +30,24 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 62
 OUTPUT
+.version 27370601395
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global bar
 bar:                                         /* Function: bar */
     mul r0, r0, r1
@@ -46,7 +57,7 @@ bar:                                         /* Function: bar */
     add r0, r0, r2
     add sp, sp, #4
     bx lr
-    
+
 .global fooRec
 fooRec:                                      /* Function: fooRec */
     sub sp, sp, #12
@@ -63,11 +74,11 @@ fooRec.L1:
     bl fooRec                                /* Call fooRec */
     add r0, r0, #1
     ldmfd sp!, {r3, r4, pc}
-    
+
 .global foo
 foo:                                         /* Function: foo */
     b fooRec                                 /* Call fooRec */
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

@@ -16,13 +16,24 @@ int main() {
 TESTCASES
 30
 OUTPUT
+.version 8528902058
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global __vec_cross
 __vec_cross:                                 /* Function: __vec_cross */
     sub sp, sp, #12
@@ -51,7 +62,7 @@ __vec_cross.L2:
     ldmfd sp!, {r3, r4, fp}
     add sp, sp, #24
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

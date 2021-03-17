@@ -27,28 +27,40 @@ TESTCASES
 0 12
 1 30
 OUTPUT
+.version 15243535669
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 Getter.L2:                                   /* Interface : Getter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b X.get@2
     b X.get@3
-    
+
 .global X.get@2
 X.get@2:                                     /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
 .global X.get@3
 X.get@3:                                     /* Function: X.get */
     mov r10, #0
@@ -65,7 +77,7 @@ X.get@3.L0:
 X.get@3.L1: 
     pop { r3 }
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

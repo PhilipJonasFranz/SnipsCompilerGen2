@@ -16,13 +16,24 @@ TESTCASES
 0 1
 1 0
 OUTPUT
+.version 6474591405
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 lambda_get:                                  /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -30,7 +41,7 @@ lambda_get:                                  /* Function address getter for pred
 get:                                         /* Function: get */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
+
 lambda_get2:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -38,7 +49,7 @@ lambda_get2:                                 /* Function address getter for pred
 get2:                                        /* Function: get2 */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     mov r3, r0

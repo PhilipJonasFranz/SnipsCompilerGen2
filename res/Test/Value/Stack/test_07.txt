@@ -16,13 +16,24 @@ TESTCASES
 0 0 0 0 0 28
 1 2 3 4 48
 OUTPUT
+.version 11979515720
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     mov r3, r0

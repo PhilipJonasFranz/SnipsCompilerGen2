@@ -44,26 +44,38 @@ int main() {
 TESTCASES
 4
 OUTPUT
+.version 26307272142
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Storage.X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global Storage.X.getValue_P_1
 Storage.X.getValue_P_1:                      /* Function: Storage.X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
 .global Storage.X.getType_P_1
 Storage.X.getType_P_1:                       /* Function: Storage.X.getType, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     bx lr
-    
+
 .global Storage.X.setValue_P_1
 Storage.X.setValue_P_1:                      /* Function: Storage.X.setValue, Provisos: INT */
     push { r3 }
@@ -73,7 +85,7 @@ Storage.X.setValue_P_1:                      /* Function: Storage.X.setValue, Pr
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

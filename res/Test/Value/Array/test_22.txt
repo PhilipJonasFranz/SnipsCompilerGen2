@@ -8,16 +8,28 @@ int main() {
 TESTCASES
 3
 OUTPUT
+.version 5105616093
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
+
 vec: .skip 16
 
 .text
     b main_init
-    
+
 .global main
-    
+
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #12

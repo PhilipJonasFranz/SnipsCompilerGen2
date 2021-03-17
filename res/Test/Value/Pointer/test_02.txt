@@ -18,13 +18,24 @@ TESTCASES
 2 1 8
 2 2 9
 OUTPUT
+.version 17231201913
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global get
 get:                                         /* Function: get */
     push { r4, r5 }
@@ -37,7 +48,7 @@ get:                                         /* Function: get */
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     ldmfd sp!, {r4, r5}
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

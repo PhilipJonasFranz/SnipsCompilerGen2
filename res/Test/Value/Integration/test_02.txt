@@ -19,13 +19,24 @@ TESTCASES
 8 4
 10 4
 OUTPUT
+.version 16004404400
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global log2
 log2:                                        /* Function: log2 */
     push { r3, lr }
@@ -39,7 +50,7 @@ log2:                                        /* Function: log2 */
 log2.L1: 
     mov r0, #0                               /* Evaluate Expression */
     ldmfd sp!, {r3, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     b log2                                   /* Call log2 */

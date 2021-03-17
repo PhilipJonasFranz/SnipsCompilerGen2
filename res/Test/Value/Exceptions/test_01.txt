@@ -43,15 +43,28 @@ TESTCASES
 3 99
 4 99
 OUTPUT
+.version 25098366800
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Exception: .word 0
+
 ContextException: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -62,7 +75,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 .global get
 get:                                         /* Function: get */
     sub sp, sp, #16
@@ -94,16 +107,17 @@ get.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1698474703_0_Exception: .word Exception
+
 .global throw
 throw:                                       /* Function: throw */
     push { fp }
     mov fp, sp
     mov r0, #99
     push { r0 }
-    ldr r0, .POOL@-1698474703_0_ContextException
+    ldr r0, .POOL@-1698474703_1_ContextException
     push { r0 }
-    ldr r12, .POOL@-1698474703_0_ContextException
+    ldr r12, .POOL@-1698474703_1_ContextException
     mov r0, #8
     cmp r12, #0
     mov r2, sp
@@ -115,7 +129,8 @@ throw:                                       /* Function: throw */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1698474703_1_ContextException: .word ContextException
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -148,7 +163,7 @@ main.L0:
     mov r1, sp
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .POOL@-1698474703_0_Exception
+    ldr r12, .POOL@-1698474703_2_Exception
     bne main.L2
     add r1, r1, #12
     mov r0, #12
@@ -163,7 +178,7 @@ main.L0:
     mov r12, #0
     b main.L3
 main.L2: 
-    ldr r12, .POOL@-1698474703_0_ContextException
+    ldr r12, .POOL@-1698474703_2_ContextException
     bne main.L3
     add r1, r1, #8
     mov r0, #8
@@ -177,5 +192,5 @@ main.L3:
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1698474703_0_ContextException: .word ContextException
-.POOL@-1698474703_0_Exception: .word Exception
+.POOL@-1698474703_2_ContextException: .word ContextException
+.POOL@-1698474703_2_Exception: .word Exception

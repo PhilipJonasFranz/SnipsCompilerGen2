@@ -15,14 +15,26 @@ int main() {
 TESTCASES
 4093
 OUTPUT
+.version 16246953985
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global addr
 addr:                                        /* Function: addr */
     push { fp }
@@ -35,7 +47,7 @@ addr:                                        /* Function: addr */
     mov sp, fp
     pop { fp }
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

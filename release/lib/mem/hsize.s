@@ -1,3 +1,5 @@
+.version 2597775093
+
 .text
     
 .global hsize

@@ -7,21 +7,24 @@ int main() {
 TESTCASES
 9
 OUTPUT
+.version 7851964397
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+.include res\Test\Value\Modules\exclude_import.s
+
 .data
-Global.globalVar: .word 10
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
-.global Global.foo
-Global.foo:                                  /* Function: Global.foo */
-    ldr r1, .POOL@-2043634595_0_L0_Global.globalVar/* Evaluate Expression */
-    ldr r1, [r1]
-    lsl r0, r1, #1
-    bx lr
-.POOL@-2043634595_0_L0_Global.globalVar: .word Global.globalVar
 
 .global main
 main:                                        /* Function: main */

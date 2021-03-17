@@ -23,15 +23,28 @@ int main() {
 TESTCASES
 26
 OUTPUT
+.version 21778622001
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Y: .word X
+
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -42,7 +55,7 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 .global X.create
 X.create:                                    /* Function: X.create */
     sub sp, sp, #12
@@ -63,7 +76,8 @@ X.create:                                    /* Function: X.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1496930648_0_X: .word X
+
 .global Y.create
 Y.create:                                    /* Function: Y.create */
     sub sp, sp, #12
@@ -73,7 +87,7 @@ Y.create:                                    /* Function: Y.create */
     push { r5 }
     bl X.create                              /* Call X.create */
     add sp, sp, #4
-    ldr r0, .POOL@-1496930648_0_Y
+    ldr r0, .POOL@-1496930648_1_Y
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -84,7 +98,8 @@ Y.create:                                    /* Function: Y.create */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.POOL@-1496930648_1_Y: .word Y
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -103,5 +118,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1496930648_0_Y: .word Y
-.POOL@-1496930648_0_X: .word X

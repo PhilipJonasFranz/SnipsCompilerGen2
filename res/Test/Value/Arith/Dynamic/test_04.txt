@@ -13,18 +13,29 @@ int main() {
 TESTCASES
 128
 OUTPUT
+.version 17337104404
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global baz
 baz:                                         /* Function: baz */
     lsl r0, r0, #1
     bx lr
-    
+
 .global foo
 foo:                                         /* Function: foo */
     push { lr }
@@ -33,7 +44,7 @@ foo:                                         /* Function: foo */
     mov r1, #8
     mul r0, r1, r0
     pop { pc }
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

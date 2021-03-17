@@ -11,18 +11,29 @@ int main() {
 TESTCASES
 5
 OUTPUT
+.version 14576781516
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global get_P_1
 get_P_1:                                     /* Function: get, Provisos: INT | BOOL */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }

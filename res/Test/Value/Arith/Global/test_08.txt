@@ -21,146 +21,28 @@ int main() {
 TESTCASES
 20
 OUTPUT
+.version 15104678682
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+.include linked_list.s
+
 .data
-List.LinkedList: .word 0
-List.ListNode: .word 0
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
+
 buffer: .skip 4
 
 .text
     b main_init
-    
-.global List.LinkedList.add_P_3
-    
-List.LinkedList.add_P_3:                     /* Function: List.LinkedList.add, Provisos: X<INT> */
-    mov r10, #0
-    sub sp, sp, #16
-    stmea sp, {r3, r4, fp, lr}
-    mov fp, sp
-    mov r3, r0
-    add r0, fp, #24
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    ldr r0, .POOL@1321795593_0_L2_NULL       /* Load null address */
-    push { r0 }
-    ldr r0, .POOL@1321795593_0_List.ListNode
-    push { r0 }
-    bl init_P_5                              /* Call init */
-    mov r4, r0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.add.L1
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r4, [r1, #4]                         /* Store value to struct field */
-    mov r0, r4                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r4, [r1, #8]                         /* Store value to struct field */
-    b List.LinkedList.add.L0
-List.LinkedList.add.L1: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r1, [r1, #8]
-    lsl r1, r1, #2
-    str r4, [r1, #4]                         /* Store value to struct field */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r4, [r1, #8]                         /* Store value to struct field */
-List.LinkedList.add.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #12
-    ldr r0, [r1]
-    add r2, r0, #1
-    str r2, [r1]
-    mov sp, fp
-    ldmfd sp!, {r3, r4, fp, lr}
-    add sp, sp, #12
-    bx lr
-    
-.global List.LinkedList.get_P_3
-List.LinkedList.get_P_3:                     /* Function: List.LinkedList.get, Provisos: X<INT> */
-    mov r10, #0
-    sub sp, sp, #16
-    stmea sp, {r3-r5, fp}
-    mov fp, sp
-    mov r3, r0
-    mov r4, r1
-    cmp r1, #0
-    bge List.LinkedList.get.L0
-    lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #16
-    ldr r0, [r1, #8]
-    ldr r2, [r1, #4]
-    stmfd sp!, {r0, r2}
-    ldr r0, [r1]
-    push { r0 }
-    b List.LinkedList.get.L7
-List.LinkedList.get.L0: 
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-List.LinkedList.get.L3:                      /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.get.L4
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get.L5
-    lsl r1, r3, #2                           /* Convert to bytes */
-    add r1, r1, #16
-    ldr r0, [r1, #8]
-    ldr r2, [r1, #4]
-    stmfd sp!, {r0, r2}
-    ldr r0, [r1]
-    push { r0 }
-    b List.LinkedList.get.L7
-List.LinkedList.get.L5: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
-    sub r4, r4, #1
-    b List.LinkedList.get.L3
-List.LinkedList.get.L4: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    add r1, r1, #8
-    ldr r0, [r1, #8]
-    ldr r2, [r1, #4]
-    stmfd sp!, {r0, r2}
-    ldr r0, [r1]
-    push { r0 }
-List.LinkedList.get.L7: 
-    mov r2, sp
-    mov sp, fp
-    ldmfd sp!, {r3-r5, fp}
-    mov r0, #12
-    add r1, r2, #12
-    add r10, pc, #8                          /* Setup return address for routine */
-    b _routine_stack_copy_
-    mov r10, #0
-    bx lr
-    
-.global List.LinkedList.create_P_3
-List.LinkedList.create_P_3:                  /* Function: List.LinkedList.create, Provisos: X<INT> */
-    push { fp, lr }
-    mov fp, sp
-    add r0, fp, #16
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    mov r0, #0
-    ldr r1, .POOL@1321795593_0_L2_NULL       /* Load null address */
-    ldr r2, .POOL@1321795593_0_L2_NULL       /* Load null address */
-    stmfd sp!, {r0-r2}
-    ldr r0, .POOL@1321795593_0_List.LinkedList
-    push { r0 }
-    bl init_P_7                              /* Call init */
-    mov sp, fp
-    ldmfd sp!, {fp, lr}
-    add sp, sp, #12
-    bx lr
-.POOL@1321795593_0_List.LinkedList: .word List.LinkedList
-.POOL@1321795593_0_List.ListNode: .word List.ListNode
-.POOL@1321795593_0_L2_NULL: .word NULL
 
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
@@ -172,11 +54,11 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
 /* Message queue that temporarily hold incoming messages */
-    
+
 .global main
-    
+
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #20

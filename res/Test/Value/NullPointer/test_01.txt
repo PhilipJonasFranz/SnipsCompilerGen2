@@ -22,14 +22,26 @@ int main() {
 TESTCASES
 1
 OUTPUT
+.version 272760116
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 A: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global get
 get:                                         /* Function: get */
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -39,17 +51,19 @@ get:                                         /* Function: get */
     moveq r0, #1
     movne r0, #0
     bx lr
-    
+.POOL@-1447428463_0_L1_NULL: .word NULL
+
 .global set
 set:                                         /* Function: set */
     push { r3 }
     mov r3, r0
-    ldr r0, .POOL@-1447428463_0_L1_NULL      /* Evaluate Expression */
+    ldr r0, .POOL@-1447428463_1_L1_NULL      /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
-    
+.POOL@-1447428463_1_L1_NULL: .word NULL
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -59,7 +73,7 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     push { r0 }
-    ldr r0, .POOL@-1447428463_0_A
+    ldr r0, .POOL@-1447428463_2_A
     push { r0 }
     sub r0, fp, #12                          /* Load parameters */
     lsr r0, r0, #2
@@ -69,5 +83,4 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-1447428463_0_A: .word A
-.POOL@-1447428463_0_L1_NULL: .word NULL
+.POOL@-1447428463_2_A: .word A

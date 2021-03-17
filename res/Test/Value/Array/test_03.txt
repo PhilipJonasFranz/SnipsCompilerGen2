@@ -16,13 +16,24 @@ TESTCASES
 1 12
 2 15
 OUTPUT
+.version 10705803466
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global foo
 foo:                                         /* Function: foo */
     push { r3, fp }
@@ -42,7 +53,7 @@ foo:                                         /* Function: foo */
     ldmfd sp!, {r3, fp}
     add sp, sp, #24
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

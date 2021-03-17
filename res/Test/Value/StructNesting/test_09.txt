@@ -20,14 +20,26 @@ int main() {
 TESTCASES
 15
 OUTPUT
+.version 26101405478
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global X.pipe_P_1
 X.pipe_P_1:                                  /* Function: X.pipe, Provisos: INT */
     sub sp, sp, #12
@@ -46,7 +58,7 @@ X.pipe_P_1:                                  /* Function: X.pipe, Provisos: INT 
     pop { r0 }
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
-    
+
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -54,7 +66,7 @@ lambda_add5:                                 /* Function address getter for pred
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

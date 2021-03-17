@@ -1,3 +1,5 @@
+.version 0
+
 .text
 .global __op_div
 __op_div:                                    /* Function: __op_div */

@@ -20,13 +20,24 @@ TESTCASES
 2 13
 3 4
 OUTPUT
+.version 18663728863
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global set
 set:                                         /* Function: set */
     push { r3 }
@@ -40,7 +51,7 @@ set:                                         /* Function: set */
     str r0, [r1]
     pop { r3 }
     bx lr
-    
+
 .global get
 get:                                         /* Function: get */
     sub sp, sp, #12
@@ -59,7 +70,7 @@ get:                                         /* Function: get */
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
     ldmfd sp!, {r3, r4, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

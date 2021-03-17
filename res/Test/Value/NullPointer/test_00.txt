@@ -7,13 +7,24 @@ int main() {
 TESTCASES
 10
 OUTPUT
+.version 18423838205
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global main
 main:                                        /* Function: main */
     ldr r3, .POOL@-1448351984_0_L1_NULL      /* Evaluate Expression */

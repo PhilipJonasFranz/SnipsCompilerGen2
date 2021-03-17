@@ -79,22 +79,35 @@ int main() {
 TESTCASES
 25
 OUTPUT
+.version 46873752992
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 List.LinkedList: .word 0
+
 List.ListNode: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 List.Iterable.L2_P_1:                        /* Interface : List.Iterable, Provisos: INT,  */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b List.LinkedList.size_P_1
     b List.LinkedList.get_P_1
-    
+
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     sub sp, sp, #16
@@ -128,7 +141,9 @@ List.LinkedList.add.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-    
+.POOL@-2062687605_0_List.ListNode: .word List.ListNode
+.POOL@-2062687605_0_L1_NULL: .word NULL
+
 .global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
     mov r10, #0
@@ -149,7 +164,7 @@ List.LinkedList.get.L3:                      /* Evaluate condition */
     beq List.LinkedList.get.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL@-2062687605_0_L1_NULL      /* Load null address */
+    ldr r1, .POOL@-2062687605_1_L1_NULL      /* Load null address */
     cmp r0, r1
     bne List.LinkedList.get.L5
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -167,7 +182,8 @@ List.LinkedList.get.L4:
 List.LinkedList.get.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
-    
+.POOL@-2062687605_1_L1_NULL: .word NULL
+
 .global List.LinkedList.size_P_1
 List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, Provisos: INT */
     mov r10, #0
@@ -178,7 +194,7 @@ List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, 
     mov r0, #0                               /* Evaluate Expression */
     mov r3, #0
 List.LinkedList.size.L1:                     /* Evaluate condition */
-    ldr r1, .POOL@-2062687605_0_L1_NULL      /* Load null address */
+    ldr r1, .POOL@-2062687605_2_L1_NULL      /* Load null address */
     cmp r4, r1
     beq List.LinkedList.size.L2
     lsl r1, r4, #2                           /* Convert to bytes */
@@ -190,16 +206,17 @@ List.LinkedList.size.L2:
     mov r0, r3                               /* Evaluate Expression */
     ldmfd sp!, {r3, r4}
     bx lr
-    
+.POOL@-2062687605_2_L1_NULL: .word NULL
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
-    ldr r1, .POOL@-2062687605_0_L1_NULL      /* Load null address */
-    ldr r2, .POOL@-2062687605_0_L1_NULL      /* Load null address */
+    ldr r1, .POOL@-2062687605_3_L1_NULL      /* Load null address */
+    ldr r2, .POOL@-2062687605_3_L1_NULL      /* Load null address */
     stmfd sp!, {r0-r2}
-    ldr r0, .POOL@-2062687605_0_List.LinkedList
+    ldr r0, .POOL@-2062687605_3_List.LinkedList
     push { r0 }
     mov r1, #12
     sub r0, fp, #16
@@ -234,6 +251,5 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.POOL@-2062687605_0_List.LinkedList: .word List.LinkedList
-.POOL@-2062687605_0_List.ListNode: .word List.ListNode
-.POOL@-2062687605_0_L1_NULL: .word NULL
+.POOL@-2062687605_3_List.LinkedList: .word List.LinkedList
+.POOL@-2062687605_3_L1_NULL: .word NULL

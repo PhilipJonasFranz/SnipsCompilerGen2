@@ -15,18 +15,29 @@ TESTCASES
 1 2 3 4 5 55
 2 2 2 2 2 20
 OUTPUT
+.version 34465090835
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global sq
 sq:                                          /* Function: sq */
     mul r0, r0, r0
     bx lr
-    
+
 .global sqsum
 sqsum:                                       /* Function: sqsum */
     sub sp, sp, #20
@@ -53,7 +64,7 @@ sqsum:                                       /* Function: sqsum */
     ldmfd sp!, {r4-r6, fp, lr}
     add sp, sp, #8
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

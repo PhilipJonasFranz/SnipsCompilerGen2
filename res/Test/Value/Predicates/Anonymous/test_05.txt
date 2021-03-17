@@ -20,14 +20,26 @@ int main() {
 TESTCASES
 100
 OUTPUT
+.version 3047728972
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
+
 r: .word 0
 
 .text
     b main
-    
+
 lambda_f:                                    /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
@@ -37,7 +49,8 @@ f:                                           /* Function: f */
     ldr r1, .POOL@-1816193410_0_L0_r
     str r0, [r1]
     bx lr
-    
+.POOL@-1816193410_0_L0_r: .word r
+
 .global map
 map:                                         /* Function: map */
     push { r4, lr }
@@ -45,7 +58,7 @@ map:                                         /* Function: map */
     add lr, pc, #8
     mov pc, r4
     ldmfd sp!, {r4, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }
@@ -55,7 +68,7 @@ main:                                        /* Function: main */
     mov r1, r0
     mov r0, #10
     bl map                                   /* Call map */
-    ldr r0, .POOL@-1816193410_0_L0_r         /* Evaluate Expression */
+    ldr r0, .POOL@-1816193410_1_L0_r         /* Evaluate Expression */
     ldr r0, [r0]
     pop { pc }
-.POOL@-1816193410_0_L0_r: .word r
+.POOL@-1816193410_1_L0_r: .word r

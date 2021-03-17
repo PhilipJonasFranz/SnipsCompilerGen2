@@ -34,28 +34,40 @@ int main() {
 TESTCASES
 40
 OUTPUT
+.version 16134771528
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 X: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 Inter.L2:                                    /* Interface : Inter */
     add r10, r12, #4
     mov r12, #0
     add pc, pc, r10
     b X.get
     b X.set
-    
+
 .global X.get
 X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
 .global X.set
 X.set:                                       /* Function: X.set */
     mov r10, #0
@@ -66,7 +78,7 @@ X.set:                                       /* Function: X.set */
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

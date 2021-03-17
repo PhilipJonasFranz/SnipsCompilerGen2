@@ -18,18 +18,29 @@ TESTCASES
 2 9
 3 1
 OUTPUT
+.version 2935435979
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global get
 get:                                         /* Function: get */
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     bx lr
-    
+
 .global shift
 shift:                                       /* Function: shift */
     push { r3, lr }
@@ -38,7 +49,7 @@ shift:                                       /* Function: shift */
     mov r0, r3                               /* Evaluate Expression */
     bl get                                   /* Call get */
     ldmfd sp!, {r3, pc}
-    
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }

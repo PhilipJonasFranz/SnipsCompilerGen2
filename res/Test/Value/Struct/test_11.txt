@@ -23,20 +23,33 @@ TESTCASES
 1 6
 2 8
 OUTPUT
+.version 2185822060
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Data: .word 0
+
 Capsule: .word 0
+
 NULL: .word 0
+
 HEAP_START: .word 0
 
 .text
     b main
-    
+
 .global create_P_2
 create_P_2:                                  /* Function: create, Provisos: INT[2] */
     mov r0, #6                               /* Evaluate Expression */
     b resv                                   /* Call resv */
-    
+
 .global main
 main:                                        /* Function: main */
     push { lr }
