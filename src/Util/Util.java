@@ -93,7 +93,9 @@ public class Util {
 		
 		if (lines != null) {
 			for (String s : lines) 
-				sum += s.hashCode();
+				/* Exclude version number directive */
+				if (!s.startsWith(".version"))
+					sum += s.hashCode();
 		}
 		else new Message("Failed to locate file '" + path + "', cannot compute hashsum.", Type.WARN);
 		
