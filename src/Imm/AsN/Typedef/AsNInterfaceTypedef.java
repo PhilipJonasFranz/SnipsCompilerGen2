@@ -172,7 +172,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 					
 					/* Generate the SID-to-Index mapper */
 					for (StructTypedef struct : def.implementers) {
-						struct.loadSIDInReg(intf, REG.R10);
+						struct.loadSIDInReg(intf, REG.R10, mapping.providedHeadProvisos);
 						intf.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(cnt++ * 4 * def.functions.size()), new Cond(COND.EQ)));
 						intf.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(tableEnd)));
 					}

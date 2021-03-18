@@ -2417,7 +2417,10 @@ public class ASMOptimizer {
 			if (ins instanceof ASMLabel) {
 				ASMLabel label = (ASMLabel) ins;
 				/* Label is used by default if its a function header or a data label */
-				if (label.isFunctionLabel || label instanceof ASMDataLabel || label.name.equals("main_init") || label.name.equals("name")) usedLabels.add((ASMLabel) ins);
+				if (label.isFunctionLabel || label instanceof ASMDataLabel || 
+						label.name.equals("main_init") || label.name.equals("name") ||
+							label.optFlags.contains(OPT_FLAG.LABEL_USED)) 
+					usedLabels.add((ASMLabel) ins);
 			}
 			if (ins instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) ins;

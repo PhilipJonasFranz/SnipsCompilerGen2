@@ -33,7 +33,14 @@ public class AsNTempAtom extends AsNExpression {
 		AsNTempAtom atom = new AsNTempAtom();
 		a.castedNode = atom;
 
-		StructTypedef def = (a.getType() instanceof STRUCT)? ((STRUCT) a.inheritType).getTypedef() : null;
+		STRUCT struct = null;
+		StructTypedef def = null;
+		
+		if (a.getType() instanceof STRUCT) {
+			struct = (STRUCT) a.getType();
+			def = ((STRUCT) a.inheritType).getTypedef();
+		}
+		
 		boolean pushSID = def != null && !CompilerDriver.disableStructSIDHeaders;
 		
 		/* Free as many regs as needed */
@@ -54,7 +61,7 @@ public class AsNTempAtom extends AsNExpression {
 					atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp((a.getType().wordsize() - 1) * 4)));
 					
 					/* Insert SID */
-					if (def != null) def.loadSIDInReg(atom, REG.R0);
+					if (def != null) def.loadSIDInReg(atom, REG.R0, struct.proviso);
 					else atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(-1)));
 					
 					atom.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
@@ -141,7 +148,7 @@ public class AsNTempAtom extends AsNExpression {
 						
 						/* If the inherited type is a struct and SIDs are enabled and this is the last word to be pushed, override value to SID */
 						if (pushSID && i == a.inheritType.wordsize() - 1) {
-							if (def != null) def.loadSIDInReg(atom, new RegOp(regs).reg);
+							if (def != null) def.loadSIDInReg(atom, new RegOp(regs).reg, struct.proviso);
 							else atom.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(-1)));
 						}
 						

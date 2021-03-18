@@ -43,12 +43,15 @@ import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
+import Imm.AST.Typedef.StructTypedef.StructProvisoMapping;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import PreP.PreProcessor;
 import Snips.CompilerDriver;
+import Util.Pair;
 import Util.Source;
 import Util.Util;
 import Util.Logging.ProgressMessage;
@@ -197,21 +200,116 @@ public class AsNBody extends AsNNode {
 			else if (s instanceof StructTypedef) {
 				/* Cast all functions defined in the struct typedef */
 				StructTypedef def = (StructTypedef) s;
-				
-				/* Inject instruction for .data Section */
-				MemoryOperand parent = new MemoryWordOp(0);
-				if (def.extension != null) {
-					ASMDataLabel entry = new ASMDataLabel(def.extension.path.build(), new MemoryWordOp(0));
-					parent = new MemoryWordRefOp(entry);
+
+				List<String> added = new ArrayList();
+					
+				for (StructProvisoMapping mapping : def.registeredMappings) {
+					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					
+					if (!added.contains(postfix)) {
+						added.add(postfix);
+						
+						List<ASMDataLabel> interfaceRelayTable = new ArrayList();
+						
+						/* Inject Interface Relay-Addresses for .data section */
+						for (int i = def.implemented.size() - 1; i >= 0; i--) {
+							INTERFACE intf = def.implemented.get(i);
+							
+							String name = def.path.build() + postfix + "_" + intf.getTypedef().path.build();
+							
+							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
+							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
+							interfaceRelayTable.add(0, relay);
+							
+							AsNBody.addToTranslationUnit(relay, def.getSource(), SECTION.DATA);
+							
+							List<ASMInstruction> relayTable = new ArrayList();
+							
+							ASMLabel relayTableHead = new ASMLabel(name);
+							relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+							relayTableHead.comment = new ASMComment("Relay: " + intf.getTypedef().path.build() + " -> " + def.path.build());
+							relayTable.add(relayTableHead);
+							
+							for (Function f : intf.getTypedef().functions) {
+								
+								Function f0 = null;
+								
+								/* 
+								 * Create a signature clone of the searched function and translate 
+								 * it to the passed provisos in the struct typedef. This is required 
+								 * to match proviso types in the signature match.
+								 */
+								Function signature = f.cloneSignature();
+								signature.translateProviso(intf.getTypedef().proviso, intf.proviso);
+								
+								/*
+								 * Search function from interface in struct typedef, and set reference to it.
+								 * This is done since the acutal proviso mappings of this function are stored
+								 * in the function located in the struct typedef, and not in the function in
+								 * the interface typedef.
+								 */
+								for (int a = 0; a < def.functions.size(); a++) {
+									Function sfunc = def.functions.get(a);
+									if (Function.signatureMatch(signature, sfunc, false, false))
+										f0 = sfunc;
+								}
+								
+								/* Make sure the function was found */
+								assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
+								
+								/* Branch to function */
+								String target = f0.path.build();
+								
+								/* Get the proviso postfix from the function in the struct with the current mapping */
+								String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
+								
+								/* 
+								 * The mapping has not been registered in the function, this means that this function
+								 * has not been called with this specific provisos.
+								 */
+								if (post == null) {
+									ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+									add.comment = new ASMComment("Function was not called, use as placeholder");
+									
+									relayTable.add(add);
+								}
+								/*
+								 * Mapping was found, append to target to create final label and branch to it.
+								 */
+								else {
+									target += post;
+									
+									/* Final label to function with proviso postfix */
+									ASMLabel functionLabel = new ASMLabel(target);
+									
+									ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
+									b.optFlags.add(OPT_FLAG.SYS_JMP);
+									relayTable.add(b);
+								}
+							}
+							
+							AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
+						}
+						
+						/* Inject instruction for .data Section */
+						MemoryOperand parent = new MemoryWordOp(0);
+						if (def.extension != null) {
+							String extPostfix = LabelUtil.getProvisoPostfix(def.extProviso);
+							ASMDataLabel entry = new ASMDataLabel(def.extension.path.build() + extPostfix, new MemoryWordOp(0));
+							parent = new MemoryWordRefOp(entry);
+						}
+						
+						ASMDataLabel entry = new ASMDataLabel(def.path.build() + postfix, parent);
+						AsNBody.addToTranslationUnit(entry, def.getSource(), SECTION.DATA);
+						
+						/* 
+						 * Create the new pair for thee SID label map that contains the 
+						 * SID-Tree-Node and the interface relay table.
+						 */
+						Pair<ASMDataLabel, List<ASMDataLabel>> pair = new Pair(entry, interfaceRelayTable);
+						def.SIDLabelMap.put(postfix, pair);
+					}
 				}
-				
-				/* Inject instruction for .data Section */
-				ASMDataLabel entry = new ASMDataLabel(def.path.build(), parent);
-				List<ASMInstruction> SIDEntry = new ArrayList();
-				SIDEntry.add(entry);
-				AsNBody.addToTranslationUnit(SIDEntry, def.getSource(), SECTION.DATA);
-				
-				def.SIDLabel = entry;
 				
 				for (Function f : def.functions) {
 					st = new StackSet();
@@ -446,6 +544,12 @@ public class AsNBody extends AsNNode {
 			AsNTranslationUnit unit = AsNBody.translationUnits.get(path);
 			unit.append(ins, section);
 		}
+	}
+	
+	public static void addToTranslationUnit(ASMInstruction ins, Source source, SECTION section) {
+		List<ASMInstruction> list = new ArrayList();
+		list.add(ins);
+		AsNBody.addToTranslationUnit(list, source, section);
 	}
 	
 	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {

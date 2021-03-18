@@ -51,6 +51,7 @@ public class LabelUtil {
 		String p = "_P_";
 		for (TYPE t : context) p += t.wordsize() + "_";
 		if (p.endsWith("_")) p = p.substring(0, p.length() - 1);
+		if (context.isEmpty()) return "";
 		return p;
 	}
 	

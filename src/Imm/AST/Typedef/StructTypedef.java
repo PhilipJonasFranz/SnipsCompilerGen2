@@ -1,8 +1,10 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
@@ -21,6 +23,7 @@ import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
+import Util.Pair;
 import Util.Source;
 
 /**
@@ -44,6 +47,8 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<ASMDataLabel> interfaceRelayLabels = new ArrayList();
+	
 	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
@@ -54,7 +59,7 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	public ASMDataLabel SIDLabel;
+	public HashMap<String, Pair<ASMDataLabel, List<ASMDataLabel>>> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
 		
@@ -179,6 +184,14 @@ public class StructTypedef extends SyntaxElement {
 				STRUCT.useProvisoFreeInCheck = true;
 			}
 		}
+		
+		if (proviso.isEmpty()) {
+			/* Add default proviso mapping if no provisos exist */
+			List<TYPE> fieldTypes = new ArrayList();
+			for (Declaration d : this.fields)
+				fieldTypes.add(d.getType().clone());
+			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
+		}
 	}
 	
 	/**
@@ -298,8 +311,13 @@ public class StructTypedef extends SyntaxElement {
 		return;
 	}
 	
-	public void loadSIDInReg(AsNNode node, REG reg) {
-		LabelOp operand = new LabelOp(this.SIDLabel);
+	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.SIDLabelMap.get(postfix) != null : 
+			"Attempted to load SID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix).first);
 		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
 	}
 
