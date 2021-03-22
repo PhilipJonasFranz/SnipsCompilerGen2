@@ -138,6 +138,7 @@ namespace List {
 					/* Only one element in list */
 					if (self->tail == n) self->tail = null;
 					
+					self->size--;
 					free(n);
 				}
 				
@@ -171,6 +172,8 @@ namespace List {
 						free(n->next);
 						n->next = next;
 					}
+					
+					self->size--;
 					return;
 				}
 			}

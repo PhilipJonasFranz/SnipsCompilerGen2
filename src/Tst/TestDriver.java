@@ -405,7 +405,7 @@ public class TestDriver {
 				
 				try {
 					LinkerUnit originUnit = Linker.parseLinkerUnit(compile);
-					Linker.linkProgram(originUnit);
+					Linker.linkProgram(new ArrayList(), originUnit);
 					compile = originUnit.build();
 				} catch (LINK_EXC e) {
 					cd.setBurstMode(false, false);

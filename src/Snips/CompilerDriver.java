@@ -688,7 +688,7 @@ public class CompilerDriver {
 		if (!CompilerDriver.buildObjectFileOnly) {
 			Linker.link_progress = new ProgressMessage("LINK -> Starting", 30, LogPoint.Type.INFO);
 			LinkerUnit originUnit = Linker.parseLinkerUnit(asm);
-			Lnk.Linker.linkProgram(originUnit);
+			Lnk.Linker.linkProgram(new ArrayList(), originUnit);
 			asm = originUnit.build();
 			Linker.link_progress.finish();
 			Linker.buffer.stream().forEach(x -> x.flush());

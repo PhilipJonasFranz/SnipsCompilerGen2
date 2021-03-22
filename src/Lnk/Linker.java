@@ -106,9 +106,7 @@ public class Linker {
 	
 	public static List<Message> buffer = new ArrayList();
 	
-	public static List<String> linkProgram(LinkerUnit unit) throws LINK_EXC {
-		List<String> included = new ArrayList();
-		
+	public static List<String> linkProgram(List<String> included, LinkerUnit unit) throws LINK_EXC {
 		for (int i = unit.imports.size() - 1; i >= 0; i--) {
 			String imp = unit.imports.get(i);
 			
@@ -150,7 +148,7 @@ public class Linker {
 			
 			LinkerUnit importedUnit = Linker.parseLinkerUnit(lines);
 			importedUnit.sourceFile = mappedPath;
-			included.addAll(Linker.linkProgram(importedUnit));
+			included = Linker.linkProgram(included, importedUnit);
 			
 			unit.dataSection.addAll(0, importedUnit.dataSection);
 			

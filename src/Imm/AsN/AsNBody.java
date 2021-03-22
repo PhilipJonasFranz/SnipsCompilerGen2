@@ -260,17 +260,12 @@ public class AsNBody extends AsNNode {
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
-				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
-				
 				InterfaceTypedef idef = (InterfaceTypedef) s;
-				
-				List<String> added = new ArrayList();
-				
+			
 				for (InterfaceProvisoMapping mapping : idef.registeredMappings) {
 					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
 					
-					if (!added.contains(postfix)) {
-						added.add(postfix);
+					if (!idef.IIDLabelMap.containsKey(postfix)) {
 						
 						/* Inject instruction for .data Section */
 						MemoryOperand parent = new MemoryWordOp(0);
@@ -281,7 +276,6 @@ public class AsNBody extends AsNNode {
 						idef.IIDLabelMap.put(postfix, entry);
 					}
 				}
-				AsNBody.addToTranslationUnit(def.getInstructions(), s.getSource(), SECTION.TEXT);
 			}
 			else if (s instanceof Comment) {
 				AsNComment com = AsNComment.cast((Comment) s, null, map, null);
