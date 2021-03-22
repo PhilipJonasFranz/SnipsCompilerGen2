@@ -10,6 +10,7 @@ import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -23,7 +24,6 @@ import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
-import Util.Pair;
 import Util.Source;
 
 /**
@@ -59,13 +59,15 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	public HashMap<String, Pair<ASMDataLabel, List<ASMDataLabel>>> SIDLabelMap = new HashMap();
+	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
 		
 		public List<TYPE> providedHeadProvisos;
 		
 		public List<TYPE> effectiveFieldTypes;
+		
+		public ASMLabel resolverLabel;
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;
@@ -317,7 +319,7 @@ public class StructTypedef extends SyntaxElement {
 		assert this.SIDLabelMap.get(postfix) != null : 
 			"Attempted to load SID for a not registered mapping!";
 		
-		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix).first);
+		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
 		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
 	}
 

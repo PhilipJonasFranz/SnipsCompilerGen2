@@ -1,14 +1,22 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
+import Imm.AsN.AsNNode;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -36,6 +44,8 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public List<StructTypedef> implementers = new ArrayList();
 
+	public HashMap<String, ASMDataLabel> IIDLabelMap = new HashMap();
+	
 	public class InterfaceProvisoMapping {
 		
 		public String provisoPostfix;
@@ -202,6 +212,24 @@ public class InterfaceTypedef extends SyntaxElement {
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
+	}
+	
+	public void loadIIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		node.instructions.addAll(this.loadIIDInReg(reg, context));
+	}
+	
+	public List<ASMInstruction> loadIIDInReg(REG reg, List<TYPE> context) {
+		List<ASMInstruction> ins = new ArrayList();
+		
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.IIDLabelMap.get(postfix) != null : 
+			"Attempted to load IID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.IIDLabelMap.get(postfix));
+		ins.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+		
+		return ins;
 	}
 
 } 

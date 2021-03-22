@@ -8,13 +8,16 @@ import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
+import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -28,6 +31,7 @@ import Imm.AST.Function;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AST.Typedef.StructTypedef;
+import Imm.AST.Typedef.StructTypedef.StructProvisoMapping;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -286,6 +290,129 @@ public class AsNInterfaceTypedef extends AsNNode {
 		}
 		
 		return hasCalls;
+	}
+	
+	public static List<ASMInstruction> createStructFunctionRelay(AsNNode node, StructTypedef sdef, StructProvisoMapping mapping, INTERFACE intf) {
+		
+		InterfaceTypedef idef = intf.getTypedef();
+		
+		List<ASMInstruction> table = new ArrayList();
+		
+		String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+		String name = sdef.path.build() + postfix + "_" + idef.path.build();
+		
+		ASMLabel relayTableHead = new ASMLabel(name);
+		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+		relayTableHead.comment = new ASMComment("Relay: " + idef.path.build() + " -> " + sdef.path.build());
+		table.add(relayTableHead);
+		
+		mapping.resolverLabel = relayTableHead;
+		
+		boolean wasUsed = false;
+		
+		table.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
+		
+		/* Pop function offset */
+		table.add(new ASMPopStack(new RegOp(REG.R12)));
+		
+		table.add(new ASMAdd(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(4)));
+		table.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R12)));
+		
+		for (Function f : idef.functions) {
+			
+			Function f0 = null;
+			
+			/* 
+			 * Create a signature clone of the searched function and translate 
+			 * it to the passed provisos in the struct typedef. This is required 
+			 * to match proviso types in the signature match.
+			 */
+			Function signature = f.cloneSignature();
+			signature.translateProviso(idef.proviso, intf.proviso);
+			
+			/*
+			 * Search function from interface in struct typedef, and set reference to it.
+			 * This is done since the acutal proviso mappings of this function are stored
+			 * in the function located in the struct typedef, and not in the function in
+			 * the interface typedef.
+			 */
+			for (int a = 0; a < sdef.functions.size(); a++) {
+				Function sfunc = sdef.functions.get(a);
+				if (Function.signatureMatch(signature, sfunc, false, false))
+					f0 = sfunc;
+			}
+			
+			/* Make sure the function was found */
+			assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
+			
+			/* Branch to function */
+			String target = f0.path.build();
+			
+			/* Get the proviso postfix from the function in the struct with the current mapping */
+			String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
+			
+			/* 
+			 * The mapping has not been registered in the function, this means that this function
+			 * has not been called with this specific provisos.
+			 */
+			if (post == null) {
+				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+				add.comment = new ASMComment("Function was not called, use as placeholder");
+				
+				table.add(add);
+			}
+			/*
+			 * Mapping was found, append to target to create final label and branch to it.
+			 */
+			else {
+				wasUsed = true;
+				
+				target += post;
+				
+				/* Final label to function with proviso postfix */
+				ASMLabel functionLabel = new ASMLabel(target);
+				
+				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
+				b.optFlags.add(OPT_FLAG.SYS_JMP);
+				table.add(b);
+			}
+		}
+		
+		if (!wasUsed) table.clear();
+		return table;
+	}
+	
+	public static List<ASMInstruction> createStructInterfaceRelay(AsNNode node, StructTypedef sdef, StructProvisoMapping mapping) {
+		
+		List<ASMInstruction> table = new ArrayList();
+		
+		String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+		String name = sdef.path.build() + postfix + "_resolver";
+		
+		ASMLabel relayTableHead = new ASMLabel(name);
+		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+		relayTableHead.comment = new ASMComment("Relay: " + sdef.path.build() + " -> INTF");
+		table.add(relayTableHead);
+		
+		for (int i = 0; i < sdef.implemented.size(); i++) {
+			INTERFACE intf = sdef.implemented.get(i);
+			
+			List<String> added = new ArrayList();
+			
+			for (InterfaceProvisoMapping imapping : intf.getTypedef().registeredMappings) {
+				postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+				
+				if (!added.contains(postfix)) {
+					added.add(postfix);
+					
+					table.addAll(intf.getTypedef().loadIIDInReg(REG.R12, imapping.providedHeadProvisos));
+					table.add(new ASMCmp(new RegOp(REG.R10), new RegOp(REG.R12)));
+					table.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(mapping.resolverLabel)));
+				}
+			}
+		}
+		
+		return table;
 	}
 	
 } 
