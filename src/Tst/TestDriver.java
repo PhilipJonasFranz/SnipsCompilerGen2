@@ -70,8 +70,12 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	public boolean printResultOnError = true;
+	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = true;
+	public boolean writebackResults = false;
+	
+	public static boolean excludeASMErrors = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -409,8 +413,9 @@ public class TestDriver {
 					compile = originUnit.build();
 				} catch (LINK_EXC e) {
 					cd.setBurstMode(false, false);
-					buffer.add(new Message("Error when linking output: " + e.getMessage(), LogPoint.Type.FAIL, true));
-					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					buffer.add(new Message("Error when linking output!" + e.getMessage(), LogPoint.Type.FAIL, true));
+					
+					if (printResultOnError) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					
 					return new Result(RET_TYPE.CRASH, 0, 0);
 				}
@@ -449,14 +454,27 @@ public class TestDriver {
 				
 				ProcessorUnit pcu0 = null;
 				
+				boolean silenced = CompilerDriver.silenced;
+				
 				try {
-					pcu0 = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
-				} catch (Exception e) {
-					buffer.add(new Message("Error generating assembly!", LogPoint.Type.FAIL, true));
-					e.printStackTrace();
+					if (excludeASMErrors) CompilerDriver.silenced = true;
 					
-					buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
-					compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					pcu0 = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+					
+					CompilerDriver.silenced = silenced;
+				} catch (Exception e) {
+					CompilerDriver.silenced = silenced;
+					
+					buffer.add(new Message("Error generating assembly!", LogPoint.Type.FAIL, true));
+					
+					if (!excludeASMErrors) {
+						e.printStackTrace();
+						
+						if (printResultOnError) {
+							buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+							compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+						}
+					}
 					
 					return new Result(RET_TYPE.CRASH, 0, 0);
 				}
@@ -530,7 +548,7 @@ public class TestDriver {
 					}
 					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
-					if (!printedOutput) {
+					if (printResultOnError && !printedOutput) {
 						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
 						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					}

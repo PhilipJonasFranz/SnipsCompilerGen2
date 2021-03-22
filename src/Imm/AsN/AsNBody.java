@@ -11,6 +11,7 @@ import CGen.StackSet;
 import CGen.Util.LabelUtil;
 import CGen.Util.LiteralUtil;
 import CGen.Util.StackUtil;
+import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
@@ -49,6 +50,7 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
+import Imm.TYPE.TYPE;
 import PreP.PreProcessor;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -229,7 +231,15 @@ public class AsNBody extends AsNNode {
 						/* Inject instruction for .data Section */
 						MemoryOperand parent = new MemoryWordOp(0);
 						if (def.extension != null) {
-							String extPostfix = LabelUtil.getProvisoPostfix(def.extProviso);
+							
+							List<TYPE> extTypes = new ArrayList();
+							for (TYPE t : def.extProviso) {
+								TYPE t0 = t.clone();
+								ProvisoUtil.mapNTo1(t0, mapping.providedHeadProvisos);
+								extTypes.add(t0);
+							}
+							
+							String extPostfix = LabelUtil.getProvisoPostfix(extTypes);
 							ASMDataLabel entry = new ASMDataLabel(def.extension.path.build() + extPostfix, new MemoryWordOp(0));
 							parent = new MemoryWordRefOp(entry);
 						}

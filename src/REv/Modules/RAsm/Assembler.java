@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import REv.Modules.Tools.Util;
 import Snips.CompilerDriver;
+import Tst.TestDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
@@ -772,7 +773,7 @@ public class Assembler {
 				}
 			} catch (Exception e) {
 				boolean silenced = CompilerDriver.silenced;
-				CompilerDriver.silenced = false;
+				if (!TestDriver.excludeASMErrors) CompilerDriver.silenced = false;
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
 				log.stream().forEach(x -> x.flush());
 				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);

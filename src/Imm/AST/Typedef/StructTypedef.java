@@ -222,7 +222,7 @@ public class StructTypedef extends SyntaxElement {
 		return this.fields;
 	}
 	
-	private StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
+	public StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
 		assert this.proviso.size() == providedProvisos.size() : "Expected " + this.proviso.size() + " proviso types, but got " + providedProvisos.size();
