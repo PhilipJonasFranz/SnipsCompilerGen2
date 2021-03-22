@@ -49,7 +49,7 @@ public class AsNStructureInit extends AsNExpression {
 				
 				if (!CompilerDriver.disableStructSIDHeaders) {
 					/* Load SID header */
-					s.structType.getTypedef().loadSIDInReg(init, REG.R0);
+					s.structType.getTypedef().loadSIDInReg(init, REG.R0, s.structType.proviso);
 					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 					
 					/* Push dummy for SID header */
@@ -140,7 +140,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
 			/* Load SID header */
-			struct.getTypedef().loadSIDInReg(node, new RegOp(regs).reg);
+			struct.getTypedef().loadSIDInReg(node, new RegOp(regs).reg, struct.proviso);
 			
 			/* Push dummy for SID header */
 			st.pushDummy();

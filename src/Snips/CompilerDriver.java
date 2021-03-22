@@ -376,10 +376,10 @@ public class CompilerDriver {
 			 * So we have to delete all existing asssembly and re-build the module from scratch.
 			 */
 			
-			if (!isMainFile && !unit.hasVersionChanged())
+			if (pruneModules)
 				new Message("SNIPS -> Pruned module '" + unit.sourceFile + "'", Type.INFO);
 			
-			if (!isMainFile)
+			if (!isMainFile && !pruneModules)
 				new Message("SNIPS -> Module changed: '" + unit.sourceFile + "'", Type.INFO);
 			
 			/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */

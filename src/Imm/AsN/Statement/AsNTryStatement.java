@@ -72,7 +72,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			/* Check if value in R12 matches watched SID */
 			STRUCT watched = (STRUCT) w.watched.getType();
 			
-			watched.getTypedef().loadSIDInReg(tr0, REG.R12);
+			watched.getTypedef().loadSIDInReg(tr0, REG.R12, watched.proviso);
 			tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(skip)));
 			
 			tr0.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(watched.wordsize() * 4)));
@@ -104,7 +104,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			/* For each unwatched type, compare the SID and move the corresponding size in R0 */
 			for (TYPE t : s.unwatched) {
 				STRUCT s0 = (STRUCT) t;
-				s0.getTypedef().loadSIDInReg(tr0, REG.R12);
+				s0.getTypedef().loadSIDInReg(tr0, REG.R12, s0.proviso);
 				tr0.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s0.wordsize() * 4), new Cond(COND.EQ)));
 			}
 			

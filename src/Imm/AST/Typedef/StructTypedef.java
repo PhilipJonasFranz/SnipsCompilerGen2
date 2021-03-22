@@ -1,13 +1,16 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -44,6 +47,8 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<ASMDataLabel> interfaceRelayLabels = new ArrayList();
+	
 	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
@@ -54,13 +59,15 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	public ASMDataLabel SIDLabel;
+	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
 		
 		public List<TYPE> providedHeadProvisos;
 		
 		public List<TYPE> effectiveFieldTypes;
+		
+		public ASMLabel resolverLabel;
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;
@@ -178,6 +185,14 @@ public class StructTypedef extends SyntaxElement {
 
 				STRUCT.useProvisoFreeInCheck = true;
 			}
+		}
+		
+		if (proviso.isEmpty()) {
+			/* Add default proviso mapping if no provisos exist */
+			List<TYPE> fieldTypes = new ArrayList();
+			for (Declaration d : this.fields)
+				fieldTypes.add(d.getType().clone());
+			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
 		}
 	}
 	
@@ -298,8 +313,13 @@ public class StructTypedef extends SyntaxElement {
 		return;
 	}
 	
-	public void loadSIDInReg(AsNNode node, REG reg) {
-		LabelOp operand = new LabelOp(this.SIDLabel);
+	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.SIDLabelMap.get(postfix) != null : 
+			"Attempted to load SID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
 		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
 	}
 

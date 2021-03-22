@@ -42,7 +42,9 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.InterfaceTypedef;
+import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AST.Typedef.StructTypedef;
+import Imm.AST.Typedef.StructTypedef.StructProvisoMapping;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
@@ -197,21 +199,47 @@ public class AsNBody extends AsNNode {
 			else if (s instanceof StructTypedef) {
 				/* Cast all functions defined in the struct typedef */
 				StructTypedef def = (StructTypedef) s;
-				
-				/* Inject instruction for .data Section */
-				MemoryOperand parent = new MemoryWordOp(0);
-				if (def.extension != null) {
-					ASMDataLabel entry = new ASMDataLabel(def.extension.path.build(), new MemoryWordOp(0));
-					parent = new MemoryWordRefOp(entry);
+
+				List<String> added = new ArrayList();
+					
+				for (StructProvisoMapping mapping : def.registeredMappings) {
+					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					
+					if (!added.contains(postfix)) {
+						added.add(postfix);
+						
+						/* Inject Interface Relay-Addresses for .data section */
+						for (int i = def.implemented.size() - 1; i >= 0; i--) {
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructFunctionRelay(body, def, mapping, def.implemented.get(i));
+							if (!relayTable.isEmpty())
+								AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
+						}
+						
+						if (!def.implemented.isEmpty()) {
+							String name = def.path.build() + postfix + "_resolver";
+							
+							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
+							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
+							AsNBody.addToTranslationUnit(relay, def.getSource(), SECTION.DATA);
+							
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructInterfaceRelay(body, def, mapping);
+							AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
+						}
+						
+						/* Inject instruction for .data Section */
+						MemoryOperand parent = new MemoryWordOp(0);
+						if (def.extension != null) {
+							String extPostfix = LabelUtil.getProvisoPostfix(def.extProviso);
+							ASMDataLabel entry = new ASMDataLabel(def.extension.path.build() + extPostfix, new MemoryWordOp(0));
+							parent = new MemoryWordRefOp(entry);
+						}
+						
+						ASMDataLabel entry = new ASMDataLabel(def.path.build() + postfix, parent);
+						AsNBody.addToTranslationUnit(entry, def.getSource(), SECTION.DATA);
+						
+						def.SIDLabelMap.put(postfix, entry);
+					}
 				}
-				
-				/* Inject instruction for .data Section */
-				ASMDataLabel entry = new ASMDataLabel(def.path.build(), parent);
-				List<ASMInstruction> SIDEntry = new ArrayList();
-				SIDEntry.add(entry);
-				AsNBody.addToTranslationUnit(SIDEntry, def.getSource(), SECTION.DATA);
-				
-				def.SIDLabel = entry;
 				
 				for (Function f : def.functions) {
 					st = new StackSet();
@@ -233,6 +261,26 @@ public class AsNBody extends AsNNode {
 			}
 			else if (s instanceof InterfaceTypedef) {
 				AsNInterfaceTypedef def = AsNInterfaceTypedef.cast((InterfaceTypedef) s, r, map, st);
+				
+				InterfaceTypedef idef = (InterfaceTypedef) s;
+				
+				List<String> added = new ArrayList();
+				
+				for (InterfaceProvisoMapping mapping : idef.registeredMappings) {
+					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					
+					if (!added.contains(postfix)) {
+						added.add(postfix);
+						
+						/* Inject instruction for .data Section */
+						MemoryOperand parent = new MemoryWordOp(0);
+						
+						ASMDataLabel entry = new ASMDataLabel(idef.path.build() + postfix, parent);
+						AsNBody.addToTranslationUnit(entry, idef.getSource(), SECTION.DATA);
+						
+						idef.IIDLabelMap.put(postfix, entry);
+					}
+				}
 				AsNBody.addToTranslationUnit(def.getInstructions(), s.getSource(), SECTION.TEXT);
 			}
 			else if (s instanceof Comment) {
@@ -446,6 +494,12 @@ public class AsNBody extends AsNNode {
 			AsNTranslationUnit unit = AsNBody.translationUnits.get(path);
 			unit.append(ins, section);
 		}
+	}
+	
+	public static void addToTranslationUnit(ASMInstruction ins, Source source, SECTION section) {
+		List<ASMInstruction> list = new ArrayList();
+		list.add(ins);
+		AsNBody.addToTranslationUnit(list, source, section);
 	}
 	
 	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {

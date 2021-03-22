@@ -183,7 +183,6 @@ public class Linker {
 						while (true) {
 							/* Copy contents until EOF is reached, or until a new .global directive is seen */
 							if (a >= lines.size() || (cnt > 3 && lines.get(a).contains(".global"))) break;
-							
 							unit.textSection.add(cnt++, lines.get(a++));
 						}
 						

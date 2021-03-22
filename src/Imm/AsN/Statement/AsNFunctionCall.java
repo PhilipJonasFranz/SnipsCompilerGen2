@@ -6,7 +6,6 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
@@ -37,11 +36,9 @@ import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Typedef.InterfaceTypedef;
-import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
@@ -174,20 +171,63 @@ public class AsNFunctionCall extends AsNStatement {
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
 		if (f != null && f.definedInInterface != null) {
-			InterfaceTypedef inter = f.definedInInterface;
-			AsNInterfaceTypedef def = (AsNInterfaceTypedef) inter.castedNode;
 			
-			/* Move the index in the interface typedef of the function * 4 in R12 */
+			/*
+			 * R0  = SID of struct w. mapping
+			 * R10 = IID of interface w. mapping
+			 * R12 = Address to resolver
+			 * In Stack = Offset to Function
+			 */
+			
+			InterfaceTypedef inter = f.definedInInterface;
+			
+			// TODO: Map provisos
+			
 			boolean found = false;
+			int offset = 0;
 			for (int i = 0; i < inter.functions.size(); i++) {
 				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
-					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
+					offset = i * 4;
 					found = true;
 					break;
 				}
 			}
 			
 			/* Make sure the function was found */
+			assert found : "Failed to locate function '" + f.path.build() + "'!";
+			
+			/* Load and push the function offset for later use */
+			call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(offset)));
+			call.instructions.add(new ASMPushStack(new RegOp(REG.R12)));
+			
+			/* Load address of struct interface resolver */
+			call.instructions.add(new ASMLsl(new RegOp(REG.R12), new RegOp(REG.R0), new ImmOp(2)));
+			call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12)));
+			call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(4)));
+			
+			/* Load IID of interface */
+			inter.loadIIDInReg(call, REG.R10, provisos);
+			
+			/* Perform a system branch to resolver */
+			call.instructions.add(new ASMAdd(new RegOp(REG.LR), new RegOp(REG.PC), new ImmOp(8)));
+			call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R12)));
+			
+			
+			/*
+			// Move the index in the interface typedef of the function * 4 in R12
+			boolean found = false;
+			int offset = 0;
+			for (int i = 0; i < inter.functions.size(); i++) {
+				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
+					offset = i * 4;
+					found = true;
+					break;
+				}
+			}
+			
+			// TODO: Need to figure out how to get from SID -> Interface label offset
+			
+			// Make sure the function was found
 			assert found : "Failed to locate function '" + f.path.build() + "'!";
 			
 			String postfix = "";
@@ -207,7 +247,7 @@ public class AsNFunctionCall extends AsNStatement {
 				nestedDeref = ((InlineCall) callee).nestedDeref;
 			
 			if (nestedDeref) {
-				/* Load Interface from pointer into R10 */
+				// Load Interface from pointer into R10
 				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
 				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 			}
@@ -217,6 +257,7 @@ public class AsNFunctionCall extends AsNStatement {
 			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
 			branch.comment = new ASMComment("Branch to relay table of " + inter.path.build());
 			call.instructions.add(branch);
+			*/
 		}
 		else if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {

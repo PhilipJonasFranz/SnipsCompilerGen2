@@ -45,6 +45,8 @@ public abstract class ASMInstruction {
 		 */
 		LOOP_BRANCH, 
 		
+		LABEL_USED,
+		
 		/**
 		 * When casting a break or continue statement, a scope pop will be initiated. This will
 		 * result in an ASMAdd that adds a value to the SP. When setting this flag, the optimizer
