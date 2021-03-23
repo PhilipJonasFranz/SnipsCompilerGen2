@@ -1429,6 +1429,8 @@ public class ASMOptimizer {
 	
 	private void removeUnusedAssignment(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			REG reg = null;
 			
 			if (ins0.get(i) instanceof ASMBinaryData) {
@@ -1552,6 +1554,8 @@ public class ASMOptimizer {
 	
 	private void defragmentAdditions(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMAdd) {
 				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
 				ASMAdd add1 = (ASMAdd) ins0.get(i);
@@ -1569,6 +1573,8 @@ public class ASMOptimizer {
 		}
 		
 		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMAdd) {
 				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
 				ASMAdd add1 = (ASMAdd) ins0.get(i);
@@ -1639,6 +1645,8 @@ public class ASMOptimizer {
 	
 	private void additionCommutative(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) ins0.get(i - 1);
 				ASMAdd add = (ASMAdd) ins0.get(i);
@@ -1656,6 +1664,8 @@ public class ASMOptimizer {
 		}
 		
 		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMLsl) {
 				ASMLsl lsl = (ASMLsl) ins0.get(i - 1);
 				ASMAdd add = (ASMAdd) ins0.get(i);
@@ -1697,6 +1707,8 @@ public class ASMOptimizer {
 	
 	private void removeZeroInstruction(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMAdd) {
 				ASMAdd add = (ASMAdd) ins0.get(i);
 				if (add.target.reg == add.op0.reg && add.op1 instanceof ImmOp && !add.isUpdatingCondField()) {
@@ -1818,6 +1830,8 @@ public class ASMOptimizer {
 	
 	private void removeExpressionIndirectTargeting(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) ins0.get(i);
 				
@@ -2169,6 +2183,8 @@ public class ASMOptimizer {
 	
 	private void constantOperandPropagation(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMMov) {
 				ASMMov move = (ASMMov) ins0.get(i);
 				
@@ -2192,6 +2208,8 @@ public class ASMOptimizer {
 							clear = false;
 							break;
 						}
+						
+						if (ins0.get(a).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 						
 						if (ins0.get(a) instanceof ASMComment) {
 							continue;
@@ -2450,6 +2468,8 @@ public class ASMOptimizer {
 	
 	private void clearInstructionsAfterBranch(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
+			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
+			
 			if (ins0.get(i) instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) ins0.get(i);
 				if (b.cond == null && b.type != BRANCH_TYPE.BL && !b.optFlags.contains(OPT_FLAG.SYS_JMP)) {

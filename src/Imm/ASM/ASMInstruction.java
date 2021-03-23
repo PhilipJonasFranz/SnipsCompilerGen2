@@ -45,7 +45,15 @@ public abstract class ASMInstruction {
 		 */
 		LOOP_BRANCH, 
 		
+		/**
+		 * Excludes a label from unused removal.
+		 */
 		LABEL_USED,
+		
+		/**
+		 * Marks this instructions as offset padding, preventing modification and/or removal.
+		 */
+		IS_PADDING,
 		
 		/**
 		 * When casting a break or continue statement, a scope pop will be initiated. This will

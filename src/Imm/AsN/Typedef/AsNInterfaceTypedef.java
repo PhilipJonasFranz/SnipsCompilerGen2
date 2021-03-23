@@ -308,8 +308,6 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		mapping.resolverLabel = relayTableHead;
 		
-		boolean wasUsed = false;
-		
 		table.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 		
 		/* Pop function offset */
@@ -317,6 +315,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		table.add(new ASMAdd(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(4)));
 		table.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R12)));
+		
+		boolean hasCalls = false;
 		
 		for (Function f : idef.functions) {
 			
@@ -358,15 +358,14 @@ public class AsNInterfaceTypedef extends AsNNode {
 			if (post == null) {
 				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
 				add.comment = new ASMComment("Function was not called, use as placeholder");
-				
+				add.optFlags.add(OPT_FLAG.IS_PADDING);
+				add.optFlags.add(OPT_FLAG.SYS_JMP);
 				table.add(add);
 			}
 			/*
 			 * Mapping was found, append to target to create final label and branch to it.
 			 */
 			else {
-				wasUsed = true;
-				
 				target += post;
 				
 				/* Final label to function with proviso postfix */
@@ -375,10 +374,23 @@ public class AsNInterfaceTypedef extends AsNNode {
 				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
 				b.optFlags.add(OPT_FLAG.SYS_JMP);
 				table.add(b);
+				
+				hasCalls = true;
 			}
 		}
 		
-		if (!wasUsed) table.clear();
+		if (!hasCalls) {
+			/*
+			 * We can clear the table here, but we still need the head label since
+			 * it will be referenced by the resolver table.
+			 */
+			
+			relayTableHead.comment.comment += " (Unused)";
+			
+			table.clear();
+			table.add(relayTableHead);
+		}
+		
 		return table;
 	}
 	
