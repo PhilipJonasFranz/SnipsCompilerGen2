@@ -67,7 +67,7 @@ public class StructTypedef extends SyntaxElement {
 		
 		public List<TYPE> effectiveFieldTypes;
 		
-		public ASMLabel resolverLabel;
+		public HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap = new HashMap();
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;

@@ -306,7 +306,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		relayTableHead.comment = new ASMComment("Relay: " + idef.path.build() + " -> " + sdef.path.build());
 		table.add(relayTableHead);
 		
-		mapping.resolverLabel = relayTableHead;
+		mapping.resolverLabelMap.put(idef, relayTableHead);
 		
 		table.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 		
@@ -408,18 +408,34 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		for (int i = 0; i < sdef.implemented.size(); i++) {
 			INTERFACE intf = sdef.implemented.get(i);
-			
+		
 			List<String> added = new ArrayList();
 			
 			for (InterfaceProvisoMapping imapping : intf.getTypedef().registeredMappings) {
-				postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+				
+				/* TODO: Exclude 'unlikely' mappings here, for example:
+				 * 
+				 * 		List.LinkedList_P_2_resolver:
+				 * 	    ldr r12, .P1974009529_Collection_P_1
+				 * 	    cmp r10, r12
+				 * 	    beq List.LinkedList_P_2_Collection
+			     * 	    ldr r12, .P1974009529_Collection_P_2
+			     * 	    cmp r10, r12
+			     * 	    beq List.LinkedList_P_2_Collection
+			     * 	    ldr r12, .P1974009529_Serializable
+			     * 	    cmp r10, r12
+			     * 		beq List.LinkedList_P_2_Serializable
+				 * 
+				 */
+				
+				postfix = LabelUtil.getProvisoPostfix(imapping.providedHeadProvisos);
 				
 				if (!added.contains(postfix)) {
 					added.add(postfix);
 					
 					table.addAll(intf.getTypedef().loadIIDInReg(REG.R12, imapping.providedHeadProvisos));
 					table.add(new ASMCmp(new RegOp(REG.R10), new RegOp(REG.R12)));
-					table.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(mapping.resolverLabel)));
+					table.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(mapping.resolverLabelMap.get(intf.getTypedef()))));
 				}
 			}
 		}

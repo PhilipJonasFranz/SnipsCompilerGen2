@@ -163,8 +163,10 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		
-		/* Pop Parameters on the stack into the correct registers, 
-		 * 		Parameter for R0 is already located in reg */
+		/* 
+		 * Pop Parameters on the stack into the correct registers, 
+		 * Parameter for R0 is already located in reg 
+		 */
 		if (regMapping >= 3) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1), new RegOp(REG.R2)));
 		else if (regMapping == 2) 
@@ -176,7 +178,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * R0  = SID of struct w. mapping
 			 * R10 = IID of interface w. mapping
 			 * R12 = Address to resolver
-			 * In Stack = Offset to Function
+			 * In Stack = Offset to Function, popped by table mapping
 			 */
 			
 			InterfaceTypedef inter = f.definedInInterface;
@@ -197,7 +199,9 @@ public class AsNFunctionCall extends AsNStatement {
 			assert found : "Failed to locate function '" + f.path.build() + "'!";
 			
 			/* Load and push the function offset for later use */
-			call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(offset)));
+			ASMMov offsetMov = new ASMMov(new RegOp(REG.R12), new ImmOp(offset));
+			offsetMov.comment = new ASMComment("Offset to " + f.path.build());
+			call.instructions.add(offsetMov);
 			call.instructions.add(new ASMPushStack(new RegOp(REG.R12)));
 			
 			/* Load address of struct interface resolver */
@@ -211,53 +215,6 @@ public class AsNFunctionCall extends AsNStatement {
 			/* Perform a system branch to resolver */
 			call.instructions.add(new ASMAdd(new RegOp(REG.LR), new RegOp(REG.PC), new ImmOp(8)));
 			call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R12)));
-			
-			
-			/*
-			// Move the index in the interface typedef of the function * 4 in R12
-			boolean found = false;
-			int offset = 0;
-			for (int i = 0; i < inter.functions.size(); i++) {
-				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
-					offset = i * 4;
-					found = true;
-					break;
-				}
-			}
-			
-			// TODO: Need to figure out how to get from SID -> Interface label offset
-			
-			// Make sure the function was found
-			assert found : "Failed to locate function '" + f.path.build() + "'!";
-			
-			String postfix = "";
-			
-			for (InterfaceProvisoMapping provisoMap : inter.registeredMappings) {
-				if (ProvisoUtil.mappingIsEqualProvisoFree(provisoMap.providedHeadProvisos, provisos)) {
-					if (inter.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
-						break;
-					
-					postfix = provisoMap.provisoPostfix;
-					break;
-				}
-			}
-			
-			boolean nestedDeref = false;
-			if (callee instanceof InlineCall)
-				nestedDeref = ((InlineCall) callee).nestedDeref;
-			
-			if (nestedDeref) {
-				// Load Interface from pointer into R10
-				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
-				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
-			}
-			
-			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);
-			
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
-			branch.comment = new ASMComment("Branch to relay table of " + inter.path.build());
-			call.instructions.add(branch);
-			*/
 		}
 		else if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {
