@@ -35,7 +35,6 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Function.ProvisoMapping;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
@@ -112,37 +111,6 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
-		/*
-		 * Change names of proviso mappings if the types are word-size equal.
-		 * The translation will result in the same assembly, so we dont have to do it again.
-		 * The name is set to the first occurrence of the similar mappings. Down below
-		 * the name is checked if its already in a list of translated mappings.
-		 */
-		for (int i = 0; i < f.provisosCalls.size(); i++) {
-			ProvisoMapping call0 = f.provisosCalls.get(i);
-			for (int a = i + 1; a < f.provisosCalls.size(); a++) {
-				ProvisoMapping call1 = f.provisosCalls.get(a);
-				
-				if (!call0.provisoPostfix.equals(call1.provisoPostfix)) {
-					boolean equal = true;
-					
-					/* Check for equal return type */
-					equal &= call0.returnType.wordsize() == call1.returnType.wordsize();
-					
-					/* Check for equal parameter types */
-					for (int k = 0; k < call0.provisoMapping.size(); k++) 
-						equal &= call0.provisoMapping.get(k).wordsize() == call1.provisoMapping.get(k).wordsize();
-					
-					/* 
-					 * Mappings are of equal types, set label gen postfix of 
-					 * this one to the other equal one 
-					 */
-					if (equal) 
-						call1.provisoPostfix = call0.provisoPostfix;
-				}
-			}
-		}
-		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
 			
 			/* 
@@ -156,31 +124,31 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Replace .hn with .sn in module link */
 				String source = Util.toASMPath(f.getSource().sourceFile);
 				
-				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).provisoPostfix));
+				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix()));
 				
 				/* Check if required module exists */
 				String mappedPath = PreProcessor.resolveToPath(source);
 				if (PreProcessor.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
-					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).provisoPostfix + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
 					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
 				}
 				
 				continue;
 			}
 			
-			LabelUtil.currentContext = f.provisosCalls.get(k).provisoPostfix;
+			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
 			
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (func.translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
-			else func.translated.add(f.provisosCalls.get(k).provisoPostfix);
+			if (func.translated.contains(f.provisosCalls.get(k).getProvisoPostfix())) continue;
+			else func.translated.add(f.provisosCalls.get(k).getProvisoPostfix());
 			
 			/* Set the current proviso call scheme if its not the default scheme */
-			if (!f.provisosCalls.get(k).provisoPostfix.equals("")) 
+			if (!f.provisosCalls.get(k).getProvisoPostfix().equals("")) 
 				f.setContext(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Setup Parameter Mapping */
@@ -216,7 +184,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
-			if (f.provisosCalls.get(k).provisoPostfix.equals("")) {
+			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
 				com = "Function: " + f.path.build();
 			}
 			else {
@@ -224,7 +192,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
-					if (f.provisosCalls.get(z).provisoPostfix.equals(f.provisosCalls.get(k).provisoPostfix)) {
+					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
 						for (int x = 0; x < types.size(); x++) 

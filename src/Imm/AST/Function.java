@@ -35,11 +35,6 @@ public class Function extends CompoundStatement {
 	public class ProvisoMapping {
 		
 				/* ---< FIELDS >--- */
-		/** 
-		 * The unique proviso postfix for this mapping.
-		 */
-		public String provisoPostfix;
-		
 		/**
 		 * The return type of the function when this mapping is applied to it.
 		 */
@@ -52,10 +47,17 @@ public class Function extends CompoundStatement {
 		
 		
 				/* ---< CONSTRUCTORS >--- */
-		public ProvisoMapping(String provisoPostfix, TYPE returnType, List<TYPE> provisoMapping) {
-			this.provisoPostfix = provisoPostfix;
+		public ProvisoMapping(TYPE returnType, List<TYPE> provisoMapping) {
 			this.returnType = returnType;
 			this.provisoMapping = provisoMapping;
+			
+			for (TYPE t : provisoMapping) {
+				assert !t.typeString().contains("PROVISO") : "Found proviso type in proviso mapping!";
+			}
+		}
+		
+		public String getProvisoPostfix() {
+			return LabelUtil.getProvisoPostfix(this.provisoMapping);
 		}
 		
 	}
@@ -320,8 +322,9 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) 
-				return this.provisosCalls.get(i).provisoPostfix;
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) {
+				return LabelUtil.getProvisoPostfix(this.provisosCalls.get(i).provisoMapping);
+			}
 		}
 		
 		return null;
@@ -337,9 +340,15 @@ public class Function extends CompoundStatement {
 		/* Proviso mapping already exists, just return */
 		if (this.containsMapping(context)) return;
 		else {
-			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix(context);
-			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
+			TYPE retTypeClone = null;
+			if (returnType != null) 
+				returnType.clone().provisoFree();
+			
+			List<TYPE> contextClone = new ArrayList();
+			for (TYPE t : context)
+				contextClone.add(t.clone().provisoFree());
+			
+			this.provisosCalls.add(new ProvisoMapping(retTypeClone, contextClone));
 		}
 	}
 	

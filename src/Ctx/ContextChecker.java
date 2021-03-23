@@ -2233,7 +2233,7 @@ public class ContextChecker {
 				/* None of the types held the searched proviso, proviso cannot be auto-ed, abort. */
 				throw new CTEX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov.typeString());
 			
-			foundMapping.add(mapped.provisoFree().clone());
+			foundMapping.add(mapped.clone());
 		}
 		
 		return foundMapping;
