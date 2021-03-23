@@ -212,7 +212,7 @@ public class AsNBody extends AsNNode {
 						
 						/* Inject Interface Relay-Addresses for .data section */
 						for (int i = def.implemented.size() - 1; i >= 0; i--) {
-							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructFunctionRelay(body, def, mapping, def.implemented.get(i));
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructFunctionRelay(def, mapping, def.implemented.get(i));
 							if (!relayTable.isEmpty())
 								AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
 						}
@@ -224,7 +224,7 @@ public class AsNBody extends AsNNode {
 							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
 							AsNBody.addToTranslationUnit(relay, def.getSource(), SECTION.DATA);
 							
-							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructInterfaceRelay(body, def, mapping);
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructInterfaceRelay(def, mapping);
 							AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
 						}
 						
