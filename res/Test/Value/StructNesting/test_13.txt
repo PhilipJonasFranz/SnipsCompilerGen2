@@ -26,7 +26,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-B: .word 0
+B_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -55,9 +55,9 @@ main:                                        /* Function: main */
     push { lr }
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P129864161_B
+    ldr r0, .P129864161_B_P_1
     push { r0 }
     bl init_P_2                              /* Call init */
     bl B.get_P_1                             /* Call B.get */
     pop { pc }
-.P129864161_B: .word B
+.P129864161_B_P_1: .word B_P_1

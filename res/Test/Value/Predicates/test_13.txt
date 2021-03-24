@@ -44,18 +44,18 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global get
 lambda_get:                                  /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global get
 get:                                         /* Function: get */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
 
+.global get2
 lambda_get2:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global get2
 get2:                                        /* Function: get2 */
     mov r0, #10                              /* Evaluate Expression */
     bx lr

@@ -43,7 +43,7 @@ OUTPUT
 .include linked_list.s
 
 .data
-X: .word 0
+X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -82,7 +82,7 @@ X.create_P_1:                                /* Function: X.create, Provisos: IN
     push { fp }
     mov fp, sp
     push { r0 }
-    ldr r0, .P321637214_X
+    ldr r0, .P321637214_X_P_1
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -93,7 +93,7 @@ X.create_P_1:                                /* Function: X.create, Provisos: IN
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-.P321637214_X: .word X
+.P321637214_X_P_1: .word X_P_1
 
 .global main
 main:                                        /* Function: main */

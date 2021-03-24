@@ -30,9 +30,9 @@ OUTPUT
 .include maybe free.s
 
 .data
-Data: .word 0
-Nib: .word 0
-Foo: .word 0
+Data_P_1: .word 0
+Nib_P_1: .word 0
+Foo_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -54,21 +54,21 @@ _routine_stack_copy_end_:
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    ldr r1, .P1001342278_Foo
+    ldr r1, .P1001342278_Foo_P_1
     stmfd sp!, {r0, r1}
-    ldr r0, .P1001342278_Nib
+    ldr r0, .P1001342278_Nib_P_1
     push { r0 }
     mov r0, #5
-    ldr r1, .P1001342278_Foo
+    ldr r1, .P1001342278_Foo_P_1
     stmfd sp!, {r0, r1}
-    ldr r0, .P1001342278_Nib
+    ldr r0, .P1001342278_Nib_P_1
     push { r0 }
-    ldr r0, .P1001342278_Data
+    ldr r0, .P1001342278_Data_P_1
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.P1001342278_Data: .word Data
-.P1001342278_Nib: .word Nib
-.P1001342278_Foo: .word Foo
+.P1001342278_Data_P_1: .word Data_P_1
+.P1001342278_Nib_P_1: .word Nib_P_1
+.P1001342278_Foo_P_1: .word Foo_P_1

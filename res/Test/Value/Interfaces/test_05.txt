@@ -90,8 +90,10 @@ OUTPUT
 .include maybe free.s
 
 .data
-List.LinkedList: .word 0
-List.ListNode: .word 0
+List.LinkedList_P_1: .word 0
+List.LinkedList_P_1_resolver_relay: .word List.LinkedList_P_1_resolver
+List.ListNode_P_1: .word 0
+List.Iterable_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -109,13 +111,6 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
-List.Iterable.L2_P_1:                        /* Interface : List.Iterable, Provisos: INT,  */
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    b List.LinkedList.size_P_1
-    b List.LinkedList.get_P_1
-
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     sub sp, sp, #16
@@ -125,7 +120,7 @@ List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, P
     push { r4 }
     ldr r0, .P481193733_NULL                 /* Load null address */
     push { r0 }
-    ldr r0, .P481193733_List.ListNode
+    ldr r0, .P481193733_List.ListNode_P_1
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r5, r0
@@ -149,7 +144,7 @@ List.LinkedList.add_P_1.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.P481193733_List.ListNode: .word List.ListNode
+.P481193733_List.ListNode_P_1: .word List.ListNode_P_1
 .P481193733_NULL: .word NULL
 
 .global List.LinkedList.get_P_1
@@ -216,15 +211,29 @@ List.LinkedList.size_P_1.L2:
     bx lr
 .P481193735_NULL: .word NULL
 
+List.LinkedList_P_1_List.Iterable:           /* Relay: List.Iterable -> List.LinkedList */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b List.LinkedList.size_P_1
+    b List.LinkedList.get_P_1
+
+List.LinkedList_P_1_resolver:                /* Relay: List.LinkedList -> INTF */
+    ldr r12, .P481193736_List.Iterable_P_1
+    cmp r10, r12
+    beq List.LinkedList_P_1_List.Iterable
+.P481193736_List.Iterable_P_1: .word List.Iterable_P_1
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #0                               /* Evaluate Expression */
-    ldr r1, .P481193736_NULL                 /* Load null address */
-    ldr r2, .P481193736_NULL                 /* Load null address */
+    ldr r1, .P481193737_NULL                 /* Load null address */
+    ldr r2, .P481193737_NULL                 /* Load null address */
     stmfd sp!, {r0-r2}
-    ldr r0, .P481193736_List.LinkedList
+    ldr r0, .P481193737_List.LinkedList_P_1
     push { r0 }
     mov r1, #12
     sub r0, fp, #16
@@ -241,7 +250,13 @@ main:                                        /* Function: main */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl List.Iterable.L2_P_1                  /* Branch to relay table of List.Iterable */
+    mov r12, #0                              /* Offset to List.Iterable.size */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P481193737_List.Iterable_P_1
+    add lr, pc, #8
+    mov pc, r12
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -250,8 +265,13 @@ main.L1:
     bge main.L2
     mov r0, r3
     mov r1, r6
-    mov r12, #4
-    bl List.Iterable.L2_P_1                  /* Branch to relay table of List.Iterable */
+    mov r12, #4                              /* Offset to List.Iterable.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P481193737_List.Iterable_P_1
+    add lr, pc, #8
+    mov pc, r12
     add r5, r5, r0
     add r6, r6, #1
     b main.L1
@@ -259,5 +279,6 @@ main.L2:
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P481193736_List.LinkedList: .word List.LinkedList
-.P481193736_NULL: .word NULL
+.P481193737_List.Iterable_P_1: .word List.Iterable_P_1
+.P481193737_List.LinkedList_P_1: .word List.LinkedList_P_1
+.P481193737_NULL: .word NULL

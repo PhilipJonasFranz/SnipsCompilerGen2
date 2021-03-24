@@ -33,8 +33,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-Data: .word 0
-Nib: .word 0
+Data_P_1: .word 0
+Nib_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -67,14 +67,14 @@ main:                                        /* Function: main */
     sub r0, fp, #24                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
-    ldr r0, .P1823335536_Nib
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r0 }
-    ldr r0, .P1823335536_Nib
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
-    ldr r0, .P1823335536_Data
+    ldr r0, .P1823335536_Data_P_1
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
@@ -94,5 +94,5 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     bx lr
-.P1823335536_Data: .word Data
-.P1823335536_Nib: .word Nib
+.P1823335536_Data_P_1: .word Data_P_1
+.P1823335536_Nib_P_1: .word Nib_P_1

@@ -45,10 +45,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global sortPred
 lambda_sortPred:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global sortPred
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1

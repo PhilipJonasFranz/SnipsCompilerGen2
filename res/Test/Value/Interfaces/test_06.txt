@@ -38,6 +38,8 @@ OUTPUT
 
 .data
 X: .word 0
+X_resolver_relay: .word X_resolver
+Inter: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -55,9 +57,6 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
-Inter.L0:                                    /* Interface : Inter */
-    b X.get
-
 .global X.get
 X.get:                                       /* Function: X.get */
     mov r10, #0
@@ -65,21 +64,41 @@ X.get:                                       /* Function: X.get */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
 
+X_Inter:                                     /* Relay: Inter -> X */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get
+
+X_resolver:                                  /* Relay: X -> INTF */
+    ldr r12, .P509822884_Inter
+    cmp r10, r12
+    beq X_Inter
+.P509822884_Inter: .word Inter
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P509822884_X
+    ldr r0, .P509822885_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     sub r0, fp, #12                          /* Evaluate Expression */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
-    ldr r0, [r10, r3, lsl #2]
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    mov r0, r3                               /* Evaluate Expression */
+    mov r12, #0                              /* Offset to Inter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P509822885_Inter
+    add lr, pc, #8
+    mov pc, r12
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P509822884_X: .word X
+.P509822885_Inter: .word Inter
+.P509822885_X: .word X

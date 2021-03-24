@@ -31,7 +31,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-TreeNode: .word 0
+TreeNode_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -61,7 +61,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .P1641386381_TreeNode
+    ldr r0, .P1641386381_TreeNode_P_1
     lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
@@ -79,7 +79,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .P1641386381_TreeNode
+    ldr r0, .P1641386381_TreeNode_P_1
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -97,7 +97,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .P1641386381_TreeNode
+    ldr r0, .P1641386381_TreeNode_P_1
     lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
@@ -112,4 +112,4 @@ main:                                        /* Function: main */
     ldr r2, [r1, #12]                        /* Load field from struct */
     add r0, r0, r2
     pop { pc }
-.P1641386381_TreeNode: .word TreeNode
+.P1641386381_TreeNode_P_1: .word TreeNode_P_1

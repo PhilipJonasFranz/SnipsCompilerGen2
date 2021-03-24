@@ -63,7 +63,13 @@ getSum:                                      /* Function: getSum */
     sub sp, sp, #20
     stmea sp, {r3-r6, lr}
     mov r3, r0
-    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
+    mov r12, #0                              /* Offset to Collection.size */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P567081186_Collection_P_1
+    add lr, pc, #8
+    mov pc, r12
     mov r4, r0
     mov r5, #0
     mov r6, #0
@@ -72,14 +78,20 @@ getSum.L1:
     bge getSum.L2
     mov r0, r3
     mov r1, r6
-    mov r12, #4
-    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
+    mov r12, #4                              /* Offset to Collection.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P567081186_Collection_P_1
+    add lr, pc, #8
+    mov pc, r12
     add r5, r5, r0
     add r6, r6, #1
     b getSum.L1
 getSum.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r6, pc}
+.P567081186_Collection_P_1: .word Collection_P_1
 
 .global main
 main:                                        /* Function: main */
@@ -103,8 +115,14 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r5
     ldmfd sp!, {r1, r2}
-    mov r12, #8
-    bl Collection.L0_P_1                     /* Branch to relay table of Collection */
+    mov r12, #8                              /* Offset to Collection.set */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P567081187_Collection_P_1
+    add lr, pc, #8
+    mov pc, r12
     mov r0, r5                               /* Evaluate Expression */
     bl getSum                                /* Call getSum */
     pop { pc }
+.P567081187_Collection_P_1: .word Collection_P_1

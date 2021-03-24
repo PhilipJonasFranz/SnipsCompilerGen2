@@ -26,8 +26,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-Data: .word 0
-Nib: .word 0
+Data_P_1: .word 0
+Nib_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -49,16 +49,16 @@ _routine_stack_copy_end_:
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    ldr r1, .P1755902985_Nib
+    ldr r1, .P1755902985_Nib_P_1
     stmfd sp!, {r0, r1}
     mov r0, #5
-    ldr r1, .P1755902985_Nib
+    ldr r1, .P1755902985_Nib_P_1
     stmfd sp!, {r0, r1}
-    ldr r0, .P1755902985_Data
+    ldr r0, .P1755902985_Data_P_1
     push { r0 }
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.P1755902985_Data: .word Data
-.P1755902985_Nib: .word Nib
+.P1755902985_Data_P_1: .word Data_P_1
+.P1755902985_Nib_P_1: .word Nib_P_1

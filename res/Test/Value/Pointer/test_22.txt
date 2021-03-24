@@ -26,7 +26,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-X: .word 0
+X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -63,11 +63,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P2130323655_X
+    ldr r0, .P2130323655_X_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     bl addr                                  /* Call addr */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P2130323655_X: .word X
+.P2130323655_X_P_1: .word X_P_1

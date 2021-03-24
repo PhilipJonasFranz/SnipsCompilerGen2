@@ -65,26 +65,26 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global add5
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global add5
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
 
+.global mul2
 lambda_mul2:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global mul2
 mul2:                                        /* Function: mul2 */
     lsl r0, r0, #1
     bx lr
 
+.global not20
 lambda_not20:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global not20
 not20:                                       /* Function: not20 */
     cmp r0, #20
     movne r0, #1
@@ -130,6 +130,12 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     mov r1, r3
-    mov r12, #4
-    bl Collection.L5_P_1                     /* Branch to relay table of Collection */
+    mov r12, #4                              /* Offset to Collection.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P595710337_Collection_P_1
+    add lr, pc, #8
+    mov pc, r12
     pop { pc }
+.P595710337_Collection_P_1: .word Collection_P_1

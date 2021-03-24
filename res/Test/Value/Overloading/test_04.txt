@@ -27,7 +27,7 @@ TESTCASES
 0 12
 1 30
 OUTPUT
-.version 26706628581
+.version 28162025715
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -38,7 +38,9 @@ OUTPUT
 .include maybe free.s
 
 .data
-X: .word 0
+X_P_1: .word 0
+X_P_1_resolver_relay: .word X_P_1_resolver
+Getter_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -55,13 +57,6 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-
-Getter.L0_P_1:                               /* Interface : Getter, Provisos: INT,  */
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    b X.get@2_P_1
-    b X.get@3_P_1
 
 .global X.get@2_P_1
 X.get@2_P_1:                                 /* Function: X.get, Provisos: INT */
@@ -87,6 +82,20 @@ X.get_P_1@3.L1:
     pop { r3 }
     bx lr
 
+X_P_1_Getter:                                /* Relay: Getter -> X */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get@2_P_1
+    b X.get@3_P_1
+
+X_P_1_resolver:                              /* Relay: X -> INTF */
+    ldr r12, .P1144089514_Getter_P_1
+    cmp r10, r12
+    beq X_P_1_Getter
+.P1144089514_Getter_P_1: .word Getter_P_1
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -94,18 +103,30 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1144089514_X
+    ldr r0, .P1144089515_X_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
-    bl Getter.L0_P_1                         /* Branch to relay table of Getter */
+    mov r12, #0                              /* Offset to Getter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1144089515_Getter_P_1
+    add lr, pc, #8
+    mov pc, r12
     mov r5, r0
     mov r0, r4
     mov r1, r3
-    mov r12, #4
-    bl Getter.L0_P_1                         /* Branch to relay table of Getter */
+    mov r12, #4                              /* Offset to Getter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1144089515_Getter_P_1
+    add lr, pc, #8
+    mov pc, r12
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1144089514_X: .word X
+.P1144089515_Getter_P_1: .word Getter_P_1
+.P1144089515_X_P_1: .word X_P_1

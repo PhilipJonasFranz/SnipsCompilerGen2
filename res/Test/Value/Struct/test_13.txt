@@ -67,10 +67,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global relation
 lambda_relation:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global relation
 relation:                                    /* Function: relation */
     push { r3, r4 }
     mov r3, r0

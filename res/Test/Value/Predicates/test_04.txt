@@ -47,10 +47,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global add5_P_1
 lambda_add5_P_1:                             /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global add5_P_1
 add5_P_1:                                    /* Function: add5, Provisos: INT | BOOL */
     push { r3 }
     mov r3, r0

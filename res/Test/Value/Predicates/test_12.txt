@@ -34,10 +34,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global ANON1
 lambda_ANON1:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global ANON1
 ANON1:                                       /* Function: ANON1 */
     add r0, r0, #10
     bx lr

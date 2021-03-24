@@ -30,8 +30,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-Data: .word 0
-Nib: .word 0
+Data_P_2: .word 0
+Nib_P_2: .word 0
 Foo: .word 0
 NULL: .word 0
 HEAP_START: .word 0
@@ -56,19 +56,19 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     ldr r1, .P1813161287_Foo
     stmfd sp!, {r0, r1}
-    ldr r0, .P1813161287_Nib
+    ldr r0, .P1813161287_Nib_P_2
     push { r0 }
     mov r0, #5
     ldr r1, .P1813161287_Foo
     stmfd sp!, {r0, r1}
-    ldr r0, .P1813161287_Nib
+    ldr r0, .P1813161287_Nib_P_2
     push { r0 }
-    ldr r0, .P1813161287_Data
+    ldr r0, .P1813161287_Data_P_2
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-.P1813161287_Data: .word Data
-.P1813161287_Nib: .word Nib
+.P1813161287_Data_P_2: .word Data_P_2
+.P1813161287_Nib_P_2: .word Nib_P_2
 .P1813161287_Foo: .word Foo

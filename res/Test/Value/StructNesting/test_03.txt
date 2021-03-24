@@ -28,7 +28,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-K.X: .word 0
+K.X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -58,11 +58,11 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1017367842_K.X
+    ldr r0, .P1017367842_K.X_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
     bl K.X.getValue_P_1                      /* Call K.X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1017367842_K.X: .word K.X
+.P1017367842_K.X_P_1: .word K.X_P_1

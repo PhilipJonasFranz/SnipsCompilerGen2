@@ -84,8 +84,10 @@ OUTPUT
 .include linked_list.s
 
 .data
-Util.Container: .word 0
-Util.Tuple2: .word 0
+Util.Container_P_1: .word 0
+Util.Tuple2_P_1_1: .word 0
+Util.Tuple2_P_3_1: .word 0
+Util.Tuple2_P_1_2: .word 0
 GameObject.Player: .word 0
 GameObject.Items.Inventory: .word 0
 NULL: .word 0
@@ -190,15 +192,15 @@ main:                                        /* Function: main */
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
-    ldr r0, .P1008736838_Util.Tuple2
+    ldr r0, .P1008736838_Util.Tuple2_P_1_1
     push { r0 }
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
     mov r0, #3
     mov r1, #1
-    ldr r2, .P1008736838_Util.Tuple2
+    ldr r2, .P1008736838_Util.Tuple2_P_1_1
     stmfd sp!, {r0-r2}
-    ldr r0, .P1008736838_Util.Tuple2
+    ldr r0, .P1008736838_Util.Tuple2_P_3_1
     push { r0 }
     ldr r0, [fp, #-24]                       /* Load field from struct */
     ldr r2, [fp, #-20]                       /* Load field from struct */
@@ -206,13 +208,13 @@ main:                                        /* Function: main */
     ldr r2, [fp, #-16]                       /* Load field from struct */
     add r0, r0, r2
     push { r0 }
-    ldr r0, .P1008736838_Util.Container
+    ldr r0, .P1008736838_Util.Container_P_1
     push { r0 }
     ldr r0, [fp, #-36]                       /* Evaluate Expression */
     ldr r1, [fp, #-40]
     stmfd sp!, {r0, r1}
     push { r4 }
-    ldr r0, .P1008736838_Util.Tuple2
+    ldr r0, .P1008736838_Util.Tuple2_P_1_2
     push { r0 }
 /* Set item at index 1 to 5 */
     ldr r0, [fp, #-36]                       /* Load field from struct */
@@ -251,8 +253,10 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1008736838_Util.Container: .word Util.Container
-.P1008736838_Util.Tuple2: .word Util.Tuple2
+.P1008736838_Util.Tuple2_P_1_2: .word Util.Tuple2_P_1_2
+.P1008736838_Util.Container_P_1: .word Util.Container_P_1
+.P1008736838_Util.Tuple2_P_3_1: .word Util.Tuple2_P_3_1
+.P1008736838_Util.Tuple2_P_1_1: .word Util.Tuple2_P_1_1
 .P1008736838_GameObject.Player: .word GameObject.Player
 .P1008736838_GameObject.Items.Inventory: .word GameObject.Items.Inventory
 .P1008736838_arr: .word arr

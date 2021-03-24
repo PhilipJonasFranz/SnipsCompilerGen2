@@ -46,6 +46,8 @@ OUTPUT
 
 .data
 X: .word 0
+X_resolver_relay: .word X_resolver
+Inter: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -62,13 +64,6 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-
-Inter.L0:                                    /* Interface : Inter */
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    b X.get
-    b X.set
 
 .global X.get
 X.get:                                       /* Function: X.get */
@@ -88,26 +83,58 @@ X.set:                                       /* Function: X.set */
     pop { r3 }
     bx lr
 
+X_Inter:                                     /* Relay: Inter -> X */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get
+    b X.set
+
+X_resolver:                                  /* Relay: X -> INTF */
+    ldr r12, .P366677129_Inter
+    cmp r10, r12
+    beq X_Inter
+.P366677129_Inter: .word Inter
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P366677129_X
+    ldr r0, .P366677130_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    mov r12, #0                              /* Offset to Inter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P366677130_Inter
+    add lr, pc, #8
+    mov pc, r12
     mov r4, r0
     mov r1, #15
     mov r0, r3
-    mov r12, #4
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    mov r12, #4                              /* Offset to Inter.set */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P366677130_Inter
+    add lr, pc, #8
+    mov pc, r12
     mov r0, r3                               /* Evaluate Expression */
-    bl Inter.L0                              /* Branch to relay table of Inter */
+    mov r12, #0                              /* Offset to Inter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P366677130_Inter
+    add lr, pc, #8
+    mov pc, r12
     add r0, r4, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P366677129_X: .word X
+.P366677130_Inter: .word Inter
+.P366677130_X: .word X

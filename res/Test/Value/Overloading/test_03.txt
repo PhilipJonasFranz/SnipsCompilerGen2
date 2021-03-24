@@ -39,6 +39,8 @@ OUTPUT
 
 .data
 X: .word 0
+X_resolver_relay: .word X_resolver
+Getter: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -55,13 +57,6 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-
-Getter.L0:                                   /* Interface : Getter */
-    add r10, r12, #4
-    mov r12, #0
-    add pc, pc, r10
-    b X.get@2
-    b X.get@3
 
 .global X.get@2
 X.get@2:                                     /* Function: X.get */
@@ -87,6 +82,20 @@ X.get@3.L1:
     pop { r3 }
     bx lr
 
+X_Getter:                                    /* Relay: Getter -> X */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get@2
+    b X.get@3
+
+X_resolver:                                  /* Relay: X -> INTF */
+    ldr r12, .P1115460363_Getter
+    cmp r10, r12
+    beq X_Getter
+.P1115460363_Getter: .word Getter
+
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
@@ -94,18 +103,30 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1115460363_X
+    ldr r0, .P1115460364_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
-    bl Getter.L0                             /* Branch to relay table of Getter */
+    mov r12, #0                              /* Offset to Getter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1115460364_Getter
+    add lr, pc, #8
+    mov pc, r12
     mov r5, r0
     mov r0, r4
     mov r1, r3
-    mov r12, #4
-    bl Getter.L0                             /* Branch to relay table of Getter */
+    mov r12, #4                              /* Offset to Getter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1115460364_Getter
+    add lr, pc, #8
+    mov pc, r12
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1115460363_X: .word X
+.P1115460364_Getter: .word Getter
+.P1115460364_X: .word X

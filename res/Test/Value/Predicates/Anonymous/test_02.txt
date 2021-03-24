@@ -45,10 +45,10 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global get
 lambda_get:                                  /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global get
 get:                                         /* Function: get */
     push { fp }
     mov fp, sp

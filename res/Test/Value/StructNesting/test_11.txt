@@ -71,8 +71,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-C.A: .word C.B
-C.B: .word 0
+C.A_P_1: .word C.B_P_1
+C.B_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -118,18 +118,18 @@ C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: IN
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
 
+.global Predicates.add5
 lambda_Predicates.add5:                      /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global Predicates.add5
 Predicates.add5:                             /* Function: Predicates.add5 */
     add r0, r0, #5
     bx lr
 
+.global Predicates.mul
 lambda_Predicates.mul:                       /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global Predicates.mul
 Predicates.mul:                              /* Function: Predicates.mul */
     mul r0, r0, r1
     bx lr
@@ -155,7 +155,7 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     mov r1, #12
     stmfd sp!, {r0, r1}
-    ldr r0, .P187122463_C.A
+    ldr r0, .P187122463_C.A_P_1
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r3, r0
@@ -200,4 +200,4 @@ main:                                        /* Function: main */
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, r2
     pop { pc }
-.P187122463_C.A: .word C.A
+.P187122463_C.A_P_1: .word C.A_P_1

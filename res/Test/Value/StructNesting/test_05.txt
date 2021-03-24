@@ -45,7 +45,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-Storage.X: .word 0
+Storage.X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -89,7 +89,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P960109540_Storage.X
+    ldr r0, .P960109540_Storage.X_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -106,4 +106,4 @@ main:                                        /* Function: main */
     bl Storage.X.get_P_1                     /* Call Storage.X.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P960109540_Storage.X: .word Storage.X
+.P960109540_Storage.X_P_1: .word Storage.X_P_1

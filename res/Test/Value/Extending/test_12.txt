@@ -30,8 +30,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-B: .word A
-A: .word 0
+B_P_1: .word A_P_1
+A_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -64,7 +64,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #14                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1612777293_A
+    ldr r0, .P1612777293_A_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -76,4 +76,4 @@ main:                                        /* Function: main */
     add r0, r1, r4
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1612777293_A: .word A
+.P1612777293_A_P_1: .word A_P_1

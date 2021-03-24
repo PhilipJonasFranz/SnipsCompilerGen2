@@ -48,7 +48,7 @@ OUTPUT
 .include linked_list.s
 
 .data
-Storage.X: .word 0
+Storage.X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -88,7 +88,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P874222087_Storage.X
+    ldr r0, .P874222087_Storage.X_P_1
     push { r0 }
     lsr r3, sp, #2
 /* Create a new linked list with 0 as default value. */
@@ -115,4 +115,4 @@ main:                                        /* Function: main */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P874222087_Storage.X: .word Storage.X
+.P874222087_Storage.X_P_1: .word Storage.X_P_1

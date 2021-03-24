@@ -31,7 +31,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-X: .word 0
+X_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -68,10 +68,10 @@ X.pipe_P_1:                                  /* Function: X.pipe, Provisos: INT 
     str r0, [r1]
     ldmfd sp!, {r3, r4, pc}
 
+.global add5
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global add5
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
@@ -85,7 +85,7 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     push { r0 }
-    ldr r0, .P845592936_X
+    ldr r0, .P845592936_X_P_1
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r3, r0
@@ -98,4 +98,4 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-4]                        /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P845592936_X: .word X
+.P845592936_X_P_1: .word X_P_1

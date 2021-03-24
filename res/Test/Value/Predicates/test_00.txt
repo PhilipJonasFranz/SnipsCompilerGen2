@@ -49,18 +49,18 @@ _routine_stack_copy_:
 _routine_stack_copy_end_: 
     mov pc, r10
 
+.global add5
 lambda_add5:                                 /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global add5
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
 
+.global add10
 lambda_add10:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global add10
 add10:                                       /* Function: add10 */
     add r0, r0, #10
     bx lr

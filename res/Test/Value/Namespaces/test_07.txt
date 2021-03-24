@@ -32,7 +32,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-Foo.Bar: .word 0
+Foo.Bar_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 Foo.Baz.x: .word 10
@@ -56,7 +56,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P512482075_Foo.Bar
+    ldr r0, .P512482075_Foo.Bar_P_1
     push { r0 }
     ldr r1, .P512482075_Foo.Baz.x            /* Load from .data section */
     ldr r1, [r1]
@@ -68,4 +68,4 @@ main:                                        /* Function: main */
     add r0, r1, r2
     bx lr
 .P512482075_Foo.Baz.x: .word Foo.Baz.x
-.P512482075_Foo.Bar: .word Foo.Bar
+.P512482075_Foo.Bar_P_1: .word Foo.Bar_P_1

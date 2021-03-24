@@ -64,8 +64,8 @@ OUTPUT
 .include maybe free.s
 
 .data
-List.LinkedList: .word 0
-List.ListNode: .word 0
+List.LinkedList_P_1: .word 0
+List.ListNode_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -92,7 +92,7 @@ List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, P
     push { r4 }
     ldr r0, .P988738691_NULL                 /* Load null address */
     push { r0 }
-    ldr r0, .P988738691_List.ListNode
+    ldr r0, .P988738691_List.ListNode_P_1
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r5, r0
@@ -116,7 +116,7 @@ List.LinkedList.add_P_1.L1:
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
-.P988738691_List.ListNode: .word List.ListNode
+.P988738691_List.ListNode_P_1: .word List.ListNode_P_1
 .P988738691_NULL: .word NULL
 
 .global List.LinkedList.get_P_1
@@ -164,10 +164,10 @@ List.create_P_1:                             /* Function: List.create, Provisos:
     ldr r0, .P988738689_NULL                 /* Load null address */
     ldr r1, .P988738689_NULL                 /* Load null address */
     stmfd sp!, {r0, r1}
-    ldr r0, .P988738689_List.LinkedList
+    ldr r0, .P988738689_List.LinkedList_P_1
     push { r0 }
     b init_P_4                               /* Call init */
-.P988738689_List.LinkedList: .word List.LinkedList
+.P988738689_List.LinkedList_P_1: .word List.LinkedList_P_1
 .P988738689_NULL: .word NULL
 
 .global main

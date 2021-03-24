@@ -47,10 +47,10 @@ process_P_1:                                 /* Function: process, Provisos: INT
     mov pc, r4
     ldmfd sp!, {r4, pc}
 
+.global ANON2
 lambda_ANON2:                                /* Function address getter for predication */
     add r0, pc, #8
     mov pc, r10
-.global ANON2
 ANON2:                                       /* Function: ANON2 */
     add r0, r0, #12
     bx lr
