@@ -28,7 +28,8 @@ public class ASMLdrLabel extends ASMLdr {
 			if (s0.startsWith(".")) s0 = s0.substring(1);
 			s += s0;
 		}
-		else this.op0.toString();
+		else s += this.op0.toString();
+		
 		return s;
 	}
 	

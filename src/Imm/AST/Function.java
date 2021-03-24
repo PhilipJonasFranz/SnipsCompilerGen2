@@ -1,6 +1,7 @@
 package Imm.AST;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import CGen.Util.LabelUtil;
@@ -8,6 +9,7 @@ import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
@@ -157,6 +159,8 @@ public class Function extends CompoundStatement {
 	 * head asm label.
 	 */
 	public boolean requireUIDInLabel = false;
+	
+	public HashMap<String, ASMLabel> headLabelMap = new HashMap();
 	
 	
 			/* ---< CONSTRUCTORS >--- */

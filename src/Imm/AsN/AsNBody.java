@@ -203,30 +203,16 @@ public class AsNBody extends AsNNode {
 				StructTypedef def = (StructTypedef) s;
 
 				List<String> added = new ArrayList();
+				
+				List<ASMInstruction> dataBlock = new ArrayList();
+				
+				for (int a = 0; a < def.registeredMappings.size(); a++) {
+					StructProvisoMapping mapping = def.registeredMappings.get(a);
 					
-				for (StructProvisoMapping mapping : def.registeredMappings) {
 					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
 					
 					if (!added.contains(postfix)) {
 						added.add(postfix);
-						
-						/* Inject Interface Relay-Addresses for .data section */
-						for (int i = def.implemented.size() - 1; i >= 0; i--) {
-							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructFunctionRelay(def, mapping, def.implemented.get(i));
-							if (!relayTable.isEmpty())
-								AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
-						}
-						
-						if (!def.implemented.isEmpty()) {
-							String name = def.path.build() + postfix + "_resolver";
-							
-							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
-							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
-							AsNBody.addToTranslationUnit(relay, def.getSource(), SECTION.DATA);
-							
-							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructInterfaceRelay(def, mapping);
-							AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
-						}
 						
 						/* Inject instruction for .data Section */
 						MemoryOperand parent = new MemoryWordOp(0);
@@ -245,9 +231,16 @@ public class AsNBody extends AsNNode {
 						}
 						
 						ASMDataLabel entry = new ASMDataLabel(def.path.build() + postfix, parent);
-						AsNBody.addToTranslationUnit(entry, def.getSource(), SECTION.DATA);
-						
+						dataBlock.add(entry);
 						def.SIDLabelMap.put(postfix, entry);
+						
+						if (!def.implemented.isEmpty()) {
+							String name = def.path.build() + postfix + "_resolver";
+							
+							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
+							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
+							dataBlock.add(relay);
+						}
 					}
 				}
 				
@@ -267,6 +260,31 @@ public class AsNBody extends AsNNode {
 					}
 					
 					AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);
+				}
+				
+				AsNBody.addToTranslationUnit(dataBlock, def.getSource(), SECTION.DATA);
+				
+				added.clear();
+				for (int a = 0; a < def.registeredMappings.size(); a++) {
+					StructProvisoMapping mapping = def.registeredMappings.get(a);
+					
+					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					
+					if (!added.contains(postfix)) {
+						added.add(postfix);
+						
+						/* Inject Interface Relay-Addresses for .data section */
+						for (int i = def.implemented.size() - 1; i >= 0; i--) {
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructFunctionRelay(def, mapping, def.implemented.get(i));
+							if (!relayTable.isEmpty())
+								AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
+						}
+						
+						if (!def.implemented.isEmpty()) {
+							List<ASMInstruction> relayTable = AsNInterfaceTypedef.createStructInterfaceRelay(def, mapping);
+							AsNBody.addToTranslationUnit(relayTable, def.getSource(), SECTION.TEXT);
+						}
+					}
 				}
 			}
 			else if (s instanceof InterfaceTypedef) {
@@ -427,10 +445,16 @@ public class AsNBody extends AsNNode {
 				ASMLdrLabel load = (ASMLdrLabel) text.get(i);
 				buffer.add(load);
 			}
-			else if (text.get(i) instanceof ASMBranch) {
-				ASMBranch b = (ASMBranch) text.get(i);
+			else {
+				ASMInstruction ins = text.get(i);
 				
-				if (b.type == BRANCH_TYPE.BX) {
+				/* 
+				 * Flush buffer either at BX branch or at instruction with BX_SEMI_EXIT set,
+				 * marking the end of a relay table mapping, which has no explicit exit.
+				 */
+				if ((ins instanceof ASMBranch && ((ASMBranch) ins).type == BRANCH_TYPE.BX) || 
+						ins.optFlags.contains(OPT_FLAG.BX_SEMI_EXIT)) {
+					
 					/* Flush buffer here */
 					if (!buffer.isEmpty()) {
 						/* Create a new prefix for this literal pool */

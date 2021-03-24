@@ -93,15 +93,13 @@ public class AsNInterfaceTypedef extends AsNNode {
 			/* Make sure the function was found */
 			assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
 			
-			/* Branch to function */
-			String target = f0.path.build();
-			
 			/* Get the proviso postfix from the function in the struct with the current mapping */
 			String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
 			
 			/* 
 			 * The mapping has not been registered in the function, this means that this function
-			 * has not been called with this specific provisos.
+			 * has not been called with this specific provisos. We do have to add a placeholder,
+			 * so that the offsets of the function order is preserved.
 			 */
 			if (post == null) {
 				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
@@ -110,15 +108,11 @@ public class AsNInterfaceTypedef extends AsNNode {
 				add.optFlags.add(OPT_FLAG.SYS_JMP);
 				table.add(add);
 			}
-			/*
-			 * Mapping was found, append to target to create final label and branch to it.
-			 */
 			else {
-				target += post;
+				/* Get function head label from function with given postfix */
+				ASMLabel functionLabel = f0.headLabelMap.get(postfix);
 				
-				/* Final label to function with proviso postfix */
-				ASMLabel functionLabel = new ASMLabel(target);
-				
+				/* Create system jump to function */
 				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
 				b.optFlags.add(OPT_FLAG.SYS_JMP);
 				table.add(b);
@@ -138,6 +132,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			table.add(relayTableHead);
 		}
 		
+		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}
 	
@@ -206,6 +201,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			}
 		}
 		
+		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}
 	

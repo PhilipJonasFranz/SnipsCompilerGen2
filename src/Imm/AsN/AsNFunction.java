@@ -167,6 +167,10 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Create the function head label */
 			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
+			/* Add .global label */
+			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+			func.instructions.add(globalFunction);
+			
 			/* Function address getter for lambda */
 			if (f.isLambdaTarget) {
 				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
@@ -179,8 +183,11 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
 			}
 			
+			
 			/* Function Header and Entry Label, add proviso specific postfix */
 			ASMLabel label = new ASMLabel(funcLabel, true);
+			f.headLabelMap.put(LabelUtil.getProvisoPostfix(f.provisosCalls.get(k).provisoMapping), label);
+			
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
@@ -205,10 +212,6 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			label.comment = new ASMComment(com);
-			
-			/* Add .global label */
-			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
-			func.instructions.add(globalFunction);
 			
 			/* Add function label */
 			func.instructions.add(label);
