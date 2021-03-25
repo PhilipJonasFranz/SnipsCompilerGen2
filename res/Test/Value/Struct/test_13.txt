@@ -38,7 +38,7 @@ TESTCASES
 0 1 0 11
 0 1 1 15
 OUTPUT
-.version 58768319103
+.version 53588532196
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -50,6 +50,7 @@ OUTPUT
 .include binary_tree.s
 
 .data
+lambda_relation: .word relation
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -68,9 +69,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global relation
-lambda_relation:                             /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 relation:                                    /* Function: relation */
     push { r3, r4 }
     mov r3, r0
@@ -101,54 +99,48 @@ main:                                        /* Function: main */
     mov r6, r0
     mov r0, #5                               /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #11                              /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #15                              /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #7                               /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #2                               /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P1995050259_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r6
     ldmfd sp!, {r1, r2}
@@ -188,3 +180,4 @@ main.L8:
     lsl r1, r7, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     pop { pc }
+.P1995050259_lambda_relation: .word lambda_relation

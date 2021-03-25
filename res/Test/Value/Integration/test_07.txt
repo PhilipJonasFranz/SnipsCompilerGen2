@@ -45,7 +45,7 @@ TESTCASES
 7 90
 8 111
 OUTPUT
-.version 41421238386
+.version 37134410936
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -56,6 +56,8 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_allocMatrix: .word allocMatrix
+lambda___mat_mult: .word __mat_mult
 NULL: .word 0
 HEAP_START: .word 0
 

@@ -46,7 +46,7 @@ TESTCASES
 10 9
 11 9
 OUTPUT
-.version 22834533771
+.version 23214893647
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -57,6 +57,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_checkThreshold: .word checkThreshold
 Exception: .word 0
 NULL: .word 0
 HEAP_START: .word 0

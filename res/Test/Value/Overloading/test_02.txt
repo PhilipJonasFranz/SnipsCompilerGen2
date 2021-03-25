@@ -21,7 +21,7 @@ TESTCASES
 0 12
 1 30
 OUTPUT
-.version 14989911601
+.version 14154480221
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -33,6 +33,8 @@ OUTPUT
 
 .data
 X: .word 0
+lambda_X.get@0: .word X.get@0
+lambda_X.get@1: .word X.get@1
 NULL: .word 0
 HEAP_START: .word 0
 

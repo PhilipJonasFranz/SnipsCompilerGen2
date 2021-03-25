@@ -16,7 +16,7 @@ TESTCASES
 0 1
 1 0
 OUTPUT
-.version 6159555438
+.version -1511005951
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,6 +27,8 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_get2: .word get2
+lambda_get: .word get
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -45,17 +47,11 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global get
-lambda_get:                                  /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 get:                                         /* Function: get */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
 
 .global get2
-lambda_get2:                                 /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 get2:                                        /* Function: get2 */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
@@ -63,23 +59,21 @@ get2:                                        /* Function: get2 */
 .global main
 main:                                        /* Function: main */
     mov r3, r0
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get
-    mov r10, #0
-    mov r4, r0
+    ldr r0, .P1023508742_lambda_get          /* Evaluate Expression */
+    ldr r4, [r0]
     cmp r3, #0
     beq main.L0
-    add r10, pc, #8
-    b lambda_get2
-    mov r10, #0
+    ldr r0, .P1023508742_lambda_get2
+    ldr r0, [r0]
     b main.L1
 main.L0: 
-    add r10, pc, #8
-    b lambda_get
-    mov r10, #0
+    ldr r0, .P1023508742_lambda_get
+    ldr r0, [r0]
 main.L1: 
     mov r5, r0
     cmp r4, r5
     moveq r0, #1
     movne r0, #0
     bx lr
+.P1023508742_lambda_get2: .word lambda_get2
+.P1023508742_lambda_get: .word lambda_get

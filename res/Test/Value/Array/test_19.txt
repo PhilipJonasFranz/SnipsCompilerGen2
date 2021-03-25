@@ -16,7 +16,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 8213866091
+.version 7369608045
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,6 +27,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda___vec_cross: .word __vec_cross
 NULL: .word 0
 HEAP_START: .word 0
 

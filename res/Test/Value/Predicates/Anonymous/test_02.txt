@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-.version 8025593189
+.version -193221928
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -28,6 +28,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_get: .word get
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -46,9 +47,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global get
-lambda_get:                                  /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 get:                                         /* Function: get */
     push { fp }
     mov fp, sp
@@ -69,9 +67,8 @@ get:                                         /* Function: get */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get
-    mov r10, #0
+    ldr r0, .P553308267_lambda_get           /* Evaluate Expression */
+    ldr r0, [r0]
     push { r0 }
     ldr r3, [fp, #-4]
 /* Call the predicate */
@@ -86,3 +83,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.P553308267_lambda_get: .word lambda_get

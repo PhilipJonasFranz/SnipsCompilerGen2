@@ -6,7 +6,7 @@ int main() {
 TESTCASES
 13
 OUTPUT
-.version 13856320074
+.version 15729305144
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -17,6 +17,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_ANON1: .word ANON1
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -35,9 +36,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global ANON1
-lambda_ANON1:                                /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 ANON1:                                       /* Function: ANON1 */
     add r0, r0, #10
     bx lr
@@ -45,11 +43,10 @@ ANON1:                                       /* Function: ANON1 */
 .global main
 main:                                        /* Function: main */
     push { lr }
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_ANON1
-    mov r10, #0
-    mov r3, r0
+    ldr r0, .P994879591_lambda_ANON1         /* Evaluate Expression */
+    ldr r3, [r0]
     mov r0, #3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r3
     pop { pc }
+.P994879591_lambda_ANON1: .word lambda_ANON1

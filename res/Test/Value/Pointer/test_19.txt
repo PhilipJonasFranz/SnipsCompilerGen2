@@ -16,7 +16,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 16561664144
+.version 16186924146
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,6 +27,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_set: .word set
 NULL: .word 0
 HEAP_START: .word 0
 

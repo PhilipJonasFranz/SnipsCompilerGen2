@@ -13,7 +13,7 @@ int main() {
 TESTCASES
 32
 OUTPUT
-.version 11948826154
+.version 11779867372
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -24,6 +24,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_vecProd: .word vecProd
 NULL: .word 0
 HEAP_START: .word 0
 

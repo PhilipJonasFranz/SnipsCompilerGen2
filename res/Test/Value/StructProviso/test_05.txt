@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 21402484840
+.version 21931432132
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -32,6 +32,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_insert_P_1: .word insert_P_1
 TreeNode_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0

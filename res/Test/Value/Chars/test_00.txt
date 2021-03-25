@@ -7,7 +7,7 @@ char main() {
 TESTCASES
 50
 OUTPUT
-.version 4380783386
+.version 3183937810
 
 .include maybe __op_div.s
 .include maybe __op_mod.s

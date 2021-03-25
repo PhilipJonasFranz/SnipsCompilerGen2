@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 13620431476
+.version 9284844704
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -29,6 +29,7 @@ OUTPUT
 
 .data
 K.X_P_1: .word 0
+lambda_K.X.getValue_P_1: .word K.X.getValue_P_1
 NULL: .word 0
 HEAP_START: .word 0
 

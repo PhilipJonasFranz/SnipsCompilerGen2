@@ -44,7 +44,7 @@ int main() {
 TESTCASES
 4
 OUTPUT
-.version 22547661567
+.version 19643223729
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -56,6 +56,9 @@ OUTPUT
 
 .data
 Storage.X_P_1: .word 0
+lambda_Storage.X.getValue_P_1: .word Storage.X.getValue_P_1
+lambda_Storage.X.getType_P_1: .word Storage.X.getType_P_1
+lambda_Storage.X.setValue_P_1: .word Storage.X.setValue_P_1
 NULL: .word 0
 HEAP_START: .word 0
 

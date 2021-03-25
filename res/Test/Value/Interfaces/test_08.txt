@@ -28,7 +28,7 @@ int main(bool b) {
 TESTCASES
 26
 OUTPUT
-.version 15935137725
+.version 12631454950
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -41,6 +41,7 @@ OUTPUT
 .include collection.s
 
 .data
+lambda_getSum: .word getSum
 NULL: .word 0
 HEAP_START: .word 0
 

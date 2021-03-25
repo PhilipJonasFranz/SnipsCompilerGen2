@@ -24,7 +24,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 37884375426
+.version 33269344549
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -37,6 +37,7 @@ OUTPUT
 .include linked_list.s
 
 .data
+lambda_relation: .word relation
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -55,9 +56,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global relation
-lambda_relation:                             /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 relation:                                    /* Function: relation */
     push { r3, r4 }
     mov r3, r0
@@ -91,27 +89,24 @@ main:                                        /* Function: main */
     mov r4, r0
     mov r0, #5                               /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P455223773_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P455223773_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     mov r0, #12                              /* Load parameters */
     push { r0 }
-    add r10, pc, #8
-    b lambda_relation
-    mov r10, #0
+    ldr r0, .P455223773_lambda_relation
+    ldr r0, [r0]
     push { r0 }
     mov r0, r4
     ldmfd sp!, {r1, r2}
@@ -120,3 +115,4 @@ main:                                        /* Function: main */
     mov r0, r3
     bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
     pop { pc }
+.P455223773_lambda_relation: .word lambda_relation

@@ -11,7 +11,7 @@ int main() {
 TESTCASES
 17
 OUTPUT
-.version 18758055212
+.version 20775920955
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -22,6 +22,8 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_ANON2: .word ANON2
+lambda_process_P_1: .word process_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -48,18 +50,14 @@ process_P_1:                                 /* Function: process, Provisos: INT
     ldmfd sp!, {r4, pc}
 
 .global ANON2
-lambda_ANON2:                                /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 ANON2:                                       /* Function: ANON2 */
     add r0, r0, #12
     bx lr
 
 .global main
 main:                                        /* Function: main */
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_ANON2
-    mov r10, #0
-    mov r1, r0
+    ldr r0, .P966250440_lambda_ANON2         /* Evaluate Expression */
+    ldr r1, [r0]
     mov r0, #5
     b process_P_1                            /* Call process */
+.P966250440_lambda_ANON2: .word lambda_ANON2

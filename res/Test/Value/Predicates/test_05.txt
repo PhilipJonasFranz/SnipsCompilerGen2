@@ -12,7 +12,7 @@ int main(int x) {
 TESTCASES
 5
 OUTPUT
-.version 7491619216
+.version 2397285239
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -23,6 +23,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_get_P_1: .word get_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -41,9 +42,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global get_P_1
-lambda_get_P_1:                              /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 get_P_1:                                     /* Function: get, Provisos: INT */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
@@ -51,10 +49,11 @@ get_P_1:                                     /* Function: get, Provisos: INT */
 .global main
 main:                                        /* Function: main */
     push { lr }
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get_P_1
-    mov r10, #0
-    mov r5, r0
+    ldr r0, .P193263363_lambda_get_P_1       /* Evaluate Expression */
+    ldr r4, [r0]
+    mov r0, r4                               /* Evaluate Expression */
+    mov r5, r4
     add lr, pc, #8                           /* Evaluate Expression */
     mov pc, r5
     pop { pc }
+.P193263363_lambda_get_P_1: .word lambda_get_P_1

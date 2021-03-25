@@ -79,7 +79,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 34439556178
+.version 32605813167
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -92,6 +92,9 @@ OUTPUT
 .data
 List.LinkedList_P_1: .word 0
 List.LinkedList_P_1_resolver_relay: .word List.LinkedList_P_1_resolver
+lambda_List.LinkedList.add_P_1: .word List.LinkedList.add_P_1
+lambda_List.LinkedList.get_P_1: .word List.LinkedList.get_P_1
+lambda_List.LinkedList.size_P_1: .word List.LinkedList.size_P_1
 List.ListNode_P_1: .word 0
 List.Iterable_P_1: .word 0
 NULL: .word 0

@@ -37,7 +37,7 @@ TESTCASES
 3 6
 4 8
 OUTPUT
-.version 12043732119
+.version 8771624639
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -48,6 +48,8 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_sort: .word sort
+lambda_sortPred: .word sortPred
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -66,9 +68,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global sortPred
-lambda_sortPred:                             /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
@@ -130,9 +129,8 @@ main:                                        /* Function: main */
     mov r0, #3
     mov r1, #6
     stmfd sp!, {r0, r1}
-    add r10, pc, #8                          /* Load parameters */
-    b lambda_sortPred
-    mov r10, #0
+    ldr r0, .P78746759_lambda_sortPred       /* Load parameters */
+    ldr r0, [r0]
     push { r0 }
     mov r0, #5
     push { r0 }
@@ -145,3 +143,4 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
+.P78746759_lambda_sortPred: .word lambda_sortPred

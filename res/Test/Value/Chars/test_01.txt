@@ -10,7 +10,7 @@ bool main() {
 TESTCASES
 1
 OUTPUT
-.version -7677570396
+.version -8874415972
 
 .include maybe __op_div.s
 .include maybe __op_mod.s

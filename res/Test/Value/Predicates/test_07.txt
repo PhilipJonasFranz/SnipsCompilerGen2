@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 12
 OUTPUT
-.version 11571724167
+.version 4631715727
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -28,6 +28,8 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_get: .word get
+lambda_sortPred: .word sortPred
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -46,9 +48,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global sortPred
-lambda_sortPred:                             /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
@@ -74,7 +73,7 @@ get.L0:
 .global main
 main:                                        /* Function: main */
 /* Context check predicate at this location */
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_sortPred
-    mov r10, #0
+    ldr r0, .P250521665_lambda_sortPred      /* Evaluate Expression */
+    ldr r0, [r0]
     b get                                    /* Call get */
+.P250521665_lambda_sortPred: .word lambda_sortPred

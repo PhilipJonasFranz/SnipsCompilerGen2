@@ -18,7 +18,7 @@ TESTCASES
 5 10
 6 5
 OUTPUT
-.version 9323872092
+.version 7530815277
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -29,6 +29,7 @@ OUTPUT
 .include maybe free.s
 
 .data
+lambda_add5: .word add5
 Point: .word 0
 NULL: .word 0
 HEAP_START: .word 0
@@ -48,9 +49,6 @@ _routine_stack_copy_end_:
     mov pc, r10
 
 .global add5
-lambda_add5:                                 /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
@@ -64,9 +62,8 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     ldr r0, .P891434015_Point
     push { r0 }
-    add r10, pc, #8
-    b lambda_add5
-    mov r10, #0
+    ldr r0, .P891434015_lambda_add5
+    ldr r0, [r0]
     push { r0 }
     mov r0, #99
     mov r1, #1
@@ -77,4 +74,5 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
+.P891434015_lambda_add5: .word lambda_add5
 .P891434015_Point: .word Point
