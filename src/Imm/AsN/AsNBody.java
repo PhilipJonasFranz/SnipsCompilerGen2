@@ -73,6 +73,10 @@ public class AsNBody extends AsNNode {
 	
 	public AsNTranslationUnit originUnit;
 	
+	private static List<ASMInstruction> globalVarReferences;
+	
+	private static MemoryMap map;
+	
 	private static String originPath;
 	
 	
@@ -92,10 +96,10 @@ public class AsNBody extends AsNNode {
 		body.originUnit.versionID = Util.computeHashSum(CompilerDriver.inputFile.getPath());
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
-		MemoryMap map = new MemoryMap();
+		map = new MemoryMap();
 		
 		/* Count global variables */
-		List<ASMInstruction> globalVarReferences = new ArrayList();
+		globalVarReferences = new ArrayList();
 		
 		int done = 0;
 		
@@ -136,34 +140,12 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
-				/* --- INSERT NULL POINTER DATALABEL --- */
-		Declaration heap = CompilerDriver.HEAP_START;
-		
-		/* Create instruction for .data Section */
-		ASMDataLabel dataEntryHeap = new ASMDataLabel(heap.path.build(), new MemoryWordOp(heap.value));
-		body.originUnit.append(dataEntryHeap, SECTION.DATA);
-		
-		/* Create address reference instruction for .text section */
-		ASMDataLabel heapReference = new ASMDataLabel(heap.path.build(), new MemoryWordRefOp(dataEntryHeap));
-		globalVarReferences.add(heapReference);
-		
-		/* Add declaration to global memory */
-		map.add(heap, heapReference);
+				/* ---< INSERT NULL POINTER DATALABEL >--- */
+		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.HEAP_START);
 		
 		
-				/* --- INSERT NULL POINTER DATALABEL --- */
-		Declaration nullPtr = CompilerDriver.NULL_PTR;
-			
-		/* Create instruction for .data Section */
-		ASMDataLabel dataEntryNull = new ASMDataLabel(nullPtr.path.build(), new MemoryWordOp(nullPtr.value));
-		body.originUnit.append(dataEntryNull, SECTION.DATA);
-		
-		/* Create address reference instruction for .text section */
-		ASMDataLabel nullReference = new ASMDataLabel(nullPtr.path.build(), new MemoryWordRefOp(dataEntryNull));
-		globalVarReferences.add(nullReference);
-		
-		/* Add declaration to global memory */
-		map.add(nullPtr, nullReference);
+				/* ---< INSERT NULL POINTER DATALABEL >--- */
+		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.NULL_PTR);
 		
 		
 		/* Branch to main Function if main function is not first function, patch target later */
@@ -528,6 +510,19 @@ public class AsNBody extends AsNNode {
 		List<ASMInstruction> list = new ArrayList();
 		list.add(ins);
 		AsNBody.addToTranslationUnit(list, source, section);
+	}
+	
+	public static void createGlobalDataLabelForDeclaration(AsNBody body, Declaration dec) {
+		/* Create instruction for .data Section */
+		ASMDataLabel dataEntryHeap = new ASMDataLabel(dec.path.build(), new MemoryWordOp(dec.value));
+		body.originUnit.append(dataEntryHeap, SECTION.DATA);
+		
+		/* Create address reference instruction for .text section */
+		ASMDataLabel heapReference = new ASMDataLabel(dec.path.build(), new MemoryWordRefOp(dataEntryHeap));
+		globalVarReferences.add(heapReference);
+		
+		/* Add declaration to global memory */
+		map.add(dec, heapReference);
 	}
 	
 	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {

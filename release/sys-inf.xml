@@ -1,5 +1,5 @@
 <Inf>
-	<Version>v.4.5.0</Version>
+	<Version>v.4.6.0</Version>
 	<Library>
 		<Alias>resv.sn:lib/mem/resv.sn</Alias>
 		<Alias>free.sn:lib/mem/free.sn</Alias>
