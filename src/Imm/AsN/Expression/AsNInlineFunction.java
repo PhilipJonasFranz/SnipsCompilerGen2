@@ -1,22 +1,24 @@
 package Imm.AsN.Expression;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
-import Imm.ASM.ASMInstruction.OPT_FLAG;
-import Imm.ASM.Branch.ASMBranch;
-import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
-import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Operands.ImmOp;
+import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
+import Imm.ASM.Util.Operands.Memory.MemoryWordRefOp;
 import Imm.AST.Expression.InlineFunction;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNFunction;
@@ -42,21 +44,26 @@ public class AsNInlineFunction extends AsNExpression {
 		LabelUtil.funcPrefix = currentPrefix;
 		LabelUtil.funcUID = currentUID;
 		
-		AsNBody.addToTranslationUnit(funcCast.getInstructions(), i.getSource(), SECTION.TEXT);
+		List<ASMInstruction> dataBlock = new ArrayList();
 		
-		/* Create return address in R10, used to return from sys jump */
-		ifunc.instructions.add(new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8)));
+		for (String funcLabel : funcCast.generatedLabels) {
+			ASMDataLabel entry = new ASMDataLabel(funcLabel, new MemoryWordOp(0));
+			MemoryWordRefOp parent = new MemoryWordRefOp(entry);
+			
+			ASMDataLabel funcEntry = new ASMDataLabel("lambda_" + funcLabel, parent);
+			dataBlock.add(funcEntry);
+		}
+		
+		AsNBody.addToTranslationUnit(dataBlock, i.getSource(), SECTION.DATA);
+		AsNBody.addToTranslationUnit(funcCast.getInstructions(), i.getSource(), SECTION.TEXT);
 		
 		/* Construct label name for function lambda target with provided provisos */
 		String label = "lambda_" + i.inlineFunction.path.build() + ((i.inlineFunction.requireUIDInLabel)? "@" + i.inlineFunction.UID : "");
+		ASMDataLabel entry = new ASMDataLabel(label, new MemoryWordOp(0));
 		
-		/* Branch to the lambda target of the function with a sys jump to obtain the address */
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(label)));
-		branch.optFlags.add(OPT_FLAG.SYS_JMP);
-		ifunc.instructions.add(branch);
-		
-		/* Reset R10 to 0, for possible addressing calculation optimizations */
-		ifunc.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
+		LabelOp operand = new LabelOp(entry);
+		ifunc.instructions.add(new ASMLdrLabel(new RegOp(REG.R0), operand, null));
+		ifunc.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		
 		return ifunc;
 	}

@@ -413,7 +413,7 @@ public class TestDriver {
 					compile = originUnit.build();
 				} catch (LINK_EXC e) {
 					cd.setBurstMode(false, false);
-					buffer.add(new Message("Error when linking output!" + e.getMessage(), LogPoint.Type.FAIL, true));
+					buffer.add(new Message("Error when linking output! " + e.getMessage(), LogPoint.Type.FAIL, true));
 					
 					if (printResultOnError) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					

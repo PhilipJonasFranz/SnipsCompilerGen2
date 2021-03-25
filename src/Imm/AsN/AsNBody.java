@@ -164,8 +164,10 @@ public class AsNBody extends AsNNode {
 			if (s instanceof Function) {
 				/* Cast a single function */
 				
+				Function f = (Function) s;
+				
 				st = new StackSet();
-				AsNFunction func = AsNFunction.cast((Function) s, new RegSet(), map, st);
+				AsNFunction func = AsNFunction.cast(f, new RegSet(), map, st);
 				
 				/* Ensure that stack was emptied, so no stack shift at compile time occurred */
 				assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
@@ -176,6 +178,20 @@ public class AsNBody extends AsNNode {
 						((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(1));
 						mainLabel = (ASMLabel) func.getInstructions().get(1);
 					}
+				}
+				
+				if (!f.path.build().equals("main")) {
+					List<ASMInstruction> dataBlock = new ArrayList();
+					
+					for (String funcLabel : func.generatedLabels) {
+						ASMDataLabel entry = new ASMDataLabel(funcLabel, new MemoryWordOp(0));
+						MemoryWordRefOp parent = new MemoryWordRefOp(entry);
+						
+						ASMDataLabel funcEntry = new ASMDataLabel("lambda_" + funcLabel, parent);
+						dataBlock.add(funcEntry);
+					}
+					
+					AsNBody.addToTranslationUnit(dataBlock, s.getSource(), SECTION.DATA);
 				}
 				
 				AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);
@@ -239,6 +255,14 @@ public class AsNBody extends AsNNode {
 							((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(0));
 							mainLabel = (ASMLabel) func.getInstructions().get(0);
 						}
+					}
+					
+					for (String funcLabel : func.generatedLabels) {
+						ASMDataLabel entry = new ASMDataLabel(funcLabel, new MemoryWordOp(0));
+						MemoryWordRefOp parent = new MemoryWordRefOp(entry);
+						
+						ASMDataLabel funcEntry = new ASMDataLabel("lambda_" + funcLabel, parent);
+						dataBlock.add(funcEntry);
 					}
 					
 					AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);

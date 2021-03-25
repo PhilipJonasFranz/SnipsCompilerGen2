@@ -59,6 +59,8 @@ public class AsNFunction extends AsNCompoundStatement {
 	
 	public ASMLabel copyLoopEscape;
 
+	public List<String> generatedLabels = new ArrayList();
+	
 	/* 
 	 * List that contains all the names of the proviso calls that were already translated.
 	 * This is used to check wether to translate the current proviso mapping again. The name
@@ -167,21 +169,11 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Create the function head label */
 			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
+			func.generatedLabels.add(funcLabel);
+			
 			/* Add .global label */
 			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
 			func.instructions.add(globalFunction);
-			
-			/* Function address getter for lambda */
-			if (f.isLambdaTarget) {
-				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
-				l.comment = new ASMComment("Function address getter for predication");
-				func.instructions.add(l);
-				
-				func.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.PC), new ImmOp(8)));
-				
-				/* Branch back via sys jump */
-				func.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
-			}
 			
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
