@@ -19,7 +19,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 2484191331
+.version 3915511449
 
 .include maybe __op_div.s
 .include maybe __op_mod.s

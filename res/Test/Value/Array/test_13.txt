@@ -14,7 +14,7 @@ TESTCASES
 0 39
 1 45
 OUTPUT
-.version 25341371906
+.version 25781083512
 
 .include maybe __op_div.s
 .include maybe __op_mod.s

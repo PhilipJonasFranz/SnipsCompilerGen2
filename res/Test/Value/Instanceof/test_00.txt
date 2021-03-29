@@ -10,12 +10,12 @@ struct B {
 int main() {
 	A a = A::(10);
 	void* p = &a;
-	return (int) isa(p, idof(A));
+	return (int) isar(p, idof(A));
 }
 TESTCASES
 1
 OUTPUT
-.version 9423114667
+.version 8809298717
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -57,7 +57,7 @@ main:                                        /* Function: main */
     lsr r3, r0, #2
     ldr r1, .P2062695848_A                   /* Evaluate Expression */
     mov r0, r3
-    bl isa                                   /* Call isa */
+    bl isar                                  /* Call isar */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P2062695848_A: .word A
