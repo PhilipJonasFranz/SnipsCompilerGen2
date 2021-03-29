@@ -5,16 +5,32 @@
  * created when linking the executable. The id of a struct can
  * be obtained with idof(TYPE).
  */
-shared bool isar(void* child, void* parent) {
+shared bool isarec(void* child, void* parent) {
 	if (child == 0) return false;
 	if (child == parent) return true;
-	return isar(*(child >> 2), parent);
+	/* 
+	 * Uses the LOAD((ADDR / 4) * 4) = LOAD(ADDR) 
+	 * operation, for inheritance tree in memory.
+	 */
+	return isarec(*(child >> 2), parent);
 }
 
 /*
  * Check if the given reference to a struct is
- * an instanceof the given struct.
+ * an instanceof the given struct. Both arguments
+ * must be SID values obtained by idof(TYPE).
  */
 shared bool isa(void* child, void* parent) {
-	return isar(*child, parent);
+	return isarec(child, parent);
+}
+
+/*
+ * Check if the given reference to a struct is
+ * an instanceof the given struct. The first argument
+ * must be a reference to a struct, the second argument
+ * must be a SID obtained by idof(TYPE).
+ */
+shared bool isar(void* child, void* parent) {
+	/* Uses the LOAD(ADDR * 4) operation, only for pointer */
+	return isarec(*child, parent);
 }

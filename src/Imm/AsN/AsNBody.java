@@ -180,20 +180,6 @@ public class AsNBody extends AsNNode {
 					}
 				}
 				
-				if (!f.path.build().equals("main")) {
-					List<ASMInstruction> dataBlock = new ArrayList();
-					
-					for (String funcLabel : func.generatedLabels) {
-						ASMDataLabel entry = new ASMDataLabel(funcLabel, new MemoryWordOp(0));
-						MemoryWordRefOp parent = new MemoryWordRefOp(entry);
-						
-						ASMDataLabel funcEntry = new ASMDataLabel("lambda_" + funcLabel, parent);
-						dataBlock.add(funcEntry);
-					}
-					
-					AsNBody.addToTranslationUnit(dataBlock, s.getSource(), SECTION.DATA);
-				}
-				
 				AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);
 			}
 			else if (s instanceof StructTypedef) {
@@ -255,14 +241,6 @@ public class AsNBody extends AsNNode {
 							((LabelOp) branch.target).patch((ASMLabel) func.getInstructions().get(0));
 							mainLabel = (ASMLabel) func.getInstructions().get(0);
 						}
-					}
-					
-					for (String funcLabel : func.generatedLabels) {
-						ASMDataLabel entry = new ASMDataLabel(funcLabel, new MemoryWordOp(0));
-						MemoryWordRefOp parent = new MemoryWordRefOp(entry);
-						
-						ASMDataLabel funcEntry = new ASMDataLabel("lambda_" + funcLabel, parent);
-						dataBlock.add(funcEntry);
 					}
 					
 					AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);

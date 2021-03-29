@@ -2359,7 +2359,7 @@ public class Parser {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
 		}
-		else if (name.equals("isa")) {
+		else if (name.equals("isa") || name.equals("isar")) {
 			CompilerDriver.driver.referencedLibaries.add("lib/mem/isa.sn");
 		}
 		else if (name.equals("free")) {

@@ -202,7 +202,11 @@ public class PreProcessor {
 		if (code != null) {
 			return "release/" + filePath;
 		}
-		else return CompilerDriver.inputFile.getParent() + "/" + filePath;
+		else {
+			String [] sp = filePath.split("/") ;
+			String in = CompilerDriver.inputFile.getParent();
+			return in + "/" + sp [sp.length - 1];
+		}
 	}
 	
 } 

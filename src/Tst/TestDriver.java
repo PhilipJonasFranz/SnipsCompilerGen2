@@ -70,7 +70,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean printResultOnError = true;
+	public boolean printResultOnError = false;
 	
 	/** Store/Update asm results in the tested file */
 	public boolean writebackResults = false;
@@ -92,15 +92,13 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
 		comp.printLogo();
+		
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		CompilerDriver.includeMetaInformation = false;
-		
 		CompilerDriver.buildModulesRecurse = true;
 		CompilerDriver.buildObjectFileOnly = true;
-		
-		/* Experimental Flags */
-		//CompilerDriver.optimizeFileSize = true;
+		CompilerDriver.pruneModules = true;
 		
 		List<String> paths = new ArrayList();
 		

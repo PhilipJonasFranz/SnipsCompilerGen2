@@ -4,7 +4,6 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
-import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.LabelOp;
@@ -21,13 +20,12 @@ public class AsNFunctionRef extends AsNExpression {
 		i.castedNode = ref;
 		
 		/* Construct label name for function lambda target with provided provisos */
-		String label = "lambda_" + i.origin.path.build() + ((i.origin.requireUIDInLabel)? "@" + i.origin.UID : "") + i.origin.getProvisoPostfix(i.proviso);
+		String label = i.origin.path.build() + ((i.origin.requireUIDInLabel)? "@" + i.origin.UID : "") + i.origin.getProvisoPostfix(i.proviso);
 		
 		ASMDataLabel entry = new ASMDataLabel(label, new MemoryWordOp(0));
 		
 		LabelOp operand = new LabelOp(entry);
 		ref.instructions.add(new ASMLdrLabel(new RegOp(REG.R0), operand, null));
-		ref.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		
 		return ref;
 	}

@@ -649,12 +649,12 @@ public class CompilerDriver {
 			
 			double rate = driver.optimizeInstructionList(body.instructions, true);
 			
-			log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
-			
 			for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
 				rate += driver.optimizeInstructionList(entry.getValue().textSection, false);
 			
 			rate /= AsNBody.translationUnits.size();
+			
+			rate = Math.round(rate * 100) / 100.0;
 			
 			if (!expectError) {
 				compressions.add(rate);
@@ -662,6 +662,8 @@ public class CompilerDriver {
 				if (rate < c_min) c_min = rate;
 				if (rate > c_max) c_max = rate;
 			}
+			
+			log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
 		}
 		
 		return body;
