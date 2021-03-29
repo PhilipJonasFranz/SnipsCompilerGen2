@@ -21,7 +21,7 @@ TESTCASES
 0 1 10
 1 1 11
 OUTPUT
-.version 12899893836
+.version 17212782954
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -32,9 +32,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_foo: .word foo
-lambda_add10: .word add10
-lambda_add5: .word add5
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -75,15 +72,13 @@ main:                                        /* Function: main */
     mov r3, r0
     cmp r1, #0
     beq main.L0
-    ldr r0, .P50117608_lambda_add10
-    ldr r0, [r0]
+    ldr r0, .P50117608_add10
     b main.L1
 main.L0: 
-    ldr r0, .P50117608_lambda_add5
-    ldr r0, [r0]
+    ldr r0, .P50117608_add5
 main.L1: 
     mov r1, r0
     mov r0, r3
     b foo                                    /* Call foo */
-.P50117608_lambda_add5: .word lambda_add5
-.P50117608_lambda_add10: .word lambda_add10
+.P50117608_add5: .word add5
+.P50117608_add10: .word add10

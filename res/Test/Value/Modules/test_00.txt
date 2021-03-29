@@ -5,7 +5,7 @@ int main() {
 	return Global::globalVar + Global::foo();
 }
 TESTCASES
-9
+30
 OUTPUT
 .version 13110677248
 
