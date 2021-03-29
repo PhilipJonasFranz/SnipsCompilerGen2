@@ -183,8 +183,6 @@ public class AsNFunctionCall extends AsNStatement {
 			
 			InterfaceTypedef inter = f.definedInInterface;
 			
-			// TODO: Map provisos
-			
 			boolean found = false;
 			int offset = 0;
 			for (int i = 0; i < inter.functions.size(); i++) {
@@ -197,6 +195,16 @@ public class AsNFunctionCall extends AsNStatement {
 			
 			/* Make sure the function was found */
 			assert found : "Failed to locate function '" + f.path.build() + "'!";
+			
+			boolean nestedDeref = false;
+			if (callee instanceof InlineCall)
+				nestedDeref = ((InlineCall) callee).nestedDeref;
+			
+			/* Interface reference is a pointer, and call uses deref, need to load from pointer */
+			if (nestedDeref) {
+				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
+			}
 			
 			/* Load and push the function offset for later use */
 			ASMMov offsetMov = new ASMMov(new RegOp(REG.R12), new ImmOp(offset));
