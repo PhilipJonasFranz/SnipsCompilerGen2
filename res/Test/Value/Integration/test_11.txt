@@ -31,7 +31,7 @@ int main() {
 TESTCASES
 12
 OUTPUT
-.version 31885776460
+.version 33082622036
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -44,9 +44,6 @@ OUTPUT
 
 .data
 X_P_1: .word 0
-lambda_X.get_P_1: .word X.get_P_1
-lambda_X.set_P_1: .word X.set_P_1
-lambda_X.create_P_1: .word X.create_P_1
 NULL: .word 0
 HEAP_START: .word 0
 

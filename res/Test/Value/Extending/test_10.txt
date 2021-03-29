@@ -47,7 +47,7 @@ int main() {
 TESTCASES
 19
 OUTPUT
-.version 24104731577
+.version 25301577153
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -59,11 +59,7 @@ OUTPUT
 
 .data
 C.A_P_1: .word C.B_P_1
-lambda_C.A.incr_P_1: .word C.A.incr_P_1
-lambda_C.A.initPointer: .word C.A.initPointer
-lambda_C.A.create_P_1: .word C.A.create_P_1
 C.B_P_1: .word 0
-lambda_C.B.create_P_1: .word C.B.create_P_1
 NULL: .word 0
 HEAP_START: .word 0
 

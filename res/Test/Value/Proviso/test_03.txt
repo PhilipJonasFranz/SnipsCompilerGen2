@@ -13,7 +13,7 @@ TESTCASES
 1 5 4
 0 1 1
 OUTPUT
-.version 14618223358
+.version 15815068934
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -24,7 +24,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_getDiff_P_1_1: .word getDiff_P_1_1
 NULL: .word 0
 HEAP_START: .word 0
 

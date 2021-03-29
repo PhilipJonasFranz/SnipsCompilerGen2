@@ -53,7 +53,7 @@ int main() {
 TESTCASES
 12
 OUTPUT
-.version 42306368656
+.version 43503214232
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -64,10 +64,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_List.create_P_1: .word List.create_P_1
 List.LinkedList_P_1: .word 0
-lambda_List.LinkedList.add_P_1: .word List.LinkedList.add_P_1
-lambda_List.LinkedList.get_P_1: .word List.LinkedList.get_P_1
 List.ListNode_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0

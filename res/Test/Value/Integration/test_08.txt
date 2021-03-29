@@ -72,7 +72,7 @@ int main() {
 TESTCASES
 18
 OUTPUT
-.version 58967546675
+.version 60164392251
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -89,8 +89,6 @@ Util.Tuple2_P_1_1: .word 0
 Util.Tuple2_P_3_1: .word 0
 Util.Tuple2_P_1_2: .word 0
 GameObject.Player: .word 0
-lambda_GameObject.Items.get: .word GameObject.Items.get
-lambda_GameObject.Items.set: .word GameObject.Items.set
 GameObject.Items.Inventory: .word 0
 NULL: .word 0
 HEAP_START: .word 0

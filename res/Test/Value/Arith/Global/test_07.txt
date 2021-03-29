@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 513062034
+.version 1709907610
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -74,8 +74,7 @@ main:                                        /* Function: main */
     ldr r0, .P250970454_list0                /* Load parameters */
     ldr r0, [r0]
     bl List.LinkedList.clear_P_1             /* Call List.LinkedList.clear */
-    ldr r0, .P250970454_lambda_List.LinkedList.add_P_1/* Evaluate Expression */
-    ldr r3, [r0]
+    ldr r3, .P250970454_List.LinkedList.add_P_1/* Evaluate Expression */
     mov r1, #30
     ldr r0, .P250970454_list0                /* Load from .data section */
     ldr r0, [r0]
@@ -88,5 +87,5 @@ main:                                        /* Function: main */
     bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P250970454_lambda_List.LinkedList.add_P_1: .word lambda_List.LinkedList.add_P_1
+.P250970454_List.LinkedList.add_P_1: .word List.LinkedList.add_P_1
 .P250970454_list0: .word list0

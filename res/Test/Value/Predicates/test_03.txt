@@ -15,7 +15,7 @@ TESTCASES
 0 5
 1 6
 OUTPUT
-.version 10120273328
+.version 11317118904
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -26,7 +26,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_add5_P_1: .word add5_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -53,10 +52,8 @@ add5_P_1:                                    /* Function: add5, Provisos: INT | 
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
-    ldr r0, .P136005061_lambda_add5_P_1      /* Evaluate Expression */
-    ldr r4, [r0]
-    ldr r0, .P136005061_lambda_add5_P_1      /* Evaluate Expression */
-    ldr r5, [r0]
+    ldr r4, .P136005061_add5_P_1             /* Evaluate Expression */
+    ldr r5, .P136005061_add5_P_1             /* Evaluate Expression */
     mov r0, #0                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r5
@@ -64,4 +61,4 @@ main:                                        /* Function: main */
     add lr, pc, #8
     mov pc, r4
     pop { pc }
-.P136005061_lambda_add5_P_1: .word lambda_add5_P_1
+.P136005061_add5_P_1: .word add5_P_1

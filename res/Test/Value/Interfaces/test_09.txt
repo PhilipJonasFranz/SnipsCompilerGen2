@@ -34,7 +34,7 @@ TESTCASES
 0 30
 1 14
 OUTPUT
-.version 17094893850
+.version 18291739426
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -48,9 +48,6 @@ OUTPUT
 .include linked_list.s
 
 .data
-lambda_not20: .word not20
-lambda_mul2: .word mul2
-lambda_add5: .word add5
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -105,14 +102,11 @@ main:                                        /* Function: main */
     bl Streamable.Stream.create_P_1          /* Call Streamable.Stream.create */
     bl init_P_2                              /* Call init */
     mov r4, r0
-    ldr r0, .P595710337_lambda_not20         /* Load parameters */
-    ldr r0, [r0]
+    ldr r0, .P595710337_not20                /* Load parameters */
     push { r0 }
-    ldr r0, .P595710337_lambda_mul2          /* Load parameters */
-    ldr r0, [r0]
+    ldr r0, .P595710337_mul2                 /* Load parameters */
     push { r0 }
-    ldr r0, .P595710337_lambda_add5          /* Load parameters */
-    ldr r1, [r0]
+    ldr r1, .P595710337_add5                 /* Load parameters */
     mov r0, r4
     bl Streamable.Stream.forEach_P_1         /* Call Streamable.Stream.forEach */
     pop { r1 }
@@ -131,6 +125,6 @@ main:                                        /* Function: main */
     mov pc, r12
     pop { pc }
 .P595710337_Collection_P_1: .word Collection_P_1
-.P595710337_lambda_add5: .word lambda_add5
-.P595710337_lambda_mul2: .word lambda_mul2
-.P595710337_lambda_not20: .word lambda_not20
+.P595710337_add5: .word add5
+.P595710337_mul2: .word mul2
+.P595710337_not20: .word not20

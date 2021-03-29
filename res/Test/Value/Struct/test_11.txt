@@ -23,7 +23,7 @@ TESTCASES
 1 6
 2 8
 OUTPUT
-.version 2064141141
+.version 3260986717
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -34,7 +34,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_create_P_2: .word create_P_2
 Data_P_2: .word 0
 Capsule_P_2: .word 0
 NULL: .word 0

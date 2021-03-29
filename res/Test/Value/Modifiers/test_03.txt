@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 11376588957
+.version 12573434533
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -33,7 +33,6 @@ OUTPUT
 
 .data
 Data.X: .word 0
-lambda_Data.X.create: .word Data.X.create
 NULL: .word 0
 HEAP_START: .word 0
 

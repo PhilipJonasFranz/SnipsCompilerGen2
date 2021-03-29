@@ -16,7 +16,7 @@ TESTCASES
 0 1
 1 0
 OUTPUT
-.version -1511005951
+.version -314160375
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -27,8 +27,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_get2: .word get2
-lambda_get: .word get
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -58,22 +56,18 @@ get2:                                        /* Function: get2 */
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
-    ldr r0, .P1023508742_lambda_get          /* Evaluate Expression */
-    ldr r4, [r0]
-    cmp r3, #0
+    ldr r4, .P1023508742_get                 /* Evaluate Expression */
+    cmp r0, #0
     beq main.L0
-    ldr r0, .P1023508742_lambda_get2
-    ldr r0, [r0]
+    ldr r0, .P1023508742_get2
     b main.L1
 main.L0: 
-    ldr r0, .P1023508742_lambda_get
-    ldr r0, [r0]
+    ldr r0, .P1023508742_get
 main.L1: 
     mov r5, r0
     cmp r4, r5
     moveq r0, #1
     movne r0, #0
     bx lr
-.P1023508742_lambda_get2: .word lambda_get2
-.P1023508742_lambda_get: .word lambda_get
+.P1023508742_get2: .word get2
+.P1023508742_get: .word get

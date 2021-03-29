@@ -43,7 +43,7 @@ TESTCASES
 3 99
 4 99
 OUTPUT
-.version 15878600582
+.version 17075446158
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -54,8 +54,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_throw: .word throw
-lambda_get: .word get
 Exception: .word 0
 ContextException: .word 0
 NULL: .word 0

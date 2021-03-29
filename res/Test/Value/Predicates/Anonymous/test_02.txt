@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-.version -193221928
+.version 1003623648
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -28,7 +28,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_get: .word get
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -67,8 +66,7 @@ get:                                         /* Function: get */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    ldr r0, .P553308267_lambda_get           /* Evaluate Expression */
-    ldr r0, [r0]
+    ldr r0, .P553308267_get                  /* Evaluate Expression */
     push { r0 }
     ldr r3, [fp, #-4]
 /* Call the predicate */
@@ -83,4 +81,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P553308267_lambda_get: .word lambda_get
+.P553308267_get: .word get

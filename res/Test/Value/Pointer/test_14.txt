@@ -18,7 +18,7 @@ TESTCASES
 2 9
 3 1
 OUTPUT
-.version -931907880
+.version 264937696
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -29,8 +29,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_shift: .word shift
-lambda_get: .word get
 NULL: .word 0
 HEAP_START: .word 0
 

@@ -27,7 +27,7 @@ TESTCASES
 0 12
 1 30
 OUTPUT
-.version 15133624001
+.version 16330469577
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -40,8 +40,6 @@ OUTPUT
 .data
 X: .word 0
 X_resolver_relay: .word X_resolver
-lambda_X.get@2: .word X.get@2
-lambda_X.get@3: .word X.get@3
 Getter: .word 0
 NULL: .word 0
 HEAP_START: .word 0

@@ -6,7 +6,7 @@ int main() {
 TESTCASES
 13
 OUTPUT
-.version 15729305144
+.version 16926150720
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -17,7 +17,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_ANON1: .word ANON1
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -43,10 +42,9 @@ ANON1:                                       /* Function: ANON1 */
 .global main
 main:                                        /* Function: main */
     push { lr }
-    ldr r0, .P994879591_lambda_ANON1         /* Evaluate Expression */
-    ldr r3, [r0]
+    ldr r3, .P994879591_ANON1                /* Evaluate Expression */
     mov r0, #3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r3
     pop { pc }
-.P994879591_lambda_ANON1: .word lambda_ANON1
+.P994879591_ANON1: .word ANON1

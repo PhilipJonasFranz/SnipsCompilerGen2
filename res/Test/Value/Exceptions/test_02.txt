@@ -52,7 +52,7 @@ TESTCASES
 3 9
 4 11
 OUTPUT
-.version 22584859241
+.version 23781704817
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -63,8 +63,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_relay: .word relay
-lambda_get: .word get
 Exception: .word 0
 ContextException: .word 0
 NULL: .word 0

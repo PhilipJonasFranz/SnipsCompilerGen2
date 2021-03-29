@@ -23,7 +23,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 3069094405
+.version 4265939981
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -34,9 +34,7 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_cast: .word cast
 K: .word 0
-lambda_sortPred: .word sortPred
 NULL: .word 0
 HEAP_START: .word 0
 
@@ -69,8 +67,7 @@ cast:                                        /* Function: cast */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    ldr r0, .P307779967_lambda_sortPred      /* Evaluate Expression */
-    ldr r0, [r0]
+    ldr r0, .P307779967_sortPred             /* Evaluate Expression */
     push { r0 }
     ldr r0, .P307779967_K
     push { r0 }
@@ -91,4 +88,4 @@ main.L2:
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P307779967_K: .word K
-.P307779967_lambda_sortPred: .word lambda_sortPred
+.P307779967_sortPred: .word sortPred

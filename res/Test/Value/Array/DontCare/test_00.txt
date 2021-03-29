@@ -18,7 +18,7 @@ TESTCASES
 5 10
 6 5
 OUTPUT
-.version 7530815277
+.version 8727660853
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -29,7 +29,6 @@ OUTPUT
 .include maybe free.s
 
 .data
-lambda_add5: .word add5
 Point: .word 0
 NULL: .word 0
 HEAP_START: .word 0
@@ -62,8 +61,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     ldr r0, .P891434015_Point
     push { r0 }
-    ldr r0, .P891434015_lambda_add5
-    ldr r0, [r0]
+    ldr r0, .P891434015_add5
     push { r0 }
     mov r0, #99
     mov r1, #1
@@ -74,5 +72,5 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-.P891434015_lambda_add5: .word lambda_add5
+.P891434015_add5: .word add5
 .P891434015_Point: .word Point

@@ -31,7 +31,7 @@ int main(int a) {
 TESTCASES
 16
 OUTPUT
-.version 3532062639
+.version 4728908215
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -44,10 +44,8 @@ OUTPUT
 .data
 B_P_1: .word A_P_1
 B_P_1_resolver_relay: .word B_P_1_resolver
-lambda_B.get_P_1: .word B.get_P_1
 A_P_1: .word 0
 A_P_1_resolver_relay: .word A_P_1_resolver
-lambda_A.get_P_1: .word A.get_P_1
 Getter_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0

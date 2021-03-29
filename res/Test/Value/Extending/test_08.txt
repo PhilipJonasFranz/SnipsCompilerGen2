@@ -24,7 +24,7 @@ int main() {
 TESTCASES
 82
 OUTPUT
-.version 44836461572
+.version 46033307148
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -36,9 +36,7 @@ OUTPUT
 
 .data
 Y_P_1: .word X_P_1_1
-lambda_Y.create_P_1: .word Y.create_P_1
 X_P_1_1: .word 0
-lambda_X.create_P_1_1: .word X.create_P_1_1
 NULL: .word 0
 HEAP_START: .word 0
 
