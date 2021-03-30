@@ -12,6 +12,7 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Cond;
@@ -72,7 +73,8 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			/* Check if value in R12 matches watched SID */
 			STRUCT watched = (STRUCT) w.watched.getType();
 			
-			watched.getTypedef().loadSIDInReg(tr0, REG.R12, watched.proviso);
+			watched.getTypedef().loadSIDInReg(tr0, REG.R10, watched.proviso);
+			tr0.instructions.add(new ASMCmp(new RegOp(REG.R12), new RegOp(REG.R10)));
 			tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(skip)));
 			
 			tr0.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(watched.wordsize() * 4)));
@@ -96,6 +98,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endBranch)));
 			
 			tr0.instructions.add(skip);
+			tr0.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 		}
 		
 		if (!s.unwatched.isEmpty()) {
@@ -104,9 +107,12 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			/* For each unwatched type, compare the SID and move the corresponding size in R0 */
 			for (TYPE t : s.unwatched) {
 				STRUCT s0 = (STRUCT) t;
-				s0.getTypedef().loadSIDInReg(tr0, REG.R12, s0.proviso);
+				s0.getTypedef().loadSIDInReg(tr0, REG.R10, s0.proviso);
+				tr0.instructions.add(new ASMCmp(new RegOp(REG.R12), new RegOp(REG.R10)));
 				tr0.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s0.wordsize() * 4), new Cond(COND.EQ)));
 			}
+			
+			tr0.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));
 			
 			/* R1 contains the location of the start of the exception in the stack, move in SP to inject in copy loop */
 			tr0.instructions.add(new ASMMov(new RegOp(REG.SP), new RegOp(REG.R1)));
