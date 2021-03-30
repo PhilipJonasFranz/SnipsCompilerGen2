@@ -19,23 +19,56 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_07.txt */
+.version 11736501959
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Data_P_1: .word 0
+Nib_P_1: .word 0
+Foo_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
-    mov r1, #1
+    ldr r1, .P1784532136_Foo_P_1
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .P1784532136_Nib_P_1
     push { r0 }
     mov r0, #5
-    mov r1, #1
+    ldr r1, .P1784532136_Foo_P_1
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .P1784532136_Nib_P_1
     push { r0 }
-    mov r0, #3
+    ldr r0, .P1784532136_Data_P_1
     push { r0 }
     ldr r0, [fp, #-16]                       /* Load field from struct */
     ldr r2, [fp, #-4]                        /* Load field from struct */
     add r0, r0, r2
     bx lr
-    
+.P1784532136_Data_P_1: .word Data_P_1
+.P1784532136_Nib_P_1: .word Nib_P_1
+.P1784532136_Foo_P_1: .word Foo_P_1

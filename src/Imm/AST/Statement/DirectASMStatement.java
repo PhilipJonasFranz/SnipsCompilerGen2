@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
@@ -55,7 +55,7 @@ public class DirectASMStatement extends Statement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -65,7 +65,7 @@ public class DirectASMStatement extends Statement {
 		return t;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		for (Pair<Expression, REG> p : this.dataIn) 
 			p.first.setContext(context);
 		

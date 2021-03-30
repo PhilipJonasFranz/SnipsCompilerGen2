@@ -37,9 +37,7 @@ public class AsNSignalStatement extends AsNStatement {
 		sig.instructions.addAll(AsNStructureInit.cast(s.exceptionInit, r, map, st).getInstructions());
 	
 		/* Move Struct ID into R12 to signal a thrown exception */
-		ASMMov signal = new ASMMov(new RegOp(REG.R12), new ImmOp(excType.getTypedef().SID));
-		signal.comment = new ASMComment("Signal thrown exception");
-		sig.instructions.add(signal);
+		excType.getTypedef().loadSIDInReg(sig, REG.R12, excType.proviso);
 		
 		/* Move word size of thrown exception into r0 to be used in the copy loop */
 		ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(s.exceptionInit.getType().wordsize() * 4));

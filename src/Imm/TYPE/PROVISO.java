@@ -119,9 +119,9 @@ public class PROVISO extends TYPE<Void> {
 
 	public TYPE provisoFree() {
 		if (this.hasContext())
-			return this.getContext().clone();
+			return this.getContext().clone().provisoFree();
 		else {
-			ContextChecker.progress.abort();
+			if (ContextChecker.progress != null) ContextChecker.progress.abort();
 			throw new SNIPS_EXC(Const.CANNOT_FREE_CONTEXTLESS_PROVISO, this.placeholderName, CompilerDriver.lastSource.getSourceMarker());
 		}
 	}

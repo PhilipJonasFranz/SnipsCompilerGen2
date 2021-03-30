@@ -12,22 +12,46 @@ int main(int x) {
 TESTCASES
 5
 OUTPUT
-/* --test_05.txt */
+.version 5329125441
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-lambda_get_P0:                               /* Function address getter for predication */
-    add r0, pc, #8
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
     mov pc, r10
-get_P0:                                      /* Function: get, Provisos: INT */
+
+.global get_P_1
+get_P_1:                                     /* Function: get, Provisos: INT */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get_P0
-    mov r10, #0
-    mov r5, r0
+    ldr r4, .P193263363_get_P_1              /* Evaluate Expression */
+    mov r0, r4                               /* Evaluate Expression */
+    mov r5, r4
     add lr, pc, #8                           /* Evaluate Expression */
     mov pc, r5
     pop { pc }
-    
+.P193263363_get_P_1: .word get_P_1

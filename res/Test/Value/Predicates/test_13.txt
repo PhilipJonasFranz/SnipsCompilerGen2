@@ -16,42 +16,58 @@ TESTCASES
 0 1
 1 0
 OUTPUT
-/* --test_13.txt */
+.version 6650478715
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-lambda_get:                                  /* Function address getter for predication */
-    add r0, pc, #8
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
     mov pc, r10
+
+.global get
 get:                                         /* Function: get */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
-lambda_get2:                                 /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
+
+.global get2
 get2:                                        /* Function: get2 */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
-    mov r3, r0
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get
-    mov r10, #0
-    mov r4, r0
-    cmp r3, #0
+    ldr r4, .P1023508742_get                 /* Evaluate Expression */
+    cmp r0, #0
     beq main.L0
-    add r10, pc, #8
-    b lambda_get2
-    mov r10, #0
+    ldr r0, .P1023508742_get2
     b main.L1
 main.L0: 
-    add r10, pc, #8
-    b lambda_get
-    mov r10, #0
+    ldr r0, .P1023508742_get
 main.L1: 
     mov r5, r0
     cmp r4, r5
     moveq r0, #1
     movne r0, #0
     bx lr
-    
+.P1023508742_get2: .word get2
+.P1023508742_get: .word get

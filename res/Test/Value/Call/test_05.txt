@@ -19,15 +19,43 @@ TESTCASES
 0 10
 5 25
 OUTPUT
-/* --test_05.txt */
+.version 7729594088
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global bar
 bar:                                         /* Function: bar */
     push { r4 }
     add r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
     pop { r4 }
     bx lr
-    
+
+.global foo
 foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r5, lr}
@@ -36,7 +64,8 @@ foo:                                         /* Function: foo */
     add r5, r3, r0
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3, r5, pc}
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -45,4 +74,3 @@ main:                                        /* Function: main */
     add r3, r3, r0
     mov r0, r3                               /* Evaluate Expression */
     pop { pc }
-    

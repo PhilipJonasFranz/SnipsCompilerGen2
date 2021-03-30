@@ -5,7 +5,7 @@ import Snips.CompilerDriver;
 
 public class ASMComment extends ASMInstruction {
 
-	String comment;
+	public String comment;
 	
 	public ASMComment(String comment) {
 		this.comment = comment;

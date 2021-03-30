@@ -23,8 +23,25 @@ int main() {
 TESTCASES
 17
 OUTPUT
-/* --test_07.txt */
+.version 38218976176
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Y_P_1: .word X_P_1
+X_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -35,8 +52,9 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-X.create_P1:                                 /* Function: X.create, Provisos: BOOL */
+
+.global X.create_P_1
+X.create_P_1:                                /* Function: X.create, Provisos: BOOL */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
     mov fp, sp
@@ -44,7 +62,7 @@ X.create_P1:                                 /* Function: X.create, Provisos: BO
     mov r4, r1
     push { r4 }
     push { r3 }
-    mov r0, #1
+    ldr r0, .P868419367_X_P_1
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -55,16 +73,18 @@ X.create_P1:                                 /* Function: X.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
-Y.create_P0:                                 /* Function: Y.create, Provisos: BOOL */
+.P868419367_X_P_1: .word X_P_1
+
+.global Y.create_P_1
+Y.create_P_1:                                /* Function: Y.create, Provisos: BOOL */
     sub sp, sp, #12
     stmea sp, {r5, fp, lr}
     mov fp, sp
     mov r5, r2
     push { r5 }
-    bl X.create_P1                           /* Call X.create */
+    bl X.create_P_1                          /* Call X.create */
     add sp, sp, #4
-    mov r0, #2
+    ldr r0, .P868419368_Y_P_1
     push { r0 }
     mov r2, sp
     mov sp, fp
@@ -75,7 +95,9 @@ Y.create_P0:                                 /* Function: Y.create, Provisos: BO
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.P868419368_Y_P_1: .word Y_P_1
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -85,7 +107,7 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #15
     ldmfd sp!, {r1, r2}
-    bl Y.create_P0                           /* Call Y.create */
+    bl Y.create_P_1                          /* Call Y.create */
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */
     add r0, r0, r2
@@ -93,4 +115,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

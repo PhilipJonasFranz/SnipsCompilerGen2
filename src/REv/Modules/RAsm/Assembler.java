@@ -7,7 +7,9 @@ import java.util.Map.Entry;
 
 import REv.Modules.Tools.Util;
 import Snips.CompilerDriver;
+import Tst.TestDriver;
 import Util.Logging.LogPoint;
+import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
 public class Assembler {
@@ -20,7 +22,7 @@ public class Assembler {
 	
 	static List<Message> log = new ArrayList();
 	
-	public static int [] [] assemble(List<String> input, boolean silent, boolean printBinary) {
+	public static int [] [] assemble(List<String> input, boolean silent, boolean printBinary) throws Exception {
 		boolean silent0 = CompilerDriver.silenced;
 		CompilerDriver.silenced = silent;
 		
@@ -145,6 +147,12 @@ public class Assembler {
 				if (in.get(i).getInstruction().equals(".text")) {
 					mode = MODE.TEXT;
 				}
+				if (in.get(i).getInstruction().startsWith(".global") ||
+						in.get(i).getInstruction().startsWith(".version")) {
+					in.remove(i);
+					i--;
+					continue;
+				}
 				
 				if (in.get(i).getInstruction().startsWith("push")) {
 					String [] sp = in.get(i).getInstruction().split(" ");
@@ -228,9 +236,13 @@ public class Assembler {
 					if (!in.get(i).getInstruction().contains(".word") && !in.get(i).getInstruction().contains(".skip")) {
 						// [label]: -> remove line
 						String label = in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1);
-						if (locations.containsKey(label))new Message("Multiple labels with similar name: " + label, LogPoint.Type.FAIL);
-						if (label.equals(""))new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
-						locations.put(in.get(i).getInstruction().substring(0, in.get(i).getInstruction().length() - 1), i * 4);
+						
+						if (locations.containsKey(label)) new Message("Multiple labels with similar name: " + label, LogPoint.Type.FAIL);
+						if (label.equals("")) new Message("Label name cannot be empty in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
+						if (label == null || label.equals("null")) 
+							new Message("Found bad label: '" + label + "' in line " + in.get(i).line, LogPoint.Type.FAIL);
+						
+						locations.put(label, i * 4);
 						in.remove(i);
 						i--;
 					}
@@ -274,7 +286,10 @@ public class Assembler {
 				if (in.get(i).getInstruction().startsWith("bl") || (in.get(i).instruction.startsWith("b") && !in.get(i).getInstruction().startsWith("bx"))) {
 					// bl there -> bl [x], x = address there
 					String [] sp = in.get(i).getInstruction().split(" ");
-					if (!locations.containsKey(sp [1]))log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL));
+					
+					if (!locations.containsKey(sp [1]) || locations.get(sp [1]) == null)
+						 log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL));
+					
 					sp [1] = "" + locations.get(sp [1]);
 					in.get(i).setInstruction(sp [0] + " " + sp [1]);
 				}
@@ -287,6 +302,8 @@ public class Assembler {
 		
 		/* Set to true when switching sections for the first time */
 		boolean sectionSwitch = false;
+		
+		Exception error = null;
 		
 		// Generate Code
 		if (!in.isEmpty())for (int i = 0; i < in.size(); i++) {
@@ -462,10 +479,10 @@ public class Assembler {
 					app += "" + acc; // Accumulate
 					app += (sp [0].startsWith("s"))? "1" : "0"; // s
 					app += getReg(sp [1]); // Rd
-					app += (sp.length > 4)? getReg(sp [4]) : "0000"; //Rn
-					app += getReg(sp [3]); //Rs
+					app += (sp.length > 4)? getReg(sp [4]) : "0000"; // Rn
+					app += getReg(sp [3]); // Rs
 					app += "1001";
-					app += getReg(sp [2]); //Rm
+					app += getReg(sp [2]); // Rm
 				}
 				else if (sp [0].startsWith("ldm") || sp [0].startsWith("stm")) {
 					/* Block Memory Op Code */
@@ -522,7 +539,7 @@ public class Assembler {
 						if (sp [k].startsWith("{")) sp [k] = sp [k].substring(1);
 						
 						if (toInt(sp [k]) != -1) {
-							regListCode = replaceChar(regListCode, "1".charAt(0), 15 - toInt(sp [k]));
+							regListCode = replaceChar(regListCode, '1', 15 - toInt(sp [k]));
 						}
 						else {
 							String [] sp0 = sp [k].split("-");
@@ -530,7 +547,7 @@ public class Assembler {
 							int e = toInt(sp0 [1].trim());
 							
 							for (int z = s; z <= e; z++) 
-								regListCode = replaceChar(regListCode, "1".charAt(0), 15 - z);
+								regListCode = replaceChar(regListCode, '1', 15 - z);
 						}
 					}
 					
@@ -723,7 +740,10 @@ public class Assembler {
 							int [] num = Util.toBinary(imm);
 							for (int a : num)app = a + app;
 						} catch (NumberFormatException e) {
-							if (!locations.containsKey(sp [1])) new Message("Unknown label in line " + in.get(i).getLine() + ": " + sp [1], LogPoint.Type.FAIL);
+							if (locations.get(sp [1]) == null) {
+								throw new Exception("Unknown label in line " + in.get(i).getLine() + ": " + sp [1]);
+							}
+							
 							int [] num = Util.toBinary(locations.get(sp [1]));
 							for (int a : num)app = a + app;
 						}
@@ -734,8 +754,15 @@ public class Assembler {
 							int [] num = Util.toBinary((sp.length > 1 && !sp [1].equals(""))? Integer.parseInt(sp [1]) : 0);
 							for (int a : num)app = a + app;
 						} catch (Exception e) {
-							new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
-							new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
+							Integer label = locations.get(sp [1]);
+							
+							if (label == null) throw new Exception("Unknown label: " + sp [1]);
+							
+							int [] num = Util.toBinary(label);
+							for (int a : num)app = a + app;
+							
+							//new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
+							//new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
 						}
 					}
 				}
@@ -745,21 +772,27 @@ public class Assembler {
 			
 				if (addLine) {
 					app = app.trim();
-					if (!app.equals("") && printBinary)System.out.println(app + ": " + in.get(i).getInstruction());
+					if (!app.equals("") && printBinary) System.out.println(app + ": " + in.get(i).getInstruction());
 					instr.add(app);
 				}
 			} catch (Exception e) {
-				System.out.println("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine());
-				e.printStackTrace();
+				boolean silenced = CompilerDriver.silenced;
+				if (!TestDriver.excludeASMErrors) CompilerDriver.silenced = false;
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
+				log.stream().forEach(x -> x.flush());
+				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);
+				error = e;
+				CompilerDriver.silenced = silenced;
 			}
 		}
+		
+		if (error != null) throw error;
 		
 		// To Integer Arrays
 		int [] [] code = new int [instr.size()] [32];
 		if (!in.isEmpty())try {
 			for (int i = 0; i < instr.size(); i++) {
-				if (instr.get(i).equals(""))continue;
+				if (instr.get(i).equals("")) continue;
 				String [] sp = instr.get(i).split("");
 				for (int a = 0; a < 32; a++)code [i] [31 - a] = Integer.parseInt(sp [a]);
 			}
@@ -809,12 +842,12 @@ public class Assembler {
 	 */
 	public static String toBinaryStringLength(String num, int w, int line) throws Exception {
 		try {
-		int [] b = Util.toBinary(Integer.parseInt(num));
-		String app = "";
-		for (int i = 0; i < w; i++)app = b [31 - i] + app;
-		return app;
+			int [] b = Util.toBinary(Integer.parseInt(num));
+			String app = "";
+			for (int i = 0; i < w; i++)app = b [31 - i] + app;
+			return app;
 		} catch (NumberFormatException e) {
-			throw new Exception("Bad parse input, line " + line);
+			throw new Exception("Bad parse input, line " + line + ": " + num);
 		}
 	}
 	

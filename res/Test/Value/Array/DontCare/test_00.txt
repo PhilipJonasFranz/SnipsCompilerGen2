@@ -15,30 +15,53 @@ int main(int b) {
 TESTCASES
 0 10
 1 1
-4 1
 5 10
 6 5
 OUTPUT
-/* --test_00.txt */
+.version 10004281003
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Point: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-lambda_add5:                                 /* Function address getter for predication */
-    add r0, pc, #8
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
     mov pc, r10
+
+.global add5
 add5:                                        /* Function: add5 */
     add r0, r0, #5
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
     mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #1
+    ldr r0, .P891434015_Point
     push { r0 }
-    add r10, pc, #8
-    b lambda_add5
-    mov r10, #0
+    ldr r0, .P891434015_add5
     push { r0 }
     mov r0, #99
     mov r1, #1
@@ -49,4 +72,5 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-    
+.P891434015_add5: .word add5
+.P891434015_Point: .word Point

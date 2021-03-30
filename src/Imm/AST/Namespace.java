@@ -3,7 +3,7 @@ package Imm.AST;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Util.NamespacePath;
@@ -54,7 +54,7 @@ public class Namespace extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		/* This function should not be called since namespaces are flattened */
 		return new VOID();
 	}

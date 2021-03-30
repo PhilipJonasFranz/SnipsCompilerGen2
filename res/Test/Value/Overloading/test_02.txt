@@ -21,13 +21,42 @@ TESTCASES
 0 12
 1 30
 OUTPUT
-/* --test_02.txt */
+.version 14989911601
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global X.get@0
 X.get@0:                                     /* Function: X.get */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
+.global X.get@1
 X.get@1:                                     /* Function: X.get */
     push { r3 }
     mov r3, r0
@@ -42,14 +71,15 @@ X.get@1.L0:
 X.get@1.L1: 
     pop { r3 }
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1086831212_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
@@ -62,4 +92,4 @@ main:                                        /* Function: main */
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P1086831212_X: .word X

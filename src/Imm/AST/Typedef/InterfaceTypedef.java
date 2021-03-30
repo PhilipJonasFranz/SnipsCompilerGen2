@@ -1,14 +1,22 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
+import Imm.AsN.AsNNode;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -36,6 +44,8 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public List<StructTypedef> implementers = new ArrayList();
 
+	public HashMap<String, ASMDataLabel> IIDLabelMap = new HashMap();
+	
 	public class InterfaceProvisoMapping {
 		
 		public String provisoPostfix;
@@ -101,7 +111,7 @@ public class InterfaceTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false, true))
+					if (Function.signatureMatch(fs, f0, false, true, false))
 						override = true;
 				
 				if (!override) {
@@ -126,7 +136,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(newMapping), clone);
 		this.registeredMappings.add(mapping);
 		
 		String s = "";
@@ -190,7 +200,7 @@ public class InterfaceTypedef extends SyntaxElement {
 			f.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -200,8 +210,26 @@ public class InterfaceTypedef extends SyntaxElement {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
+	}
+	
+	public void loadIIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		node.instructions.addAll(this.loadIIDInReg(reg, context));
+	}
+	
+	public List<ASMInstruction> loadIIDInReg(REG reg, List<TYPE> context) {
+		List<ASMInstruction> ins = new ArrayList();
+		
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.IIDLabelMap.get(postfix) != null : 
+			"Attempted to load IID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.IIDLabelMap.get(postfix));
+		ins.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+		
+		return ins;
 	}
 
 } 

@@ -1,60 +1,22 @@
 #include<iterable.sn>
 
-/*
- * This package contains the utility to create and use
- * a circular queue.
- */
 namespace Queue {
 	
-	/*
-	 * The cyclic queue capsules a pointer to a storage location for
-	 * the contained values, indexes for the head and tail, as well as the
-	 * maximum size of the queue. Finally the queue has a isEmpty flag, 
-	 * that is used to determine wether the queue is full or empty when
-	 * the head index is the same as the tail index.
-	 */
 	restricted struct CyclicQueue<T> : Iterable<T> {
 		
-		T* storage;
-		
-		T defValue;
-		
-		int size;
-		
-		int head;
-		
-		int tail;
-		
-		bool isEmpty;
-	
-		/*
-		 * Frees the allocated storage of the queue,
-		 * as well as the queue itself.
-		 */
 		shared void destroy<T:void>() {
 			free(self->storage);
 			free(self);
 		}
 		
-		/*
-		 * Returns true if currently no elements are in the queue.
-		 */
 		shared bool isEmpty<T:void>() {
 			return self->isEmpty;
 		}
 		
-		/*
-		 * Returns true if the amount of elements in the queue is
-		 * equal to the specified size when the queue was created.
-		 */
 		shared bool isFull<T:void>() {
 			return self->head == self->tail && !self->isEmpty;
 		}
 		
-		/*
-		 * Enqueue a new value. The value is only enqueued if the 
-		 * queue is not full.
-		 */
 		shared void enqueue(T value) {
 			if (self->head == self->tail && !self->isEmpty) {
 				/* Queue is full */
@@ -79,10 +41,6 @@ namespace Queue {
 			}
 		}
 		
-		/*
-		 * Dequeues a value and removes it from the queue. Returns
-		 * the default value if the queue is empty.
-		 */
 		shared T dequeue() {
 			if (self->isEmpty) {
 				/* Queue is empty, return a default value. */
@@ -102,10 +60,6 @@ namespace Queue {
 			}
 		}
 
-		/*
-		 * Clears all elements in the queue by resetting the
-		 * head and tail indexes, and setting the isEmpty flag to true.
-		 */
 		shared void clear<T:void>() {
 			self->head = 0;
 			self->tail = 0;
@@ -113,28 +67,15 @@ namespace Queue {
 			return;
 		}
 		
-		/*
-		 * Returns the value at the given index, where the index 0 is
-		 * the index at the tail, or the next value to be dequeued. 
-		 */
 		shared T get(int index) {
 			return *(self->storage + (((self->tail + index) % self->size) * sizeof(T)));
 		}
 		
-		/*
-		 * Sets the value at the given index, where the index 0 is
-		 * the index at the tail, or the next value to be dequeued,
-		 * to the provided value.
-		 */
 		shared void set(int index, T value) {
 			int off = (((self->tail + index) % self->size) * sizeof(T));
 			*(self->storage + off) = value;
 		}
 		
-		/*
-		 * Returns the amount of elements that are currently 
-		 * stored in the queue.
-		 */
 		shared int size<T:void>() {
 			/* Queue is full */
 			if (self->head == self->tail && !(self->isEmpty)) 
@@ -148,11 +89,6 @@ namespace Queue {
 			return size;
 		}
 	
-		/*
-		 * Allocates a new queue and initializes it.
-		 * The passed size will be set as the maximum amount of elements
-		 * in the queue.
-		 */
 		static CyclicQueue<T>* create<T>(int size, T defValue) {
 			/* Allocate memory for storage of given size */
 			T* storage = resv(sizeof(T) * size);

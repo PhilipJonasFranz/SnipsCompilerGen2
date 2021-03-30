@@ -4,7 +4,7 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -44,20 +44,20 @@ public class TempAtom extends Expression {
 		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
 		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
-			throw new CTX_EXC(this.getSource(), "Placeholder atom is not available at this location");
+			throw new CTEX_EXC(this.getSource(), "Placeholder atom is not available at this location");
 		
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.inheritType != null)
 			ProvisoUtil.mapNTo1(this.inheritType, context);
 		

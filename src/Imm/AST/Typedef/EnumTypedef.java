@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -66,11 +66,11 @@ public class EnumTypedef extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		return new VOID();
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
 

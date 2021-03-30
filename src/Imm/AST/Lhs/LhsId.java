@@ -1,7 +1,7 @@
 package Imm.AST.Lhs;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
@@ -36,7 +36,7 @@ public abstract class LhsId extends SyntaxElement {
 	 * Implementations provide their own check implementations, since they relay to 
 	 * internal components and have to set {@link #origin} after checking.
 	 */
-	public abstract TYPE check(ContextChecker ctx) throws CTX_EXC;
+	public abstract TYPE check(ContextChecker ctx) throws CTEX_EXC;
 	
 	public abstract NamespacePath getFieldName();
 	

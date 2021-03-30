@@ -1,20 +1,10 @@
 #include<linked_list.sn>
 #include<iterable.sn>
 
-/*
- * This package provides the utility to create and 
- * use a stack. This package builds on the linked_list
- * package. 
- */
 namespace Stack {
 	
 	restricted struct StackedList<T> : Iterable<T> {
 		
-		LinkedList<T>* list;
-		
-		/*
-		 * Destroys the stack and the capsuled list.
-		 */
 		shared void destroy<T:void>() {
 			/* Destroy the capsuled list */
 			(self->list)->destroy();
@@ -23,40 +13,23 @@ namespace Stack {
 			free(self);
 		}
 		
-		/*
-		 * Pushes given element on top of the stack.
-		 */
 		shared void push(T value) {
 			(self->list)->add(value);
 		}
 		
-		/*
-		 * Returns true if no elements are currently in the stack.
-		 */
 		shared bool isEmpty<T:void>() {
 			return (self->list)->size() == 0;
 		}
 		
-		/*
-		 * Returns the amount of elements stored in the stack.
-		 */
 		shared int size<T:void>() {
 			return (self->list)->size();
 		}
 		
-		/*
-		 * Returns the element on the top of the stack, but doesnt
-		 * remove it. Returns the default value if the stack is empty.
-		 */
 		shared T peek() {
 			if (self->isEmpty()) return self->list->defValue;
 			else return (self->list)->get((self->list)->size() - 1);
 		}
 		
-		/*
-		 * Returns the element on the top of the stack, and 
-		 * removes it. Returns the default value if the stack is empty.
-		 */
 		shared T pop() {
 			if (self->isEmpty()) {
 				return self->list->defValue;
@@ -77,10 +50,6 @@ namespace Stack {
 			(self->list)->set(index, value);
 		}
 		
-		/*
-		 * Creates and initializes a new stack.
-		 * Returns a pointer to the newly created stack.
-		 */
 		static StackedList<T>* create<T>(T defValue) {
 			/* Allocate a new linked list for the stack */
 			LinkedList<T>* list = LinkedList::create(defValue);

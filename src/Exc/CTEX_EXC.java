@@ -9,7 +9,7 @@ import Util.Logging.Message;
 /**
  * Thrown when the user input led to an illegal combination of components.
  */
-public class CTX_EXC extends Exception {
+public class CTEX_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
@@ -19,7 +19,7 @@ public class CTX_EXC extends Exception {
 	
 	Object [] format;
 	
-	public CTX_EXC(Source source, String message, Object...format) {
+	public CTEX_EXC(Source source, String message, Object...format) {
 		this.location = source;
 		this.message = message;
 		this.format = format;

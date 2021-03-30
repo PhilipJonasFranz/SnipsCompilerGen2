@@ -2,7 +2,7 @@ package Imm.TYPE.PRIMITIVES;
 
 import java.util.List;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
@@ -60,12 +60,12 @@ public class FUNC extends PRIMITIVE<Function> {
 		else {
 			for (int i = 0; i < this.funcHead.parameters.size(); i++) {
 				if (!func.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType())) {
-					return new CTX_EXC(source, Const.PARAMETER_TYPE_DOES_NOT_MATCH, func.funcHead.parameters.get(i).getType().typeString(), this.funcHead.parameters.get(i).getType().typeString());
+					return new CTEX_EXC(source, Const.PARAMETER_TYPE_DOES_NOT_MATCH, func.funcHead.parameters.get(i).getType().typeString(), this.funcHead.parameters.get(i).getType().typeString());
 				}
 				
 			}
 			
-			return new CTX_EXC(source, Const.RETURN_TYPE_DOES_NOT_MATCH, func.funcHead.getReturnType().typeString(), this.funcHead.getReturnType().typeString());
+			return new CTEX_EXC(source, Const.RETURN_TYPE_DOES_NOT_MATCH, func.funcHead.getReturnType().typeString(), this.funcHead.getReturnType().typeString());
 		}
 	}
 	

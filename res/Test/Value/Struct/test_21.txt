@@ -14,7 +14,36 @@ TESTCASES
 1 0 16
 1 1 18
 OUTPUT
-/* --test_21.txt */
+.version 32729085903
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
@@ -27,7 +56,7 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1164804880_Test
     push { r0 }
     sub r1, fp, #16                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
@@ -40,4 +69,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-    
+.P1164804880_Test: .word Test

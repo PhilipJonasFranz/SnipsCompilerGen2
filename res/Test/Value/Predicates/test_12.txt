@@ -6,24 +6,45 @@ int main() {
 TESTCASES
 13
 OUTPUT
-/* --test_12.txt */
+.version 14282719378
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-    
-lambda_ANON1:                                /* Function address getter for predication */
-    add r0, pc, #8
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
     mov pc, r10
+
+.global ANON1
 ANON1:                                       /* Function: ANON1 */
     add r0, r0, #10
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_ANON1
-    mov r10, #0
-    mov r3, r0
+    ldr r3, .P994879591_ANON1                /* Evaluate Expression */
     mov r0, #3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r3
     pop { pc }
-    
+.P994879591_ANON1: .word ANON1

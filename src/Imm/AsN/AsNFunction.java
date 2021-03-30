@@ -9,11 +9,12 @@ import CGen.StackSet;
 import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -34,15 +35,19 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Function.ProvisoMapping;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import PreP.PreProcessor;
 import Res.Const;
+import Snips.CompilerDriver;
 import Util.Pair;
+import Util.Util;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 public class AsNFunction extends AsNCompoundStatement {
 
@@ -52,14 +57,23 @@ public class AsNFunction extends AsNCompoundStatement {
 	public Function source;
 	
 	public ASMLabel copyLoopEscape;
+
+	public List<String> generatedLabels = new ArrayList();
 	
+	/* 
+	 * List that contains all the names of the proviso calls that were already translated.
+	 * This is used to check wether to translate the current proviso mapping again. The name
+	 * would be the same since it was changed up below.
+	 */
+	public List<String> translated = new ArrayList();
 	
+
 			/* ---< METHODS >--- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
-	 * @throws CTX_EXC 
+	 * @throws CTEX_EXC 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTX_EXC {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTEX_EXC {
 		AsNFunction func = new AsNFunction();
 		f.castedNode = func;
 		func.source = f;
@@ -98,55 +112,44 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
-		/*
-		 * Change names of proviso mappings if the types are word-size equal.
-		 * The translation will result in the same assembly, so we dont have to do it again.
-		 * The name is set to the first occurrence of the similar mappings. Down below
-		 * the name is checked if its already in a list of translated mappings.
-		 */
-		for (int i = 0; i < f.provisosCalls.size(); i++) {
-			ProvisoMapping call0 = f.provisosCalls.get(i);
-			for (int a = i + 1; a < f.provisosCalls.size(); a++) {
-				ProvisoMapping call1 = f.provisosCalls.get(a);
-				
-				if (!call0.provisoPostfix.equals(call1.provisoPostfix)) {
-					boolean equal = true;
-					
-					/* Check for equal return type */
-					equal &= call0.returnType.wordsize() == call1.returnType.wordsize();
-					
-					/* Check for equal parameter types */
-					for (int k = 0; k < call0.provisoMapping.size(); k++) 
-						equal &= call0.provisoMapping.get(k).wordsize() == call1.provisoMapping.get(k).wordsize();
-					
-					/* 
-					 * Mappings are of equal types, set label gen postfix of 
-					 * this one to the other equal one 
-					 */
-					if (equal) 
-						call1.provisoPostfix = call0.provisoPostfix;
-				}
-			}
-		}
-		
-		/* 
-		 * List that contains all the names of the proviso calls that were already translated.
-		 * This is used to check wether to translate the current proviso mapping again. The name
-		 * would be the same since it was changed up below.
-		 */
-		List<String> translated = new ArrayList();
-		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
+			
+			/* 
+			 * Body is null, insert include directive instead, or build 
+			 * object file only and this function is not from the main file
+			 */
+			if (!CompilerDriver.buildModulesRecurse && 
+					(f.body == null || 
+					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
+				
+				/* Replace .hn with .sn in module link */
+				String source = Util.toASMPath(f.getSource().sourceFile);
+				
+				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix()));
+				
+				/* Check if required module exists */
+				String mappedPath = PreProcessor.resolveToPath(source);
+				if (PreProcessor.getFile(mappedPath) == null) {
+					AsNBody.progress.abort();
+					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
+				}
+				
+				continue;
+			}
+			
+			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
+			
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
-			else translated.add(f.provisosCalls.get(k).provisoPostfix);
+			if (func.translated.contains(f.provisosCalls.get(k).getProvisoPostfix())) continue;
+			else func.translated.add(f.provisosCalls.get(k).getProvisoPostfix());
 			
 			/* Set the current proviso call scheme if its not the default scheme */
-			if (!f.provisosCalls.get(k).provisoPostfix.equals("")) 
+			if (!f.provisosCalls.get(k).getProvisoPostfix().equals("")) 
 				f.setContext(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Setup Parameter Mapping */
@@ -165,24 +168,21 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Create the function head label */
 			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
-			/* Function address getter for lambda */
-			if (f.isLambdaTarget) {
-				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
-				l.comment = new ASMComment("Function address getter for predication");
-				func.instructions.add(l);
-				
-				func.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.PC), new ImmOp(8)));
-				
-				/* Branch back via sys jump */
-				func.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
-			}
+			func.generatedLabels.add(funcLabel);
+			
+			/* Add .global label */
+			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+			func.instructions.add(globalFunction);
+			
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
 			ASMLabel label = new ASMLabel(funcLabel, true);
+			f.headLabelMap.put(LabelUtil.getProvisoPostfix(f.provisosCalls.get(k).provisoMapping), label);
+			
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
-			if (f.provisosCalls.get(k).provisoPostfix.equals("")) {
+			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
 				com = "Function: " + f.path.build();
 			}
 			else {
@@ -190,7 +190,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
-					if (f.provisosCalls.get(z).provisoPostfix.equals(f.provisosCalls.get(k).provisoPostfix)) {
+					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
 						for (int x = 0; x < types.size(); x++) 
@@ -203,7 +203,6 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			label.comment = new ASMComment(com);
-			
 			
 			/* Add function label */
 			func.instructions.add(label);
@@ -428,6 +427,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
+			
+			LabelUtil.currentContext = null;
 		}
 		
 		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);

@@ -1,0 +1,102 @@
+SOURCE
+struct AX {
+	int x0;
+}
+
+struct A {
+	int x;
+}
+
+struct B : A {
+	int y;
+}
+
+struct C : B {
+	int z;
+}
+
+struct D : B {
+	bool b;
+}
+
+struct E : A {
+	bool k;
+}
+
+struct F : E {
+	bool k0;
+}
+
+struct G : A {
+	int x0;
+}
+
+struct H : G {
+	int y0;
+}
+
+struct I : G {
+	int j0;
+}
+
+struct J : G {
+	int j;
+}
+
+struct AY {
+	int y0;
+}
+
+int main() {
+	return (int) isa(idof(C), idof(A));
+}
+TESTCASES
+1
+OUTPUT
+.version -10668869704
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+AY: .word 0
+J: .word G
+I: .word G
+H: .word G
+G: .word A
+F: .word E
+E: .word A
+D: .word B
+C: .word B
+B: .word A
+A: .word 0
+AX: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
+main:                                        /* Function: main */
+    ldr r1, .P2034066697_A                   /* Evaluate Expression */
+    ldr r0, .P2034066697_C
+    b isa                                    /* Call isa */
+.P2034066697_C: .word C
+.P2034066697_A: .word A

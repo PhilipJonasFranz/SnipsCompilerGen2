@@ -52,8 +52,25 @@ TESTCASES
 3 9
 4 11
 OUTPUT
-/* --test_02.txt */
+.version 24346136750
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Exception: .word 0
+ContextException: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -64,7 +81,8 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
+
+.global get
 get:                                         /* Function: get */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
@@ -75,9 +93,9 @@ get:                                         /* Function: get */
     cmp r1, #0
     bge get.L2
     push { r4 }
-    mov r0, #1
+    ldr r0, .P1084479042_ContextException
     push { r0 }
-    mov r12, #1                              /* Signal thrown exception */
+    ldr r12, .P1084479042_ContextException
     mov r0, #8
     b get.L0                                 /* Exception thrown, branch to escape target */
 get.L2: 
@@ -85,9 +103,9 @@ get.L2:
     ble get.L3
     push { r5 }
     push { r4 }
-    mov r0, #2
+    ldr r0, .P1084479042_Exception
     push { r0 }
-    mov r12, #2                              /* Signal thrown exception */
+    ldr r12, .P1084479042_Exception
     mov r0, #12
     b get.L0                                 /* Exception thrown, branch to escape target */
 get.L3: 
@@ -104,7 +122,10 @@ get.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.P1084479042_Exception: .word Exception
+.P1084479042_ContextException: .word ContextException
+
+.global relay
 relay:                                       /* Function: relay */
     sub sp, sp, #20
     stmea sp, {r4-r6, fp, lr}
@@ -127,7 +148,8 @@ relay.L1:
     mov r1, sp
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    cmp r12, #1
+    ldr r10, .P1084479041_ContextException
+    cmp r12, r10
     bne relay.L3
     add r1, r1, #8
     mov r0, #8
@@ -140,8 +162,10 @@ relay.L1:
     b relay.L2
 relay.L3: 
 /* Unwatched Exceptions */
-    cmp r12, #2
+    ldr r10, .P1084479041_Exception
+    cmp r12, r10
     moveq r0, #12
+    mov r10, #0
     mov sp, r1
     b relay.L0                               /* Exception thrown, branch to escape target */
 relay.L2: 
@@ -157,7 +181,10 @@ relay.L0:
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+.P1084479041_Exception: .word Exception
+.P1084479041_ContextException: .word ContextException
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -180,12 +207,13 @@ main:                                        /* Function: main */
     mov r4, r0
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    b main.L2
+    b main.L1
 main.L0: 
     mov r1, sp
     ldr sp, [fp, #-16]                       /* Load backed up sp from stack */
     add sp, sp, #4
-    cmp r12, #2
+    ldr r10, .P1084479040_Exception
+    cmp r12, r10
     bne main.L2
     add r1, r1, #12
     mov r0, #12
@@ -198,8 +226,11 @@ main.L0:
     add r4, r0, r2
     add sp, sp, #12
     mov r12, #0
+    b main.L1
 main.L2: 
+    mov r10, #0
+main.L1: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P1084479040_Exception: .word Exception

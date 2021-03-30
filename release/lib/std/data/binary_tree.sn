@@ -1,31 +1,7 @@
-/*
- * [BASE-PACKAGE]
- *
- * This package contains the utility to create a binary
- * search tree.
- */
 namespace Tree {
 	
-	/*
-	 * A tree node that has a left and right child and holds a value.
-	 */
 	restricted struct TreeNode<T> {
 	
-		TreeNode<T>* left;
-		
-		TreeNode<T>* right;
-		
-		T value;
-	
-		/*
-		 * Inserts given value into the tree. The given predicate is used to place
-		 * the given value at the correct position. The predicate should sort the values
-		 * in a total order. This means that the predicate (x, y) -> int returns:
-		 *		1	if x > y,
-		 *		-1	if x < y,
-		 * 		0 	if x = y.
-		 * Returns the resulting root node.
-		 */
 		shared TreeNode<T>* insert(func (T, T) -> int pred, T value) {
 			/* Initialize new node with null pointers and given value */
 			TreeNode<T>* new = init<>(TreeNode<T>::(null, null, value));
@@ -63,13 +39,6 @@ namespace Tree {
 			}
 		}
 		
-		/*
-		 * Checks if given value is contained in the tree. The predicate should sort the values
-		 * in a total order. This means that the predicate (x, y) -> int returns:
-		 *		1	if x > y,
-		 *		-1	if x < y,
-		 * 		0 	if x = y.
-		 */
 		shared bool contains(func (T, T) -> int pred, T value) {
 			if (self == null) return false;
 			else {
@@ -83,14 +52,6 @@ namespace Tree {
 			}
 		}
 		
-		/*
-		 * Delete given value from the given tree. The predicate should sort the values
-		 * in a total order. This means that the predicate (x, y) -> int returns:
-		 *		1	if x > y,
-		 *		-1	if x < y,
-		 * 		0 	if x = y.
-		 * Returns the new root. May be null when the resulting tree is empty.
-		 */
 		shared TreeNode<T>* delete(func (T, T) -> int pred, T value) {
 			/* Found leaf */
 			if (self == null) return null;
@@ -122,10 +83,6 @@ namespace Tree {
 			return self;
 		}
 	
-		/*
-		 * Create a new Tree, initialize both childs to 0, set root value
-		 * to given value. Return a pointer to the root.
-		 */
 		static TreeNode<T>* create<T>(T value) {
 			/* Initialize the root with null pointers and the given value */
 			return init<>(TreeNode<T>::(null, null, value));

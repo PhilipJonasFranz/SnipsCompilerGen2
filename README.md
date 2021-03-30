@@ -2,7 +2,7 @@
   <img width="115" height="75" src="https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/res/sn-logo.png?raw=true">
 </p>
 
-# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.5.1-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://semver.org)
+# Snips Compiler Gen.2 [![version](https://img.shields.io/badge/version-4.6.0-green.svg)](https://semver.org) [![status](https://img.shields.io/badge/status-development-red.svg)](https://semver.org)
 
 ![size](https://img.shields.io/github/repo-size/PhilipJonasFranz/SnipsCompilerGen2) ![size](https://img.shields.io/github/languages/code-size/PhilipJonasFranz/SnipsCompilerGen2)
 
@@ -68,6 +68,7 @@ int main() {
  - Context checking and creating the DAST
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, rule-based optimizations
+ - Linker, resolves assembly imports of output
 
  The compiler uses a built-in [System Library](release/lib "release/lib"), located at `release/lib`. 
  
@@ -77,21 +78,25 @@ int main() {
 ### Running the compiler executable
  The compiler executable can be run with `snips [Path to file] ARGS`. The possible arguments can be found below:
 
- |     Argument     |        Functionality         |   Default Value    |
- | ---------------- | ---------------------------- | -----------------  |
- | `-help`          | Print argument list          | `false`            |
- | `-info`          | Print compiler version       | `false`            |
- | `-log`           | Print log in console         | `false`            |
- | `-com`           | Remove comments from output  | `false`            |
- | `-warn`          | Disable warnings in console  | `false`            |
- | `-imp`           | Print out imported libraries | `false`            |
- | `-opt`           | Disable Assembly optimizer   | `false`            |
- | `-ofs`           | Optimize for filesize        | `false`            |
- | `-rov`           | Ignore errors from modifiers | `false`            |
- | `-sid`           | Disable Struct IDs           | `false`            |
- | `-imm`           | Print out immediate data     | `false`            |
- | `-viz`           | Disable ANSI colors in log   | `false`            |
- | `-o [Path]`      | Specify output path          | Directory of input |
+ |     Argument     |        Functionality                                      |   Default Value    |
+ | ---------------- | --------------------------------------------------------- | -----------------  |
+ | `-help`          | Print argument list                                       | `false`            |
+ | `-info`          | Print compiler version                                    | `false`            |
+ | `-log`           | Print log in console                                      | `false`            |
+ | `-com`           | Remove comments from output                               | `false`            |
+ | `-warn`          | Disable warnings in console                               | `false`            |
+ | `-imp`           | Print out imported libraries                              | `false`            |
+ | `-opt`           | Disable Assembly optimizer                                | `false`            |
+ | `-ofs`           | Optimize for filesize                                     | `false`            |
+ | `-rov`           | Ignore errors from modifiers                              | `false`            |
+ | `-sid`           | Disable Struct IDs                                        | `false`            |
+ | `-imm`           | Print out immediate data                                  | `false`            |
+ | `-viz`           | Disable ANSI colors in log                                | `false`            |
+ | `-o`             | Build the object file only, do not link output            | `false`            |
+ | `-r`             | Recursively re-compile all included modules               | `false`            |
+ | `-R`             | Same as `-r`, but prune all existing module dumps         | `false`            |
+ | `-L`             | Link given program, requires input to be .s file          | `false`            |
+ | `-o [Path]`      | Specify output path                                       | Directory of input |
  
 ### Running the code
 If you want to run the code, you can run either the CompilerDriver.java with the same arguments as up below, or you can run the TestDriver.java. This will run all the tests and verify the correct functionality of the compiler. The Arguments here are either a path to a file name, f.E.`res/Test/Arith/Static/test_00.txt` or a list of directories, f.E. `res/Test/Arith/ res/Test/Stack/`.

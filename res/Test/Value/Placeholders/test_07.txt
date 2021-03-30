@@ -12,18 +12,44 @@ int main(int k) {
 	return arr [k];
 }
 TESTCASES
-0 1
 1 2
 2 1
-3 1
 4 2
 5 1
-6 1
 7 2
 8 1
 9 0
 OUTPUT
-/* --test_07.txt */
+.version 14255705884
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+K: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
@@ -34,7 +60,7 @@ main:                                        /* Function: main */
     add r4, r0, #1
     push { r0 }
     push { r4 }
-    mov r0, #1
+    ldr r0, .P1310880451_K
     push { r0 }
     mov r2, sp
     mov r1, #6
@@ -52,4 +78,4 @@ main.L1:
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-    
+.P1310880451_K: .word K

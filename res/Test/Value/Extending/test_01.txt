@@ -29,32 +29,66 @@ int main() {
 	
 	Root r0 = *r;
 	
-	if (r instanceof Root) return 1 + r0.x;
+	if (isar(&r0, idof(Root))) return 1 + r0.x;
 	else return r0.x;
 }
 TESTCASES
 11
 OUTPUT
-/* --test_01.txt */
+.version 48488840
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Root2: .word 0
+C: .word A
+D: .word B
+B: .word Root
+A: .word Root
+Root: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
 main:                                        /* Function: main */
+    push { fp, lr }
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     mov r1, #10
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .P696644461_A
     push { r0 }
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
-    mov r0, #1                               /* Override SID header */
+    ldr r0, .P696644461_Root
     push { r0 }
-    ldr r0, [r10, r3, lsl #2]
-    cmp r0, #1
-    movlt r0, #0
-    cmp r0, #4
-    movge r0, #0
+    ldr r1, .P696644461_Root                 /* Load parameters */
+    sub r0, fp, #20
+    lsr r0, r0, #2
+    bl isar                                  /* Call isar */
     cmp r0, #0
     beq main.L1
     ldr r2, [fp, #-16]                       /* Load field from struct */
@@ -64,5 +98,6 @@ main.L1:
     ldr r0, [fp, #-16]                       /* Load field from struct */
 main.L3: 
     mov sp, fp
-    bx lr
-    
+    ldmfd sp!, {fp, pc}
+.P696644461_Root: .word Root
+.P696644461_A: .word A

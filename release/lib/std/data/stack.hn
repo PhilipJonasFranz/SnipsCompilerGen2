@@ -1,0 +1,59 @@
+#include<linked_list.sn>
+#include<iterable.sn>
+
+/*
+ * This package provides the utility to create and 
+ * use a stack. This package builds on the linked_list
+ * package. 
+ */
+namespace Stack {
+	
+	restricted struct StackedList<T> : Iterable<T> {
+		
+		LinkedList<T>* list;
+		
+		/*
+		 * Destroys the stack and the capsuled list.
+		 */
+		shared void destroy<T:void>();
+		
+		/*
+		 * Pushes given element on top of the stack.
+		 */
+		shared void push(T value);
+		
+		/*
+		 * Returns true if no elements are currently in the stack.
+		 */
+		shared bool isEmpty<T:void>();
+		
+		/*
+		 * Returns the amount of elements stored in the stack.
+		 */
+		shared int size<T:void>();
+		
+		/*
+		 * Returns the element on the top of the stack, but doesnt
+		 * remove it. Returns the default value if the stack is empty.
+		 */
+		shared T peek();
+		
+		/*
+		 * Returns the element on the top of the stack, and 
+		 * removes it. Returns the default value if the stack is empty.
+		 */
+		shared T pop();
+		
+		shared T get(int index);
+		
+		shared void set(int index, T value);
+		
+		/*
+		 * Creates and initializes a new stack.
+		 * Returns a pointer to the newly created stack.
+		 */
+		static StackedList<T>* create<T>(T defValue);
+		
+	}
+	
+} 

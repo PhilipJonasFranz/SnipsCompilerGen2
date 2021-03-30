@@ -9,12 +9,39 @@ TESTCASES
 1 -2
 2 5
 OUTPUT
-/* --test_20.txt */
+.version 15255180643
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 vec: .skip 12
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main_init
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
+
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
     mov r0, #5
@@ -22,7 +49,7 @@ vec: .skip 12
     mvn r0, #1
     push { r0 }
     mov r0, #3
-    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
+    ldr r1, .P855889505_vec                  /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -31,8 +58,7 @@ vec: .skip 12
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     lsl r2, r0, #2
-    ldr r0, .POOL0_L0_vec                    /* Load data section address */
+    ldr r0, .P855889505_vec                  /* Load data section address */
     ldr r0, [r0, r2]
     bx lr
-.POOL0_L0_vec: .word vec
-    
+.P855889505_vec: .word vec

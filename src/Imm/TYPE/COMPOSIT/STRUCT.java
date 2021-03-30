@@ -3,7 +3,7 @@ package Imm.TYPE.COMPOSIT;
 import java.util.ArrayList;
 import java.util.List;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
@@ -134,9 +134,9 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
-	public void checkProvisoPresent(Source source) throws CTX_EXC {
+	public void checkProvisoPresent(Source source) throws CTEX_EXC {
 		if (this.proviso.size() != this.typedef.proviso.size())
-			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
+			throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
 	}
 	
 	/**
@@ -242,7 +242,7 @@ public class STRUCT extends COMPOSIT {
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
 		if (mapType.isStruct()) {
 			STRUCT s = (STRUCT) mapType;
-			if (s.getTypedef().SID == this.getTypedef().SID) {
+			if (s.isPolymorphTo(this)) {
 				/* Missing provisos */
 				if (this.proviso.size() != s.proviso.size())
 					return null;

@@ -3,7 +3,7 @@ package Imm.AST.Lhs;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
@@ -34,7 +34,7 @@ public class StructSelectLhsId extends LhsId {
 		if (rec) this.select.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -64,7 +64,7 @@ public class StructSelectLhsId extends LhsId {
 		else return null;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		this.select.setContext(context);
 	}
 

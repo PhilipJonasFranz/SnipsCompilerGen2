@@ -15,23 +15,52 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_00.txt */
+.version 18933048861
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+X_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-X.getValue_P0:                               /* Function: X.getValue, Provisos: INT */
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global X.getValue_P_1
+X.getValue_P_1:                              /* Function: X.getValue, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1103255295_X_P_1
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
-    bl X.getValue_P0                         /* Call X.getValue */
+    bl X.getValue_P_1                        /* Call X.getValue */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P1103255295_X_P_1: .word X_P_1

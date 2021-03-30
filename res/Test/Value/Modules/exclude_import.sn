@@ -1,0 +1,9 @@
+namespace Global {
+
+	int globalVar = 10;
+
+	int foo() {
+		return globalVar * 2;
+	}
+
+}

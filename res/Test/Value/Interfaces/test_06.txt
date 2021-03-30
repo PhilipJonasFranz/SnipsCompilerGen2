@@ -26,20 +26,64 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_06.txt */
+.version 12415793251
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+X: .word 0
+X_resolver_relay: .word X_resolver
+Inter: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-Inter.L1:                                    /* Interface : Inter */
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global X.get
+X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
+X_Inter:                                     /* Relay: Inter -> X */
+    pop { r12 }
+    mov r10, #0
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get
+
+X_resolver:                                  /* Relay: X -> INTF */
+    ldr r12, .P509822884_Inter
+    cmp r10, r12
+    beq X_Inter
+.P509822884_Inter: .word Inter
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P509822885_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
@@ -47,7 +91,14 @@ main:                                        /* Function: main */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
     ldr r0, [r10, r3, lsl #2]
-    bl Inter.L1                              /* Branch to relay table of Inter */
+    mov r12, #0                              /* Offset to Inter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P509822885_Inter
+    add lr, pc, #8
+    mov pc, r12
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P509822885_Inter: .word Inter
+.P509822885_X: .word X

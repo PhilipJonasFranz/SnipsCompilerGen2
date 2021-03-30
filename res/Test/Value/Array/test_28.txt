@@ -15,12 +15,36 @@ TESTCASES
 1 0 9
 1 1 2
 OUTPUT
-/* --test_28.txt */
+.version 17105001846
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 vec: .skip 16
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
     b main_init
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global foo
 foo:                                         /* Function: foo */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
@@ -53,7 +77,9 @@ foo:                                         /* Function: foo */
     ldmfd sp!, {r3, r4, fp}
     add sp, sp, #16
     bx lr
-    
+
+.global main
+
 /* Initialize the global variables */
 main_init: 
     sub sp, sp, #12
@@ -65,7 +91,7 @@ main_init:
     mov r1, #3
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
+    ldr r1, .P626856297_vec                  /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -77,7 +103,7 @@ main_init:
 main:                                        /* Function: main */
     mov r3, r0
     mov r4, r1
-    ldr r2, .POOL0_L0_vec                    /* Evaluate Expression */
+    ldr r2, .P626856297_vec                  /* Evaluate Expression */
     add r2, r2, #12
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
@@ -88,5 +114,4 @@ main:                                        /* Function: main */
     mov r0, r3
     mov r1, r4
     b foo                                    /* Call foo */
-.POOL0_L0_vec: .word vec
-    
+.P626856297_vec: .word vec

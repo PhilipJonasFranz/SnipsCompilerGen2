@@ -1,14 +1,23 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
+import Imm.AsN.AsNNode;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
@@ -38,6 +47,8 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<ASMDataLabel> interfaceRelayLabels = new ArrayList();
+	
 	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
@@ -48,22 +59,42 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	/* 
-	 * SID is assigned during context checking, in order to allow for efficient instanceof expressions.
-	 */
-	public int SID;
-	
-	public StructTypedef SIDNeighbour;
+	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
 		
-		public List<TYPE> providedHeadProvisos;
+		private List<TYPE> providedHeadProvisos;
 		
-		public List<TYPE> effectiveFieldTypes;
+		private List<TYPE> effectiveFieldTypes;
+		
+		public HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap = new HashMap();
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;
 			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes, HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap) {
+			this.providedHeadProvisos = providedHeadProvisos;
+			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public List<TYPE> getProvidedProvisos() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.providedHeadProvisos)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public List<TYPE> getFieldTypes() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.effectiveFieldTypes)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public StructProvisoMapping clone() {
+			return new StructProvisoMapping(this.getProvidedProvisos(), this.getFieldTypes(), this.resolverLabelMap);
 		}
 		
 	}
@@ -167,7 +198,7 @@ public class StructTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false, true))
+					if (Function.signatureMatch(fs, f0, false, true, false))
 						override = true;
 				
 				if (!override) {
@@ -178,35 +209,14 @@ public class StructTypedef extends SyntaxElement {
 				STRUCT.useProvisoFreeInCheck = true;
 			}
 		}
-	}
-	
-	/**
-	 * Assign SIDs and neighbours to the StructTypedefs based on the location
-	 * in the extension tree. SIDs are unique, as well as the neighbours.
-	 */
-	public int propagateSIDs(int start, StructTypedef neighbour) {
-		this.SID = start;
-		start++;
-		this.SIDNeighbour = neighbour;
 		
-		if (!this.extenders.isEmpty()) {
-			if (this.extenders.size() == 1) 
-				start = this.extenders.get(0).propagateSIDs(start, neighbour);
-			else {
-				/* Apply to first n - 1 */
-				for (int i = 1; i < this.extenders.size(); i++) { 
-					start = this.extenders.get(i - 1).propagateSIDs(start, this.extenders.get(i));
-					
-					/* Set neighbour of n - 1 to n */
-					this.extenders.get(i - 1).SIDNeighbour = this.extenders.get(i);
-				}
-				
-				/* Apply to last */
-				this.extenders.get(this.extenders.size() - 1).propagateSIDs(start, neighbour);
-			}
+		if (proviso.isEmpty()) {
+			/* Add default proviso mapping if no provisos exist */
+			List<TYPE> fieldTypes = new ArrayList();
+			for (Declaration d : this.fields)
+				fieldTypes.add(d.getType().clone());
+			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
 		}
-		
-		return start;
 	}
 	
 	/**
@@ -224,7 +234,7 @@ public class StructTypedef extends SyntaxElement {
 			if (this.fields.get(i).path.build().equals(path.build())) {
 				/* Copy field and apply field type */
 				dec = this.fields.get(i).clone();
-				dec.setType(match.effectiveFieldTypes.get(i).provisoFree());
+				dec.setType(match.effectiveFieldTypes.get(i).clone().provisoFree());
 			}
 		}
 		
@@ -235,7 +245,7 @@ public class StructTypedef extends SyntaxElement {
 		return this.fields;
 	}
 	
-	private StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
+	public StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
 		assert this.proviso.size() == providedProvisos.size() : "Expected " + this.proviso.size() + " proviso types, but got " + providedProvisos.size();
@@ -250,7 +260,7 @@ public class StructTypedef extends SyntaxElement {
 				 */
 				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).typeString());
 			
-			if (equal) return m;
+			if (equal) return m.clone();
 		}
 		
 		/* Copy own provisos */
@@ -269,10 +279,44 @@ public class StructTypedef extends SyntaxElement {
 		for (int i = 0; i < newActive.size(); i++) 
 			ProvisoUtil.mapNTo1(newActive.get(i), clone);
 		
+		List<TYPE> headMapped = ProvisoUtil.mapToHead(this.proviso, clone);
+		
+		/* Need to propagate new proviso mapping to extended structs */
+		if (this.extension != null) {
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : this.extProviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, headMapped);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at extension */
+			this.extension.findMatch(extTypes);
+		}
+	
+		/* Need to propagate new proviso mapping to implemented interfaces */
+		for (INTERFACE intf : this.implemented) {
+			headMapped = ProvisoUtil.mapToHead(intf.proviso, clone);
+			
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : intf.proviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, headMapped);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at implemented interface */
+			intf.getTypedef().registerMapping(extTypes);
+		}
+		
+		/* Remove provisos from provided types */
+		for (int i = 0; i < clone.size(); i++) 
+			clone.set(i, clone.get(i).provisoFree());
+
 		/* Remove provisos from field types */
 		for (int i = 0; i < newActive.size(); i++) 
 			newActive.set(i, newActive.get(i).provisoFree());
-
+		
 		/* Create the new mapping and store it */
 		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
 		this.registeredMappings.add(newMapping);
@@ -281,7 +325,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">";
+		String s = this.pad(d) + "Struct Typedef<" + this.path.build() + ">";
 		
 		if (this.extension != null)
 			s += ":extends:" + this.extension.path.build() + ",";
@@ -312,7 +356,7 @@ public class StructTypedef extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -322,8 +366,18 @@ public class StructTypedef extends SyntaxElement {
 		return t;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
+	}
+	
+	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.SIDLabelMap.get(postfix) != null : 
+			"Attempted to load SID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
+		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
 	}
 
 } 

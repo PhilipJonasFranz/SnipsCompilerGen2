@@ -22,7 +22,37 @@ TESTCASES
 1 10
 2 9
 OUTPUT
-/* --test_10.txt */
+.version 39014269276
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+Data_P_1: .word 0
+Nib_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
@@ -37,14 +67,14 @@ main:                                        /* Function: main */
     sub r0, fp, #24                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
-    mov r0, #2
+    ldr r0, .P1823335536_Data_P_1
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
@@ -64,4 +94,5 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     bx lr
-    
+.P1823335536_Data_P_1: .word Data_P_1
+.P1823335536_Nib_P_1: .word Nib_P_1

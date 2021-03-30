@@ -1,13 +1,15 @@
 package Imm.AST;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
@@ -35,11 +37,6 @@ public class Function extends CompoundStatement {
 	public class ProvisoMapping {
 		
 				/* ---< FIELDS >--- */
-		/** 
-		 * The unique proviso postfix for this mapping.
-		 */
-		public String provisoPostfix;
-		
 		/**
 		 * The return type of the function when this mapping is applied to it.
 		 */
@@ -52,10 +49,17 @@ public class Function extends CompoundStatement {
 		
 		
 				/* ---< CONSTRUCTORS >--- */
-		public ProvisoMapping(String provisoPostfix, TYPE returnType, List<TYPE> provisoMapping) {
-			this.provisoPostfix = provisoPostfix;
+		public ProvisoMapping(TYPE returnType, List<TYPE> provisoMapping) {
 			this.returnType = returnType;
 			this.provisoMapping = provisoMapping;
+			
+			for (TYPE t : provisoMapping) {
+				assert !t.typeString().contains("PROVISO") : "Found proviso type in proviso mapping!";
+			}
+		}
+		
+		public String getProvisoPostfix() {
+			return LabelUtil.getProvisoPostfix(this.provisoMapping);
 		}
 		
 	}
@@ -156,6 +160,8 @@ public class Function extends CompoundStatement {
 	 */
 	public boolean requireUIDInLabel = false;
 	
+	public HashMap<String, ASMLabel> headLabelMap = new HashMap();
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
@@ -207,11 +213,11 @@ public class Function extends CompoundStatement {
 		
 		System.out.println(" " + this.toString().split("@") [1]);
 		
-		if (rec) for (Statement s : body) 
+		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
@@ -256,9 +262,9 @@ public class Function extends CompoundStatement {
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
 	 * new proviso-free mapping and store it in the proviso calls.
 	 */
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (context.size() != this.provisosTypes.size()) 
-			throw new CTX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
+			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
 		
 		ProvisoUtil.mapNToN(this.provisosTypes, context);
 
@@ -277,8 +283,9 @@ public class Function extends CompoundStatement {
 			d.setContext(clone);
 		
 		/* Apply to body */
-		for (Statement s : this.body) 
-			s.setContext(clone);
+		if (this.body != null)
+			for (Statement s : this.body) 
+				s.setContext(clone);
 		
 		/* Get proviso free of header provisos and return type copy */
 		for (int i = 0; i < clone.size(); i++)
@@ -319,8 +326,9 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) 
-				return this.provisosCalls.get(i).provisoPostfix;
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) {
+				return LabelUtil.getProvisoPostfix(this.provisosCalls.get(i).provisoMapping);
+			}
 		}
 		
 		return null;
@@ -336,9 +344,15 @@ public class Function extends CompoundStatement {
 		/* Proviso mapping already exists, just return */
 		if (this.containsMapping(context)) return;
 		else {
-			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
-			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
+			TYPE retTypeClone = null;
+			if (returnType != null) 
+				returnType.clone().provisoFree();
+			
+			List<TYPE> contextClone = new ArrayList();
+			for (TYPE t : context)
+				contextClone.add(t.clone().provisoFree());
+			
+			this.provisosCalls.add(new ProvisoMapping(retTypeClone, contextClone));
 		}
 	}
 	
@@ -429,13 +443,16 @@ public class Function extends CompoundStatement {
 	 * @param useProvisoFreeParams If set to true, when comparing the parameter types, the types will be compared proviso free.
 	 * 		This might cause a crash when using this functionality in early stages, for example before its possible to set
 	 * 		a context.
+	 * @param matchFullNames If set to true, the full namespace paths of the function will be matched, instead of only the last part.
 	 * @return True iff the signatures match with the specified flags.
 	 */
-	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams) {
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams, boolean matchFullNames) {
 		boolean match = true;
 		
 		/* Match function name, not namespace path */
 		match &= f0.path.getLast().equals(f1.path.getLast());
+		
+		if (matchFullNames) match &= f0.path.build().equals(f1.path.build());
 		
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;
@@ -472,7 +489,7 @@ public class Function extends CompoundStatement {
 	public String buildCallLabel(List<TYPE> provisos) {
 		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
 		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 
-									 this.path.build().equals("resv")|| this.path.build().equals("free")|| 
+									 this.path.build().equals("resv")|| this.path.build().equals("free") || this.path.build().equals("isa") || this.path.build().equals("isar") || 
 									 this.path.build().equals("init")|| this.path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "@" + this.UID)
 				+ this.getProvisoPostfix(provisos);
 	}
@@ -480,9 +497,11 @@ public class Function extends CompoundStatement {
 	public Function clone() {
 		Function f = this.cloneSignature();
 		
-		List<Statement> clone = new ArrayList();
-		for (Statement s : this.body) clone.add(s.clone());
-		f.body = clone;
+		if (this.body != null) {
+			List<Statement> clone = new ArrayList();
+			for (Statement s : this.body) clone.add(s.clone());
+			f.body = clone;
+		}
 		
 		return f;
 	}

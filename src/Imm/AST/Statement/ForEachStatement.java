@@ -4,7 +4,7 @@ import java.util.List;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -105,7 +105,7 @@ public class ForEachStatement extends CompoundStatement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		

@@ -16,18 +16,42 @@ int main() {
 TESTCASES
 16
 OUTPUT
-/* --test_06.txt */
+.version 19036876579
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
 .data
 Baz.x: .word 16
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
     b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global Foo.get
 Foo.get:                                     /* Function: Foo.get */
-    ldr r0, .POOL0_L0_Baz.x                  /* Evaluate Expression */
+    ldr r0, .P541111226_Baz.x                /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_L0_Baz.x: .word Baz.x
-    
+.P541111226_Baz.x: .word Baz.x
+
+.global main
 main:                                        /* Function: main */
     b Foo.get                                /* Evaluate Expression */
-    

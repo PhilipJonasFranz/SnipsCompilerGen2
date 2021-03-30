@@ -9,7 +9,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -49,7 +48,7 @@ public class AsNStructureInit extends AsNExpression {
 				
 				if (!CompilerDriver.disableStructSIDHeaders) {
 					/* Load SID header */
-					init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
+					s.structType.getTypedef().loadSIDInReg(init, REG.R0, s.structType.proviso);
 					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 					
 					/* Push dummy for SID header */
@@ -140,7 +139,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
 			/* Load SID header */
-			node.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(struct.getTypedef().SID)));
+			struct.getTypedef().loadSIDInReg(node, new RegOp(regs).reg, struct.proviso);
 			
 			/* Push dummy for SID header */
 			st.pushDummy();

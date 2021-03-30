@@ -12,9 +12,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
-import Exc.PARSE_EXC;
+import Exc.CTEX_EXC;
+import Exc.LINK_EXC;
+import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
+import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -68,8 +71,12 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	public boolean printResultOnError = false;
+	
 	/** Store/Update asm results in the tested file */
 	public boolean writebackResults = false;
+	
+	public static boolean excludeASMErrors = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -86,12 +93,13 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
 		comp.printLogo();
+		
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		CompilerDriver.includeMetaInformation = false;
-		
-		/* Experimental Flags */
-		//CompilerDriver.optimizeFileSize = true;
+		CompilerDriver.buildModulesRecurse = true;
+		CompilerDriver.buildObjectFileOnly = true;
+		CompilerDriver.pruneModules = true;
 		
 		List<String> paths = new ArrayList();
 		
@@ -132,7 +140,7 @@ public class TestDriver {
 		testPackage(head);
 		
 		/* Print out ASM-OPT stats */
-		CompilerDriver.printAverageCompression();
+		Util.printStats(CompilerDriver.driver);
 		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
@@ -191,6 +199,8 @@ public class TestDriver {
 					headMessage.flush();
 					printedHead = true;
 				}
+				
+				CompilerDriver.silenced = false;
 				test.getSecond().stream().forEach(x -> x.flush());
 			}
 			
@@ -315,6 +325,8 @@ public class TestDriver {
 			else buffer.add(new Message("Test finished successfully.", LogPoint.Type.INFO, true));
 		
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			/* Test crashed */
 			buffer.add(new Message("-> Test " + file + " ran into an error!", LogPoint.Type.FAIL, true));
 			resCnt.peek().crashed++;
@@ -344,7 +356,7 @@ public class TestDriver {
 				
 				cd.setBurstMode(false, false);
 				
-				Exception e = cd.getException();
+				Exception e = cd.thrownException;
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
@@ -358,10 +370,10 @@ public class TestDriver {
 					/* Figure out exception field value */
 					if (e instanceof SNIPS_EXC) 
 						msg = ((SNIPS_EXC) e).getExcFieldName();
-					else if (e instanceof CTX_EXC) 
-						msg = ((CTX_EXC) e).getExcFieldName();
-					else if (e instanceof PARSE_EXC) 
-						msg = ((PARSE_EXC) e).getExcFieldName();
+					else if (e instanceof CTEX_EXC) 
+						msg = ((CTEX_EXC) e).getExcFieldName();
+					else if (e instanceof PARS_EXC) 
+						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
 					else {
@@ -389,6 +401,25 @@ public class TestDriver {
 			File file = new File(path);
 			List<String> compile = cd.compile(new File(path), code);
 
+			List<String> copy = new ArrayList();
+			
+			if (compile != null) {
+				for (String s : compile) copy.add("" + s);
+				
+				try {
+					LinkerUnit originUnit = Linker.parseLinkerUnit(compile);
+					Linker.linkProgram(new ArrayList(), originUnit);
+					compile = originUnit.build();
+				} catch (LINK_EXC e) {
+					cd.setBurstMode(false, false);
+					buffer.add(new Message("Error when linking output! " + e.getMessage(), LogPoint.Type.FAIL, true));
+					
+					if (printResultOnError) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
+			}
+			
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
@@ -401,7 +432,7 @@ public class TestDriver {
 				/* Write output */
 				if (writebackResults) {
 					content.add("OUTPUT");
-					content.addAll(compile);
+					content.addAll(copy);
 					Util.writeInFile(content, path);
 				}
 			}
@@ -428,6 +459,35 @@ public class TestDriver {
 				}
 				
 				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+				
+				ProcessorUnit pcu0 = null;
+				
+				boolean silenced = CompilerDriver.silenced;
+				
+				try {
+					if (excludeASMErrors) CompilerDriver.silenced = true;
+					
+					pcu0 = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+					
+					CompilerDriver.silenced = silenced;
+				} catch (Exception e) {
+					CompilerDriver.silenced = silenced;
+					
+					buffer.add(new Message("Error generating assembly!", LogPoint.Type.FAIL, true));
+					
+					if (!excludeASMErrors) {
+						e.printStackTrace();
+						
+						if (printResultOnError) {
+							buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+							compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+						}
+					}
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
+				
+				ProcessorUnit pcu = pcu0;
 				
 				/* Setup parameters in registers and stack */
 				if (sp.length > 1) {
@@ -496,7 +556,7 @@ public class TestDriver {
 					}
 					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
-					if (!printedOutput) {
+					if (printResultOnError && !printedOutput) {
 						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
 						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					}

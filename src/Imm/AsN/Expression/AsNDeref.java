@@ -7,7 +7,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -56,11 +55,7 @@ public class AsNDeref extends AsNExpression {
 				 */
 				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct() && !CompilerDriver.disableStructSIDHeaders) {
 					STRUCT s = (STRUCT) a.getType().getCoreType();
-					
-					ASMMov mov = new ASMMov(new RegOp(target), new ImmOp(s.getTypedef().SID));
-					mov.comment = new ASMComment("Override SID header");
-					
-					ref.instructions.add(mov);
+					s.getTypedef().loadSIDInReg(ref, new RegOp(target).reg, s.proviso);
 				}
 				else {
 					ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));

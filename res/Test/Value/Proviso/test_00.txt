@@ -11,17 +11,45 @@ int main() {
 TESTCASES
 5
 OUTPUT
-/* --test_00.txt */
+.version 14261745549
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-get_P0:                                      /* Function: get, Provisos: INT | BOOL */
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global get_P_1
+get_P_1:                                     /* Function: get, Provisos: INT | BOOL */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
-    bl get_P0                                /* Evaluate Expression */
+    bl get_P_1                               /* Evaluate Expression */
     mov r3, r0
-    bl get_P0                                /* Evaluate Expression */
+    bl get_P_1                               /* Evaluate Expression */
     mov r4, r0
     cmp r4, #0
     beq main.L0
@@ -30,4 +58,3 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #2
     pop { pc }
-    

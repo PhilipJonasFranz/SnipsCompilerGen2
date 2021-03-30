@@ -17,8 +17,23 @@ int main() {
 TESTCASES
 11
 OUTPUT
-/* --test_02.txt */
+.version 9499963022
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -29,10 +44,8 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-lambda_get:                                  /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
+
+.global get
 get:                                         /* Function: get */
     push { fp }
     mov fp, sp
@@ -48,13 +61,12 @@ get:                                         /* Function: get */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get
-    mov r10, #0
+    ldr r0, .P553308267_get                  /* Evaluate Expression */
     push { r0 }
     ldr r3, [fp, #-4]
 /* Call the predicate */
@@ -69,4 +81,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P553308267_get: .word get
