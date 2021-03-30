@@ -115,6 +115,15 @@ public class AsNBody extends AsNNode {
 		globalsInit.add(initLabel);
 		globalsInit.add(new ASMPushStack(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2), new RegOp(REG.FP), new RegOp(REG.LR)));
 		
+		
+		/* ---< INSERT NULL POINTER DATALABEL >--- */
+		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.HEAP_START);
+		
+		
+				/* ---< INSERT NULL POINTER DATALABEL >--- */
+		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.NULL_PTR);
+		
+		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
 			if (s instanceof Declaration) {
@@ -139,14 +148,6 @@ public class AsNBody extends AsNNode {
 				progress.incProgress((double) done / p.programElements.size());
 			}
 		}
-		
-				/* ---< INSERT NULL POINTER DATALABEL >--- */
-		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.HEAP_START);
-		
-		
-				/* ---< INSERT NULL POINTER DATALABEL >--- */
-		AsNBody.createGlobalDataLabelForDeclaration(body, CompilerDriver.NULL_PTR);
-		
 		
 		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp());
