@@ -218,8 +218,6 @@ public class Parser {
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
 		
-		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
-		
 		if (this.progress != null) {
 			done++;
 			this.progress.incProgress((double) done / this.toGo);
@@ -247,7 +245,9 @@ public class Parser {
 		
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
-			elements.add(this.parseProgramElement());
+			
+			SyntaxElement element = this.parseProgramElement();
+			if (element != null) elements.add(element);
 		}
 		
 		accept(TokenType.EOF);
