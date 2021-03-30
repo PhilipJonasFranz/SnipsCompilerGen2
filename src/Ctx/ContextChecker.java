@@ -1026,8 +1026,8 @@ public class ContextChecker {
 		this.compoundStack.push(w);
 		
 		TYPE cond = w.condition.check(this);
-		if (!(cond instanceof BOOL)) 
-			throw new CTEX_EXC(w.getSource(), Const.CONDITION_NOT_BOOLEAN);
+		if (cond.wordsize() > 1) 
+			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : w.body) {
@@ -1044,8 +1044,8 @@ public class ContextChecker {
 		this.compoundStack.push(w);
 		
 		TYPE cond = w.condition.check(this);
-		if (!(cond instanceof BOOL)) 
-			throw new CTEX_EXC(w.getSource(), Const.CONDITION_NOT_BOOLEAN);
+		if (cond.wordsize() > 1) 
+			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		for (Statement s : w.body) {
@@ -1069,8 +1069,8 @@ public class ContextChecker {
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
 		TYPE cond = f.condition.check(this);
-		if (!(cond instanceof BOOL)) 
-			throw new CTEX_EXC(f.getSource(), Const.CONDITION_NOT_BOOLEAN);
+		if (cond.wordsize() > 1) 
+			throw new CTEX_EXC(f.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		f.increment.check(this);
 		
@@ -1172,8 +1172,8 @@ public class ContextChecker {
 		
 		if (i.condition != null) {
 			TYPE cond = i.condition.check(this);
-			if (!(cond instanceof BOOL)) 
-				throw new CTEX_EXC(i.getSource(), Const.CONDITION_NOT_BOOLEAN);
+			if (cond.wordsize() > 1) 
+				throw new CTEX_EXC(i.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		}
 		else {
 			if (i.elseStatement != null) 
@@ -1308,8 +1308,8 @@ public class ContextChecker {
 				throw new CTEX_EXC(a.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE);
 			
 			if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN || a.assignArith == ASSIGN_ARITH.ORR_ASSIGN || a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
-				if (!(ctype instanceof BOOL)) 
-					throw new CTEX_EXC(a.getSource(), Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_BOOL, t.provisoFree().typeString());
+				if (ctype.wordsize() > 1) 
+					throw new CTEX_EXC(a.getSource(), Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_TYPE, t.provisoFree().typeString());
 			}
 			else if (a.assignArith != ASSIGN_ARITH.NONE) {
 				if (!(ctype instanceof INT)) 
@@ -1405,8 +1405,8 @@ public class ContextChecker {
 	
 	public TYPE checkTernary(Ternary t) throws CTEX_EXC {
 		TYPE type = t.condition.check(this);
-		if (!(type instanceof BOOL)) 
-			throw new CTEX_EXC(t.condition.getSource(), Const.CONDITION_NOT_BOOLEAN, type.provisoFree().typeString());
+		if (type.wordsize() > 1) 
+			throw new CTEX_EXC(t.condition.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT, type.provisoFree().typeString());
 		
 		if (t.condition instanceof ArrayInit) 
 			throw new CTEX_EXC(t.condition.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
@@ -1478,11 +1478,11 @@ public class ContextChecker {
 		TYPE left = b.getLeft().check(this);
 		TYPE right = b.getRight().check(this);
 		
-		if (!(left instanceof BOOL)) 
-			throw new CTEX_EXC(b.left.getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), left.provisoFree().typeString());
+		if (left.wordsize() > 1) 
+			throw new CTEX_EXC(b.left.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
-		if (!(right instanceof BOOL)) 
-			throw new CTEX_EXC(b.right.getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), right.provisoFree().typeString());
+		if (right.wordsize() > 1) 
+			throw new CTEX_EXC(b.right.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		b.setType(left);
 		return b.getType();
@@ -1496,8 +1496,8 @@ public class ContextChecker {
 	public TYPE checkBoolUnaryExpression(BoolUnaryExpression b) throws CTEX_EXC {
 		TYPE t = b.getOperand().check(this);
 		
-		if (!(t instanceof BOOL)) 
-			throw new CTEX_EXC(b.getOperand().getSource(), Const.EXPECTED_TYPE_ACTUAL, new BOOL().typeString(), t.provisoFree().typeString());
+		if (t.wordsize() > 1) 
+			throw new CTEX_EXC(b.getOperand().getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		b.setType(t);
 		return b.getType();

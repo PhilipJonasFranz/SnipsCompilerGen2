@@ -126,9 +126,9 @@ public class Const {
 	
 	public static final String CLASS_CANNOT_BE_SELECTOR = "%s cannot be a selector";
 	
-	public static final String CONDITION_NOT_BOOLEAN = "Condition is not boolean";
+	public static final String CONDITION_TYPE_MUST_BE_32_BIT = "Condition types have to be 32 bit large";
 	
-	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_BOOL = "Expression type %s is not applicable for boolean assign operator";
+	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_TYPE = "Expression type %s is not applicable for comparison, must be 32 bit";
 	
 	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_ASSIGN_OP = "Expression type %s is not applicable for assign operator";
 	
