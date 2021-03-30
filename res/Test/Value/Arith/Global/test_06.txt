@@ -28,9 +28,9 @@ OUTPUT
 
 .data
 S: .word 0
+s0: .skip 24
 NULL: .word 0
 HEAP_START: .word 0
-s0: .skip 24
 
 .text
     b main_init

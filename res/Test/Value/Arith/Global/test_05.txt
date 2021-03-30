@@ -32,11 +32,11 @@ OUTPUT
 
 .data
 S: .word 0
-NULL: .word 0
-HEAP_START: .word 0
 s1: .skip 12
 s0: .skip 12
 sw: .word 1
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main_init

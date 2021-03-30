@@ -22,11 +22,11 @@ OUTPUT
 .include maybe free.s
 
 .data
-NULL: .word 0
-HEAP_START: .word 0
 z: .word 0
 y: .word 1
 x: .word 3
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

@@ -22,9 +22,9 @@ OUTPUT
 .include maybe free.s
 
 .data
+vec: .skip 16
 NULL: .word 0
 HEAP_START: .word 0
-vec: .skip 16
 
 .text
     b main_init

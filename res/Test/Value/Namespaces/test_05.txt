@@ -26,11 +26,11 @@ OUTPUT
 .include maybe free.s
 
 .data
-NULL: .word 0
-HEAP_START: .word 0
 Foo.Bar.x: .word 16
 Foo.x: .word 20
 Foo.k: .word 10
+NULL: .word 0
+HEAP_START: .word 0
 
 .text
     b main

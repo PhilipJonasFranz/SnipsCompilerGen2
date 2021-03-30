@@ -34,9 +34,9 @@ OUTPUT
 
 .data
 X_P_1: .word 0
+buffer: .skip 4
 NULL: .word 0
 HEAP_START: .word 0
-buffer: .skip 4
 
 .text
     b main_init

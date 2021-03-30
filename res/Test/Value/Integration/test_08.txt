@@ -90,9 +90,9 @@ Util.Tuple2_P_3_1: .word 0
 Util.Tuple2_P_1_2: .word 0
 GameObject.Player: .word 0
 GameObject.Items.Inventory: .word 0
+arr: .skip 8
 NULL: .word 0
 HEAP_START: .word 0
-arr: .skip 8
 
 .text
     b main_init

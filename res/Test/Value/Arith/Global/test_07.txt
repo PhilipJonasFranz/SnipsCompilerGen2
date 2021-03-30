@@ -35,9 +35,9 @@ OUTPUT
 .include linked_list.s
 
 .data
+list0: .skip 4
 NULL: .word 0
 HEAP_START: .word 0
-list0: .skip 4
 
 .text
     b main_init

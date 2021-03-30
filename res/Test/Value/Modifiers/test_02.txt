@@ -26,9 +26,9 @@ OUTPUT
 .include maybe free.s
 
 .data
+Test.var: .word 14
 NULL: .word 0
 HEAP_START: .word 0
-Test.var: .word 14
 
 .text
     b main

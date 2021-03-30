@@ -38,9 +38,9 @@ OUTPUT
 
 .data
 S: .word 0
+x: .word 10
 NULL: .word 0
 HEAP_START: .word 0
-x: .word 10
 
 .text
     b main

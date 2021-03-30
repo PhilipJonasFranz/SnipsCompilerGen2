@@ -31,9 +31,9 @@ OUTPUT
 .include maybe free.s
 
 .data
+r: .word 0
 NULL: .word 0
 HEAP_START: .word 0
-r: .word 0
 
 .text
     b main

@@ -25,9 +25,9 @@ OUTPUT
 .include maybe free.s
 
 .data
+s: .word 0
 NULL: .word 0
 HEAP_START: .word 0
-s: .word 0
 
 .text
     b main
