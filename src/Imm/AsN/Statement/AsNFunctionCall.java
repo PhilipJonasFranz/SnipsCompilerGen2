@@ -186,7 +186,7 @@ public class AsNFunctionCall extends AsNStatement {
 			boolean found = false;
 			int offset = 0;
 			for (int i = 0; i < inter.functions.size(); i++) {
-				if (Function.signatureMatch(inter.functions.get(i), f, false, true)) {
+				if (Function.signatureMatch(inter.functions.get(i), f, false, true, false)) {
 					offset = i * 4;
 					found = true;
 					break;

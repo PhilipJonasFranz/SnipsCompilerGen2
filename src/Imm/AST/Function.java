@@ -443,13 +443,16 @@ public class Function extends CompoundStatement {
 	 * @param useProvisoFreeParams If set to true, when comparing the parameter types, the types will be compared proviso free.
 	 * 		This might cause a crash when using this functionality in early stages, for example before its possible to set
 	 * 		a context.
+	 * @param matchFullNames If set to true, the full namespace paths of the function will be matched, instead of only the last part.
 	 * @return True iff the signatures match with the specified flags.
 	 */
-	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams) {
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams, boolean matchFullNames) {
 		boolean match = true;
 		
 		/* Match function name, not namespace path */
 		match &= f0.path.getLast().equals(f1.path.getLast());
+		
+		if (matchFullNames) match &= f0.path.build().equals(f1.path.build());
 		
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;

@@ -272,7 +272,8 @@ public class Parser {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		while (current.type != TokenType.RBRACE) {
-			elements.add(this.parseProgramElement());
+			SyntaxElement element = this.parseProgramElement();
+			if (element != null) elements.add(element);
 		}
 		
 		this.namespaces.pop();
@@ -307,7 +308,7 @@ public class Parser {
 			
 			SyntaxElement element = null;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				element = this.parseFunction(type, identifier, mod, false);
+				element = this.parseFunction(type, identifier, mod, false, false);
 			}
 			else {
 				Declaration d = this.parseGlobalDeclaration(type, identifier, mod);
@@ -442,7 +443,7 @@ public class Parser {
 				
 				TYPE type = this.parseType();
 				
-				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false);
+				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false, true);
 				
 				/* Insert Struct Name */
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
@@ -513,7 +514,7 @@ public class Parser {
 			MODIFIER fmod = this.parseModifier();
 			
 			TYPE ret = this.parseType();
-			Function f = this.parseFunction(ret, accept(TokenType.IDENTIFIER), fmod, true);
+			Function f = this.parseFunction(ret, accept(TokenType.IDENTIFIER), fmod, true, true);
 			
 			/* Insert Struct Name */
 			f.path.path.add(f.path.path.size() - 1, def.path.getLast());
@@ -586,7 +587,7 @@ public class Parser {
 		return path;
 	}
 	
-	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod, boolean parseHeadOnly) throws PARS_EXC {
+	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod, boolean parseHeadOnly, boolean isNestedFunction) throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		/* Check if a function name is a reserved identifier */
@@ -641,8 +642,26 @@ public class Parser {
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
-		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		
+		/* 
+		 * Perform merge only for functions that are not nested here,
+		 * for nested functions merge will be done later.
+		 */
+		if (!isNestedFunction) {
+			for (Pair<NamespacePath, Function> pair : this.functions) {
+				boolean useProvisoFreeInCheck = STRUCT.useProvisoFreeInCheck;
+				STRUCT.useProvisoFreeInCheck = false;
+				if (Function.signatureMatch(f, pair.second, false, false, true)) {
+					STRUCT.useProvisoFreeInCheck = useProvisoFreeInCheck;
+					pair.second.body = f.body;
+					this.scopes.pop();
+					return null;
+				}
+				STRUCT.useProvisoFreeInCheck = useProvisoFreeInCheck;
+			}
+		}
+		
+		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		this.scopes.pop();
 		return f;
 	}

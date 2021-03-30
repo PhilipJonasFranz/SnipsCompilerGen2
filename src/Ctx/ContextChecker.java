@@ -246,7 +246,7 @@ public class ContextChecker {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				for (Function f0 : this.functions) 
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true)) {
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false)) {
 						/* 
 						 * Already seen function has no body, this function has body,
 						 * so already seen function is from a header file, this function
@@ -409,7 +409,7 @@ public class ContextChecker {
 					if (f.body == null) {
 						for (int a = 0; a < e.functions.size(); a++) {
 							Function f0 = e.functions.get(a);
-							if (Function.signatureMatch(f0, f, false, false)) {
+							if (Function.signatureMatch(f0, f, false, false, false)) {
 								f.body = f0.body;
 								break;
 							}
@@ -448,7 +448,7 @@ public class ContextChecker {
 				 
 					/* Check for duplicate function name */
 					for (Function f0 : this.functions) {
-						if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
+						if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
 							throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 					}
 				}
@@ -507,7 +507,7 @@ public class ContextChecker {
 					for (int i = 0; i < e.functions.size(); i++) {
 						Function structFunction = e.functions.get(i);
 						
-						if (Function.signatureMatch(structFunction, ftranslated, false, true)) {
+						if (Function.signatureMatch(structFunction, ftranslated, false, true, false)) {
 							/* Add default context to make sure it is casted */
 							if (structFunction.provisosTypes.isEmpty())
 								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
@@ -578,7 +578,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true))
+					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
 						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
 				}
 			}
@@ -2516,9 +2516,15 @@ public class ContextChecker {
 			}
 		}
 		
+		
 		/* Neither regular function or predicate was found, undefined */
-		if (f == null && anonTarget == null) 
+		if (f == null && anonTarget == null) {
+			this.functions.stream().forEach(x -> x.print(0, false));
+			
+			AST.print(0, true);
+			
 			throw new CTEX_EXC(c.getCallee().getSource(), Const.UNDEFINED_FUNCTION_OR_PREDICATE, c.getPath().build());
+		}
 		
 		/* Write back anon target and provisos */
 		c.setProviso(proviso);

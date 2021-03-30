@@ -86,7 +86,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 */
 			for (int a = 0; a < sdef.functions.size(); a++) {
 				Function sfunc = sdef.functions.get(a);
-				if (Function.signatureMatch(signature, sfunc, false, false))
+				if (Function.signatureMatch(signature, sfunc, false, false, false))
 					f0 = sfunc;
 			}
 			

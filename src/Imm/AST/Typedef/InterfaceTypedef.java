@@ -111,7 +111,7 @@ public class InterfaceTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false, true))
+					if (Function.signatureMatch(fs, f0, false, true, false))
 						override = true;
 				
 				if (!override) {

@@ -117,7 +117,7 @@ public class PROVISO extends TYPE<Void> {
 		if (this.hasContext())
 			return this.getContext().clone();
 		else {
-			ContextChecker.progress.abort();
+			if (ContextChecker.progress != null) ContextChecker.progress.abort();
 			throw new SNIPS_EXC(Const.CANNOT_FREE_CONTEXTLESS_PROVISO, this.placeholderName, CompilerDriver.lastSource.getSourceMarker());
 		}
 	}
