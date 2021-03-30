@@ -2518,13 +2518,8 @@ public class ContextChecker {
 		
 		
 		/* Neither regular function or predicate was found, undefined */
-		if (f == null && anonTarget == null) {
-			this.functions.stream().forEach(x -> x.print(0, false));
-			
-			AST.print(0, true);
-			
+		if (f == null && anonTarget == null) 
 			throw new CTEX_EXC(c.getCallee().getSource(), Const.UNDEFINED_FUNCTION_OR_PREDICATE, c.getPath().build());
-		}
 		
 		/* Write back anon target and provisos */
 		c.setProviso(proviso);

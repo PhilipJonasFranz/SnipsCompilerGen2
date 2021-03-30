@@ -63,15 +63,38 @@ public class StructTypedef extends SyntaxElement {
 	
 	public class StructProvisoMapping {
 		
-		public List<TYPE> providedHeadProvisos;
+		private List<TYPE> providedHeadProvisos;
 		
-		public List<TYPE> effectiveFieldTypes;
+		private List<TYPE> effectiveFieldTypes;
 		
 		public HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap = new HashMap();
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;
 			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes, HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap) {
+			this.providedHeadProvisos = providedHeadProvisos;
+			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public List<TYPE> getProvidedProvisos() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.providedHeadProvisos)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public List<TYPE> getFieldTypes() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.effectiveFieldTypes)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public StructProvisoMapping clone() {
+			return new StructProvisoMapping(this.getProvidedProvisos(), this.getFieldTypes(), this.resolverLabelMap);
 		}
 		
 	}
@@ -211,7 +234,7 @@ public class StructTypedef extends SyntaxElement {
 			if (this.fields.get(i).path.build().equals(path.build())) {
 				/* Copy field and apply field type */
 				dec = this.fields.get(i).clone();
-				dec.setType(match.effectiveFieldTypes.get(i).provisoFree());
+				dec.setType(match.effectiveFieldTypes.get(i).clone().provisoFree());
 			}
 		}
 		
@@ -237,7 +260,7 @@ public class StructTypedef extends SyntaxElement {
 				 */
 				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).typeString());
 			
-			if (equal) return m;
+			if (equal) return m.clone();
 		}
 		
 		/* Copy own provisos */
@@ -256,20 +279,14 @@ public class StructTypedef extends SyntaxElement {
 		for (int i = 0; i < newActive.size(); i++) 
 			ProvisoUtil.mapNTo1(newActive.get(i), clone);
 		
-		/* Remove provisos from field types */
-		for (int i = 0; i < newActive.size(); i++) 
-			newActive.set(i, newActive.get(i).provisoFree());
-
-		/* Create the new mapping and store it */
-		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
-		this.registeredMappings.add(newMapping);
+		List<TYPE> headMapped = ProvisoUtil.mapToHead(this.proviso, clone);
 		
 		/* Need to propagate new proviso mapping to extended structs */
 		if (this.extension != null) {
 			List<TYPE> extTypes = new ArrayList();
 			for (TYPE t : this.extProviso) {
 				TYPE t0 = t.clone();
-				ProvisoUtil.mapNTo1(t0, clone);
+				ProvisoUtil.mapNTo1(t0, headMapped);
 				extTypes.add(t0.provisoFree());
 			}
 			
@@ -279,16 +296,30 @@ public class StructTypedef extends SyntaxElement {
 	
 		/* Need to propagate new proviso mapping to implemented interfaces */
 		for (INTERFACE intf : this.implemented) {
+			headMapped = ProvisoUtil.mapToHead(intf.proviso, clone);
+			
 			List<TYPE> extTypes = new ArrayList();
 			for (TYPE t : intf.proviso) {
 				TYPE t0 = t.clone();
-				ProvisoUtil.mapNTo1(t0, clone);
+				ProvisoUtil.mapNTo1(t0, headMapped);
 				extTypes.add(t0.provisoFree());
 			}
 			
 			/* Register mapping at implemented interface */
 			intf.getTypedef().registerMapping(extTypes);
 		}
+		
+		/* Remove provisos from provided types */
+		for (int i = 0; i < clone.size(); i++) 
+			clone.set(i, clone.get(i).provisoFree());
+
+		/* Remove provisos from field types */
+		for (int i = 0; i < newActive.size(); i++) 
+			newActive.set(i, newActive.get(i).provisoFree());
+		
+		/* Create the new mapping and store it */
+		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
+		this.registeredMappings.add(newMapping);
 		
 		return newMapping;
 	}

@@ -1,5 +1,6 @@
 package Ctx.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Exc.SNIPS_EXC;
@@ -220,6 +221,17 @@ public class ProvisoUtil {
 		}
 		
 		return t;
+	}
+	
+	public static List<TYPE> mapToHead(List<TYPE> head, List<TYPE> context) {
+		List<TYPE> headMapped = new ArrayList();
+		for (int i = 0; i < head.size(); i++) {
+			TYPE t0 = head.get(i).clone();
+			ProvisoUtil.map1To1(t0, context.get(i).clone());
+			headMapped.add(t0);
+		}
+		
+		return headMapped;
 	}
 	
 } 

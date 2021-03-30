@@ -194,7 +194,9 @@ public class AsNBody extends AsNNode {
 				for (int a = 0; a < def.registeredMappings.size(); a++) {
 					StructProvisoMapping mapping = def.registeredMappings.get(a);
 					
-					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					List<TYPE> headMapped = ProvisoUtil.mapToHead(def.proviso, mapping.getProvidedProvisos());
+					
+					String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
 					
 					if (!added.contains(postfix)) {
 						added.add(postfix);
@@ -206,7 +208,7 @@ public class AsNBody extends AsNNode {
 							List<TYPE> extTypes = new ArrayList();
 							for (TYPE t : def.extProviso) {
 								TYPE t0 = t.clone();
-								ProvisoUtil.mapNTo1(t0, mapping.providedHeadProvisos);
+								ProvisoUtil.mapNTo1(t0, headMapped);
 								extTypes.add(t0);
 							}
 							
@@ -253,7 +255,7 @@ public class AsNBody extends AsNNode {
 				for (int a = 0; a < def.registeredMappings.size(); a++) {
 					StructProvisoMapping mapping = def.registeredMappings.get(a);
 					
-					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+					String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
 					
 					if (!added.contains(postfix)) {
 						added.add(postfix);

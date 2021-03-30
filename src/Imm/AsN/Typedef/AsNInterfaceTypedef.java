@@ -46,7 +46,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		List<ASMInstruction> table = new ArrayList();
 		
-		String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+		String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
 		String name = sdef.path.build() + postfix + "_" + idef.path.build();
 		
 		ASMLabel relayTableHead = new ASMLabel(name);
@@ -94,7 +94,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
 			
 			/* Get the proviso postfix from the function in the struct with the current mapping */
-			String post = f0.getProvisoPostfix(mapping.providedHeadProvisos);
+			String post = f0.getProvisoPostfix(mapping.getProvidedProvisos());
 			
 			/* 
 			 * The mapping has not been registered in the function, this means that this function
@@ -148,13 +148,13 @@ public class AsNInterfaceTypedef extends AsNNode {
 		List<TYPE> sdefProviso = new ArrayList();
 		for (int a = 0; a < sdef.proviso.size(); a++) {
 			PROVISO headClone = (PROVISO) sdef.proviso.get(a).clone();
-			headClone.setContext(mapping.providedHeadProvisos.get(a).clone());
+			headClone.setContext(mapping.getProvidedProvisos().get(a).clone());
 			sdefProviso.add(headClone);
 		}
 		
 		List<ASMInstruction> table = new ArrayList();
 		
-		String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
+		String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
 		String name = sdef.path.build() + postfix + "_resolver";
 		
 		/* Create table head */
