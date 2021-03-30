@@ -264,6 +264,32 @@ public class StructTypedef extends SyntaxElement {
 		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
 		this.registeredMappings.add(newMapping);
 		
+		/* Need to propagate new proviso mapping to extended structs */
+		if (this.extension != null) {
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : this.extProviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, clone);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at extension */
+			this.extension.findMatch(extTypes);
+		}
+	
+		/* Need to propagate new proviso mapping to implemented interfaces */
+		for (INTERFACE intf : this.implemented) {
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : intf.proviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, clone);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at implemented interface */
+			intf.getTypedef().registerMapping(extTypes);
+		}
+		
 		return newMapping;
 	}
 	

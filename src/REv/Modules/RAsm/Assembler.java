@@ -754,7 +754,11 @@ public class Assembler {
 							int [] num = Util.toBinary((sp.length > 1 && !sp [1].equals(""))? Integer.parseInt(sp [1]) : 0);
 							for (int a : num)app = a + app;
 						} catch (Exception e) {
-							int [] num = Util.toBinary(locations.get(sp [1]));
+							Integer label = locations.get(sp [1]);
+							
+							if (label == null) throw new Exception("Unknown label: " + sp [1]);
+							
+							int [] num = Util.toBinary(label);
 							for (int a : num)app = a + app;
 							
 							//new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
