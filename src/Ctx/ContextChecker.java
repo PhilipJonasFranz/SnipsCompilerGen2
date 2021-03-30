@@ -778,7 +778,7 @@ public class ContextChecker {
 		
 		/* Check that type that is covering is a struct type */
 		if (extension != null && covered && !(e.elements.get(0).getType().isStruct())) 
-				throw new CTX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
+				throw new CTEX_EXC(e.getSource(), Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType().typeString());
 		
 		/* Absolute placeholder case */
 		if (e.elements.size() == 1 && e.elements.get(0) instanceof TempAtom) {
@@ -931,7 +931,7 @@ public class ContextChecker {
 						
 						if (sel0.deref) {
 							if (!type.isPointer()) 
-								throw new CTX_EXC(selection.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree().typeString());
+								throw new CTEX_EXC(selection.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree().typeString());
 							else 
 								/* Unwrap pointer, selection does dereference */
 								type = type.getContainedType();
@@ -1338,7 +1338,7 @@ public class ContextChecker {
 		
 		TYPE type = s.condition.check(this);
 		if (!type.isPrimitive()) 
-			throw new CTX_EXC(s.condition.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+			throw new CTEX_EXC(s.condition.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 		
 		if (s.defaultStatement == null) 
 			throw new CTEX_EXC(s.getSource(), Const.MISSING_DEFAULT_STATEMENT);
@@ -1429,10 +1429,10 @@ public class ContextChecker {
 		TYPE right = b.getRight().check(this);
 		
 		if (left.isNull()) 
-			throw new CTX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+			throw new CTEX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (right.isNull()) 
-			throw new CTX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+			throw new CTEX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (b.left instanceof ArrayInit) 
 			throw new CTEX_EXC(b.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
@@ -1504,7 +1504,7 @@ public class ContextChecker {
 		TYPE op = u.getOperand().check(this);
 		
 		if (op.isNull()) 
-			throw new CTX_EXC(u.getOperand().getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+			throw new CTEX_EXC(u.getOperand().getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (u.getOperand() instanceof ArrayInit) 
 			throw new CTEX_EXC(u.getOperand().getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
@@ -1643,7 +1643,7 @@ public class ContextChecker {
 				TYPE t = c.getBaseRef().check(this);
 				
 				if (!t.getCoreType().isStruct()) 
-					throw new CTX_EXC(c.getCallee().getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.NESTED_CALL_BASE_IS_NOT_A_STRUCT, t.getCoreType().typeString());
 				
 				STRUCT s = (STRUCT) t.getCoreType();
 				
@@ -1753,7 +1753,7 @@ public class ContextChecker {
 					c.setType(f.getReturnType().clone());
 				
 				if (c.getType().isVoid() && !f.hasReturn) 
-					throw new CTX_EXC(c.getCallee().getSource(), Const.EXPECTED_RETURN_VALUE);
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.EXPECTED_RETURN_VALUE);
 			}
 		}
 		else {
@@ -1935,14 +1935,8 @@ public class ContextChecker {
 		if (!this.currentFunction.isEmpty()) 
 			ProvisoUtil.mapNTo1(sot.sizeType, this.currentFunction.peek().provisosTypes);
 		
-		if (CompilerDriver.disableStructSIDHeaders) 
-			throw new CTX_EXC(iof.getSource(), Const.SID_DISABLED_NO_INSTANCEOF);
-		
-		if (!iof.instanceType.isStruct()) 
-			throw new CTX_EXC(iof.getSource(), Const.EXPECTED_STRUCT_TYPE, iof.instanceType.provisoFree().typeString());
-		
-		iof.setType(new BOOL());
-		return iof.getType();
+		sot.setType(new INT());
+		return sot.getType();
 	}
 	
 	public TYPE checkIDOfExpression(IDOfExpression sot) throws CTEX_EXC {
@@ -2016,7 +2010,7 @@ public class ContextChecker {
 		
 		/* Allow only casting to equal word sizes or from or to void types */
 		if ((t != null && t.wordsize() != tc.castType.wordsize()) && !(tc.castType.getCoreType().isVoid() || t.isVoid())) 
-			throw new CTX_EXC(tc.getSource(), Const.CANNOT_CAST_TO, t.provisoFree().typeString(), tc.castType.provisoFree().typeString());
+			throw new CTEX_EXC(tc.getSource(), Const.CANNOT_CAST_TO, t.provisoFree().typeString(), tc.castType.provisoFree().typeString());
 		
 		tc.setType(tc.castType);
 		return tc.castType;
@@ -2030,7 +2024,7 @@ public class ContextChecker {
 			TYPE t = ref.check(this);
 			
 			if (!t.isPrimitive()) 
-				throw new CTX_EXC(i.idRef.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+				throw new CTEX_EXC(i.idRef.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 			
 			i.setType(t);
 		}
@@ -2047,7 +2041,7 @@ public class ContextChecker {
 			TYPE t = ref.check(this);
 			
 			if (!t.isPrimitive()) 
-				throw new CTX_EXC(i.select.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+				throw new CTEX_EXC(i.select.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 			
 			i.setType(t);
 		}
@@ -2056,10 +2050,10 @@ public class ContextChecker {
 		return i.getType();
 	}
 	
-	public TYPE checkAssignWriteback(AssignWriteback i) throws CTX_EXC {
+	public TYPE checkAssignWriteback(AssignWriteback i) throws CTEX_EXC {
 		if (i.reference instanceof IDRefWriteback || i.reference instanceof StructSelectWriteback) 
 			i.reference.check(this);
-		else throw new CTX_EXC(i.getSource(), Const.CAN_ONLY_APPLY_TO_IDREF);
+		else throw new CTEX_EXC(i.getSource(), Const.CAN_ONLY_APPLY_TO_IDREF);
 		return null;
 	}
 	
@@ -2100,7 +2094,7 @@ public class ContextChecker {
 			else {
 				/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
 				if (!(chain.isArray() || (i == 0 && (type0.isPointer() || chain.isVoid())))) 
-					throw new CTX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
+					throw new CTEX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree().typeString());
 				else if (chain.isArray()) {
 					ARRAY arr = (ARRAY) chain;
 					
@@ -2535,7 +2529,7 @@ public class ContextChecker {
 	 * @param e Expression to extract path from, type of expression must either be STRUCT or INTERFACE.
 	 * @return The extracted and built namespace path.
 	 */
-	public String getPath(Expression e) throws CTX_EXC {
+	public String getPath(Expression e) throws CTEX_EXC {
 		if (e.check(this).getCoreType().isStruct()) {
 			STRUCT s = (STRUCT) e.check(this).getCoreType();
 			return s.getTypedef().path.build();

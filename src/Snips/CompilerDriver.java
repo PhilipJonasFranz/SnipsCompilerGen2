@@ -797,7 +797,13 @@ public class CompilerDriver {
 		/* Read Configuration */
 		List<String> conf = Util.readFile(new File("release\\sys-inf.xml"));
 		if (conf == null) conf = Util.readFile(new File("sys-inf.xml"));
-		sys_config  = new XMLNode(conf);
+		
+		try {
+			sys_config  = XMLParser.parse(conf);
+		} catch (MalformedXMLException e) {
+			new Message("Failed to parse system configuration!", Type.FAIL);
+			System.exit(0);
+		}
 	}
 	
 	/**

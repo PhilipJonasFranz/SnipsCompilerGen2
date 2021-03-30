@@ -55,8 +55,8 @@ public class FUNC extends PRIMITIVE<Function> {
 		else return false;
 	}
 	
-	public CTX_EXC getInequality(FUNC func, Source source) {
-		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTX_EXC(source, Const.MISSMATCHING_ARGUMENT_NUMBER, this.funcHead.parameters.size(), func.funcHead.parameters.size());
+	public CTEX_EXC getInequality(FUNC func, Source source) {
+		if (func.funcHead.parameters.size() != this.funcHead.parameters.size()) return new CTEX_EXC(source, Const.MISSMATCHING_ARGUMENT_NUMBER, this.funcHead.parameters.size(), func.funcHead.parameters.size());
 		else {
 			for (int i = 0; i < this.funcHead.parameters.size(); i++) {
 				if (!func.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType())) {

@@ -458,8 +458,6 @@ public class TestDriver {
 					System.exit(0);
 				}
 				
-				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
-				
 				ProcessorUnit pcu0 = null;
 				
 				boolean silenced = CompilerDriver.silenced;

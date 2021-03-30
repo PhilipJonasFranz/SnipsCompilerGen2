@@ -162,7 +162,7 @@ public class StructTypedef extends SyntaxElement {
 					for (int a = 0; a < this.extension.proviso.size(); a++) {
 						TYPE translated = ProvisoUtil.translate(i.getTypedef().proviso.get(a).clone(), i.getTypedef().proviso, this.extension.proviso);
 						pClone.add(translated);
-					}
+					} 
 					
 					/* Translate: Extension Head Proviso -> Extension Proviso */
 					for (int a = 0; a < iclone.proviso.size(); a++) {

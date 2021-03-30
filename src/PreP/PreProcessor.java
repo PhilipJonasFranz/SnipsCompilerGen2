@@ -146,8 +146,8 @@ public class PreProcessor {
 	}
 	
 	public static List<String> getFile(String filePath) {
-		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
-			String [] v = c.value.split(":");
+		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").getChildren()) {
+			String [] v = c.getValue().split(":");
 			if (v [0].equals(filePath)) {
 				filePath = v [1];
 			}
@@ -174,8 +174,8 @@ public class PreProcessor {
 	}
 	
 	public static String resolveToPath(String filePath) {
-		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").children) {
-			String [] v = c.value.split(":");
+		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").getChildren()) {
+			String [] v = c.getValue().split(":");
 			
 			String modPath = v [0];
 			if (modPath.equals(filePath)) {
@@ -203,6 +203,7 @@ public class PreProcessor {
 			return "release/" + filePath;
 		}
 		else {
+			filePath = filePath.replace("\\", "/");
 			String [] sp = filePath.split("/") ;
 			String in = CompilerDriver.inputFile.getParent();
 			return in + "/" + sp [sp.length - 1];
