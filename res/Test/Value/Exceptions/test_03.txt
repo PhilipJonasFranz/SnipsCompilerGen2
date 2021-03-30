@@ -46,7 +46,7 @@ TESTCASES
 10 9
 11 9
 OUTPUT
-.version 22834533771
+.version 21673525363
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -158,12 +158,13 @@ main:                                        /* Function: main */
     mov r5, r0
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    b main.L2
+    b main.L1
 main.L0: 
     mov r1, sp
     ldr sp, [fp, #-4]                        /* Load backed up sp from stack */
     add sp, sp, #4
-    ldr r12, .P1055849890_Exception
+    ldr r10, .P1055849890_Exception
+    cmp r12, r10
     bne main.L2
     add r1, r1, #8
     mov r0, #8
@@ -173,7 +174,10 @@ main.L0:
     ldr r5, [fp, #-4]                        /* Load field from struct */
     add sp, sp, #8
     mov r12, #0
+    b main.L1
 main.L2: 
+    mov r10, #0
+main.L1: 
     mov r0, r5                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
