@@ -1404,7 +1404,7 @@ public class ASMOptimizer {
 						if (probed.contains(reg)) continue;
 						else probed.add(reg);
 						
-						if (RegOp.toInt(reg) > 2 && reg != REG.R10 && reg != REG.FP && reg != REG.SP && reg != REG.LR && reg != REG.PC && reg != REG.R12) {
+						if (RegOp.toInt(reg) > 2 && RegOp.toInt(reg) < 10) {
 							boolean used = false;
 							for (int a = k + 1; a < ins0.size(); a++) {
 								if (ins0.get(a) instanceof ASMLabel && ((ASMLabel) ins0.get(a)).isFunctionLabel) {
@@ -1412,6 +1412,19 @@ public class ASMOptimizer {
 								}
 								else {
 									used |= readsReg(ins0.get(a), reg);
+									
+									/*
+									 * A branch, for example from a for-loop, that branches
+									 * back to the start of the loop makes this optimization
+									 * impossible.
+									 */
+									if (ins0.get(a) instanceof ASMBranch) {
+										ASMBranch branch = (ASMBranch) ins0.get(a);
+										if (branch.optFlags.contains(OPT_FLAG.LOOP_BRANCH)) {
+											used = true;
+											break;
+										}
+									}
 								}
 							}
 							
@@ -2153,15 +2166,6 @@ public class ASMOptimizer {
 						i--;
 						markOpt();
 					}
-				}
-			}
-			else if (ins0.get(i) instanceof ASMMov) {
-				/* Remove identity mov */
-				ASMMov mov = (ASMMov) ins0.get(i);
-				if (mov.op1 instanceof RegOp && ((RegOp) mov.op1).reg == mov.target.reg) {
-					ins0.remove(i);
-					i--;
-					markOpt();
 				}
 			}
 		}

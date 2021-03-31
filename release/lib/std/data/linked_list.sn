@@ -22,13 +22,13 @@ namespace List {
 		}
 		
 		shared T get(int i) {
-			if (i < 0) return self->defValue;
+			/* Index out of bounds */
+			if (i < 0 || i >= self->size) 
+				return self->defValue;
 		
+			/* List walk is safe since index is within bounds */
 			ListNode<T>* n = self->head;
 			while (i != 0) {
-				if (n->next == null) return self->defValue;
-				
-				/* Jump to next */
 				n = n->next;
 				i--;
 			}
@@ -179,8 +179,51 @@ namespace List {
 			}
 		}
 		
+		shared void reverse() {
+			int s = self->size;
+			
+			/* Current node */
+			ListNode<T>* n = self->head;
+				
+			/* 
+			 * List must contain at least two elements 
+			 * to be 'reversable'.
+			 */
+			if (n != null && s > 1) {
+				ListNode<T>* tail0 = n;
+				
+				/* Keep reference to original tail */
+				ListNode<T>* head0 = n;
+				
+				/*
+				 * For entire list, walk the list, and build
+				 * reversed list in parallel.
+				 */
+				while (s > 0) {
+					ListNode<T>* n0 = n->next;
+					
+					n->next = head0;
+					head0 = n;
+					
+					n = n0;
+					s--;
+				}
+				
+				/* 
+				 * Currently loop, cut at original 
+				 * start of list, that is now the tail.
+				 */
+				tail0->next = null;
+				
+				/* Set new head and tail references */
+				self->head = head0;
+				self->tail = tail0;
+			}
+		}
+		
 		shared void clear<T:void>() {
 			ListNode<void>* n = self->head;
+			
 			while (n != null) {
 				free(n);
 				n = n->next;

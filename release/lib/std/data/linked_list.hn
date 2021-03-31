@@ -85,6 +85,11 @@ namespace List {
 		shared void remove<T:void>(int i);
 		
 		/*
+		 * Reverses the current list.
+		 */
+		shared void reverse();
+		
+		/*
 		 * Removes all elements from the list
 		 */
 		shared void clear<T:void>();
