@@ -1,0 +1,82 @@
+SOURCE
+#include<linked_list.hn>
+
+int main(int i) {
+	LinkedList<int>* list = LinkedList::create<int>(22);
+	
+	list->add(5);
+	list->add(6);
+	list->add(2);
+	list->add(1);
+	list->add(9);
+	
+	list->reverse();
+	
+	return list->get(i);
+}
+TESTCASES
+0 9
+1 1
+2 2
+3 6
+4 5
+5 22
+6 22
+OUTPUT
+.version 13899052691
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+.include linked_list.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r3, r0
+    mov r0, #22                              /* Evaluate Expression */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
+    mov r4, r0
+    mov r1, #5
+    mov r0, r4
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r1, #6
+    mov r0, r4
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r1, #2
+    mov r0, r4
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r1, #1
+    mov r0, r4
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r1, #9
+    mov r0, r4
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r0, r4                               /* Load parameters */
+    bl List.LinkedList.reverse_P_1           /* Call List.LinkedList.reverse */
+    mov r0, r4
+    mov r1, r3
+    bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
+    pop { pc }

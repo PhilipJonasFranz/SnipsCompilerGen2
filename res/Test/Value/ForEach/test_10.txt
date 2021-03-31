@@ -56,8 +56,8 @@ _routine_stack_copy_end_:
 
 .global fib
 fib:                                         /* Function: fib */
-    sub sp, sp, #24
-    stmea sp, {r3-r7, lr}
+    sub sp, sp, #28
+    stmea sp, {r3-r8, lr}
     mov r3, r0
     bl resv                                  /* Call resv */
     mov r4, r0
@@ -67,6 +67,7 @@ fib:                                         /* Function: fib */
 fib.L1: 
     cmp r3, r6
     beq fib.L2
+    mov r8, r1
     add r0, r4, r6
     ldr r7, [r10, r0, lsl #2]                /* Load from address */
     cmp r5, #2
@@ -94,7 +95,7 @@ fib.L2:
     add r1, r4, r3
     sub r0, r1, #1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    ldmfd sp!, {r3-r7, pc}
+    ldmfd sp!, {r3-r8, pc}
 
 .global main
 main:                                        /* Function: main */
