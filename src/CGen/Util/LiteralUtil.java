@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Processing.Arith.ASMMvn;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -61,9 +62,16 @@ public class LiteralUtil {
 			
 			node.instructions.add(ldr);
 		}
-		else 
-			/* Load the value directley, fits in value range */
-			node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+		else {
+			if (value >= 0)
+				/* Load the value directley, fits in value range */
+				node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+			else {
+				/* Load the value directley, fits in value range, but use mvn */
+				int inverse = -(value + 1);
+				node.instructions.add(new ASMMvn(new RegOp(target), new ImmOp(inverse)));
+			}
+		}
 	}
 	
 	/**
@@ -75,7 +83,7 @@ public class LiteralUtil {
 			if (entry.getValue().name.equals(l.label.name)) 
 				return entry.getValue();
 		
-		return null;
+		return null; 
 	}
 	
 } 
