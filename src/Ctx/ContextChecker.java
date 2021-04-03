@@ -1408,14 +1408,14 @@ public class ContextChecker {
 		if (t.condition instanceof ArrayInit) 
 			throw new CTEX_EXC(t.condition.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		TYPE t0 = t.leftOperand.check(this);
-		TYPE t1 = t.rightOperand.check(this);
+		TYPE t0 = t.left.check(this);
+		TYPE t1 = t.right.check(this);
 		
-		if (t.leftOperand instanceof ArrayInit) 
-			throw new CTEX_EXC(t.leftOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		if (t.left instanceof ArrayInit) 
+			throw new CTEX_EXC(t.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		if (t.rightOperand instanceof ArrayInit) 
-			throw new CTEX_EXC(t.rightOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		if (t.right instanceof ArrayInit) 
+			throw new CTEX_EXC(t.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (!t0.isEqual(t1)) 
 			throw new CTEX_EXC(t.condition.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree().typeString(), t1.provisoFree().typeString());

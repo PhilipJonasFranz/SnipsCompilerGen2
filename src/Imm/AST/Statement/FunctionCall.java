@@ -7,10 +7,12 @@ import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -106,6 +108,10 @@ public class FunctionCall extends Statement implements Callee {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunctionCall(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

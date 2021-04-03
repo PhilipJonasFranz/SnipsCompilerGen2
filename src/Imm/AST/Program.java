@@ -4,7 +4,9 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -46,6 +48,10 @@ public class Program extends SyntaxElement {
 		return ctx.check();
 	}
 
+	public Program opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optProgram(this);
+	}
+	
 	public void setContext(List<TYPE> setContext) {
 		return;
 	}

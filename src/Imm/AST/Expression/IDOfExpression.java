@@ -5,7 +5,9 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -44,6 +46,10 @@ public class IDOfExpression extends Expression {
 		return t;
 	}
 
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optIDOfExpression(this);
+	}
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		ProvisoUtil.mapNTo1(this.type, context);
 	}

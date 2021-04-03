@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.CGEN_EXC;
@@ -32,6 +31,7 @@ import Imm.AsN.AsNTranslationUnit;
 import Imm.TYPE.PRIMITIVES.INT;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
+import Opt.ASMOptimizer;
 import Par.Parser;
 import Par.Scanner;
 import Par.Token;

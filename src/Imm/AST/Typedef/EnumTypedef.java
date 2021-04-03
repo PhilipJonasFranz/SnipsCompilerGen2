@@ -5,11 +5,13 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.ENUM;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Opt.ASTOptimizer;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -68,6 +70,10 @@ public class EnumTypedef extends SyntaxElement {
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		return new VOID();
+	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optEnumTypedef(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

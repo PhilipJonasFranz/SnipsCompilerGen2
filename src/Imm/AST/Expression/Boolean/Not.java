@@ -1,6 +1,8 @@
 package Imm.AST.Expression.Boolean;
 
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -17,6 +19,10 @@ public class Not extends BoolUnaryExpression {
 		super(op, UnaryOperator.NOT, source);
 	}
 
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optNot(this);
+	}
+	
 	public BoolUnaryExpression clone() {
 		return new Not(this.getOperand().clone(), this.getSource().clone());
 	}

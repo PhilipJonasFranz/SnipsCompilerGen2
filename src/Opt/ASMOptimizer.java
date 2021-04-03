@@ -1,4 +1,4 @@
-package CGen.Opt;
+package Opt;
 
 import java.util.ArrayList;
 import java.util.List;

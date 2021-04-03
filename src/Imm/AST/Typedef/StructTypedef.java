@@ -8,6 +8,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -22,6 +23,7 @@ import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -364,6 +366,10 @@ public class StructTypedef extends SyntaxElement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optStructTypedef(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

@@ -24,7 +24,7 @@ public abstract class UnaryExpression extends Expression {
 	private UnaryOperator operator;
 	
 	/** The expression operand */
-	private Expression operand;
+	public Expression operand;
 	
 	
 			/* ---< CONSTRUCTORS >--- */

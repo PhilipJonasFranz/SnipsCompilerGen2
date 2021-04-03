@@ -4,7 +4,9 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Par.Token;
 import Util.Source;
 
@@ -36,6 +38,10 @@ public class Comment extends Statement {
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		return null;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return this;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

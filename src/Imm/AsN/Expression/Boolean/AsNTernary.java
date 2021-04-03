@@ -39,7 +39,7 @@ public class AsNTernary extends AsNExpression {
 			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(loadFalse)));
 		
 		/* Load true result */
-		tern.instructions.addAll(AsNExpression.cast(t.leftOperand, r, map, st).getInstructions());
+		tern.instructions.addAll(AsNExpression.cast(t.left, r, map, st).getInstructions());
 		
 		/* Branch to end */
 		tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(end)));
@@ -49,7 +49,7 @@ public class AsNTernary extends AsNExpression {
 			tern.instructions.add(loadFalse);
 			
 			/* Load false result */
-			tern.instructions.addAll(AsNExpression.cast(t.rightOperand, r, map, st).getInstructions());
+			tern.instructions.addAll(AsNExpression.cast(t.right, r, map, st).getInstructions());
 		}
 		
 		/* Add end */

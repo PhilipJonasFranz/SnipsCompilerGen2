@@ -8,6 +8,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.CompoundStatement;
@@ -17,6 +18,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
@@ -225,6 +227,10 @@ public class Function extends CompoundStatement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Function opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunction(this);
 	}
 
 	/** 

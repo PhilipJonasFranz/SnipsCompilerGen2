@@ -8,6 +8,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -21,6 +22,7 @@ import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -208,6 +210,10 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optInterfaceTypedef(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

@@ -4,11 +4,13 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -50,6 +52,10 @@ public class PointerLhsId extends LhsId {
 		
 		CompilerDriver.lastSource = temp;
 		return this.expressionType;
+	}
+	
+	public LhsId opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optPointerLhsId(this);
 	}
 
 	public NamespacePath getFieldName() {

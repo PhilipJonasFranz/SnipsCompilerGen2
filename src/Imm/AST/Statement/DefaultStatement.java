@@ -4,7 +4,9 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -35,6 +37,10 @@ public class DefaultStatement extends CompoundStatement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optDefaultStatement(this);
 	}
 
 	public Statement clone() {

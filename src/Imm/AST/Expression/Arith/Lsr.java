@@ -1,7 +1,9 @@
 package Imm.AST.Expression.Arith;
 
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -18,6 +20,10 @@ public class Lsr extends BinaryExpression {
 		super(left, right, Operator.LSR, source);
 	}
 
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optLsr(this);
+	}
+	
 	public BinaryExpression clone() {
 		return new Lsr(this.left.clone(), this.right.clone(), this.getSource().clone());
 	}

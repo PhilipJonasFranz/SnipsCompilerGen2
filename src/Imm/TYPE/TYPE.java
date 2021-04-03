@@ -134,6 +134,10 @@ public abstract class TYPE<T> {
 	
 	public boolean isProviso() { return this instanceof PROVISO; };
 	
+	public Integer toInteger() {
+		return null;
+	}
+	
 	/**
 	 * Returns true if this type is either a PRIMITIVE, POINTER or INTERFACE type.
 	 */

@@ -290,8 +290,8 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			boolean hasRef = false;
 			Ternary ter = (Ternary) e;
 			hasRef |= hasAddressReference(ter.condition, dec);
-			hasRef |= hasAddressReference(ter.leftOperand, dec);
-			hasRef |= hasAddressReference(ter.rightOperand, dec);
+			hasRef |= hasAddressReference(ter.left, dec);
+			hasRef |= hasAddressReference(ter.right, dec);
 			return hasRef;
 		}
 		else if (e instanceof AddressOf) {

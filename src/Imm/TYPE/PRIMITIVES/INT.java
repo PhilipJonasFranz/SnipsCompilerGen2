@@ -40,6 +40,10 @@ public class INT extends PRIMITIVE<Integer> {
 		return "" + this.value;
 	}
 	
+	public Integer toInteger() {
+		return this.value;
+	}
+	
 	public TYPE clone() {
 		INT b = new INT();
 		if (this.value != null) b.setValue(this.value + "");

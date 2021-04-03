@@ -1,8 +1,10 @@
 package Imm.AST.Expression;
 
+import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -34,6 +36,8 @@ public abstract class Expression extends SyntaxElement {
 		}
 		else return this.type;
 	}
+	
+	public abstract Expression opt(ASTOptimizer s) throws OPT0_EXC;
 	
 	public void setType(TYPE type) {
 		this.type = type;

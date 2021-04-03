@@ -4,8 +4,10 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -14,17 +16,17 @@ public class Ternary extends Expression {
 			/* ---< FIELDS >--- */
 	public Expression condition;
 	
-	public Expression leftOperand;
+	public Expression left;
 	
-	public Expression rightOperand;
+	public Expression right;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Ternary(Expression condition, Expression left, Expression right, Source source) {
 		super(source);
 		this.condition = condition;
-		this.leftOperand = left;
-		this.rightOperand = right;
+		this.left = left;
+		this.right = right;
 	}
 	
 	
@@ -34,8 +36,8 @@ public class Ternary extends Expression {
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
-			this.leftOperand.print(d + this.printDepthStep, rec);
-			this.rightOperand.print(d + this.printDepthStep, rec);
+			this.left.print(d + this.printDepthStep, rec);
+			this.right.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -49,14 +51,18 @@ public class Ternary extends Expression {
 		return t;
 	}
 	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optTernary(this);
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		this.condition.setContext(context);
-		this.leftOperand.setContext(context);
-		this.rightOperand.setContext(context);
+		this.left.setContext(context);
+		this.right.setContext(context);
 	}
 
 	public Expression clone() {
-		return new Ternary(this.condition.clone(), this.leftOperand.clone(), this.rightOperand.clone(), this.getSource().clone());
+		return new Ternary(this.condition.clone(), this.left.clone(), this.right.clone(), this.getSource().clone());
 	}
 
 } 

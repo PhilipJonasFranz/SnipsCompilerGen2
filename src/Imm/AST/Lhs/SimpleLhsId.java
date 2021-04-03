@@ -4,8 +4,10 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -41,6 +43,10 @@ public class SimpleLhsId extends LhsId {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public LhsId opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optSimpleLhsId(this);
 	}
 
 	public NamespacePath getFieldName() {

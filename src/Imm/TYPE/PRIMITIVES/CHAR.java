@@ -43,6 +43,10 @@ public class CHAR extends PRIMITIVE<Character> {
 		return "" + (int) this.value;
 	}
 	
+	public Integer toInteger() {
+		return (int) this.value;
+	}
+	
 	public TYPE clone() {
 		CHAR b = new CHAR();
 		if (this.value != null) b.setValue(this.value + "");

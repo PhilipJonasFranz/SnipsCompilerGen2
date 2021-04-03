@@ -5,6 +5,7 @@ import java.util.List;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -12,6 +13,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
@@ -113,6 +115,10 @@ public class ForEachStatement extends CompoundStatement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optForEachStatement(this);
 	}
 
 	public Statement clone() {

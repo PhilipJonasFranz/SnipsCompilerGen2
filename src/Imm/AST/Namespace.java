@@ -4,8 +4,10 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
+import Opt.ASTOptimizer;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -57,6 +59,10 @@ public class Namespace extends SyntaxElement {
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		/* This function should not be called since namespaces are flattened */
 		return new VOID();
+	}
+	
+	public Namespace opt(ASTOptimizer opt) throws OPT0_EXC {
+		return this;
 	}
 
 	public void setContext(List<TYPE> setContext) {

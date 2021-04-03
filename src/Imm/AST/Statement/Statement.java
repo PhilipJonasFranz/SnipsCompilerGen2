@@ -3,7 +3,9 @@ package Imm.AST.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -27,6 +29,8 @@ public abstract class Statement extends SyntaxElement {
 	public Statement(Source source) {
 		super(source);
 	}
+	
+	public abstract Statement opt(ASTOptimizer opt) throws OPT0_EXC;
 
 	public abstract Statement clone();
 	

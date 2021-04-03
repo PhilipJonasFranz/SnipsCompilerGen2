@@ -4,9 +4,11 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.ASTOptimizer;
 import Par.Token;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -56,9 +58,12 @@ public class RegisterAtom extends Expression {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optRegisterAtom(this);
+	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		//System.out.println("Applied Context: " + this.getClass().getName());
 		return;
 	}
 

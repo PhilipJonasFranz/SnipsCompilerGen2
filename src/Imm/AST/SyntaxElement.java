@@ -4,8 +4,10 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -60,6 +62,11 @@ public abstract class SyntaxElement {
 	 * Visitor relay for context checking
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTEX_EXC;
+	
+	/**
+	 * Visitor relay for AST optimizer
+	 */
+	public abstract SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC;
 	
 	/** 
 	 * Create a padding of spaces with the given length.

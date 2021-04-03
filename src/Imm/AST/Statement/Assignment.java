@@ -4,9 +4,11 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Lhs.LhsId;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -71,6 +73,10 @@ public class Assignment extends Statement {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optAssignment(this);
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

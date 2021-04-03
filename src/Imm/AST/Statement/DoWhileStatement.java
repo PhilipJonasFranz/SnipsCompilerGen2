@@ -4,8 +4,10 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -42,6 +44,10 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 		return t;
 	}
 
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optDoWhileStatement(this);
+	}
+	
 	public Statement clone() {
 		return new DoWhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
 	}

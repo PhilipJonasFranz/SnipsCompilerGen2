@@ -136,6 +136,10 @@ public class PROVISO extends TYPE<Void> {
 		/* Base case, map type maps directley to proviso */
 		return (searchedProviso.equals(this.placeholderName))? mapType : null;
 	}
+	
+	public Integer toInteger() {
+		return (this.hasContext())? this.getContext().toInteger() : null;
+	}
 
 	public boolean hasProviso() {
 		return true;

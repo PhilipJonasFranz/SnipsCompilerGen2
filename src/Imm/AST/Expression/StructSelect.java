@@ -4,7 +4,9 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -47,6 +49,10 @@ public class StructSelect extends Expression {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optStructSelect(this);
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

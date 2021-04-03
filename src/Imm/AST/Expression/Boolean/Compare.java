@@ -2,9 +2,11 @@ package Imm.AST.Expression.Boolean;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 
@@ -47,6 +49,10 @@ public class Compare extends BinaryExpression {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optCompare(this);
 	}
 	
 	public BinaryExpression clone() {

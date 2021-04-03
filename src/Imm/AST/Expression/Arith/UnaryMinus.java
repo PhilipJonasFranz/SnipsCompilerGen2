@@ -1,7 +1,9 @@
 package Imm.AST.Expression.Arith;
 
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.UnaryExpression;
+import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -16,6 +18,10 @@ public class UnaryMinus extends UnaryExpression {
 	 */
 	public UnaryMinus(Expression operand, Source source) {
 		super(operand, UnaryOperator.NEG, source);
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optUnaryMinus(this);
 	}
 	
 	public UnaryExpression clone() {
