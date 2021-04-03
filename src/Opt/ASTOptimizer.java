@@ -69,15 +69,21 @@ import Imm.AST.Statement.WhileStatement;
 import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
+import Imm.TYPE.TYPE;
 
 public class ASTOptimizer {
 
-	public Program optProgram(Program AST) {
-		for (SyntaxElement s : AST.programElements) {
-			try {
-				s.opt(this);
-			} catch (OPT0_EXC e) {
-				e.printStackTrace();
+	public Program optProgram(Program AST) throws OPT0_EXC {
+		for (int i = 0; i < AST.programElements.size(); i++) {
+			SyntaxElement s = AST.programElements.get(i);
+			SyntaxElement s0 = s.opt(this);
+			
+			if (s0 == null) {
+				AST.programElements.remove(i);
+				i--;
+			}
+			else {
+				AST.programElements.set(AST.programElements.indexOf(s), s0);
 			}
 		}
 		
@@ -176,58 +182,68 @@ public class ASTOptimizer {
 
 	public Expression optTempAtom(TempAtom tempAtom) throws OPT0_EXC {
 		tempAtom.base = tempAtom.base.opt(this);
+		
 		return tempAtom;
 	}
 
 	public Expression optTypeCast(TypeCast typeCast) throws OPT0_EXC {
 		typeCast.expression = typeCast.expression.opt(this);
+		
 		return typeCast;
 	}
 
 	public Expression optAdd(Add add) throws OPT0_EXC {
 		add.left = add.left.opt(this);
 		add.right = add.right.opt(this);
+		
 		return add;
 	}
 
 	public Expression optBitAnd(BitAnd bitAnd) throws OPT0_EXC {
 		bitAnd.left = bitAnd.left.opt(this);
 		bitAnd.right = bitAnd.right.opt(this);
+		
 		return bitAnd;
 	}
 
 	public Expression optBitNot(BitNot bitNot) throws OPT0_EXC {
 		bitNot.operand = bitNot.operand.opt(this);
+		
 		return bitNot;
 	}
 
 	public Expression optBitOr(BitOr bitOr) throws OPT0_EXC {
 		bitOr.left = bitOr.left.opt(this);
 		bitOr.right = bitOr.right.opt(this);
+		
 		return bitOr;
 	}
 
 	public Expression optBitXor(BitXor bitXor) throws OPT0_EXC {
 		bitXor.left = bitXor.left.opt(this);
 		bitXor.right = bitXor.right.opt(this);
+		
 		return bitXor;
 	}
 
 	public Expression optLsl(Lsl lsl) throws OPT0_EXC {
 		lsl.left = lsl.left.opt(this);
 		lsl.right = lsl.right.opt(this);
+		
 		return lsl;
 	}
 
 	public Expression optLsr(Lsr lsr) throws OPT0_EXC {
 		lsr.left = lsr.left.opt(this);
 		lsr.right = lsr.right.opt(this);
+		
 		return lsr;
 	}
 
 	public Expression optMul(Mul mul) throws OPT0_EXC {
 		mul.left = mul.left.opt(this);
 		mul.right = mul.right.opt(this);
+		
 		return mul;
 	}
 	
@@ -243,10 +259,23 @@ public class ASTOptimizer {
 			s.left = right.getOperand();
 			s.right = left.getOperand();
 		}
+		
 		/* 4 - -5 = 4 + 5 = 9 */
-		else if (s.right instanceof UnaryMinus) {
+		if (s.right instanceof UnaryMinus) {
 			UnaryMinus right = (UnaryMinus) s.right;
 			return new Add(s.left, right.getOperand(), s.getSource());
+		}
+		
+		/* Precalc */
+		if (s.left.getType().hasInt() && s.right.getType().hasInt()) {
+			int left = s.left.getType().toInt();
+			int right = s.right.getType().toInt();
+			
+			TYPE t0 = s.left.getType().clone();
+			t0.value = left - right;
+			
+			Atom atom = new Atom(t0, s.getSource());
+			return atom;
 		}
 		
 		return s;
@@ -255,9 +284,20 @@ public class ASTOptimizer {
 	public Expression optUnaryMinus(UnaryMinus m) throws OPT0_EXC {
 		m.operand = m.operand.opt(this);
 		
+		/* --5 = 5 */
 		if (m.getOperand() instanceof UnaryMinus) {
 			UnaryMinus m0 = (UnaryMinus) m.getOperand();
 			return m0.getOperand();
+		}
+		
+		/* - -5 = 5 */
+		if (m.getOperand() instanceof Atom && m.getOperand().getType().hasInt()) {
+			int value = m.getOperand().getType().toInt();
+			if (value < 0) {
+				Atom atom = (Atom) m.getOperand();
+				atom.getType().value = -value;
+				return atom;
+			}
 		}
 		
 		return m;
@@ -266,30 +306,36 @@ public class ASTOptimizer {
 	public Expression optAnd(And and) throws OPT0_EXC {
 		and.left = and.left.opt(this);
 		and.right = and.right.opt(this);
+		
 		return and;
 	}
 
 	public Expression optCompare(Compare compare) throws OPT0_EXC {
 		compare.left = compare.left.opt(this);
 		compare.right = compare.right.opt(this);
+		
 		return compare;
 	}
 
 	public Expression optNot(Not not) throws OPT0_EXC {
-		not.operand = not.operand.opt(this);		
+		not.operand = not.operand.opt(this);	
+		
 		return not;
 	}
 
 	public Expression optOr(Or or) throws OPT0_EXC {
 		or.left = or.left.opt(this);
 		or.right = or.right.opt(this);
+		
 		return or;
 	}
 
 	public Expression optTernary(Ternary ternary) throws OPT0_EXC {
 		ternary.condition = ternary.condition.opt(this);
+		
 		ternary.left = ternary.left.opt(this);
 		ternary.right = ternary.right.opt(this);
+		
 		return ternary;
 	}
 
@@ -362,6 +408,9 @@ public class ASTOptimizer {
 	}
 
 	public Statement optReturnStatement(ReturnStatement returnStatement) throws OPT0_EXC {
+		if (returnStatement.value != null)
+			returnStatement.value = returnStatement.value.opt(this);
+		
 		return returnStatement;
 	}
 

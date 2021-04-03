@@ -137,8 +137,8 @@ public class PROVISO extends TYPE<Void> {
 		return (searchedProviso.equals(this.placeholderName))? mapType : null;
 	}
 	
-	public Integer toInteger() {
-		return (this.hasContext())? this.getContext().toInteger() : null;
+	public Integer toInt() {
+		return (this.hasContext())? this.getContext().toInt() : null;
 	}
 
 	public boolean hasProviso() {

@@ -15,6 +15,7 @@ import Ctx.ContextChecker;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
 import Exc.LINK_EXC;
+import Exc.OPT0_EXC;
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
@@ -32,6 +33,7 @@ import Imm.TYPE.PRIMITIVES.INT;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
 import Opt.ASMOptimizer;
+import Opt.ASTOptimizer;
 import Par.Parser;
 import Par.Scanner;
 import Par.Token;
@@ -71,7 +73,7 @@ public class CompilerDriver {
 		out = 							false,	/* Print final output.											*/
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
-		disableOptimizer = 				false,	/* The optimizer module is skipped in the pipeline.				*/
+		disableOptimizers = 			false,	/* The optimizer modules are skipped in the pipeline.			*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
@@ -104,6 +106,7 @@ public class CompilerDriver {
 		IMPM("Import Manager"),
 		NAMM("Namespace Manager"),
 		CTEX("Context Checker"),
+		OPT0("AST Optimizer"),
 		CGEN("Code Generation"),
 		OPT1("ASM Optimizer");
 		
@@ -268,10 +271,15 @@ public class CompilerDriver {
 				
 				if (imm) AST.print(4, true);
 				
+						/* ---< AST OPTIMIZER >--- */
+				AST = STAGE_OPT0(AST);
+				
+				if (imm) AST.print(4, true);
+				
 						/* ---< CODE GENERATION --- */
 				AsNBody body = STAGE_CGEN(AST);
 	
-						/* --- OPTIMIZING --- */
+						/* ---< ASM OPTIMIZER >--- */
 				body = STAGE_OPT1(body);
 				
 						/* --- OUTPUT BUILDING --- */
@@ -299,7 +307,7 @@ public class CompilerDriver {
 		} catch (Exception e) {
 			boolean customExc = e instanceof CGEN_EXC || e instanceof CTEX_EXC || 
 								e instanceof PARS_EXC || e instanceof LINK_EXC || 
-								e instanceof SNIPS_EXC;
+								e instanceof OPT0_EXC || e instanceof SNIPS_EXC;
 			
 			/* Exception is not ordinary and internal, print message and stack trace */
 			if (!customExc) 
@@ -625,6 +633,19 @@ public class CompilerDriver {
 		return AST;
 	}
 	
+	private static SyntaxElement STAGE_OPT0(SyntaxElement AST) throws OPT0_EXC {
+		if (!disableOptimizers) {
+			lastSource = null;
+			currentStage = PIPE_STAGE.OPT0;
+			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
+			ASTOptimizer opt0 = new ASTOptimizer();
+			AST = opt0.optProgram((Program) AST);
+			opt_progress.finish();
+		}
+		
+		return AST;
+	}
+	
 	private static AsNBody STAGE_CGEN(SyntaxElement AST) throws CGEN_EXC, CTEX_EXC {
 		lastSource = null;
 		currentStage = PIPE_STAGE.CGEN;
@@ -645,7 +666,7 @@ public class CompilerDriver {
 	}
 	
 	private static AsNBody STAGE_OPT1(AsNBody body) {
-		if (!disableOptimizer) {
+		if (!disableOptimizers) {
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT1;
 			
@@ -735,7 +756,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-imm")) 	imm = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
-				else if (args [i].equals("-opt")) 	disableOptimizer = true;
+				else if (args [i].equals("-opt")) 	disableOptimizers = true;
 				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
@@ -768,10 +789,10 @@ public class CompilerDriver {
 				"[Path]    : First argument, set input file",
 				"-log      : Print out log and compile information",
 				"-com      : Remove comments from assembly",
-				"-warn     : Disable Warnings",
+				"-warn     : Disable warnings",
 				"-imp      : Print out all imports",
-				"-opt      : Disable Optimizer",
-				"-ofs      : Optimize for Filesize, slight performance hit",
+				"-opt      : Disable code optimizers",
+				"-ofs      : Optimize for filesize, slight performance penalty",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
 				"-o        : Build object file only, required additional linking",

@@ -40,7 +40,7 @@ public class BOOL extends PRIMITIVE<Boolean> {
 		return (this.value)? "1" : "0";
 	}
 	
-	public Integer toInteger() {
+	public Integer toInt() {
 		return (this.value)? 1 : 0;
 	}
 

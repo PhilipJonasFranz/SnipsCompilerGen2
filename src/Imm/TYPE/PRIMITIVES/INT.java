@@ -40,7 +40,7 @@ public class INT extends PRIMITIVE<Integer> {
 		return "" + this.value;
 	}
 	
-	public Integer toInteger() {
+	public Integer toInt() {
 		return this.value;
 	}
 	

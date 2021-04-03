@@ -43,7 +43,7 @@ public class CHAR extends PRIMITIVE<Character> {
 		return "" + (int) this.value;
 	}
 	
-	public Integer toInteger() {
+	public Integer toInt() {
 		return (int) this.value;
 	}
 	

@@ -134,8 +134,21 @@ public abstract class TYPE<T> {
 	
 	public boolean isProviso() { return this instanceof PROVISO; };
 	
-	public Integer toInteger() {
+	/**
+	 * Attempts to convert the type to a numeric representation.
+	 * For example, for a char type, this would be the char's value.
+	 * If no such representation is available, the method will return null.
+	 */
+	public Integer toInt() {
 		return null;
+	}
+	
+	/**
+	 * Returns true if this type has a numeric representation generated
+	 * by {@link #toInt()}.
+	 */
+	public boolean hasInt() {
+		return this.toInt() != null;
 	}
 	
 	/**

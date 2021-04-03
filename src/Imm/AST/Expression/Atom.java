@@ -28,7 +28,8 @@ public class Atom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">");
+		Integer value = this.getType().toInt();
+		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">" + ((value != null)? " " + value : ""));
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
