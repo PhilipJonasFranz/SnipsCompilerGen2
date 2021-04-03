@@ -1,6 +1,9 @@
 package Opt;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Stack;
 
 import Exc.OPT0_EXC;
 import Imm.AST.Function;
@@ -70,28 +73,52 @@ import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
+import Opt.Util.ProgramContext;
+import Opt.Util.ProgramContext.VarState;
 
 public class ASTOptimizer {
 
+	private Stack<ProgramContext> cStack = new Stack();
+	
+	private ProgramContext state = null;
+	
+	public boolean OPT_DONE = true;
+	
 	public Program optProgram(Program AST) throws OPT0_EXC {
-		for (int i = 0; i < AST.programElements.size(); i++) {
-			SyntaxElement s = AST.programElements.get(i);
-			SyntaxElement s0 = s.opt(this);
+		
+		while (OPT_DONE) {
+			OPT_DONE = false;
 			
-			if (s0 == null) {
-				AST.programElements.remove(i);
-				i--;
+			this.state = new ProgramContext(null);
+			this.cStack.push(state);
+			
+			for (int i = 0; i < AST.programElements.size(); i++) {
+				SyntaxElement s = AST.programElements.get(i);
+				SyntaxElement s0 = s.opt(this);
+				
+				if (s0 == null) {
+					AST.programElements.remove(i);
+					i--;
+				}
+				else {
+					AST.programElements.set(AST.programElements.indexOf(s), s0);
+				}
 			}
-			else {
-				AST.programElements.set(AST.programElements.indexOf(s), s0);
-			}
+			
+			this.cStack.pop().transferContextChangeToParent();
+			this.state = null;
 		}
 		
 		return AST;
 	}
 	
 	public Function optFunction(Function f) throws OPT0_EXC {
+		
+		this.pushContext();
+		
 		f.body = this.optBody(f.body);
+		
+		this.popContext();
 		return f;
 	}
 	
@@ -108,6 +135,20 @@ public class ASTOptimizer {
 				body.set(body.indexOf(s), s0);
 			}
 		}
+		
+		List<Declaration> removed = new ArrayList();
+		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
+			Declaration dec = entry.getKey();
+			
+			if (!this.state.getRead(dec) && !this.state.getReferenced(dec)) {
+				if (body.contains(dec)) body.remove(dec);
+				removed.add(dec);
+			}
+		}
+		
+		removed.stream().forEach(x -> {
+			this.state.cState.remove(x);
+		});
 		
 		return body;
 	}
@@ -141,6 +182,15 @@ public class ASTOptimizer {
 	}
 
 	public Expression optIDRef(IDRef idRef) throws OPT0_EXC {
+		
+		this.state.notifyRead(idRef.origin);
+		
+		/* If variable has not been overwritten, substitute */
+		if (!this.state.getWrite(idRef.origin)) {
+			OPT_DONE = true;
+			return this.state.cState.get(idRef.origin).currentValue.clone();
+		}
+		
 		return idRef;
 	}
 
@@ -196,6 +246,20 @@ public class ASTOptimizer {
 		add.left = add.left.opt(this);
 		add.right = add.right.opt(this);
 		
+		/* Precalc */
+		if (add.left instanceof Atom && add.right instanceof Atom && 
+				add.left.getType().hasInt() && add.right.getType().hasInt()) {
+			int left = add.left.getType().toInt();
+			int right = add.right.getType().toInt();
+			
+			TYPE t0 = add.left.getType().clone();
+			t0.value = left + right;
+			
+			Atom atom = new Atom(t0, add.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
+		
 		return add;
 	}
 
@@ -203,11 +267,37 @@ public class ASTOptimizer {
 		bitAnd.left = bitAnd.left.opt(this);
 		bitAnd.right = bitAnd.right.opt(this);
 		
+		/* Precalc */
+		if (bitAnd.left instanceof Atom && bitAnd.right instanceof Atom && 
+				bitAnd.left.getType().hasInt() && bitAnd.right.getType().hasInt()) {
+			int left = bitAnd.left.getType().toInt();
+			int right = bitAnd.right.getType().toInt();
+			
+			TYPE t0 = bitAnd.left.getType().clone();
+			t0.value = left & right;
+			
+			Atom atom = new Atom(t0, bitAnd.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
+		
 		return bitAnd;
 	}
 
 	public Expression optBitNot(BitNot bitNot) throws OPT0_EXC {
 		bitNot.operand = bitNot.operand.opt(this);
+		
+		/* Precalc */
+		if (bitNot.operand instanceof Atom && bitNot.operand.getType().hasInt()) {
+			int value = bitNot.operand.getType().toInt();
+			
+			TYPE t0 = bitNot.operand.getType().clone();
+			t0.value = ~value;
+			
+			Atom atom = new Atom(t0, bitNot.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
 		
 		return bitNot;
 	}
@@ -216,12 +306,40 @@ public class ASTOptimizer {
 		bitOr.left = bitOr.left.opt(this);
 		bitOr.right = bitOr.right.opt(this);
 		
+		/* Precalc */
+		if (bitOr.left instanceof Atom && bitOr.right instanceof Atom && 
+				bitOr.left.getType().hasInt() && bitOr.right.getType().hasInt()) {
+			int left = bitOr.left.getType().toInt();
+			int right = bitOr.right.getType().toInt();
+			
+			TYPE t0 = bitOr.left.getType().clone();
+			t0.value = left | right;
+			
+			Atom atom = new Atom(t0, bitOr.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
+		
 		return bitOr;
 	}
 
 	public Expression optBitXor(BitXor bitXor) throws OPT0_EXC {
 		bitXor.left = bitXor.left.opt(this);
 		bitXor.right = bitXor.right.opt(this);
+		
+		/* Precalc */
+		if (bitXor.left instanceof Atom && bitXor.right instanceof Atom && 
+				bitXor.left.getType().hasInt() && bitXor.right.getType().hasInt()) {
+			int left = bitXor.left.getType().toInt();
+			int right = bitXor.right.getType().toInt();
+			
+			TYPE t0 = bitXor.left.getType().clone();
+			t0.value = left ^ right;
+			
+			Atom atom = new Atom(t0, bitXor.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
 		
 		return bitXor;
 	}
@@ -230,6 +348,20 @@ public class ASTOptimizer {
 		lsl.left = lsl.left.opt(this);
 		lsl.right = lsl.right.opt(this);
 		
+		/* Precalc */
+		if (lsl.left instanceof Atom && lsl.right instanceof Atom && 
+				lsl.left.getType().hasInt() && lsl.right.getType().hasInt()) {
+			int left = lsl.left.getType().toInt();
+			int right = lsl.right.getType().toInt();
+			
+			TYPE t0 = lsl.left.getType().clone();
+			t0.value = left << right;
+			
+			Atom atom = new Atom(t0, lsl.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
+		
 		return lsl;
 	}
 
@@ -237,12 +369,40 @@ public class ASTOptimizer {
 		lsr.left = lsr.left.opt(this);
 		lsr.right = lsr.right.opt(this);
 		
+		/* Precalc */
+		if (lsr.left instanceof Atom && lsr.right instanceof Atom && 
+				lsr.left.getType().hasInt() && lsr.right.getType().hasInt()) {
+			int left = lsr.left.getType().toInt();
+			int right = lsr.right.getType().toInt();
+			
+			TYPE t0 = lsr.left.getType().clone();
+			t0.value = left >> right;
+			
+			Atom atom = new Atom(t0, lsr.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
+		
 		return lsr;
 	}
 
 	public Expression optMul(Mul mul) throws OPT0_EXC {
 		mul.left = mul.left.opt(this);
 		mul.right = mul.right.opt(this);
+		
+		/* Precalc */
+		if (mul.left instanceof Atom && mul.right instanceof Atom && 
+				mul.left.getType().hasInt() && mul.right.getType().hasInt()) {
+			int left = mul.left.getType().toInt();
+			int right = mul.right.getType().toInt();
+			
+			TYPE t0 = mul.left.getType().clone();
+			t0.value = left * right;
+			
+			Atom atom = new Atom(t0, mul.getSource());
+			OPT_DONE = true;
+			return atom;
+		}
 		
 		return mul;
 	}
@@ -258,16 +418,20 @@ public class ASTOptimizer {
 			
 			s.left = right.getOperand();
 			s.right = left.getOperand();
+			
+			OPT_DONE = true;
 		}
 		
 		/* 4 - -5 = 4 + 5 = 9 */
 		if (s.right instanceof UnaryMinus) {
 			UnaryMinus right = (UnaryMinus) s.right;
+			OPT_DONE = true;
 			return new Add(s.left, right.getOperand(), s.getSource());
 		}
 		
 		/* Precalc */
-		if (s.left.getType().hasInt() && s.right.getType().hasInt()) {
+		if (s.left instanceof Atom && s.right instanceof Atom && 
+				s.left.getType().hasInt() && s.right.getType().hasInt()) {
 			int left = s.left.getType().toInt();
 			int right = s.right.getType().toInt();
 			
@@ -275,6 +439,7 @@ public class ASTOptimizer {
 			t0.value = left - right;
 			
 			Atom atom = new Atom(t0, s.getSource());
+			OPT_DONE = true;
 			return atom;
 		}
 		
@@ -287,6 +452,7 @@ public class ASTOptimizer {
 		/* --5 = 5 */
 		if (m.getOperand() instanceof UnaryMinus) {
 			UnaryMinus m0 = (UnaryMinus) m.getOperand();
+			OPT_DONE = true;
 			return m0.getOperand();
 		}
 		
@@ -296,6 +462,7 @@ public class ASTOptimizer {
 			if (value < 0) {
 				Atom atom = (Atom) m.getOperand();
 				atom.getType().value = -value;
+				OPT_DONE = true;
 				return atom;
 			}
 		}
@@ -306,6 +473,30 @@ public class ASTOptimizer {
 	public Expression optAnd(And and) throws OPT0_EXC {
 		and.left = and.left.opt(this);
 		and.right = and.right.opt(this);
+		
+		/* false || value = false */
+		if (and.left instanceof Atom && and.left.getType().hasInt()) {
+			int value = and.left.getType().toInt();
+			
+			if (value == 0) {
+				Atom atom = (Atom) and.left;
+				atom.getType().value = false;
+				OPT_DONE = true;
+				return atom;
+			}
+		}
+		
+		/* value || false = false */
+		if (and.right instanceof Atom && and.right.getType().hasInt()) {
+			int value = and.right.getType().toInt();
+			
+			if (value == 0) {
+				Atom atom = (Atom) and.right;
+				atom.getType().value = false;
+				OPT_DONE = true;
+				return atom;
+			}
+		}
 		
 		return and;
 	}
@@ -318,7 +509,27 @@ public class ASTOptimizer {
 	}
 
 	public Expression optNot(Not not) throws OPT0_EXC {
-		not.operand = not.operand.opt(this);	
+		not.operand = not.operand.opt(this);
+		
+		/* !!value = value */
+		if (not.getOperand() instanceof Not) {
+			Not m0 = (Not) not.getOperand();
+			OPT_DONE = true;
+			return m0.getOperand();
+		}
+		
+		/* !true = false */
+		if (not.getOperand() instanceof Atom && not.getOperand().getType().hasInt()) {
+			int value = not.getOperand().getType().toInt();
+			
+			Atom atom = (Atom) not.getOperand();
+			
+			if (value == 0) atom.getType().value = true;
+			else atom.getType().value = false;
+			
+			OPT_DONE = true;
+			return atom;
+		}
 		
 		return not;
 	}
@@ -326,6 +537,30 @@ public class ASTOptimizer {
 	public Expression optOr(Or or) throws OPT0_EXC {
 		or.left = or.left.opt(this);
 		or.right = or.right.opt(this);
+		
+		/* true || value = true */
+		if (or.left instanceof Atom && or.left.getType().hasInt()) {
+			int value = or.left.getType().toInt();
+			
+			if (value != 0) {
+				Atom atom = (Atom) or.left;
+				atom.getType().value = true;
+				OPT_DONE = true;
+				return atom;
+			}
+		}
+		
+		/* value || true = true */
+		if (or.right instanceof Atom && or.right.getType().hasInt()) {
+			int value = or.right.getType().toInt();
+			
+			if (value != 0) {
+				Atom atom = (Atom) or.right;
+				atom.getType().value = true;
+				OPT_DONE = true;
+				return atom;
+			}
+		}
 		
 		return or;
 	}
@@ -335,6 +570,13 @@ public class ASTOptimizer {
 		
 		ternary.left = ternary.left.opt(this);
 		ternary.right = ternary.right.opt(this);
+		
+		/* (true)? a : b = a, (false)? a : b = b */
+		if (ternary.condition instanceof Atom && ternary.condition.getType().hasInt()) {
+			int value = ternary.condition.getType().toInt();
+			OPT_DONE = true;
+			return (value == 0)? ternary.right : ternary.left;
+		}
 		
 		return ternary;
 	}
@@ -376,6 +618,10 @@ public class ASTOptimizer {
 	}
 
 	public Statement optDeclaration(Declaration declaration) throws OPT0_EXC {
+		if (declaration.value != null) declaration.value = declaration.value.opt(this);
+		
+		this.state.add(declaration);
+		
 		return declaration;
 	}
 
@@ -404,6 +650,14 @@ public class ASTOptimizer {
 	}
 
 	public Statement optIfStatement(IfStatement ifStatement) throws OPT0_EXC {
+		if (ifStatement.condition != null)
+			ifStatement.condition = ifStatement.condition.opt(this);
+		
+		ifStatement.body = this.optBody(ifStatement.body);
+		
+		if (ifStatement.elseStatement != null) 
+			ifStatement.elseStatement.opt(this);
+		
 		return ifStatement;
 	}
 
@@ -444,6 +698,16 @@ public class ASTOptimizer {
 
 	public SyntaxElement optStructTypedef(StructTypedef structTypedef) throws OPT0_EXC {
 		return structTypedef;
+	}
+	
+	private void pushContext() {
+		this.state = new ProgramContext(this.cStack.peek());
+		this.cStack.push(this.state);
+	}
+	
+	private void popContext() {
+		this.cStack.pop().transferContextChangeToParent();
+		this.state = this.cStack.peek();
 	}
 	
 }

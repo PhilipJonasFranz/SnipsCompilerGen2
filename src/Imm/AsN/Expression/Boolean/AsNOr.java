@@ -16,7 +16,6 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AsN.Expression.AsNBinaryExpression;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.TYPE.PRIMITIVES.INT;
 
 public class AsNOr extends AsNBinaryExpression {
 
@@ -28,12 +27,14 @@ public class AsNOr extends AsNBinaryExpression {
 		r.free(0, 1);
 		
 		if (o.getLeft() instanceof Atom && o.getRight() instanceof Atom) {
-			int value0 = ((INT) ((Atom) o.getLeft()).getType()).value;
-			int value1 = ((INT) ((Atom) o.getRight()).getType()).value;
+			int value0 = o.getLeft().getType().toInt();
+			int value1 = o.getRight().getType().toInt();
+			
 			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp((value0 != 0 || value1 != 0)? 1 : 0)));
 		}
 		else if (o.getLeft() instanceof Atom) {
-			int value = ((INT) ((Atom) o.getLeft()).getType()).value;
+			int value = o.getLeft().getType().toInt();
+			
 			if (value == 1) {
 				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1)));
 			}
@@ -47,7 +48,8 @@ public class AsNOr extends AsNBinaryExpression {
 			}
 		}
 		else if (o.getRight() instanceof Atom) {
-			int value = ((INT) ((Atom) o.getRight()).getType()).value;
+			int value = o.getRight().getType().toInt();
+			
 			if (value == 1) {
 				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1)));
 			}
