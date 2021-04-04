@@ -1,11 +1,13 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -15,6 +17,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -119,6 +122,22 @@ public class ForEachStatement extends CompoundStatement {
 	
 	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optForEachStatement(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.shadowRef.visit(visitor));
+		result.addAll(this.counter.visit(visitor));
+		result.addAll(this.counterRef.visit(visitor));
+		
+		if (this.range != null) result.addAll(this.range.visit(visitor));
+		if (this.select != null) result.addAll(this.select.visit(visitor));
+		
+		return result;
 	}
 
 	public Statement clone() {

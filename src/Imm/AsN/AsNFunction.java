@@ -44,6 +44,7 @@ import Opt.ASMOptimizer;
 import PreP.PreProcessor;
 import Res.Const;
 import Snips.CompilerDriver;
+import Tools.Matchers;
 import Util.Pair;
 import Util.Util;
 import Util.Logging.LogPoint.Type;
@@ -230,7 +231,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					boolean hasRef = false;
 					for (Statement s : f.body) 
-						hasRef |= AsNCompoundStatement.hasAddressReference(s, d);
+						hasRef |= Matchers.hasAddressReference(s, d);
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));

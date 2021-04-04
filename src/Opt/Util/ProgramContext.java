@@ -74,6 +74,15 @@ public class ProgramContext {
 					pState.written |= state.written;
 					pState.read |= state.read;
 					pState.referenced |= state.referenced;
+					
+					if (!pState.currentValue.equals(state.currentValue)) {
+						/* 
+						 * Value has changed in a child scopee of the parent. This
+						 * means that it is no longer guaranteed that the current value
+						 * will always be this expression. Hence we have to null the value.
+						 */
+						pState.currentValue = null;
+					}
 				}
 			}
 		}

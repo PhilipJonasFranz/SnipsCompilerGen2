@@ -12,6 +12,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.ENUM;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.ASTOptimizer;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -74,6 +75,15 @@ public class EnumTypedef extends SyntaxElement {
 	
 	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optEnumTypedef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

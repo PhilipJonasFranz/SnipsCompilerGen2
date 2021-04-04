@@ -21,6 +21,7 @@ import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Res.Const;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -232,7 +233,20 @@ public class Function extends CompoundStatement {
 	public Function opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optFunction(this);
 	}
-
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this)) 
+			result.add((T) this);
+		
+		for (Statement s : this.body) {
+			result.addAll(s.visit(visitor));
+		}
+		
+		return result;
+	}
+	
 	/** 
 	 * Returns the current return type, proviso-free.
 	 */

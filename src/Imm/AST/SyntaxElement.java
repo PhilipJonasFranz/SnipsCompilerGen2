@@ -8,6 +8,7 @@ import Exc.OPT0_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 /**
@@ -67,6 +68,15 @@ public abstract class SyntaxElement {
 	 * Visitor relay for AST optimizer
 	 */
 	public abstract SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC;
+	
+	/**
+	 * Visitor filter used to traverse to AST subtree with given filter and 
+	 * return a matching result set.
+	 * @param <T> Type of the elements contained in the result.
+	 * @param visitor The filter expression.
+	 * @return The elements the filter returned true for.
+	 */
+	public abstract <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor);
 	
 	/** 
 	 * Create a padding of spaces with the given length.

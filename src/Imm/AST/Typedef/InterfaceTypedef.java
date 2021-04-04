@@ -24,6 +24,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -214,6 +215,18 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optInterfaceTypedef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Function f : this.functions) 
+			result.addAll(f.visit(visitor));
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

@@ -7,10 +7,12 @@ import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Pair;
 import Util.Source;
 
@@ -69,6 +71,15 @@ public class DirectASMStatement extends Statement {
 	
 	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optDirectASMStatement(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

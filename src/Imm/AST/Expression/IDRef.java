@@ -1,15 +1,18 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -55,6 +58,15 @@ public class IDRef extends Expression {
 		return opt.optIDRef(this);
 	}
 
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.origin != null) 
 			this.setType(this.origin.getType().clone());

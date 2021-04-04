@@ -140,7 +140,7 @@ public class ASTOptimizer {
 		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
 			Declaration dec = entry.getKey();
 			
-			if (!this.state.getRead(dec) && !this.state.getReferenced(dec)) {
+			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
 				if (body.contains(dec)) body.remove(dec);
 				removed.add(dec);
 			}
@@ -186,7 +186,7 @@ public class ASTOptimizer {
 		this.state.notifyRead(idRef.origin);
 		
 		/* If variable has not been overwritten, substitute */
-		if (!this.state.getWrite(idRef.origin)) {
+		if (this.state.cState.get(idRef.origin).currentValue != null) {
 			OPT_DONE = true;
 			return this.state.cState.get(idRef.origin).currentValue.clone();
 		}
@@ -590,6 +590,10 @@ public class ASTOptimizer {
 	}
 
 	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) throws OPT0_EXC {
+		
+		if (simpleLhsId.origin != null)
+			this.state.notifyWrite(simpleLhsId.origin);
+		
 		return simpleLhsId;
 	}
 
@@ -598,6 +602,38 @@ public class ASTOptimizer {
 	}
 
 	public Statement optAssignment(Assignment assignment) throws OPT0_EXC {
+		
+		Declaration origin = null;
+		
+		if (assignment.lhsId instanceof SimpleLhsId) {
+			SimpleLhsId lhs = (SimpleLhsId) assignment.lhsId;
+			
+			if (lhs.origin != null) {
+				origin = lhs.origin;
+			}
+		}
+		
+		boolean read = true;
+		if (origin != null) 
+			read = this.state.getRead(origin);
+		
+		assignment.lhsId = assignment.lhsId.opt(this);
+		assignment.value = assignment.value.opt(this);
+		
+		if (origin != null) {
+			// TODO: Need to morph current expression into this expression, for example: int a = 5; a = a + 4;
+			this.state.cState.get(origin).currentValue = assignment.value.clone();
+		
+			if (!read) {
+				/* 
+				 * Variable value has not been read at this point. This means
+				 * we can write the new value directly to the declaration without
+				 * consequences. We return null to remove the assignment.
+				 */
+				return null;
+			}
+		}
+		
 		return assignment;
 	}
 

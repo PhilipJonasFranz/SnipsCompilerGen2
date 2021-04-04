@@ -14,49 +14,15 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
-import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ArrayInit;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.BinaryExpression;
-import Imm.AST.Expression.Deref;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.FunctionRef;
-import Imm.AST.Expression.IDOfExpression;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.InlineFunction;
-import Imm.AST.Expression.RegisterAtom;
-import Imm.AST.Expression.SizeOfExpression;
-import Imm.AST.Expression.SizeOfType;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.StructSelectWriteback;
-import Imm.AST.Expression.StructureInit;
-import Imm.AST.Expression.TempAtom;
-import Imm.AST.Expression.TypeCast;
-import Imm.AST.Expression.UnaryExpression;
-import Imm.AST.Expression.Boolean.Ternary;
-import Imm.AST.Statement.AssignWriteback;
-import Imm.AST.Statement.Assignment;
-import Imm.AST.Statement.BreakStatement;
-import Imm.AST.Statement.CaseStatement;
-import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.ConditionalCompoundStatement;
-import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.ForEachStatement;
-import Imm.AST.Statement.FunctionCall;
-import Imm.AST.Statement.ReturnStatement;
-import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
 import Res.Const;
-import Util.Pair;
+import Tools.Matchers;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -151,7 +117,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
 			
 			if (r.declarationLoaded(dec)) {
-				boolean hasAddress = hasAddressReference(a, dec); 
+				boolean hasAddress = Matchers.hasAddressReference(a, dec); 
 				if (hasAddress) {
 					int location = r.declarationRegLocation(dec);
 					
@@ -165,181 +131,6 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			}
 		}
 		else this.instructions.addAll(AsNStatement.cast(s, r, map, st).getInstructions());
-	}
-	
-	/**
-	 * Checks if in the given statement, an address reference via address of
-	 * is made to a variable with given origin declaration. If so, return true.
-	 */
-	public static boolean hasAddressReference(Statement s, Declaration dec) throws CGEN_EXC {
-		if (s instanceof CompoundStatement) {
-			CompoundStatement cs = (CompoundStatement) s;
-			
-			boolean ref = false;
-			
-			for (Statement s0 : cs.body) {
-				ref |= hasAddressReference(s0, dec);
-			}
-			
-			return ref;
-		}
-		else if (s instanceof ReturnStatement) {
-			ReturnStatement ret = (ReturnStatement) s;
-			if (ret.value == null) return false;
-			else return hasAddressReference(ret.value, dec);
-		}
-		else if (s instanceof Declaration) {
-			if (s.equals(dec)) return false;
-			else {
-				Declaration d = (Declaration) s;
-				if (d.value != null) return hasAddressReference(d.value, dec);
-				else return false;
-			}
-		}
-		else if (s instanceof Assignment) {
-			return hasAddressReference(((Assignment) s).value, dec);
-		}
-		else if (s instanceof FunctionCall) {
-			boolean hasRef = false;
-			FunctionCall fc = (FunctionCall) s;
-			for (Expression e0 : fc.parameters) {
-				hasRef |= hasAddressReference(e0, dec);
-			}
-			return hasRef;
-		}
-		else if (s instanceof SwitchStatement) {
-			boolean hasRef = false;
-			SwitchStatement sw = (SwitchStatement) s;
-			for (CaseStatement c : sw.cases) {
-				hasRef |= hasAddressReference(c, dec);
-			}
-			
-			hasRef |= hasAddressReference(sw.defaultStatement, dec);
-			return hasRef;
-		}
-		else if (s instanceof AssignWriteback) {
-			AssignWriteback awb = (AssignWriteback) s;
-			return hasAddressReference(awb.reference, dec);
-		}
-		else if (s instanceof DirectASMStatement) {
-			DirectASMStatement d = (DirectASMStatement) s;
-			
-			boolean hasRef = false;
-			
-			for (Pair<Expression, REG> p : d.dataIn) {
-				hasRef |= hasAddressReference(p.first, dec);
-			}
-			
-			for (Pair<Expression, REG> p : d.dataOut) {
-				hasRef |= hasAddressReference(p.first, dec);
-			}
-			
-			return hasRef;
-		}
-		else if (s instanceof SignalStatement) {
-			SignalStatement s0 = (SignalStatement) s;
-			return hasAddressReference(s0.exceptionInit, dec);
-		}
-		else if (s instanceof BreakStatement || s instanceof ContinueStatement || s instanceof Comment) {
-			return false;
-		}
-		else throw new CGEN_EXC(s.getSource(), Const.CANNOT_CHECK_REFERENCES, s.getClass().getName());
-	}
-	
-	/**
-	 * Checks if in the given expression, an address reference via address of
-	 * is made to a variable with given origin declaration. If so, return true.
-	 */
-	public static boolean hasAddressReference(Expression e, Declaration dec) throws CGEN_EXC {
-		if (e instanceof BinaryExpression) {
-			BinaryExpression b = (BinaryExpression) e;
-			return hasAddressReference(b.left, dec) || hasAddressReference(b.right, dec);
-		}
-		else if (e instanceof UnaryExpression) {
-			UnaryExpression u = (UnaryExpression) e;
-			return hasAddressReference(u.getOperand(), dec);
-		}
-		else if (e instanceof InlineCall) {
-			boolean hasRef = false;
-			InlineCall ic = (InlineCall) e;
-			for (Expression e0 : ic.parameters) {
-				hasRef |= hasAddressReference(e0, dec);
-			}
-			return hasRef;
-		}
-		else if (e instanceof Deref) {
-			return hasAddressReference(((Deref) e).expression, dec);
-		}
-		else if (e instanceof ArrayInit) {
-			boolean hasRef = false;
-			ArrayInit init = (ArrayInit) e;
-			for (Expression e0 : init.elements) {
-				hasRef |= hasAddressReference(e0, dec);
-			}
-			return hasRef;
-		}
-		else if (e instanceof ArraySelect) {
-			boolean hasRef = false;
-			ArraySelect sel = (ArraySelect) e;
-			for (Expression e0 : sel.selection) {
-				hasRef |= hasAddressReference(e0, dec);
-			}
-			return hasRef;
-		}
-		else if (e instanceof Ternary) {
-			boolean hasRef = false;
-			Ternary ter = (Ternary) e;
-			hasRef |= hasAddressReference(ter.condition, dec);
-			hasRef |= hasAddressReference(ter.left, dec);
-			hasRef |= hasAddressReference(ter.right, dec);
-			return hasRef;
-		}
-		else if (e instanceof AddressOf) {
-			AddressOf aof = (AddressOf) e;
-			if (aof.expression instanceof IDRef) 
-				return (((IDRef) aof.expression).origin.equals(dec));
-			else if (aof.expression instanceof IDRefWriteback) 
-				return (((IDRefWriteback) aof.expression).idRef.origin.equals(dec));
-			else if (aof.expression instanceof StructSelect) 
-				/* Struct will be on the stack anyway */
-				return true;
-			else if (aof.expression instanceof StructureInit) 
-				return hasAddressReference(aof.expression, dec);
-			else return (((ArraySelect) aof.expression).idRef.origin.equals(dec));
-		}
-		else if (e instanceof IDRefWriteback) {
-			IDRefWriteback id = (IDRefWriteback) e;
-			return hasAddressReference(id.getShadowRef(), dec);
-		}
-		else if (e instanceof SizeOfExpression) {
-			SizeOfExpression soe = (SizeOfExpression) e;
-			return hasAddressReference(soe.expression, dec);
-		}
-		else if (e instanceof TypeCast) {
-			TypeCast tc = (TypeCast) e;
-			return hasAddressReference(tc.expression, dec);
-		}
-		else if (e instanceof StructureInit) {
-			StructureInit s = (StructureInit) e;
-			boolean ref = false;
-			for (Expression e0 : s.elements) {
-				ref |= hasAddressReference(e0, dec);
-			}
-			return ref;
-		}
-		else if (e instanceof TempAtom) {
-			TempAtom a = (TempAtom) e;
-			if (a.base == null) return false;
-			else return hasAddressReference(a.base, dec);
-		}
-		else if (e instanceof InlineFunction || e instanceof IDRef || e instanceof FunctionRef || e instanceof Atom || e instanceof RegisterAtom || e instanceof SizeOfType || e instanceof IDOfExpression || e instanceof StructSelect) {
-			return false;
-		}
-		else if (e instanceof StructSelectWriteback) {
-			StructSelectWriteback s = (StructSelectWriteback) e;
-			return hasAddressReference(s.getShadowSelect(), dec) || ((s.select != null)? hasAddressReference(s.select, dec) : false);
-		}
-		else throw new CGEN_EXC(e.getSource(), Const.CANNOT_CHECK_REFERENCES, e.getClass().getName());
 	}
 	
 } 

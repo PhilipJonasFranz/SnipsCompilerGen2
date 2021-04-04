@@ -1,5 +1,6 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -11,6 +12,7 @@ import Imm.AST.Expression.StructureInit;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 /**
@@ -60,6 +62,17 @@ public class SignalStatement extends Statement {
 	
 	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optSignalStatement(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.shadowRef.visit(visitor));
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

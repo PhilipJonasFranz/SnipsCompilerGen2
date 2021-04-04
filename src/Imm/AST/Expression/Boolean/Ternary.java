@@ -1,14 +1,17 @@
 package Imm.AST.Expression.Boolean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 public class Ternary extends Expression {
@@ -53,6 +56,19 @@ public class Ternary extends Expression {
 	
 	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optTernary(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.condition.visit(visitor));
+		result.addAll(this.left.visit(visitor));
+		result.addAll(this.right.visit(visitor));
+		
+		return result;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

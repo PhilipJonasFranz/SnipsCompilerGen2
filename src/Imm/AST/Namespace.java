@@ -1,5 +1,6 @@
 package Imm.AST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -8,6 +9,7 @@ import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.ASTOptimizer;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -63,6 +65,20 @@ public class Namespace extends SyntaxElement {
 	
 	public Namespace opt(ASTOptimizer opt) throws OPT0_EXC {
 		return this;
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (SyntaxElement s : this.programElements) {
+			if (visitor.visit(s))
+				result.add((T) s);
+		}
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> setContext) {

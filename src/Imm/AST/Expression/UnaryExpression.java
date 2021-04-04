@@ -1,11 +1,14 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 /**
@@ -53,6 +56,17 @@ public abstract class UnaryExpression extends Expression {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.operand.visit(visitor));
+
+		return result;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

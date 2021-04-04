@@ -14,6 +14,7 @@ import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -84,6 +85,18 @@ public class InlineCall extends Expression implements Callee {
 	
 	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optInlineCall(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Expression e : this.parameters) 
+			result.addAll(e.visit(visitor));
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
