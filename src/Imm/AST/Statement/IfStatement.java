@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -36,7 +37,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "If");
+		System.out.println(Util.pad(d) + "If");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
@@ -48,7 +49,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 		IfStatement if0 = this.elseStatement;
 		while (if0 != null) {
 			if (if0.condition != null) {
-				System.out.println(this.pad(d) + "Else If");
+				System.out.println(Util.pad(d) + "Else If");
 				
 				if (rec) {
 					if0.condition.print(d + this.printDepthStep, rec);
@@ -60,7 +61,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 				if0 = if0.elseStatement;
 			}
 			else {
-				System.out.println(this.pad(d) + "Else");
+				System.out.println(Util.pad(d) + "Else");
 				
 				if (rec) for (Statement s : if0.body) 
 					s.print(d + this.printDepthStep, rec);
@@ -115,6 +116,41 @@ public class IfStatement extends ConditionalCompoundStatement {
 		if (this.elseStatement != null)
 			i.elseStatement = (IfStatement) this.elseStatement.clone();
 		return i;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		IfStatement if0 = this;
+		
+		while (if0 != null) {
+			String s = "";
+			
+			if (if0.condition != null) {
+				if (if0.equals(this)) {
+					/* First if */
+					s = "if (";
+				}
+				else {
+					s = "else if (";
+				}
+				
+				s += if0.condition.codePrint() + ") {";
+			}
+			else {
+				s = "else {";
+			}
+			
+			code.add(Util.pad(d) + s);
+			
+			for (Statement s0 : if0.body) {
+				code.addAll(s0.codePrint(d + this.printDepthStep));
+			}
+			
+			code.add(Util.pad(d) + "}");
+			if0 = if0.elseStatement;
+		}
+		
+		return code;
 	}
 
 } 

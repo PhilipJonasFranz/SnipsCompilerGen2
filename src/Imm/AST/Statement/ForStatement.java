@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -41,7 +42,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "For");
+		System.out.println(Util.pad(d) + "For");
 		
 		if (rec) {
 			this.iterator.print(d + this.printDepthStep, rec);
@@ -84,6 +85,18 @@ public class ForStatement extends ConditionalCompoundStatement {
 
 	public Statement clone() {
 		return new ForStatement(this.iterator.clone(), this.condition.clone(), this.increment.clone(), this.cloneBody(), this.getSource().clone());
+	}
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "for (" + this.iterator.codePrint(0).get(0) + "; " + this.condition.codePrint() + "; " + this.increment.codePrint(0).get(0) + ") {";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 	
 } 

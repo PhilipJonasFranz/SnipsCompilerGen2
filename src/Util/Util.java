@@ -223,5 +223,15 @@ public class Util {
 			}
 		}
 	}
-    
+	
+	/** 
+	 * Create a padding of spaces with the given length.
+	 * For example w=3 -> '   '.
+	 */
+	public static String pad(int w) {
+		String pad = "";
+		for (int i = 0; i < w; i++) pad += " ";
+		return pad;
+	}
+	
 } 

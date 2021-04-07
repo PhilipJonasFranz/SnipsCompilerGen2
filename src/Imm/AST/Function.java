@@ -24,6 +24,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -187,7 +188,7 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
+		System.out.print(Util.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
 		
 		if (!this.provisosTypes.isEmpty()) {
 			System.out.print("<");
@@ -524,6 +525,50 @@ public class Function extends CompoundStatement {
 		}
 		
 		return f;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += this.returnType.codeString() + " ";
+		
+		s += this.path.build();
+		
+		if (!this.provisosTypes.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.provisosTypes)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Declaration p : this.parameters) {
+				s += p.getType().codeString() + " " + p.path.build() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ")";
+		
+		if (this.body != null) {
+			s += " {";
+			code.add(Util.pad(d) + s);
+			for (Statement s0 : this.body) {
+				code.addAll(s0.codePrint(d + this.printDepthStep));
+			}
+			code.add(Util.pad(d) + "}");
+		}
+		else code.add(Util.pad(d) + s + ";");
+		
+		return code;
 	}
 	
 } 

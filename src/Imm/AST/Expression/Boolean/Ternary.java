@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 public class Ternary extends Expression {
 	
@@ -35,7 +36,7 @@ public class Ternary extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Ternary");
+		System.out.println(Util.pad(d) + "Ternary");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
@@ -79,6 +80,10 @@ public class Ternary extends Expression {
 
 	public Expression clone() {
 		return new Ternary(this.condition.clone(), this.left.clone(), this.right.clone(), this.getSource().clone());
+	}
+	
+	public String codePrint() {
+		return "(" + this.condition.codePrint() + ")? " + this.left.codePrint() + " : " + this.right.codePrint();
 	}
 
 } 

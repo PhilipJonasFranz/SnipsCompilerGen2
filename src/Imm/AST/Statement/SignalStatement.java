@@ -14,6 +14,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -41,7 +42,7 @@ public class SignalStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Signal");
+		System.out.println(Util.pad(d) + "Signal");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
@@ -89,6 +90,12 @@ public class SignalStatement extends Statement {
 			s.exceptionInit = this.exceptionInit;
 		
 		return s;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "signal " + this.exceptionInit.codePrint() + ";");
+		return code;
 	}
 
 } 

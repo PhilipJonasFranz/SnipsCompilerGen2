@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -32,7 +33,7 @@ public class Atom extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		Integer value = this.getType().toInt();
-		System.out.println(this.pad(d) + "Atom <" + this.getType().typeString() + ">" + ((value != null)? " " + value : ""));
+		System.out.println(Util.pad(d) + "Atom <" + this.getType().typeString() + ">" + ((value != null)? " " + value : ""));
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -63,6 +64,12 @@ public class Atom extends Expression {
 
 	public Expression clone() {
 		return new Atom(this.getType().clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		if (this.getType().value != null)
+			return this.getType().value.toString();
+		else return this.getType().codeString();
 	}
 
 } 

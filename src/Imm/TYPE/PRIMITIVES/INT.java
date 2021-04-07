@@ -50,4 +50,8 @@ public class INT extends PRIMITIVE<Integer> {
 		return b;
 	}
 	
+	public String codeString() {
+		return "int";
+	}
+	
 } 

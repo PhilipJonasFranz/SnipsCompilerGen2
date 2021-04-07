@@ -17,6 +17,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 public class InlineCall extends Expression implements Callee {
 
@@ -58,7 +59,7 @@ public class InlineCall extends Expression implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		System.out.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
 		if (this.calledFunction != null) {
 			for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
 			System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
@@ -66,7 +67,7 @@ public class InlineCall extends Expression implements Callee {
 		else {
 			System.out.println();
 			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
-			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
+			else System.out.println(Util.pad(d + this.printDepthStep) + "Target:?");
 		}
 		
 		if (rec) for (Expression e : this.parameters) 
@@ -180,6 +181,29 @@ public class InlineCall extends Expression implements Callee {
 		ic.watchpoint = this.watchpoint;
 		
 		return ic;
+	}
+
+	public String codePrint() {
+		String s = this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Expression e : this.parameters)
+				s += e.codePrint() + ", ";
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ")";
+		return s;
 	}
 	
 } 

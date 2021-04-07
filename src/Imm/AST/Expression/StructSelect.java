@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 public class StructSelect extends Expression {
 
@@ -37,7 +38,7 @@ public class StructSelect extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
+		System.out.println(Util.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
 		if (rec) {
 			this.selector.print(d + this.printDepthStep, rec);
 			this.selection.print(d + this.printDepthStep, rec);
@@ -77,6 +78,30 @@ public class StructSelect extends Expression {
 
 	public Expression clone() {
 		return new StructSelect(this.selector.clone(), this.selection.clone(), this.deref, this.getSource().clone());
+	}
+
+	public String codePrint() {
+		String s = "";
+		
+		StructSelect c = this;
+		
+		while (c != null) {
+			s += c.selection.codePrint();
+			
+			if (this.deref)
+				s += "->";
+			else s += ".";
+			
+			if (c.selector instanceof StructSelect) {
+				c = (StructSelect) c.selector;
+			}
+			else {
+				s += c.selector.codePrint();
+				break;
+			}
+		}
+		
+		return s;
 	}
 
 } 

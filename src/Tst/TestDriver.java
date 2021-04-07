@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
 import Exc.LINK_EXC;
+import Exc.OPT0_EXC;
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Lnk.Linker;
@@ -376,6 +377,8 @@ public class TestDriver {
 						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
+					else if (e instanceof OPT0_EXC) 
+						msg = ((OPT0_EXC) e).getExcFieldName();
 					else {
 						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
 						System.exit(0);

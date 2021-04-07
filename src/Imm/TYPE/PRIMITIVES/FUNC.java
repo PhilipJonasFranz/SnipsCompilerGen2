@@ -104,4 +104,9 @@ public class FUNC extends PRIMITIVE<Function> {
 		throw new SNIPS_EXC(Const.CANNOT_SET_VALUE_OF_TYPE, this.typeString());
 	}
 	
+	public String codeString() {
+		// TODO: Add signature if available
+		return "func";
+	}
+	
 } 

@@ -20,6 +20,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * The for-Each loop iterates over a defined data set of fixed
@@ -99,7 +100,7 @@ public class ForEachStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "ForEach");
+		System.out.println(Util.pad(d) + "ForEach");
 		
 		if (rec) {
 			this.iterator.print(d + this.printDepthStep, rec);
@@ -146,6 +147,34 @@ public class ForEachStatement extends CompoundStatement {
 			f.select = (ArraySelect) this.select.clone();
 		
 		return f;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "for ";
+		
+		if (this.writeBackIterator)
+			s += "[";
+		else s += "(";
+		
+		s += this.iterator.codePrint(0).get(0) + " : " + this.shadowRef.codePrint();
+		
+		if (this.range != null)
+			s += ", " + this.range.codePrint();
+		
+		if (this.writeBackIterator)
+			s += "]";
+		else s += ")";
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 	
 } 

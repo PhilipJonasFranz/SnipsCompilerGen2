@@ -135,5 +135,10 @@ public class ARRAY extends COMPOSIT {
 	public boolean hasProviso() {
 		return this.elementType.hasProviso();
 	}
+	
+	public String codeString() {
+		String s = this.elementType.codeString() + " [" + this.length + "]";
+		return s;
+	}
 
 } 

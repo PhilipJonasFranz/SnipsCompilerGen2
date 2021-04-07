@@ -15,6 +15,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Pair;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -40,20 +41,20 @@ public class DirectASMStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Direct ASM");
+		System.out.println(Util.pad(d) + "Direct ASM");
 		
 		if (rec) {
-			System.out.println(this.pad(d + this.printDepthStep) + "Data In:");
+			System.out.println(Util.pad(d + this.printDepthStep) + "Data In:");
 			
 			for (Pair<Expression, REG> p : this.dataIn) {
-				System.out.println(this.pad(d + this.printDepthStep) + p.second + " :");
+				System.out.println(Util.pad(d + this.printDepthStep) + p.second + " :");
 				p.first.print(d + this.printDepthStep, rec);
 			}
 			
-			System.out.println(this.pad(d + this.printDepthStep) + "Data Out:");
+			System.out.println(Util.pad(d + this.printDepthStep) + "Data Out:");
 			
 			for (Pair<Expression, REG> p : this.dataOut) {
-				System.out.println(this.pad(d + this.printDepthStep) + p.second + " :");
+				System.out.println(Util.pad(d + this.printDepthStep) + p.second + " :");
 				p.first.print(d + this.printDepthStep, rec);
 			}
 		}

@@ -1,5 +1,7 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
@@ -44,5 +46,11 @@ public abstract class Expression extends SyntaxElement {
 	}
 	
 	public abstract Expression clone();
+	
+	public abstract String codePrint();
+	
+	public List<String> codePrint(int d) {
+		return null;
+	}
 	
 } 

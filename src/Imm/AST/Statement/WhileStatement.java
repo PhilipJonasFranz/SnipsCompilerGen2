@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -27,7 +28,7 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "While");
+		System.out.println(Util.pad(d) + "While");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
@@ -66,6 +67,15 @@ public class WhileStatement extends ConditionalCompoundStatement {
 
 	public WhileStatement clone() {
 		return new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "while (" + this.condition.codePrint() + ") {");
+		for (Statement s : this.body)
+			code.addAll(s.codePrint(d + this.printDepthStep));
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 	
 } 

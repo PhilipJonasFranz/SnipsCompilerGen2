@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -41,7 +42,7 @@ public class ArraySelect extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "ArraySelect");
+		System.out.println(Util.pad(d) + "ArraySelect");
 		if (rec) {
 			this.shadowRef.print(d + this.printDepthStep, rec);
 			
@@ -94,6 +95,14 @@ public class ArraySelect extends Expression {
 		for (Expression e : this.selection) eclone.add(e.clone());
 		
 		return new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
+	}
+
+	public String codePrint() {
+		String s = this.shadowRef.codePrint() + " ";
+		for (Expression e : this.selection)
+			s += "[" + e.codePrint() + "] ";
+		s = s.substring(0, s.length() - 1);
+		return s;
 	}
 	
 } 

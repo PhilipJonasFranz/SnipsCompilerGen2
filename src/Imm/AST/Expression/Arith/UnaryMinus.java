@@ -27,5 +27,9 @@ public class UnaryMinus extends UnaryExpression {
 	public UnaryExpression clone() {
 		return new UnaryMinus(this.getOperand().clone(), this.getSource().clone());
 	}
+	
+	public String codePrint() {
+		return "-" + this.operand.codePrint();
+	}
 
 } 

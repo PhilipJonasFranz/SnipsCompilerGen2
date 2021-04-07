@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -36,8 +37,8 @@ public class SizeOfType extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "SizeOf");
-		System.out.println(this.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
+		System.out.println(Util.pad(d) + "SizeOf");
+		System.out.println(Util.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -69,6 +70,10 @@ public class SizeOfType extends Expression {
 
 	public Expression clone() {
 		return new SizeOfType(this.sizeType.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		return "sizeOf(" + this.sizeType.codeString() + ")";
 	}
 
 } 

@@ -28,6 +28,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -328,7 +329,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = this.pad(d) + "Struct Typedef<" + this.path.build() + ">";
+		String s = Util.pad(d) + "Struct Typedef<" + this.path.build() + ">";
 		
 		if (this.extension != null)
 			s += ":extends:" + this.extension.path.build() + ",";
@@ -397,6 +398,58 @@ public class StructTypedef extends SyntaxElement {
 		
 		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
 		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += "struct " + this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		if (!this.implemented.isEmpty() || this.extension != null) {
+			s += " : ";
+			
+			if (this.extension != null) {
+				s += this.extension.codePrint(0).get(0) + ", ";
+			}
+			
+			for (INTERFACE i : this.implemented) {
+				s += i.codeString() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		code.add("");
+		
+		for (Declaration d0 : this.fields) {
+			code.addAll(d0.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		for (Function f : this.functions) {
+			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		
+		return code;
 	}
 
 } 

@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -31,7 +32,7 @@ public class CaseStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Case");
+		System.out.println(Util.pad(d) + "Case");
 		this.condition.print(d + this.printDepthStep, rec);
 		
 		if (rec) for (Statement s : this.body) 
@@ -69,6 +70,18 @@ public class CaseStatement extends ConditionalCompoundStatement {
 		CaseStatement c = new CaseStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
 		c.superStatement = this.superStatement;
 		return c;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "case (" + this.condition.codePrint() + ") : {";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 	
 } 

@@ -14,6 +14,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 public class StructureInit extends Expression {
 
@@ -41,7 +42,7 @@ public class StructureInit extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		System.out.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 		
 		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
@@ -89,6 +90,15 @@ public class StructureInit extends Expression {
 		in.isTopLevelExpression = this.isTopLevelExpression;
 		
 		return in;
+	}
+
+	public String codePrint() {
+		String s = this.structType.getTypedef().path.build() + "::(";
+		for (Expression e : this.elements)
+			s += e.codePrint() + ", ";
+		s = s.substring(0, s.length() - 2);
+		s += ")";
+		return s;
 	}
 
 } 

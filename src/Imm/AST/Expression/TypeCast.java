@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -39,8 +40,8 @@ public class TypeCast extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "TypeCast");
-		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());
+		System.out.println(Util.pad(d) + "TypeCast");
+		System.out.println(Util.pad(d + this.printDepthStep) + this.castType.typeString());
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
@@ -78,6 +79,10 @@ public class TypeCast extends Expression {
 
 	public Expression clone() {
 		return new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		return "(" + this.castType.codeString() + ")" + this.expression.codePrint();
 	}
 
 } 

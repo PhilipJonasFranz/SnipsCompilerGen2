@@ -10,6 +10,7 @@ import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -49,7 +50,7 @@ public abstract class BinaryExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + this.operator.toString());
+		System.out.println(Util.pad(d) + this.operator.toString());
 		if (rec) {
 			this.left.print(d + this.printDepthStep, rec);
 			this.right.print(d + this.printDepthStep, rec);

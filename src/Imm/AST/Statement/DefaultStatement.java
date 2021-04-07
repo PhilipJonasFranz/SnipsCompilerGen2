@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -26,7 +27,7 @@ public class DefaultStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Default");
+		System.out.println(Util.pad(d) + "Default");
 		
 		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
@@ -60,6 +61,18 @@ public class DefaultStatement extends CompoundStatement {
 
 	public Statement clone() {
 		return new DefaultStatement(this.cloneBody(), this.getSource().clone());
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "default : {";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 	
 } 

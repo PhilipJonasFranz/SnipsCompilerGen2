@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * The namespace node is used to capsule multiple program
@@ -52,7 +53,7 @@ public class Namespace extends SyntaxElement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Namespace: " + this.path.build());
+		System.out.println(Util.pad(d) + "Namespace: " + this.path.build());
 		if (rec) for (SyntaxElement e : this.programElements) {
 			e.print(d + this.printDepthStep, rec);
 		}
@@ -83,6 +84,20 @@ public class Namespace extends SyntaxElement {
 
 	public void setContext(List<TYPE> setContext) {
 		return;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "namespace " + this.path.build() + "{";
+		code.add(Util.pad(d) + s);
+		
+		for (SyntaxElement s0 : this.programElements) {
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		}
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 
 } 

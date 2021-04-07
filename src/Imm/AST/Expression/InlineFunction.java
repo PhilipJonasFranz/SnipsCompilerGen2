@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -31,7 +32,7 @@ public class InlineFunction extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Inline Function");
+		System.out.println(Util.pad(d) + "Inline Function");
 		if (rec) this.inlineFunction.print(d + this.printDepthStep, rec);
 	}
 	

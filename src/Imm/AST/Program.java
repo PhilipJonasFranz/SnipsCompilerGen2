@@ -72,4 +72,15 @@ public class Program extends SyntaxElement {
 		return;
 	}
 
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		for (SyntaxElement s0 : this.programElements) {
+			code.addAll(s0.codePrint(0));
+			code.add("");
+		}
+		
+		return code;
+	}
+	
 } 

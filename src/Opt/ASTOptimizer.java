@@ -86,27 +86,35 @@ public class ASTOptimizer {
 	
 	public Program optProgram(Program AST) throws OPT0_EXC {
 		
-		while (OPT_DONE) {
-			OPT_DONE = false;
-			
-			this.state = new ProgramContext(null);
-			this.cStack.push(state);
-			
-			for (int i = 0; i < AST.programElements.size(); i++) {
-				SyntaxElement s = AST.programElements.get(i);
-				SyntaxElement s0 = s.opt(this);
+		List<String> code = AST.codePrint(0);
+		code.stream().forEach(System.out::println);
+		
+		try {
+			while (OPT_DONE) {
+				OPT_DONE = false;
 				
-				if (s0 == null) {
-					AST.programElements.remove(i);
-					i--;
+				this.state = new ProgramContext(null);
+				this.cStack.push(state);
+				
+				for (int i = 0; i < AST.programElements.size(); i++) {
+					SyntaxElement s = AST.programElements.get(i);
+					SyntaxElement s0 = s.opt(this);
+					
+					if (s0 == null) {
+						AST.programElements.remove(i);
+						i--;
+					}
+					else {
+						AST.programElements.set(AST.programElements.indexOf(s), s0);
+					}
 				}
-				else {
-					AST.programElements.set(AST.programElements.indexOf(s), s0);
-				}
+				
+				this.cStack.pop().transferContextChangeToParent();
+				this.state = null;
 			}
-			
-			this.cStack.pop().transferContextChangeToParent();
-			this.state = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new OPT0_EXC("An error occurred during AST-Optimization: " + e.getMessage());
 		}
 		
 		return AST;
@@ -116,6 +124,9 @@ public class ASTOptimizer {
 		
 		this.pushContext();
 		
+		/* Register declarations */
+		for (Declaration dec : f.parameters) dec.opt(this);
+		
 		f.body = this.optBody(f.body);
 		
 		this.popContext();
@@ -123,6 +134,8 @@ public class ASTOptimizer {
 	}
 	
 	public List<Statement> optBody(List<Statement> body) throws OPT0_EXC {
+		this.pushContext();
+		
 		for (int i = 0; i < body.size(); i++) {
 			Statement s = body.get(i);
 			Statement s0 = s.opt(this);
@@ -150,6 +163,7 @@ public class ASTOptimizer {
 			this.state.cState.remove(x);
 		});
 		
+		this.popContext();
 		return body;
 	}
 
@@ -705,6 +719,8 @@ public class ASTOptimizer {
 	}
 
 	public Statement optSignalStatement(SignalStatement signalStatement) throws OPT0_EXC {
+		signalStatement.exceptionInit = (StructureInit) signalStatement.exceptionInit.opt(this);
+		
 		return signalStatement;
 	}
 
@@ -713,14 +729,24 @@ public class ASTOptimizer {
 	}
 
 	public Statement optTryStatement(TryStatement tryStatement) throws OPT0_EXC {
+		tryStatement.body = this.optBody(tryStatement.body);
+		
+		for (int i = 0; i < tryStatement.watchpoints.size(); i++)
+			tryStatement.watchpoints.set(i, (WatchStatement) tryStatement.watchpoints.get(i).opt(this));
+		
 		return tryStatement;
 	}
 
 	public Statement optWatchStatement(WatchStatement watchStatement) throws OPT0_EXC {
+		watchStatement.body = this.optBody(watchStatement.body);
+		
 		return watchStatement;
 	}
 
 	public Statement optWhileStatement(WhileStatement whileStatement) throws OPT0_EXC {
+		whileStatement.condition = whileStatement.condition.opt(this);
+		whileStatement.body = this.optBody(whileStatement.body);
+		
 		return whileStatement;
 	}
 
@@ -733,6 +759,8 @@ public class ASTOptimizer {
 	}
 
 	public SyntaxElement optStructTypedef(StructTypedef structTypedef) throws OPT0_EXC {
+		for (Function f : structTypedef.functions) f.opt(this);
+		
 		return structTypedef;
 	}
 	

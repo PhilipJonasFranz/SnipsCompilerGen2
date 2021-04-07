@@ -27,5 +27,9 @@ public class BitNot extends UnaryExpression {
 	public UnaryExpression clone() {
 		return new BitNot(this.getOperand().clone(), this.getSource().clone());
 	}
+	
+	public String codePrint() {
+		return "~" + this.operand.codePrint();
+	}
 
 } 

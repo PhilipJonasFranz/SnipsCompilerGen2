@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -27,7 +28,7 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Do While");
+		System.out.println(Util.pad(d) + "Do While");
 		
 		if (rec) {
 			for (Statement s : this.body) 
@@ -66,6 +67,18 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 	
 	public Statement clone() {
 		return new DoWhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "do {";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "} while (" + this.condition.codePrint() + ");");
+		return code;
 	}
 	
 } 

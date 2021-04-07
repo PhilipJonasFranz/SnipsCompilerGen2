@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -36,7 +37,7 @@ public class IDOfExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "IDOf " + this.type.typeString());
+		System.out.println(Util.pad(d) + "IDOf " + this.type.typeString());
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -69,6 +70,10 @@ public class IDOfExpression extends Expression {
 
 	public Expression clone() {
 		return new IDOfExpression(this.type.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		return "idof(" + this.type.codeString() + ")";
 	}
 
 } 

@@ -50,4 +50,8 @@ public class BOOL extends PRIMITIVE<Boolean> {
 		return b;
 	}
 	
+	public String codeString() {
+		return "bool";
+	}
+	
 } 

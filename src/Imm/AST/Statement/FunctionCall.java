@@ -17,6 +17,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 public class FunctionCall extends Statement implements Callee {
 	
@@ -86,7 +87,7 @@ public class FunctionCall extends Statement implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
+		System.out.print(Util.pad(d) + "Function Call: " + this.path.build());
 		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
@@ -135,6 +136,31 @@ public class FunctionCall extends Statement implements Callee {
 		
 		for (Expression e : this.parameters) 
 			e.setContext(context);
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Expression e : this.parameters)
+				s += e.codePrint() + ", ";
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ")";
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 
 

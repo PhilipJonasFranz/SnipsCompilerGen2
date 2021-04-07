@@ -29,7 +29,7 @@ public class OPT0_EXC extends Exception {
 		this.message = message;
 		this.format = format;
 		
-		AsNBody.progress.abort();
+		if (AsNBody.progress != null) AsNBody.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
 	

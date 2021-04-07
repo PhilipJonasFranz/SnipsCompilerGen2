@@ -9,6 +9,7 @@ import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
+import Util.Util;
 
 public class Compare extends BinaryExpression {
 
@@ -33,7 +34,7 @@ public class Compare extends BinaryExpression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
+		System.out.println(Util.pad(d) + "Compare " + this.comparator.toString());
 		
 		if (rec) {
 			this.getLeft().print(d + this.printDepthStep, rec);
@@ -57,6 +58,20 @@ public class Compare extends BinaryExpression {
 	
 	public BinaryExpression clone() {
 		return new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
+	}
+	
+	public String codePrint() {
+		String s = this.left.codePrint();
+		
+		if (this.comparator == COMPARATOR.EQUAL) s += " == ";
+		if (this.comparator == COMPARATOR.GREATER_SAME) s += " >= ";
+		if (this.comparator == COMPARATOR.GREATER_THAN) s += " > ";
+		if (this.comparator == COMPARATOR.LESS_SAME) s += " <= ";
+		if (this.comparator == COMPARATOR.LESS_THAN) s += " < ";
+		if (this.comparator == COMPARATOR.NOT_EQUAL) s += " != ";
+		
+		s += this.right.codePrint();
+		return s;
 	}
 	
 } 

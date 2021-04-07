@@ -14,6 +14,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -33,7 +34,7 @@ public class SimpleLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "SimpleLhsId");
+		System.out.println(Util.pad(d) + "SimpleLhsId");
 		if (rec) this.ref.print(d + this.printDepthStep, rec);
 	}
 
@@ -73,6 +74,10 @@ public class SimpleLhsId extends LhsId {
 
 	public SimpleLhsId clone() {
 		return new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		return this.ref.codePrint();
 	}
 	
 } 

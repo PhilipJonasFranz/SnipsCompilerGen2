@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -39,7 +40,7 @@ public class SwitchStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Switch");
+		System.out.println(Util.pad(d) + "Switch");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
@@ -90,6 +91,20 @@ public class SwitchStatement extends Statement {
 		for (CaseStatement w : this.cases) casesC.add((CaseStatement) w.clone());
 		
 		return new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "switch (" + this.condition.codePrint() + ") {";
+		code.add(Util.pad(d) + s);
+		
+		for (CaseStatement s0 : this.cases)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.addAll(this.defaultStatement.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 
 } 

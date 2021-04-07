@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -35,7 +36,7 @@ public class ContinueStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Continue");
+		System.out.println(Util.pad(d) + "Continue");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -69,6 +70,12 @@ public class ContinueStatement extends Statement {
 		ContinueStatement b = new ContinueStatement(this.getSource().clone());
 		b.superLoop = this.superLoop;
 		return b;
+	}
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "continue;");
+		return code;
 	}
 	
 } 

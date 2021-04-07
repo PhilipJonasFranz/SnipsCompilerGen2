@@ -28,4 +28,8 @@ public class Add extends BinaryExpression {
 		return new Add(this.left.clone(), this.right.clone(), this.getSource().clone());
 	}
 	
+	public String codePrint() {
+		return this.left.codePrint() + " + " + this.right.codePrint();
+	}
+	
 } 

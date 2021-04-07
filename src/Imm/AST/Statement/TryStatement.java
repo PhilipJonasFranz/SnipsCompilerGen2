@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -39,7 +40,7 @@ public class TryStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Try");
+		System.out.println(Util.pad(d) + "Try");
 		
 		if (rec) {
 			for (Statement s : this.body) 
@@ -100,6 +101,24 @@ public class TryStatement extends CompoundStatement {
 		TryStatement tr = new TryStatement(this.cloneBody(), watchClone, this.getSource().clone());
 		if (this.watchpoint != null) tr.watchpoint = this.watchpoint;
 		return tr;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "try";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		for (WatchStatement w : this.watchpoints) {
+			List<String> c0 = w.codePrint(d);
+			code.set(code.size() - 1, code.get(code.size() - 1) + " " + c0.get(0));
+			c0.remove(0);
+			code.addAll(c0);
+		}
+		
+		return code;
 	}
 
 } 

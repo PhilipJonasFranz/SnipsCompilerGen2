@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -41,7 +42,7 @@ public class StructSelectWriteback extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Increment");
+		System.out.println(Util.pad(d) + "Increment");
 		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);
 	}
 
@@ -83,6 +84,13 @@ public class StructSelectWriteback extends Expression {
 
 	public Expression clone() {
 		return new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		String s = this.shadowSelect.codePrint();
+		if (this.writeback == WRITEBACK.INCR) s += "++";
+		else s += "--";
+		return s;
 	}
 	
 } 

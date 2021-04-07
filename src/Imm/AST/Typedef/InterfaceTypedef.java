@@ -27,6 +27,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -197,7 +198,7 @@ public class InterfaceTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
+		System.out.println(Util.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
 		
 		if (rec) for (Function f : this.functions)
 			f.print(d + this.printDepthStep, rec);
@@ -250,5 +251,46 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		return ins;
 	}
-
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += "interface " + this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		if (!this.implemented.isEmpty()) {
+			s += " : ";
+			for (INTERFACE i : this.implemented) {
+				s += i.codeString() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		code.add("");
+		
+		for (Function f : this.functions) {
+			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		
+		return code;
+	}
 } 

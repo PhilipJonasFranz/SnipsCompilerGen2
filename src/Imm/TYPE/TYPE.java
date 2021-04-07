@@ -51,6 +51,11 @@ public abstract class TYPE<T> {
 	public abstract String typeString();
 	
 	/**
+	 * Return a string representation of this type as if written in Snips-Code.
+	 */
+	public abstract String codeString();
+	
+	/**
 	 * Returns the value of this type in a form that can be written into the generated assembly
 	 * file. For example, an int would just return the stored number, a char would return the UTF-8 value
 	 * of the stored character.

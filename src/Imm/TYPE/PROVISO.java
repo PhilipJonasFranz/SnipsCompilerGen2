@@ -145,4 +145,12 @@ public class PROVISO extends TYPE<Void> {
 		return true;
 	}
 
+
+	public String codeString() {
+		String s = this.placeholderName;
+		if (this.defaultContext != null)
+			s += ":" + this.defaultContext.codeString();
+		return s;
+	}
+
 } 

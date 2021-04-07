@@ -15,6 +15,7 @@ import Opt.ASTOptimizer;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -61,11 +62,11 @@ public class EnumTypedef extends SyntaxElement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Enum Typedef <" + this.path.build() + ">");
+		System.out.println(Util.pad(d) + "Enum Typedef <" + this.path.build() + ">");
 		
 		if (rec) {
 			for (String e : this.enums) 
-				System.out.println(this.pad(d + this.printDepthStep) + e);
+				System.out.println(Util.pad(d + this.printDepthStep) + e);
 		}
 	}
 
@@ -88,6 +89,17 @@ public class EnumTypedef extends SyntaxElement {
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
+	}
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "enum " + this.path.build() + " {");
+		for (String field : this.enums) {
+			code.add(Util.pad(d + this.printDepthStep) + field + ", ");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 
 } 

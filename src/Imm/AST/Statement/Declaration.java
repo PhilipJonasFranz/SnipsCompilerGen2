@@ -17,6 +17,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -74,9 +75,9 @@ public class Declaration extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
-			System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+			System.out.println(Util.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
 		} catch (Exception e) {
-			System.out.println(this.pad(d) + "Declaration <?> " + this.path.build());
+			System.out.println(Util.pad(d) + "Declaration <?> " + this.path.build());
 		}
 		
 		if (rec && this.value != null) 
@@ -141,6 +142,15 @@ public class Declaration extends Statement {
 	public Declaration clone() {
 		Declaration clone = new Declaration(this.path, this.type.clone(), this.modifier, this.getSource());
 		return clone;
+	}
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = this.type.codeString() + " " + this.path.build();
+		if (this.value != null)
+			s += " = " + this.value.codePrint() + ";";
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 	
 } 

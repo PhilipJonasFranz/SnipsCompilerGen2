@@ -14,6 +14,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -53,7 +54,7 @@ public class FunctionRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		System.out.println(Util.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -93,6 +94,10 @@ public class FunctionRef extends Expression {
 		f.origin = this.origin;
 		
 		return f;
+	}
+	
+	public String codePrint() {
+		return this.path.build();
 	}
 
 } 

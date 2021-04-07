@@ -14,6 +14,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -60,7 +61,7 @@ public class Assignment extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Assign, arith = " + this.assignArith.toString());
+		System.out.println(Util.pad(d) + "Assign, arith = " + this.assignArith.toString());
 		
 		if (rec) {
 			this.lhsId.print(d + this.printDepthStep, rec);
@@ -101,6 +102,31 @@ public class Assignment extends Statement {
 
 	public Assignment clone() {
 		return new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+	}
+
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String a = "";
+		
+		if (this.assignArith == ASSIGN_ARITH.ADD_ASSIGN) a = "+";
+		if (this.assignArith == ASSIGN_ARITH.AND_ASSIGN) a = "&&";
+		if (this.assignArith == ASSIGN_ARITH.BIT_AND_ASSIGN) a = "&";
+		if (this.assignArith == ASSIGN_ARITH.BIT_ORR_ASSIGN) a = "|";
+		if (this.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) a = "^";
+		if (this.assignArith == ASSIGN_ARITH.DIV_ASSIGN) a = "/";
+		if (this.assignArith == ASSIGN_ARITH.LSL_ASSIGN) a = "<<";
+		if (this.assignArith == ASSIGN_ARITH.LSR_ASSIGN) a = ">>";
+		if (this.assignArith == ASSIGN_ARITH.MOD_ASSIGN) a = "%";
+		if (this.assignArith == ASSIGN_ARITH.MUL_ASSIGN) a = "*";
+		if (this.assignArith == ASSIGN_ARITH.ORR_ASSIGN) a = "||";
+		if (this.assignArith == ASSIGN_ARITH.SUB_ASSIGN) a = "-";
+		
+		String s = this.lhsId.codePrint() + " " + a + "= " + this.value.codePrint() + ";";
+		
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 
 } 

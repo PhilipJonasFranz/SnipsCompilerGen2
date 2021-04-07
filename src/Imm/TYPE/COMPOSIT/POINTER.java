@@ -124,5 +124,9 @@ public class POINTER extends COMPOSIT {
 	public boolean hasProviso() {
 		return this.targetType.hasProviso();
 	}
+	
+	public String codeString() {
+		return this.targetType.codeString() + "*";
+	}
 
 } 

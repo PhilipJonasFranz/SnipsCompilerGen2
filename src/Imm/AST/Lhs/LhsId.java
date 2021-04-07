@@ -1,5 +1,7 @@
 package Imm.AST.Lhs;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
@@ -45,5 +47,11 @@ public abstract class LhsId extends SyntaxElement {
 	public abstract NamespacePath getFieldName();
 	
 	public abstract LhsId clone();
+	
+	public abstract String codePrint();
+	
+	public List<String> codePrint(int d) {
+		return null;
+	}
 	
 } 

@@ -53,4 +53,8 @@ public class CHAR extends PRIMITIVE<Character> {
 		return b;
 	}
 	
+	public String codeString() {
+		return "char";
+	}
+	
 } 

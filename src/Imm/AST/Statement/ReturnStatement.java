@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -36,7 +37,7 @@ public class ReturnStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Return");
+		System.out.println(Util.pad(d) + "Return");
 		
 		if (rec && this.value != null) 
 			this.value.print(d + this.printDepthStep, rec);
@@ -75,6 +76,16 @@ public class ReturnStatement extends Statement {
 
 	public Statement clone() {
 		return new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "return";
+		if (this.value != null) 
+			s += " " + this.value.codePrint();
+		s += ";";
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 
 } 

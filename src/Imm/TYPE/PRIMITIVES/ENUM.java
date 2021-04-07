@@ -61,4 +61,8 @@ public class ENUM extends PRIMITIVE<String> {
 		return b;
 	}
 	
+	public String codeString() {
+		return this.def.path.build();
+	}
+	
 } 

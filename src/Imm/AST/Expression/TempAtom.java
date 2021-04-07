@@ -13,6 +13,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -44,8 +45,8 @@ public class TempAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
-		System.out.println(this.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
+		System.out.println(Util.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
+		System.out.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
 		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 
@@ -89,6 +90,11 @@ public class TempAtom extends Expression {
 		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
 		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
 		return t;
+	}
+
+	public String codePrint() {
+		if (this.base == null) return "...";
+		else return "(" + this.base.codePrint() + ")...";
 	}
 
 } 

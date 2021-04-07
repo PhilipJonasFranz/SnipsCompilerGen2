@@ -14,6 +14,7 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -33,7 +34,7 @@ public class ArraySelectLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "ElementSelectLhsId");
+		System.out.println(Util.pad(d) + "ElementSelectLhsId");
 		if (rec) this.selection.print(d + this.printDepthStep, rec);
 	}
 
@@ -73,6 +74,10 @@ public class ArraySelectLhsId extends LhsId {
 
 	public ArraySelectLhsId clone() {
 		return new ArraySelectLhsId((ArraySelect) this.selection.clone(), this.getSource().clone());
+	}
+
+	public String codePrint() {
+		return this.selection.codePrint();
 	}
 
 } 

@@ -78,18 +78,27 @@ public abstract class SyntaxElement {
 	 */
 	public abstract <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor);
 	
-	/** 
-	 * Create a padding of spaces with the given length.
-	 * For example w=3 -> '   '.
+	/**
+	 * Print out this node as Snips Code. Each String represents a code-line. The 
+	 * outputted code *should* be valid code, so it can be used as compiler input again.
+	 * 
+	 * The outputted code will represent a snapshot of the current AST. This means that
+	 * based on when this representation is created, the AST may has been transformed by
+	 * for example the Parser or Context Checker. The outputted code will probably NOT match
+	 * the inputted code, since some information about formatting and some other are ignored
+	 * in the various stages. Also, internal transformations of the AST will most likely not
+	 * be logged, so the AST printout will represent this transformed code.
+	 * 
+	 * This function is mostly for debug purposes, and can be used to get a more minimal of
+	 * the current AST.
+	 * 
+	 * @param Current printing depth, initially 0.
 	 */
-	public String pad(int w) {
-		String pad = "";
-		for (int i = 0; i < w; i++) pad += " ";
-		return pad;
-	}
+	public abstract List<String> codePrint(int d);
 	
 	/**
-	 * Returns the source at which this syntax element was parsed.
+	 * Returns the source at which this syntax element was parsed. The Source holds the
+	 * approximated source file location from which this AST node was parsed.
 	 */
 	public Source getSource() {
 		return this.source;

@@ -12,6 +12,7 @@ import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -36,7 +37,7 @@ public class WatchStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
+		System.out.println(Util.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
 		
 		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
@@ -82,6 +83,18 @@ public class WatchStatement extends CompoundStatement {
 		WatchStatement w = new WatchStatement(this.cloneBody(), wc, this.getSource().clone());
 		w.hasTarget = this.hasTarget;
 		return w;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = "watch (" + this.watched.codePrint(0).get(0) + ") {";
+		code.add(Util.pad(d) + s);
+		
+		for (Statement s0 : this.body)
+			code.addAll(s0.codePrint(d + this.printDepthStep));
+		
+		code.add(Util.pad(d) + "}");
+		return code;
 	}
 
 } 
