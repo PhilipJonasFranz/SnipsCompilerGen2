@@ -27,7 +27,7 @@ public class DefaultStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Default");
+		CompilerDriver.outs.println(Util.pad(d) + "Default");
 		
 		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);

@@ -9,6 +9,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Res.Const;
+import Snips.CompilerDriver;
 import Util.Pair;
 
 /**
@@ -173,19 +174,19 @@ public class StackSet {
 	
 	/** Prints out the stack layout and the contents of the stack cells. */
 	public void print() {
-		System.out.println("\n---- STACK TOP ----");
+		CompilerDriver.outs.println("\n---- STACK TOP ----");
 		
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
 			
-			System.out.println(x.type.toString() + ": ");
+			CompilerDriver.outs.println(x.type.toString() + ": ");
 			
 			if (x.type == CONTENT_TYPE.DECLARATION) 
 				x.declaration.print(4, true);
-			else System.out.println("    " + x.reg.toString());
+			else CompilerDriver.outs.println("    " + x.reg.toString());
 		}
 		
-		System.out.println("---- STACK BASE ----\n");
+		CompilerDriver.outs.println("---- STACK BASE ----\n");
 	}
 	
 	/**

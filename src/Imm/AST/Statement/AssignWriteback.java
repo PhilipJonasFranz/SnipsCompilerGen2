@@ -39,7 +39,7 @@ public class AssignWriteback extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Assign Writeback");
+		CompilerDriver.outs.println(Util.pad(d) + "Assign Writeback");
 		if (rec) this.reference.print(d + this.printDepthStep, rec);
 	}
 

@@ -25,7 +25,9 @@ public class Add extends BinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Add(this.left.clone(), this.right.clone(), this.getSource().clone());
+		Add e = new Add(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

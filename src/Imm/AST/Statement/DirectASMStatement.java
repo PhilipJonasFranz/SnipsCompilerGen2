@@ -6,6 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
@@ -41,20 +42,20 @@ public class DirectASMStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Direct ASM");
+		CompilerDriver.outs.println(Util.pad(d) + "Direct ASM");
 		
 		if (rec) {
-			System.out.println(Util.pad(d + this.printDepthStep) + "Data In:");
+			CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + "Data In:");
 			
 			for (Pair<Expression, REG> p : this.dataIn) {
-				System.out.println(Util.pad(d + this.printDepthStep) + p.second + " :");
+				CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + p.second + " :");
 				p.first.print(d + this.printDepthStep, rec);
 			}
 			
-			System.out.println(Util.pad(d + this.printDepthStep) + "Data Out:");
+			CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + "Data Out:");
 			
 			for (Pair<Expression, REG> p : this.dataOut) {
-				System.out.println(Util.pad(d + this.printDepthStep) + p.second + " :");
+				CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + p.second + " :");
 				p.first.print(d + this.printDepthStep, rec);
 			}
 		}
@@ -104,4 +105,8 @@ public class DirectASMStatement extends Statement {
 		return new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
 	}
 
+	public List<String> codePrint(int d) {
+		throw new SNIPS_EXC("Not implemented!");
+	}
+	
 } 

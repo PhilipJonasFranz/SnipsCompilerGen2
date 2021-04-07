@@ -38,7 +38,7 @@ public class StructSelect extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
+		CompilerDriver.outs.println(Util.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
 		if (rec) {
 			this.selector.print(d + this.printDepthStep, rec);
 			this.selection.print(d + this.printDepthStep, rec);
@@ -77,7 +77,12 @@ public class StructSelect extends Expression {
 	}
 
 	public Expression clone() {
-		return new StructSelect(this.selector.clone(), this.selection.clone(), this.deref, this.getSource().clone());
+		StructSelect ss = new StructSelect(this.selector.clone(), this.selection.clone(), this.deref, this.getSource().clone());
+		
+		if (this.getType() != null) 
+			ss.setType(this.getType().clone());
+		
+		return ss;
 	}
 
 	public String codePrint() {

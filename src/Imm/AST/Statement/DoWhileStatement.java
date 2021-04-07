@@ -28,7 +28,7 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Do While");
+		CompilerDriver.outs.println(Util.pad(d) + "Do While");
 		
 		if (rec) {
 			for (Statement s : this.body) 

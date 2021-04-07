@@ -42,7 +42,7 @@ public class SignalStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Signal");
+		CompilerDriver.outs.println(Util.pad(d) + "Signal");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 

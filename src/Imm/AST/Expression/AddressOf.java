@@ -36,7 +36,7 @@ public class AddressOf extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "AddressOf");
+		CompilerDriver.outs.println(Util.pad(d) + "AddressOf");
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
@@ -70,7 +70,9 @@ public class AddressOf extends Expression {
 	}
 
 	public Expression clone() {
-		return new AddressOf(this.expression.clone(), this.getSource().clone());
+		AddressOf aof = new AddressOf(this.expression.clone(), this.getSource().clone());
+		aof.setType(this.getType().clone());
+		return aof;
 	}
 
 	public String codePrint() {

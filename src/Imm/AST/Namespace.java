@@ -9,6 +9,7 @@ import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.ASTOptimizer;
+import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
@@ -53,7 +54,7 @@ public class Namespace extends SyntaxElement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Namespace: " + this.path.build());
+		CompilerDriver.outs.println(Util.pad(d) + "Namespace: " + this.path.build());
 		if (rec) for (SyntaxElement e : this.programElements) {
 			e.print(d + this.printDepthStep, rec);
 		}

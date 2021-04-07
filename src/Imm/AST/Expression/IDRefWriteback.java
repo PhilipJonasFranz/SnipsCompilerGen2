@@ -42,7 +42,7 @@ public class IDRefWriteback extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Increment");
+		CompilerDriver.outs.println(Util.pad(d) + "Increment");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
@@ -80,7 +80,9 @@ public class IDRefWriteback extends Expression {
 	}
 
 	public Expression clone() {
-		return new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
+		IDRefWriteback idwb = new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
+		idwb.setType(this.getType().clone());
+		return idwb;
 	}
 
 	public String codePrint() {

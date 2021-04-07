@@ -36,7 +36,7 @@ public class Deref extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Deref");
+		CompilerDriver.outs.println(Util.pad(d) + "Deref");
 		this.expression.print(d + this.printDepthStep, rec);
 	}
 
@@ -70,7 +70,9 @@ public class Deref extends Expression {
 	}
 
 	public Expression clone() {
-		return new Deref(this.expression.clone(), this.getSource().clone());
+		Deref d = new Deref(this.expression.clone(), this.getSource().clone());
+		d.setType(this.getType().clone());
+		return d;
 	}
 
 	public String codePrint() {

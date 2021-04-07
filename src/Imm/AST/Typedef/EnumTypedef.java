@@ -12,6 +12,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.ENUM;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.ASTOptimizer;
+import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
@@ -62,11 +63,11 @@ public class EnumTypedef extends SyntaxElement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Enum Typedef <" + this.path.build() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Enum Typedef <" + this.path.build() + ">");
 		
 		if (rec) {
 			for (String e : this.enums) 
-				System.out.println(Util.pad(d + this.printDepthStep) + e);
+				CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + e);
 		}
 	}
 

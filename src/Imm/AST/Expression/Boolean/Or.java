@@ -18,7 +18,9 @@ public class Or extends BoolBinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Or(this.left.clone(), this.right.clone(), this.getSource().clone());
+		Or e = new Or(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

@@ -28,7 +28,7 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "While");
+		CompilerDriver.outs.println(Util.pad(d) + "While");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);

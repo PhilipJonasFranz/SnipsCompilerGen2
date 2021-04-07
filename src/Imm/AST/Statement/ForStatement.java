@@ -42,7 +42,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "For");
+		CompilerDriver.outs.println(Util.pad(d) + "For");
 		
 		if (rec) {
 			this.iterator.print(d + this.printDepthStep, rec);

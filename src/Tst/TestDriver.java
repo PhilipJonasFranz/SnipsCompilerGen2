@@ -380,7 +380,7 @@ public class TestDriver {
 					else if (e instanceof OPT0_EXC) 
 						msg = ((OPT0_EXC) e).getExcFieldName();
 					else {
-						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
+						CompilerDriver.outs.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
 						System.exit(0);
 					}
 					
@@ -443,7 +443,7 @@ public class TestDriver {
 			boolean printedOutput = this.printResult;
 			
 			if (this.printResult) {
-				compile.stream().forEach(x -> System.out.println(x));
+				compile.stream().forEach(x -> CompilerDriver.outs.println(x));
 				printedOutput = true;
 			}
 			

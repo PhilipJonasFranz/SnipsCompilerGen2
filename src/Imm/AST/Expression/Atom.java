@@ -33,7 +33,7 @@ public class Atom extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		Integer value = this.getType().toInt();
-		System.out.println(Util.pad(d) + "Atom <" + this.getType().typeString() + ">" + ((value != null)? " " + value : ""));
+		CompilerDriver.outs.println(Util.pad(d) + "Atom <" + this.getType().typeString() + ">" + ((value != null)? " " + value : ""));
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -63,7 +63,9 @@ public class Atom extends Expression {
 	}
 
 	public Expression clone() {
-		return new Atom(this.getType().clone(), this.getSource().clone());
+		Atom atom = new Atom(this.getType().clone(), this.getSource().clone());
+		atom.setType(this.getType().clone());
+		return atom;
 	}
 
 	public String codePrint() {

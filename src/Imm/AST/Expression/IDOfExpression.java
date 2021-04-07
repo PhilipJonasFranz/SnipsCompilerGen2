@@ -37,7 +37,7 @@ public class IDOfExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "IDOf " + this.type.typeString());
+		CompilerDriver.outs.println(Util.pad(d) + "IDOf " + this.type.typeString());
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -69,7 +69,9 @@ public class IDOfExpression extends Expression {
 	}
 
 	public Expression clone() {
-		return new IDOfExpression(this.type.clone(), this.getSource().clone());
+		IDOfExpression iof = new IDOfExpression(this.type.clone(), this.getSource().clone());
+		iof.setType(this.getType().clone());
+		return iof;
 	}
 
 	public String codePrint() {

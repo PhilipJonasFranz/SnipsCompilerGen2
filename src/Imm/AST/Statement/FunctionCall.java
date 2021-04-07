@@ -69,6 +69,7 @@ public class FunctionCall extends Statement implements Callee {
 		if (this.baseRef != null)
 			ic.baseRef = this.baseRef.clone();
 		
+		ic.setType(this.getType().clone());
 		return ic;
 	}
 	
@@ -87,16 +88,16 @@ public class FunctionCall extends Statement implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(Util.pad(d) + "Function Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path.build());
 		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
 			s = s.substring(0, s.length() - 2);
 			s += "}";
-			System.out.print(s);
+			CompilerDriver.outs.print(s);
 		}
 		
-		System.out.println();
+		CompilerDriver.outs.println();
 		
 		if (rec) for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);

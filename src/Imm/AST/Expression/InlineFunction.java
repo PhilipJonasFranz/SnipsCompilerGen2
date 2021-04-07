@@ -6,6 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -32,7 +33,7 @@ public class InlineFunction extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Inline Function");
+		CompilerDriver.outs.println(Util.pad(d) + "Inline Function");
 		if (rec) this.inlineFunction.print(d + this.printDepthStep, rec);
 	}
 	
@@ -66,7 +67,13 @@ public class InlineFunction extends Expression {
 	}
 
 	public Expression clone() {
-		return new InlineFunction(this.inlineFunction.clone(), this.getSource().clone());
+		InlineFunction if0 = new InlineFunction(this.inlineFunction.clone(), this.getSource().clone());
+		if0.setType(this.getType().clone());
+		return if0;
+	}
+
+	public String codePrint() {
+		throw new SNIPS_EXC("Not implemented!");
 	}
 
 } 

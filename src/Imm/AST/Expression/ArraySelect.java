@@ -42,7 +42,7 @@ public class ArraySelect extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "ArraySelect");
+		CompilerDriver.outs.println(Util.pad(d) + "ArraySelect");
 		if (rec) {
 			this.shadowRef.print(d + this.printDepthStep, rec);
 			
@@ -94,7 +94,9 @@ public class ArraySelect extends Expression {
 		List<Expression> eclone = new ArrayList();
 		for (Expression e : this.selection) eclone.add(e.clone());
 		
-		return new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
+		ArraySelect select = new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
+		select.setType(this.getType().clone());
+		return select;
 	}
 
 	public String codePrint() {

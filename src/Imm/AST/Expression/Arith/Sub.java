@@ -25,7 +25,9 @@ public class Sub extends BinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Sub(this.left.clone(), this.right.clone(), this.getSource().clone());
+		Sub e = new Sub(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

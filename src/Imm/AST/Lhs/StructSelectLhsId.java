@@ -36,7 +36,7 @@ public class StructSelectLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "StructSelectLhsId");
+		CompilerDriver.outs.println(Util.pad(d) + "StructSelectLhsId");
 		if (rec) this.select.print(d + this.printDepthStep, rec);
 	}
 

@@ -100,7 +100,7 @@ public class ForEachStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "ForEach");
+		CompilerDriver.outs.println(Util.pad(d) + "ForEach");
 		
 		if (rec) {
 			this.iterator.print(d + this.printDepthStep, rec);

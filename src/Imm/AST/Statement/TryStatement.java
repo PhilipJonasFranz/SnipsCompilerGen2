@@ -40,7 +40,7 @@ public class TryStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Try");
+		CompilerDriver.outs.println(Util.pad(d) + "Try");
 		
 		if (rec) {
 			for (Statement s : this.body) 

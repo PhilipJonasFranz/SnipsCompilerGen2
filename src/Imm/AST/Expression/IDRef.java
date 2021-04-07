@@ -42,7 +42,7 @@ public class IDRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -78,6 +78,10 @@ public class IDRef extends Expression {
 	public Expression clone() {
 		IDRef r = new IDRef(this.path.clone(), this.getSource().clone());
 		r.origin = this.origin;
+		
+		if (this.getType() != null) 
+			r.setType(this.getType().clone());
+		
 		return r;
 	}
 

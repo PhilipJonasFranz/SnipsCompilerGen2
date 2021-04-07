@@ -36,7 +36,7 @@ public class ContinueStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Continue");
+		CompilerDriver.outs.println(Util.pad(d) + "Continue");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

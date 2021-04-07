@@ -25,7 +25,9 @@ public class Lsl extends BinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Lsl(this.left.clone(), this.right.clone(), this.getSource().clone());
+		Lsl e = new Lsl(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

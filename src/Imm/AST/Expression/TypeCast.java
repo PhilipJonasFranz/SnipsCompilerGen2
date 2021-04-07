@@ -40,8 +40,8 @@ public class TypeCast extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "TypeCast");
-		System.out.println(Util.pad(d + this.printDepthStep) + this.castType.typeString());
+		CompilerDriver.outs.println(Util.pad(d) + "TypeCast");
+		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.castType.typeString());
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
@@ -78,7 +78,9 @@ public class TypeCast extends Expression {
 	}
 
 	public Expression clone() {
-		return new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+		TypeCast tc = new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+		tc.setType(this.getType().clone());
+		return tc;
 	}
 
 	public String codePrint() {

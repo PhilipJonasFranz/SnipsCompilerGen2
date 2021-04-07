@@ -188,34 +188,34 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(Util.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
 		
 		if (!this.provisosTypes.isEmpty()) {
-			System.out.print("<");
+			CompilerDriver.outs.print("<");
 			for (int i = 0; i < this.provisosTypes.size(); i++) {
-				System.out.print(this.provisosTypes.get(i).typeString());
-				if (i < this.provisosTypes.size() - 1) System.out.print(", ");
+				CompilerDriver.outs.print(this.provisosTypes.get(i).typeString());
+				if (i < this.provisosTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
-			System.out.print(">");
+			CompilerDriver.outs.print(">");
 		}
 		
-		System.out.print("(");
+		CompilerDriver.outs.print("(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
-			if (i < this.parameters.size() - 1) System.out.print(", ");
+			CompilerDriver.outs.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
+			if (i < this.parameters.size() - 1) CompilerDriver.outs.print(", ");
 		}
-		System.out.print(")");
+		CompilerDriver.outs.print(")");
 		
 		if (!this.signalsTypes.isEmpty()) {
-			System.out.print(" signals ");
+			CompilerDriver.outs.print(" signals ");
 			for (int i = 0; i < this.signalsTypes.size(); i++) {
-				System.out.print(this.signalsTypes.get(i).typeString());
-				if (i < this.signalsTypes.size() - 1) System.out.print(", ");
+				CompilerDriver.outs.print(this.signalsTypes.get(i).typeString());
+				if (i < this.signalsTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
 		}
 		
-		System.out.println(" " + this.toString().split("@") [1]);
+		CompilerDriver.outs.println(" " + this.toString().split("@") [1]);
 		
 		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);

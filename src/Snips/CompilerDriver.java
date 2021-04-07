@@ -40,6 +40,7 @@ import Par.Token;
 import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
+import Util.BufferedPrintStream;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
@@ -66,6 +67,7 @@ public class CompilerDriver {
 	
 			/* ---< FLAGS & SETTINGS >--- */
 	public static boolean 
+		saveLog = 						false,  /* Everything written to the log is saved in a file 			*/
 		logoPrinted = 					false, 	/* Set to true when the logo was printed once. 					*/
 		useTerminalColors = 			true, 	/* ANSI-Escape codes are used in the console. 					*/
 		silenced = 						true,	/* Less or no messages are printed to the console. 				*/
@@ -75,6 +77,7 @@ public class CompilerDriver {
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
 		disableOptimizers = 			false,	/* The optimizer modules are skipped in the pipeline.			*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
+		useASTOptimizer	= 				false,  /* Wether to use the AST optimizer in the pipeline.				*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
@@ -84,7 +87,7 @@ public class CompilerDriver {
 		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
 		linkOnly = 						false;	/* Only link the given input							 		*/
 		
-	
+
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = 			false,	/* Print out proviso types when generating type string.			*/
@@ -117,6 +120,9 @@ public class CompilerDriver {
 		}
 		
 	}
+	
+	/** Print stream all debug and log messages are printed to */
+	public static BufferedPrintStream outs = new BufferedPrintStream(System.out);
 	
 	/* Documents the occurred compression rates */
 	public static List<Double> compressions = new ArrayList();
@@ -164,7 +170,7 @@ public class CompilerDriver {
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
-			System.out.println(new Message("No input file specified! See -help for argument information.", LogPoint.Type.FAIL).getMessage());
+			CompilerDriver.outs.println(new Message("No input file specified! See -help for argument information.", LogPoint.Type.FAIL).getMessage());
 			System.exit(0);
 		}
 		
@@ -186,7 +192,7 @@ public class CompilerDriver {
 		/* Errors occurred due to faulty parameters, abort */
 		if (!log.isEmpty()) {
 			log.add(new Message("Aborting.", LogPoint.Type.FAIL));
-			log.stream().forEach(x -> System.out.println(x.getMessage()));
+			log.stream().forEach(x -> CompilerDriver.outs.println(x.getMessage()));
 			log.clear();
 			System.exit(0);
 		}
@@ -237,7 +243,7 @@ public class CompilerDriver {
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", LogPoint.Type.INFO));
-				code.stream().forEach(x -> System.out.println(printDepth + x));
+				code.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x));
 			}
 			
 			if (!linkOnly) {
@@ -249,7 +255,7 @@ public class CompilerDriver {
 				
 				if (imm) {
 					log.add(new Message("SNIPS -> Pre-Processed Code:", LogPoint.Type.INFO));
-					preCode.stream().forEach(x -> System.out.println(printDepth + x.line));
+					preCode.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x.line));
 				}
 				
 						/* --- SCANNING --- */
@@ -272,7 +278,7 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				AST = STAGE_OPT0(AST);
+				if (useASTOptimizer) AST = STAGE_OPT0(AST);
 				
 				if (imm) AST.print(4, true);
 				
@@ -298,7 +304,7 @@ public class CompilerDriver {
 			
 			if (imm || out) {
 				log.add(new Message("SNIPS -> Outputted Code:", LogPoint.Type.INFO));
-				output.stream().forEach(x -> System.out.println(printDepth + x));
+				output.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x));
 			}
 			
 			/* Error test generated instructions are not counted, since they duplicate many times. */
@@ -351,6 +357,18 @@ public class CompilerDriver {
 		if (outputPath != null && output != null) {
 			Util.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
+		}
+		
+		if (saveLog) {
+			outs.flush();
+			
+			List<String> out = outs.getContents();
+			
+			String path = CompilerDriver.outputPath;
+			String [] sp = path.replace('\\', '/').split("/");
+			path = path.substring(0, path.length() - sp [sp.length - 1].length());
+			
+			Util.writeInFile(out, path + "compile.log");
 		}
 		
 		return output;
@@ -728,14 +746,14 @@ public class CompilerDriver {
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
-		for (String s : logo) System.out.println(s);
+		for (String s : logo) CompilerDriver.outs.println(s);
 		
 		String ver = "Gen.2 " + sys_config.getValue("Version");
 		
 		int l = ver.length();
 		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
 		
-		System.out.println("\t" + ver + "\n");
+		CompilerDriver.outs.println("\t" + ver + "\n");
 	}
 	
 	public void readArgs(String [] args) {
@@ -769,8 +787,13 @@ public class CompilerDriver {
 				}
 				else if (args [i].equals("-L")) 	linkOnly = true;
 				else if (args [i].equals("-log")) {
-					logoPrinted = false;
-					silenced = false;
+													logoPrinted = false;
+													silenced = false;
+				}
+				else if (args [i].equals("-logs")) {
+													logoPrinted = false;
+													silenced = false;
+													saveLog = true;
 				}
 				else if (args [i].equals("-o")) 	outputPath = args [i++ + 1];
 				else log.add(new Message("Unknown Parameter: " + args [i], LogPoint.Type.FAIL));
@@ -788,6 +811,7 @@ public class CompilerDriver {
 				"-info     : Print Version Compiler Version and information",
 				"[Path]    : First argument, set input file",
 				"-log      : Print out log and compile information",
+				"-logs     : Print out log and compile information, save log to file",
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable warnings",
 				"-imp      : Print out all imports",
@@ -804,7 +828,7 @@ public class CompilerDriver {
 				"-viz      : Disable Ansi Color in Log messages"
 		};
 	
-		for (String s : params) System.out.println(printDepth + s);
+		for (String s : params) CompilerDriver.outs.println(printDepth + s);
 	}
 	
 	public void printInfo() {

@@ -37,7 +37,7 @@ public class ReturnStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Return");
+		CompilerDriver.outs.println(Util.pad(d) + "Return");
 		
 		if (rec && this.value != null) 
 			this.value.print(d + this.printDepthStep, rec);

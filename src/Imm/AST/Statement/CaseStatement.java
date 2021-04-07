@@ -32,7 +32,7 @@ public class CaseStatement extends ConditionalCompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Case");
+		CompilerDriver.outs.println(Util.pad(d) + "Case");
 		this.condition.print(d + this.printDepthStep, rec);
 		
 		if (rec) for (Statement s : this.body) 

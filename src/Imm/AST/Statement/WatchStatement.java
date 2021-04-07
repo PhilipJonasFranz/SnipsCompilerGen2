@@ -37,7 +37,7 @@ public class WatchStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
 		
 		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);

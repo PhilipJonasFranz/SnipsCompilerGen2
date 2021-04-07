@@ -349,7 +349,7 @@ public class StructTypedef extends SyntaxElement {
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);
 		
-		System.out.println(s);
+		CompilerDriver.outs.println(s);
 		
 		if (rec) {
 			for (Declaration dec : this.fields) 

@@ -25,7 +25,9 @@ public class BitAnd extends BinaryExpression {
 	}
 
 	public BinaryExpression clone() {
-		return new BitAnd(this.left.clone(), this.right.clone(), this.getSource().clone());
+		BitAnd e = new BitAnd(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

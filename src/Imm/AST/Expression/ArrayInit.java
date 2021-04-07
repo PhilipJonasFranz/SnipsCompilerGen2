@@ -39,7 +39,7 @@ public class ArrayInit extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
+		CompilerDriver.outs.println(Util.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
 		
 		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
@@ -81,7 +81,9 @@ public class ArrayInit extends Expression {
 		List<Expression> eclone = new ArrayList();
 		for (Expression e : this.elements) eclone.add(e.clone());
 		
-		return new ArrayInit(eclone, this.dontCareTypes, this.getSource().clone());
+		ArrayInit init = new ArrayInit(eclone, this.dontCareTypes, this.getSource().clone());
+		init.setType(this.getType().clone());
+		return init;
 	}
 	
 	public String codePrint() {

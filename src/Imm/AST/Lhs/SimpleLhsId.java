@@ -34,7 +34,7 @@ public class SimpleLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "SimpleLhsId");
+		CompilerDriver.outs.println(Util.pad(d) + "SimpleLhsId");
 		if (rec) this.ref.print(d + this.printDepthStep, rec);
 	}
 

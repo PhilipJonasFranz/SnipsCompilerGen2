@@ -39,7 +39,7 @@ public class PointerLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "PointerLhsId");
+		CompilerDriver.outs.println(Util.pad(d) + "PointerLhsId");
 		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);
 	}
 

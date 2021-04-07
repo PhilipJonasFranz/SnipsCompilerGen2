@@ -45,8 +45,8 @@ public class TempAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
-		System.out.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
 		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 
@@ -89,6 +89,7 @@ public class TempAtom extends Expression {
 	public Expression clone() {
 		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
 		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
+		t.setType(this.getType().clone());
 		return t;
 	}
 

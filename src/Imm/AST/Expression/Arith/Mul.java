@@ -25,7 +25,9 @@ public class Mul extends BinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Mul(this.left.clone(), this.right.clone(), this.getSource().clone());
+		Mul e = new Mul(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 
 	public String codePrint() {

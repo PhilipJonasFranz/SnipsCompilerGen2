@@ -42,7 +42,7 @@ public class StructSelectWriteback extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Increment");
+		CompilerDriver.outs.println(Util.pad(d) + "Increment");
 		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);
 	}
 
@@ -83,7 +83,9 @@ public class StructSelectWriteback extends Expression {
 	}
 
 	public Expression clone() {
-		return new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+		StructSelectWriteback sswb = new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+		sswb.setType(this.getType().clone());
+		return sswb;
 	}
 
 	public String codePrint() {

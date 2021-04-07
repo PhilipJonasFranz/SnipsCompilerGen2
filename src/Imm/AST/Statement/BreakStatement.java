@@ -36,7 +36,7 @@ public class BreakStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Break");
+		CompilerDriver.outs.println(Util.pad(d) + "Break");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

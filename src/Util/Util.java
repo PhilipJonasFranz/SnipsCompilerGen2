@@ -119,7 +119,7 @@ public class Util {
 			new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO);
 			
 			/* Plot compression statistics */		
-			System.out.println();
+			CompilerDriver.outs.println();
 			
 			int [] map = new int [100];
 			for (double d : CompilerDriver.compressions) {
@@ -135,24 +135,24 @@ public class Util {
 				
 				if (i % 5 == 0) {
 					String num = "" + i;
-					for (int k = 0; k < f.length() - num.length(); k++) System.out.print(" ");
-					System.out.print(num + "|");
+					for (int k = 0; k < f.length() - num.length(); k++) CompilerDriver.outs.print(" ");
+					CompilerDriver.outs.print(num + "|");
 				}
-				else System.out.print(f + "|");
+				else CompilerDriver.outs.print(f + "|");
 				for (int a = 0; a < 100; a++) {
-					if (map [a] > i) System.out.print("\u2588");
-					else System.out.print(" ");
+					if (map [a] > i) CompilerDriver.outs.print("\u2588");
+					else CompilerDriver.outs.print(" ");
 				}
-				System.out.println();
+				CompilerDriver.outs.println();
 			}
 			
 			for (int i = 0; i < 100; i++) {
-				if (i > f.length()) System.out.print("-");
-				else System.out.print(" ");
+				if (i > f.length()) CompilerDriver.outs.print("-");
+				else CompilerDriver.outs.print(" ");
 			}
-			System.out.println();
+			CompilerDriver.outs.println();
 			
-			System.out.print(" ");
+			CompilerDriver.outs.print(" ");
 			String s = f;
 			for (int i = 0; i <= 100; i += 10) {
 				if (i % 10 == 0) {
@@ -161,7 +161,7 @@ public class Util {
 				}
 			}
 			
-			System.out.println(s + "\n");
+			CompilerDriver.outs.println(s + "\n");
 			
 			new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min + "%, max: " + CompilerDriver.c_max + "%", LogPoint.Type.INFO);
 		}
@@ -188,7 +188,7 @@ public class Util {
 		}
 		
 		if (!rmap.isEmpty()) {
-			System.out.println();
+			CompilerDriver.outs.println();
 			
 			double stretch = 1.0;
 			
@@ -197,17 +197,17 @@ public class Util {
 			}
 			
 			for (int i = 0; i < rmap.size(); i++) {
-				System.out.print(f + "|");
+				CompilerDriver.outs.print(f + "|");
 				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
-					System.out.print("\u2588");
+					CompilerDriver.outs.print("\u2588");
 				}
 				
 				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
 				
-				System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
+				CompilerDriver.outs.println(" : " + n + " (" + rmap.get(i).first + ")");
 			}
 			
-			System.out.println();
+			CompilerDriver.outs.println();
 		}
 		
 		new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(CompilerDriver.instructionsGenerated), LogPoint.Type.INFO);

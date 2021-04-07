@@ -54,7 +54,7 @@ public class FunctionRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -92,6 +92,7 @@ public class FunctionRef extends Expression {
 		if (this.base != null) f.base = (IDRef) this.base.clone();
 		
 		f.origin = this.origin;
+		f.setType(this.getType().clone());
 		
 		return f;
 	}

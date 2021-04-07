@@ -36,7 +36,7 @@ public class Ternary extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Ternary");
+		CompilerDriver.outs.println(Util.pad(d) + "Ternary");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);
@@ -79,7 +79,9 @@ public class Ternary extends Expression {
 	}
 
 	public Expression clone() {
-		return new Ternary(this.condition.clone(), this.left.clone(), this.right.clone(), this.getSource().clone());
+		Ternary t = new Ternary(this.condition.clone(), this.left.clone(), this.right.clone(), this.getSource().clone());
+		t.setType(this.getType().clone());
+		return t;
 	}
 	
 	public String codePrint() {

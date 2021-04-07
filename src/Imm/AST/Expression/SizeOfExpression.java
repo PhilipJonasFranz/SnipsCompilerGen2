@@ -39,7 +39,7 @@ public class SizeOfExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "SizeOf");
+		CompilerDriver.outs.println(Util.pad(d) + "SizeOf");
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
@@ -74,7 +74,9 @@ public class SizeOfExpression extends Expression {
 	}
 
 	public Expression clone() {
-		return new SizeOfExpression(this.expression.clone(), this.getSource().clone());
+		SizeOfExpression soe = new SizeOfExpression(this.expression.clone(), this.getSource().clone());
+		soe.setType(this.getType().clone());
+		return soe;
 	}
 
 	public String codePrint() {

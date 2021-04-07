@@ -61,7 +61,7 @@ public class Assignment extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Assign, arith = " + this.assignArith.toString());
+		CompilerDriver.outs.println(Util.pad(d) + "Assign, arith = " + this.assignArith.toString());
 		
 		if (rec) {
 			this.lhsId.print(d + this.printDepthStep, rec);

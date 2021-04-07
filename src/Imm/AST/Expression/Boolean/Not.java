@@ -24,7 +24,9 @@ public class Not extends BoolUnaryExpression {
 	}
 	
 	public BoolUnaryExpression clone() {
-		return new Not(this.getOperand().clone(), this.getSource().clone());
+		Not not = new Not(this.getOperand().clone(), this.getSource().clone());
+		not.setType(this.getType().clone());
+		return not;
 	}
 	
 	public String codePrint() {

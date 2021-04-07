@@ -18,7 +18,9 @@ public class And extends BoolBinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new And(this.left.clone(), this.right.clone(), this.getSource().clone());
+		And e = new And(this.left.clone(), this.right.clone(), this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {

@@ -34,7 +34,7 @@ public class ArraySelectLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "ElementSelectLhsId");
+		CompilerDriver.outs.println(Util.pad(d) + "ElementSelectLhsId");
 		if (rec) this.selection.print(d + this.printDepthStep, rec);
 	}
 

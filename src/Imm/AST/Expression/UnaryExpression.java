@@ -45,7 +45,7 @@ public abstract class UnaryExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + this.operator.toString());
+		CompilerDriver.outs.println(Util.pad(d) + this.operator.toString());
 		if (rec) this.operand.print(d + this.printDepthStep, rec);
 	}
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import Exc.LINK_EXC;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import PreP.PreProcessor;
+import Snips.CompilerDriver;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -70,9 +71,9 @@ public class Linker {
 		}
 		
 		public void print() {
-			System.out.println("LinkerUnit | Source File: " + ((this.sourceFile != null)? this.sourceFile : "Unknown"));
-			this.build().stream().forEach(x -> System.out.println(x));
-			System.out.println();
+			CompilerDriver.outs.println("LinkerUnit | Source File: " + ((this.sourceFile != null)? this.sourceFile : "Unknown"));
+			this.build().stream().forEach(x -> CompilerDriver.outs.println(x));
+			CompilerDriver.outs.println();
 		}
 		
 	}

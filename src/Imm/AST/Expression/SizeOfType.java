@@ -37,8 +37,8 @@ public class SizeOfType extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "SizeOf");
-		System.out.println(Util.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
+		CompilerDriver.outs.println(Util.pad(d) + "SizeOf");
+		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -69,7 +69,9 @@ public class SizeOfType extends Expression {
 	}
 
 	public Expression clone() {
-		return new SizeOfType(this.sizeType.clone(), this.getSource().clone());
+		SizeOfType sot = new SizeOfType(this.sizeType.clone(), this.getSource().clone());
+		sot.setType(this.getType().clone());
+		return sot;
 	}
 
 	public String codePrint() {

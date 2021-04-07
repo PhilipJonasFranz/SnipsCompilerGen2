@@ -34,7 +34,7 @@ public class Compare extends BinaryExpression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Compare " + this.comparator.toString());
+		CompilerDriver.outs.println(Util.pad(d) + "Compare " + this.comparator.toString());
 		
 		if (rec) {
 			this.getLeft().print(d + this.printDepthStep, rec);
@@ -57,7 +57,9 @@ public class Compare extends BinaryExpression {
 	}
 	
 	public BinaryExpression clone() {
-		return new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
+		Compare c = new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
+		c.setType(this.getType().clone());
+		return c;
 	}
 	
 	public String codePrint() {

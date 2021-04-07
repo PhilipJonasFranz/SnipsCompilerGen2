@@ -42,7 +42,7 @@ public class StructureInit extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 		
 		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
@@ -88,6 +88,8 @@ public class StructureInit extends Expression {
 		StructureInit in = new StructureInit(this.structType.clone(), ec, this.getSource().clone());
 		in.hasCoveredParam = this.hasCoveredParam;
 		in.isTopLevelExpression = this.isTopLevelExpression;
+		
+		in.setType(this.getType().clone());
 		
 		return in;
 	}

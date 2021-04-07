@@ -40,7 +40,7 @@ public class SwitchStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(Util.pad(d) + "Switch");
+		CompilerDriver.outs.println(Util.pad(d) + "Switch");
 		
 		if (rec) {
 			this.condition.print(d + this.printDepthStep, rec);

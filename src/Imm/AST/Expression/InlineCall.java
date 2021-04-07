@@ -59,15 +59,15 @@ public class InlineCall extends Expression implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
 		if (this.calledFunction != null) {
-			for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
-			System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
+			for (TYPE t : this.proviso) CompilerDriver.outs.print(", " + t.typeString());
+			CompilerDriver.outs.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		}
 		else {
-			System.out.println();
+			CompilerDriver.outs.println();
 			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
-			else System.out.println(Util.pad(d + this.printDepthStep) + "Target:?");
+			else CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + "Target:?");
 		}
 		
 		if (rec) for (Expression e : this.parameters) 
@@ -179,6 +179,8 @@ public class InlineCall extends Expression implements Callee {
 		ic.nestedDeref = this.nestedDeref;
 		
 		ic.watchpoint = this.watchpoint;
+		
+		ic.setType(this.getType().clone());
 		
 		return ic;
 	}
