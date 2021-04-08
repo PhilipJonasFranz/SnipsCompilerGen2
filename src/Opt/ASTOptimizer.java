@@ -75,6 +75,8 @@ import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
 import Opt.Util.ProgramContext;
 import Opt.Util.ProgramContext.VarState;
+import Res.Setting;
+import Snips.CompilerDriver;
 
 public class ASTOptimizer {
 
@@ -96,8 +98,12 @@ public class ASTOptimizer {
 				this.state = new ProgramContext(null);
 				this.cStack.push(state);
 				
+				CompilerDriver.HEAP_START.opt(this);
+				CompilerDriver.NULL_PTR.opt(this);
+				
 				for (int i = 0; i < AST.programElements.size(); i++) {
 					SyntaxElement s = AST.programElements.get(i);
+					
 					SyntaxElement s0 = s.opt(this);
 					
 					if (s0 == null) {
@@ -156,7 +162,7 @@ public class ASTOptimizer {
 		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
 			Declaration dec = entry.getKey();
 			
-			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
+			if (false && !this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
 				if (body.contains(dec)) body.remove(dec);
 				removed.add(dec);
 			}
@@ -171,6 +177,16 @@ public class ASTOptimizer {
 	}
 
 	public Expression optAddressOf(AddressOf addressOf) throws OPT0_EXC {
+		this.state.disableSetting(Setting.SUBSTITUTION);
+		
+		Expression e0 = addressOf.expression.opt(this);
+		
+		if (e0 != null && (e0 instanceof IDRef || e0 instanceof IDRefWriteback || 
+				e0 instanceof ArraySelect || e0 instanceof StructSelect || e0 instanceof StructureInit)) {
+			addressOf.expression = e0;
+		}
+		
+		this.state.enableSetting(Setting.SUBSTITUTION);
 		return addressOf;
 	}
 
@@ -179,6 +195,9 @@ public class ASTOptimizer {
 	}
 
 	public Expression optArraySelect(ArraySelect arraySelect) throws OPT0_EXC {
+		
+		this.state.setRead(arraySelect.idRef.origin);
+		
 		return arraySelect;
 	}
 
@@ -187,6 +206,8 @@ public class ASTOptimizer {
 	}
 
 	public Expression optDeref(Deref deref) throws OPT0_EXC {
+		deref.expression = deref.expression.opt(this);
+		
 		return deref;
 	}
 
@@ -200,10 +221,12 @@ public class ASTOptimizer {
 
 	public Expression optIDRef(IDRef idRef) throws OPT0_EXC {
 		
-		this.state.notifyRead(idRef.origin);
+		this.state.setRead(idRef.origin);
 		
 		/* If variable has not been overwritten, substitute */
-		if (this.state.cState.get(idRef.origin).currentValue != null) {
+		if (false && this.state.getSetting(Setting.SUBSTITUTION) && !this.state.getWrite(idRef.origin) && 
+				this.state.cState.get(idRef.origin).currentValue != null) {
+			OPT_DONE();
 			return this.state.cState.get(idRef.origin).currentValue.clone();
 		}
 		
@@ -215,8 +238,11 @@ public class ASTOptimizer {
 	}
 
 	public Expression optInlineCall(InlineCall inlineCall) throws OPT0_EXC {
-		for (Expression e : inlineCall.parameters) {
-			e.opt(this);
+		for (int i = 0; i < inlineCall.parameters.size(); i++) {
+			Expression e = inlineCall.parameters.get(i);
+			Expression e0 = e.opt(this);
+			
+			if (e0 != null) inlineCall.parameters.set(i, e0);
 		}
 		
 		return inlineCall;
@@ -241,6 +267,12 @@ public class ASTOptimizer {
 	}
 
 	public Expression optStructSelect(StructSelect structSelect) throws OPT0_EXC {
+		if (structSelect.selector instanceof IDRef) {
+			IDRef ref = (IDRef) structSelect.selector;
+			this.state.setRead(ref.origin);
+		}
+		else structSelect.selector.opt(this);
+		
 		return structSelect;
 	}
 
@@ -253,7 +285,8 @@ public class ASTOptimizer {
 	}
 
 	public Expression optTempAtom(TempAtom tempAtom) throws OPT0_EXC {
-		tempAtom.base = tempAtom.base.opt(this);
+		if (tempAtom.base != null)
+			tempAtom.base = tempAtom.base.opt(this);
 		
 		return tempAtom;
 	}
@@ -604,22 +637,28 @@ public class ASTOptimizer {
 	}
 
 	public LhsId optArraySelectLhsId(ArraySelectLhsId arraySelectLhsId) throws OPT0_EXC {
+		arraySelectLhsId.selection.opt(this);
+		
 		return arraySelectLhsId;
 	}
 
 	public LhsId optPointerLhsId(PointerLhsId pointerLhsId) throws OPT0_EXC {
+		pointerLhsId.deref.opt(this);
+		
 		return pointerLhsId;
 	}
 
 	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) throws OPT0_EXC {
 		
 		if (simpleLhsId.origin != null)
-			this.state.notifyWrite(simpleLhsId.origin);
+			this.state.setWrite(simpleLhsId.origin);
 		
 		return simpleLhsId;
 	}
 
 	public LhsId optStructSelectLhsId(StructSelectLhsId structSelectLhsId) throws OPT0_EXC {
+		structSelectLhsId.select.opt(this);
+		
 		return structSelectLhsId;
 	}
 
@@ -642,7 +681,7 @@ public class ASTOptimizer {
 		assignment.lhsId = assignment.lhsId.opt(this);
 		assignment.value = assignment.value.opt(this);
 		
-		if (origin != null) {
+		if (false && origin != null) {
 			// TODO: Need to morph current expression into this expression, for example: int a = 5; a = a + 4;
 			this.state.cState.get(origin).currentValue = assignment.value.clone();
 		
@@ -679,7 +718,7 @@ public class ASTOptimizer {
 		if (declaration.value != null) 
 			declaration.value = declaration.value.opt(this);
 		
-		this.state.add(declaration);
+		this.state.register(declaration);
 		
 		return declaration;
 	}
@@ -719,9 +758,15 @@ public class ASTOptimizer {
 	}
 
 	public Statement optFunctionCall(FunctionCall functionCall) throws OPT0_EXC {
-		for (Expression e : functionCall.parameters) {
-			e.opt(this);
+		for (int i = 0; i < functionCall.parameters.size(); i++) {
+			Expression e = functionCall.parameters.get(i);
+			Expression e0 = e.opt(this);
+			
+			if (e0 != null) functionCall.parameters.set(i, e0);
 		}
+		
+		if (functionCall.anonTarget != null)
+			this.state.setRead(functionCall.anonTarget);
 		
 		return functionCall;
 	}

@@ -68,7 +68,10 @@ public class InlineFunction extends Expression {
 
 	public Expression clone() {
 		InlineFunction if0 = new InlineFunction(this.inlineFunction.clone(), this.getSource().clone());
-		if0.setType(this.getType().clone());
+		
+		if (this.getType() != null)
+			if0.setType(this.getType().clone());
+		
 		return if0;
 	}
 

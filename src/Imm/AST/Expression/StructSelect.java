@@ -91,17 +91,17 @@ public class StructSelect extends Expression {
 		StructSelect c = this;
 		
 		while (c != null) {
-			s += c.selection.codePrint();
+			s = c.selection.codePrint() + s;
 			
 			if (this.deref)
-				s += "->";
-			else s += ".";
+				s = "->" + s;
+			else s = "." + s;
 			
 			if (c.selector instanceof StructSelect) {
 				c = (StructSelect) c.selector;
 			}
 			else {
-				s += c.selector.codePrint();
+				s = c.selector.codePrint() + s;
 				break;
 			}
 		}

@@ -87,8 +87,10 @@ public class TempAtom extends Expression {
 	}
 
 	public Expression clone() {
-		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
-		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
+		TempAtom t = new TempAtom(((this.base != null)? this.base.clone() : null), this.getSource().clone());
+		if (this.inheritType != null) 
+			t.inheritType = this.inheritType.clone();
+		
 		t.setType(this.getType().clone());
 		return t;
 	}

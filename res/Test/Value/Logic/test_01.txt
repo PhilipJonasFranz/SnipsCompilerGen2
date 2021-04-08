@@ -1,6 +1,6 @@
 SOURCE
 bool main(bool a) {
-	return !!a;
+	return (bool) ((!!a)? 1 : 0);
 }
 TESTCASES
 0 0

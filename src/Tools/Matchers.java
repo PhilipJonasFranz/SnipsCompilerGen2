@@ -29,7 +29,9 @@ public class Matchers {
 					return true;
 				else if (aof.expression instanceof StructureInit) 
 					return false;
-				else return (((ArraySelect) aof.expression).idRef.origin.equals(dec));
+				else if (aof.expression instanceof ArraySelect) {
+					return (((ArraySelect) aof.expression).idRef.origin.equals(dec));
+				}
 			}
 			
 			return false;

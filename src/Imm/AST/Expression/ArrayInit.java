@@ -96,8 +96,8 @@ public class ArrayInit extends Expression {
 			
 		s = s.substring(0, s.length() - 2);
 		
-		if (this.dontCareTypes) s = "]";
-		else s = "}";
+		if (this.dontCareTypes) s += "]";
+		else s += "}";
 		
 		return s;
 	}

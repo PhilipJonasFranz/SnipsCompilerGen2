@@ -435,16 +435,15 @@ public class StructTypedef extends SyntaxElement {
 		
 		code.add(Util.pad(d) + s);
 		
-		code.add("");
-		
 		for (Declaration d0 : this.fields) {
 			code.addAll(d0.codePrint(d + this.printDepthStep));
-			code.add("");
 		}
+		
+		if (!this.fields.isEmpty() && !this.functions.isEmpty())
+			code.add("");
 		
 		for (Function f : this.functions) {
 			code.addAll(f.codePrint(d + this.printDepthStep));
-			code.add("");
 		}
 		
 		code.add(Util.pad(d) + "}");

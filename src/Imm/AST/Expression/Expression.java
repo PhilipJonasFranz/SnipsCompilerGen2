@@ -53,4 +53,8 @@ public abstract class Expression extends SyntaxElement {
 		return null;
 	}
 	
+	public boolean isEqualTo(Expression e) {
+		return this.codePrint().equals(e.codePrint());
+	}
+	
 } 
