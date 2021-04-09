@@ -259,10 +259,22 @@ public class ASTOptimizer {
 	public Expression optSizeOfExpression(SizeOfExpression sizeOfExpression) throws OPT0_EXC {
 		sizeOfExpression.expression = sizeOfExpression.expression.opt(this);
 		
+		if (!sizeOfExpression.expression.getType().hasProviso()) {
+			Atom size = new Atom(new INT("" + sizeOfExpression.expression.getType().wordsize()), sizeOfExpression.getSource());
+			OPT_DONE();
+			return size;
+		}
+		
 		return sizeOfExpression;
 	}
 
 	public Expression optSizeOfType(SizeOfType sizeOfType) throws OPT0_EXC {
+		if (!sizeOfType.sizeType.hasProviso()) {
+			Atom size = new Atom(new INT("" + sizeOfType.sizeType.wordsize()), sizeOfType.getSource());
+			OPT_DONE();
+			return size;
+		}
+		
 		return sizeOfType;
 	}
 
