@@ -125,10 +125,16 @@ public class CompilerDriver {
 	public static BufferedPrintStream outs = new BufferedPrintStream(System.out);
 	
 	/* Documents the occurred compression rates */
-	public static List<Double> compressions = new ArrayList();
+	public static List<Double> compressions1 = new ArrayList();
 	
 	/* Documents the minimum and maximum compression reached */
-	public static double c_min = 100, c_max = 0;
+	public static double c_min1 = 100, c_max1 = 0;
+	
+	/* Documents the occurred compression rates */
+	public static List<Double> compressions0 = new ArrayList();
+	
+	/* Documents the minimum and maximum compression reached */
+	public static double c_min0 = 100, c_max0 = 0;
 	
 	/* Counts the amount of the different instructions */
 	public static HashMap<String, Integer> ins_p = new HashMap();
@@ -653,7 +659,7 @@ public class CompilerDriver {
 	
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST) throws OPT0_EXC {
 		if (useASTOptimizer) {
-			int nodes_before = AST.visit(x -> { return true; }).size();
+			double nodes_before = AST.visit(x -> { return true; }).size();
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
@@ -661,7 +667,17 @@ public class CompilerDriver {
 			AST = opt0.optProgram((Program) AST);
 			opt_progress.finish();
 			
-			int nodes_after = AST.visit(x -> { return true; }).size();
+			double nodes_after = AST.visit(x -> { return true; }).size();
+			
+			double rate = Math.round(1 / (nodes_before / 100) * (nodes_before - nodes_after) * 100) / 100.0;
+			
+			if (!expectError) {
+				compressions0.add(rate);
+			
+				if (rate < c_min0) c_min0 = rate;
+				if (rate > c_max0) c_max0 = rate;
+			}
+			
 			new Message("OPT0 -> Optimization Cycles: " + ASTOptimizer.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
 		}
 		
@@ -702,10 +718,10 @@ public class CompilerDriver {
 			rate = Math.round(rate * 100) / 100.0;
 			
 			if (!expectError) {
-				compressions.add(rate);
+				compressions1.add(rate);
 			
-				if (rate < c_min) c_min = rate;
-				if (rate > c_max) c_max = rate;
+				if (rate < c_min1) c_min1 = rate;
+				if (rate > c_max1) c_max1 = rate;
 			}
 			
 			log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));

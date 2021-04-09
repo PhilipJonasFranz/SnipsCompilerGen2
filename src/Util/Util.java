@@ -107,13 +107,73 @@ public class Util {
 		return sum;
 	}
 	
+	public static void plot(List<Double> history) {
+		String f = "  ";
+		
+		int [] map = new int [100];
+		for (double d : history) {
+			map [(int) d]++;
+		}
+		
+		int m = 0;
+		for (int i : map) if (i > m) m = i;
+		
+		f = ("" + m).replaceAll(".", " ");
+		
+		for (int i = m; i >= 0; i--) {
+			
+			if (i % 5 == 0) {
+				String num = "" + i;
+				for (int k = 0; k < f.length() - num.length(); k++) CompilerDriver.outs.print(" ");
+				CompilerDriver.outs.print(num + "|");
+			}
+			else CompilerDriver.outs.print(f + "|");
+			for (int a = 0; a < 100; a++) {
+				if (map [a] > i) CompilerDriver.outs.print("\u2588");
+				else CompilerDriver.outs.print(" ");
+			}
+			CompilerDriver.outs.println();
+		}
+		
+		for (int i = 0; i < 100; i++) {
+			if (i > f.length()) CompilerDriver.outs.print("-");
+			else CompilerDriver.outs.print(" ");
+		}
+		CompilerDriver.outs.println();
+		
+		CompilerDriver.outs.print(" ");
+		String s = f;
+		for (int i = 0; i <= 100; i += 10) {
+			if (i % 10 == 0) {
+				s += "" + i;
+				while (s.length() < i + 10) s += " ";
+			}
+		}
+		
+		CompilerDriver.outs.println(s + "\n");
+	}
+	
 	public static void printStats(CompilerDriver driver) {
-		double [] rate = {0};
-		CompilerDriver.compressions.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions.size());
+		double [] rate = {0, 0};
+		CompilerDriver.compressions0.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions0.size());
+		CompilerDriver.compressions1.stream().forEach(x -> rate [1] += x / CompilerDriver.compressions1.size());
+		
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
 		
-		String f = "  ";
+		double r1 = rate [1];
+		r1 = Math.round(r1 * 100.0) / 100.0;
+		
+		if (CompilerDriver.useASTOptimizer) {
+			new Message("SNIPS_OPT0 -> Compression Statistics: ", LogPoint.Type.INFO);
+			
+			/* Plot compression statistics */		
+			CompilerDriver.outs.println();
+			
+			plot(CompilerDriver.compressions0);
+			
+			new Message("SNIPS_OPT0 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min0 + "%, max: " + CompilerDriver.c_max0 + "%", LogPoint.Type.INFO);
+		}
 		
 		if (CompilerDriver.useASMOptimizer) {
 			new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO);
@@ -121,49 +181,9 @@ public class Util {
 			/* Plot compression statistics */		
 			CompilerDriver.outs.println();
 			
-			int [] map = new int [100];
-			for (double d : CompilerDriver.compressions) {
-				map [(int) d]++;
-			}
+			plot(CompilerDriver.compressions1);
 			
-			int m = 0;
-			for (int i : map) if (i > m) m = i;
-			
-			f = ("" + m).replaceAll(".", " ");
-			
-			for (int i = m; i >= 0; i--) {
-				
-				if (i % 5 == 0) {
-					String num = "" + i;
-					for (int k = 0; k < f.length() - num.length(); k++) CompilerDriver.outs.print(" ");
-					CompilerDriver.outs.print(num + "|");
-				}
-				else CompilerDriver.outs.print(f + "|");
-				for (int a = 0; a < 100; a++) {
-					if (map [a] > i) CompilerDriver.outs.print("\u2588");
-					else CompilerDriver.outs.print(" ");
-				}
-				CompilerDriver.outs.println();
-			}
-			
-			for (int i = 0; i < 100; i++) {
-				if (i > f.length()) CompilerDriver.outs.print("-");
-				else CompilerDriver.outs.print(" ");
-			}
-			CompilerDriver.outs.println();
-			
-			CompilerDriver.outs.print(" ");
-			String s = f;
-			for (int i = 0; i <= 100; i += 10) {
-				if (i % 10 == 0) {
-					s += "" + i;
-					while (s.length() < i + 10) s += " ";
-				}
-			}
-			
-			CompilerDriver.outs.println(s + "\n");
-			
-			new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min + "%, max: " + CompilerDriver.c_max + "%", LogPoint.Type.INFO);
+			new Message("SNIPS_OPT1 -> Average compression rate: " + r1 + "%, min: " + CompilerDriver.c_min1 + "%, max: " + CompilerDriver.c_max1 + "%", LogPoint.Type.INFO);
 		}
 		
 		new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", LogPoint.Type.INFO);
@@ -186,6 +206,8 @@ public class Util {
 				if (!added) rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
 			}
 		}
+		
+		String f = "  ";
 		
 		if (!rmap.isEmpty()) {
 			CompilerDriver.outs.println();
