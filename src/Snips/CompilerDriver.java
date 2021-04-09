@@ -653,12 +653,16 @@ public class CompilerDriver {
 	
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST) throws OPT0_EXC {
 		if (useASTOptimizer) {
+			int nodes_before = AST.visit(x -> { return true; }).size();
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
 			ASTOptimizer opt0 = new ASTOptimizer();
 			AST = opt0.optProgram((Program) AST);
 			opt_progress.finish();
+			
+			int nodes_after = AST.visit(x -> { return true; }).size();
+			new Message("OPT0 -> Optimization Cycles: " + ASTOptimizer.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
 		}
 		
 		return AST;

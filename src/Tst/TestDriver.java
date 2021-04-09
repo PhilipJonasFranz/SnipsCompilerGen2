@@ -401,8 +401,7 @@ public class TestDriver {
 		else {
 			cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 			
-			File file = new File(path);
-			List<String> compile = cd.compile(new File(path), code);
+			List<String> compile = doCompile(cd, path, code);
 
 			List<String> copy = new ArrayList();
 			
@@ -426,10 +425,16 @@ public class TestDriver {
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
-				buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
-				if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
-				cd.compile(file, code);
-				return new Result(RET_TYPE.CRASH, 0, 0);
+				if (timeout) {
+					buffer.add(new Message("-> The compilation process timed out.", LogPoint.Type.FAIL, true));
+					return new Result(RET_TYPE.TIMEOUT, 0, 0);
+				}
+				else {
+					buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
+					if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
+					doCompile(cd, path, code);
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
 			}
 			else {
 				/* Write output */
@@ -524,7 +529,6 @@ public class TestDriver {
 						runThread.stop();
 						runThread = null;
 						buffer.add(new Message("The compiled program timed out!", LogPoint.Type.FAIL, true));
-						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
@@ -545,17 +549,16 @@ public class TestDriver {
 					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
 					
 					/* Print inputted parameters */
-					String params = "-> Params: ";
-					if (sp.length == 1) params += "-";
-					else {
+					if (sp.length > 1) {
+						String params = "-> Params: ";
 						for (int a = 0; a < sp.length - 1; a++) {
 							params += sp [a];
 							if (a < sp.length - 2) {
 								params += ", ";
 							}
 						}
+						buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					}
-					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
 					if (printResultOnError && !printedOutput) {
 						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
@@ -569,6 +572,40 @@ public class TestDriver {
 		}
 		
 		return new Result((fail > 0)? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
+	}
+	
+	private boolean timeout = false;
+	
+	public List<String> doCompile(CompilerDriver cd, String path, List<String> code) {
+		Object [] out = new Object [] {null};
+		
+		timeout = false;
+		
+		Thread compileThread = new Thread(new Runnable() {
+			public void run() {
+				out [0] = cd.compile(new File(path), code);
+			}
+		});
+		
+		compileThread.start();
+		
+		long MAX_RUNTIME = 500;
+		
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() - start < MAX_RUNTIME && out [0] == null) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_RUNTIME) {
+			timeout = true;
+			return null;
+		}
+		
+		return (List<String>) out [0];
 	}
 	
 	/**

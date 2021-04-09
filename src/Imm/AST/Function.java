@@ -241,8 +241,10 @@ public class Function extends CompoundStatement {
 		if (visitor.visit(this)) 
 			result.add((T) this);
 		
-		for (Statement s : this.body) {
-			result.addAll(s.visit(visitor));
+		if (this.body != null) {
+			for (Statement s : this.body) {
+				result.addAll(s.visit(visitor));
+			}
 		}
 		
 		return result;

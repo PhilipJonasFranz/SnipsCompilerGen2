@@ -88,15 +88,17 @@ public class ASTOptimizer {
 	
 	private boolean OPT_DONE = true;
 	
+	public static int CYCLES = 0;
+	
 	private void OPT_DONE() {
 		OPT_DONE = true;
 	}
 	
 	public Program optProgram(Program AST) throws OPT0_EXC {
 		try {
-			AST.codePrint(0).stream().forEach(System.out::println);
-			
+			CYCLES = 0;
 			while (OPT_DONE) {
+				CYCLES++;
 				OPT_DONE = false;
 				
 				this.state = new ProgramContext(null);
@@ -126,9 +128,7 @@ public class ASTOptimizer {
 			e.printStackTrace();
 			throw new OPT0_EXC("An error occurred during AST-Optimization: " + e.getMessage());
 		}
-		
-		AST.codePrint(0).stream().forEach(System.out::println);
-		
+
 		return AST;
 	}
 	
@@ -255,7 +255,7 @@ public class ASTOptimizer {
 			 * No variables in the expression changed, safe
 			 * to forward-substitute.
 			 */
-			if (writeFree) {
+			if (writeFree && !idRef.codePrint().equals(cValue.codePrint())) {
 				OPT_DONE();
 				return cValue.clone();
 			}

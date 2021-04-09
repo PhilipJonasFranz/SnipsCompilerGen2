@@ -61,8 +61,7 @@ public class Program extends SyntaxElement {
 			result.add((T) this);
 		
 		for (SyntaxElement s : this.programElements) {
-			if (visitor.visit(s))
-				result.add((T) s);
+			result.addAll(s.visit(visitor));
 		}
 		
 		return result;

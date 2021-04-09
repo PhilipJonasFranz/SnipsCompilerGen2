@@ -98,12 +98,7 @@ public class AsNIDRef extends AsNExpression {
 					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), 
 						new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 				}
-				else {
-					System.out.println();
-					st.print();
-					r.print();
-					throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
-				}
+				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				
 				r.getReg(target).setDeclaration(i.origin);
 			}
