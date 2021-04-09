@@ -11,10 +11,10 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.InlineCall;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitAnd;
@@ -100,7 +100,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 	
 		/* --- OPERAND LOADING --- */
-	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
+	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
 		
 		/* Some assertions for debug purposes */
 		if (b.getLeft() instanceof TypeCast) {
@@ -186,7 +186,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 	}
 	
-	protected void generateLoaderCode(AsNBinaryExpression m, BinaryExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXC {
+	protected void generateLoaderCode(AsNBinaryExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXC {
 		/* Total Atomic Loading */
 		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
 			m.atomicPrecalc(b, solver);
@@ -232,7 +232,7 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	/**
 	 * Precalculate this expression since both operands are immediates.
 	 */
-	protected void atomicPrecalc(BinaryExpression b, BinarySolver s) {
+	protected void atomicPrecalc(NFoldExpression b, BinarySolver s) {
 		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
 			Atom l0 = (Atom) b.getLeft(), r0 = (Atom) b.getRight();
 			if (l0.getType() instanceof INT && r0.getType() instanceof INT) {

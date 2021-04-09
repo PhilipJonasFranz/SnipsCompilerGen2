@@ -18,7 +18,7 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
@@ -1424,7 +1424,7 @@ public class ContextChecker {
 		return t.getType();
 	}
 	
-	public TYPE checkBinaryExpression(BinaryExpression b) throws CTEX_EXC {
+	public TYPE checkBinaryExpression(NFoldExpression b) throws CTEX_EXC {
 		TYPE left = b.getLeft().check(this);
 		TYPE right = b.getRight().check(this);
 		

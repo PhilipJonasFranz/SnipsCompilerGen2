@@ -2,7 +2,7 @@ package Imm.AST.Expression.Boolean;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Util.Source;
@@ -10,7 +10,7 @@ import Util.Source;
 /**
  * This class represents a superclass for all Expressions.
  */
-public abstract class BoolBinaryExpression extends BinaryExpression {
+public abstract class BoolBinaryExpression extends NFoldExpression {
 
 			/* ---< CONSTRUCTORS >--- */
 	/**

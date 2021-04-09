@@ -1,15 +1,15 @@
 package Imm.AST.Expression.Arith;
 
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
 import Opt.ASTOptimizer;
 import Util.Source;
 
 /**
  * This class represents a superclass for all Expressions.
  */
-public class Add extends BinaryExpression {
+public class Add extends NFoldExpression {
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -24,7 +24,7 @@ public class Add extends BinaryExpression {
 		return opt.optAdd(this);
 	}
 	
-	public BinaryExpression clone() {
+	public Add clone() {
 		Add e = new Add(this.left.clone(), this.right.clone(), this.getSource().clone());
 		e.setType(this.getType().clone());
 		return e;

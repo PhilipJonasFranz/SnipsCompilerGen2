@@ -13,9 +13,9 @@ import Util.Source;
 import Util.Util;
 
 /**
- * This class represents a superclass for all Expressions.
+ * Describes an operation that is applied to two or more operands.
  */
-public abstract class BinaryExpression extends Expression {
+public abstract class NFoldExpression extends Expression {
 
 			/* ---< NESTED >--- */
 	public enum Operator {
@@ -40,7 +40,7 @@ public abstract class BinaryExpression extends Expression {
 	 * Default constructor.
 	 * @param source See {@link #source}
 	 */
-	public BinaryExpression(Expression left, Expression right, Operator operator, Source source) {
+	public NFoldExpression(Expression left, Expression right, Operator operator, Source source) {
 		super(source);
 		this.left = left;
 		this.right = right;

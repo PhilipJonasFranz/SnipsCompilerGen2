@@ -115,7 +115,7 @@ public class Util {
 		
 		String f = "  ";
 		
-		if (!CompilerDriver.disableOptimizers) {
+		if (CompilerDriver.useASMOptimizer) {
 			new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO);
 			
 			/* Plot compression statistics */		

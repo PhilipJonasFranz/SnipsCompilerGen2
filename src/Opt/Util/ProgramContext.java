@@ -148,9 +148,9 @@ public class ProgramContext {
 			this.cState.get(dec).read = true;
 	}
 	
-	public void setWrite(Declaration dec) {
+	public void setWrite(Declaration dec, boolean value) {
 		if (this.cState.containsKey(dec)) 
-			this.cState.get(dec).written = true;
+			this.cState.get(dec).written = value;
 	}
 	
 	public void setReferenced(Declaration dec) {

@@ -3,7 +3,7 @@ package Imm.AST.Expression.Boolean;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
@@ -11,7 +11,7 @@ import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
 
-public class Compare extends BinaryExpression {
+public class Compare extends NFoldExpression {
 
 			/* ---< NESTED >--- */
 	public enum COMPARATOR {
@@ -56,7 +56,7 @@ public class Compare extends BinaryExpression {
 		return opt.optCompare(this);
 	}
 	
-	public BinaryExpression clone() {
+	public NFoldExpression clone() {
 		Compare c = new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
 		c.setType(this.getType().clone());
 		return c;

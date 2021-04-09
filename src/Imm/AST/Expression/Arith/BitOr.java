@@ -1,7 +1,7 @@
 package Imm.AST.Expression.Arith;
 
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
 import Opt.ASTOptimizer;
 import Util.Source;
@@ -9,7 +9,7 @@ import Util.Source;
 /**
  * This class represents a superclass for all Expressions.
  */
-public class BitOr extends BinaryExpression {
+public class BitOr extends NFoldExpression {
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -24,7 +24,7 @@ public class BitOr extends BinaryExpression {
 		return opt.optBitOr(this);
 	}
 
-	public BinaryExpression clone() {
+	public NFoldExpression clone() {
 		BitOr e = new BitOr(this.left.clone(), this.right.clone(), this.getSource().clone());
 		e.setType(this.getType().clone());
 		return e;

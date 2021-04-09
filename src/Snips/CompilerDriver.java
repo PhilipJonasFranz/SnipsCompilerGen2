@@ -75,9 +75,9 @@ public class CompilerDriver {
 		out = 							false,	/* Print final output.											*/
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
-		disableOptimizers = 			false,	/* The optimizer modules are skipped in the pipeline.			*/
-		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
+		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
 		useASTOptimizer	= 				false,  /* Wether to use the AST optimizer in the pipeline.				*/
+		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
@@ -278,7 +278,7 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				if (useASTOptimizer) AST = STAGE_OPT0(AST);
+				AST = STAGE_OPT0(AST);
 				
 				if (imm) AST.print(4, true);
 				
@@ -652,7 +652,7 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST) throws OPT0_EXC {
-		if (!disableOptimizers) {
+		if (useASTOptimizer) {
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
@@ -684,7 +684,7 @@ public class CompilerDriver {
 	}
 	
 	private static AsNBody STAGE_OPT1(AsNBody body) {
-		if (!disableOptimizers) {
+		if (useASMOptimizer) {
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT1;
 			
@@ -774,7 +774,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-imm")) 	imm = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
-				else if (args [i].equals("-opt")) 	disableOptimizers = true;
+				else if (args [i].equals("-opt")) 	useASMOptimizer = false;
 				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;

@@ -1,7 +1,7 @@
 package Imm.AST.Expression.Boolean;
 
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.BinaryExpression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
 import Opt.ASTOptimizer;
 import Util.Source;
@@ -17,7 +17,7 @@ public class And extends BoolBinaryExpression {
 		return opt.optAnd(this);
 	}
 	
-	public BinaryExpression clone() {
+	public NFoldExpression clone() {
 		And e = new And(this.left.clone(), this.right.clone(), this.getSource().clone());
 		e.setType(this.getType().clone());
 		return e;

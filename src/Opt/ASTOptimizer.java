@@ -41,6 +41,7 @@ import Imm.AST.Expression.Arith.Sub;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.Expression.Boolean.Not;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -73,6 +74,7 @@ import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.INT;
 import Opt.Util.ProgramContext;
 import Opt.Util.ProgramContext.VarState;
 import Res.Setting;
@@ -92,6 +94,8 @@ public class ASTOptimizer {
 	
 	public Program optProgram(Program AST) throws OPT0_EXC {
 		try {
+			AST.codePrint(0).stream().forEach(System.out::println);
+			
 			while (OPT_DONE) {
 				OPT_DONE = false;
 				
@@ -122,6 +126,8 @@ public class ASTOptimizer {
 			e.printStackTrace();
 			throw new OPT0_EXC("An error occurred during AST-Optimization: " + e.getMessage());
 		}
+		
+		AST.codePrint(0).stream().forEach(System.out::println);
 		
 		return AST;
 	}
@@ -162,7 +168,7 @@ public class ASTOptimizer {
 		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
 			Declaration dec = entry.getKey();
 			
-			if (false && !this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
+			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
 				if (body.contains(dec)) body.remove(dec);
 				removed.add(dec);
 			}
@@ -224,10 +230,35 @@ public class ASTOptimizer {
 		this.state.setRead(idRef.origin);
 		
 		/* If variable has not been overwritten, substitute */
-		if (false && this.state.getSetting(Setting.SUBSTITUTION) && !this.state.getWrite(idRef.origin) && 
+		if (this.state.getSetting(Setting.SUBSTITUTION) && !this.state.getWrite(idRef.origin) && 
 				this.state.cState.get(idRef.origin).currentValue != null) {
-			OPT_DONE();
-			return this.state.cState.get(idRef.origin).currentValue.clone();
+			
+			/* 
+			 * Check if there are any variables in the current value. If there
+			 * are variables, forward-substitution of the expression may be incorrect,
+			 * since the expression substitution would be theoretically correct, but since
+			 * the values have changed already, the evaluation of this expression may be
+			 * different.
+			 */
+			Expression cValue = this.state.cState.get(idRef.origin).currentValue;
+			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
+			
+			boolean writeFree = true;
+			for (IDRef ref : varsInExpression) {
+				if (this.state.getWrite(ref.origin)) {
+					writeFree = false;
+					break;
+				}
+			}
+			
+			/*
+			 * No variables in the expression changed, safe
+			 * to forward-substitute.
+			 */
+			if (writeFree) {
+				OPT_DONE();
+				return cValue.clone();
+			}
 		}
 		
 		return idRef;
@@ -259,6 +290,7 @@ public class ASTOptimizer {
 	public Expression optSizeOfExpression(SizeOfExpression sizeOfExpression) throws OPT0_EXC {
 		sizeOfExpression.expression = sizeOfExpression.expression.opt(this);
 		
+		/* If there are no proviso types in the type of the expression, size is static */
 		if (!sizeOfExpression.expression.getType().hasProviso()) {
 			Atom size = new Atom(new INT("" + sizeOfExpression.expression.getType().wordsize()), sizeOfExpression.getSource());
 			OPT_DONE();
@@ -269,6 +301,8 @@ public class ASTOptimizer {
 	}
 
 	public Expression optSizeOfType(SizeOfType sizeOfType) throws OPT0_EXC {
+		
+		/* If there are no proviso types in the type, size is static */
 		if (!sizeOfType.sizeType.hasProviso()) {
 			Atom size = new Atom(new INT("" + sizeOfType.sizeType.wordsize()), sizeOfType.getSource());
 			OPT_DONE();
@@ -568,11 +602,23 @@ public class ASTOptimizer {
 		return and;
 	}
 
-	public Expression optCompare(Compare compare) throws OPT0_EXC {
-		compare.left = compare.left.opt(this);
-		compare.right = compare.right.opt(this);
+	public Expression optCompare(Compare c) throws OPT0_EXC {
+		c.left = c.left.opt(this);
+		c.right = c.right.opt(this);
 		
-		return compare;
+		if (c.comparator == COMPARATOR.EQUAL) {
+			if (c.left instanceof IDRef) {
+				IDRef ref = (IDRef) c.left;
+				this.state.cState.get(ref.origin).currentValue = c.right.clone();
+			}
+			
+			if (c.right instanceof IDRef) {
+				IDRef ref = (IDRef) c.right;
+				this.state.cState.get(ref.origin).currentValue = c.left.clone();
+			}
+		}
+		
+		return c;
 	}
 
 	public Expression optNot(Not not) throws OPT0_EXC {
@@ -663,7 +709,7 @@ public class ASTOptimizer {
 	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) throws OPT0_EXC {
 		
 		if (simpleLhsId.origin != null)
-			this.state.setWrite(simpleLhsId.origin);
+			this.state.setWrite(simpleLhsId.origin, true);
 		
 		return simpleLhsId;
 	}
@@ -690,8 +736,8 @@ public class ASTOptimizer {
 		if (origin != null) 
 			read = this.state.getRead(origin);
 		
-		assignment.lhsId = assignment.lhsId.opt(this);
 		assignment.value = assignment.value.opt(this);
+		assignment.lhsId = assignment.lhsId.opt(this);
 		
 		if (false && origin != null) {
 			// TODO: Need to morph current expression into this expression, for example: int a = 5; a = a + 4;
@@ -744,8 +790,8 @@ public class ASTOptimizer {
 	}
 
 	public Statement optDoWhileStatement(DoWhileStatement doWhileStatement) throws OPT0_EXC {
-		doWhileStatement.body = this.optBody(doWhileStatement.body);
 		doWhileStatement.condition = doWhileStatement.condition.opt(this);
+		doWhileStatement.body = this.optBody(doWhileStatement.body);
 		
 		return doWhileStatement;
 	}
@@ -828,8 +874,8 @@ public class ASTOptimizer {
 	}
 
 	public Statement optWhileStatement(WhileStatement whileStatement) throws OPT0_EXC {
-		whileStatement.condition = whileStatement.condition.opt(this);
 		whileStatement.body = this.optBody(whileStatement.body);
+		whileStatement.condition = whileStatement.condition.opt(this);
 		
 		return whileStatement;
 	}
