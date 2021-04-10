@@ -233,12 +233,10 @@ public class CompilerDriver {
 		this.readConfig();
 	}
 	
-	public SyntaxElement createOPT0Dupe(List<String> code) throws PARS_EXC, CTEX_EXC, OPT0_EXC {
+	public SyntaxElement createOPT0Dupe(List<Token> dequeue) throws PARS_EXC, CTEX_EXC, OPT0_EXC {
 		boolean silenced = CompilerDriver.silenced;
 		CompilerDriver.silenced = true;
 		
-		List<LineObject> preCode = STAGE_PREP(code, inputFile.getPath());
-		List<Token> dequeue = STAGE_SCAN(preCode);
 		SyntaxElement AST = STAGE_PARS(dequeue);
 		AST = STAGE_PRE1(AST);
 		AST = STAGE_NAME(AST);
@@ -284,6 +282,12 @@ public class CompilerDriver {
 						/* --- SCANNING --- */
 				List<Token> dequeue = STAGE_SCAN(preCode);
 				
+				/* If needed, create a cache of the tokens here */
+				List<Token> dupeCache = new ArrayList();
+				if (CompilerDriver.useASTOptimizer)
+					for (Token t : dequeue)
+						dupeCache.add(t);
+				
 						/* --- PARSING --- */
 				SyntaxElement AST = STAGE_PARS(dequeue);
 				
@@ -301,7 +305,7 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				AST = STAGE_OPT0(AST, this.createOPT0Dupe(code));
+				AST = STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
 				
 				if (imm) AST.print(4, true);
 				
