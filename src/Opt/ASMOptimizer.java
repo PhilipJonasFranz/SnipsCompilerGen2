@@ -1592,7 +1592,7 @@ public class ASMOptimizer {
 				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
 				ASMAdd add1 = (ASMAdd) ins0.get(i);
 				
-				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp) {
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && RegOp.toInt(add0.target.reg) < 3) {
 					ImmOp op0 = (ImmOp) add0.op1;
 					ImmOp op1 = (ImmOp) add1.op1;
 					
