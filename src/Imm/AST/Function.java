@@ -158,6 +158,8 @@ public class Function extends CompoundStatement {
 	 */
 	public int UID = LabelUtil.getUID();
 	
+	public Function ASTOptCounterpart;
+	
 	/**
 	 * If set to true, the '...@UID' will be included in the function
 	 * head asm label.

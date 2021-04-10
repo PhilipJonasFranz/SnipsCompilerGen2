@@ -76,7 +76,7 @@ public class CompilerDriver {
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
 		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
-		useASTOptimizer	= 				false,  /* Wether to use the AST optimizer in the pipeline.				*/
+		useASTOptimizer	= 				true,  /* Wether to use the AST optimizer in the pipeline.				*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
@@ -233,6 +233,32 @@ public class CompilerDriver {
 		this.readConfig();
 	}
 	
+	public SyntaxElement createOPT0Dupe(List<String> code) throws PARS_EXC, CTEX_EXC, OPT0_EXC {
+		boolean silenced = CompilerDriver.silenced;
+		CompilerDriver.silenced = true;
+		
+				/* --- PRE-PROCESSING --- */
+		List<LineObject> preCode = STAGE_PREP(code, inputFile.getPath());
+		
+				/* --- SCANNING --- */
+		List<Token> dequeue = STAGE_SCAN(preCode);
+		
+				/* --- PARSING --- */
+		SyntaxElement AST = STAGE_PARS(dequeue);
+		
+				/* --- PROCESS DYNAMIC IMPORTS >--- */
+		AST = STAGE_PRE1(AST);
+		
+				/* ---< NAMESPACE MANAGER --- */
+		AST = STAGE_NAME(AST);
+		
+				/* ---< CONTEXT CHECKING --- */
+		AST = STAGE_CTEX(AST);
+		
+		CompilerDriver.silenced = silenced;
+		return AST;
+	}
+	
 	
 			/* ---< METHODS >--- */
 	public List<String> compile(File file0, List<String> code) {
@@ -286,7 +312,7 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				AST = STAGE_OPT0(AST);
+				AST = STAGE_OPT0(AST, this.createOPT0Dupe(code));
 				
 				if (imm) AST.print(4, true);
 				
@@ -659,14 +685,14 @@ public class CompilerDriver {
 		return AST;
 	}
 	
-	private static SyntaxElement STAGE_OPT0(SyntaxElement AST) throws OPT0_EXC {
+	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) throws OPT0_EXC {
 		if (useASTOptimizer) {
 			double nodes_before = AST.visit(x -> { return true; }).size();
 			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
 			ASTOptimizer opt0 = new ASTOptimizer();
-			AST = opt0.optProgram((Program) AST);
+			AST = opt0.optProgram((Program) AST, (Program) AST0);
 			opt_progress.finish();
 			
 			double nodes_after = AST.visit(x -> { return true; }).size();

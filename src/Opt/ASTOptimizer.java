@@ -1,7 +1,6 @@
 package Opt;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
@@ -102,7 +101,7 @@ public class ASTOptimizer {
 	 * is set to true. The optimizer keeps starting new cycles,
 	 * until this variable is false at the end of a cycle.
 	 */
-	private boolean OPT_DONE = true;
+	private boolean OPT_DONE;
 	
 	/**
 	 * How many optimization cycles the optimizer had to do
@@ -112,14 +111,77 @@ public class ASTOptimizer {
 	
 	private boolean printBeforeAfter = false;
 	
+	/**
+	 * Used to keep track of the current phase of the optimizer.
+	 * There are two phases:
+	 * 
+	 * - In the first phase, the optimizer optimizes a duplicate AST.
+	 * - In the second phase, the optimizer checks for each function in the already
+	 * 		optimized AST, if the resulting function is smaller than the original.
+	 * 		If this is the case, the function of the original AST is optimized as well.
+	 * 
+	 * The duplicate ASTs are used since it is easier to parse and check a new
+	 * AST than to clone the AST in a way that also keeps the references between the
+	 * trees in a consistent state.
+	 */
+	private int phase = 1;
+	
 	private void OPT_DONE() {
 		OPT_DONE = true;
 	}
 	
-	public Program optProgram(Program AST) throws OPT0_EXC {
+	public Program optProgram(Program AST, Program AST0) throws OPT0_EXC {
 		try {
 			if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
+
+			/*
+			 * Create 1-to-1 links between the functions in the original and duplicate
+			 * AST for phase 2 cross-referencing.
+			 */
+			for (int i = 0; i < AST.programElements.size(); i++) {
+				SyntaxElement s = AST.programElements.get(i);
+				
+				if (s instanceof Function) {
+					Function f = (Function) s;
+					Function f0 = (Function) AST0.programElements.get(i);
+					f.ASTOptCounterpart = f0;
+				}
+			}
 			
+			/*
+			 * First phase:
+			 * 
+			 * Optimize the duplicate AST. For each function in the original AST,
+			 * we have created the link using the field 'ASTOptCounterpart'. For
+			 * each function optimized, we can then compare in phase 2, if the optimizations
+			 * actually helped to reduce the complexity.
+			 */
+			AST0 = this.optProgram(AST0);
+			
+			phase = 2;
+			
+			/**
+			 * Second phase:
+			 * 
+			 * Using the optimized duplicate AST, we can check for each function
+			 * if the optimized function is smaller than the original. If so, optimize
+			 * this function in the original AST.
+			 */
+			AST = this.optProgram(AST);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new OPT0_EXC("An error occurred during AST-Optimization, Phase " + phase + ": " + e.getMessage());
+		}
+
+		if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
+		
+		return AST;
+	}
+	
+	public Program optProgram(Program AST) throws OPT0_EXC {
+		try {
+			OPT_DONE = true;
 			CYCLES = 0;
 			
 			/*
@@ -162,11 +224,9 @@ public class ASTOptimizer {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new OPT0_EXC("An error occurred during AST-Optimization: " + e.getMessage());
+			throw new OPT0_EXC("An error occurred during AST-Optimization, Phase " + phase + ": " + e.getMessage());
 		}
 
-		if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
-		
 		return AST;
 	}
 	
@@ -174,6 +234,25 @@ public class ASTOptimizer {
 		
 		/* Function was not called, wont be translated anyway */
 		if (f.provisosCalls.isEmpty()) return f;
+		
+		if (phase == 2) {
+			if (f.ASTOptCounterpart != null) {
+				
+				/* Node # of optimized body */
+				int opt_f0 = 0;
+				for (Statement s : f.ASTOptCounterpart.body) opt_f0 += s.visit(x -> { return true; }).size();
+				
+				/* Node # of original body */
+				int nodes_f = 0;
+				for (Statement s : f.body) nodes_f += s.visit(x -> { return true; }).size();
+				
+				/**
+				 * Optimizations did not help to reduce the complexit, keep
+				 * original function without optimizations.
+				 */
+				if (opt_f0 >= nodes_f) return f;
+			}
+		}
 		
 		this.pushContext();
 		
