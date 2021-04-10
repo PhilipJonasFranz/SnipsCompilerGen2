@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 import Exc.OPT0_EXC;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
@@ -79,16 +80,36 @@ import Opt.Util.ProgramContext;
 import Opt.Util.ProgramContext.VarState;
 import Res.Setting;
 import Snips.CompilerDriver;
+import Util.Pair;
 
 public class ASTOptimizer {
 
+	/**
+	 * Stack of program contexts.
+	 */
 	private Stack<ProgramContext> cStack = new Stack();
 	
+	/**
+	 * The program context keeps track of variables and 
+	 * other related information, such as if a variable has
+	 * been overwritten or read at the current moment.
+	 */
 	private ProgramContext state = null;
 	
+	/**
+	 * Each time an optimization is done, this variable
+	 * is set to true. The optimizer keeps starting new cycles,
+	 * until this variable is false at the end of a cycle.
+	 */
 	private boolean OPT_DONE = true;
 	
+	/**
+	 * How many optimization cycles the optimizer had to do
+	 * for the given AST.
+	 */
 	public static int CYCLES = 0;
+	
+	private boolean printBeforeAfter = false;
 	
 	private void OPT_DONE() {
 		OPT_DONE = true;
@@ -96,17 +117,31 @@ public class ASTOptimizer {
 	
 	public Program optProgram(Program AST) throws OPT0_EXC {
 		try {
+			if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
+			
 			CYCLES = 0;
+			
+			/*
+			 * Do optimization cycles as long as optimizations
+			 * are done.
+			 */
 			while (OPT_DONE) {
 				CYCLES++;
 				OPT_DONE = false;
 				
-				this.state = new ProgramContext(null);
+				/* Root program context. */
+				this.state = new ProgramContext(null, false);
 				this.cStack.push(state);
 				
+				/* Add globally used symbols. */
 				CompilerDriver.HEAP_START.opt(this);
 				CompilerDriver.NULL_PTR.opt(this);
 				
+				/*
+				 * Iterate over each program element. If the optimization
+				 * returns null the program element can be removed. If it
+				 * returns someting else, the element can be replaced.
+				 */
 				for (int i = 0; i < AST.programElements.size(); i++) {
 					SyntaxElement s = AST.programElements.get(i);
 					
@@ -116,11 +151,11 @@ public class ASTOptimizer {
 						AST.programElements.remove(i);
 						i--;
 					}
-					else {
+					else if (!s0.equals(s)) 
 						AST.programElements.set(AST.programElements.indexOf(s), s0);
-					}
 				}
 				
+				/* Reset state and scopes for next optimization round */
 				this.cStack.pop().transferContextChangeToParent();
 				this.state = null;
 			}
@@ -129,6 +164,8 @@ public class ASTOptimizer {
 			throw new OPT0_EXC("An error occurred during AST-Optimization: " + e.getMessage());
 		}
 
+		if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
+		
 		return AST;
 	}
 	
@@ -142,14 +179,14 @@ public class ASTOptimizer {
 		/* Register declarations */
 		for (Declaration dec : f.parameters) dec.opt(this);
 		
-		f.body = this.optBody(f.body);
+		f.body = this.optBody(f.body, false);
 		
 		this.popContext();
 		return f;
 	}
 	
-	public List<Statement> optBody(List<Statement> body) throws OPT0_EXC {
-		this.pushContext();
+	public List<Statement> optBody(List<Statement> body, boolean isLoopedScope) throws OPT0_EXC {
+		this.pushContext(isLoopedScope);
 		
 		for (int i = 0; i < body.size(); i++) {
 			Statement s = body.get(i);
@@ -169,7 +206,32 @@ public class ASTOptimizer {
 			Declaration dec = entry.getKey();
 			
 			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
-				if (body.contains(dec)) body.remove(dec);
+				
+				List<IDRefWriteback> idwb = new ArrayList();
+				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);
+				
+				/*
+				 * Get all writeback sub-expressions from the expression
+				 * that is going to be removed. We have to wrap them in
+				 * AssignWriteback statements and add them to the body
+				 * in order to keep the program's functionality.
+				 */
+				List<AssignWriteback> awb = new ArrayList();
+				for (IDRefWriteback idwb0 : idwb) 
+					awb.add(new AssignWriteback(idwb0, idwb0.getSource()));
+				
+				if (body.contains(dec)) {
+					int index = body.indexOf(dec);
+					body.remove(dec);
+					
+					/* 
+					 * Add all writeback operations of the removed expression
+					 * as standalone statements at the location of the removed
+					 * declaration.
+					 */
+					for (AssignWriteback awb0 : awb) 
+						body.add(index++, awb0);
+				}
 				removed.add(dec);
 			}
 		}
@@ -182,22 +244,46 @@ public class ASTOptimizer {
 		return body;
 	}
 
-	public Expression optAddressOf(AddressOf addressOf) throws OPT0_EXC {
+	public Expression optAddressOf(AddressOf aof) throws OPT0_EXC {
 		this.state.disableSetting(Setting.SUBSTITUTION);
 		
-		Expression e0 = addressOf.expression.opt(this);
+		Expression e0 = aof.expression.opt(this);
 		
 		if (e0 != null && (e0 instanceof IDRef || e0 instanceof IDRefWriteback || 
 				e0 instanceof ArraySelect || e0 instanceof StructSelect || e0 instanceof StructureInit)) {
-			addressOf.expression = e0;
+			
+			if (e0 instanceof IDRef) {
+				IDRef ref = (IDRef) e0;
+				this.state.setReferenced(ref.origin);
+			}
+			
+			if (e0 instanceof IDRefWriteback) {
+				IDRefWriteback ref = (IDRefWriteback) e0;
+				this.state.setReferenced(ref.idRef.origin);
+			}
+			
+			aof.expression = e0;
 		}
 		
 		this.state.enableSetting(Setting.SUBSTITUTION);
-		return addressOf;
+		
+		List<IDRef> refs = aof.expression.visit(x -> x instanceof IDRef);
+		refs.stream().forEach(x -> {
+			this.state.setReferenced(x.origin);
+		});
+		
+		return aof;
 	}
 
-	public Expression optArrayInit(ArrayInit arrayInit) throws OPT0_EXC {
-		return arrayInit;
+	public Expression optArrayInit(ArrayInit a) throws OPT0_EXC {
+		
+		for (int i = 0; i < a.elements.size(); i++) {
+			Expression e0 = a.elements.get(i).opt(this);
+			if (e0 != null) 
+				a.elements.set(i, e0);
+		}
+		
+		return a;
 	}
 
 	public Expression optArraySelect(ArraySelect arraySelect) throws OPT0_EXC {
@@ -229,6 +315,10 @@ public class ASTOptimizer {
 		
 		this.state.setRead(idRef.origin);
 		
+		/* Make sure declaration was registered */
+		if (!this.state.cState.containsKey(idRef.origin))
+			throw new OPT0_EXC("Unknown declaration: " + idRef.path.build());
+		
 		/* If variable has not been overwritten, substitute */
 		if (this.state.getSetting(Setting.SUBSTITUTION) && !this.state.getWrite(idRef.origin) && 
 				this.state.cState.get(idRef.origin).currentValue != null) {
@@ -240,16 +330,30 @@ public class ASTOptimizer {
 			 * the values have changed already, the evaluation of this expression may be
 			 * different.
 			 */
+			boolean writeFree = true;
 			Expression cValue = this.state.cState.get(idRef.origin).currentValue;
 			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
-			
-			boolean writeFree = true;
 			for (IDRef ref : varsInExpression) {
 				if (this.state.getWrite(ref.origin)) {
 					writeFree = false;
 					break;
 				}
 			}
+			
+			/*
+			 * Only do substitution for primitive values. Pointers
+			 * are to likely to have changed data that they point to.
+			 * Structs and Array types may also have changed fields.
+			 * Forwards-Substitution is not always valid.
+			 */
+			writeFree &= cValue.getType().isPrimitive();
+			
+			/* 
+			 * Check if the current path is within a looped scope.
+			 * If yes, we cannot substitute since it is possible
+			 * that the value of this changing per iteration.
+			 */
+			writeFree &= !this.state.isInLoopedContext(idRef.origin);
 			
 			/*
 			 * No variables in the expression changed, safe
@@ -264,17 +368,34 @@ public class ASTOptimizer {
 		return idRef;
 	}
 
-	public Expression optIDRefWriteback(IDRefWriteback idRefWriteback) throws OPT0_EXC {
-		return idRefWriteback;
+	public Expression optIDRefWriteback(IDRefWriteback wb) throws OPT0_EXC {
+		this.state.disableSetting(Setting.SUBSTITUTION);
+		wb.idRef.opt(this);
+		this.state.enableSetting(Setting.SUBSTITUTION);
+		
+		this.state.setWrite(wb.idRef.origin, true);
+		return wb;
 	}
 
 	public Expression optInlineCall(InlineCall inlineCall) throws OPT0_EXC {
 		for (int i = 0; i < inlineCall.parameters.size(); i++) {
 			Expression e = inlineCall.parameters.get(i);
+			
+			boolean isNestedFirst = inlineCall.isNestedCall && i == 0;
+			
+			if (isNestedFirst) this.state.disableSetting(Setting.SUBSTITUTION);
 			Expression e0 = e.opt(this);
+			if (isNestedFirst) {
+				this.state.enableSetting(Setting.SUBSTITUTION);
+				continue;
+			}
+			
 			
 			if (e0 != null) inlineCall.parameters.set(i, e0);
 		}
+		
+		if (inlineCall.anonTarget != null)
+			this.state.setRead(inlineCall.anonTarget);
 		
 		return inlineCall;
 	}
@@ -326,8 +447,15 @@ public class ASTOptimizer {
 		return structSelectWriteback;
 	}
 
-	public Expression optStructureInit(StructureInit structureInit) throws OPT0_EXC {
-		return structureInit;
+	public Expression optStructureInit(StructureInit s) throws OPT0_EXC {
+		
+		for (int i = 0; i < s.elements.size(); i++) {
+			Expression e0 = s.elements.get(i).opt(this);
+			if (e0 != null) 
+				s.elements.set(i, e0);
+		}
+		
+		return s;
 	}
 
 	public Expression optTempAtom(TempAtom tempAtom) throws OPT0_EXC {
@@ -679,7 +807,10 @@ public class ASTOptimizer {
 	}
 
 	public Expression optTernary(Ternary ternary) throws OPT0_EXC {
+		
+		this.pushContext();
 		ternary.condition = ternary.condition.opt(this);
+		this.popContext();
 		
 		ternary.left = ternary.left.opt(this);
 		ternary.right = ternary.right.opt(this);
@@ -695,13 +826,29 @@ public class ASTOptimizer {
 	}
 
 	public LhsId optArraySelectLhsId(ArraySelectLhsId arraySelectLhsId) throws OPT0_EXC {
-		arraySelectLhsId.selection.opt(this);
+		
+		this.state.setWrite(arraySelectLhsId.selection.idRef.origin, true);
 		
 		return arraySelectLhsId;
 	}
 
 	public LhsId optPointerLhsId(PointerLhsId pointerLhsId) throws OPT0_EXC {
-		pointerLhsId.deref.opt(this);
+		
+		/* 
+		 * Cannot say for sure which variable is targeted, mark all occurring variables as
+		 * potential candidates. For each found reference, mark the variable as written to.
+		 */
+		List<IDRef> refs = pointerLhsId.deref.visit(x -> x instanceof IDRef);
+		refs.stream().forEach(x -> {
+			this.state.setWrite(x.origin, true);
+		});
+		
+		if (refs.isEmpty()) {
+			
+			/* No variables are used, this must be an unsafe operation. */
+			// TODO: Enable unsafe operation from here
+			
+		}
 		
 		return pointerLhsId;
 	}
@@ -720,6 +867,7 @@ public class ASTOptimizer {
 		return structSelectLhsId;
 	}
 
+	@SuppressWarnings("unused")
 	public Statement optAssignment(Assignment assignment) throws OPT0_EXC {
 		
 		Declaration origin = null;
@@ -756,8 +904,10 @@ public class ASTOptimizer {
 		return assignment;
 	}
 
-	public Statement optAssignWriteback(AssignWriteback assignWriteback) throws OPT0_EXC {
-		return assignWriteback;
+	public Statement optAssignWriteback(AssignWriteback wb) throws OPT0_EXC {
+		wb.reference.opt(this);
+		
+		return wb;
 	}
 
 	public Statement optBreakStatement(BreakStatement breakStatement) throws OPT0_EXC {
@@ -765,6 +915,9 @@ public class ASTOptimizer {
 	}
 
 	public Statement optCaseStatement(CaseStatement caseStatement) throws OPT0_EXC {
+		caseStatement.body = this.optBody(caseStatement.body, true);
+		caseStatement.condition = caseStatement.condition.opt(this);
+		
 		return caseStatement;
 	}
 
@@ -782,43 +935,77 @@ public class ASTOptimizer {
 	}
 
 	public Statement optDefaultStatement(DefaultStatement defaultStatement) throws OPT0_EXC {
+		defaultStatement.body = this.optBody(defaultStatement.body, false);
+		
 		return defaultStatement;
 	}
 
-	public Statement optDirectASMStatement(DirectASMStatement directASMStatement) throws OPT0_EXC {
-		return directASMStatement;
+	public Statement optDirectASMStatement(DirectASMStatement d) throws OPT0_EXC {
+		for (Pair<Expression, REG> pair : d.dataOut) {
+			IDRef ref = (IDRef) pair.first;
+			
+			this.state.disableSetting(Setting.SUBSTITUTION);
+			pair.first.opt(this);
+			this.state.enableSetting(Setting.SUBSTITUTION);
+			
+			this.state.setWrite(ref.origin, true);
+		}
+		
+		for (Pair<Expression, REG> pair : d.dataIn) 
+			pair.first = pair.first.opt(this);
+		
+		return d;
 	}
 
 	public Statement optDoWhileStatement(DoWhileStatement doWhileStatement) throws OPT0_EXC {
 		doWhileStatement.condition = doWhileStatement.condition.opt(this);
-		doWhileStatement.body = this.optBody(doWhileStatement.body);
+		doWhileStatement.body = this.optBody(doWhileStatement.body, true);
 		
 		return doWhileStatement;
 	}
 
 	public Statement optForEachStatement(ForEachStatement forEachStatement) throws OPT0_EXC {
+		this.pushContext();
 		forEachStatement.iterator.opt(this);
 		forEachStatement.counter.opt(this);
 		
-		forEachStatement.body = this.optBody(forEachStatement.body);
+		this.state.disableSetting(Setting.SUBSTITUTION);
+		forEachStatement.shadowRef.opt(this);
+		this.state.enableSetting(Setting.SUBSTITUTION);
 		
+		forEachStatement.body = this.optBody(forEachStatement.body, true);
+		
+		this.popContext();
 		return forEachStatement;
 	}
 
-	public Statement optForStatement(ForStatement forStatement) throws OPT0_EXC {
-		forStatement.iterator.opt(this);
-		forStatement.condition = forStatement.condition.opt(this);
-		forStatement.increment = forStatement.increment.opt(this);
+	public Statement optForStatement(ForStatement f) throws OPT0_EXC {
+		this.pushContext();
+		f.iterator.opt(this);
+		this.state.setWrite(f.iterator, true);
 		
-		forStatement.body = this.optBody(forStatement.body);
+		f.body = this.optBody(f.body, true);
 		
-		return forStatement;
+		f.increment = f.increment.opt(this);
+		f.condition = f.condition.opt(this);
+		
+		this.popContext();
+		return f;
 	}
 
 	public Statement optFunctionCall(FunctionCall functionCall) throws OPT0_EXC {
 		for (int i = 0; i < functionCall.parameters.size(); i++) {
 			Expression e = functionCall.parameters.get(i);
+			
+			boolean isNestedFirst = functionCall.isNestedCall && i == 0;
+			
+			if (isNestedFirst) this.state.disableSetting(Setting.SUBSTITUTION);
 			Expression e0 = e.opt(this);
+			if (isNestedFirst) {
+				this.state.enableSetting(Setting.SUBSTITUTION);
+				continue;
+			}
+			
 			
 			if (e0 != null) functionCall.parameters.set(i, e0);
 		}
@@ -833,7 +1020,7 @@ public class ASTOptimizer {
 		if (ifStatement.condition != null)
 			ifStatement.condition = ifStatement.condition.opt(this);
 		
-		ifStatement.body = this.optBody(ifStatement.body);
+		ifStatement.body = this.optBody(ifStatement.body, false);
 		
 		if (ifStatement.elseStatement != null) 
 			ifStatement.elseStatement.opt(this);
@@ -859,7 +1046,7 @@ public class ASTOptimizer {
 	}
 
 	public Statement optTryStatement(TryStatement tryStatement) throws OPT0_EXC {
-		tryStatement.body = this.optBody(tryStatement.body);
+		tryStatement.body = this.optBody(tryStatement.body, false);
 		
 		for (int i = 0; i < tryStatement.watchpoints.size(); i++)
 			tryStatement.watchpoints.set(i, (WatchStatement) tryStatement.watchpoints.get(i).opt(this));
@@ -868,13 +1055,13 @@ public class ASTOptimizer {
 	}
 
 	public Statement optWatchStatement(WatchStatement watchStatement) throws OPT0_EXC {
-		watchStatement.body = this.optBody(watchStatement.body);
+		watchStatement.body = this.optBody(watchStatement.body, false);
 		
 		return watchStatement;
 	}
 
 	public Statement optWhileStatement(WhileStatement whileStatement) throws OPT0_EXC {
-		whileStatement.body = this.optBody(whileStatement.body);
+		whileStatement.body = this.optBody(whileStatement.body, true);
 		whileStatement.condition = whileStatement.condition.opt(this);
 		
 		return whileStatement;
@@ -894,8 +1081,13 @@ public class ASTOptimizer {
 		return structTypedef;
 	}
 	
+	private void pushContext(boolean isLoopedContext) {
+		this.state = new ProgramContext(this.cStack.peek(), isLoopedContext);
+		this.cStack.push(this.state);
+	}
+	
 	private void pushContext() {
-		this.state = new ProgramContext(this.cStack.peek());
+		this.state = new ProgramContext(this.cStack.peek(), false);
 		this.cStack.push(this.state);
 	}
 	

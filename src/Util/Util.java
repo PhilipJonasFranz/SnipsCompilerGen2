@@ -112,6 +112,7 @@ public class Util {
 		
 		int [] map = new int [100];
 		for (double d : history) {
+			if (d < 0) continue;
 			map [(int) d]++;
 		}
 		
@@ -172,7 +173,11 @@ public class Util {
 			
 			plot(CompilerDriver.compressions0);
 			
+			double l = ((double) CompilerDriver.opt0_loops) / CompilerDriver.opt0_exc;
+			l = Math.round(l * 100.0) / 100.0;
+			
 			new Message("SNIPS_OPT0 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min0 + "%, max: " + CompilerDriver.c_max0 + "%", LogPoint.Type.INFO);
+			new Message("SNIPS_OPT0 -> Average optimization cycles: " + l, LogPoint.Type.INFO);
 		}
 		
 		if (CompilerDriver.useASMOptimizer) {

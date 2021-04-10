@@ -41,13 +41,17 @@ public class ProgramContext {
 		
 	}
 	
+	public boolean isLoopedContext;
+	
 	public HashMap<Declaration, VarState> cState = new HashMap();
 	
 	public ProgramContext parent;
 	
 	private HashMap<String, Stack<Boolean>> settings = new HashMap();
 	
-	public ProgramContext(ProgramContext parent) {
+	public ProgramContext(ProgramContext parent, boolean isLoopedContext) {
+		this.isLoopedContext = isLoopedContext;
+		
 		if (parent != null) {
 			this.parent = parent;
 			
@@ -136,6 +140,14 @@ public class ProgramContext {
 				}
 			}
 		}
+	}
+	
+	public boolean isInLoopedContext(Declaration dec) {
+		if (this.cState.containsKey(dec)) {
+			if (this.parent == null || !this.parent.cState.containsKey(dec)) return false;
+			else return this.isLoopedContext || this.parent.isInLoopedContext(dec);
+		}
+		else return false;
 	}
 	
 	public void register(Declaration dec) {

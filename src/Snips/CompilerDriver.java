@@ -136,6 +136,8 @@ public class CompilerDriver {
 	/* Documents the minimum and maximum compression reached */
 	public static double c_min0 = 100, c_max0 = 0;
 	
+	public static int opt0_loops = 0, opt0_exc = 0;
+	
 	/* Counts the amount of the different instructions */
 	public static HashMap<String, Integer> ins_p = new HashMap();
 	
@@ -678,6 +680,7 @@ public class CompilerDriver {
 				if (rate > c_max0) c_max0 = rate;
 			}
 			
+			opt0_loops += ASTOptimizer.CYCLES; opt0_exc++;
 			new Message("OPT0 -> Optimization Cycles: " + ASTOptimizer.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
 		}
 		

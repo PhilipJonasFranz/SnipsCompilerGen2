@@ -6,7 +6,6 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
@@ -106,7 +105,42 @@ public class DirectASMStatement extends Statement {
 	}
 
 	public List<String> codePrint(int d) {
-		throw new SNIPS_EXC("Not implemented!");
+		List<String> code = new ArrayList();
+		
+		String s = "asm";
+		
+		if (!this.dataIn.isEmpty()) {
+			s += "(";
+			for (Pair<Expression, REG> p : this.dataIn) {
+				s += p.first.codePrint() + " : " + p.second.toString().toLowerCase() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+			s += ")";
+		}
+		
+		s += " {";
+		code.add(Util.pad(d) + s);
+		
+		for (int i = 0; i < this.assembly.size(); i++) {
+			String assembly = this.assembly.get(i);
+			code.add(Util.pad(d + this.printDepthStep) + assembly + ((i < this.assembly.size() - 1)? " :" : ""));
+		}
+		
+		s = "}";
+		
+		if (!this.dataOut.isEmpty()) {
+			s += " (";
+			for (Pair<Expression, REG> p : this.dataOut) {
+				s += p.second.toString().toLowerCase() + " : " + p.first.codePrint() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+			s += ")";
+		}
+		
+		s += ";";
+		code.add(Util.pad(d) + s);
+		
+		return code;
 	}
 	
 } 

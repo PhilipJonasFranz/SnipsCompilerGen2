@@ -84,7 +84,7 @@ public class TypeCast extends Expression {
 	}
 
 	public String codePrint() {
-		return "(" + this.castType.codeString() + ")" + this.expression.codePrint();
+		return "(" + this.castType.codeString() + ") " + this.expression.codePrint();
 	}
 
 } 

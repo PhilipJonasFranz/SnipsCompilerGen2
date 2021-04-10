@@ -72,10 +72,10 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean printResultOnError = false;
+	public boolean printResultOnError = true;
 	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	public static boolean excludeASMErrors = false;
 	
@@ -158,6 +158,8 @@ public class TestDriver {
 			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}
 		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);
+		
+		System.exit(0);
 	}
 	
 	
@@ -589,7 +591,7 @@ public class TestDriver {
 		
 		compileThread.start();
 		
-		long MAX_RUNTIME = 500;
+		long MAX_RUNTIME = 2000;
 		
 		long start = System.currentTimeMillis();
 		while (System.currentTimeMillis() - start < MAX_RUNTIME && out [0] == null) {

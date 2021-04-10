@@ -89,7 +89,12 @@ public class ForStatement extends ConditionalCompoundStatement {
 
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
-		String s = "for (" + this.iterator.codePrint(0).get(0) + "; " + this.condition.codePrint() + "; " + this.increment.codePrint(0).get(0) + ") {";
+		String inc = this.increment.codePrint(0).get(0);
+		
+		if (inc.endsWith(";"))
+			inc = inc.substring(0, inc.length() - 1);
+		
+		String s = "for (" + this.iterator.codePrint(0).get(0) + " " + this.condition.codePrint() + "; " + inc + ") {";
 		code.add(Util.pad(d) + s);
 		
 		for (Statement s0 : this.body)

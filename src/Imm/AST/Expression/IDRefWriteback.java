@@ -82,6 +82,7 @@ public class IDRefWriteback extends Expression {
 	public Expression clone() {
 		IDRefWriteback idwb = new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
 		idwb.setType(this.getType().clone());
+		if (this.idRef != null) idwb.idRef = (IDRef) idwb.getShadowRef();
 		return idwb;
 	}
 

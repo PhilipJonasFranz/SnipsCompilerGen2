@@ -96,6 +96,10 @@ public class ArraySelect extends Expression {
 		
 		ArraySelect select = new ArraySelect(this.shadowRef.clone(), eclone, this.getSource().clone());
 		select.setType(this.getType().clone());
+		
+		if (this.idRef != null)
+			select.idRef = (IDRef) select.shadowRef;
+		
 		return select;
 	}
 
