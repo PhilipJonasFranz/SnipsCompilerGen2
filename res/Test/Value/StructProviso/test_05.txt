@@ -52,8 +52,7 @@ _routine_stack_copy_end_:
 
 .global insert_P_1
 insert_P_1:                                  /* Function: insert, Provisos: INT */
-    mov r0, #4                               /* Evaluate Expression */
-    b resv                                   /* Call resv */
+    bx lr
 
 .global main
 main:                                        /* Function: main */

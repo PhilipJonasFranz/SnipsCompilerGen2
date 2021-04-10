@@ -44,12 +44,10 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
     cmp r0, #3
     bne main.L0
-    lsl r5, r3, #1
-    add r4, r4, r5
+    add r4, r4, #6
 main.L0: 
     add r4, r4, #10
     mov r0, r4                               /* Evaluate Expression */

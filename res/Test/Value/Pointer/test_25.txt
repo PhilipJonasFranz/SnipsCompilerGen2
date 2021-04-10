@@ -18,7 +18,7 @@ int main() {
 TESTCASES
 42
 OUTPUT
-.version 3453767487
+.version 1529849457
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -67,9 +67,15 @@ main:                                        /* Function: main */
     lsl r1, r1, #2                           /* Convert to bytes */
     add r0, r1, #16
     lsr r3, r0, #2
-    ldr r1, [r10, r3, lsl #2]                /* Load from address */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    ldr r0, [fp, #-8]                        /* Evaluate Expression */
+    ldr r1, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, #15
-    str r0, [r10, r3, lsl #2]
+    push { r0 }
+    ldr r0, [fp, #-8]
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
     ldr r1, [fp, #-4]
     lsl r1, r1, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */

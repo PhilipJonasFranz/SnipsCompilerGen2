@@ -37,13 +37,13 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    ldr r3, .P1949238496_NULL                /* Evaluate Expression */
+    ldr r0, .P1949238496_NULL                /* Load null address */
     ldr r1, .P1949238496_NULL                /* Load null address */
-    cmp r3, r1
+    cmp r0, r1
     bne main.L1
     mov r0, #10                              /* Evaluate Expression */
     bx lr
+.P1949238496_NULL: .word NULL
 main.L1: 
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-.P1949238496_NULL: .word NULL

@@ -20,7 +20,7 @@ int main() {
 TESTCASES
 55
 OUTPUT
-.version 7911702145
+.version 12504367116
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -71,20 +71,18 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     ldr r3, .P524679116_f                    /* Evaluate Expression */
-    mov r4, r3
-    mov r5, r3
     mov r4, #0
     mov r0, #0                               /* Evaluate Expression */
-    mov r6, #0
+    mov r5, #0
 main.L1: 
-    cmp r6, #10
+    cmp r5, #10
     bge main.L2
-    add r0, r6, #1
+    add r0, r5, #1
     add lr, pc, #8
-    mov pc, r5
-    ldr r7, [fp, #-8]
-    add r4, r4, r7
-    add r6, r6, #1
+    mov pc, r3
+    ldr r0, [fp, #-8]
+    add r4, r4, r0
+    add r5, r5, #1
     add sp, sp, #8
     b main.L1
 main.L2: 

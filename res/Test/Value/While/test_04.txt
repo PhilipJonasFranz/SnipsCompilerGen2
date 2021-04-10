@@ -17,7 +17,7 @@ int main(int a) {
 TESTCASES
 4 28
 OUTPUT
-.version 2449619893
+.version 5577890871
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -54,22 +54,16 @@ main.L1:                                     /* Evaluate condition */
     cmp r3, #0
     ble main.L2
     lsl r5, r3, #1
-    sub r0, sp, #0                           /* Evaluate Expression */
-    push { r5 }                              /* Push declaration on stack, referenced by addressof. */
-    lsr r5, r0, #2
-    ldr r0, [sp]
-    cmp r0, #4
+    cmp r5, #4
     bne main.L3
-    add sp, sp, #4
     b main.L2
 /* Break */
 main.L3: 
-    ldr r5, [sp]                             /* Evaluate Expression */
-    ldr r2, [sp]
-    add r1, r4, r2
-    add r4, r1, r5
+    mov r0, r5                               /* Evaluate Expression */
+    mov r6, r5
+    add r1, r4, r5
+    add r4, r1, r6
     sub r3, r3, #1
-    add sp, sp, #4
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */

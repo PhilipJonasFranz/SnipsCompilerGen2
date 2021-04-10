@@ -35,6 +35,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mvn r2, #1
-    rsb r0, r2, #2
+    mov r0, #4                               /* Evaluate Expression */
     bx lr

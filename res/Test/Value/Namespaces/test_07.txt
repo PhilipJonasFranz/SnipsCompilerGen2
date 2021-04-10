@@ -58,14 +58,9 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P512482075_Foo.Bar_P_1
     push { r0 }
-    ldr r1, .P512482075_Foo.Baz.x            /* Load from .data section */
-    ldr r1, [r1]
-    add r0, r1, #8
+    mov r0, #18                              /* Evaluate Expression */
     str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r1, [fp, #-4]                        /* Load field from struct */
-    ldr r2, .P512482075_Foo.Baz.x            /* Load from .data section */
-    ldr r2, [r2]
-    add r0, r1, r2
+    add r0, r1, #10
     bx lr
-.P512482075_Foo.Baz.x: .word Foo.Baz.x
 .P512482075_Foo.Bar_P_1: .word Foo.Bar_P_1

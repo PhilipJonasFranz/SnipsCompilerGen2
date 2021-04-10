@@ -68,9 +68,8 @@ map:                                         /* Function: map */
 .global main
 main:                                        /* Function: main */
     push { lr }
-    ldr r3, .P467420813_f                    /* Evaluate Expression */
+    ldr r1, .P467420813_f                    /* Load parameters */
     mov r0, #10
-    mov r1, r3
     bl map                                   /* Call map */
     ldr r0, .P467420813_r                    /* Evaluate Expression */
     ldr r0, [r0]

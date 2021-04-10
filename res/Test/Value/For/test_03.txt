@@ -46,7 +46,6 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov fp, sp
     mov r3, r0
     mov r4, #0
     mov r5, #0
@@ -63,16 +62,11 @@ main.L6:
     cmp r6, #4
     bge main.L7
     add r4, r4, r4
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #4
-    stmfd sp!, {r0, r1}
     add r6, r6, #1
-    add sp, sp, #8
     b main.L6
 main.L7: 
     add r5, r5, #1
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
-    mov sp, fp
     bx lr

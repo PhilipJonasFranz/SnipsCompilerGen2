@@ -30,7 +30,7 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 62
 OUTPUT
-.version 27055565428
+.version 27434145304
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -122,17 +122,17 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
-    mov r3, r0
     mov r1, #5
+    push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
-    mov r4, r0
+    push { r0 }
     mov r0, #6                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
     pop { r1 }
     bl foo                                   /* Call foo */
-    mov r5, r0
+    push { r0 }
     mov r0, #7                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
@@ -141,11 +141,14 @@ main:                                        /* Function: main */
     add r1, r6, r7
     add r1, r1, r8
     add r1, r1, r9
-    add r1, r1, r3
-    add r1, r1, r4
-    add r1, r1, r5
     push { r0 }
     ldr r2, [fp, #-8]
+    add r1, r1, r2
+    ldr r2, [fp, #-12]
+    add r1, r1, r2
+    ldr r2, [fp, #-16]
+    add r1, r1, r2
+    ldr r2, [fp, #-20]
     add r1, r1, r2
     ldr r2, [fp, #-4]
     add r0, r1, r2

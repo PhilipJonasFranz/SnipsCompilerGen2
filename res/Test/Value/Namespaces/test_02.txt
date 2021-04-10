@@ -47,11 +47,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    ldr r1, .P655627830_Foo.x                /* Evaluate Expression */
-    ldr r1, [r1]
-    ldr r2, .P655627830_Foo.Bar.x            /* Load from .data section */
-    ldr r2, [r2]
-    add r0, r1, r2
+    mov r0, #25                              /* Evaluate Expression */
     bx lr
-.P655627830_Foo.Bar.x: .word Foo.Bar.x
-.P655627830_Foo.x: .word Foo.x

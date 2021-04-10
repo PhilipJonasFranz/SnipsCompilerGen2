@@ -36,10 +36,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    push { fp }
-    mov fp, sp
-    push { r0 }                              /* Push declaration on stack, referenced by addressof. */
     mov r0, #1                               /* Evaluate Expression */
-    mov sp, fp
-    pop { fp }
     bx lr

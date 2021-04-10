@@ -68,26 +68,12 @@ main_init:
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    ldr r0, .P308228756_sw                   /* Load from .data section */
-    ldr r0, [r0]
-    cmp r0, #0
-    beq main.L2
     mov r0, #2
     push { r0 }
     ldr r1, .P308228756_s0                   /* Load field location */
     ldr r0, [r1, #8]                         /* Load field from struct */
     push { r0 }
     ldr r0, .P308228756_S
-    push { r0 }
-    b main.L3
-main.L2: 
-    ldr r2, .P308228756_s0                   /* Load data section address */
-    add r2, r2, #8
-    ldr r0, [r2] #-4
-    ldr r1, [r2] #-4
-    stmfd sp!, {r0, r1}
-main.L3: 
-    pop { r0 }
     ldr r1, .P308228756_s1                   /* Load from .data section */
     str r0, [r1]
     pop { r0 }
@@ -105,6 +91,5 @@ main:                                        /* Function: main */
     mul r0, r3, r2
     bx lr
 .P308228756_s1: .word s1
-.P308228756_sw: .word sw
 .P308228756_s0: .word s0
 .P308228756_S: .word S

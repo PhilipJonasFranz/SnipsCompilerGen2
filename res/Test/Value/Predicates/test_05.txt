@@ -49,9 +49,7 @@ get_P_1:                                     /* Function: get, Provisos: INT */
 main:                                        /* Function: main */
     push { lr }
     ldr r4, .P193263363_get_P_1              /* Evaluate Expression */
-    mov r0, r4                               /* Evaluate Expression */
-    mov r5, r4
     add lr, pc, #8                           /* Evaluate Expression */
-    mov pc, r5
+    mov pc, r4
     pop { pc }
 .P193263363_get_P_1: .word get_P_1

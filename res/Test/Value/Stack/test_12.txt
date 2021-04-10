@@ -24,7 +24,7 @@ TESTCASES
 1 4 14
 4 1 17
 OUTPUT
-.version 11340165173
+.version 28109355438
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -57,6 +57,7 @@ main:                                        /* Function: main */
     mov r4, r1
     add r1, r0, r1
     add r6, r0, r4
-    add r6, r0, r6
+    add r2, r0, r4
+    add r6, r0, r2
     add r0, r6, #8
     bx lr

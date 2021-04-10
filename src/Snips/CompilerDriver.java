@@ -237,22 +237,11 @@ public class CompilerDriver {
 		boolean silenced = CompilerDriver.silenced;
 		CompilerDriver.silenced = true;
 		
-				/* --- PRE-PROCESSING --- */
 		List<LineObject> preCode = STAGE_PREP(code, inputFile.getPath());
-		
-				/* --- SCANNING --- */
 		List<Token> dequeue = STAGE_SCAN(preCode);
-		
-				/* --- PARSING --- */
 		SyntaxElement AST = STAGE_PARS(dequeue);
-		
-				/* --- PROCESS DYNAMIC IMPORTS >--- */
 		AST = STAGE_PRE1(AST);
-		
-				/* ---< NAMESPACE MANAGER --- */
 		AST = STAGE_NAME(AST);
-		
-				/* ---< CONTEXT CHECKING --- */
 		AST = STAGE_CTEX(AST);
 		
 		CompilerDriver.silenced = silenced;

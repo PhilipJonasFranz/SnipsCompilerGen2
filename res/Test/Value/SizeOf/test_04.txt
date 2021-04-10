@@ -36,11 +36,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov fp, sp
-    mov r3, r0
-    add r0, r0, #2
-    push { r0 }
-    push { r3 }
     mov r0, #2                               /* Evaluate Expression */
-    mov sp, fp
     bx lr
