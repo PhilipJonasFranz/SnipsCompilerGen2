@@ -12,6 +12,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
@@ -175,7 +176,10 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	public TYPE getType() {
-		return this.getType();
+		if (this.calledFunction != null)
+			return this.calledFunction.getReturnTypeDirect();
+		else
+			return new VOID();
 	}
 
 	public List<Expression> getParams() {

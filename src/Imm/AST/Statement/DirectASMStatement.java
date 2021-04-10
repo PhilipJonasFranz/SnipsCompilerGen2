@@ -96,10 +96,10 @@ public class DirectASMStatement extends Statement {
 		for (String s : this.assembly) ac.add(s);
 		
 		List<Pair<Expression, REG>> dataInC = new ArrayList();
-		for (Pair<Expression, REG> p : this.dataIn) dataInC.add(new Pair<Expression, REG>(p.first, p.second));
+		for (Pair<Expression, REG> p : this.dataIn) dataInC.add(new Pair<Expression, REG>(p.first.clone(), p.second));
 		
 		List<Pair<Expression, REG>> dataOutC = new ArrayList();
-		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<Expression, REG>(p.first, p.second));
+		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<Expression, REG>(p.first.clone(), p.second));
 		
 		return new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
 	}

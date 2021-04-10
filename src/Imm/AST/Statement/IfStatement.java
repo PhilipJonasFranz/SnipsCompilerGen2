@@ -112,7 +112,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 	}
 
 	public Statement clone() {
-		IfStatement i = new IfStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		IfStatement i = new IfStatement((this.condition != null)? this.condition.clone() : null, this.cloneBody(), this.getSource().clone());
 		if (this.elseStatement != null)
 			i.elseStatement = (IfStatement) this.elseStatement.clone();
 		return i;

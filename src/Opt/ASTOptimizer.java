@@ -1,6 +1,7 @@
 package Opt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
@@ -319,8 +320,19 @@ public class ASTOptimizer {
 		if (!this.state.cState.containsKey(idRef.origin))
 			throw new OPT0_EXC("Unknown declaration: " + idRef.path.build());
 		
-		/* If variable has not been overwritten, substitute */
-		if (this.state.getSetting(Setting.SUBSTITUTION) && !this.state.getWrite(idRef.origin) && 
+		/* 
+		 * If variable has not been modified, and not been referenced,
+		 * and has a value, we can attempt to forward substitute.
+		 * The following criteria has to be given:
+		 * 	- Not modified, referenced
+		 *  - No variables in the value have been referenced or modified
+		 *  - The type of the substituted value is primitive
+		 *  - The value does not contain a function call
+		 *  - We are not in a scope that is a looped scope
+		 */
+		if (this.state.getSetting(Setting.SUBSTITUTION) && 
+				!this.state.getWrite(idRef.origin) && 
+				!this.state.getReferenced(idRef.origin) && 
 				this.state.cState.get(idRef.origin).currentValue != null) {
 			
 			/* 
@@ -334,7 +346,7 @@ public class ASTOptimizer {
 			Expression cValue = this.state.cState.get(idRef.origin).currentValue;
 			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
 			for (IDRef ref : varsInExpression) {
-				if (this.state.getWrite(ref.origin)) {
+				if (this.state.getWrite(ref.origin) || this.state.getReferenced(ref.origin)) {
 					writeFree = false;
 					break;
 				}
@@ -347,6 +359,12 @@ public class ASTOptimizer {
 			 * Forwards-Substitution is not always valid.
 			 */
 			writeFree &= cValue.getType().isPrimitive();
+			
+			/*
+			 * Make sure we do not forward substitute function calls.
+			 * The calls could change global state variables.
+			 */
+			writeFree &= cValue.visit(x -> x instanceof InlineCall).isEmpty();
 			
 			/* 
 			 * Check if the current path is within a looped scope.
@@ -739,8 +757,7 @@ public class ASTOptimizer {
 				IDRef ref = (IDRef) c.left;
 				this.state.cState.get(ref.origin).currentValue = c.right.clone();
 			}
-			
-			if (c.right instanceof IDRef) {
+			else if (c.right instanceof IDRef) {
 				IDRef ref = (IDRef) c.right;
 				this.state.cState.get(ref.origin).currentValue = c.left.clone();
 			}

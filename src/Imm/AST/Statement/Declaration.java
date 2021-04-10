@@ -24,7 +24,11 @@ import Util.Util;
  */
 public class Declaration extends Statement {
 
+	private static int SERIAL_CNT = 0;
+	
 			/* ---< FIELDS >--- */
+	public long SERIAL = SERIAL_CNT++;
+	
 	/** 
 	 * The visibility modifer of this declaration. Can only be applied to global declarations. 
 	 */
@@ -141,6 +145,10 @@ public class Declaration extends Statement {
 	
 	public Declaration clone() {
 		Declaration clone = new Declaration(this.path, this.type.clone(), this.modifier, this.getSource());
+		
+		if (this.value != null) clone.value = this.value.clone();
+		
+		clone.SERIAL = this.SERIAL;
 		return clone;
 	}
 

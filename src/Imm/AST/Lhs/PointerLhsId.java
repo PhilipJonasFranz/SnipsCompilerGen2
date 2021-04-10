@@ -92,7 +92,12 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public PointerLhsId clone() {
-		return new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+		PointerLhsId lhs = new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+		
+		if (this.deref != null)
+			lhs.deref = (Deref) lhs.shadowDeref;
+		
+		return lhs;
 	}
 
 	public String codePrint() {
