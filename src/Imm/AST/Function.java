@@ -160,6 +160,8 @@ public class Function extends CompoundStatement {
 	
 	public Function ASTOptCounterpart;
 	
+	public int LAST_UPDATE = 0;
+	
 	/**
 	 * If set to true, the '...@UID' will be included in the function
 	 * head asm label.

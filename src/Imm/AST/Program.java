@@ -51,7 +51,7 @@ public class Program extends SyntaxElement {
 	}
 
 	public Program opt(ASTOptimizer opt) throws OPT0_EXC {
-		return opt.optProgram(this);
+		return this;
 	}
 	
 	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {

@@ -76,11 +76,13 @@ import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.Util.OPT_STRATEGY;
 import Opt.Util.ProgramContext;
 import Opt.Util.ProgramContext.VarState;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.Pair;
+import Util.Util;
 
 public class ASTOptimizer {
 
@@ -109,16 +111,16 @@ public class ASTOptimizer {
 	 */
 	public static int CYCLES = 0;
 	
-	private boolean printBeforeAfter = false;
-	
 	/**
 	 * Used to keep track of the current phase of the optimizer.
 	 * There are two phases:
 	 * 
 	 * - In the first phase, the optimizer optimizes a duplicate AST.
-	 * - In the second phase, the optimizer checks for each function in the already
-	 * 		optimized AST, if the resulting function is smaller than the original.
-	 * 		If this is the case, the function of the original AST is optimized as well.
+	 * - In the second phase, the original AST is optimized. For each function
+	 * 		in this AST, the function decides based on the current optimized counterpart,
+	 * 		if it is worth it to optimize to the same point. If not, the function skips
+	 * 		optimization until the counterpart has made optimizations that are worth
+	 * 		adopting.
 	 * 
 	 * The duplicate ASTs are used since it is easier to parse and check a new
 	 * AST than to clone the AST in a way that also keeps the references between the
@@ -126,13 +128,30 @@ public class ASTOptimizer {
 	 */
 	private int phase = 1;
 	
+	/**
+	 * The current substitution size. With each cycle, the size will grow exponentially.
+	 * The size determines how large substituted expressions are allowed to be in this
+	 * current iteration. The intuition behind this is to attempt to substitute small
+	 * expressions first.
+	 */
+	private int CURR_SUBS_SIZE, subs_arg_n = 0;
+
+	/**
+	 * Sets the optimization-strategy. The optimization-strategy determines
+	 * how and when optimizations are accepted. Different strategies may lead
+	 * to under or over-optimized ASTs.
+	 */
+	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
+	
+	private boolean PRINT_RESULT = false;
+
 	private void OPT_DONE() {
 		OPT_DONE = true;
 	}
 	
 	public Program optProgram(Program AST, Program AST0) throws OPT0_EXC {
 		try {
-			if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
+			if (PRINT_RESULT) AST.codePrint(0).stream().forEach(System.out::println);
 
 			/*
 			 * Create 1-to-1 links between the functions in the original and duplicate
@@ -148,41 +167,10 @@ public class ASTOptimizer {
 				}
 			}
 			
-			/*
-			 * First phase:
-			 * 
-			 * Optimize the duplicate AST. For each function in the original AST,
-			 * we have created the link using the field 'ASTOptCounterpart'. For
-			 * each function optimized, we can then compare in phase 2, if the optimizations
-			 * actually helped to reduce the complexity.
-			 */
-			AST0 = this.optProgram(AST0);
-			
-			phase = 2;
-			
-			/**
-			 * Second phase:
-			 * 
-			 * Using the optimized duplicate AST, we can check for each function
-			 * if the optimized function is smaller than the original. If so, optimize
-			 * this function in the original AST.
-			 */
-			AST = this.optProgram(AST);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new OPT0_EXC("An error occurred during AST-Optimization, Phase " + phase + ": " + e.getMessage());
-		}
-
-		if (printBeforeAfter) AST.codePrint(0).stream().forEach(System.out::println);
-		
-		return AST;
-	}
-	
-	public Program optProgram(Program AST) throws OPT0_EXC {
-		try {
-			OPT_DONE = true;
+			/* Reset values and state */
 			CYCLES = 0;
+			OPT_DONE = true;
+			subs_arg_n = 0;
 			
 			/*
 			 * Do optimization cycles as long as optimizations
@@ -191,42 +179,72 @@ public class ASTOptimizer {
 			while (OPT_DONE) {
 				CYCLES++;
 				OPT_DONE = false;
-				
-				/* Root program context. */
-				this.state = new ProgramContext(null, false);
-				this.cStack.push(state);
-				
-				/* Add globally used symbols. */
-				CompilerDriver.HEAP_START.opt(this);
-				CompilerDriver.NULL_PTR.opt(this);
+			
+				/* Use fibonacci-sequence as substitution size. */
+				CURR_SUBS_SIZE = Util.fib(subs_arg_n);
+			
+				/*
+				 * Perform one optimization cycle on paralell AST.
+				 */
+				phase = 1;
+				AST0 = this.optProgramStep(AST0);
 				
 				/*
-				 * Iterate over each program element. If the optimization
-				 * returns null the program element can be removed. If it
-				 * returns someting else, the element can be replaced.
+				 * Perform optimizations on original AST. But since phase = 2, 
+				 * the functions will decide wether to do optimizations or
+				 * skip this optimization round.
 				 */
-				for (int i = 0; i < AST.programElements.size(); i++) {
-					SyntaxElement s = AST.programElements.get(i);
-					
-					SyntaxElement s0 = s.opt(this);
-					
-					if (s0 == null) {
-						AST.programElements.remove(i);
-						i--;
-					}
-					else if (!s0.equals(s)) 
-						AST.programElements.set(AST.programElements.indexOf(s), s0);
-				}
+				phase = 2;
+				AST = this.optProgramStep(AST);
 				
-				/* Reset state and scopes for next optimization round */
-				this.cStack.pop().transferContextChangeToParent();
-				this.state = null;
+				subs_arg_n++;
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new OPT0_EXC("An error occurred during AST-Optimization, Phase " + phase + ": " + e.getMessage());
 		}
 
+		if (PRINT_RESULT) AST.codePrint(0).stream().forEach(System.out::println);
+		
+		return AST;
+	}
+	
+	/**
+	 * Optimizes the given AST once.
+	 */
+	public Program optProgramStep(Program AST) throws OPT0_EXC {
+		
+		/* Root program context. */
+		this.state = new ProgramContext(null, false);
+		this.cStack.push(state);
+		
+		/* Add globally used symbols. */
+		CompilerDriver.HEAP_START.opt(this);
+		CompilerDriver.NULL_PTR.opt(this);
+		
+		/*
+		 * Iterate over each program element. If the optimization
+		 * returns null the program element can be removed. If it
+		 * returns someting else, the element can be replaced.
+		 */
+		for (int i = 0; i < AST.programElements.size(); i++) {
+			SyntaxElement s = AST.programElements.get(i);
+			
+			SyntaxElement s0 = s.opt(this);
+			
+			if (s0 == null) {
+				AST.programElements.remove(i);
+				i--;
+			}
+			else if (!s0.equals(s)) 
+				AST.programElements.set(AST.programElements.indexOf(s), s0);
+		}
+		
+		/* Reset state and scopes for next optimization round */
+		this.cStack.pop().transferContextChangeToParent();
+		this.state = null;
+		
 		return AST;
 	}
 	
@@ -235,33 +253,56 @@ public class ASTOptimizer {
 		/* Function was not called, wont be translated anyway */
 		if (f.provisosCalls.isEmpty()) return f;
 		
-		if (phase == 2) {
-			if (f.ASTOptCounterpart != null) {
+		/**
+		 * If there is a counterpart available and we have selected the 
+		 * 'ON_IMPROVEMENT'-Strategy, the function can decide here to accept
+		 * the current optimizations or refuse them and wait for further optimizations.
+		 */
+		if (f.ASTOptCounterpart != null && STRATEGY == OPT_STRATEGY.ON_IMPROVEMENT) {
 				
-				/* Node # of optimized body */
-				int opt_f0 = 0;
-				for (Statement s : f.ASTOptCounterpart.body) opt_f0 += s.visit(x -> { return true; }).size();
-				
-				/* Node # of original body */
-				int nodes_f = 0;
-				for (Statement s : f.body) nodes_f += s.visit(x -> { return true; }).size();
-				
-				/**
-				 * Optimizations did not help to reduce the complexit, keep
-				 * original function without optimizations.
-				 */
-				if (opt_f0 >= nodes_f) return f;
-			}
+			/* Node # of optimized body */
+			int opt_f0 = 0;
+			for (Statement s : f.ASTOptCounterpart.body) opt_f0 += s.visit(x -> { return true; }).size();
+			
+			/* Node # of original body */
+			int nodes_f = 0;
+			for (Statement s : f.body) nodes_f += s.visit(x -> { return true; }).size();
+			
+			/**
+			 * At this point, the AST-Counterpart-Function could not make an optimization that
+			 * reduced its complexity below the current complexity of the original. So the
+			 * original function skips this optimization round to prevent a rise in
+			 * complexity.
+			 */
+			if (opt_f0 >= nodes_f) return f;
+		
 		}
 		
-		this.pushContext();
+		int repeat = 1;
 		
-		/* Register declarations */
-		for (Declaration dec : f.parameters) dec.opt(this);
+		/*
+		 * If this is the second phase, and the function has decided
+		 * to do the optimizations to the current point as well, based
+		 * on the last update, the amount of cycles required to get to the current
+		 * point is calculated.
+		 */
+		if (phase == 2) {
+			repeat = CYCLES - f.LAST_UPDATE;
+			f.LAST_UPDATE = CYCLES;
+		}
 		
-		f.body = this.optBody(f.body, false);
+		/*
+		 * Perform the set number of cycles to get the function up-to-date.
+		 */
+		for (int i = 0; i < repeat; i++) {
+			this.pushContext();
 		
-		this.popContext();
+			for (Declaration dec : f.parameters) dec.opt(this);
+			f.body = this.optBody(f.body, false);
+			
+			this.popContext();
+		}
+		
 		return f;
 	}
 	
@@ -303,6 +344,8 @@ public class ASTOptimizer {
 				if (body.contains(dec)) {
 					int index = body.indexOf(dec);
 					body.remove(dec);
+					
+					OPT_DONE();
 					
 					/* 
 					 * Add all writeback operations of the removed expression
@@ -456,7 +499,7 @@ public class ASTOptimizer {
 			 * No variables in the expression changed, safe
 			 * to forward-substitute.
 			 */
-			if (writeFree && !idRef.codePrint().equals(cValue.codePrint())) {
+			if (writeFree && !idRef.codePrint().equals(cValue.codePrint()) && cValue.size() <= CURR_SUBS_SIZE) {
 				OPT_DONE();
 				return cValue.clone();
 			}
@@ -584,6 +627,21 @@ public class ASTOptimizer {
 			Atom atom = new Atom(t0, add.getSource());
 			OPT_DONE();
 			return atom;
+		}
+		
+		/* Two equal operands */
+		if (add.left.codePrint().equals(add.right.codePrint())) {
+			boolean writeFree = add.left.visit(x -> {
+				return x instanceof IDRefWriteback || x instanceof InlineCall;
+			}).size() == 0;
+			
+			// TODO: NFoldExpression needeed for this to work well
+			
+			if (writeFree) {
+				Lsl lsl = new Lsl(add.left, new Atom(new INT("1"), add.right.getSource()), add.left.getSource());
+				OPT_DONE();
+				return lsl;
+			}
 		}
 		
 		return add;

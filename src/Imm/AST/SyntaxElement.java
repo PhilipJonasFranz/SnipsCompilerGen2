@@ -104,4 +104,12 @@ public abstract class SyntaxElement {
 		return this.source;
 	}
 	
+	/**
+	 * Returns the number of nodes that are in the subtree of this syntax element plus 
+	 * this syntax element.
+	 */
+	public int size() {
+		return this.visit(x -> { return true; }).size();
+	}
+	
 } 
