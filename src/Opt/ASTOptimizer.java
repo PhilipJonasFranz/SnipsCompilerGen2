@@ -143,6 +143,10 @@ public class ASTOptimizer {
 	 */
 	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
 	
+	/**
+	 * If set to true, the AST before and after the optimization will be
+	 * print out in Snips-Code representation.
+	 */
 	private boolean PRINT_RESULT = false;
 
 	private void OPT_DONE() {
@@ -174,9 +178,11 @@ public class ASTOptimizer {
 			
 			/*
 			 * Do optimization cycles as long as optimizations
-			 * are done.
+			 * are done. Enforce at least eight cycles. This is needed so that
+			 * the CURR_SUBS_SIZE value can grow a bit before premature cancellation
+			 * of the optimization algorithm.
 			 */
-			while (OPT_DONE) {
+			while (OPT_DONE || CYCLES < 8) {
 				CYCLES++;
 				OPT_DONE = false;
 			
