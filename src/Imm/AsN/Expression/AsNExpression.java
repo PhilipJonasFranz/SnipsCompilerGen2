@@ -39,7 +39,7 @@ public abstract class AsNExpression extends AsNNode {
 		AsNExpression node = null;
 		
 		if (e instanceof NFoldExpression) {
-			node = AsNBinaryExpression.cast((NFoldExpression) e, r, map, st);
+			node = AsNNFoldExpression.cast((NFoldExpression) e, r, map, st);
 		}
 		else if (e instanceof UnaryExpression) {
 			node = AsNUnaryExpression.cast((UnaryExpression) e, r, map, st);

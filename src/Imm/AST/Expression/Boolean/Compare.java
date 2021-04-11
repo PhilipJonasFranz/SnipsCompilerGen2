@@ -1,5 +1,8 @@
 package Imm.AST.Expression.Boolean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
@@ -31,14 +34,19 @@ public class Compare extends NFoldExpression {
 		this.comparator = comparator;
 	}
 	
+	public Compare(List<Expression> operands, COMPARATOR comparator, Source source) {
+		super(operands, Operator.CMP, source);
+		this.comparator = comparator;
+	}
+	
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Compare " + this.comparator.toString());
 		
 		if (rec) {
-			this.getLeft().print(d + this.printDepthStep, rec);
-			this.getRight().print(d + this.printDepthStep, rec);
+			for (Expression e : this.operands)
+				e.print(d + this.printDepthStep, rec);
 		}
 	}
 
@@ -56,23 +64,30 @@ public class Compare extends NFoldExpression {
 		return opt.optCompare(this);
 	}
 	
-	public NFoldExpression clone() {
-		Compare c = new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
-		c.setType(this.getType().clone());
-		return c;
+	public Compare clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		Compare e = new Compare(op0, this.comparator, this.getSource().clone());
+		e.setType(this.getType().clone());
+		return e;
 	}
 	
 	public String codePrint() {
-		String s = this.left.codePrint();
+		String comp = "";
+		if (this.comparator == COMPARATOR.EQUAL) comp = " == ";
+		if (this.comparator == COMPARATOR.GREATER_SAME) comp = " >= ";
+		if (this.comparator == COMPARATOR.GREATER_THAN) comp = " > ";
+		if (this.comparator == COMPARATOR.LESS_SAME) comp = " <= ";
+		if (this.comparator == COMPARATOR.LESS_THAN) comp = " < ";
+		if (this.comparator == COMPARATOR.NOT_EQUAL) comp = " != ";
 		
-		if (this.comparator == COMPARATOR.EQUAL) s += " == ";
-		if (this.comparator == COMPARATOR.GREATER_SAME) s += " >= ";
-		if (this.comparator == COMPARATOR.GREATER_THAN) s += " > ";
-		if (this.comparator == COMPARATOR.LESS_SAME) s += " <= ";
-		if (this.comparator == COMPARATOR.LESS_THAN) s += " < ";
-		if (this.comparator == COMPARATOR.NOT_EQUAL) s += " != ";
+		String s = "";
+		for (Expression e : this.operands) 
+			s += e.codePrint() + " " + comp + " ";
 		
-		s += this.right.codePrint();
+		s = s.substring(0, s.length() - (2 + comp.length()));
 		return s;
 	}
 	

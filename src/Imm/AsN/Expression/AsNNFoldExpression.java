@@ -39,11 +39,10 @@ import Imm.AsN.Expression.Arith.AsNSub;
 import Imm.AsN.Expression.Boolean.AsNAnd;
 import Imm.AsN.Expression.Boolean.AsNCmp;
 import Imm.AsN.Expression.Boolean.AsNOr;
-import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Res.Const;
 
-public abstract class AsNBinaryExpression extends AsNExpression {
+public abstract class AsNNFoldExpression extends AsNExpression {
 
 			/* ---< NESTED >--- */
 	/**
@@ -55,9 +54,9 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 	
 
 			/* ---< METHODS >--- */
-	public static AsNBinaryExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static AsNNFoldExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
-		AsNBinaryExpression node = null;
+		AsNNFoldExpression node = null;
 		
 		if (e instanceof Add) {
 			node = AsNAdd.cast((Add) e, r, map, st);
@@ -98,22 +97,24 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		return node;
 	}
 	
+	public abstract ASMInstruction buildInjector();
+	
 	
 		/* --- OPERAND LOADING --- */
-	protected void generatePrimitiveLoaderCode(AsNBinaryExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
+	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
 		
 		/* Some assertions for debug purposes */
-		if (b.getLeft() instanceof TypeCast) {
-			assert(b.getLeft().getType().getCoreType() instanceof PRIMITIVE);
+		if (e0 instanceof TypeCast) {
+			assert(e0.getType().getCoreType() instanceof PRIMITIVE);
 		}
 		
-		if (b.getRight() instanceof TypeCast) {
-			assert(b.getRight().getType().getCoreType() instanceof PRIMITIVE);
+		if (e1 instanceof TypeCast) {
+			assert(e1.getType().getCoreType() instanceof PRIMITIVE);
 		}
 		
 		/* If operands are TypeCasts, unrwrap expression from type cast */
-		Expression left = (b.getLeft() instanceof TypeCast)? ((TypeCast) b.getLeft()).expression : b.getLeft();
-		Expression right = (b.getRight() instanceof TypeCast)? ((TypeCast) b.getRight()).expression : b.getRight();
+		Expression left = (e0 instanceof TypeCast)? ((TypeCast) e0).expression : e0;
+		Expression right = (e1 instanceof TypeCast)? ((TypeCast) e1).expression : e1;
 		
 		/* Load both operands directley */
 		if (left instanceof IDRef && right instanceof IDRef) {
@@ -186,32 +187,76 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 		}
 	}
 	
-	protected void generateLoaderCode(AsNBinaryExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, ASMInstruction inject) throws CGEN_EXC {
-		/* Total Atomic Loading */
-		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
-			m.atomicPrecalc(b, solver);
-		}
-		else {
-			this.clearReg(r, st, 0, 1, 2);
-			
-			/* Partial Atomic Loading Left */
-			if (b.getLeft() instanceof Atom) {
-				this.loadOperand(b.getRight(), 2, r, map, st);
-				AsNBody.literalManager.loadValue(this, Integer.parseInt(b.getLeft().getType().sourceCodeRepresentation()), 1);
+	protected void evalExpression(AsNNFoldExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
+		this.clearReg(r, st, 0, 1, 2);
+		
+		generateLoaderCode(m, b, b.operands.get(0), b.operands.get(1), r, map, st, solver);
+		
+		/* Inject calculation into loader code */
+		m.instructions.add(m.buildInjector());
+		
+		if (b.operands.size() > 2) {
+			for (int i = 2; i < b.operands.size(); i++) {
+				Expression op0 = b.operands.get(i);
+				boolean requireClear = !(op0 instanceof IDRef || op0 instanceof Atom);
+				
+				int free = -1;
+				
+				/* 
+				 * Expression is inline call, which means that push/pop most likely
+				 * cannot be removed during optimizing. Attempt to move to other reg.
+				 */
+				if (op0 instanceof InlineCall) free = r.findFree();
+				
+				if (requireClear) {
+					if (free != -1) {
+						m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
+						r.getReg(free).setDeclaration(null);
+					}
+					else {
+						m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+						st.pushDummy();
+					}
+				}
+				else this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(REG.R0)));
+				
+				r.free(2);
+				
+				loadOperand(b.operands.get(i), 2, r, map, st);
+				
+				if (requireClear) {
+					if (free != -1) {
+						/* Move back from original reg */
+						this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(free)));
+						r.free(free);
+					}
+					else {
+						this.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
+						st.pop();
+					}
+				}
+				
+				/* Inject calculation into loader code */
+				m.instructions.add(m.buildInjector());
 			}
-			/* Partial Atomic Loading Right */
-			else if (b.getRight() instanceof Atom) {
-				this.loadOperand(b.getLeft(), 1, r, map, st);
-				AsNBody.literalManager.loadValue(this, Integer.parseInt(b.getRight().getType().sourceCodeRepresentation()), 2);
-			}
-			else m.generatePrimitiveLoaderCode(m, b, r, map, st, 1, 2);
-			
-			/* Inject calculation into loader code */
-			m.instructions.add(inject);
-			
-			/* Clean up Reg Set */
-			r.free(0, 1, 2);
 		}
+		
+		/* Clean up Reg Set */
+		r.free(0, 1, 2);
+	}
+	
+	protected void generateLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
+		/* Partial Atomic Loading Left */
+		if (e0 instanceof Atom) {
+			this.loadOperand(e1, 2, r, map, st);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().sourceCodeRepresentation()), 1);
+		}
+		/* Partial Atomic Loading Right */
+		else if (e1 instanceof Atom) {
+			this.loadOperand(e0, 1, r, map, st);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().sourceCodeRepresentation()), 2);
+		}
+		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2);
 	}
 	
 	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
@@ -225,19 +270,6 @@ public abstract class AsNBinaryExpression extends AsNExpression {
 			if (target != 0) {
 				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(0)));
 				r.copy(0, target);
-			}
-		}
-	}
-	
-	/**
-	 * Precalculate this expression since both operands are immediates.
-	 */
-	protected void atomicPrecalc(NFoldExpression b, BinarySolver s) {
-		if (b.getLeft() instanceof Atom && b.getRight() instanceof Atom) {
-			Atom l0 = (Atom) b.getLeft(), r0 = (Atom) b.getRight();
-			if (l0.getType() instanceof INT && r0.getType() instanceof INT) {
-				INT i0 = (INT) l0.getType(), i1 = (INT) r0.getType();
-				AsNBody.literalManager.loadValue(this, s.solve(i0.value, i1.value), 0);
 			}
 		}
 	}

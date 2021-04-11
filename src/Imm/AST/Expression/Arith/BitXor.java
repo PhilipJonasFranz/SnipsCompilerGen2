@@ -1,5 +1,8 @@
 package Imm.AST.Expression.Arith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Exc.OPT0_EXC;
 import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
@@ -20,18 +23,31 @@ public class BitXor extends NFoldExpression {
 		super(left, right, Operator.LSR, source);
 	}
 	
+	public BitXor(List<Expression> operands, Source source) {
+		super(operands, Operator.BXR, source);
+	}
+	
 	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optBitXor(this);
 	}
 	
-	public NFoldExpression clone() {
-		BitXor e = new BitXor(this.left.clone(), this.right.clone(), this.getSource().clone());
+	public BitXor clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		BitXor e = new BitXor(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
 		return e;
 	}
-
+	
 	public String codePrint() {
-		return this.left.codePrint() + " ^ " + this.right.codePrint();
+		String s = "";
+		for (Expression e : this.operands)
+			s += e.codePrint() + " ^ ";
+		
+		s = s.substring(0, s.length() - 3);
+		return s;
 	}
 	
 } 

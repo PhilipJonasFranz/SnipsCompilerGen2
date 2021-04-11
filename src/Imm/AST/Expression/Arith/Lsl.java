@@ -1,8 +1,11 @@
 package Imm.AST.Expression.Arith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
 import Opt.ASTOptimizer;
 import Util.Source;
 
@@ -20,18 +23,31 @@ public class Lsl extends NFoldExpression {
 		super(left, right, Operator.LSL, source);
 	}
 	
+	public Lsl(List<Expression> operands, Source source) {
+		super(operands, Operator.LSL, source);
+	}
+	
 	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
 		return opt.optLsl(this);
 	}
 	
-	public NFoldExpression clone() {
-		Lsl e = new Lsl(this.left.clone(), this.right.clone(), this.getSource().clone());
+	public Lsl clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		Lsl e = new Lsl(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
 		return e;
 	}
 	
 	public String codePrint() {
-		return this.left.codePrint() + " << " + this.right.codePrint();
+		String s = "";
+		for (Expression e : this.operands)
+			s += e.codePrint() + " << ";
+		
+		s = s.substring(0, s.length() - 4);
+		return s;
 	}
 
 } 

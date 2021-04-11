@@ -305,7 +305,7 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				AST = STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
+				if (useASTOptimizer) AST = STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
 				
 				if (imm) AST.print(4, true);
 				

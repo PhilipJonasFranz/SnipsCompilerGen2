@@ -75,6 +75,7 @@ import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.Util.OPT_STRATEGY;
 import Opt.Util.ProgramContext;
@@ -372,6 +373,16 @@ public class ASTOptimizer {
 		this.popContext();
 		return body;
 	}
+	
+	public List<Expression> optExpressionList(List<Expression> ops) throws OPT0_EXC {
+		for (int i = 0; i < ops.size(); i++) {
+			Expression s = ops.get(i);
+			Expression s0 = s.opt(this);
+			ops.set(ops.indexOf(s), s0);
+		}
+		
+		return ops;
+	}
 
 	public Expression optAddressOf(AddressOf aof) throws OPT0_EXC {
 		this.state.disableSetting(Setting.SUBSTITUTION);
@@ -618,60 +629,97 @@ public class ASTOptimizer {
 	}
 
 	public Expression optAdd(Add add) throws OPT0_EXC {
-		add.left = add.left.opt(this);
-		add.right = add.right.opt(this);
 		
-		/* Precalc */
-		if (add.left instanceof Atom && add.right instanceof Atom && 
-				add.left.getType().hasInt() && add.right.getType().hasInt()) {
-			int left = add.left.getType().toInt();
-			int right = add.right.getType().toInt();
+		add.operands = this.optExpressionList(add.operands);
+		
+		/* Multiple equal operands, collapse into multiplication */
+		for (int i = 0; i < add.operands.size(); i++) {
+			Expression e0 = add.operands.get(i);
 			
-			TYPE t0 = add.left.getType().clone();
-			t0.value = left + right;
+			/**
+			 * We cannot fold sub-expressions that modify variables or the program state.
+			 */
+			boolean block = !e0.visit(x -> x instanceof InlineCall || x instanceof IDRefWriteback).isEmpty();
 			
-			Atom atom = new Atom(t0, add.getSource());
-			OPT_DONE();
-			return atom;
+			if (!block) {
+				List<Integer> indicies = new ArrayList();
+				
+				for (int a = i + 1; a < add.operands.size(); a++) {
+					Expression e1 = add.operands.get(a);
+					if (e0.codePrint().equals(e1.codePrint())) indicies.add(a);
+				}
+				
+				if (!indicies.isEmpty()) {
+					for (int a = indicies.size() - 1; a >= 0; a--) {
+						int index = indicies.get(a);
+						add.operands.remove(index);
+					}
+					
+					Mul mul = new Mul(e0, new Atom(new INT("" + (indicies.size() + 1)), e0.getSource()), e0.getSource());
+					add.operands.set(i, mul);
+					mul.setType(e0.getType().clone());
+					
+					OPT_DONE();
+				}
+			}
 		}
 		
-		/* Two equal operands */
-		if (add.left.codePrint().equals(add.right.codePrint())) {
-			boolean writeFree = add.left.visit(x -> {
-				return x instanceof IDRefWriteback || x instanceof InlineCall;
-			}).size() == 0;
-			
-			// TODO: NFoldExpression needeed for this to work well
-			
-			if (writeFree) {
-				Lsl lsl = new Lsl(add.left, new Atom(new INT("1"), add.right.getSource()), add.left.getSource());
+		/* Flatten Tree of Additions into one N-Fold Expression */
+		for (int i = 0; i < add.operands.size(); i++) {
+			if (add.operands.get(i) instanceof Add) {
+				Add add0 = (Add) add.operands.remove(i);
+				i--;
+				add.operands.addAll(i + 1, add0.operands);
 				OPT_DONE();
-				return lsl;
 			}
+		}
+		
+		/* Precalc */
+		int sum = 0, c = 0;
+		for (int i = 0; i < add.operands.size(); i++) {
+			Expression e = add.operands.get(i);
+			
+			if (e instanceof Atom && e.getType().hasInt()) {
+				sum += e.getType().toInt();
+				add.operands.remove(i);
+				i--;
+				c++;
+			}
+		}
+		if (sum != 0) {
+			Atom atom = new Atom(new INT("" + sum), add.getSource());
+			add.operands.add(atom);
+			if (c > 1) OPT_DONE();
+		}
+		
+		/* Only single operand -> Return operand */
+		if (add.operands.size() == 1) {
+			OPT_DONE();
+			return add.operands.get(0);
 		}
 		
 		return add;
 	}
 
-	public Expression optBitAnd(BitAnd bitAnd) throws OPT0_EXC {
-		bitAnd.left = bitAnd.left.opt(this);
-		bitAnd.right = bitAnd.right.opt(this);
+	public Expression optBitAnd(BitAnd b) throws OPT0_EXC {
+		b.operands = this.optExpressionList(b.operands);
 		
 		/* Precalc */
-		if (bitAnd.left instanceof Atom && bitAnd.right instanceof Atom && 
-				bitAnd.left.getType().hasInt() && bitAnd.right.getType().hasInt()) {
-			int left = bitAnd.left.getType().toInt();
-			int right = bitAnd.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : b.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = b.operands.get(0).getType().clone();
 			
-			TYPE t0 = bitAnd.left.getType().clone();
-			t0.value = left & right;
+			for (Expression e : b.operands)
+				if (!e.equals(b.operands.get(0)))
+					t0.value = t0.toInt() & e.getType().toInt();
 			
-			Atom atom = new Atom(t0, bitAnd.getSource());
+			Atom atom = new Atom(t0, b.getSource());
 			OPT_DONE();
 			return atom;
 		}
 		
-		return bitAnd;
+		return b;
 	}
 
 	public Expression optBitNot(BitNot bitNot) throws OPT0_EXC {
@@ -692,60 +740,60 @@ public class ASTOptimizer {
 		return bitNot;
 	}
 
-	public Expression optBitOr(BitOr bitOr) throws OPT0_EXC {
-		bitOr.left = bitOr.left.opt(this);
-		bitOr.right = bitOr.right.opt(this);
+	public Expression optBitOr(BitOr b) throws OPT0_EXC {
+		b.operands = this.optExpressionList(b.operands);
 		
 		/* Precalc */
-		if (bitOr.left instanceof Atom && bitOr.right instanceof Atom && 
-				bitOr.left.getType().hasInt() && bitOr.right.getType().hasInt()) {
-			int left = bitOr.left.getType().toInt();
-			int right = bitOr.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : b.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = b.operands.get(0).getType().clone();
 			
-			TYPE t0 = bitOr.left.getType().clone();
-			t0.value = left | right;
+			for (Expression e : b.operands)
+				if (!e.equals(b.operands.get(0)))
+					t0.value = t0.toInt() | e.getType().toInt();
 			
-			Atom atom = new Atom(t0, bitOr.getSource());
+			Atom atom = new Atom(t0, b.getSource());
 			OPT_DONE();
 			return atom;
 		}
 		
-		return bitOr;
+		return b;
 	}
 
-	public Expression optBitXor(BitXor bitXor) throws OPT0_EXC {
-		bitXor.left = bitXor.left.opt(this);
-		bitXor.right = bitXor.right.opt(this);
+	public Expression optBitXor(BitXor b) throws OPT0_EXC {
+		b.operands = this.optExpressionList(b.operands);
 		
 		/* Precalc */
-		if (bitXor.left instanceof Atom && bitXor.right instanceof Atom && 
-				bitXor.left.getType().hasInt() && bitXor.right.getType().hasInt()) {
-			int left = bitXor.left.getType().toInt();
-			int right = bitXor.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : b.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = b.operands.get(0).getType().clone();
 			
-			TYPE t0 = bitXor.left.getType().clone();
-			t0.value = left ^ right;
+			for (Expression e : b.operands)
+				if (!e.equals(b.operands.get(0)))
+					t0.value = t0.toInt() ^ e.getType().toInt();
 			
-			Atom atom = new Atom(t0, bitXor.getSource());
+			Atom atom = new Atom(t0, b.getSource());
 			OPT_DONE();
 			return atom;
 		}
 		
-		return bitXor;
+		return b;
 	}
 
 	public Expression optLsl(Lsl lsl) throws OPT0_EXC {
-		lsl.left = lsl.left.opt(this);
-		lsl.right = lsl.right.opt(this);
+		lsl.operands = this.optExpressionList(lsl.operands);
 		
 		/* Precalc */
-		if (lsl.left instanceof Atom && lsl.right instanceof Atom && 
-				lsl.left.getType().hasInt() && lsl.right.getType().hasInt()) {
-			int left = lsl.left.getType().toInt();
-			int right = lsl.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : lsl.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = lsl.operands.get(0).getType().clone();
 			
-			TYPE t0 = lsl.left.getType().clone();
-			t0.value = left << right;
+			for (Expression e : lsl.operands)
+				if (!e.equals(lsl.operands.get(0)))
+					t0.value = t0.toInt() << e.getType().toInt();
 			
 			Atom atom = new Atom(t0, lsl.getSource());
 			OPT_DONE();
@@ -756,17 +804,17 @@ public class ASTOptimizer {
 	}
 
 	public Expression optLsr(Lsr lsr) throws OPT0_EXC {
-		lsr.left = lsr.left.opt(this);
-		lsr.right = lsr.right.opt(this);
+		lsr.operands = this.optExpressionList(lsr.operands);
 		
 		/* Precalc */
-		if (lsr.left instanceof Atom && lsr.right instanceof Atom && 
-				lsr.left.getType().hasInt() && lsr.right.getType().hasInt()) {
-			int left = lsr.left.getType().toInt();
-			int right = lsr.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : lsr.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = lsr.operands.get(0).getType().clone();
 			
-			TYPE t0 = lsr.left.getType().clone();
-			t0.value = left >> right;
+			for (Expression e : lsr.operands)
+				if (!e.equals(lsr.operands.get(0)))
+					t0.value = t0.toInt() >> e.getType().toInt();
 			
 			Atom atom = new Atom(t0, lsr.getSource());
 			OPT_DONE();
@@ -777,17 +825,17 @@ public class ASTOptimizer {
 	}
 
 	public Expression optMul(Mul mul) throws OPT0_EXC {
-		mul.left = mul.left.opt(this);
-		mul.right = mul.right.opt(this);
+		mul.operands = this.optExpressionList(mul.operands);
 		
 		/* Precalc */
-		if (mul.left instanceof Atom && mul.right instanceof Atom && 
-				mul.left.getType().hasInt() && mul.right.getType().hasInt()) {
-			int left = mul.left.getType().toInt();
-			int right = mul.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : mul.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = mul.operands.get(0).getType().clone();
 			
-			TYPE t0 = mul.left.getType().clone();
-			t0.value = left * right;
+			for (Expression e : mul.operands)
+				if (!e.equals(mul.operands.get(0)))
+					t0.value = t0.toInt() * e.getType().toInt();
 			
 			Atom atom = new Atom(t0, mul.getSource());
 			OPT_DONE();
@@ -798,35 +846,37 @@ public class ASTOptimizer {
 	}
 	
 	public Expression optSub(Sub s) throws OPT0_EXC {
-		s.left = s.left.opt(this);
-		s.right = s.right.opt(this);
+		s.operands = this.optExpressionList(s.operands);
 		
-		/* -4 - -5 = 5 - 4 = 1 */
-		if (s.left instanceof UnaryMinus && s.right instanceof UnaryMinus) {
-			UnaryMinus left = (UnaryMinus) s.left;
-			UnaryMinus right = (UnaryMinus) s.right;
+		if (s.operands.size() == 2) {
+			/* -4 - -5 = 5 - 4 = 1 */
+			if (s.operands.get(0) instanceof UnaryMinus && s.operands.get(1) instanceof UnaryMinus) {
+				UnaryMinus left = (UnaryMinus) s.operands.get(0);
+				UnaryMinus right = (UnaryMinus) s.operands.get(1);
+				
+				s.operands.set(0, right.getOperand());
+				s.operands.set(1, left.getOperand());
+				
+				OPT_DONE();
+			}
 			
-			s.left = right.getOperand();
-			s.right = left.getOperand();
-			
-			OPT_DONE();
-		}
-		
-		/* 4 - -5 = 4 + 5 = 9 */
-		if (s.right instanceof UnaryMinus) {
-			UnaryMinus right = (UnaryMinus) s.right;
-			OPT_DONE();
-			return new Add(s.left, right.getOperand(), s.getSource());
+			/* 4 - -5 = 4 + 5 = 9 */
+			if (s.operands.get(1) instanceof UnaryMinus) {
+				UnaryMinus right = (UnaryMinus) s.operands.get(1);
+				OPT_DONE();
+				return new Add(s.operands.get(0), right.getOperand(), s.getSource());
+			}
 		}
 		
 		/* Precalc */
-		if (s.left instanceof Atom && s.right instanceof Atom && 
-				s.left.getType().hasInt() && s.right.getType().hasInt()) {
-			int left = s.left.getType().toInt();
-			int right = s.right.getType().toInt();
+		boolean allAtom = true;
+		for (Expression e : s.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
+		if (allAtom) {
+			TYPE t0 = s.operands.get(0).getType().clone();
 			
-			TYPE t0 = s.left.getType().clone();
-			t0.value = left - right;
+			for (Expression e : s.operands)
+				if (!e.equals(s.operands.get(0)))
+					t0.value = t0.toInt() - e.getType().toInt();
 			
 			Atom atom = new Atom(t0, s.getSource());
 			OPT_DONE();
@@ -861,48 +911,31 @@ public class ASTOptimizer {
 	}
 
 	public Expression optAnd(And and) throws OPT0_EXC {
-		and.left = and.left.opt(this);
-		and.right = and.right.opt(this);
+		and.operands = this.optExpressionList(and.operands);
 		
 		/* false || value = false */
-		if (and.left instanceof Atom && and.left.getType().hasInt()) {
-			int value = and.left.getType().toInt();
-			
-			if (value == 0) {
-				Atom atom = (Atom) and.left;
-				atom.getType().value = false;
-				OPT_DONE();
-				return atom;
-			}
-		}
-		
-		/* value || false = false */
-		if (and.right instanceof Atom && and.right.getType().hasInt()) {
-			int value = and.right.getType().toInt();
-			
-			if (value == 0) {
-				Atom atom = (Atom) and.right;
-				atom.getType().value = false;
-				OPT_DONE();
-				return atom;
-			}
+		boolean hasFalseAtom = false;
+		for (Expression e : and.operands) hasFalseAtom |= e instanceof Atom && e.getType().hasInt() && e.getType().toInt() == 0;
+		if (hasFalseAtom) {
+			Atom atom = new Atom(new BOOL("" + false), and.operands.get(0).getSource());		
+			OPT_DONE();
+			return atom;
 		}
 		
 		return and;
 	}
 
 	public Expression optCompare(Compare c) throws OPT0_EXC {
-		c.left = c.left.opt(this);
-		c.right = c.right.opt(this);
+		c.operands = this.optExpressionList(c.operands);
 		
 		if (c.comparator == COMPARATOR.EQUAL) {
-			if (c.left instanceof IDRef) {
-				IDRef ref = (IDRef) c.left;
-				this.state.cState.get(ref.origin).currentValue = c.right.clone();
+			if (c.operands.get(0) instanceof IDRef) {
+				IDRef ref = (IDRef) c.operands.get(0);
+				this.state.cState.get(ref.origin).currentValue = c.operands.get(1).clone();
 			}
-			else if (c.right instanceof IDRef) {
-				IDRef ref = (IDRef) c.right;
-				this.state.cState.get(ref.origin).currentValue = c.left.clone();
+			else if (c.operands.get(1) instanceof IDRef) {
+				IDRef ref = (IDRef) c.operands.get(1);
+				this.state.cState.get(ref.origin).currentValue = c.operands.get(0).clone();
 			}
 		}
 		
@@ -936,31 +969,15 @@ public class ASTOptimizer {
 	}
 
 	public Expression optOr(Or or) throws OPT0_EXC {
-		or.left = or.left.opt(this);
-		or.right = or.right.opt(this);
+		or.operands = this.optExpressionList(or.operands);
 		
 		/* true || value = true */
-		if (or.left instanceof Atom && or.left.getType().hasInt()) {
-			int value = or.left.getType().toInt();
-			
-			if (value != 0) {
-				Atom atom = (Atom) or.left;
-				atom.getType().value = true;
-				OPT_DONE();
-				return atom;
-			}
-		}
-		
-		/* value || true = true */
-		if (or.right instanceof Atom && or.right.getType().hasInt()) {
-			int value = or.right.getType().toInt();
-			
-			if (value != 0) {
-				Atom atom = (Atom) or.right;
-				atom.getType().value = true;
-				OPT_DONE();
-				return atom;
-			}
+		boolean hasTrueAtom = false;
+		for (Expression e : or.operands) hasTrueAtom |= e instanceof Atom && e.getType().hasInt() && e.getType().toInt() != 0;
+		if (hasTrueAtom) {
+			Atom atom = new Atom(new BOOL("" + true), or.operands.get(0).getSource());		
+			OPT_DONE();
+			return atom;
 		}
 		
 		return or;

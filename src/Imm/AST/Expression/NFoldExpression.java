@@ -20,19 +20,17 @@ public abstract class NFoldExpression extends Expression {
 			/* ---< NESTED >--- */
 	public enum Operator {
 		MUL, ADD, SUB, ORR,
-		LSL, LSR, CMP, AND;
+		LSL, LSR, CMP, AND,
+		BOR, BAN, BXR;
 	}
 	
 	
 			/* ---< FIELDS >--- */
-	/** The left operand expression */
-	public Expression left;
+	/** The operands of the expression, from left to right. */
+	public List<Expression> operands = new ArrayList();
 	
 	/** The operator */
 	public Operator operator;
-	
-	/** The right operand expression */
-	public Expression right;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -42,8 +40,17 @@ public abstract class NFoldExpression extends Expression {
 	 */
 	public NFoldExpression(Expression left, Expression right, Operator operator, Source source) {
 		super(source);
-		this.left = left;
-		this.right = right;
+		
+		this.operands.add(left);
+		this.operands.add(right);
+		
+		this.operator = operator;
+	}
+	
+	public NFoldExpression(List<Expression> operands, Operator operator, Source source) {
+		super(source);
+		
+		this.operands = operands;
 		this.operator = operator;
 	}
 
@@ -52,8 +59,8 @@ public abstract class NFoldExpression extends Expression {
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + this.operator.toString());
 		if (rec) {
-			this.left.print(d + this.printDepthStep, rec);
-			this.right.print(d + this.printDepthStep, rec);
+			for (Expression e : this.operands)
+				e.print(d + this.printDepthStep, rec);
 		}
 	}
 	
@@ -61,7 +68,7 @@ public abstract class NFoldExpression extends Expression {
 		Source temp = CompilerDriver.lastSource;
 		CompilerDriver.lastSource = this.getSource();
 		
-		TYPE t = ctx.checkBinaryExpression(this);
+		TYPE t = ctx.checkNFoldExpression(this);
 		
 		CompilerDriver.lastSource = temp;
 		return t;
@@ -73,23 +80,15 @@ public abstract class NFoldExpression extends Expression {
 		if (visitor.visit(this))
 			result.add((T) this);
 		
-		result.addAll(this.left.visit(visitor));
-		result.addAll(this.right.visit(visitor));
+		for (Expression e : this.operands)
+			result.addAll(e.visit(visitor));
 		
 		return result;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		this.left.setContext(context);
-		this.right.setContext(context);
-	}
-	
-	public Expression getLeft() {
-		return this.left;
-	}
-	
-	public Expression getRight() {
-		return this.right;
+		for (Expression e : this.operands)
+			e.setContext(context);
 	}
 	
 	public Operator getOperator() {

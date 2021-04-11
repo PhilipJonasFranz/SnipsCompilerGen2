@@ -40,7 +40,7 @@ import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.UnaryMinus;
-import Imm.AST.Expression.Boolean.BoolBinaryExpression;
+import Imm.AST.Expression.Boolean.BoolNFoldExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -1424,45 +1424,42 @@ public class ContextChecker {
 		return t.getType();
 	}
 	
-	public TYPE checkBinaryExpression(NFoldExpression b) throws CTEX_EXC {
-		TYPE left = b.getLeft().check(this);
-		TYPE right = b.getRight().check(this);
+	public TYPE checkNFoldExpression(NFoldExpression b) throws CTEX_EXC {
 		
-		if (left.isNull()) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+		for (Expression e : b.operands) e.check(this);
 		
-		if (right.isNull()) 
-			throw new CTEX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+		for (Expression e : b.operands)
+			if (e.getType().isNull()) 
+				throw new CTEX_EXC(e.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
-		if (b.left instanceof ArrayInit) 
-			throw new CTEX_EXC(b.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		for (Expression e : b.operands)
+			if (e instanceof ArrayInit) 
+				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		if (b.right instanceof ArrayInit) 
-			throw new CTEX_EXC(b.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		for (Expression e : b.operands)
+			if (e.getType().wordsize() > 1) 
+				throw new CTEX_EXC(e.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree().typeString());
 		
-		if (left.wordsize() > 1) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, left.provisoFree().typeString());
-		
-		if (right.wordsize() > 1) {
-			throw new CTEX_EXC(b.left.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, right.provisoFree().typeString());
+		boolean gotPointer = false;
+		for (Expression e : b.operands) {
+			if (e.getType().isPointer()) {
+				gotPointer = true;
+				for (Expression e0 : b.operands) {
+					if (e.equals(e0)) continue;
+					if (!(e0.getType().getCoreType() instanceof INT)) 
+						throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), e0.getType().provisoFree().typeString());
+				}
+			}
 		}
 		
-		if (left.isPointer()) {
-			if (!(right.getCoreType() instanceof INT)) 
-				throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), right.provisoFree().typeString());
-			
-			b.setType(left);
+		if (!gotPointer) {
+			for (Expression e : b.operands) {
+				if (!e.getType().isEqual(b.operands.get(0).getType()))
+					throw new CTEX_EXC(b.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, b.operands.get(0).getType().provisoFree().typeString(), e.getType().provisoFree().typeString());
+			}
 		}
-		else if (right.isPointer()) {
-			if (!(left.getCoreType() instanceof INT)) 
-				throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), left.provisoFree().typeString());
-			
-			b.setType(left);
-		}
-		else if (left.isEqual(right)) 
-			b.setType(left);
-		else throw new CTEX_EXC(b.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, left.provisoFree().typeString(), right.provisoFree().typeString());
-	
+		
+		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
 	
@@ -1471,17 +1468,14 @@ public class ContextChecker {
 	 * Checks for:<br>
 	 * - Both operand types have to be of type BOOL<br>
 	 */
-	public TYPE checkBoolBinaryExpression(BoolBinaryExpression b) throws CTEX_EXC {
-		TYPE left = b.getLeft().check(this);
-		TYPE right = b.getRight().check(this);
-		
-		if (left.wordsize() > 1) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
-		
-		if (right.wordsize() > 1) 
-			throw new CTEX_EXC(b.right.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
-		
-		b.setType(left);
+	public TYPE checkBoolNFoldExpression(BoolNFoldExpression b) throws CTEX_EXC {
+		for (Expression e : b.operands) {
+			e.check(this);
+			if (e.getType().wordsize() > 1) 
+				throw new CTEX_EXC(e.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
+		}
+
+		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
 	
@@ -1521,20 +1515,22 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkCompare(Compare c) throws CTEX_EXC {
-		TYPE left = c.getLeft().check(this);
-		TYPE right = c.getRight().check(this);
+		TYPE t0 = null;
 		
-		if (c.left instanceof ArrayInit) 
-			throw new CTEX_EXC(c.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
-		
-		if (c.right instanceof ArrayInit) 
-			throw new CTEX_EXC(c.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
-		
-		if (left.isEqual(right)) {
-			c.setType(new BOOL());
-			return c.getType();
+		for (Expression e : c.operands) {
+			TYPE t = e.check(this);
+			if (t0 == null) t0 = t;
+			else {
+				if (!t.isEqual(t0)) 
+					throw new CTEX_EXC(c.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree().typeString(), t.provisoFree().typeString());
+			}
+			
+			if (e instanceof ArrayInit) 
+				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		}
-		else throw new CTEX_EXC(c.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, left.provisoFree().typeString(), right.provisoFree().typeString());
+		
+		c.setType(new BOOL());
+		return c.getType();
 	}
 	
 	/**
