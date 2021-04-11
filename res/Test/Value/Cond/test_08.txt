@@ -26,7 +26,7 @@ TESTCASES
 1 2 3 4 1
 3 2 4 5 25
 OUTPUT
-.version 16999867139
+.version 14509583745
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -65,11 +65,11 @@ main:                                        /* Function: main */
     bne main.L2
     mov r3, #8
 main.L2: 
-    add r1, r4, #6
+    add r1, r3, r4
     add r1, r1, r5
     ldr r2, [sp]
-    add r2, r1, r2
-    add r3, r3, r2
+    add r1, r1, r2
+    add r3, r1, #6
 main.L0: 
     mov r0, r3                               /* Evaluate Expression */
     bx lr

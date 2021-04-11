@@ -36,9 +36,9 @@ _routine_stack_copy_end_:
 .global main
 main:                                        /* Function: main */
     mov r3, r0
-    lsl r1, r0, #1
-    add r0, r1, #5
+    lsl r0, r0, #1
     mul r2, r3, r3
     sub r2, r3, r2
-    add r0, r0, r2
+    add r1, r0, r2
+    add r0, r1, #5
     bx lr

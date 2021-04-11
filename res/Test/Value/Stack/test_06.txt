@@ -19,7 +19,7 @@ TESTCASES
 0 45
 2 65
 OUTPUT
-.version 39035135117
+.version 9943947663
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -49,23 +49,7 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
-    add r2, r0, #1
-    add r0, r0, r2
-    add r2, r3, #2
-    add r0, r0, r2
-    add r2, r3, #3
-    add r0, r0, r2
-    add r2, r3, #4
-    add r0, r0, r2
-    add r2, r3, #5
-    add r0, r0, r2
-    add r2, r3, #6
-    add r0, r0, r2
-    add r2, r3, #7
-    add r0, r0, r2
-    add r2, r3, #8
-    add r0, r0, r2
-    add r2, r3, #9
-    add r0, r0, r2
+    mov r2, #10
+    mul r1, r0, r2
+    add r0, r1, #45
     bx lr

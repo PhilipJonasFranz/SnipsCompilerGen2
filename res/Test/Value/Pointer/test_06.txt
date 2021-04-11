@@ -11,7 +11,7 @@ TESTCASES
 0 3
 1 8
 OUTPUT
-.version 12484183961
+.version 12529473915
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -41,18 +41,17 @@ _routine_stack_copy_end_:
 
 .global get
 get:                                         /* Function: get */
-    push { r3, r4 }
+    push { r3 }
     mov r3, r0
-    mov r4, r1
     add r0, r0, r1
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    add r1, r3, #2
+    add r1, r3, r1
     push { r0 }
-    add r0, r1, r4
+    add r0, r1, #2
     pop { r1 }
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     mul r0, r1, r2
-    ldmfd sp!, {r3, r4}
+    pop { r3 }
     bx lr
 
 .global main
