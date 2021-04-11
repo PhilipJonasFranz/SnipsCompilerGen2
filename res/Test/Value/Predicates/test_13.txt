@@ -16,7 +16,7 @@ TESTCASES
 0 1
 1 0
 OUTPUT
-.version 5846203125
+.version 3291254434
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -56,15 +56,19 @@ get2:                                        /* Function: get2 */
 
 .global main
 main:                                        /* Function: main */
-    ldr r4, .P1023508742_get                 /* Evaluate Expression */
-    cmp r0, #0
+    mov r3, r0
+    ldr r0, .P1023508742_get                 /* Evaluate Expression */
+    cmp r3, #0
+    push { r0 }
     beq main.L0
     ldr r0, .P1023508742_get2
     b main.L1
 main.L0: 
     ldr r0, .P1023508742_get
 main.L1: 
-    cmp r4, r0
+    mov r1, r0
+    pop { r0 }
+    cmp r0, r1
     moveq r0, #1
     movne r0, #0
     bx lr

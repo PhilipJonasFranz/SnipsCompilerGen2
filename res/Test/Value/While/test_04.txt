@@ -17,7 +17,7 @@ int main(int a) {
 TESTCASES
 4 28
 OUTPUT
-.version 3939379401
+.version 2770114165
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -59,10 +59,8 @@ main.L1:                                     /* Evaluate condition */
     b main.L2
 /* Break */
 main.L3: 
-    mov r0, r5                               /* Evaluate Expression */
-    mov r6, r5
     add r1, r4, r5
-    add r4, r1, r6
+    add r4, r1, r5
     sub r3, r3, #1
     b main.L1
 main.L2: 
