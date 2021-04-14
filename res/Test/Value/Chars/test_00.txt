@@ -7,7 +7,7 @@ char main() {
 TESTCASES
 50
 OUTPUT
-.version 4380783386
+.version 10075306316
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -37,11 +37,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov r0, #49                              /* Evaluate Expression */
-    mov r3, #49
-    cmp r3, #49
-    bne main.L0
-    mov r3, #50
-main.L0: 
-    mov r0, r3                               /* Evaluate Expression */
+    mov r0, #50                              /* Evaluate Expression */
     bx lr

@@ -1,30 +1,24 @@
-DESCRIPTION
-This test aims to verify the correct functionality of assignments to read and write from
-and to the stack.
 SOURCE
-int main(int a, int b) {
-	int b0 = a + b;
-	int b1 = a + b + 1;
-	int b2 = a + b + 2;
-	int b3 = a + b + 3;
-	int b4 = a + b + 4;
-	int b5 = a + b + 5;
-	int b6 = a + b + 6;
-	int b7 = a + b + 7;
-	int b8 = a + b + 8;
-	int b9 = a + b;
+int main() {
+	int a = 10;
 	
-	b9 = a + b9;
-	b8 = 8;
+	int r = 0;
 	
-	return b8 + b9;
+	switch (a) {
+		case (5) : {
+			r = 10;
+		}
+		default : {
+			r = a + 10;
+		}
+	}
+	
+	return r;
 }
 TESTCASES
-0 0 8
-1 4 14
-4 1 17
+20
 OUTPUT
-.version 11421935796
+.version -1287931413
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -54,6 +48,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    add r1, r1, r0, lsl #1
-    add r0, r1, #8
+    mov r0, #20                              /* Evaluate Expression */
     bx lr

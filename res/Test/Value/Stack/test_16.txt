@@ -8,7 +8,7 @@ int main() {
 TESTCASES
 39
 OUTPUT
-.version 4314116367
+.version 6560323825
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -39,17 +39,9 @@ _routine_stack_copy_end_:
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
-    mov r1, #12
-    stmfd sp!, {r0, r1}
     mov r0, #24                              /* Evaluate Expression */
     mov r1, #15
     stmfd sp!, {r0, r1}
-    pop { r0 }
-    sub r1, fp, #8                           /* Start of structure in stack */
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
     ldr r0, [fp, #-8]
     ldr r2, [fp, #-4]
     add r0, r0, r2
