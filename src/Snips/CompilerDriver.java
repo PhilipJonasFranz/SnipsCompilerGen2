@@ -76,7 +76,7 @@ public class CompilerDriver {
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
 		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
-		useASTOptimizer	= 				true,  /* Wether to use the AST optimizer in the pipeline.				*/
+		useASTOptimizer	= 				true,	/* Wether to use the AST optimizer in the pipeline.				*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/

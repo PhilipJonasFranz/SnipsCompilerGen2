@@ -77,9 +77,13 @@ import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.Util.CompoundStatementRules;
+import Opt.Util.ExpressionMorpher;
+import Opt.Util.Makros;
+import Opt.Util.Matchers;
 import Opt.Util.OPT_STRATEGY;
-import Opt.Util.ProgramContext;
-import Opt.Util.ProgramContext.VarState;
+import Opt.Util.ProgramState;
+import Opt.Util.ProgramState.VarState;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -90,14 +94,14 @@ public class ASTOptimizer {
 	/**
 	 * Stack of program contexts.
 	 */
-	private Stack<ProgramContext> cStack = new Stack();
+	private Stack<ProgramState> cStack = new Stack();
 	
 	/**
 	 * The program context keeps track of variables and 
 	 * other related information, such as if a variable has
 	 * been overwritten or read at the current moment.
 	 */
-	private ProgramContext state = null;
+	private ProgramState state = null;
 	
 	/**
 	 * Each time an optimization is done, this variable
@@ -223,7 +227,7 @@ public class ASTOptimizer {
 	public Program optProgramStep(Program AST) throws OPT0_EXC {
 		
 		/* Root program context. */
-		this.state = new ProgramContext(null, false);
+		this.state = new ProgramState(null, false);
 		this.cStack.push(state);
 		
 		/* Add globally used symbols. */
@@ -305,7 +309,7 @@ public class ASTOptimizer {
 			this.pushContext();
 		
 			for (Declaration dec : f.parameters) dec.opt(this);
-			f.body = this.optBody(f.body, false);
+			f.body = this.optBody(f.body, false, false);
 			
 			this.popContext();
 		}
@@ -313,8 +317,8 @@ public class ASTOptimizer {
 		return f;
 	}
 	
-	public List<Statement> optBody(List<Statement> body, boolean isLoopedScope) throws OPT0_EXC {
-		this.pushContext(isLoopedScope);
+	public List<Statement> optBody(List<Statement> body, boolean isLoopedScope, boolean pushContext) throws OPT0_EXC {
+		if (pushContext) this.pushContext(isLoopedScope);
 		
 		for (int i = 0; i < body.size(); i++) {
 			Statement s = body.get(i);
@@ -328,6 +332,9 @@ public class ASTOptimizer {
 				body.set(body.indexOf(s), s0);
 			}
 		}
+		
+		/* Removes assignments to variables that are not used after this assignment */
+		CompoundStatementRules.removeDanglingAssignments(body, this.state);
 		
 		List<Declaration> removed = new ArrayList();
 		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
@@ -370,7 +377,7 @@ public class ASTOptimizer {
 			this.state.cState.remove(x);
 		});
 		
-		this.popContext();
+		if (pushContext) this.popContext();
 		return body;
 	}
 	
@@ -470,9 +477,10 @@ public class ASTOptimizer {
 		 *  - We are not in a scope that is a looped scope
 		 */
 		if (this.state.getSetting(Setting.SUBSTITUTION) && 
-				!this.state.getWrite(idRef.origin) && 
 				!this.state.getReferenced(idRef.origin) && 
 				this.state.cState.get(idRef.origin).currentValue != null) {
+			
+			boolean operationApplicable = true;
 			
 			/* 
 			 * Check if there are any variables in the current value. If there
@@ -481,12 +489,11 @@ public class ASTOptimizer {
 			 * the values have changed already, the evaluation of this expression may be
 			 * different.
 			 */
-			boolean writeFree = true;
 			Expression cValue = this.state.cState.get(idRef.origin).currentValue;
 			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
 			for (IDRef ref : varsInExpression) {
-				if (this.state.getWrite(ref.origin) || this.state.getReferenced(ref.origin)) {
-					writeFree = false;
+				if ((!ref.origin.equals(idRef.origin) && this.state.getWrite(ref.origin)) || ref.origin.equals(idRef.origin)) {
+					operationApplicable = false;
 					break;
 				}
 			}
@@ -497,26 +504,37 @@ public class ASTOptimizer {
 			 * Structs and Array types may also have changed fields.
 			 * Forwards-Substitution is not always valid.
 			 */
-			writeFree &= cValue.getType().isPrimitive();
+			operationApplicable &= cValue.getType().isPrimitive();
 			
 			/*
 			 * Make sure we do not forward substitute function calls.
 			 * The calls could change global state variables.
 			 */
-			writeFree &= cValue.visit(x -> x instanceof InlineCall).isEmpty();
+			operationApplicable &= cValue.visit(x -> x instanceof InlineCall).isEmpty();
 			
 			/* 
 			 * Check if the current path is within a looped scope.
 			 * If yes, we cannot substitute since it is possible
 			 * that the value of this changing per iteration.
 			 */
-			writeFree &= !this.state.isInLoopedContext(idRef.origin);
+			operationApplicable &= !this.state.isInLoopedScope(idRef.origin);
+			
+			/*
+			 * Make sure we only substitute a different value, prevent
+			 * unneessesary OPT_DONE().
+			 */
+			operationApplicable &= !idRef.codePrint().equals(cValue.codePrint());
+			
+			/*
+			 * Make sure substituted value is smaller thatn current substitution size.
+			 */
+			operationApplicable &= cValue.size() <= CURR_SUBS_SIZE;
 			
 			/*
 			 * No variables in the expression changed, safe
 			 * to forward-substitute.
 			 */
-			if (writeFree && !idRef.codePrint().equals(cValue.codePrint()) && cValue.size() <= CURR_SUBS_SIZE) {
+			if (operationApplicable) {
 				OPT_DONE();
 				return cValue.clone();
 			}
@@ -928,6 +946,13 @@ public class ASTOptimizer {
 	public Expression optCompare(Compare c) throws OPT0_EXC {
 		c.operands = this.optExpressionList(c.operands);
 		
+		/*
+		 * If we get an equal operator, we can retrieve some information about the current
+		 * value of a variable under certain circumstances. This information is active within
+		 * the current scope.
+		 * 
+		 * a == 20 -> if true, a is 20 currently
+		 */
 		if (c.comparator == COMPARATOR.EQUAL) {
 			if (c.operands.get(0) instanceof IDRef) {
 				IDRef ref = (IDRef) c.operands.get(0);
@@ -937,6 +962,27 @@ public class ASTOptimizer {
 				IDRef ref = (IDRef) c.operands.get(1);
 				this.state.cState.get(ref.origin).currentValue = c.operands.get(0).clone();
 			}
+		}
+		
+		Expression op0 = c.operands.get(0);
+		Expression op1 = c.operands.get(1);
+		
+		/*
+		 * Pre-Compute comparison and replace with direct value.
+		 */
+		if  (op0 instanceof Atom && op0.getType().hasInt() && op1 instanceof Atom && op1.getType().hasInt()) {
+			int val0 = op0.getType().toInt(), val1 = op1.getType().toInt();
+			
+			boolean res = false;
+			if (c.comparator == COMPARATOR.EQUAL) res = val0 == val1;
+			if (c.comparator == COMPARATOR.GREATER_SAME) res = val0 >= val1;
+			if (c.comparator == COMPARATOR.GREATER_THAN) res = val0 > val1;
+			if (c.comparator == COMPARATOR.LESS_SAME) res = val0 <= val1;
+			if (c.comparator == COMPARATOR.LESS_THAN) res = val0 < val1;
+			if (c.comparator == COMPARATOR.NOT_EQUAL) res = val0 != val1;
+			
+			OPT_DONE();
+			return new Atom(new BOOL("" + res), op0.getSource());
 		}
 		
 		return c;
@@ -1044,7 +1090,6 @@ public class ASTOptimizer {
 		return structSelectLhsId;
 	}
 
-	@SuppressWarnings("unused")
 	public Statement optAssignment(Assignment assignment) throws OPT0_EXC {
 		
 		Declaration origin = null;
@@ -1057,25 +1102,62 @@ public class ASTOptimizer {
 			}
 		}
 		
-		boolean read = true;
-		if (origin != null) 
-			read = this.state.getRead(origin);
-		
 		assignment.value = assignment.value.opt(this);
 		assignment.lhsId = assignment.lhsId.opt(this);
 		
-		if (false && origin != null) {
-			// TODO: Need to morph current expression into this expression, for example: int a = 5; a = a + 4;
-			this.state.cState.get(origin).currentValue = assignment.value.clone();
-		
-			if (!read) {
-				/* 
-				 * Variable value has not been read at this point. This means
-				 * we can write the new value directly to the declaration without
-				 * consequences. We return null to remove the assignment.
+		if (origin != null) {
+			
+			Expression currentValue = this.state.cState.get(origin).currentValue;
+			
+			/**
+			 * Make sure upward propagation of this assignment is side-effect free.
+			 * We need to make sure that in this expression, no inline functions are called, 
+			 * since they may modify the state. Also, no writeback operations may take place.
+			 * Additionally, the assignment must be in the same scope as the declaration - otherwise
+			 * we risk that the value is propagated through a loop or condition.
+			 * Finally, the assigned value has to be morphable in order to propagate the value
+			 * back up.
+			 */
+			if (!Matchers.containsStateDependentSubExpression(assignment.value, this.state) &&
+				this.state.isDeclarationScope(origin) && 
+				Matchers.isMorphable(assignment.value, origin, this.state) &&
+				currentValue != null) {
+				
+				Expression toMorph = assignment.value.clone();
+					
+				/**
+				 * Morph the assigned value into the exisiting, current value
+				 * of the variable.
 				 */
+				final Declaration origin0 = origin;
+				ExpressionMorpher.morphExpression(toMorph, x -> {
+					if (x instanceof IDRef) {
+						IDRef ref = (IDRef) x;
+						return ref.origin.equals(origin0);
+					}
+					
+					return false;
+				}, currentValue);
+				
+				/* 
+				 * Set the new current value both in program state 
+				 * and to actual declaration in code 
+				 */
+				this.state.cState.get(origin).currentValue = toMorph;
+				origin.value = toMorph;
+			
+				/* 
+				 * We can safely delete the assignment here, since the value change 
+				 * has been propagated upwards.
+				 */
+				OPT_DONE();
 				return null;
 			}
+			
+			/**
+			 * Set value that was assigned to variable in program context
+			 */
+			this.state.cState.get(origin).currentValue = assignment.value;
 		}
 		
 		return assignment;
@@ -1092,7 +1174,7 @@ public class ASTOptimizer {
 	}
 
 	public Statement optCaseStatement(CaseStatement caseStatement) throws OPT0_EXC {
-		caseStatement.body = this.optBody(caseStatement.body, true);
+		caseStatement.body = this.optBody(caseStatement.body, true, true);
 		caseStatement.condition = caseStatement.condition.opt(this);
 		
 		return caseStatement;
@@ -1112,7 +1194,7 @@ public class ASTOptimizer {
 	}
 
 	public Statement optDefaultStatement(DefaultStatement defaultStatement) throws OPT0_EXC {
-		defaultStatement.body = this.optBody(defaultStatement.body, false);
+		defaultStatement.body = this.optBody(defaultStatement.body, false, true);
 		
 		return defaultStatement;
 	}
@@ -1136,7 +1218,7 @@ public class ASTOptimizer {
 
 	public Statement optDoWhileStatement(DoWhileStatement doWhileStatement) throws OPT0_EXC {
 		doWhileStatement.condition = doWhileStatement.condition.opt(this);
-		doWhileStatement.body = this.optBody(doWhileStatement.body, true);
+		doWhileStatement.body = this.optBody(doWhileStatement.body, true, true);
 		
 		return doWhileStatement;
 	}
@@ -1150,7 +1232,7 @@ public class ASTOptimizer {
 		forEachStatement.shadowRef.opt(this);
 		this.state.enableSetting(Setting.SUBSTITUTION);
 		
-		forEachStatement.body = this.optBody(forEachStatement.body, true);
+		forEachStatement.body = this.optBody(forEachStatement.body, true, true);
 		
 		this.popContext();
 		return forEachStatement;
@@ -1161,7 +1243,7 @@ public class ASTOptimizer {
 		f.iterator.opt(this);
 		this.state.setWrite(f.iterator, true);
 		
-		f.body = this.optBody(f.body, true);
+		f.body = this.optBody(f.body, true, true);
 		
 		f.increment = f.increment.opt(this);
 		f.condition = f.condition.opt(this);
@@ -1193,16 +1275,53 @@ public class ASTOptimizer {
 		return functionCall;
 	}
 
-	public Statement optIfStatement(IfStatement ifStatement) throws OPT0_EXC {
-		if (ifStatement.condition != null)
-			ifStatement.condition = ifStatement.condition.opt(this);
+	public Statement optIfStatement(IfStatement i) throws OPT0_EXC {
+		if (i.condition != null)
+			i.condition = i.condition.opt(this);
 		
-		ifStatement.body = this.optBody(ifStatement.body, false);
+		i.body = this.optBody(i.body, false, true);
 		
-		if (ifStatement.elseStatement != null) 
-			ifStatement.elseStatement.opt(this);
+		/*
+		 * Condition is always true, prune else statement.
+		 */
+		if (i.condition != null && Makros.isAlwaysTrue(i.condition) && i.elseStatement != null) {
+			i.elseStatement = null;
+			OPT_DONE();
+		}
 		
-		return ifStatement;
+		/*
+		 * Condition is always false, remove from chain.
+		 */
+		if (i.condition != null && Makros.isAlwaysFalse(i.condition)) {
+			OPT_DONE();
+			return i.elseStatement;
+		}
+		
+		if (i.elseStatement != null) {
+			Statement s = i.elseStatement.opt(this);
+			if (s instanceof IfStatement)
+				i.elseStatement = (IfStatement) s;
+		}
+		
+		/*
+		 * Body is empty, check if it is safe to remove this if-statement
+		 * from the if-else chain or from the statement block.
+		 */
+		if (i.body.isEmpty()) {
+			if (i.condition == null) {
+				OPT_DONE();
+				return null;
+			}
+			else {
+				if (!Matchers.containsStateChangingSubExpression(i.condition, this.state)) {
+					OPT_DONE();
+					if (i.elseStatement != null) return i.elseStatement;
+					else return null;
+				}
+			}
+		}
+		
+		return i;
 	}
 
 	public Statement optReturnStatement(ReturnStatement returnStatement) throws OPT0_EXC {
@@ -1223,7 +1342,7 @@ public class ASTOptimizer {
 	}
 
 	public Statement optTryStatement(TryStatement tryStatement) throws OPT0_EXC {
-		tryStatement.body = this.optBody(tryStatement.body, false);
+		tryStatement.body = this.optBody(tryStatement.body, false, true);
 		
 		for (int i = 0; i < tryStatement.watchpoints.size(); i++)
 			tryStatement.watchpoints.set(i, (WatchStatement) tryStatement.watchpoints.get(i).opt(this));
@@ -1232,13 +1351,13 @@ public class ASTOptimizer {
 	}
 
 	public Statement optWatchStatement(WatchStatement watchStatement) throws OPT0_EXC {
-		watchStatement.body = this.optBody(watchStatement.body, false);
+		watchStatement.body = this.optBody(watchStatement.body, false, true);
 		
 		return watchStatement;
 	}
 
 	public Statement optWhileStatement(WhileStatement whileStatement) throws OPT0_EXC {
-		whileStatement.body = this.optBody(whileStatement.body, true);
+		whileStatement.body = this.optBody(whileStatement.body, true, true);
 		whileStatement.condition = whileStatement.condition.opt(this);
 		
 		return whileStatement;
@@ -1259,12 +1378,12 @@ public class ASTOptimizer {
 	}
 	
 	private void pushContext(boolean isLoopedContext) {
-		this.state = new ProgramContext(this.cStack.peek(), isLoopedContext);
+		this.state = new ProgramState(this.cStack.peek(), isLoopedContext);
 		this.cStack.push(this.state);
 	}
 	
 	private void pushContext() {
-		this.state = new ProgramContext(this.cStack.peek(), false);
+		this.state = new ProgramState(this.cStack.peek(), false);
 		this.cStack.push(this.state);
 	}
 	

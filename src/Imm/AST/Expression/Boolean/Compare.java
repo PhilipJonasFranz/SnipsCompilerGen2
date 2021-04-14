@@ -76,12 +76,12 @@ public class Compare extends NFoldExpression {
 	
 	public String codePrint() {
 		String comp = "";
-		if (this.comparator == COMPARATOR.EQUAL) comp = " == ";
-		if (this.comparator == COMPARATOR.GREATER_SAME) comp = " >= ";
-		if (this.comparator == COMPARATOR.GREATER_THAN) comp = " > ";
-		if (this.comparator == COMPARATOR.LESS_SAME) comp = " <= ";
-		if (this.comparator == COMPARATOR.LESS_THAN) comp = " < ";
-		if (this.comparator == COMPARATOR.NOT_EQUAL) comp = " != ";
+		if (this.comparator == COMPARATOR.EQUAL) comp = "==";
+		if (this.comparator == COMPARATOR.GREATER_SAME) comp = ">=";
+		if (this.comparator == COMPARATOR.GREATER_THAN) comp = ">";
+		if (this.comparator == COMPARATOR.LESS_SAME) comp = "<=";
+		if (this.comparator == COMPARATOR.LESS_THAN) comp = "<";
+		if (this.comparator == COMPARATOR.NOT_EQUAL) comp = "!=";
 		
 		String s = "";
 		for (Expression e : this.operands) 

@@ -8,7 +8,7 @@ import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Declaration;
 
-public class ProgramContext {
+public class ProgramState {
 		
 	public static class VarState {
 		
@@ -45,11 +45,11 @@ public class ProgramContext {
 	
 	public HashMap<Declaration, VarState> cState = new HashMap();
 	
-	public ProgramContext parent;
+	public ProgramState parent;
 	
 	private HashMap<String, Stack<Boolean>> settings = new HashMap();
 	
-	public ProgramContext(ProgramContext parent, boolean isLoopedContext) {
+	public ProgramState(ProgramState parent, boolean isLoopedContext) {
 		this.isLoopedContext = isLoopedContext;
 		
 		if (parent != null) {
@@ -142,10 +142,17 @@ public class ProgramContext {
 		}
 	}
 	
-	public boolean isInLoopedContext(Declaration dec) {
+	public boolean isInLoopedScope(Declaration dec) {
 		if (this.cState.containsKey(dec)) {
 			if (this.parent == null || !this.parent.cState.containsKey(dec)) return false;
-			else return this.isLoopedContext || this.parent.isInLoopedContext(dec);
+			else return this.isLoopedContext || this.parent.isInLoopedScope(dec);
+		}
+		else return false;
+	}
+	
+	public boolean isDeclarationScope(Declaration dec) {
+		if (this.cState.containsKey(dec)) {
+			return this.parent == null || !this.parent.cState.containsKey(dec);
 		}
 		else return false;
 	}
@@ -185,6 +192,15 @@ public class ProgramContext {
 	public boolean getReferenced(Declaration dec) {
 		if (this.cState.containsKey(dec)) 
 			return this.cState.get(dec).referenced;
+		return false;
+	}
+	
+	/**
+	 * Returns wether given variable was either referenced, modified or read.
+	 */
+	public boolean getAll(Declaration dec) {
+		if (this.cState.containsKey(dec)) 
+			return this.cState.get(dec).referenced || this.cState.get(dec).written || this.cState.get(dec).read;
 		return false;
 	}
 	
