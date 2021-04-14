@@ -71,6 +71,7 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
@@ -329,7 +330,12 @@ public class ASTOptimizer {
 				i--;
 			}
 			else {
-				body.set(body.indexOf(s), s0);
+				if (s0 instanceof DefaultStatement) {
+					DefaultStatement d = (DefaultStatement) s0;
+					body.remove(i);
+					body.addAll(i, d.body);
+				}
+				else body.set(body.indexOf(s), s0);
 			}
 		}
 		
@@ -337,7 +343,7 @@ public class ASTOptimizer {
 		CompoundStatementRules.removeDanglingAssignments(body, this.state);
 		
 		List<Declaration> removed = new ArrayList();
-		for (Entry<Declaration, VarState> entry : this.state.cState.entrySet()) {
+		for (Entry<Declaration, VarState> entry : this.state.getCState().entrySet()) {
 			Declaration dec = entry.getKey();
 			
 			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
@@ -374,7 +380,7 @@ public class ASTOptimizer {
 		}
 		
 		removed.stream().forEach(x -> {
-			this.state.cState.remove(x);
+			this.state.remove(x);
 		});
 		
 		if (pushContext) this.popContext();
@@ -463,7 +469,7 @@ public class ASTOptimizer {
 		this.state.setRead(idRef.origin);
 		
 		/* Make sure declaration was registered */
-		if (!this.state.cState.containsKey(idRef.origin))
+		if (!this.state.getCState().containsKey(idRef.origin))
 			throw new OPT0_EXC("Unknown declaration: " + idRef.path.build());
 		
 		/* 
@@ -478,7 +484,7 @@ public class ASTOptimizer {
 		 */
 		if (this.state.getSetting(Setting.SUBSTITUTION) && 
 				!this.state.getReferenced(idRef.origin) && 
-				this.state.cState.get(idRef.origin).currentValue != null) {
+				this.state.get(idRef.origin).getCurrentValue() != null) {
 			
 			boolean operationApplicable = true;
 			
@@ -489,7 +495,7 @@ public class ASTOptimizer {
 			 * the values have changed already, the evaluation of this expression may be
 			 * different.
 			 */
-			Expression cValue = this.state.cState.get(idRef.origin).currentValue;
+			Expression cValue = this.state.get(idRef.origin).getCurrentValue();
 			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
 			for (IDRef ref : varsInExpression) {
 				if ((!ref.origin.equals(idRef.origin) && this.state.getWrite(ref.origin)) || ref.origin.equals(idRef.origin)) {
@@ -956,11 +962,11 @@ public class ASTOptimizer {
 		if (c.comparator == COMPARATOR.EQUAL) {
 			if (c.operands.get(0) instanceof IDRef) {
 				IDRef ref = (IDRef) c.operands.get(0);
-				this.state.cState.get(ref.origin).currentValue = c.operands.get(1).clone();
+				this.state.get(ref.origin).setCurrentValue(c.operands.get(1).clone());
 			}
 			else if (c.operands.get(1) instanceof IDRef) {
 				IDRef ref = (IDRef) c.operands.get(1);
-				this.state.cState.get(ref.origin).currentValue = c.operands.get(0).clone();
+				this.state.get(ref.origin).setCurrentValue(c.operands.get(0).clone());
 			}
 		}
 		
@@ -1094,6 +1100,9 @@ public class ASTOptimizer {
 		
 		Declaration origin = null;
 		
+		/*
+		 * Extract data origin if it is a SimpleLhsId.
+		 */
 		if (assignment.lhsId instanceof SimpleLhsId) {
 			SimpleLhsId lhs = (SimpleLhsId) assignment.lhsId;
 			
@@ -1105,9 +1114,9 @@ public class ASTOptimizer {
 		assignment.value = assignment.value.opt(this);
 		assignment.lhsId = assignment.lhsId.opt(this);
 		
-		if (origin != null) {
+		if (origin != null && assignment.assignArith == ASSIGN_ARITH.NONE) {
 			
-			Expression currentValue = this.state.cState.get(origin).currentValue;
+			Expression currentValue = this.state.get(origin).getCurrentValue();
 			
 			/**
 			 * Make sure upward propagation of this assignment is side-effect free.
@@ -1119,9 +1128,8 @@ public class ASTOptimizer {
 			 * back up.
 			 */
 			if (!Matchers.containsStateDependentSubExpression(assignment.value, this.state) &&
-				this.state.isDeclarationScope(origin) && 
-				Matchers.isMorphable(assignment.value, origin, this.state) &&
-				currentValue != null) {
+				this.state.isDeclarationScope(origin) && currentValue != null &&
+				Matchers.isMorphable(assignment.value, origin, this.state)) {
 				
 				Expression toMorph = assignment.value.clone();
 					
@@ -1143,7 +1151,7 @@ public class ASTOptimizer {
 				 * Set the new current value both in program state 
 				 * and to actual declaration in code 
 				 */
-				this.state.cState.get(origin).currentValue = toMorph;
+				this.state.get(origin).setCurrentValue(toMorph);
 				origin.value = toMorph;
 			
 				/* 
@@ -1157,7 +1165,7 @@ public class ASTOptimizer {
 			/**
 			 * Set value that was assigned to variable in program context
 			 */
-			this.state.cState.get(origin).currentValue = assignment.value;
+			this.state.get(origin).setCurrentValue(assignment.value);
 		}
 		
 		return assignment;
@@ -1166,6 +1174,26 @@ public class ASTOptimizer {
 	public Statement optAssignWriteback(AssignWriteback wb) throws OPT0_EXC {
 		wb.reference.opt(this);
 		
+		// TODO Check if incremented value is in same scope, and has atom as value. If yes, write back changes to current value
+		
+		/*
+		 * Signal in the current program context that the target of the writeback
+		 * operations has been modified.
+		 */
+		if (wb.reference instanceof IDRefWriteback) {
+			IDRefWriteback idwb = (IDRefWriteback) wb.reference;
+			this.state.setWrite(idwb.idRef.origin, true);
+			this.state.get(idwb.idRef.origin).clearCurrentValue();
+		}
+		else {
+			StructSelectWriteback sswb = (StructSelectWriteback) wb.reference;
+			if (sswb.select.selector instanceof IDRef) {
+				IDRef ref = (IDRef) sswb.select.selector;
+				this.state.setWrite(ref.origin, true);
+				this.state.get(ref.origin).clearCurrentValue();
+			}
+		}
+		
 		return wb;
 	}
 
@@ -1173,11 +1201,14 @@ public class ASTOptimizer {
 		return breakStatement;
 	}
 
-	public Statement optCaseStatement(CaseStatement caseStatement) throws OPT0_EXC {
-		caseStatement.body = this.optBody(caseStatement.body, true, true);
-		caseStatement.condition = caseStatement.condition.opt(this);
+	public Statement optCaseStatement(CaseStatement c) throws OPT0_EXC {
+		c.body = this.optBody(c.body, true, true);
+		c.condition = c.condition.opt(this);
 		
-		return caseStatement;
+		/* Case is not satisfiable */
+		if (Makros.isAlwaysFalse(c.condition)) return null;
+		
+		return c;
 	}
 
 	public Statement optContinueStatement(ContinueStatement continueStatement) throws OPT0_EXC {
@@ -1337,8 +1368,47 @@ public class ASTOptimizer {
 		return signalStatement;
 	}
 
-	public Statement optSwitchStatement(SwitchStatement switchStatement) throws OPT0_EXC {
-		return switchStatement;
+	public Statement optSwitchStatement(SwitchStatement s) throws OPT0_EXC {
+		
+		this.state.disableSetting(Setting.SUBSTITUTION);
+		s.condition.opt(this);
+		this.state.enableSetting(Setting.SUBSTITUTION);
+		
+		IDRef ref = (IDRef) s.condition;
+		Expression value = this.state.get(ref.origin).getCurrentValue();
+		
+		/*
+		 * Condition of switch statement has value, we can attempt to match
+		 * it against case conditions to determine always-false cases.
+		 */
+		if (value != null) {
+			for (int i = 0; i < s.cases.size(); i++) {
+				CaseStatement c0 = s.cases.get(i);
+				c0.opt(this);
+				
+				/*
+				 * Value of switch statement condition and condition of case 
+				 * do not match, case will never be executed.
+				 */
+				if (Makros.atomComparable(value, c0.condition) && !Makros.compareAtoms(value, c0.condition)) {
+					s.cases.remove(i);
+					i--;
+					OPT_DONE();
+				}
+			}
+		}
+		
+		s.defaultStatement.opt(this);
+		
+		/*
+		 * No cases left, return contents of default statement.
+		 */
+		if (s.cases.isEmpty()) {
+			OPT_DONE();
+			return s.defaultStatement;
+		}
+		
+		return s;
 	}
 
 	public Statement optTryStatement(TryStatement tryStatement) throws OPT0_EXC {

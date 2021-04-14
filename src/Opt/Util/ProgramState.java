@@ -14,7 +14,7 @@ public class ProgramState {
 		
 		public Declaration declaration;
 		
-		public Expression currentValue;
+		private Expression currentValue;
 		
 		public boolean 	written = false,		// Wether this variable was overwritten since declaration
 						read = false,			// Wether this variable was read sincee declaration
@@ -39,11 +39,23 @@ public class ProgramState {
 			return state0;
 		}
 		
+		public Expression getCurrentValue() {
+			return (this.currentValue != null)? this.currentValue.clone() : null;
+		}
+		
+		public void setCurrentValue(Expression e) {
+			this.currentValue = e.clone();
+		}
+		
+		public void clearCurrentValue() {
+			this.currentValue = null;
+		}
+		
 	}
 	
 	public boolean isLoopedContext;
 	
-	public HashMap<Declaration, VarState> cState = new HashMap();
+	private HashMap<Declaration, VarState> cState = new HashMap();
 	
 	public ProgramState parent;
 	
@@ -62,6 +74,26 @@ public class ProgramState {
 			for (Entry<String, Stack<Boolean>> entry : this.parent.settings.entrySet()) 
 				this.settings.put(entry.getKey(), (Stack<Boolean>) entry.getValue().clone());
 		}
+	}
+	
+	/**
+	 * Returns the VarState associated with the given declaration.
+	 * May return null if the Declaration is not registered.
+	 */
+	public VarState get(Declaration origin) {
+		return this.cState.get(origin);
+	}
+	
+	/**
+	 * Removes the VarState mapping associated with the given
+	 * declaration from the cState map.
+	 */
+	public VarState remove(Declaration origin) {
+		return this.cState.remove(origin);
+	}
+	
+	public HashMap<Declaration, VarState> getCState() {
+		return this.cState;
 	}
 	
 	/**
