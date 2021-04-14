@@ -261,9 +261,21 @@ public class Util {
 		return pad;
 	}
 	
+	/**
+	 * Iterative Fibonacci Sequence Implementation.
+	 */
 	public static int fib(int n) {
-		if (n < 3) return 1;
-		else return fib(n - 1) + fib(n - 2);
+		int n1 = 1;
+		int n2 = 1;
+		
+		while (n >= 3) {
+			int temp = n1 + n2;
+			n1 = n2;
+			n2 = temp;
+			n--;
+		}
+		
+		return n2;
 	}
 	
 } 
