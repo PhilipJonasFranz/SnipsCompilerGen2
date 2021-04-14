@@ -66,6 +66,7 @@ int main() {
  - Parsing the token stream, creating an AST
  - Processing dynamic imports
  - Context checking and creating the DAST
+ - AST Optimizer, rule-based AST transformations
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, rule-based optimizations
  - Linker, resolves assembly imports of output
