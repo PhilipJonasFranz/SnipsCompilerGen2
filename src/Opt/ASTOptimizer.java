@@ -53,6 +53,7 @@ import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.CaseStatement;
 import Imm.AST.Statement.ContinueStatement;
@@ -71,7 +72,6 @@ import Imm.AST.Statement.SwitchStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
@@ -89,6 +89,8 @@ import Res.Setting;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 public class ASTOptimizer {
 
@@ -214,7 +216,16 @@ public class ASTOptimizer {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new OPT0_EXC("An error occurred during AST-Optimization, Phase " + phase + ": " + e.getMessage());
+			
+			String cause = e.getMessage();
+			if (cause == null) cause = "Unknown";
+			
+			/* 
+			 * Since the exception should be thrown by the duplicate AST optimization, 
+			 * we can assume the original is still in consistent state. 
+			 */
+			new Message("An error occurred during AST-Optimization, Iteration " + CYCLES + ", cause: " + cause, Type.WARN);
+			new Message("Assuming AST is in consistent state, aborting OPT0, keeping changes.", Type.WARN);
 		}
 
 		if (PRINT_RESULT) AST.codePrint(0).stream().forEach(System.out::println);
@@ -640,8 +651,20 @@ public class ASTOptimizer {
 	}
 
 	public Expression optTempAtom(TempAtom tempAtom) throws OPT0_EXC {
-		if (tempAtom.base != null)
+		if (tempAtom.base != null) {
 			tempAtom.base = tempAtom.base.opt(this);
+			
+			/*
+			 * The inherited type has a fixed wordsize and the base is exactly this
+			 * size, this means we can return the base instead since it would be
+			 * loaded only once anyway.
+			 */
+			if (tempAtom.inheritType != null && !tempAtom.inheritType.hasProviso() && 
+					tempAtom.base.getType().wordsize() == tempAtom.inheritType.wordsize()) {
+				OPT_DONE();
+				return tempAtom.base;
+			}
+		}
 		
 		return tempAtom;
 	}
