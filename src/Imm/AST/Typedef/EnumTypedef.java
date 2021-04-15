@@ -103,4 +103,8 @@ public class EnumTypedef extends SyntaxElement {
 		return code;
 	}
 
+	public SyntaxElement clone() {
+		return this;
+	}
+
 } 

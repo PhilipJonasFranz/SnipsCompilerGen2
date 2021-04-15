@@ -451,4 +451,8 @@ public class StructTypedef extends SyntaxElement {
 		return code;
 	}
 
+	public SyntaxElement clone() {
+		return this;
+	}
+
 } 

@@ -1060,8 +1060,16 @@ public class ContextChecker {
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		f.iterator.check(this);
-		if (f.iterator.value == null) 
-			throw new CTEX_EXC(f.getSource(), Const.ITERATOR_MUST_HAVE_INITIAL_VALUE);
+		
+		if (f.iterator instanceof Declaration) {
+			Declaration dec = (Declaration) f.iterator;
+			if (dec.value == null) 
+				throw new CTEX_EXC(f.getSource(), Const.ITERATOR_MUST_HAVE_INITIAL_VALUE);
+		}
+		else if (!(f.iterator instanceof IDRef)) {
+			/* Make sure iterator can only be IDRef or declaration */
+			throw new CTEX_EXC(f.getSource(), Const.EXPECTED_IDREF_ACTUAL, f.iterator.getClass().getSimpleName());
+		}
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		

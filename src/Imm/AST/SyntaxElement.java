@@ -112,4 +112,6 @@ public abstract class SyntaxElement {
 		return this.visit(x -> { return true; }).size();
 	}
 	
+	public abstract SyntaxElement clone();
+	
 } 

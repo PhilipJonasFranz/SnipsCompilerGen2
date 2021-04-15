@@ -1,5 +1,6 @@
 package Opt.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Exc.CGEN_EXC;
@@ -13,7 +14,11 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Expression.StructureInit;
+import Imm.AST.Statement.BreakStatement;
+import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.Statement.Statement;
+import Tools.ASTNodeVisitor;
 
 /**
  * Contains pre-built AST-Visitor matcher statements.
@@ -111,6 +116,19 @@ public class Matchers {
 		});
 		
 		return list.isEmpty();
+	}
+	
+	public static boolean hasLoopUnrollBlockerStatements(List<Statement> body) {
+		List<Statement> blockers = Matchers.visitBody(body, x -> {
+			return x instanceof Declaration || x instanceof ContinueStatement || x instanceof BreakStatement;
+		});
+		return !blockers.isEmpty();
+	}
+	
+	public static <T extends SyntaxElement> List<T> visitBody(List<Statement> body, ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		for (Statement s : body) result.addAll(s.visit(visitor));
+		return result;
 	}
 	
 }

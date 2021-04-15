@@ -35,6 +35,8 @@ public class ProgramState {
 			
 			if (this.currentValue != null) 
 				state0.currentValue = this.currentValue.clone();
+			else
+				state0.currentValue = null;
 			
 			return state0;
 		}
@@ -65,14 +67,14 @@ public class ProgramState {
 		this.isLoopedContext = isLoopedContext;
 		
 		if (parent != null) {
+			
 			this.parent = parent;
 			
 			/* Copy state of parent */
 			for (Entry<Declaration, VarState> entry : this.parent.cState.entrySet()) 
 				this.cState.put(entry.getKey(), entry.getValue().clone());
 			
-			for (Entry<String, Stack<Boolean>> entry : this.parent.settings.entrySet()) 
-				this.settings.put(entry.getKey(), (Stack<Boolean>) entry.getValue().clone());
+			this.settings = this.parent.settings;
 		}
 	}
 	
@@ -107,25 +109,21 @@ public class ProgramState {
 	/**
 	 * Disable the given setting in the settings-registry.
 	 */
-	public void disableSetting(String setting) {
+	public void pushSetting(String setting, boolean value) {
 		if (!this.settings.containsKey(setting)) {
 			Stack<Boolean> s = new Stack();
-			s.push(true);
-			
 			this.settings.put(setting, s);
 		}
 		
-		this.settings.get(setting).push(false);
+		this.settings.get(setting).push(value);
 	}
 	
 	/**
 	 * Enable given setting in the settings-registry.
 	 */
-	public void enableSetting(String setting) {
+	public void popSetting(String setting) {
 		if (!this.settings.containsKey(setting)) {
 			Stack<Boolean> s = new Stack();
-			s.push(false);
-			
 			this.settings.put(setting, s);
 		}
 	
@@ -161,7 +159,7 @@ public class ProgramState {
 					pState.read |= state.read;
 					pState.referenced |= state.referenced;
 					
-					if (pState.currentValue != null && !pState.currentValue.equals(state.currentValue)) {
+					if (pState.written) {
 						/* 
 						 * Value has changed in a child scopee of the parent. This
 						 * means that it is no longer guaranteed that the current value
@@ -171,6 +169,8 @@ public class ProgramState {
 					}
 				}
 			}
+			
+			this.parent.settings = this.settings;
 		}
 	}
 	
@@ -234,6 +234,28 @@ public class ProgramState {
 		if (this.cState.containsKey(dec)) 
 			return this.cState.get(dec).referenced || this.cState.get(dec).written || this.cState.get(dec).read;
 		return false;
+	}
+	
+	public void print() {
+		System.out.println(" ------ State Dump ------ ");
+		System.out.println("Looped: " + this.isLoopedContext);
+		for (Entry<Declaration, VarState> entry : this.cState.entrySet()) {
+			VarState state = entry.getValue();
+			
+			String s = entry.getKey().path.build() + " ";
+			
+			if (state.read) s += "read, ";
+			if (state.referenced) s += "referenced, ";
+			if (state.written) s += "write, ";
+			
+			if (state.currentValue != null) s += state.currentValue.codePrint();
+			else s += "null";
+			
+			s += ", isLooped: " + this.isInLoopedScope(state.declaration);
+			
+			System.out.println(s);
+		}
+		System.out.println(" ------------------------ ");
 	}
 	
 }

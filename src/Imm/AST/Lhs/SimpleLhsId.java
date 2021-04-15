@@ -73,7 +73,9 @@ public class SimpleLhsId extends LhsId {
 	}
 
 	public SimpleLhsId clone() {
-		return new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
+		SimpleLhsId lhs = new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
+		lhs.origin = this.origin;
+		return lhs;
 	}
 
 	public String codePrint() {

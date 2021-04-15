@@ -97,6 +97,8 @@ public class PointerLhsId extends LhsId {
 		if (this.deref != null)
 			lhs.deref = (Deref) lhs.shadowDeref;
 		
+		lhs.origin = this.origin;
+		
 		return lhs;
 	}
 

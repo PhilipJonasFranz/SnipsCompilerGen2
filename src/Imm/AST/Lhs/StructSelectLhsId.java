@@ -90,7 +90,9 @@ public class StructSelectLhsId extends LhsId {
 	}
 
 	public StructSelectLhsId clone() {
-		return new StructSelectLhsId((StructSelect) this.select.clone(), this.getSource().clone());
+		StructSelectLhsId lhs = new StructSelectLhsId((StructSelect) this.select.clone(), this.getSource().clone());
+		lhs.origin = this.origin;
+		return lhs;
 	}
 
 	public String codePrint() {

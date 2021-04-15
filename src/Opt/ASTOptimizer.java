@@ -1,6 +1,7 @@
 package Opt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
@@ -52,6 +53,7 @@ import Imm.AST.Lhs.PointerLhsId;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AST.Statement.AssignWriteback;
+import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AST.Statement.BreakStatement;
@@ -82,9 +84,11 @@ import Opt.Util.CompoundStatementRules;
 import Opt.Util.ExpressionMorpher;
 import Opt.Util.Makros;
 import Opt.Util.Matchers;
+import Opt.Util.FEATURE;
 import Opt.Util.OPT_STRATEGY;
 import Opt.Util.ProgramState;
 import Opt.Util.ProgramState.VarState;
+import Opt.Util.UnrollStatementUtil;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -114,10 +118,26 @@ public class ASTOptimizer {
 	private boolean OPT_DONE;
 	
 	/**
+	 * If set to true, this will indicate the optimizer that in the
+	 * previous round no optimizations were made. This will lead
+	 * the optimizer to use last round optimizations, see 
+	 * {@link #optBody(List, boolean, boolean)}. These optimizations
+	 * have great potential to shake things up but should not be 
+	 * executed constantly, hence this mechanism.
+	 */
+	private boolean LAST_ROUND = false;
+
+	/**
 	 * How many optimization cycles the optimizer had to do
 	 * for the given AST.
 	 */
 	public static int CYCLES = 0;
+	
+	/**
+	 * Perform at least this many cycles before stopping the
+	 * optimization process.
+	 */
+	public static int MIN_CYCLES = 8;
 	
 	/**
 	 * Used to keep track of the current phase of the optimizer.
@@ -152,18 +172,40 @@ public class ASTOptimizer {
 	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
 	
 	/**
+	 * Contains all enabled optimization features. This list is created upon
+	 * Compiler Driver startup, and based on the inputted parameters.
+	 */
+	public static List<FEATURE> ENABLED_FEATURES = Arrays.asList(FEATURE.LOOP_UNROLL);
+	
+	/**
 	 * If set to true, the AST before and after the optimization will be
 	 * print out in Snips-Code representation.
 	 */
-	private boolean PRINT_RESULT = false;
-
+	private boolean PRINT_RESULT = true;
+	
+	/** Keeps track of the LAST_ROUND value after each optimization cycle. */
+	private List<Boolean> lRoundHist = new ArrayList();
+	
+	/**
+	 * Signals that an optimization has been made at some location. Will
+	 * trigger another optimization cycle. Marking an optimization should
+	 * be done with great delicacy, since an infinite optimization loop
+	 * can be caused if an optimization is done repeadetly, but not applied
+	 * to the AST. The optimization is only marked if the setting 'PROBE' is
+	 * inactive.
+	 */
 	private void OPT_DONE() {
-		OPT_DONE = true;
+		if (!this.state.getSetting(Setting.PROBE)) {
+			OPT_DONE = true;
+			
+			/* Reset last round, optimization has been done */
+			LAST_ROUND = false;
+		}
 	}
 	
 	public Program optProgram(Program AST, Program AST0) throws OPT0_EXC {
 		try {
-			if (PRINT_RESULT) AST.codePrint(0).stream().forEach(System.out::println);
+			if (PRINT_RESULT) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
 
 			/*
 			 * Create 1-to-1 links between the functions in the original and duplicate
@@ -180,8 +222,10 @@ public class ASTOptimizer {
 			}
 			
 			/* Reset values and state */
+			lRoundHist.clear();
 			CYCLES = 0;
 			OPT_DONE = true;
+			LAST_ROUND = false;
 			subs_arg_n = 0;
 			
 			/*
@@ -190,19 +234,37 @@ public class ASTOptimizer {
 			 * the CURR_SUBS_SIZE value can grow a bit before premature cancellation
 			 * of the optimization algorithm.
 			 */
-			while (OPT_DONE || CYCLES < 8) {
+			while (OPT_DONE || CYCLES < MIN_CYCLES) {
+				
+				/* 
+				 * Keep track what LAST_ROUND was at each start of cycle, later
+				 * used to restore state when original AST catches up.
+				 */
+				lRoundHist.add(LAST_ROUND);
+				
 				CYCLES++;
 				OPT_DONE = false;
 			
 				/* Use fibonacci-sequence as substitution size. */
 				CURR_SUBS_SIZE = Util.fib(subs_arg_n);
-			
+				
 				/*
 				 * Perform one optimization cycle on paralell AST.
 				 */
 				phase = 1;
 				AST0 = this.optProgramStep(AST0);
 				
+				if (!OPT_DONE && CYCLES >= MIN_CYCLES) {
+					if (LAST_ROUND) break;
+					else {
+						LAST_ROUND = true;
+						OPT_DONE = true;
+					}
+				}
+
+				/* Create copy, optimization of original may change value */
+				boolean LAST_ROUND_C = LAST_ROUND;
+								
 				/*
 				 * Perform optimizations on original AST. But since phase = 2, 
 				 * the functions will decide wether to do optimizations or
@@ -211,6 +273,7 @@ public class ASTOptimizer {
 				phase = 2;
 				AST = this.optProgramStep(AST);
 				
+				LAST_ROUND = LAST_ROUND_C;
 				subs_arg_n++;
 			}
 			
@@ -228,7 +291,7 @@ public class ASTOptimizer {
 			new Message("Assuming AST is in consistent state, aborting OPT0, keeping changes.", Type.WARN);
 		}
 
-		if (PRINT_RESULT) AST.codePrint(0).stream().forEach(System.out::println);
+		if (PRINT_RESULT) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
 		
 		return AST;
 	}
@@ -241,6 +304,10 @@ public class ASTOptimizer {
 		/* Root program context. */
 		this.state = new ProgramState(null, false);
 		this.cStack.push(state);
+		
+		/* Push default settings */
+		this.state.pushSetting(Setting.PROBE, false);
+		this.state.pushSetting(Setting.SUBSTITUTION, true);
 		
 		/* Add globally used symbols. */
 		CompilerDriver.HEAP_START.opt(this);
@@ -263,6 +330,10 @@ public class ASTOptimizer {
 			else if (!s0.equals(s)) 
 				AST.programElements.set(AST.programElements.indexOf(s), s0);
 		}
+		
+		/* Remove default settings from settings-stack */
+		this.state.popSetting(Setting.SUBSTITUTION);
+		this.state.popSetting(Setting.PROBE);
 		
 		/* Reset state and scopes for next optimization round */
 		this.cStack.pop().transferContextChangeToParent();
@@ -320,6 +391,14 @@ public class ASTOptimizer {
 		for (int i = 0; i < repeat; i++) {
 			this.pushContext();
 		
+			/* 
+			 * We have to make sure that the LAST_ROUND field has the same value as it
+			 * had in the cycle when the duplicate AST optimized. If this is not the case,
+			 * the last round optimizations will not be executed in the same order as in
+			 * the other AST, resulting in different ASTs.
+			 */
+			if (phase == 2) LAST_ROUND = lRoundHist.get(CYCLES - repeat + i);
+			
 			for (Declaration dec : f.parameters) dec.opt(this);
 			f.body = this.optBody(f.body, false, false);
 			
@@ -345,8 +424,68 @@ public class ASTOptimizer {
 					DefaultStatement d = (DefaultStatement) s0;
 					body.remove(i);
 					body.addAll(i, d.body);
+					i--;
+					OPT_DONE();
 				}
-				else body.set(body.indexOf(s), s0);
+				else if (s0 instanceof IfStatement) {
+					IfStatement if0 = (IfStatement) s0;
+					if (Makros.isAlwaysTrue(if0.condition)) {
+						body.remove(i);
+						body.addAll(i, if0.body);
+						i--;
+						OPT_DONE();
+					}
+					else body.set(i, s0);
+				}
+				else body.set(i, s0);
+			}
+		}
+		
+		/*
+		 * Perform last round optimizations. The intuition is that these optimizations
+		 * will most likely cause optimizations, but spamming these optimizations each
+		 * round will result in a bloated AST (for example loop unrolling). So, we only
+		 * perform these optimizations if NO other optimization can be made. 
+		 * 
+		 * When these changes are made, the AST is shaken up a bit. Then, in the following
+		 * rounds, the changes get optimized further, and possibly collapsed. When no
+		 * further optimizations are possible, we can attempt another round of these 
+		 * optimizations.
+		 */
+		if (LAST_ROUND) {
+			List<Statement> done = new ArrayList();
+			for (int i = 0; i < body.size(); i++) {
+				Statement s = body.get(i);
+				
+				/* 
+				 * Last round optimizations add and remove statements from 
+				 * the body, so it can happen that a statement is caught multiple
+				 * times in this loop. But we only want each one to be done once,
+				 * so we check if the statement was already done.
+				 */
+				if (done.contains(s)) continue;
+				else done.add(s);
+				
+				if (s instanceof ForStatement) {
+					ForStatement f = (ForStatement) s;
+					
+					/* Attempt loop unrolling */
+					if (featureEnabled(FEATURE.LOOP_UNROLL) && 
+							UnrollStatementUtil.unrollForStatement(f, body)) {
+						OPT_DONE();
+						break;
+					}
+				}
+				else if (s instanceof WhileStatement) {
+					WhileStatement w = (WhileStatement) s;
+					
+					/* Attempt loop unrolling */
+					if (featureEnabled(FEATURE.LOOP_UNROLL) && 
+							UnrollStatementUtil.unrollWhileStatement(w, body)) {
+						OPT_DONE();
+						break;
+					}
+				}
 			}
 		}
 		
@@ -393,23 +532,22 @@ public class ASTOptimizer {
 		removed.stream().forEach(x -> {
 			this.state.remove(x);
 		});
-		
+	
 		if (pushContext) this.popContext();
 		return body;
 	}
 	
-	public List<Expression> optExpressionList(List<Expression> ops) throws OPT0_EXC {
+	public void optExpressionList(List<Expression> ops) throws OPT0_EXC {
 		for (int i = 0; i < ops.size(); i++) {
 			Expression s = ops.get(i);
 			Expression s0 = s.opt(this);
-			ops.set(ops.indexOf(s), s0);
+			
+			if (s0 != null) ops.set(i, s0);
 		}
-		
-		return ops;
 	}
 
 	public Expression optAddressOf(AddressOf aof) throws OPT0_EXC {
-		this.state.disableSetting(Setting.SUBSTITUTION);
+		this.state.pushSetting(Setting.SUBSTITUTION, false);
 		
 		Expression e0 = aof.expression.opt(this);
 		
@@ -429,7 +567,7 @@ public class ASTOptimizer {
 			aof.expression = e0;
 		}
 		
-		this.state.enableSetting(Setting.SUBSTITUTION);
+		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		List<IDRef> refs = aof.expression.visit(x -> x instanceof IDRef);
 		refs.stream().forEach(x -> {
@@ -561,9 +699,14 @@ public class ASTOptimizer {
 	}
 
 	public Expression optIDRefWriteback(IDRefWriteback wb) throws OPT0_EXC {
-		this.state.disableSetting(Setting.SUBSTITUTION);
+		/* 
+		 * Since we cannot increment an expression that may be substituted
+		 * instead of the idRef, we have to make sure substitution does not
+		 * take place.
+		 */
+		this.state.pushSetting(Setting.SUBSTITUTION, false);
 		wb.idRef.opt(this);
-		this.state.enableSetting(Setting.SUBSTITUTION);
+		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		this.state.setWrite(wb.idRef.origin, true);
 		return wb;
@@ -575,10 +718,10 @@ public class ASTOptimizer {
 			
 			boolean isNestedFirst = inlineCall.isNestedCall && i == 0;
 			
-			if (isNestedFirst) this.state.disableSetting(Setting.SUBSTITUTION);
+			if (isNestedFirst) this.state.pushSetting(Setting.SUBSTITUTION, false);
 			Expression e0 = e.opt(this);
 			if (isNestedFirst) {
-				this.state.enableSetting(Setting.SUBSTITUTION);
+				this.state.popSetting(Setting.SUBSTITUTION);
 				continue;
 			}
 			
@@ -677,7 +820,7 @@ public class ASTOptimizer {
 
 	public Expression optAdd(Add add) throws OPT0_EXC {
 		
-		add.operands = this.optExpressionList(add.operands);
+		this.optExpressionList(add.operands);
 		
 		/* Multiple equal operands, collapse into multiplication */
 		for (int i = 0; i < add.operands.size(); i++) {
@@ -749,7 +892,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optBitAnd(BitAnd b) throws OPT0_EXC {
-		b.operands = this.optExpressionList(b.operands);
+		this.optExpressionList(b.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -788,7 +931,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optBitOr(BitOr b) throws OPT0_EXC {
-		b.operands = this.optExpressionList(b.operands);
+		this.optExpressionList(b.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -809,7 +952,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optBitXor(BitXor b) throws OPT0_EXC {
-		b.operands = this.optExpressionList(b.operands);
+		this.optExpressionList(b.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -830,7 +973,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optLsl(Lsl lsl) throws OPT0_EXC {
-		lsl.operands = this.optExpressionList(lsl.operands);
+		this.optExpressionList(lsl.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -851,7 +994,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optLsr(Lsr lsr) throws OPT0_EXC {
-		lsr.operands = this.optExpressionList(lsr.operands);
+		this.optExpressionList(lsr.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -872,7 +1015,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optMul(Mul mul) throws OPT0_EXC {
-		mul.operands = this.optExpressionList(mul.operands);
+		this.optExpressionList(mul.operands);
 		
 		/* Precalc */
 		boolean allAtom = true;
@@ -893,7 +1036,7 @@ public class ASTOptimizer {
 	}
 	
 	public Expression optSub(Sub s) throws OPT0_EXC {
-		s.operands = this.optExpressionList(s.operands);
+		this.optExpressionList(s.operands);
 		
 		if (s.operands.size() == 2) {
 			/* -4 - -5 = 5 - 4 = 1 */
@@ -911,7 +1054,9 @@ public class ASTOptimizer {
 			if (s.operands.get(1) instanceof UnaryMinus) {
 				UnaryMinus right = (UnaryMinus) s.operands.get(1);
 				OPT_DONE();
-				return new Add(s.operands.get(0), right.getOperand(), s.getSource());
+				Add add = new Add(s.operands.get(0), right.getOperand(), s.getSource());
+				add.setType(s.operands.get(0).getType().clone());
+				return add;
 			}
 		}
 		
@@ -958,7 +1103,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optAnd(And and) throws OPT0_EXC {
-		and.operands = this.optExpressionList(and.operands);
+		this.optExpressionList(and.operands);
 		
 		/* false || value = false */
 		boolean hasFalseAtom = false;
@@ -973,7 +1118,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optCompare(Compare c) throws OPT0_EXC {
-		c.operands = this.optExpressionList(c.operands);
+		this.optExpressionList(c.operands);
 		
 		/*
 		 * If we get an equal operator, we can retrieve some information about the current
@@ -1044,7 +1189,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optOr(Or or) throws OPT0_EXC {
-		or.operands = this.optExpressionList(or.operands);
+		this.optExpressionList(or.operands);
 		
 		/* true || value = true */
 		boolean hasTrueAtom = false;
@@ -1107,8 +1252,8 @@ public class ASTOptimizer {
 
 	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) throws OPT0_EXC {
 		
-		if (simpleLhsId.origin != null)
-			this.state.setWrite(simpleLhsId.origin, true);
+		if (simpleLhsId.ref.origin != null)
+			this.state.setWrite(simpleLhsId.ref.origin, true);
 		
 		return simpleLhsId;
 	}
@@ -1129,13 +1274,13 @@ public class ASTOptimizer {
 		if (assignment.lhsId instanceof SimpleLhsId) {
 			SimpleLhsId lhs = (SimpleLhsId) assignment.lhsId;
 			
-			if (lhs.origin != null) {
-				origin = lhs.origin;
+			if (lhs.ref.origin != null) {
+				origin = lhs.ref.origin;
 			}
 		}
 		
 		assignment.value = assignment.value.opt(this);
-		assignment.lhsId = assignment.lhsId.opt(this);
+		assignment.lhsId.opt(this);
 		
 		if (origin != null && assignment.assignArith == ASSIGN_ARITH.NONE) {
 			
@@ -1184,11 +1329,14 @@ public class ASTOptimizer {
 				OPT_DONE();
 				return null;
 			}
-			
-			/**
-			 * Set value that was assigned to variable in program context
-			 */
-			this.state.get(origin).setCurrentValue(assignment.value);
+		}
+		
+		/* Set value that was assigned to variable in program context */
+		if (origin != null) {
+			if (assignment.assignArith == ASSIGN_ARITH.NONE)
+				this.state.get(origin).setCurrentValue(assignment.value.clone());
+			else
+				this.state.get(origin).clearCurrentValue();
 		}
 		
 		return assignment;
@@ -1197,8 +1345,6 @@ public class ASTOptimizer {
 	public Statement optAssignWriteback(AssignWriteback wb) throws OPT0_EXC {
 		wb.reference.opt(this);
 		
-		// TODO Check if incremented value is in same scope, and has atom as value. If yes, write back changes to current value
-		
 		/*
 		 * Signal in the current program context that the target of the writeback
 		 * operations has been modified.
@@ -1206,7 +1352,34 @@ public class ASTOptimizer {
 		if (wb.reference instanceof IDRefWriteback) {
 			IDRefWriteback idwb = (IDRefWriteback) wb.reference;
 			this.state.setWrite(idwb.idRef.origin, true);
+			
+			Expression cValue = this.state.get(idwb.idRef.origin).getCurrentValue();
 			this.state.get(idwb.idRef.origin).clearCurrentValue();
+			
+			/* Attempt to writeback new value into current value */
+			if (cValue instanceof Atom && cValue.getType().hasInt()) {
+				Atom atom = (Atom) cValue;
+				
+				int val = atom.getType().toInt();
+				if (idwb.writeback == WRITEBACK.INCR) val++;
+				else val--;
+				
+				atom.getType().value = val;
+				this.state.get(idwb.idRef.origin).setCurrentValue(atom);
+				OPT_DONE();
+				return null;
+			}
+			
+			/* Transform assign writeback into simple assignment: a++ -> a = a + 1 */
+			Expression value = null;
+			
+			if (idwb.writeback == WRITEBACK.INCR) value = new Add(idwb.idRef.clone(), new Atom(new INT("1"), idwb.getSource()), idwb.getSource());
+			else value = new Sub(idwb.idRef.clone(), new Atom(new INT("1"), idwb.getSource()), idwb.getSource());
+			value.setType(idwb.idRef.getType().clone());
+			
+			Assignment assign = new Assignment(ASSIGN_ARITH.NONE, new SimpleLhsId(idwb.idRef, idwb.getSource()), value, idwb.getSource());
+			OPT_DONE();
+			return assign;
 		}
 		else {
 			StructSelectWriteback sswb = (StructSelectWriteback) wb.reference;
@@ -1257,9 +1430,9 @@ public class ASTOptimizer {
 		for (Pair<Expression, REG> pair : d.dataOut) {
 			IDRef ref = (IDRef) pair.first;
 			
-			this.state.disableSetting(Setting.SUBSTITUTION);
+			this.state.pushSetting(Setting.SUBSTITUTION, false);
 			pair.first.opt(this);
-			this.state.enableSetting(Setting.SUBSTITUTION);
+			this.state.popSetting(Setting.SUBSTITUTION);
 			
 			this.state.setWrite(ref.origin, true);
 		}
@@ -1282,9 +1455,9 @@ public class ASTOptimizer {
 		forEachStatement.iterator.opt(this);
 		forEachStatement.counter.opt(this);
 		
-		this.state.disableSetting(Setting.SUBSTITUTION);
+		this.state.pushSetting(Setting.SUBSTITUTION, false);
 		forEachStatement.shadowRef.opt(this);
-		this.state.enableSetting(Setting.SUBSTITUTION);
+		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		forEachStatement.body = this.optBody(forEachStatement.body, true, true);
 		
@@ -1293,14 +1466,22 @@ public class ASTOptimizer {
 	}
 
 	public Statement optForStatement(ForStatement f) throws OPT0_EXC {
-		this.pushContext();
+		this.pushContext(true);
 		f.iterator.opt(this);
-		this.state.setWrite(f.iterator, true);
+		
+		if (f.iterator instanceof Declaration) {
+			Declaration dec = (Declaration) f.iterator;
+			this.state.setWrite(dec, true);
+		}
+		else {
+			IDRef ref = (IDRef) f.iterator;
+			this.state.setWrite(ref.origin, true);
+		}
 		
 		f.body = this.optBody(f.body, true, true);
 		
-		f.increment = f.increment.opt(this);
 		f.condition = f.condition.opt(this);
+		f.increment = f.increment.opt(this);
 		
 		this.popContext();
 		return f;
@@ -1312,10 +1493,10 @@ public class ASTOptimizer {
 			
 			boolean isNestedFirst = functionCall.isNestedCall && i == 0;
 			
-			if (isNestedFirst) this.state.disableSetting(Setting.SUBSTITUTION);
+			if (isNestedFirst) this.state.pushSetting(Setting.SUBSTITUTION, false);
 			Expression e0 = e.opt(this);
 			if (isNestedFirst) {
-				this.state.enableSetting(Setting.SUBSTITUTION);
+				this.state.popSetting(Setting.SUBSTITUTION);
 				continue;
 			}
 			
@@ -1330,9 +1511,11 @@ public class ASTOptimizer {
 	}
 
 	public Statement optIfStatement(IfStatement i) throws OPT0_EXC {
+		this.pushContext();
+		
 		if (i.condition != null)
 			i.condition = i.condition.opt(this);
-		
+
 		i.body = this.optBody(i.body, false, true);
 		
 		/*
@@ -1343,18 +1526,20 @@ public class ASTOptimizer {
 			OPT_DONE();
 		}
 		
+		if (i.elseStatement != null) {
+			Statement s = i.elseStatement.opt(this);
+			if (s instanceof IfStatement)
+				i.elseStatement = (IfStatement) s;
+		}
+		
+		this.popContext();
+		
 		/*
 		 * Condition is always false, remove from chain.
 		 */
 		if (i.condition != null && Makros.isAlwaysFalse(i.condition)) {
 			OPT_DONE();
 			return i.elseStatement;
-		}
-		
-		if (i.elseStatement != null) {
-			Statement s = i.elseStatement.opt(this);
-			if (s instanceof IfStatement)
-				i.elseStatement = (IfStatement) s;
 		}
 		
 		/*
@@ -1393,9 +1578,9 @@ public class ASTOptimizer {
 
 	public Statement optSwitchStatement(SwitchStatement s) throws OPT0_EXC {
 		
-		this.state.disableSetting(Setting.SUBSTITUTION);
+		this.state.pushSetting(Setting.SUBSTITUTION, false);
 		s.condition.opt(this);
-		this.state.enableSetting(Setting.SUBSTITUTION);
+		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		IDRef ref = (IDRef) s.condition;
 		Expression value = this.state.get(ref.origin).getCurrentValue();
@@ -1481,8 +1666,13 @@ public class ASTOptimizer {
 	}
 	
 	private void popContext() {
-		this.cStack.pop().transferContextChangeToParent();
+		ProgramState state = this.cStack.pop();
+		state.transferContextChangeToParent();
 		this.state = this.cStack.peek();
+	}
+	
+	private boolean featureEnabled(FEATURE feature) {
+		return ASTOptimizer.ENABLED_FEATURES.contains(feature);
 	}
 	
 }

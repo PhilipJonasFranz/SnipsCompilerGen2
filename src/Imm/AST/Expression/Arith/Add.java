@@ -37,7 +37,9 @@ public class Add extends NFoldExpression {
 			op0.add(e.clone());
 		
 		Add e = new Add(op0, this.getSource().clone());
-		e.setType(this.getType().clone());
+		if (this.getType() != null)
+			e.setType(this.getType().clone());
+		
 		return e;
 	}
 	

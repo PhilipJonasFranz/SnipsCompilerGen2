@@ -81,5 +81,9 @@ public class Program extends SyntaxElement {
 		
 		return code;
 	}
+
+	public SyntaxElement clone() {
+		return this;
+	}
 	
 } 

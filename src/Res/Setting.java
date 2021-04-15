@@ -12,4 +12,11 @@ public class Setting {
 	 */
 	public static final String SUBSTITUTION = "substitution";
 	
+	/**
+	 * If this setting is active, the OPT_DONE flag should not be
+	 * set in the scope of the setting. Used to test if under a given
+	 * condition an optimization is done for example.
+	 */
+	public static final String PROBE = "probe";
+	
 }

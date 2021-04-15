@@ -22,18 +22,20 @@ public class ForStatement extends ConditionalCompoundStatement {
 
 			/* ---< FIELDS >--- */
 	/** 
-	 * The declaration of the iterator. 
+	 * The declaration or IDRef of the iterator. 
 	 */
-	public Declaration iterator;
+	public SyntaxElement iterator;
 	
 	/** 
 	 * The iterator increment statement. 
 	 */
 	public Statement increment;
 	
+	public int CURR_UNROLL_DEPTH = 0;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public ForStatement(Declaration iterator, Expression condition, Statement increment, List<Statement> body, Source source) {
+	public ForStatement(SyntaxElement iterator, Expression condition, Statement increment, List<Statement> body, Source source) {
 		super(condition, body, source);
 		this.iterator = iterator;
 		this.increment = increment;
@@ -94,7 +96,12 @@ public class ForStatement extends ConditionalCompoundStatement {
 		if (inc.endsWith(";"))
 			inc = inc.substring(0, inc.length() - 1);
 		
-		String s = "for (" + this.iterator.codePrint(0).get(0) + " " + this.condition.codePrint() + "; " + inc + ") {";
+		String it = "";
+		/* Switch between Declaration and IDRef iterator codePrint implementations */
+		if (this.iterator instanceof Declaration) it = this.iterator.codePrint(0).get(0);
+		else it = ((Expression) this.iterator).codePrint() + ";";
+		
+		String s = "for (" + it + " " + this.condition.codePrint() + "; " + inc + ") {";
 		code.add(Util.pad(d) + s);
 		
 		for (Statement s0 : this.body)

@@ -293,4 +293,8 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		return code;
 	}
+
+	public SyntaxElement clone() {
+		return this;
+	}
 } 

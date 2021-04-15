@@ -20,6 +20,10 @@ import Util.Util;
  */
 public class WhileStatement extends ConditionalCompoundStatement {
 
+			/* ---< FIELDS >--- */
+	public int CURR_UNROLL_DEPTH = 0;
+	
+	
 			/* ---< CONSTRUCTORS >--- */
 	public WhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);

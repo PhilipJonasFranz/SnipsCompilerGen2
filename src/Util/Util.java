@@ -263,6 +263,8 @@ public class Util {
 	
 	/**
 	 * Iterative Fibonacci Sequence Implementation.
+	 * Returns Integer.MAX_VALUE if the value is too large to be stored in 
+	 * an integer.
 	 */
 	public static int fib(int n) {
 		int n1 = 1;
@@ -275,6 +277,7 @@ public class Util {
 			n--;
 		}
 		
+		if (n2 < 0) return Integer.MAX_VALUE;
 		return n2;
 	}
 	
