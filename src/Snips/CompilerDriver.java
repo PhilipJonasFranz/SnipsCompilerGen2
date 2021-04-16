@@ -699,8 +699,8 @@ public class CompilerDriver {
 				if (rate > c_max0) c_max0 = rate;
 			}
 			
-			opt0_loops += ASTOptimizer.CYCLES; opt0_exc++;
-			new Message("OPT0 -> Optimization Cycles: " + ASTOptimizer.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
+			opt0_loops += opt0.CYCLES; opt0_exc++;
+			new Message("OPT0 -> Optimization Cycles: " + opt0.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
 		}
 		
 		return AST;

@@ -131,13 +131,13 @@ public class ASTOptimizer {
 	 * How many optimization cycles the optimizer had to do
 	 * for the given AST.
 	 */
-	public static int CYCLES = 0;
+	public int CYCLES = 0;
 	
 	/**
 	 * Perform at least this many cycles before stopping the
 	 * optimization process.
 	 */
-	public static int MIN_CYCLES = 8;
+	public int MIN_CYCLES = 8;
 	
 	/**
 	 * Used to keep track of the current phase of the optimizer.
@@ -181,7 +181,13 @@ public class ASTOptimizer {
 	 * If set to true, the AST before and after the optimization will be
 	 * print out in Snips-Code representation.
 	 */
-	private boolean PRINT_RESULT = true;
+	public static boolean PRINT_RESULT = false;
+	
+	/**
+	 * If set to true, the entire program will be printed out after each
+	 * optimization round.
+	 */
+	public static boolean PRINT_INTERMEDIATE_STEPS = false;
 	
 	/** Keeps track of the LAST_ROUND value after each optimization cycle. */
 	private List<Boolean> lRoundHist = new ArrayList();
@@ -221,13 +227,6 @@ public class ASTOptimizer {
 				}
 			}
 			
-			/* Reset values and state */
-			lRoundHist.clear();
-			CYCLES = 0;
-			OPT_DONE = true;
-			LAST_ROUND = false;
-			subs_arg_n = 0;
-			
 			/*
 			 * Do optimization cycles as long as optimizations
 			 * are done. Enforce at least eight cycles. This is needed so that
@@ -253,6 +252,7 @@ public class ASTOptimizer {
 				 */
 				phase = 1;
 				AST0 = this.optProgramStep(AST0);
+				if (PRINT_INTERMEDIATE_STEPS) AST0.codePrint(0).stream().forEach(System.out::println);
 				
 				if (!OPT_DONE && CYCLES >= MIN_CYCLES) {
 					if (LAST_ROUND) break;
@@ -415,10 +415,8 @@ public class ASTOptimizer {
 			Statement s = body.get(i);
 			Statement s0 = s.opt(this);
 			
-			if (s0 == null) {
-				body.remove(i);
-				i--;
-			}
+			/* Statement was removed */
+			if (s0 == null) body.remove(i--);
 			else {
 				if (s0 instanceof DefaultStatement) {
 					DefaultStatement d = (DefaultStatement) s0;
@@ -1351,13 +1349,15 @@ public class ASTOptimizer {
 		 */
 		if (wb.reference instanceof IDRefWriteback) {
 			IDRefWriteback idwb = (IDRefWriteback) wb.reference;
-			this.state.setWrite(idwb.idRef.origin, true);
+			Declaration origin = idwb.idRef.origin;
 			
-			Expression cValue = this.state.get(idwb.idRef.origin).getCurrentValue();
-			this.state.get(idwb.idRef.origin).clearCurrentValue();
+			this.state.setWrite(origin, true);
+			
+			Expression cValue = this.state.get(origin).getCurrentValue();
+			this.state.get(origin).clearCurrentValue();
 			
 			/* Attempt to writeback new value into current value */
-			if (cValue instanceof Atom && cValue.getType().hasInt()) {
+			if (cValue instanceof Atom && cValue.getType().hasInt() && this.state.isDeclarationScope(origin)) {
 				Atom atom = (Atom) cValue;
 				
 				int val = atom.getType().toInt();
@@ -1365,7 +1365,7 @@ public class ASTOptimizer {
 				else val--;
 				
 				atom.getType().value = val;
-				this.state.get(idwb.idRef.origin).setCurrentValue(atom);
+				this.state.get(origin).setCurrentValue(atom);
 				OPT_DONE();
 				return null;
 			}
@@ -1377,7 +1377,9 @@ public class ASTOptimizer {
 			else value = new Sub(idwb.idRef.clone(), new Atom(new INT("1"), idwb.getSource()), idwb.getSource());
 			value.setType(idwb.idRef.getType().clone());
 			
-			Assignment assign = new Assignment(ASSIGN_ARITH.NONE, new SimpleLhsId(idwb.idRef, idwb.getSource()), value, idwb.getSource());
+			SimpleLhsId lhs = new SimpleLhsId(idwb.idRef, idwb.getSource());
+			lhs.origin = origin;
+			Assignment assign = new Assignment(ASSIGN_ARITH.NONE, lhs, value, idwb.getSource());
 			OPT_DONE();
 			return assign;
 		}
@@ -1526,13 +1528,13 @@ public class ASTOptimizer {
 			OPT_DONE();
 		}
 		
+		this.popContext();
+		
 		if (i.elseStatement != null) {
 			Statement s = i.elseStatement.opt(this);
 			if (s instanceof IfStatement)
 				i.elseStatement = (IfStatement) s;
 		}
-		
-		this.popContext();
 		
 		/*
 		 * Condition is always false, remove from chain.

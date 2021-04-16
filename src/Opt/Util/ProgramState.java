@@ -7,6 +7,7 @@ import java.util.Stack;
 import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Declaration;
+import Snips.CompilerDriver;
 
 public class ProgramState {
 		
@@ -237,8 +238,8 @@ public class ProgramState {
 	}
 	
 	public void print() {
-		System.out.println(" ------ State Dump ------ ");
-		System.out.println("Looped: " + this.isLoopedContext);
+		CompilerDriver.outs.println(" ------ State Dump ------ ");
+		CompilerDriver.outs.println("Looped: " + this.isLoopedContext);
 		for (Entry<Declaration, VarState> entry : this.cState.entrySet()) {
 			VarState state = entry.getValue();
 			
@@ -253,9 +254,9 @@ public class ProgramState {
 			
 			s += ", isLooped: " + this.isInLoopedScope(state.declaration);
 			
-			System.out.println(s);
+			CompilerDriver.outs.println(s);
 		}
-		System.out.println(" ------------------------ ");
+		CompilerDriver.outs.println(" ------------------------ ");
 	}
 	
 }

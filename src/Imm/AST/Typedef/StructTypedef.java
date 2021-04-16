@@ -444,6 +444,7 @@ public class StructTypedef extends SyntaxElement {
 		
 		for (Function f : this.functions) {
 			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
 		}
 		
 		code.add(Util.pad(d) + "}");

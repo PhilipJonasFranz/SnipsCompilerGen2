@@ -160,7 +160,7 @@ public class FunctionCall extends Statement implements Callee {
 			s = s.substring(0, s.length() - 2);
 		}
 		
-		s += ")";
+		s += ");";
 		code.add(Util.pad(d) + s);
 		return code;
 	}

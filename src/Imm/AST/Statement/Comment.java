@@ -12,7 +12,6 @@ import Opt.ASTOptimizer;
 import Par.Token;
 import Tools.ASTNodeVisitor;
 import Util.Source;
-import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -66,9 +65,7 @@ public class Comment extends Statement {
 	}
 
 	public List<String> codePrint(int d) {
-		List<String> code = new ArrayList();
-		code.add(Util.pad(d) + "/* " + this.comment + " */");
-		return code;
+		return new ArrayList();
 	}
 
 } 

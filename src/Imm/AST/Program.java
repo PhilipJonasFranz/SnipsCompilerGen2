@@ -75,8 +75,9 @@ public class Program extends SyntaxElement {
 		List<String> code = new ArrayList();
 		
 		for (SyntaxElement s0 : this.programElements) {
-			code.addAll(s0.codePrint(0));
-			code.add("");
+			List<String> code0 = s0.codePrint(0);
+			code.addAll(code0);
+			if (!code0.isEmpty()) code.add("");
 		}
 		
 		return code;
