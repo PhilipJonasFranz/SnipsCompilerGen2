@@ -598,6 +598,45 @@ will become after the Pre-Processor:
 
 When starting the compiler, using the `-F [Args]` argument, multiple flags can be passed to the Pre-Processor. These flags can then be used within `#ifdef` conditions. The passed flags are globally visible, meaning they extend over all translation units, including transitive imports.
 
+#### AST Optimizer Directives
+
+Next to the Pre-Processor directives, AST directives will be attatched to the AST during the parsing stage. These directives can have arguments and are read-out during the AST-Optimizer stage. Using these directives, the AST-Optimizer can be guided to achieve improved optimization results. A directive can be attatched to a statement or function by writing it one line above the target, like so:
+
+```c
+  #inline
+  int foo() {
+    #unroll depth = 10
+    for (int i = 0; i < 10; i++) ...
+  }
+```
+
+A directive can have no arguments or multiple of them. In case of having multiple arguments, they are seperated by a comma:
+
+```c
+  #somedirective foo = abc, bar = baz
+  int foo() {
+    ...
+  }
+```
+
+Directive arguments do not have to have a value, for example the `#strategy` directive:
+
+```c
+  #strategy always
+  int foo() {
+    ...
+  }
+```
+
+Currently available AST-Optimizer directives are:
+
+ |    Directive Name      |         Arguments              |                                        Description                                          |
+ | ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------------- |
+ | unroll                 | depth &lt;n&gt;                | Attatch to a loop to indicate the Optimizer &lt;n&gt; loop-unrolls should bee made.         |
+ | inline                 | -                              | Attatch to a function to indicate that this function should be inlined when possible.       |
+ | unsafe                 | -                              | Attatch to function to exclude from optimizer, indicates it is performing unsafe operations.|
+ | strategy               | &lt;always, on_improvement&gt; | Attatch to function to overwrite default optimization strategy for function scope.          |
+
 ### Header Files
 
 Header files are a way to define the contents of a module without including the contents itself. For example, method signatures can be declared in a header file, without including their bodies. Using header files and including header files instead of a single source file can speed up the compilation process when the `-r` or `-R` argument flag is not set. In this case, the compiler only reads in the included imports. If the imports are header files, the compiler will only create signatures and type definitions based on the contents of the header. Later, during the linking-stage, the compiler will read-in existing module translations and copy the required assembly into the main translation unit.
