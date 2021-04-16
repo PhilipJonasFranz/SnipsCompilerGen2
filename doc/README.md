@@ -536,7 +536,7 @@ Using the `#include<[Path]>` directive, code from other files can be included in
 - Relative filepath to the main file the compiler was called with
 - Alias Names, which is only available for included libraries
 
-Example
+Example:
 
 ```c
   // Absolute import
@@ -555,7 +555,7 @@ Warning: A limitation of the system are cyclic imports. This means `A` imports `
 
 Using the `#define [Value] [Replace With]` directive, an alias for a value can be created. All instances of this value will be replaced with the second argument. This can be used to dynamically create code, and ties in with the ifdef-directive. 
 
-Example
+Example:
 
 ```c
   #define dimension 3
@@ -572,6 +572,27 @@ will become after the Pre-Processor:
 #### If-Define Directive
 
 Using the `#ifdef [Condition]` directive, code can be included or excluded based on the condition. A block is defined by a leading `#ifdef` and closed by a `#end` directive. These blocks may be capsuled. If a block's condition is evaluated to false, all of the block's contents, including other directives, will be removed. The condition may be be equal to `true`, `false`, `[FLAG]`, where the flag was passed from the command line. Note that using `#define`, flags can be created in the code itself, which are then substituted into the condition by the Pre-Processor.
+
+Example:
+
+```c
+  #define includeFunction true
+  ...
+  #ifdef includeFunction
+  int foo() {
+    ...
+  }
+  #end
+```
+
+will become after the Pre-Processor:
+
+
+```c
+  int foo() {
+    ...
+  }
+```
 
 #### Passing Pre-Processor Flags from the Command Line
 
