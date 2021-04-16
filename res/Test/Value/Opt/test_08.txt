@@ -1,0 +1,65 @@
+SOURCE
+#define accum true
+
+#ifdef accum
+
+int add() {
+	return 10;
+}
+
+#end
+
+int main(int x) {
+	int sum = 12;
+	
+#ifdef accum	
+	sum = sum + add();
+#end
+	
+	return sum;
+}
+TESTCASES
+22
+OUTPUT
+.version -6997072537
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global add
+add:                                         /* Function: add */
+    mov r0, #10                              /* Evaluate Expression */
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r0, #12                              /* Evaluate Expression */
+    mov r4, #12
+    bl add                                   /* Evaluate Expression */
+    add r4, r4, r0
+    mov r0, r4                               /* Evaluate Expression */
+    pop { pc }

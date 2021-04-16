@@ -828,6 +828,16 @@ public class CompilerDriver {
 													pruneModules = true;
 				}
 				else if (args [i].equals("-L")) 	linkOnly = true;
+				else if (args [i].equals("-F")) {
+					List<String> flags = new ArrayList();
+					i++;
+					while (i < args.length && !args [i].startsWith("-")) {
+						flags.add(args [i]);
+						i++;
+					}
+					
+					PreProcessor.passedFlags = flags;
+				}
 				else if (args [i].equals("-log")) {
 													logoPrinted = false;
 													silenced = false;
@@ -865,6 +875,7 @@ public class CompilerDriver {
 				"-r        : Re-build all changed required modules and save them",
 				"-R        : Force to re-build all required modules and save them",
 				"-L        : Link the given assembly file. Requires the input file to be a .s file.",
+				"-F        : Pass define flags to the PreProcessor to use in #ifdef directives.",
 				"-imm      : Print out immediate representations",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"
@@ -933,6 +944,7 @@ public class CompilerDriver {
 		expectError = false;
 		AsNBody.translationUnits.clear();
 		PreProcessor.importsPerFile.clear();
+		PreProcessor.passedFlags.clear();
 	}
 	
 } 

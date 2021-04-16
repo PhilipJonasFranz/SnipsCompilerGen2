@@ -9,7 +9,6 @@ import java.util.Stack;
 import Exc.SNIPS_EXC;
 import Res.Const;
 import Snips.CompilerDriver;
-import Util.Pair;
 import Util.Source;
 import Util.Util;
 import Util.Logging.LogPoint;
@@ -19,6 +18,8 @@ import XMLParser.XMLParser.XMLNode;
 
 public class PreProcessor {
 
+	public static List<String> passedFlags = new ArrayList();
+	
 	public static HashMap<String, List<String>> importsPerFile = new HashMap();
 	
 	public class LineObject {
@@ -39,8 +40,6 @@ public class PreProcessor {
 		}
 		
 	}
-	
-	List<Pair<String, String>> aliases = new ArrayList();
 	
 	List<LineObject> process = new ArrayList();
 	
@@ -64,11 +63,45 @@ public class PreProcessor {
 		
 		for (int i = 0; i < this.process.size(); i++) {
 			String line = this.process.get(i).line.trim();
-			if (line.startsWith("#define")) {
+			if (line.startsWith("#ifdef")) {
 				String s = this.process.remove(i).line.trim();
 				String [] sp = s.split(" ");
 				
-				this.aliases.add(new Pair<String, String>(sp [1], sp [2]));
+				String cond = line.substring(sp [0].length() + 1);
+				boolean eval = PreProcessor.evaluate(cond);
+				
+				int c = 1;
+				if (eval) {
+					int a = i;
+					while (a != this.process.size()) {
+						String s0 = this.process.get(a).line.trim();
+						
+						if (s0.startsWith("#end")) c--;
+						else if (s0.startsWith("#ifdef")) c++;
+						
+						if (c == 0) {
+							this.process.remove(a);
+							break;
+						}
+						
+						a++;
+					}
+				}
+				else {
+					while (i != this.process.size()) {
+						String s0 = this.process.get(i).line.trim();
+						
+						if (s0.startsWith("#end")) c--;
+						else if (s0.startsWith("#ifdef")) c++;
+						
+						this.process.remove(i);
+						if (c == 0) break;
+					}
+				}
+			}
+			else if (line.startsWith("#define")) {
+				String s = this.process.remove(i).line.trim();
+				String [] sp = s.split(" ");
 				
 				for (int a = i; a < this.process.size(); a++) {
 					String s0 = this.process.get(a).line;
@@ -225,6 +258,17 @@ public class PreProcessor {
 			String [] sp = filePath.split("/") ;
 			String in = CompilerDriver.inputFile.getParent();
 			return in + "/" + sp [sp.length - 1];
+		}
+	}
+	
+	public static boolean evaluate(String cond) {
+		cond = cond.trim();
+		if (cond.equals("true")) return true;
+		else if (cond.equals("false")) return false;
+		else if (passedFlags.contains(cond)) return true;
+		else {
+			/* Implement ||, &&, ! */
+			return false;
 		}
 	}
 	

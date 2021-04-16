@@ -24,27 +24,27 @@ import Util.ASTDirective.DIRECTIVE;
  * take place. Example for forStatement:
  * 
  * 	int main() {
- *    int a = 15;
- *    int i = 5;
- *    for (i; i < 5; i = i + 1) {
- *      a = a + 1;
- *    }
- *    return a;
+ *      int a = 15;
+ *      int i = 5;
+ *      for (i; i < 5; i = i + 1) {
+ *          a = a + 1;
+ *      }
+ *      return a;
  *  }
  * 
  * will become
  * 
  *  int main() {
- *    int a = 15;
- *    int i = 5;
- *    if (i < 5) {
- *    	a = a + 1;
- *      i = i + 1;
- *      for (i; i < 5; i = i + 1) {
- *        a = a + 1;
+ *      int a = 15;
+ *      int i = 5;
+ *      if (i < 5) {
+ *    	    a = a + 1;
+ *          i = i + 1;
+ *          for (i; i < 5; i = i + 1) {
+ *              a = a + 1;
+ *          }
  *      }
- *    }
- *    return a;
+ *      return a;
  *  }
  * 
  * The second if-statement can be simplified and potentially this will lead to
@@ -83,7 +83,6 @@ public class UnrollStatementUtil {
 			ref.origin = dec;
 			f.iterator = ref;
 		}
-		
 		
 		List<Statement> bodyCopy = Makros.copyBody(f.body);
 		bodyCopy.add(f.increment.clone());
