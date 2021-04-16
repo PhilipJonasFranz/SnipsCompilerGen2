@@ -61,7 +61,7 @@ main.L1:
 main.L6: 
     cmp r6, #4
     bge main.L7
-    lsl r4, r4, #1
+    add r4, r4, r4
     add r6, r6, #1
     b main.L6
 main.L7: 

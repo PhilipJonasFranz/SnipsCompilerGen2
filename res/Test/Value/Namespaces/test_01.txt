@@ -17,7 +17,7 @@ int main() {
 TESTCASES
 26
 OUTPUT
-.version 17789608130
+.version 18914050043
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -49,16 +49,9 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    ldr r0, .P684256981_Foo.Baz.x            /* Load from .data section */
-    ldr r0, [r0]
-    add r1, r0, #1
-    ldr r2, .P684256981_Foo.Baz.x            /* Load from .data section */
-    str r1, [r2]
-    ldr r1, .P684256981_Foo.Baz.x            /* Evaluate Expression */
-    ldr r1, [r1]
-    ldr r2, .P684256981_Bar.x                /* Load from .data section */
-    ldr r2, [r2]
-    add r0, r1, r2
+    mov r0, #11                              /* Evaluate Expression */
+    ldr r1, .P684256981_Foo.Baz.x
+    str r0, [r1]
+    mov r0, #26                              /* Evaluate Expression */
     bx lr
-.P684256981_Bar.x: .word Bar.x
 .P684256981_Foo.Baz.x: .word Foo.Baz.x

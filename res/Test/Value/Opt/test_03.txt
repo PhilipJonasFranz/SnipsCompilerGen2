@@ -17,7 +17,7 @@ int main(int b) {
 TESTCASES
 5 50
 OUTPUT
-.version 10063265898
+.version 12157221059
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -48,7 +48,6 @@ _routine_stack_copy_end_:
 .global main
 main:                                        /* Function: main */
     add r1, r0, #10
-    lsl r4, r1, #1
-    add r4, r4, #20
-    mov r0, r4                               /* Evaluate Expression */
+    lsl r1, r1, #1
+    add r0, r1, #20
     bx lr
