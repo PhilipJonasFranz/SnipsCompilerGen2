@@ -87,7 +87,9 @@ int main() {
  | `-com`           | Remove comments from output                               | `false`            |
  | `-warn`          | Disable warnings in console                               | `false`            |
  | `-imp`           | Print out imported libraries                              | `false`            |
- | `-opt`           | Disable Assembly optimizer                                | `false`            |
+ | `-opt`           | Disable all optimizers                                    | `false`            |
+ | `-opt0`          | Disable AST optimizer                                     | `false`            |
+ | `-opt1`          | Disable ASM optimizer                                     | `false`            |
  | `-ofs`           | Optimize for filesize                                     | `false`            |
  | `-rov`           | Ignore errors from modifiers                              | `false`            |
  | `-sid`           | Disable Struct IDs                                        | `false`            |
@@ -97,6 +99,7 @@ int main() {
  | `-r`             | Recursively re-compile all included modules               | `false`            |
  | `-R`             | Same as `-r`, but prune all existing module dumps         | `false`            |
  | `-L`             | Link given program, requires input to be .s file          | `false`            |
+ | `-F [Args]`      | Pass Pre-Processor directive flags                        | `[]`               |
  | `-o [Path]`      | Specify output path                                       | Directory of input |
  
 ### Running the code
