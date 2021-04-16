@@ -99,6 +99,9 @@ public class PointerLhsId extends LhsId {
 		
 		lhs.origin = this.origin;
 		
+		if (this.expressionType != null)
+			lhs.expressionType = this.expressionType.clone();
+		
 		return lhs;
 	}
 

@@ -63,6 +63,9 @@ public class TestDriver {
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
+	/** The amount of milliseconds the compiler can run for a given program before being considered timeouted. */
+	public long MAX_COMPILE_TIME = 5000;
+	
 	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
 	
@@ -591,10 +594,8 @@ public class TestDriver {
 		
 		compileThread.start();
 		
-		long MAX_RUNTIME = 2000;
-		
 		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() - start < MAX_RUNTIME && out [0] == null) {
+		while (System.currentTimeMillis() - start < MAX_COMPILE_TIME && out [0] == null) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
@@ -602,7 +603,7 @@ public class TestDriver {
 			}
 		}
 		
-		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_RUNTIME) {
+		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_COMPILE_TIME) {
 			timeout = true;
 			return null;
 		}

@@ -75,6 +75,10 @@ public class ArraySelectLhsId extends LhsId {
 	public ArraySelectLhsId clone() {
 		ArraySelectLhsId lhs = new ArraySelectLhsId((ArraySelect) this.selection.clone(), this.getSource().clone());
 		lhs.origin = this.origin;
+		
+		if (this.expressionType != null)
+			lhs.expressionType = this.expressionType.clone();
+		
 		return lhs;
 	}
 

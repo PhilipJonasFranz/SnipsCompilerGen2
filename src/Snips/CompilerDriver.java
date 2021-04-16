@@ -611,7 +611,7 @@ public class CompilerDriver {
 		PreProcessor preProcess = new PreProcessor(codeIn, inputFile.getPath());
 		List<LineObject> preCode = preProcess.getProcessed();
 		if (CompilerDriver.buildModulesRecurse) 
-			new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
+			new Message("Recompiling " + preProcess.modulesIncluded + " modules", Type.INFO);
 		
 		return preCode;
 	}

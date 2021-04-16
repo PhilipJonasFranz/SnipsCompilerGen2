@@ -43,7 +43,7 @@ public class PreProcessor {
 	
 	public List<String> imported = new ArrayList();
 	
-	public static int modulesIncluded = 0;
+	public int modulesIncluded = 0;
 	
 	/**
 	 * Create new instance, convert code input into LineObject representation

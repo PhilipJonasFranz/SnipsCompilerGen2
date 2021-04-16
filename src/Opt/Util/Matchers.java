@@ -125,6 +125,22 @@ public class Matchers {
 		return !blockers.isEmpty();
 	}
 	
+	/**
+	 * Check if the given expressions contains any IDRefs where the origin has
+	 * been overwritten in the given state.
+	 */
+	public static boolean hasOverwrittenVariables(Expression e, ProgramState state) {
+		List<Expression> list = e.visit(x -> {
+			if (e instanceof IDRef) {
+				IDRef ref = (IDRef) e;
+				return state.getWrite(ref.origin);
+			}
+			return false;
+		});
+		
+		return !list.isEmpty();
+	}
+	
 	public static <T extends SyntaxElement> List<T> visitBody(List<Statement> body, ASTNodeVisitor<T> visitor) {
 		List<T> result = new ArrayList();
 		for (Statement s : body) result.addAll(s.visit(visitor));

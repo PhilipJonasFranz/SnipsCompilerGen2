@@ -588,6 +588,8 @@ public class ASTOptimizer {
 
 	public Expression optArraySelect(ArraySelect arraySelect) throws OPT0_EXC {
 		
+		this.optExpressionList(arraySelect.selection);
+		
 		this.state.setRead(arraySelect.idRef.origin);
 		
 		return arraySelect;
@@ -834,6 +836,9 @@ public class ASTOptimizer {
 				
 				for (int a = i + 1; a < add.operands.size(); a++) {
 					Expression e1 = add.operands.get(a);
+					
+					if (Matchers.hasOverwrittenVariables(e1, this.state)) continue;
+					
 					if (e0.codePrint().equals(e1.codePrint())) indicies.add(a);
 				}
 				
@@ -1379,6 +1384,7 @@ public class ASTOptimizer {
 			
 			SimpleLhsId lhs = new SimpleLhsId(idwb.idRef, idwb.getSource());
 			lhs.origin = origin;
+			lhs.expressionType = origin.getType().clone();
 			Assignment assign = new Assignment(ASSIGN_ARITH.NONE, lhs, value, idwb.getSource());
 			OPT_DONE();
 			return assign;

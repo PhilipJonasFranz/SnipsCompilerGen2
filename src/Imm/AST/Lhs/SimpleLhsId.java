@@ -75,6 +75,10 @@ public class SimpleLhsId extends LhsId {
 	public SimpleLhsId clone() {
 		SimpleLhsId lhs = new SimpleLhsId((IDRef) this.ref.clone(), this.getSource().clone());
 		lhs.origin = this.origin;
+		
+		if (this.expressionType != null)
+			lhs.expressionType = this.expressionType.clone();
+		
 		return lhs;
 	}
 
