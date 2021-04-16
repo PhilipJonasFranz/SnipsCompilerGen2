@@ -92,6 +92,7 @@ public class TempAtom extends Expression {
 			t.inheritType = this.inheritType.clone();
 		
 		t.setType(this.getType().clone());
+		t.copyDirectivesFrom(this);
 		return t;
 	}
 

@@ -9,6 +9,7 @@ import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.WhileStatement;
+import Util.ASTDirective.DIRECTIVE;
 
 /**
  * Contains methods that allow loop unrolling for 
@@ -21,9 +22,12 @@ public class UnrollStatementUtil {
 	
 	public static boolean unrollForStatement(ForStatement f, List<Statement> body) {
 		
+		/* Check if loop was marked to be unrolled */
+		if (!f.hasDirective(DIRECTIVE.UNROLL)) return false;
+		
 		/* Abort if maximum unroll depth is exceeded */
-		if (f.CURR_UNROLL_DEPTH > MAX_UNROLL_DEPTH) return false;
-		f.CURR_UNROLL_DEPTH++;
+		if (f.CURR_UNROLL_DEPTH < 0) return false;
+		f.CURR_UNROLL_DEPTH--;
 		
 		/* 
 		 * Make sure no declaration is created within the loop body. 
@@ -96,9 +100,12 @@ public class UnrollStatementUtil {
 	
 	public static boolean unrollWhileStatement(WhileStatement w, List<Statement> body) {
 		
+		/* Check if loop was marked to be unrolled */
+		if (!w.hasDirective(DIRECTIVE.UNROLL)) return false;
+		
 		/* Abort if maximum unroll depth is exceeded */
-		if (w.CURR_UNROLL_DEPTH > MAX_UNROLL_DEPTH) return false;
-		w.CURR_UNROLL_DEPTH++;
+		if (w.CURR_UNROLL_DEPTH < 0) return false;
+		w.CURR_UNROLL_DEPTH--;
 		
 		/* 
 		 * Make sure no declaration is created within the loop body. 

@@ -69,6 +69,7 @@ public class BreakStatement extends Statement {
 	public Statement clone() {
 		BreakStatement b = new BreakStatement(this.getSource().clone());
 		b.superLoop = this.superLoop;
+		b.copyDirectivesFrom(this);
 		return b;
 	}
 	

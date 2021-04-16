@@ -81,6 +81,7 @@ public class Ternary extends Expression {
 	public Expression clone() {
 		Ternary t = new Ternary(this.condition.clone(), this.left.clone(), this.right.clone(), this.getSource().clone());
 		t.setType(this.getType().clone());
+		t.copyDirectivesFrom(this);
 		return t;
 	}
 	

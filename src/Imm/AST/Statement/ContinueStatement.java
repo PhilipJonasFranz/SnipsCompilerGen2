@@ -69,6 +69,7 @@ public class ContinueStatement extends Statement {
 	public Statement clone() {
 		ContinueStatement b = new ContinueStatement(this.getSource().clone());
 		b.superLoop = this.superLoop;
+		b.copyDirectivesFrom(this);
 		return b;
 	}
 

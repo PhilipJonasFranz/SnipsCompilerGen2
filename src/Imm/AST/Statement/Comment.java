@@ -61,7 +61,9 @@ public class Comment extends Statement {
 	}
 
 	public Statement clone() {
-		return new Comment(this.comment, this.getSource().clone());
+		Comment com = new Comment(this.comment, this.getSource().clone());
+		com.copyDirectivesFrom(this);
+		return com;
 	}
 
 	public List<String> codePrint(int d) {

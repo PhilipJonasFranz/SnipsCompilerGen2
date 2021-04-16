@@ -27,6 +27,7 @@ public class UnaryMinus extends UnaryExpression {
 	public UnaryExpression clone() {
 		UnaryMinus um = new UnaryMinus(this.getOperand().clone(), this.getSource().clone());
 		um.setType(this.getType().clone());
+		um.copyDirectivesFrom(this);
 		return um;
 	}
 	

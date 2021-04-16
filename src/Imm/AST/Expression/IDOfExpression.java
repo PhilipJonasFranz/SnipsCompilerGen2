@@ -71,6 +71,7 @@ public class IDOfExpression extends Expression {
 	public Expression clone() {
 		IDOfExpression iof = new IDOfExpression(this.type.clone(), this.getSource().clone());
 		iof.setType(this.getType().clone());
+		iof.copyDirectivesFrom(this);
 		return iof;
 	}
 

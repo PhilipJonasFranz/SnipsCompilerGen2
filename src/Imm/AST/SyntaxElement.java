@@ -1,5 +1,6 @@
 package Imm.AST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -9,6 +10,8 @@ import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Tools.ASTNodeVisitor;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.Source;
 
 /**
@@ -32,6 +35,8 @@ public abstract class SyntaxElement {
 	 * The location of this syntax element in the source code, row and column representation. 
 	 */
 	Source source;
+	
+	public List<ASTDirective> activeAnnotations = new ArrayList();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -113,5 +118,24 @@ public abstract class SyntaxElement {
 	}
 	
 	public abstract SyntaxElement clone();
+	
+	/**
+	 * Copy all directives from the given SyntaxElement and add them to the own
+	 * active ASTDirectives list.
+	 */
+	public void copyDirectivesFrom(SyntaxElement s) {
+		for (ASTDirective dir : s.activeAnnotations)
+			this.activeAnnotations.add(dir.clone());
+	}
+	
+	public boolean hasDirective(DIRECTIVE annotation) {
+		return this.activeAnnotations.stream().filter(x -> x.type == annotation).count() > 0;
+	}
+	
+	public ASTDirective getDirective(DIRECTIVE annotation) {
+		for (ASTDirective x : this.activeAnnotations)
+			if (x.type == annotation) return x;
+		return null;
+	}
 	
 } 

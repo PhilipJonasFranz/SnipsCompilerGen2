@@ -146,6 +146,7 @@ public class ForEachStatement extends CompoundStatement {
 		if (this.select != null)
 			f.select = (ArraySelect) this.select.clone();
 		
+		f.copyDirectivesFrom(this);
 		return f;
 	}
 	

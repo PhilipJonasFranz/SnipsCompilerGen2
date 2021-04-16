@@ -38,6 +38,7 @@ public class Sub extends NFoldExpression {
 		
 		Sub e = new Sub(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

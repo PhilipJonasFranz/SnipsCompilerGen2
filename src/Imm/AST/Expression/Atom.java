@@ -65,6 +65,7 @@ public class Atom extends Expression {
 	public Expression clone() {
 		Atom atom = new Atom(this.getType().clone(), this.getSource().clone());
 		atom.setType(this.getType().clone());
+		atom.copyDirectivesFrom(this);
 		return atom;
 	}
 

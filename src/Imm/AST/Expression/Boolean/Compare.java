@@ -71,6 +71,7 @@ public class Compare extends NFoldExpression {
 		
 		Compare e = new Compare(op0, this.comparator, this.getSource().clone());
 		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

@@ -149,6 +149,7 @@ public class Declaration extends Statement {
 		if (this.value != null) clone.value = this.value.clone();
 		
 		clone.SERIAL = this.SERIAL;
+		clone.copyDirectivesFrom(this);
 		return clone;
 	}
 

@@ -76,6 +76,7 @@ public class SizeOfExpression extends Expression {
 	public Expression clone() {
 		SizeOfExpression soe = new SizeOfExpression(this.expression.clone(), this.getSource().clone());
 		soe.setType(this.getType().clone());
+		soe.copyDirectivesFrom(this);
 		return soe;
 	}
 

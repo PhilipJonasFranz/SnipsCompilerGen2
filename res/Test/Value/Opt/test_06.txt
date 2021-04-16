@@ -2,10 +2,12 @@ SOURCE
 int main() {
 	int a = 10;
 	
+	# unroll depth = 5
 	for (int i = 0; i < 5; i++) {
 		a = a + 1;
 	}
 	
+	#unroll depth = 10
 	while (a > 6) a--;
 	
 	return a;

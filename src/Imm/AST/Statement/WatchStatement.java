@@ -82,6 +82,7 @@ public class WatchStatement extends CompoundStatement {
 		
 		WatchStatement w = new WatchStatement(this.cloneBody(), wc, this.getSource().clone());
 		w.hasTarget = this.hasTarget;
+		w.copyDirectivesFrom(this);
 		return w;
 	}
 	

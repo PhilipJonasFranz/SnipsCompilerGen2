@@ -69,6 +69,7 @@ public class CaseStatement extends ConditionalCompoundStatement {
 	public Statement clone() {
 		CaseStatement c = new CaseStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
 		c.superStatement = this.superStatement;
+		c.copyDirectivesFrom(this);
 		return c;
 	}
 	

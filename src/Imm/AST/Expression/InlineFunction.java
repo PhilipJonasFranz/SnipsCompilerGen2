@@ -72,6 +72,7 @@ public class InlineFunction extends Expression {
 		if (this.getType() != null)
 			if0.setType(this.getType().clone());
 		
+		if0.copyDirectivesFrom(this);
 		return if0;
 	}
 

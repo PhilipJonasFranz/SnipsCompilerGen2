@@ -10,6 +10,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
+import Opt.Util.UnrollStatementUtil;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
@@ -31,7 +32,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 	 */
 	public Statement increment;
 	
-	public int CURR_UNROLL_DEPTH = 0;
+	public int CURR_UNROLL_DEPTH = UnrollStatementUtil.MAX_UNROLL_DEPTH;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -86,7 +87,9 @@ public class ForStatement extends ConditionalCompoundStatement {
 	}
 
 	public Statement clone() {
-		return new ForStatement(this.iterator.clone(), this.condition.clone(), this.increment.clone(), this.cloneBody(), this.getSource().clone());
+		ForStatement f = new ForStatement(this.iterator.clone(), this.condition.clone(), this.increment.clone(), this.cloneBody(), this.getSource().clone());
+		f.copyDirectivesFrom(this);
+		return f;
 	}
 
 	public List<String> codePrint(int d) {

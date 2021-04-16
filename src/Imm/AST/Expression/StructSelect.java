@@ -82,6 +82,7 @@ public class StructSelect extends Expression {
 		if (this.getType() != null) 
 			ss.setType(this.getType().clone());
 		
+		ss.copyDirectivesFrom(this);
 		return ss;
 	}
 

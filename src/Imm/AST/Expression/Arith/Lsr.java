@@ -38,6 +38,7 @@ public class Lsr extends NFoldExpression {
 		
 		Lsr e = new Lsr(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

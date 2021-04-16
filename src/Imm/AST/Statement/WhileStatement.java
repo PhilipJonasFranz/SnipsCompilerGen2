@@ -70,7 +70,9 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	}
 
 	public WhileStatement clone() {
-		return new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		WhileStatement w = new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		w.copyDirectivesFrom(this);
+		return w;
 	}
 	
 	public List<String> codePrint(int d) {

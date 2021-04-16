@@ -104,7 +104,9 @@ public class Namespace extends SyntaxElement {
 	public Namespace clone() {
 		List<SyntaxElement> copy = new ArrayList();
 		for (SyntaxElement s : this.programElements) copy.add(s.clone());
-		return new Namespace(this.path.clone(), copy, this.getSource().clone());
+		Namespace name = new Namespace(this.path.clone(), copy, this.getSource().clone());
+		name.copyDirectivesFrom(this);
+		return name;
 	}
 
 } 

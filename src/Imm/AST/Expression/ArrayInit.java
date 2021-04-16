@@ -83,6 +83,7 @@ public class ArrayInit extends Expression {
 		
 		ArrayInit init = new ArrayInit(eclone, this.dontCareTypes, this.getSource().clone());
 		init.setType(this.getType().clone());
+		init.copyDirectivesFrom(this);
 		return init;
 	}
 	

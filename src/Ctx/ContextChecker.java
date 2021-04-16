@@ -18,7 +18,6 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
@@ -27,6 +26,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -86,6 +86,8 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
@@ -1022,6 +1024,14 @@ public class ContextChecker {
 	public TYPE checkWhileStatement(WhileStatement w) throws CTEX_EXC {
 		this.compoundStack.push(w);
 		
+		if (w.hasDirective(DIRECTIVE.UNROLL)) {
+			ASTDirective directive = w.getDirective(DIRECTIVE.UNROLL);
+			if (directive.hasProperty("depth")) {
+				int depth = Integer.parseInt(directive.getProperty("depth"));
+				w.CURR_UNROLL_DEPTH = depth;
+			}
+		}
+		
 		TYPE cond = w.condition.check(this);
 		if (cond.wordsize() > 1) 
 			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
@@ -1057,6 +1067,14 @@ public class ContextChecker {
 	
 	public TYPE checkForStatement(ForStatement f) throws CTEX_EXC {
 		this.compoundStack.push(f);
+		
+		if (f.hasDirective(DIRECTIVE.UNROLL)) {
+			ASTDirective directive = f.getDirective(DIRECTIVE.UNROLL);
+			if (directive.hasProperty("depth")) {
+				int depth = Integer.parseInt(directive.getProperty("depth"));
+				f.CURR_UNROLL_DEPTH = depth;
+			}
+		}
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		f.iterator.check(this);

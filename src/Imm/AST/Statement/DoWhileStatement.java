@@ -66,7 +66,9 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 	}
 	
 	public Statement clone() {
-		return new DoWhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		DoWhileStatement dw = new DoWhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		dw.copyDirectivesFrom(this);
+		return dw;
 	}
 	
 	public List<String> codePrint(int d) {

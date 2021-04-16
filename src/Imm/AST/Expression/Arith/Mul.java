@@ -41,6 +41,7 @@ public class Mul extends NFoldExpression {
 		if (this.getType() != null)
 			e.setType(this.getType().clone());
 		
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

@@ -100,6 +100,7 @@ public class ArraySelect extends Expression {
 		if (this.idRef != null)
 			select.idRef = (IDRef) select.shadowRef;
 		
+		select.copyDirectivesFrom(this);
 		return select;
 	}
 

@@ -101,7 +101,9 @@ public class Assignment extends Statement {
 	}
 
 	public Assignment clone() {
-		return new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+		Assignment assign = new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+		assign.copyDirectivesFrom(this);
+		return assign;
 	}
 
 

@@ -79,6 +79,7 @@ public class SimpleLhsId extends LhsId {
 		if (this.expressionType != null)
 			lhs.expressionType = this.expressionType.clone();
 		
+		lhs.copyDirectivesFrom(this);
 		return lhs;
 	}
 

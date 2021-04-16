@@ -82,6 +82,7 @@ public class IDRef extends Expression {
 		if (this.getType() != null) 
 			r.setType(this.getType().clone());
 		
+		r.copyDirectivesFrom(this);
 		return r;
 	}
 

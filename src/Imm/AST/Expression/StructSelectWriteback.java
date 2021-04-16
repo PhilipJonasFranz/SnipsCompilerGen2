@@ -85,6 +85,7 @@ public class StructSelectWriteback extends Expression {
 	public Expression clone() {
 		StructSelectWriteback sswb = new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
 		sswb.setType(this.getType().clone());
+		sswb.copyDirectivesFrom(this);
 		return sswb;
 	}
 

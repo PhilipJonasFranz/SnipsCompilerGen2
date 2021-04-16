@@ -71,6 +71,7 @@ public class FunctionCall extends Statement implements Callee {
 			ic.baseRef = this.baseRef.clone();
 		
 		ic.setType(this.getType().clone());
+		ic.copyDirectivesFrom(this);
 		return ic;
 	}
 	

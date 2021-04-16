@@ -80,6 +80,7 @@ public class TypeCast extends Expression {
 	public Expression clone() {
 		TypeCast tc = new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
 		tc.setType(this.getType().clone());
+		tc.copyDirectivesFrom(this);
 		return tc;
 	}
 

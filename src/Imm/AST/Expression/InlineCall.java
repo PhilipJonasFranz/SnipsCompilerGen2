@@ -182,6 +182,7 @@ public class InlineCall extends Expression implements Callee {
 		
 		ic.setType(this.getType().clone());
 		
+		ic.copyDirectivesFrom(this);
 		return ic;
 	}
 

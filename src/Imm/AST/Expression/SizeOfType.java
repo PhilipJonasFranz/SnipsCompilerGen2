@@ -71,6 +71,7 @@ public class SizeOfType extends Expression {
 	public Expression clone() {
 		SizeOfType sot = new SizeOfType(this.sizeType.clone(), this.getSource().clone());
 		sot.setType(this.getType().clone());
+		sot.copyDirectivesFrom(this);
 		return sot;
 	}
 

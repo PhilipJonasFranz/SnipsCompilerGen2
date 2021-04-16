@@ -60,7 +60,9 @@ public class DefaultStatement extends CompoundStatement {
 	}
 
 	public Statement clone() {
-		return new DefaultStatement(this.cloneBody(), this.getSource().clone());
+		DefaultStatement def = new DefaultStatement(this.cloneBody(), this.getSource().clone());
+		def.copyDirectivesFrom(this);
+		return def;
 	}
 	
 	public List<String> codePrint(int d) {

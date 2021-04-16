@@ -89,6 +89,7 @@ public class SignalStatement extends Statement {
 		if (this.exceptionInit != null)
 			s.exceptionInit = this.exceptionInit;
 		
+		s.copyDirectivesFrom(this);
 		return s;
 	}
 	

@@ -91,6 +91,7 @@ public class StructureInit extends Expression {
 		
 		in.setType(this.getType().clone());
 		
+		in.copyDirectivesFrom(this);
 		return in;
 	}
 

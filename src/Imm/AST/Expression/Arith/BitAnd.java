@@ -38,6 +38,7 @@ public class BitAnd extends NFoldExpression {
 		
 		BitAnd e = new BitAnd(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

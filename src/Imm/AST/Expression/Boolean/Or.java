@@ -30,6 +30,7 @@ public class Or extends BoolNFoldExpression {
 		
 		Or e = new Or(op0, this.getSource().clone());
 		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
 		return e;
 	}
 	

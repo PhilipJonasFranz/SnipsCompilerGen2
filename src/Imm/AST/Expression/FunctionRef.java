@@ -94,6 +94,7 @@ public class FunctionRef extends Expression {
 		f.origin = this.origin;
 		f.setType(this.getType().clone());
 		
+		f.copyDirectivesFrom(this);
 		return f;
 	}
 	

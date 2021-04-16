@@ -100,6 +100,7 @@ public class TryStatement extends CompoundStatement {
 		
 		TryStatement tr = new TryStatement(this.cloneBody(), watchClone, this.getSource().clone());
 		if (this.watchpoint != null) tr.watchpoint = this.watchpoint;
+		tr.copyDirectivesFrom(this);
 		return tr;
 	}
 	

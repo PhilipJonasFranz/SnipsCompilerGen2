@@ -72,6 +72,7 @@ public class AddressOf extends Expression {
 	public Expression clone() {
 		AddressOf aof = new AddressOf(this.expression.clone(), this.getSource().clone());
 		aof.setType(this.getType().clone());
+		aof.copyDirectivesFrom(this);
 		return aof;
 	}
 

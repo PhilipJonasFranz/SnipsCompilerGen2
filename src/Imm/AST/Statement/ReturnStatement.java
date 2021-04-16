@@ -75,7 +75,9 @@ public class ReturnStatement extends Statement {
 	}
 
 	public Statement clone() {
-		return new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
+		ReturnStatement r = new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
+		r.copyDirectivesFrom(this);
+		return r;
 	}
 	
 	public List<String> codePrint(int d) {

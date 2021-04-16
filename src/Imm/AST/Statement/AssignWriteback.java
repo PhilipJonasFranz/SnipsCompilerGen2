@@ -73,7 +73,9 @@ public class AssignWriteback extends Statement {
 	}
 
 	public Statement clone() {
-		return new AssignWriteback(this.reference.clone(), this.getSource().clone());
+		AssignWriteback awb = new AssignWriteback(this.reference.clone(), this.getSource().clone());
+		awb.copyDirectivesFrom(this);
+		return awb;
 	}
 
 	public List<String> codePrint(int d) {

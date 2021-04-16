@@ -90,7 +90,9 @@ public class SwitchStatement extends Statement {
 		List<CaseStatement> casesC = new ArrayList();
 		for (CaseStatement w : this.cases) casesC.add((CaseStatement) w.clone());
 		
-		return new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
+		SwitchStatement s = new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
+		s.copyDirectivesFrom(this);
+		return s;
 	}
 	
 	public List<String> codePrint(int d) {

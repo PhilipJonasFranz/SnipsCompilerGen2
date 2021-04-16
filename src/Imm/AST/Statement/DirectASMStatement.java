@@ -101,7 +101,9 @@ public class DirectASMStatement extends Statement {
 		List<Pair<Expression, REG>> dataOutC = new ArrayList();
 		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<Expression, REG>(p.first.clone(), p.second));
 		
-		return new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
+		DirectASMStatement dasm = new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
+		dasm.copyDirectivesFrom(this);
+		return dasm;
 	}
 
 	public List<String> codePrint(int d) {

@@ -530,6 +530,7 @@ public class Function extends CompoundStatement {
 			f.body = clone;
 		}
 		
+		f.copyDirectivesFrom(this);
 		return f;
 	}
 	

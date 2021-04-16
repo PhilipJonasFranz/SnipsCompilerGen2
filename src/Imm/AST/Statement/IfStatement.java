@@ -115,6 +115,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 		IfStatement i = new IfStatement((this.condition != null)? this.condition.clone() : null, this.cloneBody(), this.getSource().clone());
 		if (this.elseStatement != null)
 			i.elseStatement = (IfStatement) this.elseStatement.clone();
+		i.copyDirectivesFrom(this);
 		return i;
 	}
 	

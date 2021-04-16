@@ -83,6 +83,7 @@ public class RegisterAtom extends Expression {
 	public Expression clone() {
 		RegisterAtom ra = new RegisterAtom(this.spelling, this.reg, this.getSource().clone());
 		ra.setType(this.getType().clone());
+		ra.copyDirectivesFrom(this);
 		return ra;
 	}
 

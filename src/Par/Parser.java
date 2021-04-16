@@ -1,6 +1,7 @@
 package Par;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -98,10 +99,12 @@ import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
 import Util.Source;
+import Util.ASTDirective.DIRECTIVE;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -145,6 +148,8 @@ public class Parser {
 	
 	Stack<List<Declaration>> scopes = new Stack();
 	
+	Stack<List<ASTDirective>> bufferedAnnotations = new Stack();
+	
 	/** Generated warn messages that are flushed at the end */
 	List<Message> buffered = new ArrayList();
 	
@@ -167,6 +172,25 @@ public class Parser {
 		tokenStream.remove(0);
 		
 		Parser.instance = this;
+	}
+	
+	/**
+	 * Accept a token based on its type.
+	 * @param types Accepted types
+	 * @return The accepted Token.
+	 * @throws PARS_EXC Thrown then the token does not have one of the given types.
+	 */
+	protected Token accept(TokenType...types) throws PARS_EXC {
+		/* Convert tokens dynamically based on the currently active provisos */
+		if (this.activeProvisos.contains(current.spelling)) 
+			current.type = TokenType.PROVISO;
+		
+		for (TokenType type : types) {
+			if (current.type() == type) return accept();
+		}
+		
+		this.progress.abort();
+		throw new PARS_EXC(current.source, current.type(), types);
 	}
 	
 	/**
@@ -243,11 +267,20 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
+		boolean push = true;
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
 			
+			if (push) this.bufferedAnnotations.push(new ArrayList());
+			push = true;
+			
 			SyntaxElement element = this.parseProgramElement();
-			if (element != null) elements.add(element);
+			
+			if (element != null) {
+				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				elements.add(element);
+			}
+			else push = false;
 		}
 		
 		accept(TokenType.EOF);
@@ -271,9 +304,18 @@ public class Parser {
 		
 		List<SyntaxElement> elements = new ArrayList();
 		
+		boolean push = true;
 		while (current.type != TokenType.RBRACE) {
+			if (push) this.bufferedAnnotations.push(new ArrayList());
+			push = true;
+			
 			SyntaxElement element = this.parseProgramElement();
-			if (element != null) elements.add(element);
+			
+			if (element != null) {
+				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				elements.add(element);
+			}
+			else push = false;
 		}
 		
 		this.namespaces.pop();
@@ -283,9 +325,38 @@ public class Parser {
 		return new Namespace(path, elements, source);
 	}
 	
+	public ASTDirective parseASTAnnotation() throws PARS_EXC {
+		accept(TokenType.DIRECTIVE);
+		Token type = accept(TokenType.IDENTIFIER);
+		
+		HashMap<String, String> arguments = new HashMap();
+		
+		while (current.source.row == type.source.row) {
+			String key = accept(TokenType.IDENTIFIER).spelling;
+			accept(TokenType.LET);
+			String value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
+			
+			if (arguments.containsKey(key)) {
+				throw new SNIPS_EXC("Found duplicate annotation argument key: " + key + ", " + type.source.getSourceMarker());
+			}
+			
+			arguments.put(key, value);
+			
+			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
+			else break;
+		}
+		
+		DIRECTIVE type0 = DIRECTIVE.valueOf(type.spelling.toUpperCase());
+		return new ASTDirective(type0, arguments);
+	}
+	
 	public SyntaxElement parseProgramElement() throws PARS_EXC {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
+		}
+		else if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
 		}
 		else if (current.type == TokenType.STRUCT || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
@@ -689,6 +760,11 @@ public class Parser {
 		/* Convert next token */
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
+		}
+		
+		if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
 		}
 		
 		Token modT = (current.type.group() == TokenGroup.MODIFIER)? current : null;
@@ -2889,13 +2965,37 @@ public class Parser {
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
 			
-			while (current.type != TokenType.RBRACE) 
-				body.add(this.parseStatement());
+			boolean push = true;
+			while (current.type != TokenType.RBRACE) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+				}
+				else push = false;
+			}
 			
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
-		else body.add(this.parseStatement());
+		else {
+			this.bufferedAnnotations.push(new ArrayList());
+			
+			Statement s = this.parseStatement();
+			
+			if (s != null) {
+				s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				body.add(s);
+			}
+			else {
+				List<ASTDirective> annotations = this.bufferedAnnotations.pop();
+				this.bufferedAnnotations.peek().addAll(annotations);
+			}
+		}
 		
 		this.scopes.pop();
 		return body;
