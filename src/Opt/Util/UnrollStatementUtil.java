@@ -31,7 +31,7 @@ public class UnrollStatementUtil {
 		 * body, since these statements cannot be copied out of the
 		 * loop.
 		 */
-		if (Matchers.hasLoopUnrollBlockerStatements(body)) return false;
+		if (Matchers.hasLoopUnrollBlockerStatements(f.body)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
@@ -106,7 +106,7 @@ public class UnrollStatementUtil {
 		 * body, since these statements cannot be copied out of the
 		 * loop.
 		 */
-		if (Matchers.hasLoopUnrollBlockerStatements(body)) return false;
+		if (Matchers.hasLoopUnrollBlockerStatements(w.body)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
