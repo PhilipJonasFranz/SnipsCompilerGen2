@@ -82,15 +82,17 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.Util.CompoundStatementRules;
 import Opt.Util.ExpressionMorpher;
+import Opt.Util.FEATURE;
 import Opt.Util.Makros;
 import Opt.Util.Matchers;
-import Opt.Util.FEATURE;
 import Opt.Util.OPT_STRATEGY;
 import Opt.Util.ProgramState;
 import Opt.Util.ProgramState.VarState;
 import Opt.Util.UnrollStatementUtil;
 import Res.Setting;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.Pair;
 import Util.Util;
 import Util.Logging.LogPoint.Type;
@@ -347,6 +349,18 @@ public class ASTOptimizer {
 		/* Function was not called, wont be translated anyway */
 		if (f.provisosCalls.isEmpty()) return f;
 		
+		/* Function is marked unsafe, skip optimizations */
+		if (f.hasDirective(DIRECTIVE.UNSAFE)) return f;
+		
+		/* Function defines own strategy */
+		OPT_STRATEGY STRAT_B = STRATEGY;
+		if (f.hasDirective(DIRECTIVE.STRATEGY)) {
+			ASTDirective dir = f.getDirective(DIRECTIVE.STRATEGY);
+			
+			if (dir.hasProperty(OPT_STRATEGY.ALWAYS.toString())) STRATEGY = OPT_STRATEGY.ALWAYS;
+			else if (dir.hasProperty(OPT_STRATEGY.ON_IMPROVEMENT.toString())) STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
+		}
+		
 		/**
 		 * If there is a counterpart available and we have selected the 
 		 * 'ON_IMPROVEMENT'-Strategy, the function can decide here to accept
@@ -368,7 +382,10 @@ public class ASTOptimizer {
 			 * original function skips this optimization round to prevent a rise in
 			 * complexity.
 			 */
-			if (opt_f0 >= nodes_f) return f;
+			if (opt_f0 >= nodes_f) {
+				STRATEGY = STRAT_B;
+				return f;
+			}
 		
 		}
 		
@@ -405,6 +422,8 @@ public class ASTOptimizer {
 			this.popContext();
 		}
 		
+		/* Restore global strategy */
+		STRATEGY = STRAT_B;
 		return f;
 	}
 	
@@ -1233,6 +1252,8 @@ public class ASTOptimizer {
 	}
 
 	public LhsId optPointerLhsId(PointerLhsId pointerLhsId) throws OPT0_EXC {
+		
+		pointerLhsId.deref.opt(this);
 		
 		/* 
 		 * Cannot say for sure which variable is targeted, mark all occurring variables as

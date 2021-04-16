@@ -1,0 +1,205 @@
+SOURCE
+#define dimX 3
+#define dimY 3
+
+int* __mat_mult(int* m, int* n) {
+	int* r = (int*) resv(dimX * dimY);
+	for (int i = 0; i < dimX; i++) {
+		for (int j = 0; j < dimY; j++) {
+			int sum = 0;
+			for (int k = 0; k < dimY; k++) {
+				sum += *(m + (i * dimY) + k) * *(n + (k * dimY) + j);
+			}
+			*(r + (i * dimY) + j) = sum;
+		}
+	}
+
+	return r;
+}
+
+#strategy always
+int* allocMatrix() {
+	int* p = (int*) resv(dimX * dimY);
+	
+	#unroll depth = dimY
+	for (int i = 0; i < dimY; i++) 
+		#unroll depth = dimX
+		for (int a = 0; a < dimX; a++) 
+			*(p + (i * dimY) + a) = (i * dimY) + a;
+			
+	return p;
+}
+
+int main(int x) {
+	int* p = allocMatrix();
+	int* q = allocMatrix();
+	int* mul = __mat_mult(p, q);
+	return *(mul + x);
+}
+TESTCASES
+0 15
+1 18
+2 21
+3 42
+4 54
+5 66
+6 69
+7 90
+8 111
+OUTPUT
+.version -1430966460
+
+.include maybe __op_div.s
+.include maybe __op_mod.s
+.include maybe resv.s
+.include maybe isa.s
+.include maybe init.s
+.include maybe hsize.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+
+.global __mat_mult
+__mat_mult:                                  /* Function: __mat_mult */
+    sub sp, sp, #32
+    stmea sp, {r3-r9, lr}
+    mov r3, r0
+    mov r4, r1
+    mov r0, #9
+    bl resv                                  /* Call resv */
+    mov r5, r0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r6, #0
+__mat_mult.L1: 
+    cmp r6, #3
+    bge __mat_mult.L2
+    mov r0, #0                               /* Evaluate Expression */
+    mov r7, #0
+__mat_mult.L4: 
+    cmp r7, #3
+    bge __mat_mult.L5
+    mov r8, #0
+    mov r0, #0                               /* Evaluate Expression */
+    mov r9, #0
+__mat_mult.L7: 
+    cmp r9, #3
+    bge __mat_mult.L8
+    mov r2, #3
+    mul r2, r6, r2
+    add r1, r3, r2
+    add r0, r1, r9
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    mov r2, #3
+    mul r2, r9, r2
+    add r1, r4, r2
+    push { r0 }
+    add r0, r1, r7
+    pop { r1 }
+    ldr r2, [r10, r0, lsl #2]                /* Load from address */
+    mul r0, r1, r2
+    add r8, r8, r0
+    add r9, r9, #1
+    b __mat_mult.L7
+__mat_mult.L8: 
+    mov r2, #3
+    mul r2, r6, r2
+    add r1, r5, r2
+    add r0, r1, r7
+    str r8, [r10, r0, lsl #2]
+    add r7, r7, #1
+    b __mat_mult.L4
+__mat_mult.L5: 
+    add r6, r6, #1
+    b __mat_mult.L1
+__mat_mult.L2: 
+    mov r0, r5                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r9, pc}
+
+.global allocMatrix
+allocMatrix:                                 /* Function: allocMatrix */
+    push { r3, lr }
+    mov r0, #9                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    str r0, [r10, r3, lsl #2]
+    mov r0, #1                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #1
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #2                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #2
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #3                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #3
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #4                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #4
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #5                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #5
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #6                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #6
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #7                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #7
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, #8                               /* Evaluate Expression */
+    push { r0 }
+    add r0, r3, #8
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
+    mov r0, r3                               /* Evaluate Expression */
+    ldmfd sp!, {r3, pc}
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r3, r0
+    bl allocMatrix                           /* Evaluate Expression */
+    mov r4, r0
+    bl allocMatrix                           /* Evaluate Expression */
+    mov r1, r0
+    mov r0, r4
+    bl __mat_mult                            /* Call __mat_mult */
+    add r0, r0, r3
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
+    pop { pc }

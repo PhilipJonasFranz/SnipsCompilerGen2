@@ -9,6 +9,7 @@ import java.util.Stack;
 import Exc.SNIPS_EXC;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.Pair;
 import Util.Source;
 import Util.Util;
 import Util.Logging.LogPoint;
@@ -39,6 +40,8 @@ public class PreProcessor {
 		
 	}
 	
+	List<Pair<String, String>> aliases = new ArrayList();
+	
 	List<LineObject> process = new ArrayList();
 	
 	public List<String> imported = new ArrayList();
@@ -61,7 +64,21 @@ public class PreProcessor {
 		
 		for (int i = 0; i < this.process.size(); i++) {
 			String line = this.process.get(i).line.trim();
-			if (line.startsWith("#include")) {
+			if (line.startsWith("#define")) {
+				String s = this.process.remove(i).line.trim();
+				String [] sp = s.split(" ");
+				
+				this.aliases.add(new Pair<String, String>(sp [1], sp [2]));
+				
+				for (int a = i; a < this.process.size(); a++) {
+					String s0 = this.process.get(a).line;
+					if (s0.contains(sp [1])) s0 = s0.replace(sp [1], sp [2]);
+					this.process.get(a).line = s0;
+				}
+				
+				i--;
+			}
+			else if (line.startsWith("#include")) {
 				String s = line.substring(8).trim();
 				
 				if (s.startsWith("<") && s.endsWith(">")) {
@@ -129,6 +146,7 @@ public class PreProcessor {
 		if (!this.imported.contains(path)) {
 			try {
 				List<String> lines = getFile(path);
+				
 				for (int a = 0; a < lines.size(); a++) 
 					this.process.add(i + a, new LineObject(a + 1, lines.get(a), path));
 				

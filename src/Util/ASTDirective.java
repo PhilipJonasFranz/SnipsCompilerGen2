@@ -22,7 +22,20 @@ public class ASTDirective {
 		 * is recommended to use the ALWAYS optimization strategy, since
 		 * otherwise changes may be discarded.
 		 */
-		INLINE;
+		INLINE,
+		
+		/**
+		 * If set the AST-Optimizer will skip a function annotated with this
+		 * directive. If a function is manipulating memory directly or uses
+		 * direct stack accesses, it can be safer to exclude it from optimizing.
+		 */
+		UNSAFE,
+		
+		/**
+		 * If set to a function, the optimization strategy will be overwritten
+		 * for the scope of this function.
+		 */
+		STRATEGY;
 		
 	}
 	
@@ -59,11 +72,11 @@ public class ASTDirective {
 	
 	
 	public boolean hasProperty(String key) {
-		return this.properties.containsKey(key);
+		return this.properties.containsKey(key.toLowerCase());
 	}
 	
 	public String getProperty(String key) {
-		return this.properties.get(key);
+		return this.properties.get(key.toLowerCase());
 	}
 	
 } 

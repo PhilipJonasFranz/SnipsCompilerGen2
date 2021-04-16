@@ -15,6 +15,40 @@ import Util.ASTDirective.DIRECTIVE;
  * Contains methods that allow loop unrolling for 
  * 		- ForStatement
  * 		- WhileStatement
+ * 
+ * --- General strategy when unrolling loops ---
+ * 
+ * Create copy of body and increment operation and add it wrapped
+ * in an if-statement guarded by the loop-condition. At the end,
+ * the Statement is added so that a new unroll-operation can
+ * take place. Example for forStatement:
+ * 
+ * 	int main() {
+ *    int a = 15;
+ *    int i = 5;
+ *    for (i; i < 5; i = i + 1) {
+ *      a = a + 1;
+ *    }
+ *    return a;
+ *  }
+ * 
+ * will become
+ * 
+ *  int main() {
+ *    int a = 15;
+ *    int i = 5;
+ *    if (i < 5) {
+ *    	a = a + 1;
+ *      i = i + 1;
+ *      for (i; i < 5; i = i + 1) {
+ *        a = a + 1;
+ *      }
+ *    }
+ *    return a;
+ *  }
+ * 
+ * The second if-statement can be simplified and potentially this will lead to
+ * the if-statement being removed, the for-statement with it.
  */
 public class UnrollStatementUtil {
 
@@ -50,40 +84,7 @@ public class UnrollStatementUtil {
 			f.iterator = ref;
 		}
 		
-		/* 
-		 * Create copy of body and increment operation and add it wrapped
-		 * in an if-statement guarded by the loop-condition. At the end,
-		 * the For-Statement is added so that a new unroll-operation can
-		 * take place here.
-		 * 
-		 * 	int main() {
-		 *    int a = 15;
-		 *    int i = 5;
-		 *    for (i; i < 5; i = i + 1) {
-		 *      a = a + 1;
-		 *    }
-		 *    return a;
-		 *  }
-		 * 
-		 * will become
-		 * 
-		 *  int main() {
-		 *    int a = 15;
-		 *    int i = 5;
-		 *    if (i < 5) {
-		 *    	a = a + 1;
-		 *      i = i + 1;
-		 *      for (i; i < 5; i = i + 1) {
-		 *        a = a + 1;
-		 *      }
-		 *    }
-		 *    return a;
-		 *  }
-		 * 
-		 * The second if-statement can be simplified and potentially this will lead to
-		 * the if-statement being removed, the for-statement with it.
-		 * 
-		 */
+		
 		List<Statement> bodyCopy = Makros.copyBody(f.body);
 		bodyCopy.add(f.increment.clone());
 		bodyCopy.add(f);

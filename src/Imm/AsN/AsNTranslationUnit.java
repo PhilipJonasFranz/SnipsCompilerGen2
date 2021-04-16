@@ -2,6 +2,7 @@ package Imm.AsN;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
@@ -45,8 +46,7 @@ public class AsNTranslationUnit extends AsNNode {
 	 * Appends the given instruction to the given section.
 	 */
 	public void append(ASMInstruction instruction, SECTION section) {
-		List<ASMInstruction> instructions = new ArrayList();
-		instructions.add(instruction);
+		List<ASMInstruction> instructions = Arrays.asList(instruction);
 		this.append(instructions, section);
 	}
 	

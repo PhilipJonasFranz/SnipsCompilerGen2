@@ -176,7 +176,7 @@ public class Scanner {
 		
 		for (int i = 0; i < input.size(); i++) {
 			/* Replace tabs with 4 spaces */
-			input.get(i).line = input.get(i).line.replace("\t", "    ");
+			input.get(i).line = input.get(i).line.replace("\t", "    ") + " ";
 			
 			/* For every char in every line, let fsm read char and check state */
 			for (int a = 0; a < input.get(i).line.length(); a++) 

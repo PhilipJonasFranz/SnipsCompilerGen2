@@ -595,7 +595,7 @@ public class TestDriver {
 		compileThread.start();
 		
 		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() - start < MAX_COMPILE_TIME && out [0] == null) {
+		while (System.currentTimeMillis() - start < MAX_COMPILE_TIME && compileThread.isAlive()) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {

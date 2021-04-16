@@ -327,17 +327,29 @@ public class Parser {
 	
 	public ASTDirective parseASTAnnotation() throws PARS_EXC {
 		accept(TokenType.DIRECTIVE);
+		
 		Token type = accept(TokenType.IDENTIFIER);
+		DIRECTIVE type0 = null;
+		
+		try {
+			type0 = DIRECTIVE.valueOf(type.spelling.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			throw new SNIPS_EXC("Unknown directive: '" + type.spelling + "', " + type.source.getSourceMarker());
+		}
 		
 		HashMap<String, String> arguments = new HashMap();
 		
 		while (current.source.row == type.source.row) {
 			String key = accept(TokenType.IDENTIFIER).spelling;
-			accept(TokenType.LET);
-			String value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
+			String value = null;
 			
-			if (arguments.containsKey(key)) {
-				throw new SNIPS_EXC("Found duplicate annotation argument key: " + key + ", " + type.source.getSourceMarker());
+			if (current.type == TokenType.LET) {
+				accept(TokenType.LET);
+				value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
+			}
+			
+			if (arguments.containsKey(key.toLowerCase())) {
+				throw new SNIPS_EXC("Found duplicate directive argument key: " + key + ", " + type.source.getSourceMarker());
 			}
 			
 			arguments.put(key, value);
@@ -345,8 +357,7 @@ public class Parser {
 			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
 			else break;
 		}
-		
-		DIRECTIVE type0 = DIRECTIVE.valueOf(type.spelling.toUpperCase());
+			
 		return new ASTDirective(type0, arguments);
 	}
 	
@@ -2983,17 +2994,19 @@ public class Parser {
 		}
 		/* Without braces, one statement only */
 		else {
-			this.bufferedAnnotations.push(new ArrayList());
-			
-			Statement s = this.parseStatement();
-			
-			if (s != null) {
-				s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
-				body.add(s);
-			}
-			else {
-				List<ASTDirective> annotations = this.bufferedAnnotations.pop();
-				this.bufferedAnnotations.peek().addAll(annotations);
+			boolean push = true;
+			while (true) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+					break;
+				}
+				else push = false;
 			}
 		}
 		

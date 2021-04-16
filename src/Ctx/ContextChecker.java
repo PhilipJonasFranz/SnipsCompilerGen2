@@ -1,6 +1,7 @@
 package Ctx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -1152,8 +1153,7 @@ public class ContextChecker {
 				throw new CTEX_EXC(f.getSource(), Const.ARRAY_TYPE_DOES_NOT_MATCH_ITERATOR_TYPE, a.elementType.provisoFree().typeString(), itType.provisoFree().typeString());
 			
 			/* Select first value from array */
-			List<Expression> select = new ArrayList();
-			select.add(f.counterRef);
+			List<Expression> select = Arrays.asList(f.counterRef);
 			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
 			
 			f.select.check(this);
