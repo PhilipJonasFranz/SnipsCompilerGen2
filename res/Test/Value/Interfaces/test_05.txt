@@ -79,7 +79,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 176361571699
+.version 40494097179
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -158,184 +158,30 @@ List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, P
     bge List.LinkedList.get_P_1.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
+    b List.LinkedList.get_P_1.L7
 List.LinkedList.get_P_1.L0: 
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
+List.LinkedList.get_P_1.L3:                  /* Evaluate condition */
     cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
+    beq List.LinkedList.get_P_1.L4
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r1, .P481193734_NULL                 /* Load null address */
     cmp r0, r1
-    bne List.LinkedList.get_P_1.L4
+    bne List.LinkedList.get_P_1.L5
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
+    b List.LinkedList.get_P_1.L7
+List.LinkedList.get_P_1.L5: 
+    lsl r1, r5, #2                           /* Convert to bytes */
+    ldr r5, [r1, #4]                         /* Load field from struct */
+    sub r4, r4, #1
+    b List.LinkedList.get_P_1.L3
 List.LinkedList.get_P_1.L4: 
     lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L8
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L8: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L12
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L12: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L16
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L16: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L20
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L20: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L24
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L24: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L28
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L28: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L32
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L32: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L36
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L36: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L40
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L40: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L44
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L44: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-List.LinkedList.get_P_1.L47:                 /* Evaluate condition */
-    cmp r4, #0
-    beq List.LinkedList.get_P_1.L48
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .P481193734_NULL                 /* Load null address */
-    cmp r0, r1
-    bne List.LinkedList.get_P_1.L49
-    lsl r1, r3, #2                           /* Convert to bytes */
-    ldr r0, [r1, #12]                        /* Load field from struct */
-    b List.LinkedList.get_P_1.L51
-List.LinkedList.get_P_1.L49: 
-    lsl r1, r5, #2                           /* Convert to bytes */
-    ldr r5, [r1, #4]                         /* Load field from struct */
-    sub r4, r4, #1
-    b List.LinkedList.get_P_1.L47
-List.LinkedList.get_P_1.L48: 
-    lsl r1, r5, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-List.LinkedList.get_P_1.L51: 
+List.LinkedList.get_P_1.L7: 
     ldmfd sp!, {r3-r5}
     bx lr
 .P481193734_NULL: .word NULL
@@ -350,92 +196,15 @@ List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, 
     ldr r4, [r1, #4]                         /* Load field from struct */
     mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
+List.LinkedList.size_P_1.L1:                 /* Evaluate condition */
     ldr r1, .P481193735_NULL                 /* Load null address */
     cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #1                               /* Evaluate Expression */
-    mov r5, #1
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #2                               /* Evaluate Expression */
-    mov r5, #2
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #3                               /* Evaluate Expression */
-    mov r5, #3
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #4                               /* Evaluate Expression */
-    mov r5, #4
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #5                               /* Evaluate Expression */
-    mov r5, #5
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #6                               /* Evaluate Expression */
-    mov r5, #6
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #7                               /* Evaluate Expression */
-    mov r5, #7
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #8                               /* Evaluate Expression */
-    mov r5, #8
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #9                               /* Evaluate Expression */
-    mov r5, #9
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #10                              /* Evaluate Expression */
-    mov r5, #10
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
-    lsl r1, r4, #2                           /* Convert to bytes */
-    ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, #11                              /* Evaluate Expression */
-    mov r5, #11
-List.LinkedList.size_P_1.L23:                /* Evaluate condition */
-    ldr r1, .P481193735_NULL                 /* Load null address */
-    cmp r4, r1
-    beq List.LinkedList.size_P_1.L24
+    beq List.LinkedList.size_P_1.L2
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
     add r5, r5, #1
-    b List.LinkedList.size_P_1.L23
-List.LinkedList.size_P_1.L24: 
+    b List.LinkedList.size_P_1.L1
+List.LinkedList.size_P_1.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r5}
     bx lr

@@ -1,9 +1,12 @@
 SOURCE
 int __vec_cross(int [3] v, int [3] w) {
 	int sum = 0;
+	
+	#unroll depth = 3
 	for (int i = 0; i < 3; i = i + 1) {
 		sum = sum + (v [i] * w [i]);
 	}
+	
 	return sum;
 }
 
@@ -16,7 +19,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 8213866091
+.version 9628977565
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
