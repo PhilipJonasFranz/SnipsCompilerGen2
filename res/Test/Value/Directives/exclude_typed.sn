@@ -1,0 +1,5 @@
+#define T int
+
+T get(T value) {
+	return (T) ((int) value * 2);
+}

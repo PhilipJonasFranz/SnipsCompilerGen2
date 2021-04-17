@@ -611,7 +611,7 @@ public class CompilerDriver {
 		PreProcessor preProcess = new PreProcessor(codeIn, inputFile.getPath());
 		List<LineObject> preCode = preProcess.getProcessed();
 		if (CompilerDriver.buildModulesRecurse) 
-			new Message("Recompiling " + preProcess.modulesIncluded + " modules", Type.INFO);
+			new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
 		
 		return preCode;
 	}
@@ -943,8 +943,11 @@ public class CompilerDriver {
 		null_referenced = false;
 		expectError = false;
 		AsNBody.translationUnits.clear();
+		
 		PreProcessor.importsPerFile.clear();
 		PreProcessor.passedFlags.clear();
+		PreProcessor.imports.clear();
+		PreProcessor.modulesIncluded = 0;
 	}
 	
 } 
