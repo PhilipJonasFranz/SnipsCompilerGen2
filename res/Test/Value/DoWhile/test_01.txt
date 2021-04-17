@@ -55,12 +55,9 @@ main.L2:
     add r4, r1, #1
     sub r3, r3, #1
     cmp r3, #2
-    bne main.L3
-    b main.L0
-main.L3: 
+    beq main.L0
     cmp r3, #0
-    ble main.L0
-    b main.L2
+    bgt main.L2
 main.L0: 
     mov r0, r4                               /* Evaluate Expression */
     bx lr

@@ -55,9 +55,7 @@ main.L1:
     cmp r5, r3
     bge main.L2
     cmp r5, #3
-    bge main.L3
-    b main.L0
-main.L3: 
+    blt main.L0
     add r1, r4, r5
     add r4, r1, #1
 main.L0: 

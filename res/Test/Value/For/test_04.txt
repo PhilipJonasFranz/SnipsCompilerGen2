@@ -57,9 +57,7 @@ main.L1:
     add r1, r4, r5
     add r4, r1, #1
     cmp r5, #4
-    bne main.L3
-    b main.L2
-main.L3: 
+    beq main.L2
     add r5, r5, #1
     b main.L1
 main.L2: 

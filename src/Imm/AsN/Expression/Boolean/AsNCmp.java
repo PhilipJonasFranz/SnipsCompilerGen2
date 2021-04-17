@@ -15,7 +15,6 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
-import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNNFoldExpression;
@@ -61,8 +60,8 @@ public class AsNCmp extends AsNNFoldExpression {
 			cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 	
-		cmp.trueC = cmp.toCondition(c.comparator);
-		cmp.neg = cmp.negate(cmp.trueC);
+		cmp.trueC = COND.toCondition(c.comparator);
+		cmp.neg = cmp.trueC.negate();
 		
 		/* Move #1 into R0 when condition is true with comparator of c */
 		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(cmp.trueC)));
@@ -73,26 +72,6 @@ public class AsNCmp extends AsNNFoldExpression {
 		r.free(0, 1);
 		
 		return cmp;
-	}
-	
-	protected COND toCondition(COMPARATOR c) {
-		if (c == COMPARATOR.EQUAL) return COND.EQ;
-		else if (c == COMPARATOR.NOT_EQUAL) return COND.NE;
-		else if (c == COMPARATOR.GREATER_SAME) return COND.GE;
-		else if (c == COMPARATOR.GREATER_THAN) return COND.GT;
-		else if (c == COMPARATOR.LESS_SAME) return COND.LE;
-		else if (c == COMPARATOR.LESS_THAN) return COND.LT;
-		return null;
-	}
-	
-	protected COND negate(COND c) {
-		if (c == COND.EQ) return COND.NE;
-		if (c == COND.NE) return COND.EQ;
-		if (c == COND.GE) return COND.LT;
-		if (c == COND.GT) return COND.LE;
-		if (c == COND.LE) return COND.GT;
-		if (c == COND.LT) return COND.GE;
-		return null;
 	}
 
 	public ASMInstruction buildInjector() {

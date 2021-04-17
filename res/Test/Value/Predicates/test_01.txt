@@ -109,10 +109,7 @@ sort.L8:
     b sort.L6
 sort.L7: 
     cmp r6, #0
-    beq sort.L10
-    ldmfd sp!, {r3-r9, pc}
-sort.L10: 
-    b sort.L3
+    beq sort.L3
     ldmfd sp!, {r3-r9, pc}
 
 .global main

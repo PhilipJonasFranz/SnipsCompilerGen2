@@ -36,6 +36,8 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.Cond.COND;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Shift.SHIFT;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -312,6 +314,17 @@ public class ASMOptimizer {
 			if (!OPT_DONE) {
 				
 				this.deepRegPropagation(ins);
+				
+			}
+			
+			if (!OPT_DONE) {
+				
+				/**
+				 * bne L3
+				 * b L2	    -> beq L2
+				 * L3:
+				 */
+				this.clearEmptyBreakStatements(ins);
 				
 			}
 			
@@ -831,6 +844,27 @@ public class ASMOptimizer {
 						ins0.remove(i);
 						i--;
 						markOpt();
+					}
+				}
+			}
+		}
+	}
+	
+	public void clearEmptyBreakStatements(List<ASMInstruction> ins0) {
+		for (int i = 2; i < ins0.size(); i++) {
+			if (ins0.get(i) instanceof ASMLabel && ins0.get(i - 1) instanceof ASMBranch && ins0.get(i - 2) instanceof ASMBranch) {
+				ASMBranch branch0 = (ASMBranch) ins0.get(i - 2);
+				ASMBranch branch1 = (ASMBranch) ins0.get(i - 1);
+				ASMLabel label = (ASMLabel) ins0.get(i);
+				
+				if (branch0.cond != null && branch1.cond == null) {
+					COND cond = branch0.cond.cond;
+					
+					if (branch0.target instanceof LabelOp && ((LabelOp) branch0.target).label.equals(label)) {
+						branch1.cond = new Cond(cond.negate());
+						ins0.remove(i - 2);
+						OPT_DONE = true;
+						i--;
 					}
 				}
 			}
