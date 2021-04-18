@@ -111,6 +111,10 @@ public class Matcher {
 				IDRefWriteback wb = (IDRefWriteback) x;
 				return wb.idRef.origin.equals(origin);
 			}
+			else if (x instanceof ArraySelect) {
+				ArraySelect s = (ArraySelect) x;
+				return s.idRef.origin.equals(origin);
+			}
 			
 			return false;
 		});

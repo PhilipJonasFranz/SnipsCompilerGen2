@@ -15,9 +15,11 @@ import Imm.TYPE.TYPE;
 import Opt.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
+import Util.ASTDirective;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
+import Util.ASTDirective.DIRECTIVE;
 
 public class InlineCall extends Expression implements Callee {
 
@@ -43,6 +45,8 @@ public class InlineCall extends Expression implements Callee {
 	public boolean isNestedCall = false;
 	
 	public boolean nestedDeref = false;
+	
+	public int INLINE_DEPTH = -1;
 
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -79,6 +83,18 @@ public class InlineCall extends Expression implements Callee {
 		CompilerDriver.lastSource = this.getSource();
 		
 		TYPE t = ctx.checkCall(this);
+		
+		if (this.calledFunction != null) {
+			Function called = this.calledFunction;
+			
+			if (called.hasDirective(DIRECTIVE.INLINE)) {
+				ASTDirective directive = called.getDirective(DIRECTIVE.INLINE);
+				if (directive.hasProperty("depth")) {
+					int depth = Integer.parseInt(directive.getProperty("depth"));
+					this.INLINE_DEPTH = depth;
+				}
+			}
+		}
 		
 		CompilerDriver.lastSource = temp;
 		return t;
@@ -183,6 +199,7 @@ public class InlineCall extends Expression implements Callee {
 		ic.setType(this.getType().clone());
 		
 		ic.copyDirectivesFrom(this);
+		ic.INLINE_DEPTH = this.INLINE_DEPTH;
 		return ic;
 	}
 

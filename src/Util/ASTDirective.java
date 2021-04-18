@@ -21,6 +21,10 @@ public class ASTDirective {
 		 * into where it is used. This may lead to code-duplication. It
 		 * is recommended to use the ALWAYS optimization strategy, since
 		 * otherwise changes may be discarded.
+		 * 
+		 * Properties:
+		 * 		- depth = n 		: The maximum depth the function should 
+		 * 								be inlined, only relevant for recursion.
 		 */
 		INLINE,
 		

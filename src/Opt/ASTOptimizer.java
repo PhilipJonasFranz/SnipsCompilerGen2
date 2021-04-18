@@ -80,7 +80,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.Util.CompoundStatementRules;
-import Opt.Util.ExpressionMorpher;
+import Opt.Util.Morpher;
 import Opt.Util.Makro;
 import Opt.Util.Matcher;
 import Opt.Util.OPT_STRATEGY;
@@ -96,6 +96,11 @@ import Util.Util;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
+/**
+ * The AST Optimizer will perform transformations on the given AST.
+ * These transformations do not change the program's behaviour, but
+ * will affect the execution flow.
+ */
 public class ASTOptimizer {
 
 	/**
@@ -185,6 +190,9 @@ public class ASTOptimizer {
 	
 	/** Keeps track of the LAST_ROUND value after each optimization cycle. */
 	private List<Boolean> lRoundHist = new ArrayList();
+	
+	/** The function that is currently optimized */
+	private Function currentFunction = null;
 	
 	/**
 	 * Signals that an optimization has been made at some location. Will
@@ -337,6 +345,8 @@ public class ASTOptimizer {
 	}
 	
 	public Function optFunction(Function f) throws OPT0_EXC {
+		
+		currentFunction = f;
 		
 		/* Function was not called, wont be translated anyway */
 		if (f.provisosCalls.isEmpty()) return f;
@@ -503,7 +513,7 @@ public class ASTOptimizer {
 		for (Entry<Declaration, VarState> entry : this.state.getCState().entrySet()) {
 			Declaration dec = entry.getKey();
 			
-			if (!this.state.getRead(dec) && !this.state.getReferenced(dec) && !this.state.getWrite(dec)) {
+			if (!this.state.getAll(dec)) {
 				
 				List<IDRefWriteback> idwb = new ArrayList();
 				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);
@@ -718,6 +728,8 @@ public class ASTOptimizer {
 		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		this.state.setWrite(wb.idRef.origin, true);
+		this.state.get(wb.idRef.origin).clearCurrentValue();
+		
 		return wb;
 	}
 
@@ -740,6 +752,54 @@ public class ASTOptimizer {
 		
 		if (inlineCall.anonTarget != null)
 			this.state.setRead(inlineCall.anonTarget);
+		
+		/*
+		 * Attempt to inline function.
+		 */
+		if (inlineCall.calledFunction != null) {
+			Function f = inlineCall.calledFunction;
+			
+			/*
+			 * Only inline if directive at target function is set and this inline
+			 * call's inline depth is greater or equal to 0.
+			 */
+			if (f.hasDirective(DIRECTIVE.INLINE) && inlineCall.INLINE_DEPTH >= 0) {
+				if (f.body != null && f.body.size() == 1 && f.body.get(0) instanceof ReturnStatement) {
+					ReturnStatement ret = (ReturnStatement) f.body.get(0);
+					
+					Expression value = ret.value.clone();
+					
+					boolean morphable = true;
+					List<Declaration> parameters = f.parameters;
+					for (Declaration param : parameters) 
+						morphable &= Matcher.isMorphable(value, param, this.state);
+					
+					if (!value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(currentFunction)).isEmpty())
+						morphable = false;
+					
+					if (morphable) {
+						inlineCall.INLINE_DEPTH--;
+						
+						for (int i = 0; i < parameters.size(); i++) {
+							final Declaration param0 = f.parameters.get(i);
+							Morpher.morphExpression(value, x -> {
+								return x instanceof IDRef && ((IDRef) x).origin.equals(param0);
+							}, inlineCall.parameters.get(i).clone());
+						}
+						
+						/* 
+						 * Get list of inline calls in the new value, decrement the 
+						 * INLINE_DEPTH for these calls to prevent infinite inlining.
+						 */
+						List<InlineCall> calls = value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(f));
+						calls.stream().forEach(x -> x.INLINE_DEPTH = inlineCall.INLINE_DEPTH);
+						
+						OPT_DONE();
+						return value;
+					}
+				}
+			}
+		}
 		
 		return inlineCall;
 	}
@@ -1221,15 +1281,16 @@ public class ASTOptimizer {
 		ternary.condition = ternary.condition.opt(this);
 		this.popContext();
 		
-		ternary.left = ternary.left.opt(this);
-		ternary.right = ternary.right.opt(this);
-		
 		/* (true)? a : b = a, (false)? a : b = b */
 		if (ternary.condition instanceof Atom && ternary.condition.getType().hasInt()) {
 			int value = ternary.condition.getType().toInt();
 			OPT_DONE();
-			return (value == 0)? ternary.right : ternary.left;
+			/* Prune tree, only optimize one of the sides in this case */
+			return (value == 0)? ternary.right.opt(this) : ternary.left.opt(this);
 		}
+		
+		ternary.left = ternary.left.opt(this);
+		ternary.right = ternary.right.opt(this);
 		
 		return ternary;
 	}
@@ -1320,7 +1381,7 @@ public class ASTOptimizer {
 				 * of the variable.
 				 */
 				final Declaration origin0 = origin;
-				ExpressionMorpher.morphExpression(toMorph, x -> {
+				Morpher.morphExpression(toMorph, x -> {
 					if (x instanceof IDRef) {
 						IDRef ref = (IDRef) x;
 						return ref.origin.equals(origin0);
@@ -1454,6 +1515,7 @@ public class ASTOptimizer {
 			this.state.popSetting(Setting.SUBSTITUTION);
 			
 			this.state.setWrite(ref.origin, true);
+			this.state.get(ref.origin).clearCurrentValue();
 		}
 		
 		for (Pair<Expression, REG> pair : d.dataIn) 
