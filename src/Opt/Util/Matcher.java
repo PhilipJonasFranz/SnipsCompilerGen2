@@ -23,7 +23,7 @@ import Tools.ASTNodeVisitor;
 /**
  * Contains pre-built AST-Visitor matcher statements.
  */
-public class Matchers {
+public class Matcher {
 
 	/**
 	 * Checks if in the given subtree defined by the given statement, has an address reference via address of
@@ -119,7 +119,7 @@ public class Matchers {
 	}
 	
 	public static boolean hasLoopUnrollBlockerStatements(List<Statement> body) {
-		List<Statement> blockers = Matchers.visitBody(body, x -> {
+		List<Statement> blockers = Matcher.visitBody(body, x -> {
 			return x instanceof Declaration || x instanceof ContinueStatement || x instanceof BreakStatement;
 		});
 		return !blockers.isEmpty();

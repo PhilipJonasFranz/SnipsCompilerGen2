@@ -69,7 +69,7 @@ public class UnrollStatementUtil {
 		 * body, since these statements cannot be copied out of the
 		 * loop.
 		 */
-		if (Matchers.hasLoopUnrollBlockerStatements(f.body)) return false;
+		if (Matcher.hasLoopUnrollBlockerStatements(f.body)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
@@ -84,7 +84,7 @@ public class UnrollStatementUtil {
 			f.iterator = ref;
 		}
 		
-		List<Statement> bodyCopy = Makros.copyBody(f.body);
+		List<Statement> bodyCopy = Makro.copyBody(f.body);
 		bodyCopy.add(f.increment.clone());
 		bodyCopy.add(f);
 		IfStatement if0 = new IfStatement(f.condition.clone(), bodyCopy, f.getSource());
@@ -113,7 +113,7 @@ public class UnrollStatementUtil {
 		 * body, since these statements cannot be copied out of the
 		 * loop.
 		 */
-		if (Matchers.hasLoopUnrollBlockerStatements(w.body)) return false;
+		if (Matcher.hasLoopUnrollBlockerStatements(w.body)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
@@ -121,7 +121,7 @@ public class UnrollStatementUtil {
 		 * Create copy of body and increment operation and add it wrapped
 		 * in an if-statement guarded by the loop-condition.
 		 */
-		List<Statement> bodyCopy = Makros.copyBody(w.body);
+		List<Statement> bodyCopy = Makro.copyBody(w.body);
 		bodyCopy.add(w);
 		IfStatement if0 = new IfStatement(w.condition.clone(), bodyCopy, w.getSource());
 		result.add(if0);

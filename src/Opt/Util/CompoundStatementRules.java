@@ -32,13 +32,13 @@ public class CompoundStatementRules {
 							 */
 							boolean delete = !state.getReferenced(lhs.origin);
 							for (int a = i + 1; a < body.size(); a++) 
-								delete &= !Matchers.hasRefTo(body.get(a), lhs.origin);
+								delete &= !Matcher.hasRefTo(body.get(a), lhs.origin);
 
 							/*
 							 * Make sure removing the expression of the assignment has no side-effects,
 							 * for example removing a function call or removing a writeback operation.
 							 */
-							delete &= !Matchers.containsStateDependentSubExpression(as.value, state);
+							delete &= !Matcher.containsStateDependentSubExpression(as.value, state);
 
 							/*
 							 * No var references have been made, assignment is safe to delete.

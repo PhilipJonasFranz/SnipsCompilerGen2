@@ -24,7 +24,7 @@ import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
-import Opt.Util.Matchers;
+import Opt.Util.Matcher;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
@@ -50,7 +50,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 				/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
 				boolean push = false;
 				for (Statement s : a.body)
-					push |= Matchers.hasAddressReference(s, dec);
+					push |= Matcher.hasAddressReference(s, dec);
 				
 				if (push) {
 					int reg = r.declarationRegLocation(dec);

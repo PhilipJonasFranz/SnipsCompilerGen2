@@ -34,6 +34,10 @@ public class ASTDirective {
 		/**
 		 * If set to a function, the optimization strategy will be overwritten
 		 * for the scope of this function.
+		 * 
+		 * Properties:
+		 * 		- always			: Sets the strategy 'ALWAYS' for the target function.
+		 * 		- on_improvement	: Sets the strategy 'ON_IMPROVEMENT' for the target function.
 		 */
 		STRATEGY;
 		

@@ -10,7 +10,7 @@ import Imm.AST.Statement.Statement;
 /**
  * Contains small helper functions and predicates.
  */
-public class Makros {
+public class Makro {
 
 	/**
 	 * Returns true if the given expression is an atom,

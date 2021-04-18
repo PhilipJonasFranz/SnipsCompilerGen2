@@ -1,7 +1,6 @@
 package Opt;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
@@ -82,9 +81,8 @@ import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.Util.CompoundStatementRules;
 import Opt.Util.ExpressionMorpher;
-import Opt.Util.FEATURE;
-import Opt.Util.Makros;
-import Opt.Util.Matchers;
+import Opt.Util.Makro;
+import Opt.Util.Matcher;
 import Opt.Util.OPT_STRATEGY;
 import Opt.Util.ProgramState;
 import Opt.Util.ProgramState.VarState;
@@ -172,12 +170,6 @@ public class ASTOptimizer {
 	 * to under or over-optimized ASTs.
 	 */
 	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
-	
-	/**
-	 * Contains all enabled optimization features. This list is created upon
-	 * Compiler Driver startup, and based on the inputted parameters.
-	 */
-	public static List<FEATURE> ENABLED_FEATURES = Arrays.asList(FEATURE.LOOP_UNROLL);
 	
 	/**
 	 * If set to true, the AST before and after the optimization will be
@@ -446,7 +438,7 @@ public class ASTOptimizer {
 				}
 				else if (s0 instanceof IfStatement) {
 					IfStatement if0 = (IfStatement) s0;
-					if (Makros.isAlwaysTrue(if0.condition)) {
+					if (Makro.isAlwaysTrue(if0.condition)) {
 						body.remove(i);
 						body.addAll(i, if0.body);
 						i--;
@@ -487,8 +479,7 @@ public class ASTOptimizer {
 					ForStatement f = (ForStatement) s;
 					
 					/* Attempt loop unrolling */
-					if (featureEnabled(FEATURE.LOOP_UNROLL) && 
-							UnrollStatementUtil.unrollForStatement(f, body)) {
+					if (UnrollStatementUtil.unrollForStatement(f, body)) {
 						OPT_DONE();
 						break;
 					}
@@ -497,8 +488,7 @@ public class ASTOptimizer {
 					WhileStatement w = (WhileStatement) s;
 					
 					/* Attempt loop unrolling */
-					if (featureEnabled(FEATURE.LOOP_UNROLL) && 
-							UnrollStatementUtil.unrollWhileStatement(w, body)) {
+					if (UnrollStatementUtil.unrollWhileStatement(w, body)) {
 						OPT_DONE();
 						break;
 					}
@@ -856,7 +846,7 @@ public class ASTOptimizer {
 				for (int a = i + 1; a < add.operands.size(); a++) {
 					Expression e1 = add.operands.get(a);
 					
-					if (Matchers.hasOverwrittenVariables(e1, this.state)) continue;
+					if (Matcher.hasOverwrittenVariables(e1, this.state)) continue;
 					
 					if (e0.codePrint().equals(e1.codePrint())) indicies.add(a);
 				}
@@ -1319,9 +1309,9 @@ public class ASTOptimizer {
 			 * Finally, the assigned value has to be morphable in order to propagate the value
 			 * back up.
 			 */
-			if (!Matchers.containsStateDependentSubExpression(assignment.value, this.state) &&
+			if (!Matcher.containsStateDependentSubExpression(assignment.value, this.state) &&
 				this.state.isDeclarationScope(origin) && currentValue != null &&
-				Matchers.isMorphable(assignment.value, origin, this.state)) {
+				Matcher.isMorphable(assignment.value, origin, this.state)) {
 				
 				Expression toMorph = assignment.value.clone();
 					
@@ -1431,7 +1421,7 @@ public class ASTOptimizer {
 		c.condition = c.condition.opt(this);
 		
 		/* Case is not satisfiable */
-		if (Makros.isAlwaysFalse(c.condition)) return null;
+		if (Makro.isAlwaysFalse(c.condition)) return null;
 		
 		return c;
 	}
@@ -1550,7 +1540,7 @@ public class ASTOptimizer {
 		/*
 		 * Condition is always true, prune else statement.
 		 */
-		if (i.condition != null && Makros.isAlwaysTrue(i.condition) && i.elseStatement != null) {
+		if (i.condition != null && Makro.isAlwaysTrue(i.condition) && i.elseStatement != null) {
 			i.elseStatement = null;
 			OPT_DONE();
 		}
@@ -1566,7 +1556,7 @@ public class ASTOptimizer {
 		/*
 		 * Condition is always false, remove from chain.
 		 */
-		if (i.condition != null && Makros.isAlwaysFalse(i.condition)) {
+		if (i.condition != null && Makro.isAlwaysFalse(i.condition)) {
 			OPT_DONE();
 			return i.elseStatement;
 		}
@@ -1581,7 +1571,7 @@ public class ASTOptimizer {
 				return null;
 			}
 			else {
-				if (!Matchers.containsStateChangingSubExpression(i.condition, this.state)) {
+				if (!Matcher.containsStateChangingSubExpression(i.condition, this.state)) {
 					OPT_DONE();
 					if (i.elseStatement != null) return i.elseStatement;
 					else return null;
@@ -1627,7 +1617,7 @@ public class ASTOptimizer {
 				 * Value of switch statement condition and condition of case 
 				 * do not match, case will never be executed.
 				 */
-				if (Makros.atomComparable(value, c0.condition) && !Makros.compareAtoms(value, c0.condition)) {
+				if (Makro.atomComparable(value, c0.condition) && !Makro.compareAtoms(value, c0.condition)) {
 					s.cases.remove(i);
 					i--;
 					OPT_DONE();
@@ -1698,10 +1688,6 @@ public class ASTOptimizer {
 		ProgramState state = this.cStack.pop();
 		state.transferContextChangeToParent();
 		this.state = this.cStack.peek();
-	}
-	
-	private boolean featureEnabled(FEATURE feature) {
-		return ASTOptimizer.ENABLED_FEATURES.contains(feature);
 	}
 	
 }

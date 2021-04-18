@@ -21,7 +21,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
-import Opt.Util.Matchers;
+import Opt.Util.Matcher;
 import Res.Const;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
@@ -117,7 +117,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
 			
 			if (r.declarationLoaded(dec)) {
-				boolean hasAddress = Matchers.hasAddressReference(a, dec); 
+				boolean hasAddress = Matcher.hasAddressReference(a, dec); 
 				if (hasAddress) {
 					int location = r.declarationRegLocation(dec);
 					

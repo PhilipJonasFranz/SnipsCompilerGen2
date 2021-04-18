@@ -43,7 +43,7 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
-import Opt.Util.Matchers;
+import Opt.Util.Matcher;
 import Res.Const;
 
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {
@@ -69,7 +69,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
 			boolean push = false;
 			for (Statement s : a.body)
-				push |= Matchers.hasAddressReference(s, a.iterator);
+				push |= Matcher.hasAddressReference(s, a.iterator);
 			
 			if (push) {
 				int reg = r.declarationRegLocation(a.iterator);

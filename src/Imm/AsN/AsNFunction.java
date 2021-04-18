@@ -41,7 +41,7 @@ import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.ASMOptimizer;
-import Opt.Util.Matchers;
+import Opt.Util.Matcher;
 import PreP.PreProcessor;
 import Res.Const;
 import Snips.CompilerDriver;
@@ -231,7 +231,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					boolean hasRef = false;
 					for (Statement s : f.body) 
-						hasRef |= Matchers.hasAddressReference(s, d);
+						hasRef |= Matcher.hasAddressReference(s, d);
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
