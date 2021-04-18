@@ -384,7 +384,7 @@ public class ASTOptimizer {
 			 * original function skips this optimization round to prevent a rise in
 			 * complexity.
 			 */
-			if (opt_f0 >= nodes_f) {
+			if (opt_f0 > nodes_f) {
 				STRATEGY = STRAT_B;
 				return f;
 			}
@@ -1087,21 +1087,37 @@ public class ASTOptimizer {
 	}
 
 	public Expression optMul(Mul mul) throws OPT0_EXC {
+		
 		this.optExpressionList(mul.operands);
 		
 		/* Precalc */
-		boolean allAtom = true;
-		for (Expression e : mul.operands) allAtom &= e instanceof Atom && e.getType().hasInt();
-		if (allAtom) {
-			TYPE t0 = mul.operands.get(0).getType().clone();
-			
-			for (Expression e : mul.operands)
-				if (!e.equals(mul.operands.get(0)))
-					t0.value = t0.toInt() * e.getType().toInt();
-			
-			Atom atom = new Atom(t0, mul.getSource());
+		int accum = 1, c = 0;
+		for (int a = 0; a < mul.operands.size(); a++) {
+			Expression e1 = mul.operands.get(a);
+			if (e1 instanceof Atom && e1.getType().hasInt()) {
+				accum *= e1.getType().toInt();
+				mul.operands.remove(a--);
+				c++;
+			}
+		}
+		
+		if (mul.operands.isEmpty()) {
 			OPT_DONE();
-			return atom;
+			return new Atom(new INT("" + accum), mul.getSource());
+		}
+		else {
+			if (c > 1) OPT_DONE();
+			if (c > 0) mul.operands.add(new Atom(new INT("" + accum), mul.getSource()));
+		}
+		
+		/* Flatten Tree of Additions into one N-Fold Expression */
+		for (int i = 0; i < mul.operands.size(); i++) {
+			if (mul.operands.get(i) instanceof Mul) {
+				Mul mul0 = (Mul) mul.operands.remove(i);
+				i--;
+				mul.operands.addAll(i + 1, mul0.operands);
+				OPT_DONE();
+			}
 		}
 		
 		return mul;
