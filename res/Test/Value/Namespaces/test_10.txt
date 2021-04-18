@@ -25,7 +25,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 18545628909
+.version 20691679855
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -64,8 +64,8 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     ldr r0, .P174617549_Name0.C
     push { r0 }
-    ldr r2, [fp, #-4]                        /* Load field from struct */
-    add r0, r2, #20
+    ldr r1, [fp, #-4]                        /* Load field from struct */
+    add r0, r1, #20
     bx lr
 .P174617549_Name0.C: .word Name0.C
 .P174617549_Name1.B: .word Name1.B

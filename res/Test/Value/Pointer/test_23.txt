@@ -14,7 +14,7 @@ int main() {
 TESTCASES
 5
 OUTPUT
-.version 21019386122
+.version 23795809519
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -67,9 +67,9 @@ main.L1:
     sub r0, fp, #4                           /* Load parameters */
     lsr r0, r0, #2
     bl incr                                  /* Call incr */
-    ldr r0, [fp, #-4]
-    add r1, r0, #1
-    str r1, [fp, #-4]
+    ldr r1, [fp, #-4]                        /* Evaluate Expression */
+    add r0, r1, #1
+    str r0, [fp, #-4]
     b main.L1
 main.L2: 
     add sp, sp, #4

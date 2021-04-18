@@ -30,7 +30,7 @@ TESTCASES
 7 180
 8 222
 OUTPUT
-.version 10940354489
+.version 10926686212
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -64,7 +64,7 @@ _routine_stack_copy_end_:
 allocMatrix:                                 /* Function: allocMatrix */
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
-    mov r0, #9
+    mov r0, #9                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */

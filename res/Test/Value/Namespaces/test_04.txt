@@ -28,7 +28,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 15209012649
+.version 15967057284
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -77,11 +77,7 @@ main:                                        /* Function: main */
     ldr r1, [fp, #-8]
     stmfd sp!, {r0, r1}
     bl Foo.get                               /* Call Foo.get */
-    mov r1, r0
-    ldr r2, .P598369528_Foo.Baz.x            /* Load from .data section */
-    ldr r2, [r2]
-    add r0, r0, r2
+    add r0, r0, #10
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P598369528_Foo.Baz.x: .word Foo.Baz.x
 .P598369528_Foo.Bar: .word Foo.Bar

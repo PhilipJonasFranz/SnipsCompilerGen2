@@ -7,7 +7,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 13110678820
+.version 9852597662
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -40,9 +40,5 @@ _routine_stack_copy_end_:
 main:                                        /* Function: main */
     push { lr }
     bl Global.foo                            /* Evaluate Expression */
-    mov r2, r0
-    ldr r1, .P1878741393_Global.globalVar    /* Load from .data section */
-    ldr r1, [r1]
-    add r0, r1, r0
+    add r0, r0, #10
     pop { pc }
-.P1878741393_Global.globalVar: .word Global.globalVar

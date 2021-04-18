@@ -10,7 +10,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 13872622746
+.version 14511852866
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -41,7 +41,5 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    ldr r0, .P712886132_Test.x               /* Evaluate Expression */
-    ldr r0, [r0]
+    mov r0, #10                              /* Evaluate Expression */
     bx lr
-.P712886132_Test.x: .word Test.x

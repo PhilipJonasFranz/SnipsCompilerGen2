@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 14
 OUTPUT
-.version 11758881784
+.version 12530693571
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -46,10 +46,8 @@ _routine_stack_copy_end_:
 
 .global Test.getter
 Test.getter:                                 /* Function: Test.getter */
-    ldr r0, .P1864234344_Test.var            /* Evaluate Expression */
-    ldr r0, [r0]
+    mov r0, #14                              /* Evaluate Expression */
     bx lr
-.P1864234344_Test.var: .word Test.var
 
 .global main
 main:                                        /* Function: main */

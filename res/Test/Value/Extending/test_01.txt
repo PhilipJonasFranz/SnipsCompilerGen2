@@ -35,7 +35,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-.version 48488840
+.version 2222245416
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -91,8 +91,8 @@ main:                                        /* Function: main */
     bl isar                                  /* Call isar */
     cmp r0, #0
     beq main.L1
-    ldr r2, [fp, #-16]                       /* Load field from struct */
-    add r0, r2, #1
+    ldr r1, [fp, #-16]                       /* Load field from struct */
+    add r0, r1, #1
     b main.L3
 main.L1: 
     ldr r0, [fp, #-16]                       /* Load field from struct */

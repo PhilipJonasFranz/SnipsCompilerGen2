@@ -16,7 +16,7 @@ int main() {
 TESTCASES
 16
 OUTPUT
-.version 19036876579
+.version 19876656004
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -47,10 +47,8 @@ _routine_stack_copy_end_:
 
 .global Foo.get
 Foo.get:                                     /* Function: Foo.get */
-    ldr r0, .P541111226_Baz.x                /* Evaluate Expression */
-    ldr r0, [r0]
+    mov r0, #16                              /* Evaluate Expression */
     bx lr
-.P541111226_Baz.x: .word Baz.x
 
 .global main
 main:                                        /* Function: main */

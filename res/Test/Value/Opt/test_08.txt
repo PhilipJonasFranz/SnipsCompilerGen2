@@ -21,7 +21,7 @@ int main(int x) {
 TESTCASES
 22
 OUTPUT
-.version 1348693605
+.version 4164833081
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -60,6 +60,6 @@ main:                                        /* Function: main */
     mov r0, #12                              /* Evaluate Expression */
     mov r4, #12
     bl add                                   /* Evaluate Expression */
-    add r4, r4, r0
+    add r4, r0, #12
     mov r0, r4                               /* Evaluate Expression */
     pop { pc }
