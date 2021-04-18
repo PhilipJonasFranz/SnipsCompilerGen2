@@ -18,7 +18,7 @@ TESTCASES
 2 1 8
 2 2 9
 OUTPUT
-.version 16916165946
+.version 16919860028
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -51,8 +51,8 @@ get:                                         /* Function: get */
     push { r4, r5 }
     mov r4, r1
     mov r5, r2
-    mov r1, #3
-    mul r2, r1, r4
+    mov r2, #3
+    mul r2, r4, r2
     add r1, r0, r2
     add r0, r1, r5
     ldr r0, [r10, r0, lsl #2]                /* Load from address */

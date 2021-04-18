@@ -48,8 +48,7 @@ main:                                        /* Function: main */
     mov r4, r1
     cmp r0, r1
     bne main.L0
-    mov r1, #2
-    mul r4, r1, r4
+    lsl r4, r4, #1
 main.L0: 
     cmp r4, r3
     beq main.L2

@@ -47,7 +47,7 @@ TESTCASES
 7 90
 8 111
 OUTPUT
-.version 31654680107
+.version 31668348384
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -81,7 +81,7 @@ __mat_mult:                                  /* Function: __mat_mult */
     stmea sp, {r3-r9, lr}
     mov r3, r0
     mov r4, r1
-    mov r0, #9                               /* Evaluate Expression */
+    mov r0, #9
     bl resv                                  /* Call resv */
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */

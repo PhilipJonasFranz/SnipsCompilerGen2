@@ -10,7 +10,7 @@ TESTCASES
 3 9
 4 12
 OUTPUT
-.version 15783194960
+.version 9539511212
 
 .include maybe __op_div.s
 .include maybe __op_mod.s
@@ -41,12 +41,11 @@ _routine_stack_copy_end_:
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
-    mov r1, #3
-    mul r0, r1, r0
+    mov r2, #3
+    mul r0, r0, r2
     ldr r1, .P336857907_x
     str r0, [r1]
-    mov r1, #3
-    mul r0, r1, r3
+    ldr r0, .P336857907_x                    /* Evaluate Expression */
+    ldr r0, [r0]
     bx lr
 .P336857907_x: .word x
