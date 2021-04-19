@@ -351,6 +351,9 @@ public class ASTOptimizer {
 		/* Function was not called, wont be translated anyway */
 		if (f.provisosCalls.isEmpty()) return f;
 		
+		/* Function is only signature, nothing to optimize */
+		if (f.body == null) return f;
+		
 		/* Function is marked unsafe, skip optimizations */
 		if (f.hasDirective(DIRECTIVE.UNSAFE)) return f;
 		
