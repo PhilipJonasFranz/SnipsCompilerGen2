@@ -75,8 +75,9 @@ public class CompilerDriver {
 		out = 							false,	/* Print final output.											*/
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
-		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
 		useASTOptimizer	= 				true,	/* Wether to use the AST optimizer in the pipeline.				*/
+		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
+		useExperimentalOptimizer =		false,	/* If true, new and potentially buggy opt features are used.	*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
@@ -816,7 +817,13 @@ public class CompilerDriver {
 				else if (args [i].equals("-imm")) 	imm = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
-				else if (args [i].equals("-opt")) 	useASMOptimizer = false;
+				else if (args [i].equals("-opt0"))  useASTOptimizer = false;
+				else if (args [i].equals("-opt1"))  useASMOptimizer = false;
+				else if (args [i].equals("-opt1e")) useExperimentalOptimizer = false;
+				else if (args [i].equals("-opt")) {
+					useASTOptimizer = false;
+					useASMOptimizer = false;
+				}
 				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
@@ -867,6 +874,8 @@ public class CompilerDriver {
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable warnings",
 				"-imp      : Print out all imports",
+				"-opt0     : Disable AST Optimizer",
+				"-opt1     : Disable ASM Optimizer",
 				"-opt      : Disable code optimizers",
 				"-ofs      : Optimize for filesize, slight performance penalty",
 				"-rov      : Disable visibility modifiers",

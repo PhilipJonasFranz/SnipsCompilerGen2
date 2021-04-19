@@ -2,6 +2,7 @@ package Opt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMHardcode;
@@ -329,15 +330,26 @@ public class ASMOptimizer {
 			}
 			
 		}
-
+		
 		/**
 		 * Check if a bx lr statement is directley after the func clean pop. If the last
 		 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
 		 */
 		this.popReturnDirect(ins);
 		
+		/**
+		 * Attempt to push down the Function Frame Push. If this frame Push is pushed below
+		 * the base-cases of recursive functions, the Frame-Push for these Base-Cases can
+		 * be left out, saving an increased amount of instructions based on the size of
+		 * the recursion-tree. This optimization rarely does improve anything, and often
+		 * discards the changes it does.
+		 */
+		if (CompilerDriver.useExperimentalOptimizer) this.pushDownFunctionFrame(ins);
+		
 		/* Finishing touches, no iteration required */
 		this.popPcSubstitution(ins);
+		
+		/* Remove labels that are not referenced anywhere. */
 		this.clearUnusedLabels(ins);
 		
 		/* Replace sub-structure loads with ldm */
@@ -867,6 +879,144 @@ public class ASMOptimizer {
 						i--;
 					}
 				}
+			}
+		}
+	}
+	
+	public void pushDownFunctionFrame(List<ASMInstruction> ins0) {
+		for (int i = 0; i < ins0.size(); i++) {
+			/* Found function push */
+			if (ins0.get(i) instanceof ASMPushStack && ins0.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+				ASMPushStack push = (ASMPushStack) ins0.get(i);
+				
+				boolean DID_OPT = false;
+				
+				/* Get list of all regs that are pushed in the function frame */
+				List<REG> clearedRegs = new ArrayList();
+				for (RegOp op : push.operands) 
+					clearedRegs.add(op.reg);
+				
+				/* TODO: Check if FP push can be ignored */
+				if (clearedRegs.contains(REG.FP)) continue;
+				
+				int wroteR0 = 0;
+				List<ASMInstruction> ins1 = ins0.stream().collect(Collectors.toList());
+				
+				List<ASMLabel> visited = new ArrayList();
+				List<REG> regsReadByInitial = new ArrayList();
+				List<REG> clearedRegOccurrence = clearedRegs.stream().collect(Collectors.toList());
+				
+				int currentPosition = i + 1;
+				int insertPosition = i;
+				
+				while (currentPosition < ins0.size()) {
+					ASMInstruction ins = ins0.get(currentPosition);
+					
+					boolean overwritesPushedReg = false;
+					for (REG reg : clearedRegs) overwritesPushedReg |= ASMOptimizer.overwritesReg(ins, reg);
+					
+					boolean readsPushedReg = false;
+					for (REG reg : clearedRegs) readsPushedReg |= ASMOptimizer.readsReg(ins, reg);
+					
+					/* Break if either R0, R1 or R2 is overwritten */
+					boolean opRegsOverwrite = false;
+					for (REG reg : regsReadByInitial) {
+						if (reg == REG.R0 && ASMOptimizer.overwritesReg(ins, reg)) {
+							wroteR0 = 1;
+						}
+						else opRegsOverwrite |= ASMOptimizer.overwritesReg(ins, reg);
+					}
+				
+					if (opRegsOverwrite) break;
+						
+					if (!overwritesPushedReg) {
+						/* If it does not overwrite one of the regs it is not part of the initial push */
+						if (ins instanceof ASMPopStack) {
+							ASMPopStack pop = (ASMPopStack) ins;
+							
+							/* Is function frame pop, replace with bx lr */
+							if (pop.operands.get(pop.operands.size() - 1).reg == REG.PC) {
+								ins0.set(currentPosition, new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
+								DID_OPT = true;
+							}
+						}
+						else if (readsPushedReg || ins instanceof ASMPushStack ||
+								 ins instanceof ASMLabel && ins.optFlags.contains(OPT_FLAG.LOOP_HEAD)) {
+							break;
+						}
+						else {
+							if (ins instanceof ASMLabel) {
+								ASMLabel label = (ASMLabel) ins;
+								if (label.optFlags.contains(OPT_FLAG.LOOP_HEAD)) break;
+								else {
+									if (visited.contains(label)) 
+										visited.remove(label);
+								}
+							}
+							else if (ins instanceof ASMBranch) {
+								/* Stop at function call */
+								ASMBranch branch = (ASMBranch) ins;
+								if (branch.type == BRANCH_TYPE.BL) break;
+								
+								if (ins.optFlags.contains(OPT_FLAG.BRANCH_TO_EXIT)) {
+									wroteR0 = 0;
+									ins = new ASMBranch(BRANCH_TYPE.BX, ins.cond, new RegOp(REG.LR));
+									DID_OPT = true;
+								}
+								else {
+									if (branch.target instanceof LabelOp) {
+										LabelOp op = (LabelOp) branch.target;
+										if (!visited.contains(op.label)) 
+											visited.add(op.label);
+									}
+									else break;
+								}
+							}
+							else if (ASMOptimizer.overwritesReg(ins, REG.PC)) {
+								break;
+							}
+							
+							ins0.remove(currentPosition);
+							ins0.add(insertPosition++, ins);
+							OPT_DONE = true;
+						}
+					}
+					else {
+						/* 
+						 * We have to keep track which regs are read by
+						 * the initial instructions. If any of these regs
+						 * is overwritten, we have to stop.
+						 */
+						for (int a = 0; a < 11; a++) {
+							REG reg = RegOp.toReg(a);
+							if (ASMOptimizer.readsReg(ins, RegOp.toReg(a)) && !regsReadByInitial.contains(reg)) {
+								regsReadByInitial.add(reg);
+							}
+						}
+						
+						boolean abort = false;
+						for (REG reg : clearedRegs) {
+							if (ASMOptimizer.overwritesReg(ins, reg)) {
+								if (clearedRegOccurrence.contains(reg)) {
+									/* Allow first overwrite, made by initial */
+									clearedRegOccurrence.remove(reg);
+								}
+								else abort = true;
+							}
+						}
+						
+						if (abort) break;
+					}
+					
+					if (wroteR0 > 0) wroteR0++;
+					currentPosition++;
+				}
+				
+				if (!visited.isEmpty() || wroteR0 > 1 || !DID_OPT) {
+					ins0.clear();
+					ins0.addAll(ins1);
+				}
+				else OPT_DONE = true;
 			}
 		}
 	}

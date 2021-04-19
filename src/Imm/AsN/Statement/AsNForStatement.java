@@ -68,6 +68,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		/* Marks the start of the loop */
 		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
+		forStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		f.instructions.add(forStart);
 		
 		/* End of the loop */

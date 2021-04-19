@@ -447,6 +447,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Only patch bx and instructions that are not part of exceptional exit */
 				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
+					branch.optFlags.add(OPT_FLAG.BRANCH_TO_EXIT);
 					branch.target = new LabelOp(funcReturn);
 				}
 			}

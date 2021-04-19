@@ -46,14 +46,14 @@ _routine_stack_copy_end_:
 
 .global fib
 fib:                                         /* Function: fib */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, lr}
-    mov r3, r0
     cmp r0, #3
     bge fib.L1
     mov r0, #1                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4, pc}
+    bx lr
 fib.L1: 
+    sub sp, sp, #12
+    stmea sp, {r3, r4, lr}
+    mov r3, r0
     sub r0, r3, #1
     bl fib                                   /* Call fib */
     mov r4, r0

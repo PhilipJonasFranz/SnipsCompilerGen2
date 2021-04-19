@@ -26,6 +26,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		w.continueJump = new ASMLabel(LabelUtil.getLabel());
 		
 		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
+		whileStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		w.instructions.add(whileStart);
 
 		w.breakJump = new ASMLabel(LabelUtil.getLabel());

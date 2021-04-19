@@ -39,11 +39,18 @@ public abstract class ASMInstruction {
 		
 		BX_SEMI_EXIT,
 		
+		BRANCH_TO_EXIT,
+		
 		/**
 		 * Mark that a jump will target a loop start, or that its jumping upwards, which means
 		 * that it can distrupt dataflows.
 		 */
 		LOOP_BRANCH, 
+		
+		/**
+		 * Applied to labels that are the head of an assembly loop.
+		 */
+		LOOP_HEAD,
 		
 		/**
 		 * Excludes a label from unused removal.
