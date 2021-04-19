@@ -97,10 +97,12 @@ public class Util {
 		List<String> lines = Util.readFile(new File(mappedPath));
 		
 		if (lines != null) {
-			for (String s : lines) 
+			for (String s : lines) {
 				/* Exclude version number directive */
-				if (!s.startsWith(".version"))
+				if (!s.startsWith(".version")) 
 					sum += s.hashCode();
+				else sum = 0;
+			}
 		}
 		else new Message("Failed to locate file '" + path + "', cannot compute hashsum.", Type.WARN);
 		
