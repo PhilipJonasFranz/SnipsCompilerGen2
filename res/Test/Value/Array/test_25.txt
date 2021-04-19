@@ -13,14 +13,6 @@ TESTCASES
 OUTPUT
 .version 9726841733
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
-
 .data
 vec: .skip 16
 NULL: .word 0
@@ -28,17 +20,6 @@ HEAP_START: .word 0
 
 .text
     b main_init
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global main
 

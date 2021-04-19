@@ -1041,7 +1041,7 @@ public class Parser {
 		accept(TokenType.SEMICOLON);
 		
 		if (path.getLast().equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		
 		return new FunctionCall(path, provisos, params, source);
@@ -1410,13 +1410,13 @@ public class Parser {
 		else if (current.type == TokenType.DIV) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
 			return ASSIGN_ARITH.DIV_ASSIGN;
 		}
 		else if (current.type == TokenType.MOD) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
 			return ASSIGN_ARITH.MOD_ASSIGN;
 		}
 		/* Bitwise Operation */
@@ -1904,7 +1904,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
 			}
 			else {
 				Source source = accept().source();
@@ -1914,7 +1914,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_mod"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
 			}
 		}
 		
@@ -2459,20 +2459,20 @@ public class Parser {
 	public void checkAutoInclude(String name) {
 		if (name.equals("resv")) {
 			CompilerDriver.heap_referenced = true;
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
 		}
 		else if (name.equals("init")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/init.sn");
 		}
 		else if (name.equals("isa") || name.equals("isar")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/isa.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/isa.sn");
 		}
 		else if (name.equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		else if (name.equals("hsize")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/hsize.sn");
 		}
 	}
 

@@ -151,11 +151,6 @@ public class AsNBody extends AsNNode {
 		/* Branch to main Function if main function is not first function, patch target later */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp());
 		body.originUnit.append(branch, SECTION.TEXT);
-				
-		
-		/* --- Inject Stack Copy Routine --- */
-		List<ASMInstruction> routine = StackUtil.buildStackCopyRoutine();
-		body.originUnit.append(routine, SECTION.TEXT);
 		
 		ASMLabel mainLabel = null;
 		
@@ -375,6 +370,12 @@ public class AsNBody extends AsNNode {
 			}
 		}
 		
+		/* --- Inject Stack Copy Routine --- */
+		if (AsNBody.usedStackCopyRoutine || !CompilerDriver.buildModulesRecurse) {
+			List<ASMInstruction> routine = StackUtil.buildStackCopyRoutine();
+			body.originUnit.append(routine, SECTION.TEXT);
+		}
+		
 		/* Add all system libraries that were used */
 		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 	
@@ -406,7 +407,14 @@ public class AsNBody extends AsNNode {
 				
 				for (String imp : referenced) {
 					if (!unit.imports.contains(imp)) {
-						unit.imports.add(imp);
+						
+						/* Map path to dynamic imports, check if import was used */
+						String iPath = imp.split(" ") [1];
+						iPath = iPath.substring(0, iPath.length() - 1) + "sn";
+						iPath = PreProcessor.resolveToPath(iPath);
+						
+						if (!CompilerDriver.buildModulesRecurse || CompilerDriver.driver.referencedLibaries.contains(iPath))
+							unit.imports.add(imp);
 					}
 				}
 			}
