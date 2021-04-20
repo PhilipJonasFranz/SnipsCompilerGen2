@@ -41,8 +41,7 @@ X.create_P_1:                                /* Function: X.create, Provisos: BO
     mov fp, sp
     mov r4, r1
     mov r3, r0
-    push { r4 }
-    push { r3 }
+    push { r3, r4 }
     ldr r0, .P868419367_X_P_1
     push { r0 }
     mov r2, sp

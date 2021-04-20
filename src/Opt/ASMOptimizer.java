@@ -23,6 +23,7 @@ import Imm.ASM.Memory.Stack.ASMStackOp;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
+import Imm.ASM.Processing.ASMUnaryData;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMLsr;
@@ -85,6 +86,14 @@ public class ASMOptimizer {
 			 * add r0, ry, #6
 			 */
 			this.defragmentAdditions(ins);
+			
+			/**
+			 * push { r0 }
+			 * push { r1 }
+			 * Replace with:
+			 * push { r1, r0 }
+			 */
+			this.defragmentPush(ins);
 			
 			/**
 			 * sub r0, fp, #8
@@ -1846,6 +1855,32 @@ public class ASMOptimizer {
 					ins0.remove(i - 1);
 					i--;
 					markOpt();
+				}
+			}
+		}
+	}
+	
+	private void defragmentPush(List<ASMInstruction> ins0) {
+		for (int i = 1; i < ins0.size(); i++) {
+			if (ins0.get(i) instanceof ASMPushStack && ins0.get(i - 1) instanceof ASMPushStack) {
+				ASMPushStack push0 = (ASMPushStack) ins0.get(i - 1);
+				ASMPushStack push1 = (ASMPushStack) ins0.get(i);
+				
+				if (push0.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
+				if (push1.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
+				
+				for (int a = 0; a < push1.operands.size(); a++) {
+					RegOp reg = push1.operands.get(a);
+					if (push0.operands.stream().filter(x -> x.reg == reg.reg).count() == 0) {
+						push0.operands.add(0, reg);
+						push1.operands.remove(a--);
+						OPT_DONE = true;
+					}
+				}
+				
+				if (push1.operands.isEmpty()) {
+					ins0.remove(i--);
+					OPT_DONE = true;
 				}
 			}
 		}

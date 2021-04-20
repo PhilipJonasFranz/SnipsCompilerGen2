@@ -47,8 +47,7 @@ main:                                        /* Function: main */
     mov r0, #4                               /* Evaluate Expression */
     push { r0 }
     lsl r0, r3, #1
-    push { r0 }
-    push { r3 }
+    stmfd sp!, {r0, r3}
     ldr r0, .P1966421108_Cap_P_2
     push { r0 }
     ldr r0, .P1966421108_Data_P_3

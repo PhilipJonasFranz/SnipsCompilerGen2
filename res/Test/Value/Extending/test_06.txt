@@ -41,8 +41,7 @@ X.create:                                    /* Function: X.create */
     mov fp, sp
     mov r4, r1
     mov r3, r0
-    push { r4 }
-    push { r3 }
+    push { r3, r4 }
     ldr r0, .P839790216_X
     push { r0 }
     mov r2, sp

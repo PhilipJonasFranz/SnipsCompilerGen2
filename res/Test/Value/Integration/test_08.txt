@@ -197,8 +197,7 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, [fp, #-36]                       /* Evaluate Expression */
     ldr r1, [fp, #-40]
-    stmfd sp!, {r0, r1}
-    push { r4 }
+    stmfd sp!, {r0, r1, r4}
     ldr r0, .P1008736838_Util.Tuple2_P_1_2
     push { r0 }
 /* Set item at index 1 to 5 */

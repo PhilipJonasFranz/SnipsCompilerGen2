@@ -35,8 +35,7 @@ f:                                           /* Function: f */
     mov fp, sp
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    push { r3 }
+    stmfd sp!, {r0, r3}
     mov r2, sp
     mov sp, fp
     ldmfd sp!, {r3, fp}

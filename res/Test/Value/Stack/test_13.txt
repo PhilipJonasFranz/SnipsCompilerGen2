@@ -33,8 +33,7 @@ main:                                        /* Function: main */
     cmp r0, #3
     bne main.L1
     mov r0, #5                               /* Evaluate Expression */
-    push { r0 }
-    push { r4 }
+    stmfd sp!, {r0, r4}
     mov r0, #3
     push { r0 }
     ldr r2, [fp, #-4]
@@ -46,8 +45,7 @@ main.L1:
     bne main.L0
     mov r1, #5
     mov r0, #12                              /* Evaluate Expression */
-    stmfd sp!, {r0, r1}
-    push { r4 }
+    stmfd sp!, {r0, r1, r4}
     mov r0, #4
     push { r0 }
     ldr r2, [fp, #-4]

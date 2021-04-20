@@ -40,8 +40,7 @@ main:                                        /* Function: main */
     bl resv                                  /* Call resv */
     mov r4, r0
     add r0, r3, #1
-    push { r0 }
-    push { r3 }
+    stmfd sp!, {r0, r3}
     ldr r0, .P1355155054_Point2D
     push { r0 }
     mov r2, #3
