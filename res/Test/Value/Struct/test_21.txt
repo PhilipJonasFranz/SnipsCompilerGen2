@@ -27,20 +27,20 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r3, r0
     mov r4, r1
-    mov r0, #8                               /* Evaluate Expression */
+    mov r3, r0
     mov r1, #6
+    mov r0, #8                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #4
     mov r1, #2
+    mov r0, #4
     stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
     ldr r0, .P1164804880_Test
     push { r0 }
-    sub r1, fp, #16                          /* Evaluate Expression */
     mov r2, #0                               /* Calculate offset of sub structure */
+    sub r1, fp, #16                          /* Evaluate Expression */
     lsl r0, r3, #3
     add r2, r2, r0
     lsl r0, r4, #2

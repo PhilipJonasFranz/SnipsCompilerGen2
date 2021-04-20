@@ -27,11 +27,11 @@ HEAP_START: .word 0
 smallest:                                    /* Function: smallest */
     sub sp, sp, #24
     stmea sp, {r3-r8}
-    mov r3, r0
-    mov r4, r1
-    ldr r5, [r10, r3, lsl #2]                /* Load from address */
-    mov r6, #0
     mov r7, #0
+    mov r6, #0
+    mov r4, r1
+    mov r3, r0
+    ldr r5, [r10, r3, lsl #2]                /* Load from address */
 smallest.L1: 
     cmp r4, r6
     beq smallest.L2
@@ -40,8 +40,8 @@ smallest.L1:
     ldr r7, [r10, r0, lsl #2]                /* Load from address */
     cmp r7, r5
     bge smallest.L3
-    mov r0, r7                               /* Evaluate Expression */
     mov r5, r7
+    mov r0, r7                               /* Evaluate Expression */
 smallest.L3: 
     add r6, r6, #1
     b smallest.L1
@@ -54,12 +54,12 @@ smallest.L2:
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
-    mov r1, #2
     mov r2, #7
+    mov r1, #2
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #3
     mov r1, #5
+    mov r0, #3
     stmfd sp!, {r0, r1}
     mov r1, #5
     sub r0, fp, #20

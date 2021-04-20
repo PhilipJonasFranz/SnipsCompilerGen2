@@ -35,8 +35,8 @@ foo:                                         /* Function: foo */
     push { fp, lr }
     mov fp, sp
     add r1, fp, #32                          /* Start of structure in stack */
-    ldr r0, [r1, #8]
     ldr r2, [r1, #4]
+    ldr r0, [r1, #8]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }
@@ -51,17 +51,17 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #9                               /* Evaluate Expression */
-    mov r1, #8
     mov r2, #7
+    mov r1, #8
+    mov r0, #9                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #6
-    mov r1, #5
     mov r2, #4
+    mov r1, #5
+    mov r0, #6
     stmfd sp!, {r0-r2}
-    mov r0, #3
-    mov r1, #2
     mov r2, #1
+    mov r1, #2
+    mov r0, #3
     stmfd sp!, {r0-r2}
     sub r0, fp, #4
     ldmfa r0, {r0-r2}

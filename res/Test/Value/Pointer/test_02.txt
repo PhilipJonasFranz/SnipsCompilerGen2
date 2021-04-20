@@ -29,34 +29,33 @@ HEAP_START: .word 0
 
 .global get
 get:                                         /* Function: get */
-    push { r4, r5 }
-    mov r4, r1
+    push { r5 }
     mov r5, r2
     mov r2, #3
-    mul r2, r4, r2
+    mul r2, r1, r2
     add r1, r0, r2
     add r0, r1, r5
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
-    ldmfd sp!, {r4, r5}
+    pop { r5 }
     bx lr
 
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
     mov r4, r1
-    mov r0, #9                               /* Evaluate Expression */
-    mov r1, #8
+    mov r3, r0
     mov r2, #7
+    mov r1, #8
+    mov r0, #9                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #6
-    mov r1, #5
     mov r2, #4
+    mov r1, #5
+    mov r0, #6
     stmfd sp!, {r0-r2}
-    mov r0, #3
-    mov r1, #2
     mov r2, #1
+    mov r1, #2
+    mov r0, #3
     stmfd sp!, {r0-r2}
     push { r4 }
     push { r3 }

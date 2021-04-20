@@ -62,42 +62,42 @@ HEAP_START: .word 0
 __mat_mult:                                  /* Function: __mat_mult */
     sub sp, sp, #32
     stmea sp, {r3-r9, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     mov r0, #9
     bl resv                                  /* Call resv */
+    mov r6, #0
     mov r5, r0
     mov r0, #0                               /* Evaluate Expression */
-    mov r6, #0
 __mat_mult.L1: 
     cmp r6, #3
     bge __mat_mult.L2
-    mov r0, #0                               /* Evaluate Expression */
     mov r7, #0
+    mov r0, #0                               /* Evaluate Expression */
 __mat_mult.L4: 
     cmp r7, #3
     bge __mat_mult.L5
+    mov r9, #0
     mov r8, #0
     mov r0, #0                               /* Evaluate Expression */
-    mov r9, #0
 __mat_mult.L7: 
     cmp r9, #3
     bge __mat_mult.L8
     mov r2, #3
     mul r2, r6, r2
     add r1, r3, r2
-    add r0, r1, r9
-    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     mov r2, #3
     mul r2, r9, r2
+    add r0, r1, r9
     add r1, r4, r2
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
     add r0, r1, r7
     pop { r1 }
+    add r9, r9, #1
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
     mul r0, r1, r2
     add r8, r8, r0
-    add r9, r9, #1
     b __mat_mult.L7
 __mat_mult.L8: 
     mov r2, #3

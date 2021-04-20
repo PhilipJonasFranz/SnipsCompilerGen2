@@ -66,13 +66,13 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P509822885_X
     push { r0 }
+    mov r12, #0                              /* Offset to Inter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     sub r0, fp, #12                          /* Evaluate Expression */
     push { r3 }                              /* Push declaration on stack, referenced by addressof. */
     lsr r3, r0, #2
     ldr r0, [r10, r3, lsl #2]
-    mov r12, #0                              /* Offset to Inter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]

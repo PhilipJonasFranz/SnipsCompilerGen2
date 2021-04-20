@@ -41,8 +41,8 @@ Data.X.create:                               /* Function: Data.X.create */
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0

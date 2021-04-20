@@ -46,9 +46,9 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P967568823_A
     push { r0 }
+    mov r4, #0
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
-    mov r4, #0
     sub sp, sp, #16                          /* Make space on stack for declaration a0 */
 main.L1: 
     cmp r4, #2
@@ -58,11 +58,11 @@ main.L1:
     add r2, r2, r0
     sub r1, fp, #32                          /* Start of structure in stack */
     add r1, r1, r2                           /* Start of sub structure in stack */
-    ldr r0, [r1, #12]
     ldr r2, [r1, #8]
+    ldr r0, [r1, #12]
     stmfd sp!, {r0, r2}
-    ldr r0, [r1, #4]
     ldr r2, [r1]
+    ldr r0, [r1, #4]
     stmfd sp!, {r0, r2}
     pop { r0 }
     sub r1, fp, #48
@@ -73,8 +73,8 @@ main.L1:
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
+    mov r0, #0                               /* Evaluate Expression */
     sub sp, sp, #8                           /* Make space on stack for declaration a1 */
 main.L4: 
     cmp r5, #2
@@ -84,17 +84,17 @@ main.L4:
     add r2, r2, r0
     sub r1, fp, #48                          /* Start of structure in stack */
     add r1, r1, r2                           /* Start of sub structure in stack */
-    ldr r0, [r1, #4]
     ldr r2, [r1]
+    ldr r0, [r1, #4]
     stmfd sp!, {r0, r2}
     pop { r0 }
     sub r1, fp, #56
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
+    add r5, r5, #1
     ldr r0, [fp, #-52]                       /* Load field from struct */
     add r3, r3, r0
-    add r5, r5, #1
     b main.L4
 main.L5: 
     add sp, sp, #8                           /* Reset stack, remove iterator and counter */

@@ -49,14 +49,14 @@ allocMatrix:                                 /* Function: allocMatrix */
     stmea sp, {r3-r5, lr}
     mov r0, #9
     bl resv                                  /* Call resv */
+    mov r4, #0
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */
-    mov r4, #0
 allocMatrix.L1: 
     cmp r4, #3
     bge allocMatrix.L2
-    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
+    mov r0, #0                               /* Evaluate Expression */
 allocMatrix.L4: 
     cmp r5, #3
     bge allocMatrix.L5

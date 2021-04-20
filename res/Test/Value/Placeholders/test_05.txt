@@ -32,9 +32,9 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #5
+    mov r1, #5
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     ldr r2, .P1368138753_Test
     stmfd sp!, {r0-r2}

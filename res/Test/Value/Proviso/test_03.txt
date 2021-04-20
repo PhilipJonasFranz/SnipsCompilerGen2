@@ -26,8 +26,8 @@ HEAP_START: .word 0
 getDiff_P_1_1:                               /* Function: getDiff, Provisos: INT, INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     cmp r0, #0
     bne getDiff_P_1_1.L1
     mov r0, r4                               /* Evaluate Expression */

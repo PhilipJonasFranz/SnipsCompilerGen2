@@ -46,12 +46,11 @@ HEAP_START: .word 0
 
 .global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global Storage.X.get_P_1

@@ -46,16 +46,16 @@ set:                                         /* Function: set */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
     mov r4, r1
-    mov r0, #4                               /* Evaluate Expression */
+    mov r3, r0
     mov r1, #3
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #2
     mov r1, #1
+    mov r0, #2
     stmfd sp!, {r0, r1}
-    mov r0, #6                               /* Load parameters */
     mov r1, #5
+    mov r0, #6                               /* Load parameters */
     stmfd sp!, {r0, r1}
     sub r0, fp, #16
     lsr r0, r0, #2

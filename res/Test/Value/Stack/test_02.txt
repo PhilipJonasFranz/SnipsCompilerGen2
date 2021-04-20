@@ -31,8 +31,8 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
     ldr r1, [fp, #8]                         /* Evaluate Expression */
     bl foo                                   /* Call foo */
     add r0, r0, r4

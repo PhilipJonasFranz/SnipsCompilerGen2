@@ -53,12 +53,11 @@ HEAP_START: .word 0
 
 .global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global Storage.X.get_P_1
@@ -75,8 +74,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P874222087_Storage.X_P_1
     push { r0 }
-    lsr r3, sp, #2
 /* Create a new linked list with 0 as default value. */
+    lsr r3, sp, #2
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r4, r0

@@ -40,8 +40,8 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    ldr r0, .P1612757230_TreeNode_P_1
     lsl r1, r3, #2
+    ldr r0, .P1612757230_TreeNode_P_1
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]

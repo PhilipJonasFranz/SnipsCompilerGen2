@@ -27,8 +27,8 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     push { r4 }
     push { r3 }
     ldr r0, [fp, #-4]                        /* Evaluate Expression */

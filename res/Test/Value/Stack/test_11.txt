@@ -53,8 +53,8 @@ bar:                                         /* Function: bar */
 fooRec:                                      /* Function: fooRec */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     cmp r1, #0
     bne fooRec.L1
     mov r0, r3                               /* Evaluate Expression */
@@ -74,9 +74,9 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     mov r1, #0
     bl foo                                   /* Call foo */
     mov r6, r0

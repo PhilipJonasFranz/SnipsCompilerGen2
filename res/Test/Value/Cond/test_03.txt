@@ -25,8 +25,8 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     cmp r0, r1
     bne main.L0
     lsl r4, r4, #1

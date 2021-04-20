@@ -28,14 +28,14 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, #0
+    mov r3, r0
 main.L1: 
     cmp r4, r3
     bge main.L2
-    add r0, r4, #1
     ldr r1, .P1969102551_s
     ldr r2, [r1]
+    add r0, r4, #1
     add r0, r2, r0
     str r0, [r1]
     add r4, r4, #1

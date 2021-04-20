@@ -63,10 +63,10 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P338047979_X
     push { r0 }
+    mov r12, #0                              /* Offset to Inter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    mov r12, #0                              /* Offset to Inter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]

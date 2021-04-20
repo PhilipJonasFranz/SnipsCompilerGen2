@@ -62,8 +62,8 @@ HEAP_START: .word 0
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #12                              /* Evaluate Expression */
     mov r1, #10
+    mov r0, #12                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P725273612_A
     push { r0 }
@@ -76,14 +76,14 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     b main.L10
 main.L0: 
+/* Since polymorphism is only available through pointers, */
+/* r0 is not an instance of A anymore */
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r3, r0, #2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]
     push { r0 }
     ldr r0, .P725273612_Root
-/* Since polymorphism is only available through pointers, */
-/* r0 is not an instance of A anymore */
     push { r0 }
     ldr r1, .P725273612_A                    /* Load parameters */
     sub r0, fp, #20

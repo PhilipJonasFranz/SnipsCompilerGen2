@@ -51,8 +51,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P1355155054_Point2D
     push { r0 }
-    ldr r0, .P1355155054_Line2D
     lsl r1, r4, #2
+    ldr r0, .P1355155054_Line2D
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]

@@ -31,18 +31,18 @@ main:                                        /* Function: main */
     mov r0, #3                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r3, r0
-    mov r0, #5                               /* Evaluate Expression */
     mov r1, #3
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    ldr r0, .P1555559111_Test
     lsl r1, r3, #2
+    ldr r0, .P1555559111_Test
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    mov r0, #8                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
+    mov r0, #8                               /* Evaluate Expression */
     str r0, [r1, #4]                         /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */

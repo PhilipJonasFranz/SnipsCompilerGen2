@@ -127,8 +127,8 @@ GameObject.Items.get:                        /* Function: GameObject.Items.get *
 main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
-    mov r0, #8
     mov r1, #5
+    mov r0, #8
     stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .P1008736838_arr                 /* Load from .data section */
@@ -146,8 +146,8 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl resv                                  /* Call resv */
     push { r0 }
-    ldr r0, .P1008736838_GameObject.Items.Inventory
     lsl r1, r3, #2
+    ldr r0, .P1008736838_GameObject.Items.Inventory
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -162,8 +162,8 @@ main:                                        /* Function: main */
     ldr r0, .P1008736838_arr                 /* Load data section address */
     ldr r0, [r0]
     push { r0 }
-    ldr r0, .P1008736838_GameObject.Player
     lsl r1, r4, #2
+    ldr r0, .P1008736838_GameObject.Player
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -181,9 +181,9 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #3
-    mov r1, #1
     ldr r2, .P1008736838_Util.Tuple2_P_1_1
+    mov r1, #1
+    mov r0, #3
     stmfd sp!, {r0-r2}
     ldr r0, .P1008736838_Util.Tuple2_P_3_1
     push { r0 }

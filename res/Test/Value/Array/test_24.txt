@@ -27,11 +27,11 @@ HEAP_START: .word 0
 main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
-    mov r0, #0
     mov r1, #2
+    mov r0, #0
     stmfd sp!, {r0, r1}
-    mov r0, #7
     mov r1, #3
+    mov r0, #7
     stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .P741372901_vec                  /* Load from .data section */
@@ -44,10 +44,10 @@ main_init:
     str r0, [r1, #12]
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
-    mov r0, #5                               /* Evaluate Expression */
+    mov r3, r0
     mov r1, #1
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     pop { r0 }
     ldr r1, .P741372901_vec                  /* Load data section address */

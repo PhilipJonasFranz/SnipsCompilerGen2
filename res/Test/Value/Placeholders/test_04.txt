@@ -31,8 +31,8 @@ main:                                        /* Function: main */
     mov fp, sp
 /* Generates the Struct (SID, [1, 2, 1, 2], 1) */
     sub sp, sp, #12                          /* Evaluate Expression */
-    mov r0, #2
     mov r1, #1
+    mov r0, #2
     stmfd sp!, {r0, r1}
     mov r2, sp
     mov r1, #3

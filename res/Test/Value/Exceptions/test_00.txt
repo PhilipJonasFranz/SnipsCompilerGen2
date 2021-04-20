@@ -47,9 +47,9 @@ get:                                         /* Function: get */
     sub sp, sp, #16
     stmea sp, {r3-r5, fp}
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     cmp r1, #2
     ble get.L2
     push { r5 }
@@ -80,9 +80,9 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #8                               /* Evaluate Expression */
-    mov r1, #3
     mov r2, #5
+    mov r1, #3
+    mov r0, #8                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     mov r4, #0
     mov r0, #3                               /* Evaluate Expression */

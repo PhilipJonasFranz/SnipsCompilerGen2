@@ -29,11 +29,11 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
+    ldr r1, .P1755902985_Nib_P_1
     mov r0, #10                              /* Evaluate Expression */
-    ldr r1, .P1755902985_Nib_P_1
     stmfd sp!, {r0, r1}
-    mov r0, #5
     ldr r1, .P1755902985_Nib_P_1
+    mov r0, #5
     stmfd sp!, {r0, r1}
     ldr r0, .P1755902985_Data_P_1
     push { r0 }

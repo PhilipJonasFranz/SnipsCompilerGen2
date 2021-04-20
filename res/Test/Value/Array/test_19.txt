@@ -48,39 +48,39 @@ __vec_cross:                                 /* Function: __vec_cross */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #9                               /* Evaluate Expression */
-    mov r1, #8
     mov r2, #7
-    stmfd sp!, {r0-r2}
-    mov r0, #6
-    mov r1, #5
-    mov r2, #4
-    stmfd sp!, {r0-r2}
-    mov r0, #3
-    mov r1, #2
-    mov r2, #1
-    stmfd sp!, {r0-r2}
+    mov r1, #8
     mov r0, #9                               /* Evaluate Expression */
-    mov r1, #6
-    mov r2, #3
     stmfd sp!, {r0-r2}
-    mov r0, #8
+    mov r2, #4
     mov r1, #5
-    mov r2, #2
+    mov r0, #6
     stmfd sp!, {r0-r2}
-    mov r0, #7
-    mov r1, #4
     mov r2, #1
+    mov r1, #2
+    mov r0, #3
+    stmfd sp!, {r0-r2}
+    mov r2, #3
+    mov r1, #6
+    mov r0, #9                               /* Evaluate Expression */
+    stmfd sp!, {r0-r2}
+    mov r2, #2
+    mov r1, #5
+    mov r0, #8
+    stmfd sp!, {r0-r2}
+    mov r2, #1
+    mov r1, #4
+    mov r0, #7
     stmfd sp!, {r0-r2}
     sub r1, fp, #36                          /* Start of structure in stack */
-    ldr r0, [r1, #8]
     ldr r2, [r1, #4]
+    ldr r0, [r1, #8]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     sub r1, fp, #72                          /* Start of structure in stack */
     push { r0 }
-    ldr r0, [r1, #8]
     ldr r2, [r1, #4]
+    ldr r0, [r1, #8]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }

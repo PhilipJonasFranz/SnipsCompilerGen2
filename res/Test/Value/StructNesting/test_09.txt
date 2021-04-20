@@ -37,8 +37,8 @@ HEAP_START: .word 0
 X.pipe_P_1:                                  /* Function: X.pipe, Provisos: INT */
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     ldr r0, [r10, r0, lsl #2]                /* Load from address */

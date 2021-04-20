@@ -43,10 +43,10 @@ fib:                                         /* Function: fib */
     stmea sp, {r3-r8, lr}
     mov r3, r0
     bl resv                                  /* Call resv */
-    mov r4, r0
-    mov r5, #0
-    mov r6, #0
     mov r7, #0
+    mov r6, #0
+    mov r5, #0
+    mov r4, r0
 fib.L1: 
     cmp r3, r6
     beq fib.L2
@@ -55,14 +55,14 @@ fib.L1:
     ldr r7, [r10, r0, lsl #2]                /* Load from address */
     cmp r5, #2
     bge fib.L4
-    mov r0, #1                               /* Evaluate Expression */
     mov r7, #1
+    mov r0, #1                               /* Evaluate Expression */
     b fib.L3
 fib.L4: 
     add r1, r4, r5
     sub r0, r1, #1
-    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     add r1, r4, r5
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
     sub r0, r1, #2
     pop { r1 }

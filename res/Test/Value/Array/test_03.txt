@@ -50,13 +50,13 @@ main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                               /* Evaluate Expression */
-    mov r1, #2
     mov r2, #1
+    mov r1, #2
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #4
+    mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     sub r0, fp, #4
     ldmfa r0, {r0-r2}

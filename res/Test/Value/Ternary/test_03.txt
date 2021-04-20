@@ -28,8 +28,8 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     cmp r0, #3
     moveq r0, #1
     movne r0, #0

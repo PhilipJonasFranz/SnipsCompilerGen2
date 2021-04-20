@@ -38,8 +38,8 @@ add:                                         /* Function: add */
 .global main
 main:                                        /* Function: main */
     push { lr }
-    mov r0, #12                              /* Evaluate Expression */
     mov r4, #12
+    mov r0, #12                              /* Evaluate Expression */
     bl add                                   /* Evaluate Expression */
     add r4, r0, #12
     mov r0, r4                               /* Evaluate Expression */

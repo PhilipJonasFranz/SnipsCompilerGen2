@@ -26,9 +26,9 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
+    mov r4, #0
     mov r3, r0
     mov r0, #0                               /* Evaluate Expression */
-    mov r4, #0
 main.L1:                                     /* Evaluate condition */
     cmp r3, #0
     ble main.L2

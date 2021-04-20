@@ -33,16 +33,16 @@ HEAP_START: .word 0
 Test.getter:                                 /* Function: Test.getter */
     push { fp }
     mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P1892863495_Test.S
     push { r0 }
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #12
     add r1, r2, #12
+    mov r0, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0

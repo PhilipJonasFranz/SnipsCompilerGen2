@@ -67,8 +67,8 @@ main:                                        /* Function: main */
     mov r0, r4                               /* Evaluate Expression */
     bl X.get@0                               /* Call X.get */
     mov r5, r0
-    mov r0, r4
     mov r1, r3
+    mov r0, r4
     bl X.get@1                               /* Call X.get */
     add r0, r5, r0
     mov sp, fp

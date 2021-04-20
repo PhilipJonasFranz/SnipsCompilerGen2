@@ -37,8 +37,8 @@ incr:                                        /* Function: incr */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, #0
     mov r4, #0
+    mov r3, #0
     push { r4 }
 main.L1: 
     ldr r0, [fp, #-4]

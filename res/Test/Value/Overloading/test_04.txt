@@ -86,20 +86,20 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P1144089515_X_P_1
     push { r0 }
+    mov r12, #0                              /* Offset to Getter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, r4                               /* Evaluate Expression */
-    mov r12, #0                              /* Offset to Getter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
     ldr r10, .P1144089515_Getter_P_1
     add lr, pc, #8
     mov pc, r12
-    mov r5, r0
-    mov r0, r4
-    mov r1, r3
     mov r12, #4                              /* Offset to Getter.get */
+    mov r5, r0
+    mov r1, r3
+    mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]

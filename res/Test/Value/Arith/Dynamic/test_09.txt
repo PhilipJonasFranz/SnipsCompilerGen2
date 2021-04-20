@@ -38,8 +38,8 @@ HEAP_START: .word 0
 baz:                                         /* Function: baz */
     push { fp }
     mov fp, sp
-    mov r0, #10                              /* Evaluate Expression */
     mov r1, #3
+    mov r0, #10                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P1594258110_Bar
     push { r0 }
@@ -49,8 +49,8 @@ baz:                                         /* Function: baz */
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #12
     add r1, r2, #12
+    mov r0, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
@@ -71,8 +71,8 @@ foo:                                         /* Function: foo */
     mov r2, sp
     mov sp, fp
     ldmfd sp!, {r3, fp}
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0

@@ -21,8 +21,8 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
     mov r1, r0                               /* Evaluate Expression */
     ldr r2, [sp]
     mla r0, r1, r2, r4

@@ -27,9 +27,9 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
-    mov r4, #0
     mov r5, #0
+    mov r4, #0
+    mov r3, r0
 main.L1: 
     cmp r5, r3
     bge main.L2
@@ -37,13 +37,13 @@ main.L1:
     add r4, r1, #1
     cmp r5, #5
     bge main.L7
-    mov r0, #0                               /* Evaluate Expression */
     mov r6, #0
+    mov r0, #0                               /* Evaluate Expression */
 main.L6: 
     cmp r6, #4
     bge main.L7
-    add r4, r4, r4
     add r6, r6, #1
+    add r4, r4, r4
     b main.L6
 main.L7: 
     add r5, r5, #1

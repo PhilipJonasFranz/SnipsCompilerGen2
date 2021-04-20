@@ -39,8 +39,8 @@ bar:                                         /* Function: bar */
     sub sp, sp, #12
     stmea sp, {r3, r4, fp}
     mov fp, sp
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     mov r1, r2                               /* Evaluate Expression */
     ldr r2, [fp, #12]
     mul r0, r1, r2
@@ -60,9 +60,9 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     mov r0, #6                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]

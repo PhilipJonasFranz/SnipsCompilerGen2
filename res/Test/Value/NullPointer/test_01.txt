@@ -45,12 +45,9 @@ get:                                         /* Function: get */
 
 .global set
 set:                                         /* Function: set */
-    push { r3 }
-    mov r3, r0
+    lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, .P1920609344_NULL                /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
     bx lr
 .P1920609344_NULL: .word NULL
 

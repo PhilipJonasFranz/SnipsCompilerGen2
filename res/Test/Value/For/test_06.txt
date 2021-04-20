@@ -53,10 +53,10 @@ main:                                        /* Function: main */
     mov r1, #5
     mov r0, r4
     bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
-    mov r0, #0                               /* Evaluate Expression */
     mov r5, #0
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
+    mov r0, #0                               /* Evaluate Expression */
 main.L1: 
     ldr r1, .P1724490585_NULL                /* Load null address */
     cmp r6, r1

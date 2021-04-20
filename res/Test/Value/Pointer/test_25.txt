@@ -36,11 +36,11 @@ HEAP_START: .word 0
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
     ldr r1, .P2044436202_K
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #10
     mov r1, #13
+    mov r0, #10
     stmfd sp!, {r0, r1}
     ldr r0, .P2044436202_P
     push { r0 }

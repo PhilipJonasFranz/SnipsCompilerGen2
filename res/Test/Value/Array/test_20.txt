@@ -29,8 +29,8 @@ main_init:
     push { r0 }
     mvn r0, #1
     push { r0 }
-    mov r0, #3
     ldr r1, .P855889505_vec                  /* Load from .data section */
+    mov r0, #3
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]

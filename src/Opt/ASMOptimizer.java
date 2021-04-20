@@ -314,6 +314,12 @@ public class ASMOptimizer {
 			
 			if (!OPT_DONE) {
 				
+				this.pushDownInsDataUsed(ins);
+				
+			}
+			
+			if (!OPT_DONE) {
+				
 				this.deepRegPropagation(ins);
 				
 			}
@@ -765,6 +771,59 @@ public class ASMOptimizer {
 				
 			}
 			else throw new RuntimeException("OPT: Cannot patch FP to SP: " + ins.getClass().getName());
+		}
+	}
+	
+	public void pushDownInsDataUsed(List<ASMInstruction> ins0) {
+		for (int i = 0; i < ins0.size(); i++) {
+			ASMInstruction ins = ins0.get(i);
+			
+			if (ins instanceof ASMBranch || ins instanceof ASMPushStack || ins instanceof ASMPopStack) continue;
+			
+			for (int a = 0; a < 10; a++) {
+				REG reg = RegOp.toReg(a);
+				if (ASMOptimizer.overwritesReg(ins, reg)) {
+					for (int z = i + 1; z < ins0.size(); z++) {
+						ASMInstruction ins1 = ins0.get(z);
+						
+						/*
+						 * To prevent infinite optimization cycles, break when the ins1 instruction
+						 * overwrites a register that is less or equal to the register overwritten by 
+						 * the ins instruction. This will order the assigned registers in register
+						 * number descending, eventually no more pushdown can be done.
+						 */
+						boolean skip = false;
+						for (int k = 0; k < 10; k++) {
+							REG reg0 = RegOp.toReg(k);
+							if (ASMOptimizer.overwritesReg(ins1, reg0) && (k <= a || ASMOptimizer.readsReg(ins, reg0))) {
+								skip = true;
+							}
+						}
+						
+						/* Cannot pushdown, essential for addressing */
+						if (ASMOptimizer.overwritesReg(ins1, REG.SP) || ASMOptimizer.readsReg(ins1, REG.SP) ||
+							ASMOptimizer.overwritesReg(ins1, REG.FP) || ASMOptimizer.readsReg(ins1, REG.FP)) break;
+						
+						/* Cannot pushdown, essential for program flow */
+						if (ASMOptimizer.overwritesReg(ins1, REG.PC) || ASMOptimizer.readsReg(ins1, REG.PC)) break;
+						
+						boolean overwritesCondition = false;
+						overwritesCondition |= ins1 instanceof ASMUnaryData && ((ASMUnaryData) ins1).updateConditionField;
+						overwritesCondition |= ins1 instanceof ASMBinaryData && ((ASMBinaryData) ins1).updateConditionField;
+						
+						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch || 
+							ins1 instanceof ASMPushStack || ins1 instanceof ASMPopStack || 
+							ins1 instanceof ASMCmp || overwritesCondition || skip) break;
+						
+						if (!ASMOptimizer.readsReg(ins1, reg)) {
+							ins0.remove(z);
+							ins0.add(z - 1, ins1);
+							OPT_DONE = true;
+						}
+						else break;
+					}
+				}
+			}
 		}
 	}
 	

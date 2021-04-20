@@ -49,8 +49,8 @@ main:                                        /* Function: main */
     mvn r1, #0
     mov r0, #10
     bl Map.HashMap.create_P_1_1              /* Call Map.HashMap.create */
-    mov r4, r0
 /* Hash function will hash the same value here */
+    mov r4, r0
     mov r0, #12                              /* Load parameters */
     push { r0 }
     mov r0, #1

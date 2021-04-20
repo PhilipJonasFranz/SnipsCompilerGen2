@@ -30,11 +30,11 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
 /* Comment C */
 /* ... */
 /* End Comment C  */
 /* Comment D */
+    mov r3, r0
     add r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
     bx lr

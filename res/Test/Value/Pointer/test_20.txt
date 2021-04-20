@@ -49,11 +49,11 @@ set:                                         /* Function: set */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
     mov r1, #1
+    mov r0, #2                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #6
     mov r1, #3
+    mov r0, #6
     stmfd sp!, {r0, r1}
     sub r0, fp, #8
     lsr r0, r0, #2

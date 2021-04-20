@@ -34,8 +34,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P668015310_Base
     push { r0 }
-    mov r0, #15                              /* Evaluate Expression */
     mov r1, #10
+    mov r0, #15                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P668015310_Extend
     push { r0 }

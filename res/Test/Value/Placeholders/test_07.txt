@@ -33,9 +33,9 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r3, r0
-    mov r4, #1
 /* Loads a copy of K three times */
+    mov r4, #1
+    mov r3, r0
     sub sp, sp, #24                          /* Evaluate Expression */
     mov r0, #1
     add r4, r0, #1

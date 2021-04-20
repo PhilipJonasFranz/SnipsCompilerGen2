@@ -54,12 +54,11 @@ X.get_P_1:                                   /* Function: X.get, Provisos: INT *
 
 .global X.set_P_1
 X.set_P_1:                                   /* Function: X.set, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global X.create_P_1
@@ -72,8 +71,8 @@ X.create_P_1:                                /* Function: X.create, Provisos: IN
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0

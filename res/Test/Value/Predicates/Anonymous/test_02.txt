@@ -30,14 +30,14 @@ HEAP_START: .word 0
 get:                                         /* Function: get */
     push { fp }
     mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
@@ -49,13 +49,13 @@ main:                                        /* Function: main */
     mov fp, sp
     ldr r0, .P553308267_get                  /* Evaluate Expression */
     push { r0 }
-    ldr r3, [fp, #-4]
 /* Call the predicate */
+    ldr r3, [fp, #-4]
     add lr, pc, #8
     mov pc, r3
     sub sp, fp, #4                           /* Reset the stack after anonymous call */
-    mov r0, #6                               /* Evaluate Expression */
     mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, [fp, #-12]
     ldr r2, [fp, #-8]
