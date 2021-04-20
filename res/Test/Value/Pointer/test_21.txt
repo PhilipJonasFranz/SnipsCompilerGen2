@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 20
 OUTPUT
-.version 13309662979
+.version 0
 
 .data
 Y: .word 0

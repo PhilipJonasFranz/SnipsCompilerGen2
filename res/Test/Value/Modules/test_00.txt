@@ -7,7 +7,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 11182421395
+.version 0
 
 .include res\Test\Value\Modules\exclude_import.s
 

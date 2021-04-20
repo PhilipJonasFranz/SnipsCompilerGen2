@@ -28,7 +28,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 10786266802
+.version 0
 
 .data
 Foo.Bar: .word 0

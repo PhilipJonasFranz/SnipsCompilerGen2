@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 10
 OUTPUT
-.version 19164903624
+.version 0
 
 .data
 TreeNode_P_1: .word 0

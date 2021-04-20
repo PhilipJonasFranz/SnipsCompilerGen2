@@ -20,7 +20,7 @@ TESTCASES
 8 1
 9 0
 OUTPUT
-.version 20860160893
+.version 0
 
 .data
 K: .word 0

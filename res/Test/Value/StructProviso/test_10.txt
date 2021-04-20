@@ -22,7 +22,7 @@ TESTCASES
 1 10
 2 9
 OUTPUT
-.version 37768729004
+.version 0
 
 .data
 Data_P_1: .word 0

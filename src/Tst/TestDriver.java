@@ -105,6 +105,7 @@ public class TestDriver {
 		CompilerDriver.buildObjectFileOnly = true;
 		CompilerDriver.pruneModules = true;
 		CompilerDriver.useExperimentalOptimizer = true;
+		CompilerDriver.useDefaultVersionID = false;
 		
 		List<String> paths = new ArrayList();
 		

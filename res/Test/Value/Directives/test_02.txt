@@ -14,7 +14,7 @@ TESTCASES
 1 0 11
 1 1 25
 OUTPUT
-.version 14165952813
+.version 0
 
 .include res\Test\Value\Directives\exclude_import3.s
 .include res\Test\Value\Directives\exclude_mult.s

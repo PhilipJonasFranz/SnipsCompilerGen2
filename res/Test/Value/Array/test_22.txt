@@ -8,7 +8,7 @@ int main() {
 TESTCASES
 3
 OUTPUT
-.version 3420481683
+.version 0
 
 .data
 vec: .skip 16

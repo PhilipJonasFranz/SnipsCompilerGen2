@@ -32,7 +32,7 @@ TESTCASES
 3 9
 4 11
 OUTPUT
-.version 17424775692
+.version 0
 
 .data
 Exception: .word 0

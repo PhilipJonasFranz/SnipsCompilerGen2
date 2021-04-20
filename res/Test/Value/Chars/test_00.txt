@@ -7,7 +7,7 @@ char main() {
 TESTCASES
 50
 OUTPUT
-.version 10389502700
+.version 0
 
 .data
 NULL: .word 0

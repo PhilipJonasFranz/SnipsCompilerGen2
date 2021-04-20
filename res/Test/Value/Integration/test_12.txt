@@ -23,7 +23,7 @@ TESTCASES
 5 22
 6 22
 OUTPUT
-.version 17166051944
+.version 0
 
 .include maybe resv.s
 .include maybe init.s

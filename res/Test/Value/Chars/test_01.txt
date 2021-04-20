@@ -10,7 +10,7 @@ bool main() {
 TESTCASES
 1
 OUTPUT
-.version -6638795078
+.version 0
 
 .include maybe resv.s
 .include maybe init.s

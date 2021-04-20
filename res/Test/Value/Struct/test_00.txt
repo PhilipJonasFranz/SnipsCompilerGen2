@@ -18,7 +18,7 @@ TESTCASES
 1 5
 5 13
 OUTPUT
-.version 23411062780
+.version 0
 
 .data
 Line2D: .word 0

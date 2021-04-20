@@ -13,6 +13,7 @@ import Imm.ASM.Structural.ASMSeperator;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
 import PreP.PreProcessor;
+import Snips.CompilerDriver;
 import Util.Util;
 
 public class AsNTranslationUnit extends AsNNode {
@@ -73,7 +74,10 @@ public class AsNTranslationUnit extends AsNNode {
 	public List<ASMInstruction> buildTranslationUnit() {
 		List<ASMInstruction> out = new ArrayList();
 		
-		out.add(new ASMDirective(".version " + this.versionID));
+		long idUsed = this.versionID;
+		if (!CompilerDriver.useDefaultVersionID) idUsed = 0;
+		
+		out.add(new ASMDirective(".version " + idUsed));
 		out.add(new ASMSeperator());
 		
 		/* Add imports */

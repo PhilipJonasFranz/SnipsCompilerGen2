@@ -10,7 +10,7 @@ TESTCASES
 1 2
 2 6
 OUTPUT
-.version 9397580830
+.version 0
 
 .include maybe __op_div.s
 .include res\Test\Value\Directives\exclude_import.s

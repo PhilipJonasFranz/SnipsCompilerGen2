@@ -9,7 +9,7 @@ int main() {
 TESTCASES
 40
 OUTPUT
-.version 9241321086
+.version 0
 
 .include res\Test\Value\Namespaces\exclude_import.s
 

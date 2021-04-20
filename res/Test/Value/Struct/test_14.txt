@@ -20,7 +20,7 @@ TESTCASES
 1 6
 2 8
 OUTPUT
-.version 19233996988
+.version 0
 
 .data
 Cap_P_1: .word 0

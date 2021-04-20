@@ -10,7 +10,7 @@ int main() {
 TESTCASES
 4
 OUTPUT
-.version 6688235243
+.version 0
 
 .data
 NULL: .word 0

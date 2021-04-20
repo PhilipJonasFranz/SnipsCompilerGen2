@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 8418322167
+.version 0
 
 .data
 Data_P_1: .word 0

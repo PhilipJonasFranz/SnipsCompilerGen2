@@ -43,7 +43,7 @@ TESTCASES
 3 99
 4 99
 OUTPUT
-.version 16212018132
+.version 0
 
 .data
 Exception: .word 0

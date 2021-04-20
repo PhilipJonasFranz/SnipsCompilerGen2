@@ -15,7 +15,7 @@ int main() {
 TESTCASES
 14
 OUTPUT
-.version 12914033006
+.version 0
 
 .data
 Test.var: .word 14

@@ -18,7 +18,7 @@ TESTCASES
 5 10
 6 5
 OUTPUT
-.version 13445168696
+.version 0
 
 .data
 Point: .word 0

@@ -13,7 +13,7 @@ TESTCASES
 1 2 3 4 5 19
 1 0 1 0 1 1
 OUTPUT
-.version 10758944141
+.version 0
 
 .data
 NULL: .word 0

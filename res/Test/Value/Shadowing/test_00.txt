@@ -13,7 +13,7 @@ TESTCASES
 1 1
 2 2
 OUTPUT
-.version 7942166279
+.version 0
 
 .data
 x: .word 10

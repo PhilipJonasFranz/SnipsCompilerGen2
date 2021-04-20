@@ -24,7 +24,7 @@ TESTCASES
 0 15
 2 21
 OUTPUT
-.version 16347086921
+.version 0
 
 .data
 Bar: .word 0

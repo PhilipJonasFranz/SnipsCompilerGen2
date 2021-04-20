@@ -34,7 +34,7 @@ int main() {
 TESTCASES
 8
 OUTPUT
-.version 13323122777
+.version 0
 
 .data
 Storage.X_P_1: .word 0

@@ -11,7 +11,7 @@ int* main(int a) {
 }
 TESTCASES
 OUTPUT
-.version 6300686102
+.version 0
 
 .include maybe resv.s
 .include maybe free.s

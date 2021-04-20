@@ -21,7 +21,7 @@ int main() {
 TESTCASES
 20
 OUTPUT
-.version 12266160484
+.version 0
 
 .include maybe resv.s
 .include maybe init.s
