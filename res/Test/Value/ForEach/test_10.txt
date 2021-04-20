@@ -61,7 +61,6 @@ fib.L1:
 fib.L4: 
     add r1, r4, r5
     sub r0, r1, #1
-    add r1, r4, r5
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
     sub r0, r1, #2

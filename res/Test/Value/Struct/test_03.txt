@@ -43,8 +43,8 @@ main:                                        /* Function: main */
     ldr r0, .P1412413356_Test
     push { r0 }
     sub r1, fp, #12                          /* Evaluate Expression */
-    ldr r2, [r1]
     ldr r0, [r1, #4]
+    ldr r2, [r1]
     stmfd sp!, {r0, r2}
     ldr r0, [fp, #-28]                       /* Load field from struct */
     mov sp, fp

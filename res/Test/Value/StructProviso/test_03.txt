@@ -44,10 +44,9 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
-    lsl r1, r3, #2
     ldr r0, .P1670015532_TreeNode_P_1
+    lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -62,10 +61,9 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
-    lsl r1, r4, #2
     ldr r0, .P1670015532_TreeNode_P_1
+    lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -80,10 +78,9 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
-    lsl r1, r5, #2
     ldr r0, .P1670015532_TreeNode_P_1
+    lsl r1, r5, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -93,9 +90,7 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
-    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r2, [r1, #12]                        /* Load field from struct */

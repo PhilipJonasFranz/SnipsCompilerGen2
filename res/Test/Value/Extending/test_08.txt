@@ -94,7 +94,6 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #1
     push { r0 }
-    mov r0, #1
     push { r0 }
     mov r0, #15
     ldmfd sp!, {r1, r2}

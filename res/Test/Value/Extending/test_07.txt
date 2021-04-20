@@ -83,7 +83,6 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #1                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
     push { r0 }
     mov r0, #15
     ldmfd sp!, {r1, r2}

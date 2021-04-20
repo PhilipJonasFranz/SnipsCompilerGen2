@@ -34,8 +34,6 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     mov r0, #65
     push { r0 }
-    mov r2, #66
-    mov r1, #67
     mov r0, #0                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     mov r2, #68

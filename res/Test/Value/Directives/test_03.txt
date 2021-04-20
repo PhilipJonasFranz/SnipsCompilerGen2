@@ -62,7 +62,6 @@ allocMatrix.L4:
     bge allocMatrix.L5
     mov r2, #3
     mla r0, r4, r2, r5
-    mov r2, #3
     mul r2, r4, r2
     add r1, r3, r2
     push { r0 }

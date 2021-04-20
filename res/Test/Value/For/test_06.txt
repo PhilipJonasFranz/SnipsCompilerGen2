@@ -63,9 +63,8 @@ main.L1:
     beq main.L2
     lsl r1, r6, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
-    add r5, r5, r0
-    lsl r1, r6, #2                           /* Convert to bytes */
     ldr r6, [r1, #4]                         /* Load field from struct */
+    add r5, r5, r0
     b main.L1
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */

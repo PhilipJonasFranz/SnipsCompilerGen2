@@ -35,8 +35,8 @@ foo:                                         /* Function: foo */
     push { fp, lr }
     mov fp, sp
     add r1, fp, #32                          /* Start of structure in stack */
-    ldr r2, [r1, #4]
     ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }

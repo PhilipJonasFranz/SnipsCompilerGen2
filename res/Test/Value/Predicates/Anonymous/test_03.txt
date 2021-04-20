@@ -50,9 +50,9 @@ f:                                           /* Function: f */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
+    ldr r3, .P524679116_f                    /* Evaluate Expression */
     mov r5, #0
     mov r4, #0
-    ldr r3, .P524679116_f                    /* Evaluate Expression */
     mov r0, #0                               /* Evaluate Expression */
 main.L1: 
     cmp r5, #10
@@ -60,8 +60,8 @@ main.L1:
     add r0, r5, #1
     add lr, pc, #8
     mov pc, r3
-    add r5, r5, #1
     ldr r0, [fp, #-8]
+    add r5, r5, #1
     add r4, r4, r0
     add sp, sp, #8
     b main.L1

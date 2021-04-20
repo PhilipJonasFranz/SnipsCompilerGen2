@@ -56,7 +56,6 @@ main:                                        /* Function: main */
     mov r0, #3
     stmfd sp!, {r0, r1}
     mov r1, #4
-    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     mov r1, #1
     mov r0, #2

@@ -53,8 +53,8 @@ main:                                        /* Function: main */
     ldr r1, [fp, #-4]
     add r6, r1, r3
     sub r1, fp, #28                          /* Start of structure in stack */
-    ldr r2, [r1, #4]
     ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }

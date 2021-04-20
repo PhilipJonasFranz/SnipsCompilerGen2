@@ -58,8 +58,6 @@ main.L4:
     sub r0, fp, #16
     ldr r4, [r0, r2]
     add r4, r4, #10
-    lsl r2, r3, #2
-    sub r0, fp, #16
     str r4, [r0, r2]
     add r3, r3, #1
     b main.L4

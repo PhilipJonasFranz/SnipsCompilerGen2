@@ -66,8 +66,8 @@ main.L1:
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
-    add r4, r4, #2
     ldr r0, [fp, #-36]                       /* Load field from struct */
+    add r4, r4, #2
     add r3, r3, r0
     b main.L1
 main.L2: 

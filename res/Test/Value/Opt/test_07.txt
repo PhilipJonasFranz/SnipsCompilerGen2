@@ -86,16 +86,16 @@ __mat_mult.L7:
     mov r2, #3
     mul r2, r6, r2
     add r1, r3, r2
+    add r0, r1, r9
+    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     mov r2, #3
     mul r2, r9, r2
-    add r0, r1, r9
     add r1, r4, r2
-    ldr r0, [r10, r0, lsl #2]                /* Load from address */
     push { r0 }
     add r0, r1, r7
     pop { r1 }
-    add r9, r9, #1
     ldr r2, [r10, r0, lsl #2]                /* Load from address */
+    add r9, r9, #1
     mul r0, r1, r2
     add r8, r8, r0
     b __mat_mult.L7

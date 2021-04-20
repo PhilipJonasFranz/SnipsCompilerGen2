@@ -75,7 +75,7 @@ public class AsNTranslationUnit extends AsNNode {
 		List<ASMInstruction> out = new ArrayList();
 		
 		long idUsed = this.versionID;
-		if (!CompilerDriver.useDefaultVersionID) idUsed = 0;
+		if (!CompilerDriver.useDefaultVersionID && CompilerDriver.inputFile.getPath().equals(this.sourceFile)) idUsed = 0;
 		
 		out.add(new ASMDirective(".version " + idUsed));
 		out.add(new ASMSeperator());

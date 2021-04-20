@@ -49,8 +49,8 @@ main:                                        /* Function: main */
     mov fp, sp
     ldr r0, .P553308267_get                  /* Evaluate Expression */
     push { r0 }
-/* Call the predicate */
     ldr r3, [fp, #-4]
+/* Call the predicate */
     add lr, pc, #8
     mov pc, r3
     sub sp, fp, #4                           /* Reset the stack after anonymous call */

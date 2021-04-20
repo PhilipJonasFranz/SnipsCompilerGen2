@@ -27,11 +27,11 @@ HEAP_START: .word 0
 smallest:                                    /* Function: smallest */
     sub sp, sp, #16
     stmea sp, {r3-r6}
-    mov r6, #0
     mov r4, r1
     mov r3, r0
     mov r2, #0
     ldr r5, [r2, r3, lsl #2]
+    mov r6, #0
 smallest.L1: 
     cmp r6, r4
     bge smallest.L2
@@ -60,7 +60,6 @@ main:                                        /* Function: main */
     mov r1, #5
     mov r0, #3
     stmfd sp!, {r0, r1}
-    mov r1, #5
     sub r0, fp, #20
     lsr r0, r0, #2
     bl smallest                              /* Call smallest */

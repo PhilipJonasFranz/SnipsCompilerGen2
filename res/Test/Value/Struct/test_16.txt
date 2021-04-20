@@ -37,8 +37,8 @@ main:                                        /* Function: main */
     mov r1, #2
     mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    lsl r1, r4, #2
     ldr r0, .P1909162806_Data
+    lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -46,11 +46,9 @@ main:                                        /* Function: main */
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    lsl r1, r4, #2                           /* Convert to bytes */
     mov r0, #5                               /* Evaluate Expression */
     str r0, [r1, #8]                         /* Store value to struct field */
     lsl r2, r3, #2
-    lsl r1, r4, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1, r2]                         /* Load field from struct */
     pop { pc }

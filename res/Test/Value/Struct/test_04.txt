@@ -50,8 +50,8 @@ main:                                        /* Function: main */
     stmfd sp!, {r0, r1}
     ldr r0, .P1441042507_Nib
     push { r0 }
-    lsl r1, r3, #2
     ldr r0, .P1441042507_Test
+    lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -67,10 +67,9 @@ main:                                        /* Function: main */
     str r0, [r1, #24]
     pop { r0 }
     str r0, [r1, #28]
-    lsl r1, r3, #2                           /* Convert to bytes */
     add r1, r1, #16
-    ldr r2, [r1, #4]
     ldr r0, [r1, #8]
+    ldr r2, [r1, #4]
     stmfd sp!, {r0, r2}
     ldr r0, [r1]
     push { r0 }

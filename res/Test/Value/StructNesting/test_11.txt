@@ -122,7 +122,6 @@ set:                                         /* Function: set */
     bl resv                                  /* Call resv */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r0, [r1, #8]                         /* Store value to struct field */
-    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     str r4, [r10, r0, lsl #2]
     ldmfd sp!, {r3, r4, pc}
@@ -148,7 +147,6 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
-    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
@@ -165,7 +163,6 @@ main:                                        /* Function: main */
     bl C.A.incr_P_1                          /* Call C.A.incr */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
     push { r0 }
     ldr r0, [r1, #8]                         /* Load field from struct */
     pop { r1 }

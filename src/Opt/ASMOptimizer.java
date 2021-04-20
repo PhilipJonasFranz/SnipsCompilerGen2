@@ -344,6 +344,12 @@ public class ASMOptimizer {
 				
 			}
 			
+			if (!OPT_DONE) {
+				
+				this.removeSameValueAssignments(ins);
+				
+			}
+			
 		}
 		
 		/**
@@ -787,7 +793,8 @@ public class ASMOptimizer {
 		for (int i = 0; i < ins0.size(); i++) {
 			ASMInstruction ins = ins0.get(i);
 			
-			if (ins instanceof ASMBranch || ins instanceof ASMPushStack || ins instanceof ASMPopStack) continue;
+			if (ins instanceof ASMBranch || ins instanceof ASMPushStack || ins instanceof ASMPopStack || 
+				ins instanceof ASMLdr || ins instanceof ASMLdrStack) continue;
 			
 			for (int a = 0; a < 10; a++) {
 				REG reg = RegOp.toReg(a);
@@ -946,6 +953,51 @@ public class ASMOptimizer {
 						OPT_DONE = true;
 						i--;
 					}
+				}
+			}
+		}
+	}
+	
+	public void removeSameValueAssignments(List<ASMInstruction> ins0) {
+		for (int i = 0; i < ins0.size(); i++) {
+			ASMInstruction ins = ins0.get(i);
+			
+			if (ins instanceof ASMPushStack || ins instanceof ASMPopStack || 
+				ins instanceof ASMLdr || ins instanceof ASMStr) continue;
+			
+			for (int a = 0; a < 10; a++) {
+				REG reg = RegOp.toReg(a);
+				if (ASMOptimizer.overwritesReg(ins, reg)) {
+					
+					List<REG> read = new ArrayList();
+					for (int k = 0; k < 10; k++)
+						if (ASMOptimizer.readsReg(ins, RegOp.toReg(k)))
+							read.add(RegOp.toReg(k));
+					
+					for (int k = i + 1; k < ins0.size(); k++) {
+						ASMInstruction ins1 = ins0.get(k);
+						
+						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch) break;
+						
+						if (ASMOptimizer.overwritesReg(ins1, REG.PC)) break;
+						
+						boolean overwrite = false;
+						for (REG reg0 : read) 
+							overwrite |= ASMOptimizer.overwritesReg(ins1, reg0);
+						if (overwrite) break;
+						
+						if (ASMOptimizer.overwritesReg(ins1, reg)) {
+							if (ins1.build().equals(ins.build())) {
+								/* Same instruction, can remove */
+								ins0.remove(k);
+								k--;
+								OPT_DONE = true;
+							}
+							else break;
+						}
+					}
+					
+					break;
 				}
 			}
 		}
@@ -1868,6 +1920,16 @@ public class ASMOptimizer {
 				
 				if (push0.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
 				if (push1.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
+				
+				List<REG> op0 = push0.operands.stream().map(x -> x.reg).collect(Collectors.toList());
+				List<REG> op1 = push1.operands.stream().map(x -> x.reg).collect(Collectors.toList());
+				
+				/* Make sure no REGs of the push1 are contained in the REGs of push0 */
+				boolean contains = false;
+				for (REG reg : op1) 
+					if (op0.contains(reg)) 
+						contains = true;
+				if (contains) continue;
 				
 				for (int a = 0; a < push1.operands.size(); a++) {
 					RegOp reg = push1.operands.get(a);

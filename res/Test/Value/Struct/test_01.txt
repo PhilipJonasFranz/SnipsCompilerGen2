@@ -50,8 +50,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P1355155054_Point2D
     push { r0 }
-    lsl r1, r4, #2
     ldr r0, .P1355155054_Line2D
+    lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -65,7 +65,6 @@ main:                                        /* Function: main */
     str r0, [r1, #20]
     pop { r0 }
     str r0, [r1, #24]
-    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     pop { pc }
 .P1355155054_Line2D: .word Line2D

@@ -146,8 +146,8 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl resv                                  /* Call resv */
     push { r0 }
-    lsl r1, r3, #2
     ldr r0, .P1008736838_GameObject.Items.Inventory
+    lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -162,8 +162,8 @@ main:                                        /* Function: main */
     ldr r0, .P1008736838_arr                 /* Load data section address */
     ldr r0, [r0]
     push { r0 }
-    lsl r1, r4, #2
     ldr r0, .P1008736838_GameObject.Player
+    lsl r1, r4, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -171,10 +171,8 @@ main:                                        /* Function: main */
     str r0, [r1, #8]
     pop { r0 }
     str r0, [r1, #12]
-    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     push { r0 }
-    lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     push { r0 }
     ldr r0, .P1008736838_Util.Tuple2_P_1_1

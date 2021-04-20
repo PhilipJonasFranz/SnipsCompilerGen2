@@ -34,8 +34,8 @@ set:                                         /* Function: set */
     add r0, fp, #20
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
-    lsl r1, r3, #2
     ldr r0, [fp, #8]
+    lsl r1, r3, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -71,8 +71,8 @@ main:                                        /* Function: main */
     bl set                                   /* Call set */
     mov r1, #7
     str r1, [fp, #-12]
-    mov r2, #10
     ldr r1, [fp, #-16]
+    mov r2, #10
     mul r1, r1, r2
     str r1, [fp, #-4]
     mov r2, #0                               /* Evaluate Expression */
