@@ -65,9 +65,10 @@ Types are seperated in three classes: Primitives, Composit and Special Types. Pr
 
 Special types are managed during compile time, and are fixed during runtime. Special types are:
 
- |          Type        |                         Description                         |
- | -------------------- | ----------------------------------------------------------- |
- | `PROVISO`            | A shapeshifter type, used for templating and re-usability   |
+ |          Type        |                         Description                                 |
+ | -------------------- | ------------------------------------------------------------------- |
+ | `PROVISO`            | A shapeshifter type, used for templating and re-usability           |
+ | `AUTO`               | Used as a shortcut. Will be replaced with acutal type automatically |
 
 
 ## Expressions
