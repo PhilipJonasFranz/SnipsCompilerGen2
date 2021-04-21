@@ -166,4 +166,8 @@ public abstract class TYPE<T> {
 	 */
 	public boolean isStackType() { return this.isArray() || this.isStruct(); };
 	
+	public String toString() {
+		return this.typeString();
+	}
+	
 } 

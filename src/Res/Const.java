@@ -82,7 +82,7 @@ public class Const {
 	
 	public static final String PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY = "Argument (%d) does not match parameter, polymorphism only via pointers, actual %s vs %s";
 	
-	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION = "Expression type does not match the declaration type: %s vs %s";
+	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION = "Value type does not match the stated type for declaration '%s': %s vs %s";
 	
 	public static final String AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION = "Using an AUTO type at this location is problematic, use actual type descriptor";
 	

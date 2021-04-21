@@ -1270,7 +1270,7 @@ public class ContextChecker {
 				if (d.hadAutoType)
 					throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION);
 				else
-					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
+					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, d.path.build(), t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 			}
 		}
 		else {
