@@ -74,6 +74,7 @@ import Imm.AST.Statement.WhileStatement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -1235,6 +1236,9 @@ public class ContextChecker {
 			
 			TYPE t = d.value.check(this);
 			
+			if (d.getType() instanceof AUTO) 
+				d.setType(t.clone());
+			
 			if (t instanceof FUNC) {
 				FUNC d0 = (FUNC) d.getType();
 				FUNC t0 = (FUNC) t;
@@ -1264,6 +1268,10 @@ public class ContextChecker {
 				
 				throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 			}
+		}
+		else {
+			if (d.getType() instanceof AUTO) 
+				throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_REQUIRES_VALUE);
 		}
 		
 		/* When function type, can not only collide with over vars, but also function names */

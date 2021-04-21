@@ -100,6 +100,7 @@ public class Scanner {
 			new ScannableToken("false",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
 			new ScannableToken("else",		TokenType.ELSE,			ACC_STATE.NONE,			""),
 			new ScannableToken("void",		TokenType.VOID,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("auto",		TokenType.AUTO,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),

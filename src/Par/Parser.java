@@ -83,6 +83,7 @@ import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -100,11 +101,11 @@ import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
 import Util.Source;
-import Util.ASTDirective.DIRECTIVE;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -2670,6 +2671,10 @@ public class Parser {
 		else if (current.type == TokenType.IDENTIFIER) token = accept();
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
+		
+		if (token.type() == TokenType.AUTO) 
+			/* Auto type is always a standalone, so no wrapping in Pointer etc. */
+			return new AUTO();
 		
 		InterfaceTypedef intf = null;
 		StructTypedef stru = null;

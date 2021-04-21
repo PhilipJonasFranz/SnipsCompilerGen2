@@ -86,6 +86,8 @@ public class Const {
 	
 	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE = "Expression type does not match the variable type: %s vs %s";
 	
+	public static final String AUTO_TYPE_REQUIRES_VALUE = "Cannot resolve AUTO type, declaration value is needed";
+	
 	public static final String POLY_ONLY_VIA_POINTER = "Polymorphism only via pointers, actual %s vs %s";
 	
 	public static final String RETURN_TYPE_DOES_NOT_MATCH = "Return type does not match stated return type: %s vs %s";
