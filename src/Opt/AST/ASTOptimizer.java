@@ -1,4 +1,4 @@
-package Opt;
+package Opt.AST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,14 +79,14 @@ import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.INT;
-import Opt.Util.CompoundStatementRules;
-import Opt.Util.Morpher;
-import Opt.Util.Makro;
-import Opt.Util.Matcher;
-import Opt.Util.OPT_STRATEGY;
-import Opt.Util.ProgramState;
-import Opt.Util.ProgramState.VarState;
-import Opt.Util.UnrollStatementUtil;
+import Opt.AST.Util.CompoundStatementRules;
+import Opt.AST.Util.Makro;
+import Opt.AST.Util.Matcher;
+import Opt.AST.Util.Morpher;
+import Opt.AST.Util.OPT_STRATEGY;
+import Opt.AST.Util.ProgramState;
+import Opt.AST.Util.UnrollStatementUtil;
+import Opt.AST.Util.ProgramState.VarState;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.ASTDirective;

@@ -43,7 +43,7 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
-import Opt.Util.Matcher;
+import Opt.AST.Util.Matcher;
 import Res.Const;
 
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {

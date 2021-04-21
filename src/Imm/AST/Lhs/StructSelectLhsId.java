@@ -11,7 +11,7 @@ import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.StructSelect;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;

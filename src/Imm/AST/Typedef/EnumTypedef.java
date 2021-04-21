@@ -11,7 +11,7 @@ import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.ENUM;
 import Imm.TYPE.PRIMITIVES.VOID;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.NamespacePath;

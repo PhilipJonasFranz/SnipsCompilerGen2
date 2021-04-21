@@ -7,7 +7,7 @@ import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 

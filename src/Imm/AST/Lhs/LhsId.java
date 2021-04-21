@@ -9,7 +9,7 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Util.NamespacePath;
 import Util.Source;
 

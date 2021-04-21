@@ -5,8 +5,8 @@ import java.util.List;
 
 import Exc.OPT0_EXC;
 import Imm.AST.Expression.NFoldExpression;
+import Opt.AST.ASTOptimizer;
 import Imm.AST.Expression.Expression;
-import Opt.ASTOptimizer;
 import Util.Source;
 
 /**

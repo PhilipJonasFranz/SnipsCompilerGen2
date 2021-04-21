@@ -24,7 +24,7 @@ import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.Boolean.AsNCmp;
-import Opt.Util.Matcher;
+import Opt.AST.Util.Matcher;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 

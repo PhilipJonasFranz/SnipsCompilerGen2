@@ -9,7 +9,7 @@ import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;

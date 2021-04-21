@@ -12,7 +12,7 @@ import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.ASTDirective;

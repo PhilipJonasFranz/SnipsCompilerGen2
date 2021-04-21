@@ -10,7 +10,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Par.Token;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;

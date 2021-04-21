@@ -6,7 +6,7 @@ import java.util.List;
 import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.NFoldExpression;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Util.Source;
 
 /**

@@ -1,4 +1,4 @@
-package Opt.Util;
+package Opt.AST.Util;
 
 public enum OPT_STRATEGY {
 

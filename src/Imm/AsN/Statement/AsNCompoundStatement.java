@@ -21,7 +21,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNNode;
-import Opt.Util.Matcher;
+import Opt.AST.Util.Matcher;
 import Res.Const;
 
 public abstract class AsNCompoundStatement extends AsNStatement {

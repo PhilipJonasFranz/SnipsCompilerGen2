@@ -1,4 +1,4 @@
-package Opt.Util;
+package Opt.AST.Util;
 
 import Exc.SNIPS_EXC;
 import Imm.AST.Expression.ArrayInit;

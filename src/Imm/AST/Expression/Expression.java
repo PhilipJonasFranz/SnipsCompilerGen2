@@ -6,7 +6,7 @@ import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Util.Source;
 
 /**

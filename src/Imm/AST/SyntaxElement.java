@@ -8,7 +8,7 @@ import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Tools.ASTNodeVisitor;
 import Util.ASTDirective;
 import Util.ASTDirective.DIRECTIVE;

@@ -1,4 +1,4 @@
-package Opt.Util;
+package Opt.AST.Util;
 
 import java.util.HashMap;
 import java.util.Map.Entry;

@@ -18,7 +18,7 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
-import Opt.ASTOptimizer;
+import Opt.AST.ASTOptimizer;
 import Res.Const;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
