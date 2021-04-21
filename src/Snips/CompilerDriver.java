@@ -829,7 +829,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
-				else if (args [i].equals("-o")) 	buildObjectFileOnly = true;
+				else if (args [i].equals("-O")) 	buildObjectFileOnly = true;
 				else if (args [i].equals("-r")) 	buildModulesRecurse = true;
 				else if (args [i].equals("-R")) {
 													buildModulesRecurse = true;
@@ -881,7 +881,7 @@ public class CompilerDriver {
 				"-ofs      : Optimize for filesize, slight performance penalty",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
-				"-o        : Build object file only, required additional linking",
+				"-O        : Build object file only, required additional linking",
 				"-r        : Re-build all changed required modules and save them",
 				"-R        : Force to re-build all required modules and save them",
 				"-L        : Link the given assembly file. Requires the input file to be a .s file.",

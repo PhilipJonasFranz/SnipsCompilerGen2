@@ -95,7 +95,7 @@ int main() {
  | `-sid`           | Disable Struct IDs                                        | `false`            |
  | `-imm`           | Print out immediate data                                  | `false`            |
  | `-viz`           | Disable ANSI colors in log                                | `false`            |
- | `-o`             | Build the object file only, do not link output            | `false`            |
+ | `-O`             | Build the object file only, do not link output            | `false`            |
  | `-r`             | Recursively re-compile all included modules               | `false`            |
  | `-R`             | Same as `-r`, but prune all existing module dumps         | `false`            |
  | `-L`             | Link given program, requires input to be .s file          | `false`            |
