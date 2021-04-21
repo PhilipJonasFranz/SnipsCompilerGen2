@@ -388,15 +388,15 @@ public class Scanner {
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.INTERFACE_ID) {
-						this.interfaceIds.add(id);
+						if (!this.interfaceIds.contains(id)) this.interfaceIds.add(id);
 						tokens.add(new Token(TokenType.INTERFACEID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.STRUCT_ID) {
-						this.structIds.add(id);
+						if (!this.structIds.contains(id)) this.structIds.add(id);
 						tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.ENUM_ID) {
-						this.enumIds.add(id);
+						if (!this.enumIds.contains(id)) this.enumIds.add(id);
 						tokens.add(new Token(TokenType.ENUMID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.NAMESPACE_ID) {

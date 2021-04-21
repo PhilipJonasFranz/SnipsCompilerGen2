@@ -84,6 +84,8 @@ public class Const {
 	
 	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION = "Expression type does not match the declaration type: %s vs %s";
 	
+	public static final String AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION = "Using an AUTO type at this location is problematic, use actual type descriptor";
+	
 	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE = "Expression type does not match the variable type: %s vs %s";
 	
 	public static final String AUTO_TYPE_REQUIRES_VALUE = "Cannot resolve AUTO type, declaration value is needed";

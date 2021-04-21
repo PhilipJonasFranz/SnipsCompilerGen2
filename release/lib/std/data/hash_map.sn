@@ -16,7 +16,7 @@ namespace Map {
 		shared void destroy<K:void, V:void>() {
 			/* Destroy all the linked lists */
 			for (int i = 0; i < self->size; i++) {
-				LinkedList<void>* l = *(self->storage + i);
+				auto l = *(self->storage + i);
 				if (l != null) l->destroy();
 			}
 			
@@ -32,7 +32,7 @@ namespace Map {
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
 			/* Load the corresponding linked list */
-			LinkedList<MapEntry<K, V>*>* l = *(self->storage + hash);
+			auto l = *(self->storage + hash);
 	
 			/* Initialize new list at index */
 			if (l == null) {
@@ -41,7 +41,7 @@ namespace Map {
 			}
 			
 			/* Initialize the new key/value tuple */
-			MapEntry<K, V>* new = init<>(MapEntry<K, V>::(key, 0, value));
+			auto new = init<>(MapEntry<K, V>::(key, 0, value));
 			
 			/* Store in the list */
 			l->add<MapEntry<K, V>>(new);
@@ -52,25 +52,25 @@ namespace Map {
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
 			/* Load the corresponding linked list */
-			LinkedList<MapEntry<K, V>*>* l = *(self->storage + hash);
+			auto list = *(self->storage + hash);
 	
-			if (l != null) {
+			if (list != null) {
 				/* Init tuple for searching */
-				MapEntry<K, V> search = MapEntry<K, V>::(key, 0, self->defValue->value);
+				auto search = MapEntry<K, V>::(key, 0, self->defValue->value);
 			
 				/* Get iterator to go through list */
-				ListNode<MapEntry<K, V>*>* n = l->head;
+				auto node = list->head;
 				
 				/* Iterate through list, check for match */
-				while (n != null) {
-					if (tupleKeyMatcher<K, V>(n->value, &search)) {
+				while (node != null) {
+					if (tupleKeyMatcher<K, V>(node->value, &search)) {
 						/* Reassign value with new tuple */
-						MapEntry<K, V>* new = init<>(MapEntry<K, V>::(key, 0, value));
-						n->value = new;
+						auto new = init<>(MapEntry<K, V>::(key, 0, value));
+						node->value = new;
 						break;
 					}
 					else {
-						n = n->next;
+						node = node->next;
 					}
 				}
 			}
@@ -81,14 +81,14 @@ namespace Map {
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
 			/* Load the corresponding linked list */
-			LinkedList<MapEntry<K, V>*>* l = *(self->storage + hash);
+			auto l = *(self->storage + hash);
 			
 			if (l != null) {
 				/* Init tuple for searching */
-				MapEntry<K, V> search = MapEntry<K, V>::(key, 0, self->defValue->value);
+				auto search = MapEntry<K, V>::(key, 0, self->defValue->value);
 			
 				/* Get iterator to go through list */
-				ListNode<MapEntry<K, V>*>* n = l->head;
+				auto n = l->head;
 				
 				/* Iterate through list, check for match, and remove */
 				while (n != null) {
@@ -109,14 +109,14 @@ namespace Map {
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
 			/* Load the corresponding linked list */
-			LinkedList<MapEntry<K, V>*>* l = *(self->storage + hash);
+			auto l = *(self->storage + hash);
 			
 			if (l != null) {
 				/* Init tuple for searching */
-				MapEntry<K, V> search = MapEntry<K, V>::(key, 0, self->defValue->value);
+				auto search = MapEntry<K, V>::(key, 0, self->defValue->value);
 			
 				/* Get iterator to go through list */
-				ListNode<MapEntry<K, V>*>* n = l->head;
+				auto n = l->head;
 				int i = 0;
 				
 				/* Iterate through list, check for match, and remove */
@@ -138,14 +138,14 @@ namespace Map {
 			int hash = Hash::hash(&key, sizeof(K)) % self->size;
 			
 			/* Load the corresponding linked list */
-			LinkedList<MapEntry<K, V>>* l = *(self->storage + hash);
+			auto l = *(self->storage + hash);
 			
 			if (l != null) {
 				/* Init tuple for searching */
-				MapEntry<K, V> search = MapEntry<K, V>::(key, 0, self->defValue->value);
+				auto search = MapEntry<K, V>::(key, 0, self->defValue->value);
 			
 				/* Get iterator to go through list */
-				ListNode<MapEntry<K, V>>* n = l->head;
+				auto n = l->head;
 				
 				/* Iterate through list, check for match */
 				while (n != null) {
@@ -161,17 +161,17 @@ namespace Map {
 		
 		shared LinkedList<MapEntry<K, V>*>* getEntries() {
 			/* Create new list to collect */
-			LinkedList<MapEntry<K, V>*>* list = LinkedList::create<MapEntry<K, V>*>(self->defValue);
+			auto list = LinkedList::create<MapEntry<K, V>*>(self->defValue);
 			
 			/* Iterate over storage lists */
 			int s = self->size;
 			for (int i = 0; i < s; i++) {
 				/* Get list from storage */
-				LinkedList<MapEntry<K, V>*>* l0 = *(self->storage + i);
+				auto l0 = *(self->storage + i);
 				
 				if (l0 != null) {
 					/* Get iterator to go through list */
-					ListNode<MapEntry<K, V>>* n = l0->head;
+					auto n = l0->head;
 					
 					/* Iterate through list, add elements into list */
 					while (n != null) {
@@ -186,17 +186,17 @@ namespace Map {
 		
 		shared LinkedList<V>* getValues() {
 			/* Create new list to collect */
-			LinkedList<V>* list = LinkedList::create<V>(self->defValue->value);
+			auto list = LinkedList::create<V>(self->defValue->value);
 			
 			/* Iterate over storage lists */
 			int s = self->size;
 			for (int i = 0; i < s; i++) {
 				/* Get list from storage */
-				LinkedList<MapEntry<K, V>*>* l0 = *(self->storage + i);
+				auto l0 = *(self->storage + i);
 				
 				if (l0 != null) {
 					/* Get iterator to go through list */
-					ListNode<MapEntry<K, V>>* n = l0->head;
+					auto n = l0->head;
 					
 					/* Iterate through list, add elements into list */
 					while (n != null) {
@@ -210,6 +210,7 @@ namespace Map {
 		}
 	
 		static HashMap<K, V>* create<K, V>(int size, V defValue) {
+			/* Allocate space for linked list array */
 			LinkedList<MapEntry<K, V>*>** storage = resv(size);
 			
 			/* Initialize storage to null */

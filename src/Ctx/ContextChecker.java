@@ -1235,9 +1235,10 @@ public class ContextChecker {
 			}
 			
 			TYPE t = d.value.check(this);
-			
-			if (d.getType() instanceof AUTO) 
-				d.setType(t.clone());
+			if (d.getType() instanceof AUTO || d.hadAutoType) {
+				d.hadAutoType = true;
+				d.setType(d.value.getType().clone());
+			}
 			
 			if (t instanceof FUNC) {
 				FUNC d0 = (FUNC) d.getType();
@@ -1266,7 +1267,10 @@ public class ContextChecker {
 				if (this.checkPolymorphViolation(t, d.getType())) 
 					throw new CTEX_EXC(d.getSource(), Const.POLY_ONLY_VIA_POINTER, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 				
-				throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
+				if (d.hadAutoType)
+					throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION);
+				else
+					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 			}
 		}
 		else {

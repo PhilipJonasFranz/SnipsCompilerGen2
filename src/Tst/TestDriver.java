@@ -610,6 +610,7 @@ public class TestDriver {
 			return null;
 		}
 		
+		CompilerDriver.reset();
 		return (List<String>) out [0];
 	}
 	

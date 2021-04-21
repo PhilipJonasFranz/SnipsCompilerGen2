@@ -54,6 +54,8 @@ public class Declaration extends Statement {
 	 */
 	public Statement last = null;
 	
+	public boolean hadAutoType = false;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -121,6 +123,10 @@ public class Declaration extends Statement {
 		/* Apply to value */
 		if (this.value != null) 
 			this.value.setContext(context);
+		
+		/* Copy type of value to make sure correct provisos are set */
+		if (this.hadAutoType) 
+			this.type = this.value.getType().clone();
 	}
 
 	/** 
