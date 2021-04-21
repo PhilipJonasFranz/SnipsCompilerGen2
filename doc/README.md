@@ -68,7 +68,7 @@ Special types are managed during compile time, and are fixed during runtime. Spe
  |          Type        |                         Description                                 |
  | -------------------- | ------------------------------------------------------------------- |
  | `PROVISO`            | A shapeshifter type, used for templating and re-usability           |
- | `AUTO`               | Used as a shortcut. Will be replaced with acutal type automatically |
+ | `AUTO`               | Used as a shortcut. Will be replaced with acutal type automatically. Only available for declarations with initial value. The type of the value will be used as the actual type. |
 
 
 ## Expressions
