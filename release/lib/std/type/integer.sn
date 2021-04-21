@@ -42,7 +42,7 @@ namespace Integer {
 	 * Converts given int to a String representation.
 	 */
 	shared char* toString(int num) {
-		LinkedList<int>* list = LinkedList::create<>(0);
+		auto list = LinkedList::create<>(0);
 	
 		bool neg = false;
 		if (num < 0) {

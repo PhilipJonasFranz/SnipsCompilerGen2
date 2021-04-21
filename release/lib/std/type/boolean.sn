@@ -10,7 +10,7 @@ namespace Boolean {
 	 * 'true', false if not.
 	 */
 	shared bool parseBool(char* str) {
-		char[5] str0 = "true";
+		auto str0 = "true";
 		if (equals(str, &str0)) return true;
 		else return false;
 	}
