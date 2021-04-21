@@ -1,6 +1,7 @@
 package Par;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -82,6 +83,7 @@ import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -98,6 +100,8 @@ import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
@@ -145,6 +149,8 @@ public class Parser {
 	
 	Stack<List<Declaration>> scopes = new Stack();
 	
+	Stack<List<ASTDirective>> bufferedAnnotations = new Stack();
+	
 	/** Generated warn messages that are flushed at the end */
 	List<Message> buffered = new ArrayList();
 	
@@ -167,6 +173,25 @@ public class Parser {
 		tokenStream.remove(0);
 		
 		Parser.instance = this;
+	}
+	
+	/**
+	 * Accept a token based on its type.
+	 * @param types Accepted types
+	 * @return The accepted Token.
+	 * @throws PARS_EXC Thrown then the token does not have one of the given types.
+	 */
+	protected Token accept(TokenType...types) throws PARS_EXC {
+		/* Convert tokens dynamically based on the currently active provisos */
+		if (this.activeProvisos.contains(current.spelling)) 
+			current.type = TokenType.PROVISO;
+		
+		for (TokenType type : types) {
+			if (current.type() == type) return accept();
+		}
+		
+		this.progress.abort();
+		throw new PARS_EXC(current.source, current.type(), types);
 	}
 	
 	/**
@@ -243,11 +268,20 @@ public class Parser {
 		Source source = this.current.source;
 		List<SyntaxElement> elements = new ArrayList();
 		
+		boolean push = true;
 		while (this.current.type != TokenType.EOF) {
 			this.activeProvisos.clear();
 			
+			if (push) this.bufferedAnnotations.push(new ArrayList());
+			push = true;
+			
 			SyntaxElement element = this.parseProgramElement();
-			if (element != null) elements.add(element);
+			
+			if (element != null) {
+				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				elements.add(element);
+			}
+			else push = false;
 		}
 		
 		accept(TokenType.EOF);
@@ -271,9 +305,18 @@ public class Parser {
 		
 		List<SyntaxElement> elements = new ArrayList();
 		
+		boolean push = true;
 		while (current.type != TokenType.RBRACE) {
+			if (push) this.bufferedAnnotations.push(new ArrayList());
+			push = true;
+			
 			SyntaxElement element = this.parseProgramElement();
-			if (element != null) elements.add(element);
+			
+			if (element != null) {
+				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				elements.add(element);
+			}
+			else push = false;
 		}
 		
 		this.namespaces.pop();
@@ -283,9 +326,49 @@ public class Parser {
 		return new Namespace(path, elements, source);
 	}
 	
+	public ASTDirective parseASTAnnotation() throws PARS_EXC {
+		accept(TokenType.DIRECTIVE);
+		
+		Token type = accept(TokenType.IDENTIFIER);
+		DIRECTIVE type0 = null;
+		
+		try {
+			type0 = DIRECTIVE.valueOf(type.spelling.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			throw new SNIPS_EXC("Unknown directive: '" + type.spelling + "', " + type.source.getSourceMarker());
+		}
+		
+		HashMap<String, String> arguments = new HashMap();
+		
+		while (current.source.row == type.source.row) {
+			String key = accept(TokenType.IDENTIFIER).spelling;
+			String value = null;
+			
+			if (current.type == TokenType.LET) {
+				accept(TokenType.LET);
+				value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
+			}
+			
+			if (arguments.containsKey(key.toLowerCase())) {
+				throw new SNIPS_EXC("Found duplicate directive argument key: " + key + ", " + type.source.getSourceMarker());
+			}
+			
+			arguments.put(key, value);
+			
+			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
+			else break;
+		}
+			
+		return new ASTDirective(type0, arguments);
+	}
+	
 	public SyntaxElement parseProgramElement() throws PARS_EXC {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
+		}
+		else if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
 		}
 		else if (current.type == TokenType.STRUCT || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
@@ -691,6 +774,11 @@ public class Parser {
 			current.type = TokenType.PROVISO;
 		}
 		
+		if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
+		}
+		
 		Token modT = (current.type.group() == TokenGroup.MODIFIER)? current : null;
 		MODIFIER mod = this.parseModifier();
 		
@@ -954,7 +1042,7 @@ public class Parser {
 		accept(TokenType.SEMICOLON);
 		
 		if (path.getLast().equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		
 		return new FunctionCall(path, provisos, params, source);
@@ -1323,13 +1411,13 @@ public class Parser {
 		else if (current.type == TokenType.DIV) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
 			return ASSIGN_ARITH.DIV_ASSIGN;
 		}
 		else if (current.type == TokenType.MOD) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
 			return ASSIGN_ARITH.MOD_ASSIGN;
 		}
 		/* Bitwise Operation */
@@ -1817,7 +1905,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
 			}
 			else {
 				Source source = accept().source();
@@ -1827,7 +1915,7 @@ public class Parser {
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_mod"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
 			}
 		}
 		
@@ -2372,20 +2460,20 @@ public class Parser {
 	public void checkAutoInclude(String name) {
 		if (name.equals("resv")) {
 			CompilerDriver.heap_referenced = true;
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
 		}
 		else if (name.equals("init")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/init.sn");
 		}
 		else if (name.equals("isa") || name.equals("isar")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/isa.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/isa.sn");
 		}
 		else if (name.equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		else if (name.equals("hsize")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/hsize.sn");
 		}
 	}
 
@@ -2583,6 +2671,10 @@ public class Parser {
 		else if (current.type == TokenType.IDENTIFIER) token = accept();
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
+		
+		if (token.type() == TokenType.AUTO) 
+			/* Auto type is always a standalone, so no wrapping in Pointer etc. */
+			return new AUTO();
 		
 		InterfaceTypedef intf = null;
 		StructTypedef stru = null;
@@ -2889,13 +2981,39 @@ public class Parser {
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
 			
-			while (current.type != TokenType.RBRACE) 
-				body.add(this.parseStatement());
+			boolean push = true;
+			while (current.type != TokenType.RBRACE) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+				}
+				else push = false;
+			}
 			
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
-		else body.add(this.parseStatement());
+		else {
+			boolean push = true;
+			while (true) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+					break;
+				}
+				else push = false;
+			}
+		}
 		
 		this.scopes.pop();
 		return body;

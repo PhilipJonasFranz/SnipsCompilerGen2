@@ -29,6 +29,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		
 		/* Loop Entrypoint */
 		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
+		whileStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		w.instructions.add(whileStart);
 		
 		/* Add Body */

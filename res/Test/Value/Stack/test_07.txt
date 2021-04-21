@@ -16,15 +16,7 @@ TESTCASES
 0 0 0 0 0 28
 1 2 3 4 48
 OUTPUT
-.version 11664479753
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 NULL: .word 0
@@ -33,39 +25,15 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
-    add r6, r0, #0
-    add r7, r0, #1
-    add r3, r1, #2
-    add r8, r1, #3
-    add r4, r2, #4
-    add r9, r2, #5
-    ldr r1, [sp]                             /* Evaluate Expression */
-    add r5, r1, #6
-    ldr r1, [sp]                             /* Evaluate Expression */
-    add r0, r1, #7
-    add r1, r6, r7
-    add r1, r1, r3
-    add r1, r1, r8
-    add r1, r1, r4
-    add r1, r1, r9
-    add r1, r1, r5
-    push { r0 }
-    ldr r2, [sp]
-    add r0, r1, r2
+    lsl r2, r1, #1
+    add r0, r2, r0, lsl #1
+    lsl r2, r5, #1
+    add r0, r0, r2
+    ldr r1, [sp]
+    lsl r2, r1, #1
+    add r1, r0, r2
+    add r0, r1, #28
     bx lr

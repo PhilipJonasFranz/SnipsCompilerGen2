@@ -46,15 +46,10 @@ TESTCASES
 10 9
 11 9
 OUTPUT
-.version 20775806670
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
 .include maybe hsize.s
-.include maybe free.s
 
 .data
 Exception: .word 0
@@ -64,28 +59,17 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global checkThreshold
 checkThreshold:                              /* Function: checkThreshold */
     sub sp, sp, #32
     stmea sp, {r3-r8, fp, lr}
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, #0
+    mov r4, r1
+    mov r3, r0
     bl hsize                                 /* Call hsize */
-    mov r6, r0
     mov r7, #0
+    mov r6, r0
 checkThreshold.L2: 
     cmp r7, r6
     bge checkThreshold.L3
@@ -102,8 +86,8 @@ checkThreshold.L2:
 checkThreshold.L5: 
     cmp r8, r5
     ble checkThreshold.L7
-    mov r0, r8                               /* Evaluate Expression */
     mov r5, r8
+    mov r0, r8                               /* Evaluate Expression */
 checkThreshold.L7: 
     add r7, r7, #1
     b checkThreshold.L2
@@ -130,12 +114,12 @@ main:                                        /* Function: main */
     mov r0, #5                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
     mov r4, r0
-    mov r0, #9                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #7
+    mov r1, #5
+    mov r0, #9                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #1
     mov r1, #6
+    mov r0, #1
     stmfd sp!, {r0, r1}
     pop { r0 }
     lsl r1, r4, #2
@@ -149,8 +133,8 @@ main:                                        /* Function: main */
     pop { r0 }
     str r0, [r1, #16]
     mov r5, #0
-    mov r0, r4
     mov r1, r3
+    mov r0, r4
     push { sp }
     bl checkThreshold                        /* Call checkThreshold */
     cmp r12, #0
@@ -182,3 +166,15 @@ main.L1:
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P1055849890_Exception: .word Exception
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

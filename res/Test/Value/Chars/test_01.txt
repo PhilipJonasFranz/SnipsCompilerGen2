@@ -10,14 +10,10 @@ bool main() {
 TESTCASES
 1
 OUTPUT
-.version -7677570396
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
 .include maybe free.s
 .include string.s
 
@@ -28,34 +24,21 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #0                               /* Evaluate Expression */
-    mov r1, #67
     mov r2, #66
+    mov r1, #67
+    mov r0, #0                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     mov r0, #65
     push { r0 }
     mov r0, #0                               /* Evaluate Expression */
-    mov r1, #67
-    mov r2, #66
     stmfd sp!, {r0-r2}
-    mov r0, #65
-    mov r1, #69
     mov r2, #68
+    mov r1, #69
+    mov r0, #65
     stmfd sp!, {r0-r2}
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }

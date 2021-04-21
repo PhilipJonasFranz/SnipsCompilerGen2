@@ -6,7 +6,6 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
@@ -41,6 +40,8 @@ import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.ASM.ASMOptimizer;
+import Opt.AST.Util.Matcher;
 import PreP.PreProcessor;
 import Res.Const;
 import Snips.CompilerDriver;
@@ -230,7 +231,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					boolean hasRef = false;
 					for (Statement s : f.body) 
-						hasRef |= AsNCompoundStatement.hasAddressReference(s, d);
+						hasRef |= Matcher.hasAddressReference(s, d);
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
@@ -446,6 +447,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Only patch bx and instructions that are not part of exceptional exit */
 				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
+					branch.optFlags.add(OPT_FLAG.BRANCH_TO_EXIT);
 					branch.target = new LabelOp(funcReturn);
 				}
 			}

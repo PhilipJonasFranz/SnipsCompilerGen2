@@ -15,7 +15,7 @@ public class Message {
 		this.messageType = type;
 		if (!CompilerDriver.silenced) {
 			if (type != Type.WARN || !CompilerDriver.disableWarnings) {
-				System.out.println(this.getMessage());
+				CompilerDriver.outs.println(this.getMessage());
 			}
 		}
 	}
@@ -23,12 +23,12 @@ public class Message {
 	public Message(String message, Type type, boolean buffered) {
 		this.message = message;
 		this.messageType = type;
-		if (!CompilerDriver.silenced && !buffered) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced && !buffered) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	/** Flush the buffered message to the console. */
 	public void flush() {
-		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	public String getMessage() {

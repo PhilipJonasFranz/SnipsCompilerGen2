@@ -33,5 +33,9 @@ public class NULL extends PRIMITIVE<Object> {
 	public NULL clone() {
 		return new NULL();
 	}
+	
+	public String codeString() {
+		return "null";
+	}
 
 } 

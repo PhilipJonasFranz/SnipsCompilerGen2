@@ -1,6 +1,7 @@
 package Ctx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -18,7 +19,6 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.BinaryExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
@@ -27,6 +27,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -40,7 +41,7 @@ import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.BitNot;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AST.Expression.Arith.UnaryMinus;
-import Imm.AST.Expression.Boolean.BoolBinaryExpression;
+import Imm.AST.Expression.Boolean.BoolNFoldExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Ternary;
@@ -73,6 +74,7 @@ import Imm.AST.Statement.WhileStatement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -86,6 +88,8 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
@@ -1022,6 +1026,14 @@ public class ContextChecker {
 	public TYPE checkWhileStatement(WhileStatement w) throws CTEX_EXC {
 		this.compoundStack.push(w);
 		
+		if (w.hasDirective(DIRECTIVE.UNROLL)) {
+			ASTDirective directive = w.getDirective(DIRECTIVE.UNROLL);
+			if (directive.hasProperty("depth")) {
+				int depth = Integer.parseInt(directive.getProperty("depth"));
+				w.CURR_UNROLL_DEPTH = depth;
+			}
+		}
+		
 		TYPE cond = w.condition.check(this);
 		if (cond.wordsize() > 1) 
 			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
@@ -1058,10 +1070,26 @@ public class ContextChecker {
 	public TYPE checkForStatement(ForStatement f) throws CTEX_EXC {
 		this.compoundStack.push(f);
 		
+		if (f.hasDirective(DIRECTIVE.UNROLL)) {
+			ASTDirective directive = f.getDirective(DIRECTIVE.UNROLL);
+			if (directive.hasProperty("depth")) {
+				int depth = Integer.parseInt(directive.getProperty("depth"));
+				f.CURR_UNROLL_DEPTH = depth;
+			}
+		}
+		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		f.iterator.check(this);
-		if (f.iterator.value == null) 
-			throw new CTEX_EXC(f.getSource(), Const.ITERATOR_MUST_HAVE_INITIAL_VALUE);
+		
+		if (f.iterator instanceof Declaration) {
+			Declaration dec = (Declaration) f.iterator;
+			if (dec.value == null) 
+				throw new CTEX_EXC(f.getSource(), Const.ITERATOR_MUST_HAVE_INITIAL_VALUE);
+		}
+		else if (!(f.iterator instanceof IDRef)) {
+			/* Make sure iterator can only be IDRef or declaration */
+			throw new CTEX_EXC(f.getSource(), Const.EXPECTED_IDREF_ACTUAL, f.iterator.getClass().getSimpleName());
+		}
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
@@ -1126,8 +1154,7 @@ public class ContextChecker {
 				throw new CTEX_EXC(f.getSource(), Const.ARRAY_TYPE_DOES_NOT_MATCH_ITERATOR_TYPE, a.elementType.provisoFree().typeString(), itType.provisoFree().typeString());
 			
 			/* Select first value from array */
-			List<Expression> select = new ArrayList();
-			select.add(f.counterRef);
+			List<Expression> select = Arrays.asList(f.counterRef);
 			f.select = new ArraySelect(f.shadowRef, select, f.shadowRef.getSource());
 			
 			f.select.check(this);
@@ -1208,6 +1235,10 @@ public class ContextChecker {
 			}
 			
 			TYPE t = d.value.check(this);
+			if (d.getType() instanceof AUTO || d.hadAutoType) {
+				d.hadAutoType = true;
+				d.setType(d.value.getType().clone());
+			}
 			
 			if (t instanceof FUNC) {
 				FUNC d0 = (FUNC) d.getType();
@@ -1236,8 +1267,15 @@ public class ContextChecker {
 				if (this.checkPolymorphViolation(t, d.getType())) 
 					throw new CTEX_EXC(d.getSource(), Const.POLY_ONLY_VIA_POINTER, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 				
-				throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
+				if (d.hadAutoType)
+					throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION);
+				else
+					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, t.provisoFree().typeString(), d.getType().provisoFree().typeString());
 			}
+		}
+		else {
+			if (d.getType() instanceof AUTO) 
+				throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_REQUIRES_VALUE);
 		}
 		
 		/* When function type, can not only collide with over vars, but also function names */
@@ -1408,14 +1446,14 @@ public class ContextChecker {
 		if (t.condition instanceof ArrayInit) 
 			throw new CTEX_EXC(t.condition.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		TYPE t0 = t.leftOperand.check(this);
-		TYPE t1 = t.rightOperand.check(this);
+		TYPE t0 = t.left.check(this);
+		TYPE t1 = t.right.check(this);
 		
-		if (t.leftOperand instanceof ArrayInit) 
-			throw new CTEX_EXC(t.leftOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		if (t.left instanceof ArrayInit) 
+			throw new CTEX_EXC(t.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		if (t.rightOperand instanceof ArrayInit) 
-			throw new CTEX_EXC(t.rightOperand.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		if (t.right instanceof ArrayInit) 
+			throw new CTEX_EXC(t.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (!t0.isEqual(t1)) 
 			throw new CTEX_EXC(t.condition.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree().typeString(), t1.provisoFree().typeString());
@@ -1424,45 +1462,42 @@ public class ContextChecker {
 		return t.getType();
 	}
 	
-	public TYPE checkBinaryExpression(BinaryExpression b) throws CTEX_EXC {
-		TYPE left = b.getLeft().check(this);
-		TYPE right = b.getRight().check(this);
+	public TYPE checkNFoldExpression(NFoldExpression b) throws CTEX_EXC {
 		
-		if (left.isNull()) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+		for (Expression e : b.operands) e.check(this);
 		
-		if (right.isNull()) 
-			throw new CTEX_EXC(b.right.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+		for (Expression e : b.operands)
+			if (e.getType().isNull()) 
+				throw new CTEX_EXC(e.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
-		if (b.left instanceof ArrayInit) 
-			throw new CTEX_EXC(b.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		for (Expression e : b.operands)
+			if (e instanceof ArrayInit) 
+				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
-		if (b.right instanceof ArrayInit) 
-			throw new CTEX_EXC(b.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+		for (Expression e : b.operands)
+			if (e.getType().wordsize() > 1) 
+				throw new CTEX_EXC(e.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree().typeString());
 		
-		if (left.wordsize() > 1) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, left.provisoFree().typeString());
-		
-		if (right.wordsize() > 1) {
-			throw new CTEX_EXC(b.left.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, right.provisoFree().typeString());
+		boolean gotPointer = false;
+		for (Expression e : b.operands) {
+			if (e.getType().isPointer()) {
+				gotPointer = true;
+				for (Expression e0 : b.operands) {
+					if (e.equals(e0)) continue;
+					if (!(e0.getType().getCoreType() instanceof INT)) 
+						throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), e0.getType().provisoFree().typeString());
+				}
+			}
 		}
 		
-		if (left.isPointer()) {
-			if (!(right.getCoreType() instanceof INT)) 
-				throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), right.provisoFree().typeString());
-			
-			b.setType(left);
+		if (!gotPointer) {
+			for (Expression e : b.operands) {
+				if (!e.getType().isEqual(b.operands.get(0).getType()))
+					throw new CTEX_EXC(b.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, b.operands.get(0).getType().provisoFree().typeString(), e.getType().provisoFree().typeString());
+			}
 		}
-		else if (right.isPointer()) {
-			if (!(left.getCoreType() instanceof INT)) 
-				throw new CTEX_EXC(b.getSource(), Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT().typeString(), left.provisoFree().typeString());
-			
-			b.setType(left);
-		}
-		else if (left.isEqual(right)) 
-			b.setType(left);
-		else throw new CTEX_EXC(b.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, left.provisoFree().typeString(), right.provisoFree().typeString());
-	
+		
+		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
 	
@@ -1471,17 +1506,14 @@ public class ContextChecker {
 	 * Checks for:<br>
 	 * - Both operand types have to be of type BOOL<br>
 	 */
-	public TYPE checkBoolBinaryExpression(BoolBinaryExpression b) throws CTEX_EXC {
-		TYPE left = b.getLeft().check(this);
-		TYPE right = b.getRight().check(this);
-		
-		if (left.wordsize() > 1) 
-			throw new CTEX_EXC(b.left.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
-		
-		if (right.wordsize() > 1) 
-			throw new CTEX_EXC(b.right.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
-		
-		b.setType(left);
+	public TYPE checkBoolNFoldExpression(BoolNFoldExpression b) throws CTEX_EXC {
+		for (Expression e : b.operands) {
+			e.check(this);
+			if (e.getType().wordsize() > 1) 
+				throw new CTEX_EXC(e.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
+		}
+
+		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
 	
@@ -1521,20 +1553,22 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkCompare(Compare c) throws CTEX_EXC {
-		TYPE left = c.getLeft().check(this);
-		TYPE right = c.getRight().check(this);
+		TYPE t0 = null;
 		
-		if (c.left instanceof ArrayInit) 
-			throw new CTEX_EXC(c.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
-		
-		if (c.right instanceof ArrayInit) 
-			throw new CTEX_EXC(c.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
-		
-		if (left.isEqual(right)) {
-			c.setType(new BOOL());
-			return c.getType();
+		for (Expression e : c.operands) {
+			TYPE t = e.check(this);
+			if (t0 == null) t0 = t;
+			else {
+				if (!t.isEqual(t0)) 
+					throw new CTEX_EXC(c.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree().typeString(), t.provisoFree().typeString());
+			}
+			
+			if (e instanceof ArrayInit) 
+				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		}
-		else throw new CTEX_EXC(c.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, left.provisoFree().typeString(), right.provisoFree().typeString());
+		
+		c.setType(new BOOL());
+		return c.getType();
 	}
 	
 	/**

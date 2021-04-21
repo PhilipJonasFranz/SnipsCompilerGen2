@@ -25,15 +25,7 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 18545628909
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 Name1.B: .word 0
@@ -45,27 +37,16 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #10                              /* Evaluate Expression */
     ldr r1, .P174617549_Name1.B
+    mov r0, #10                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P174617549_Name0.C
     push { r0 }
-    ldr r2, [fp, #-4]                        /* Load field from struct */
-    add r0, r2, #20
+    ldr r1, [fp, #-4]                        /* Load field from struct */
+    add r0, r1, #20
     bx lr
 .P174617549_Name0.C: .word Name0.C
 .P174617549_Name1.B: .word Name1.B

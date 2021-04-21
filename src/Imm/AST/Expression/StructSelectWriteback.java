@@ -1,13 +1,19 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -36,7 +42,7 @@ public class StructSelectWriteback extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Increment");
+		CompilerDriver.outs.println(Util.pad(d) + "Increment");
 		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);
 	}
 
@@ -48,6 +54,21 @@ public class StructSelectWriteback extends Expression {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optStructSelectWriteback(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.shadowSelect.visit(visitor));
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
@@ -62,7 +83,17 @@ public class StructSelectWriteback extends Expression {
 	}
 
 	public Expression clone() {
-		return new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+		StructSelectWriteback sswb = new StructSelectWriteback(this.writeback, this.shadowSelect.clone(), this.getSource().clone());
+		sswb.setType(this.getType().clone());
+		sswb.copyDirectivesFrom(this);
+		return sswb;
+	}
+
+	public String codePrint() {
+		String s = this.shadowSelect.codePrint();
+		if (this.writeback == WRITEBACK.INCR) s += "++";
+		else s += "--";
+		return s;
 	}
 	
 } 

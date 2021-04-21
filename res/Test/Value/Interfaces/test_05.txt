@@ -79,15 +79,10 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 36196238823
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 
 .data
 List.LinkedList_P_1: .word 0
@@ -100,23 +95,12 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     push { r4 }
     ldr r0, .P481193733_NULL                 /* Load null address */
     push { r0 }
@@ -131,8 +115,6 @@ List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, P
     bne List.LinkedList.add_P_1.L1
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
 List.LinkedList.add_P_1.L1: 
@@ -140,7 +122,6 @@ List.LinkedList.add_P_1.L1:
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     str r5, [r1, #4]                         /* Store value to struct field */
-    mov r0, r5                               /* Evaluate Expression */
     lsl r1, r3, #2                           /* Convert to bytes */
     str r5, [r1, #8]                         /* Store value to struct field */
     ldmfd sp!, {r3-r5, pc}
@@ -152,8 +133,8 @@ List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, P
     mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     cmp r1, #0
     bge List.LinkedList.get_P_1.L0
     lsl r1, r3, #2                           /* Convert to bytes */
@@ -176,7 +157,6 @@ List.LinkedList.get_P_1.L3:                  /* Evaluate condition */
 List.LinkedList.get_P_1.L5: 
     lsl r1, r5, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
-    mov r0, r4
     sub r4, r4, #1
     b List.LinkedList.get_P_1.L3
 List.LinkedList.get_P_1.L4: 
@@ -190,24 +170,24 @@ List.LinkedList.get_P_1.L7:
 .global List.LinkedList.size_P_1
 List.LinkedList.size_P_1:                    /* Function: List.LinkedList.size, Provisos: INT */
     mov r10, #0
-    push { r3, r4 }
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
+    mov r5, #0
     mov r0, #0                               /* Evaluate Expression */
-    mov r3, #0
 List.LinkedList.size_P_1.L1:                 /* Evaluate condition */
     ldr r1, .P481193735_NULL                 /* Load null address */
     cmp r4, r1
     beq List.LinkedList.size_P_1.L2
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r4, [r1, #4]                         /* Load field from struct */
-    mov r0, r3
-    add r3, r3, #1
+    add r5, r5, #1
     b List.LinkedList.size_P_1.L1
 List.LinkedList.size_P_1.L2: 
-    mov r0, r3                               /* Evaluate Expression */
-    ldmfd sp!, {r3, r4}
+    mov r0, r5                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r5}
     bx lr
 .P481193735_NULL: .word NULL
 
@@ -229,9 +209,9 @@ List.LinkedList_P_1_resolver:                /* Relay: List.LinkedList -> INTF *
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #0                               /* Evaluate Expression */
     ldr r1, .P481193737_NULL                 /* Load null address */
     ldr r2, .P481193737_NULL                 /* Load null address */
+    mov r0, #0                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     ldr r0, .P481193737_List.LinkedList_P_1
     push { r0 }
@@ -247,33 +227,33 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     lsr r0, r0, #2
     bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r12, #0                              /* Offset to List.Iterable.size */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    mov r12, #0                              /* Offset to List.Iterable.size */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
     ldr r10, .P481193737_List.Iterable_P_1
     add lr, pc, #8
     mov pc, r12
-    mov r4, r0
-    mov r5, #0
     mov r6, #0
+    mov r5, #0
+    mov r4, r0
 main.L1: 
     cmp r6, r4
     bge main.L2
-    mov r0, r3
-    mov r1, r6
     mov r12, #4                              /* Offset to List.Iterable.get */
+    mov r1, r6
+    mov r0, r3
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
     ldr r10, .P481193737_List.Iterable_P_1
     add lr, pc, #8
     mov pc, r12
-    add r5, r5, r0
     add r6, r6, #1
+    add r5, r5, r0
     b main.L1
 main.L2: 
     mov r0, r5                               /* Evaluate Expression */

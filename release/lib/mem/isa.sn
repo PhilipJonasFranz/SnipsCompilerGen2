@@ -5,6 +5,7 @@
  * created when linking the executable. The id of a struct can
  * be obtained with idof(TYPE).
  */
+# unsafe
 shared bool isarec(void* child, void* parent) {
 	if (child == 0) return false;
 	if (child == parent) return true;
@@ -20,6 +21,7 @@ shared bool isarec(void* child, void* parent) {
  * an instanceof the given struct. Both arguments
  * must be SID values obtained by idof(TYPE).
  */
+# unsafe
 shared bool isa(void* child, void* parent) {
 	return isarec(child, parent);
 }
@@ -30,6 +32,7 @@ shared bool isa(void* child, void* parent) {
  * must be a reference to a struct, the second argument
  * must be a SID obtained by idof(TYPE).
  */
+# unsafe
 shared bool isar(void* child, void* parent) {
 	/* Uses the LOAD(ADDR * 4) operation, only for pointer */
 	return isarec(*child, parent);

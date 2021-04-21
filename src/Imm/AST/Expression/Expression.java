@@ -1,8 +1,12 @@
 package Imm.AST.Expression;
 
+import java.util.List;
+
+import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Util.Source;
 
 /**
@@ -35,10 +39,22 @@ public abstract class Expression extends SyntaxElement {
 		else return this.type;
 	}
 	
+	public abstract Expression opt(ASTOptimizer s) throws OPT0_EXC;
+	
 	public void setType(TYPE type) {
 		this.type = type;
 	}
 	
 	public abstract Expression clone();
+	
+	public abstract String codePrint();
+	
+	public List<String> codePrint(int d) {
+		return null;
+	}
+	
+	public boolean isEqualTo(Expression e) {
+		return this.codePrint().equals(e.codePrint());
+	}
 	
 } 

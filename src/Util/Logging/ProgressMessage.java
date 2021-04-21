@@ -20,7 +20,7 @@ public class ProgressMessage {
 		this.maxProgress = maxProgress;
 		if (!CompilerDriver.silenced) {
 			if (type != Type.WARN || !CompilerDriver.disableWarnings) {
-				System.out.print(this.getMessage());
+				CompilerDriver.outs.print(this.getMessage());
 			}
 		}
 	}
@@ -28,7 +28,7 @@ public class ProgressMessage {
 	public ProgressMessage(String message, Type type, boolean buffered) {
 		this.message = message;
 		this.messageType = type;
-		if (!CompilerDriver.silenced && !buffered) System.out.print(this.getMessage());
+		if (!CompilerDriver.silenced && !buffered) CompilerDriver.outs.print(this.getMessage());
 	}
 	
 	/**
@@ -55,12 +55,12 @@ public class ProgressMessage {
 	public void incProgress(double progress) {
 		if (!CompilerDriver.silenced) {
 			while (this.maxProgress * progress > printed && !isDone) {
-				System.out.print(".");
+				CompilerDriver.outs.print(".");
 				printed++;
 			}
 			
 			if (progress == 1 && !isDone) {
-				System.out.println("DONE!");
+				CompilerDriver.outs.println("DONE!");
 				isDone = true;
 			}
 		}
@@ -78,7 +78,7 @@ public class ProgressMessage {
 	 */
 	public void incProgressSingle() {
 		if (!CompilerDriver.silenced) {
-			System.out.print(".");
+			CompilerDriver.outs.print(".");
 			printed++;
 		}
 	}
@@ -91,18 +91,18 @@ public class ProgressMessage {
 			aborted = true;
 			if (!CompilerDriver.silenced) {
 				while (printed < this.maxProgress) {
-					System.out.print(".");
+					CompilerDriver.outs.print(".");
 					printed++;
 				}
 				
-				System.out.println("ERROR!");
+				CompilerDriver.outs.println("ERROR!");
 			}
 		}
 	}
 	
 	/** Flush the buffered message to the console. */
 	public void flush() {
-		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	public String getMessage() {

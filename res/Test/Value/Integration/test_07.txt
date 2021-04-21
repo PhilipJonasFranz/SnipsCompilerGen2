@@ -45,15 +45,9 @@ TESTCASES
 7 90
 8 111
 OUTPUT
-.version 41421238386
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 
 .data
 NULL: .word 0
@@ -61,17 +55,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 /* Multiplicate the given matricies. Both matricies have to have the given */
 
@@ -82,15 +65,15 @@ __mat_mult:                                  /* Function: __mat_mult */
     sub sp, sp, #36
     stmea sp, {r3-r9, fp, lr}
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     mov r1, r2                               /* Evaluate Expression */
     ldr r2, [fp, #36]
     mul r0, r1, r2
     bl resv                                  /* Call resv */
-    mov r6, r0
     mov r7, #0
+    mov r6, r0
 __mat_mult.L1: 
     cmp r7, r5
     bge __mat_mult.L2
@@ -153,12 +136,12 @@ __mat_mult.L2:
 allocMatrix:                                 /* Function: allocMatrix */
     sub sp, sp, #24
     stmea sp, {r3-r7, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     mul r0, r0, r1
     bl resv                                  /* Call resv */
-    mov r5, r0
     mov r6, #0
+    mov r5, r0
 allocMatrix.L1: 
     cmp r6, r4
     bge allocMatrix.L2
@@ -166,9 +149,9 @@ allocMatrix.L1:
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mla r0, r6, r4, r7
     mul r2, r6, r4
     add r1, r5, r2
+    mla r0, r6, r4, r7
     push { r0 }
     add r0, r1, r7
     lsl r1, r0, #2
@@ -197,9 +180,7 @@ main:                                        /* Function: main */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #3
-    push { r0 }
-    push { r5 }
+    stmfd sp!, {r0, r5}
     mov r0, r4
     ldmfd sp!, {r1, r2}
     bl __mat_mult                            /* Call __mat_mult */

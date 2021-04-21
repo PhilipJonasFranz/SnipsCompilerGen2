@@ -7,13 +7,18 @@ import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.VOID;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 public class FunctionCall extends Statement implements Callee {
 	
@@ -65,6 +70,8 @@ public class FunctionCall extends Statement implements Callee {
 		if (this.baseRef != null)
 			ic.baseRef = this.baseRef.clone();
 		
+		ic.setType(this.getType().clone());
+		ic.copyDirectivesFrom(this);
 		return ic;
 	}
 	
@@ -83,16 +90,16 @@ public class FunctionCall extends Statement implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "Function Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path.build());
 		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = "{";
 			for (TYPE t : this.proviso) s += t.typeString() + ", ";
 			s = s.substring(0, s.length() - 2);
 			s += "}";
-			System.out.print(s);
+			CompilerDriver.outs.print(s);
 		}
 		
-		System.out.println();
+		CompilerDriver.outs.println();
 		
 		if (rec) for (Expression e : this.parameters) 
 			e.print(d + this.printDepthStep, rec);
@@ -107,6 +114,22 @@ public class FunctionCall extends Statement implements Callee {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunctionCall(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Expression e : this.parameters)
+			result.addAll(e.visit(visitor));
+		
+		return result;
+	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.anonTarget == null) {
@@ -116,6 +139,31 @@ public class FunctionCall extends Statement implements Callee {
 		
 		for (Expression e : this.parameters) 
 			e.setContext(context);
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Expression e : this.parameters)
+				s += e.codePrint() + ", ";
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ");";
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 
 
@@ -129,7 +177,10 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	public TYPE getType() {
-		return this.getType();
+		if (this.calledFunction != null)
+			return this.calledFunction.getReturnTypeDirect();
+		else
+			return new VOID();
 	}
 
 	public List<Expression> getParams() {

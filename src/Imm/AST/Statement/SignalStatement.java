@@ -1,15 +1,20 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -37,7 +42,7 @@ public class SignalStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Signal");
+		CompilerDriver.outs.println(Util.pad(d) + "Signal");
 		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
 	}
 
@@ -55,6 +60,21 @@ public class SignalStatement extends Statement {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optSignalStatement(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.shadowRef.visit(visitor));
+		
+		return result;
+	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.shadowRef != null) 
@@ -69,7 +89,14 @@ public class SignalStatement extends Statement {
 		if (this.exceptionInit != null)
 			s.exceptionInit = this.exceptionInit;
 		
+		s.copyDirectivesFrom(this);
 		return s;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "signal " + this.exceptionInit.codePrint() + ";");
+		return code;
 	}
 
 } 

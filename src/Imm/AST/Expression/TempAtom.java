@@ -1,13 +1,19 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -39,8 +45,8 @@ public class TempAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
-		System.out.println(this.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
 		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 
@@ -56,7 +62,23 @@ public class TempAtom extends Expression {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optTempAtom(this);
+	}
 
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		if (this.base != null)
+			result.addAll(this.base.visit(visitor));
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.inheritType != null)
 			ProvisoUtil.mapNTo1(this.inheritType, context);
@@ -65,9 +87,18 @@ public class TempAtom extends Expression {
 	}
 
 	public Expression clone() {
-		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
-		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
+		TempAtom t = new TempAtom(((this.base != null)? this.base.clone() : null), this.getSource().clone());
+		if (this.inheritType != null) 
+			t.inheritType = this.inheritType.clone();
+		
+		t.setType(this.getType().clone());
+		t.copyDirectivesFrom(this);
 		return t;
+	}
+
+	public String codePrint() {
+		if (this.base == null) return "...";
+		else return "(" + this.base.codePrint() + ")...";
 	}
 
 } 

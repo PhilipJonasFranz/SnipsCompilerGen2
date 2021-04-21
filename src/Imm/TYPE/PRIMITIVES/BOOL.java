@@ -39,11 +39,19 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	public String sourceCodeRepresentation() {
 		return (this.value)? "1" : "0";
 	}
+	
+	public Integer toInt() {
+		return (this.value)? 1 : 0;
+	}
 
 	public TYPE clone() {
 		BOOL b = new BOOL();
 		if (this.value != null) b.setValue(this.value + "");
 		return b;
+	}
+	
+	public String codeString() {
+		return "bool";
 	}
 	
 } 

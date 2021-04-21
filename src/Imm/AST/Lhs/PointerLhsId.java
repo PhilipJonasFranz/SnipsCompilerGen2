@@ -1,17 +1,23 @@
 package Imm.AST.Lhs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -33,7 +39,7 @@ public class PointerLhsId extends LhsId {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "PointerLhsId");
+		CompilerDriver.outs.println(Util.pad(d) + "PointerLhsId");
 		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);
 	}
 
@@ -50,6 +56,21 @@ public class PointerLhsId extends LhsId {
 		
 		CompilerDriver.lastSource = temp;
 		return this.expressionType;
+	}
+	
+	public LhsId opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optPointerLhsId(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.shadowDeref.visit(visitor));
+		
+		return result;
 	}
 
 	public NamespacePath getFieldName() {
@@ -71,7 +92,22 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public PointerLhsId clone() {
-		return new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+		PointerLhsId lhs = new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+		
+		if (this.deref != null)
+			lhs.deref = (Deref) lhs.shadowDeref;
+		
+		lhs.origin = this.origin;
+		
+		if (this.expressionType != null)
+			lhs.expressionType = this.expressionType.clone();
+		
+		lhs.copyDirectivesFrom(this);
+		return lhs;
+	}
+
+	public String codePrint() {
+		return this.deref.codePrint();
 	}
 	
 } 

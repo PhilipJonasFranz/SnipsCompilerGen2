@@ -23,8 +23,8 @@ public class PROVISO extends TYPE<Void> {
 	
 			/* ---< METHODS >--- */
 	public void setContext(TYPE type) {
-		if (type.isProviso()) {
-			while (type.isProviso()) {
+		if (type != null && type.isProviso()) {
+			while (type != null && type.isProviso()) {
 				type = ((PROVISO) type).getContext();
 			}
 		}
@@ -33,16 +33,15 @@ public class PROVISO extends TYPE<Void> {
 	}
 	
 	public TYPE getContext() {
-		if (this.context.isProviso()) {
-			PROVISO p = (PROVISO) this.context;
-			if (p.hasContext()) return p.getContext();
-			else return p;
+		if (this.context != null) {
+			if (this.context.isProviso()) {
+				PROVISO p = (PROVISO) this.context;
+				if (p.hasContext()) return p.getContext();
+				else return p;
+			}
+			else return this.context;
 		}
-		else {
-			if (this.context != null)
-				return this.context;
-			else return this.defaultContext;
-		}
+		else return this.defaultContext;
 	}
 	
 	public boolean hasContext() {
@@ -136,9 +135,21 @@ public class PROVISO extends TYPE<Void> {
 		/* Base case, map type maps directley to proviso */
 		return (searchedProviso.equals(this.placeholderName))? mapType : null;
 	}
+	
+	public Integer toInt() {
+		return (this.hasContext())? this.getContext().toInt() : null;
+	}
 
 	public boolean hasProviso() {
 		return true;
+	}
+
+
+	public String codeString() {
+		String s = this.placeholderName;
+		if (this.defaultContext != null)
+			s += ":" + this.defaultContext.codeString();
+		return s;
 	}
 
 } 

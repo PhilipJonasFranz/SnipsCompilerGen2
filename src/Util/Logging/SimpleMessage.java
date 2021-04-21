@@ -7,16 +7,16 @@ public class SimpleMessage extends Message {
 	
 	public SimpleMessage(String message) {
 		super(message, LogPoint.Type.INFO);
-		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	public SimpleMessage(String message, boolean buffered) {
 		super(message, LogPoint.Type.INFO, buffered);
-		if (!CompilerDriver.silenced && !buffered) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced && !buffered) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	public void flush() {
-		if (!CompilerDriver.silenced) System.out.println(this.getMessage());
+		if (!CompilerDriver.silenced) CompilerDriver.outs.println(this.getMessage());
 	}
 	
 	public String getMessage() {

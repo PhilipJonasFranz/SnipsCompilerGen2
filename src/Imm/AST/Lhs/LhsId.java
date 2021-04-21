@@ -1,11 +1,15 @@
 package Imm.AST.Lhs;
 
+import java.util.List;
+
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Util.NamespacePath;
 import Util.Source;
 
@@ -38,8 +42,16 @@ public abstract class LhsId extends SyntaxElement {
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTEX_EXC;
 	
+	public abstract LhsId opt(ASTOptimizer s) throws OPT0_EXC;
+	
 	public abstract NamespacePath getFieldName();
 	
 	public abstract LhsId clone();
+	
+	public abstract String codePrint();
+	
+	public List<String> codePrint(int d) {
+		return null;
+	}
 	
 } 

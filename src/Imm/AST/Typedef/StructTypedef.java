@@ -8,6 +8,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -22,9 +23,12 @@ import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -325,7 +329,7 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = this.pad(d) + "Struct Typedef<" + this.path.build() + ">";
+		String s = Util.pad(d) + "Struct Typedef<" + this.path.build() + ">";
 		
 		if (this.extension != null)
 			s += ":extends:" + this.extension.path.build() + ",";
@@ -345,7 +349,7 @@ public class StructTypedef extends SyntaxElement {
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);
 		
-		System.out.println(s);
+		CompilerDriver.outs.println(s);
 		
 		if (rec) {
 			for (Declaration dec : this.fields) 
@@ -365,6 +369,22 @@ public class StructTypedef extends SyntaxElement {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optStructTypedef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Function f : this.functions)
+			result.addAll(f.visit(visitor));
+		
+		return result;
+	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
@@ -378,6 +398,62 @@ public class StructTypedef extends SyntaxElement {
 		
 		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
 		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += "struct " + this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		if (!this.implemented.isEmpty() || this.extension != null) {
+			s += " : ";
+			
+			if (this.extension != null) {
+				s += this.extension.codePrint(0).get(0) + ", ";
+			}
+			
+			for (INTERFACE i : this.implemented) {
+				s += i.codeString() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		for (Declaration d0 : this.fields) {
+			code.addAll(d0.codePrint(d + this.printDepthStep));
+		}
+		
+		if (!this.fields.isEmpty() && !this.functions.isEmpty())
+			code.add("");
+		
+		for (Function f : this.functions) {
+			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		
+		return code;
+	}
+
+	public SyntaxElement clone() {
+		return this;
 	}
 
 } 

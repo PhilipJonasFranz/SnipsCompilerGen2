@@ -18,15 +18,7 @@ int main() {
 TESTCASES
 186
 OUTPUT
-.version 13197315718
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 A: .word 0
@@ -35,17 +27,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -66,8 +47,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P938939672_A
     push { r0 }
-    mov r3, #0
     mov r4, #0
+    mov r3, #0
     sub sp, sp, #8                           /* Make space on stack for declaration a */
 main.L1: 
     mov r0, #8
@@ -86,8 +67,8 @@ main.L1:
     pop { r0 }
     str r0, [r1, #4]
     ldr r0, [fp, #-36]                       /* Load field from struct */
-    add r3, r3, r0
     add r4, r4, #2
+    add r3, r3, r0
     b main.L1
 main.L2: 
     add sp, sp, #8                           /* Reset stack, remove iterator and counter */

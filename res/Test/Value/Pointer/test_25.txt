@@ -18,15 +18,10 @@ int main() {
 TESTCASES
 42
 OUTPUT
-.version 3453767487
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 
 .data
 P: .word 0
@@ -37,26 +32,15 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
     ldr r1, .P2044436202_K
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #10
     mov r1, #13
+    mov r0, #10
     stmfd sp!, {r0, r1}
     ldr r0, .P2044436202_P
     push { r0 }
@@ -67,9 +51,15 @@ main:                                        /* Function: main */
     lsl r1, r1, #2                           /* Convert to bytes */
     add r0, r1, #16
     lsr r3, r0, #2
-    ldr r1, [r10, r3, lsl #2]                /* Load from address */
+    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
+    ldr r0, [fp, #-8]                        /* Evaluate Expression */
+    ldr r1, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, #15
-    str r0, [r10, r3, lsl #2]
+    push { r0 }
+    ldr r0, [fp, #-8]
+    lsl r1, r0, #2
+    pop { r0 }
+    str r0, [r1]
     ldr r1, [fp, #-4]
     lsl r1, r1, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */

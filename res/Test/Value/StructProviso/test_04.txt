@@ -27,15 +27,9 @@ int main() {
 TESTCASES
 37
 OUTPUT
-.version 35630338238
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 
 .data
 TreeNode_P_1: .word 0
@@ -44,17 +38,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global main
 main:                                        /* Function: main */
@@ -66,7 +49,6 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
     ldr r0, .P1698644683_TreeNode_P_1
     lsl r1, r3, #2
@@ -84,7 +66,6 @@ main:                                        /* Function: main */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
     ldr r0, .P1698644683_TreeNode_P_1
     lsl r1, r4, #2
@@ -97,15 +78,14 @@ main:                                        /* Function: main */
     str r0, [r1, #12]
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r4, r0
+    mov r5, r0
     mov r0, #15                              /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
     ldr r0, .P1698644683_TreeNode_P_1
-    lsl r1, r4, #2
+    lsl r1, r5, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -114,18 +94,17 @@ main:                                        /* Function: main */
     pop { r0 }
     str r0, [r1, #12]
     lsl r1, r3, #2                           /* Convert to bytes */
-    str r4, [r1, #8]                         /* Store value to struct field */
+    str r5, [r1, #8]                         /* Store value to struct field */
     mov r0, #4                               /* Evaluate Expression */
     bl resv                                  /* Call resv */
-    mov r4, r0
+    mov r6, r0
     mov r0, #12                              /* Evaluate Expression */
     push { r0 }
     mov r0, #0
     push { r0 }
-    mov r0, #0
     push { r0 }
     ldr r0, .P1698644683_TreeNode_P_1
-    lsl r1, r4, #2
+    lsl r1, r6, #2
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -136,19 +115,18 @@ main:                                        /* Function: main */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
-    str r4, [r1, #4]                         /* Store value to struct field */
+    str r6, [r1, #4]                         /* Store value to struct field */
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r2, [r1, #12]                        /* Load field from struct */
-    add r0, r0, r2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #8]
     lsl r1, r1, #2
     ldr r1, [r1, #4]
     lsl r1, r1, #2
+    add r0, r0, r2
     ldr r2, [r1, #12]                        /* Load field from struct */
     add r0, r0, r2
     pop { pc }

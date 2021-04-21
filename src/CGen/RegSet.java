@@ -1,6 +1,7 @@
 package CGen;
 
 import Imm.AST.Statement.Declaration;
+import Snips.CompilerDriver;
 
 public class RegSet {
 
@@ -39,7 +40,7 @@ public class RegSet {
 		
 		/** Print out the register status and contents. */
 		public void print() {
-			System.out.println("    Status: " + this.status.toString());
+			CompilerDriver.outs.println("    Status: " + this.status.toString());
 			if (this.status == STATUS.USED) 
 				this.declaration.print(4, true);
 		}
@@ -93,9 +94,9 @@ public class RegSet {
 	 * Prints out the reg set and all of its registers via Reg.print().
 	 */
 	public void print() {
-		System.out.println("RegSet State:");
+		CompilerDriver.outs.println("RegSet State:");
 		for (int i = 0; i < regs.length; i++) {
-			System.out.println("R" + i);
+			CompilerDriver.outs.println("R" + i);
 			this.regs [i].print();
 		}
 	}

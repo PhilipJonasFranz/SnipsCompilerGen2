@@ -1,12 +1,18 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -30,7 +36,7 @@ public class BreakStatement extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Break");
+		CompilerDriver.outs.println(Util.pad(d) + "Break");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -43,6 +49,19 @@ public class BreakStatement extends Statement {
 		return t;
 	}
 	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optBreakStatement(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
@@ -50,7 +69,14 @@ public class BreakStatement extends Statement {
 	public Statement clone() {
 		BreakStatement b = new BreakStatement(this.getSource().clone());
 		b.superLoop = this.superLoop;
+		b.copyDirectivesFrom(this);
 		return b;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		code.add(Util.pad(d) + "break;");
+		return code;
 	}
 
 } 

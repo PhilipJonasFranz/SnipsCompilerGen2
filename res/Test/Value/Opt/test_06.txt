@@ -1,0 +1,30 @@
+SOURCE
+int main() {
+	int a = 10;
+	
+	#unroll depth = 5
+	for (int i = 0; i < 5; i++) {
+		a = a + 1;
+	}
+	
+	#unroll depth = 10
+	while (a > 6) a--;
+	
+	return a;
+}
+TESTCASES
+6
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    mov r0, #6                               /* Evaluate Expression */
+    bx lr

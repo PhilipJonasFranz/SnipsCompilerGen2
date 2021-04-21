@@ -8,6 +8,7 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.CompoundStatement;
@@ -17,10 +18,13 @@ import Imm.AST.Statement.Statement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Res.Const;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -154,6 +158,10 @@ public class Function extends CompoundStatement {
 	 */
 	public int UID = LabelUtil.getUID();
 	
+	public Function ASTOptCounterpart;
+	
+	public int LAST_UPDATE = 0;
+	
 	/**
 	 * If set to true, the '...@UID' will be included in the function
 	 * head asm label.
@@ -184,34 +192,34 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
 		
 		if (!this.provisosTypes.isEmpty()) {
-			System.out.print("<");
+			CompilerDriver.outs.print("<");
 			for (int i = 0; i < this.provisosTypes.size(); i++) {
-				System.out.print(this.provisosTypes.get(i).typeString());
-				if (i < this.provisosTypes.size() - 1) System.out.print(", ");
+				CompilerDriver.outs.print(this.provisosTypes.get(i).typeString());
+				if (i < this.provisosTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
-			System.out.print(">");
+			CompilerDriver.outs.print(">");
 		}
 		
-		System.out.print("(");
+		CompilerDriver.outs.print("(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
-			if (i < this.parameters.size() - 1) System.out.print(", ");
+			CompilerDriver.outs.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
+			if (i < this.parameters.size() - 1) CompilerDriver.outs.print(", ");
 		}
-		System.out.print(")");
+		CompilerDriver.outs.print(")");
 		
 		if (!this.signalsTypes.isEmpty()) {
-			System.out.print(" signals ");
+			CompilerDriver.outs.print(" signals ");
 			for (int i = 0; i < this.signalsTypes.size(); i++) {
-				System.out.print(this.signalsTypes.get(i).typeString());
-				if (i < this.signalsTypes.size() - 1) System.out.print(", ");
+				CompilerDriver.outs.print(this.signalsTypes.get(i).typeString());
+				if (i < this.signalsTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
 		}
 		
-		System.out.println(" " + this.toString().split("@") [1]);
+		CompilerDriver.outs.println(" " + this.toString().split("@") [1]);
 		
 		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
@@ -226,7 +234,26 @@ public class Function extends CompoundStatement {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
-
+	
+	public Function opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunction(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this)) 
+			result.add((T) this);
+		
+		if (this.body != null) {
+			for (Statement s : this.body) {
+				result.addAll(s.visit(visitor));
+			}
+		}
+		
+		return result;
+	}
+	
 	/** 
 	 * Returns the current return type, proviso-free.
 	 */
@@ -503,7 +530,52 @@ public class Function extends CompoundStatement {
 			f.body = clone;
 		}
 		
+		f.copyDirectivesFrom(this);
 		return f;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += this.returnType.codeString() + " ";
+		
+		s += this.path.build();
+		
+		if (!this.provisosTypes.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.provisosTypes)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Declaration p : this.parameters) {
+				s += p.getType().codeString() + " " + p.path.build() + ", ";
+			}
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ")";
+		
+		if (this.body != null) {
+			s += " {";
+			code.add(Util.pad(d) + s);
+			for (Statement s0 : this.body) {
+				code.addAll(s0.codePrint(d + this.printDepthStep));
+			}
+			code.add(Util.pad(d) + "}");
+		}
+		else code.add(Util.pad(d) + s + ";");
+		
+		return code;
 	}
 	
 } 

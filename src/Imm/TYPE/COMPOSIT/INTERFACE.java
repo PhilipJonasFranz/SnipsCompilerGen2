@@ -143,4 +143,17 @@ public class INTERFACE extends COMPOSIT {
 		return false;
 	}
 	
+	public String codeString() {
+		String s = this.getTypedef().path.build();
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		return s;
+	}
+	
 } 

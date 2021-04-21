@@ -20,15 +20,7 @@ TESTCASES
 0 0 0 0 28
 1 2 3 4 48
 OUTPUT
-.version 24510048053
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 NULL: .word 0
@@ -36,17 +28,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global foo
 foo:                                         /* Function: foo */
@@ -57,9 +38,9 @@ foo:                                         /* Function: foo */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     mov r1, #0
     bl foo                                   /* Call foo */
     mov r6, r0
@@ -70,38 +51,41 @@ main:                                        /* Function: main */
     mov r1, #2
     mov r0, r4
     bl foo                                   /* Call foo */
-    mov r3, r0
+    mov r8, r0
     mov r1, #3
     mov r0, r4
     bl foo                                   /* Call foo */
-    mov r8, r0
+    mov r9, r0
     mov r1, #4
     mov r0, r5
     bl foo                                   /* Call foo */
-    mov r4, r0
     mov r1, #5
+    push { r0 }
     mov r0, r5
     bl foo                                   /* Call foo */
-    mov r9, r0
+    push { r0 }
     mov r0, #6                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
     pop { r1 }
     bl foo                                   /* Call foo */
-    mov r5, r0
+    push { r0 }
     mov r0, #7                               /* Evaluate Expression */
     push { r0 }
     ldr r0, [fp, #8]
     pop { r1 }
     bl foo                                   /* Call foo */
     add r1, r6, r7
-    add r1, r1, r3
     add r1, r1, r8
-    add r1, r1, r4
     add r1, r1, r9
-    add r1, r1, r5
     push { r0 }
     ldr r2, [fp, #-4]
+    add r1, r1, r2
+    ldr r2, [fp, #-8]
+    add r1, r1, r2
+    ldr r2, [fp, #-12]
+    add r1, r1, r2
+    ldr r2, [fp, #-16]
     add r0, r1, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}

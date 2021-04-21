@@ -31,7 +31,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	public Shift shift;
 	
 	/** Wether to update the condition field when executing this instruction. */
-	private boolean updateConditionField = false;
+	public boolean updateConditionField = false;
 	
 	
 			/* ---< CONSTRUCTURS >--- */

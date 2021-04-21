@@ -1,13 +1,18 @@
 package Imm.AST.Expression.Arith;
 
-import Imm.AST.Expression.BinaryExpression;
+import java.util.ArrayList;
+import java.util.List;
+
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
+import Opt.AST.ASTOptimizer;
 import Util.Source;
 
 /**
  * This class represents a superclass for all Expressions.
  */
-public class BitOr extends BinaryExpression {
+public class BitOr extends NFoldExpression {
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -15,11 +20,35 @@ public class BitOr extends BinaryExpression {
 	 * @param source See {@link #source}
 	 */
 	public BitOr(Expression left, Expression right, Source source) {
-		super(left, right, Operator.LSR, source);
+		super(left, right, Operator.BOR, source);
+	}
+	
+	public BitOr(List<Expression> operands, Source source) {
+		super(operands, Operator.BOR, source);
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optBitOr(this);
 	}
 
-	public BinaryExpression clone() {
-		return new BitOr(this.left.clone(), this.right.clone(), this.getSource().clone());
+	public BitOr clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		BitOr e = new BitOr(op0, this.getSource().clone());
+		e.setType(this.getType().clone());
+		e.copyDirectivesFrom(this);
+		return e;
+	}
+	
+	public String codePrint() {
+		String s = "";
+		for (Expression e : this.operands)
+			s += e.codePrint() + " | ";
+		
+		s = s.substring(0, s.length() - 3);
+		return s;
 	}
 	
 } 

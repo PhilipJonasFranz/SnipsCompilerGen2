@@ -21,14 +21,10 @@ int main() {
 TESTCASES
 20
 OUTPUT
-.version 16217298465
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
 .include maybe free.s
 .include linked_list.s
 
@@ -41,17 +37,6 @@ HEAP_START: .word 0
 .text
     b main_init
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 /* Message queue that temporarily hold incoming messages */
 
 .global main
@@ -60,9 +45,9 @@ _routine_stack_copy_end_:
 main_init: 
     sub sp, sp, #20
     stmea sp, {r0-r2, fp, lr}
-    mov r0, #0                               /* Load parameters */
-    mov r1, #0
     ldr r2, .P222341303_X_P_1
+    mov r1, #0
+    mov r0, #0                               /* Load parameters */
     stmfd sp!, {r0-r2}
     bl List.LinkedList.create_P_3            /* Call List.LinkedList.create */
     ldr r1, .P222341303_buffer               /* Load from .data section */
@@ -71,8 +56,8 @@ main_init:
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #20                              /* Load parameters */
     mov r1, #0
+    mov r0, #20                              /* Load parameters */
     stmfd sp!, {r0, r1}
     ldr r0, .P222341303_X_P_1
     push { r0 }
@@ -88,3 +73,15 @@ main:                                        /* Function: main */
     ldmfd sp!, {fp, pc}
 .P222341303_buffer: .word buffer
 .P222341303_X_P_1: .word X_P_1
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

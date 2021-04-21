@@ -1,6 +1,9 @@
 <Inf>
 	<Version>v.4.6.0</Version>
 	<Library>
+		<Alias>__op_mod.sn:lib/op/__op_mod.sn</Alias>
+		<Alias>__op_div.sn:lib/op/__op_div.sn</Alias>
+		
 		<Alias>resv.sn:lib/mem/resv.sn</Alias>
 		<Alias>free.sn:lib/mem/free.sn</Alias>
 		<Alias>isa.sn:lib/mem/isa.sn</Alias>

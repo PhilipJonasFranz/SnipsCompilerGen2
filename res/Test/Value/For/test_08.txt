@@ -18,15 +18,7 @@ int main() {
 TESTCASES
 2
 OUTPUT
-.version 36668235486
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 A: .word 0
@@ -36,40 +28,27 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global smallest
 smallest:                                    /* Function: smallest */
     sub sp, sp, #16
     stmea sp, {r3-r6}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r5, [r1, #4]                         /* Load field from struct */
     mov r6, #0
 smallest.L1: 
     cmp r6, r4
     bge smallest.L2
-    lsl r1, r3, #2                           /* Convert to bytes */
     lsl r2, r6, #2
     lsl r2, r2, #1
-    add r1, r1, r2
+    add r1, r2, r3, lsl #2
     ldr r0, [r1, #4]                         /* Load field from struct */
     cmp r0, r5
     bge smallest.L3
-    lsl r1, r3, #2                           /* Convert to bytes */
     lsl r2, r6, #2
     lsl r2, r2, #1
-    add r1, r1, r2
+    add r1, r2, r3, lsl #2
     ldr r5, [r1, #4]                         /* Load field from struct */
 smallest.L3: 
     add r6, r6, #1

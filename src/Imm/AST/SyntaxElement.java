@@ -1,11 +1,17 @@
 package Imm.AST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Tools.ASTNodeVisitor;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.Source;
 
 /**
@@ -29,6 +35,8 @@ public abstract class SyntaxElement {
 	 * The location of this syntax element in the source code, row and column representation. 
 	 */
 	Source source;
+	
+	public List<ASTDirective> activeAnnotations = new ArrayList();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -61,21 +69,73 @@ public abstract class SyntaxElement {
 	 */
 	public abstract TYPE check(ContextChecker ctx) throws CTEX_EXC;
 	
-	/** 
-	 * Create a padding of spaces with the given length.
-	 * For example w=3 -> '   '.
+	/**
+	 * Visitor relay for AST optimizer
 	 */
-	public String pad(int w) {
-		String pad = "";
-		for (int i = 0; i < w; i++) pad += " ";
-		return pad;
-	}
+	public abstract SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC;
 	
 	/**
-	 * Returns the source at which this syntax element was parsed.
+	 * Visitor filter used to traverse to AST subtree with given filter and 
+	 * return a matching result set.
+	 * @param <T> Type of the elements contained in the result.
+	 * @param visitor The filter expression.
+	 * @return The elements the filter returned true for.
+	 */
+	public abstract <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor);
+	
+	/**
+	 * Print out this node as Snips Code. Each String represents a code-line. The 
+	 * outputted code *should* be valid code, so it can be used as compiler input again.
+	 * 
+	 * The outputted code will represent a snapshot of the current AST. This means that
+	 * based on when this representation is created, the AST may has been transformed by
+	 * for example the Parser or Context Checker. The outputted code will probably NOT match
+	 * the inputted code, since some information about formatting and some other are ignored
+	 * in the various stages. Also, internal transformations of the AST will most likely not
+	 * be logged, so the AST printout will represent this transformed code.
+	 * 
+	 * This function is mostly for debug purposes, and can be used to get a more minimal of
+	 * the current AST.
+	 * 
+	 * @param Current printing depth, initially 0.
+	 */
+	public abstract List<String> codePrint(int d);
+	
+	/**
+	 * Returns the source at which this syntax element was parsed. The Source holds the
+	 * approximated source file location from which this AST node was parsed.
 	 */
 	public Source getSource() {
 		return this.source;
+	}
+	
+	/**
+	 * Returns the number of nodes that are in the subtree of this syntax element plus 
+	 * this syntax element.
+	 */
+	public int size() {
+		return this.visit(x -> { return true; }).size();
+	}
+	
+	public abstract SyntaxElement clone();
+	
+	/**
+	 * Copy all directives from the given SyntaxElement and add them to the own
+	 * active ASTDirectives list.
+	 */
+	public void copyDirectivesFrom(SyntaxElement s) {
+		for (ASTDirective dir : s.activeAnnotations)
+			this.activeAnnotations.add(dir.clone());
+	}
+	
+	public boolean hasDirective(DIRECTIVE annotation) {
+		return this.activeAnnotations.stream().filter(x -> x.type == annotation).count() > 0;
+	}
+	
+	public ASTDirective getDirective(DIRECTIVE annotation) {
+		for (ASTDirective x : this.activeAnnotations)
+			if (x.type == annotation) return x;
+		return null;
 	}
 	
 } 

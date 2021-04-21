@@ -1,10 +1,14 @@
 package Imm.AST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 /**
@@ -46,8 +50,41 @@ public class Program extends SyntaxElement {
 		return ctx.check();
 	}
 
+	public Program opt(ASTOptimizer opt) throws OPT0_EXC {
+		return this;
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (SyntaxElement s : this.programElements) {
+			result.addAll(s.visit(visitor));
+		}
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> setContext) {
 		return;
 	}
 
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		for (SyntaxElement s0 : this.programElements) {
+			List<String> code0 = s0.codePrint(0);
+			code.addAll(code0);
+			if (!code0.isEmpty()) code.add("");
+		}
+		
+		return code;
+	}
+
+	public SyntaxElement clone() {
+		return this;
+	}
+	
 } 

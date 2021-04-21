@@ -1,15 +1,21 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.AST.ASTOptimizer;
 import Par.Token;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -44,7 +50,7 @@ public class RegisterAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -56,14 +62,33 @@ public class RegisterAtom extends Expression {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optRegisterAtom(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
+	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		//System.out.println("Applied Context: " + this.getClass().getName());
 		return;
 	}
 
 	public Expression clone() {
-		return new RegisterAtom(this.spelling, this.reg, this.getSource().clone());
+		RegisterAtom ra = new RegisterAtom(this.spelling, this.reg, this.getSource().clone());
+		ra.setType(this.getType().clone());
+		ra.copyDirectivesFrom(this);
+		return ra;
+	}
+
+	public String codePrint() {
+		return "#" + this.reg.toString().toLowerCase();
 	}
 
 } 

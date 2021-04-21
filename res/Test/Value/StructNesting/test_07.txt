@@ -44,15 +44,7 @@ int main() {
 TESTCASES
 4
 OUTPUT
-.version 21257054783
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 Storage.X_P_1: .word 0
@@ -61,17 +53,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global Storage.X.getValue_P_1
 Storage.X.getValue_P_1:                      /* Function: Storage.X.getValue, Provisos: INT */
@@ -87,20 +68,19 @@ Storage.X.getType_P_1:                       /* Function: Storage.X.getType, Pro
 
 .global Storage.X.setValue_P_1
 Storage.X.setValue_P_1:                      /* Function: Storage.X.setValue, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #0                               /* Evaluate Expression */
     mov r1, #12
+    mov r0, #0                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P902851238_Storage.X_P_1
     push { r0 }

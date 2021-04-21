@@ -200,7 +200,7 @@ public class Assembler {
 						}
 						else {
 							if (n % 4 != 0) {
-								System.out.println("Error: can only bytes in quantity of fours.");
+								CompilerDriver.outs.println("Error: can only bytes in quantity of fours.");
 								continue;
 							}
 							else {
@@ -217,7 +217,7 @@ public class Assembler {
 						in.remove(i);
 						
 						if (n % 4 != 0) {
-							System.out.println("Error: can only bytes in quantity of fours.");
+							CompilerDriver.outs.println("Error: can only bytes in quantity of fours.");
 							continue;
 						}
 						else for (int a = 0; a < n >> 2; a++)in.add(i, new Instruction(".word 0", i));
@@ -772,7 +772,7 @@ public class Assembler {
 			
 				if (addLine) {
 					app = app.trim();
-					if (!app.equals("") && printBinary) System.out.println(app + ": " + in.get(i).getInstruction());
+					if (!app.equals("") && printBinary) CompilerDriver.outs.println(app + ": " + in.get(i).getInstruction());
 					instr.add(app);
 				}
 			} catch (Exception e) {

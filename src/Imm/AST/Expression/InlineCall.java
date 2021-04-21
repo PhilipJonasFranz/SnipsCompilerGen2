@@ -7,13 +7,19 @@ import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
+import Util.ASTDirective;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
+import Util.ASTDirective.DIRECTIVE;
 
 public class InlineCall extends Expression implements Callee {
 
@@ -39,6 +45,8 @@ public class InlineCall extends Expression implements Callee {
 	public boolean isNestedCall = false;
 	
 	public boolean nestedDeref = false;
+	
+	public int INLINE_DEPTH = -1;
 
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -55,15 +63,15 @@ public class InlineCall extends Expression implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
 		if (this.calledFunction != null) {
-			for (TYPE t : this.proviso) System.out.print(", " + t.typeString());
-			System.out.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
+			for (TYPE t : this.proviso) CompilerDriver.outs.print(", " + t.typeString());
+			CompilerDriver.outs.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		}
 		else {
-			System.out.println();
+			CompilerDriver.outs.println();
 			if (anonTarget != null) anonTarget.print(d + this.printDepthStep, rec);
-			else System.out.println(this.pad(d + this.printDepthStep) + "Target:?");
+			else CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + "Target:?");
 		}
 		
 		if (rec) for (Expression e : this.parameters) 
@@ -76,8 +84,36 @@ public class InlineCall extends Expression implements Callee {
 		
 		TYPE t = ctx.checkCall(this);
 		
+		if (this.calledFunction != null) {
+			Function called = this.calledFunction;
+			
+			if (called.hasDirective(DIRECTIVE.INLINE)) {
+				ASTDirective directive = called.getDirective(DIRECTIVE.INLINE);
+				if (directive.hasProperty("depth")) {
+					int depth = Integer.parseInt(directive.getProperty("depth"));
+					this.INLINE_DEPTH = depth;
+				}
+			}
+		}
+		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optInlineCall(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Expression e : this.parameters) 
+			result.addAll(e.visit(visitor));
+		
+		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
@@ -160,7 +196,34 @@ public class InlineCall extends Expression implements Callee {
 		
 		ic.watchpoint = this.watchpoint;
 		
+		ic.setType(this.getType().clone());
+		
+		ic.copyDirectivesFrom(this);
+		ic.INLINE_DEPTH = this.INLINE_DEPTH;
 		return ic;
+	}
+
+	public String codePrint() {
+		String s = this.path.build();
+		
+		if (!this.proviso.isEmpty()) {
+			s += "<";
+			for (TYPE t : this.proviso)
+				s += t.codeString() + ", ";
+			s = s.substring(0, s.length() - 2);
+			s += ">";
+		}
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) {
+			for (Expression e : this.parameters)
+				s += e.codePrint() + ", ";
+			s = s.substring(0, s.length() - 2);
+		}
+		
+		s += ")";
+		return s;
 	}
 	
 } 

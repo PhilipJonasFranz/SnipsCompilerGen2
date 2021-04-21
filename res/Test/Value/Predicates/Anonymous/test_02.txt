@@ -17,15 +17,7 @@ int main() {
 TESTCASES
 11
 OUTPUT
-.version 9499963022
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 NULL: .word 0
@@ -34,29 +26,18 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global get
 get:                                         /* Function: get */
     push { fp }
     mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
@@ -73,8 +54,8 @@ main:                                        /* Function: main */
     add lr, pc, #8
     mov pc, r3
     sub sp, fp, #4                           /* Reset the stack after anonymous call */
-    mov r0, #6                               /* Evaluate Expression */
     mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, [fp, #-12]
     ldr r2, [fp, #-8]
@@ -82,3 +63,15 @@ main:                                        /* Function: main */
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P553308267_get: .word get
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

@@ -7,15 +7,8 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version 13110678820
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 .include res\Test\Value\Modules\exclude_import.s
 
 .data
@@ -25,24 +18,9 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
     push { lr }
     bl Global.foo                            /* Evaluate Expression */
-    mov r2, r0
-    ldr r1, .P1878741393_Global.globalVar    /* Load from .data section */
-    ldr r1, [r1]
-    add r0, r1, r0
+    add r0, r0, #10
     pop { pc }
-.P1878741393_Global.globalVar: .word Global.globalVar

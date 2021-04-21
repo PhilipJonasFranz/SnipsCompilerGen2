@@ -1,0 +1,34 @@
+SOURCE
+int main(int b) {
+	int a = 10;
+	
+	a = a + b;
+	
+	a = a * 2;
+	
+	b = 20;
+	
+	if (b == 20) {
+		a = a + b;
+	}
+	
+	return a;
+}
+TESTCASES
+5 50
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    add r1, r0, #10
+    lsl r1, r1, #1
+    add r0, r1, #20
+    bx lr

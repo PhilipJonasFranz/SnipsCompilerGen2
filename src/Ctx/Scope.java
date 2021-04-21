@@ -45,8 +45,8 @@ public class Scope {
 	
 	/** Print out the current scope and all parent scopes and the stored declarations */
 	public void print(int d) {
-		if (d != 0) System.out.println("--- SCOPE ---");
-		else System.out.println("--- TOP SCOPE ---");
+		if (d != 0) CompilerDriver.outs.println("--- SCOPE ---");
+		else CompilerDriver.outs.println("--- TOP SCOPE ---");
 		
 		for (Entry<String, Pair<Declaration, NamespacePath>> dec : this.declarations.entrySet()) 
 			dec.getValue().first.print(d, true);

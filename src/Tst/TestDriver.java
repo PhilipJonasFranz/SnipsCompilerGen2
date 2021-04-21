@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
 import Exc.LINK_EXC;
+import Exc.OPT0_EXC;
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Lnk.Linker;
@@ -62,6 +63,9 @@ public class TestDriver {
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
+	/** The amount of milliseconds the compiler can run for a given program before being considered timeouted. */
+	public long MAX_COMPILE_TIME = 5000;
+	
 	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
 	
@@ -71,7 +75,7 @@ public class TestDriver {
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
-	public boolean printResultOnError = false;
+	public boolean printResultOnError = true;
 	
 	/** Store/Update asm results in the tested file */
 	public boolean writebackResults = false;
@@ -100,6 +104,8 @@ public class TestDriver {
 		CompilerDriver.buildModulesRecurse = true;
 		CompilerDriver.buildObjectFileOnly = true;
 		CompilerDriver.pruneModules = true;
+		CompilerDriver.useExperimentalOptimizer = true;
+		CompilerDriver.useDefaultVersionID = false;
 		
 		List<String> paths = new ArrayList();
 		
@@ -157,6 +163,8 @@ public class TestDriver {
 			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}
 		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);
+		
+		System.exit(0);
 	}
 	
 	
@@ -376,8 +384,10 @@ public class TestDriver {
 						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
+					else if (e instanceof OPT0_EXC) 
+						msg = ((OPT0_EXC) e).getExcFieldName();
 					else {
-						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
+						CompilerDriver.outs.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
 						System.exit(0);
 					}
 					
@@ -398,8 +408,7 @@ public class TestDriver {
 		else {
 			cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 			
-			File file = new File(path);
-			List<String> compile = cd.compile(new File(path), code);
+			List<String> compile = doCompile(cd, path, code);
 
 			List<String> copy = new ArrayList();
 			
@@ -423,10 +432,16 @@ public class TestDriver {
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
-				buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
-				if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
-				cd.compile(file, code);
-				return new Result(RET_TYPE.CRASH, 0, 0);
+				if (timeout) {
+					buffer.add(new Message("-> The compilation process timed out.", LogPoint.Type.FAIL, true));
+					return new Result(RET_TYPE.TIMEOUT, 0, 0);
+				}
+				else {
+					buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
+					if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
+					doCompile(cd, path, code);
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
 			}
 			else {
 				/* Write output */
@@ -440,7 +455,7 @@ public class TestDriver {
 			boolean printedOutput = this.printResult;
 			
 			if (this.printResult) {
-				compile.stream().forEach(x -> System.out.println(x));
+				compile.stream().forEach(x -> CompilerDriver.outs.println(x));
 				printedOutput = true;
 			}
 			
@@ -521,7 +536,6 @@ public class TestDriver {
 						runThread.stop();
 						runThread = null;
 						buffer.add(new Message("The compiled program timed out!", LogPoint.Type.FAIL, true));
-						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
@@ -542,17 +556,16 @@ public class TestDriver {
 					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
 					
 					/* Print inputted parameters */
-					String params = "-> Params: ";
-					if (sp.length == 1) params += "-";
-					else {
+					if (sp.length > 1) {
+						String params = "-> Params: ";
 						for (int a = 0; a < sp.length - 1; a++) {
 							params += sp [a];
 							if (a < sp.length - 2) {
 								params += ", ";
 							}
 						}
+						buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					}
-					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
 					if (printResultOnError && !printedOutput) {
 						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
@@ -566,6 +579,39 @@ public class TestDriver {
 		}
 		
 		return new Result((fail > 0)? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
+	}
+	
+	private boolean timeout = false;
+	
+	public List<String> doCompile(CompilerDriver cd, String path, List<String> code) {
+		Object [] out = new Object [] {null};
+		
+		timeout = false;
+		
+		Thread compileThread = new Thread(new Runnable() {
+			public void run() {
+				out [0] = cd.compile(new File(path), code);
+			}
+		});
+		
+		compileThread.start();
+		
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() - start < MAX_COMPILE_TIME && compileThread.isAlive()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_COMPILE_TIME) {
+			timeout = true;
+			return null;
+		}
+		
+		CompilerDriver.reset();
+		return (List<String>) out [0];
 	}
 	
 	/**

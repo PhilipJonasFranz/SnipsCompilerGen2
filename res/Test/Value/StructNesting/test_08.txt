@@ -36,14 +36,10 @@ int main() {
 TESTCASES
 20
 OUTPUT
-.version 28943207397
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
 .include maybe free.s
 .include linked_list.s
 
@@ -55,25 +51,13 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global Storage.X.get_P_1
@@ -90,8 +74,8 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P874222087_Storage.X_P_1
     push { r0 }
-    lsr r3, sp, #2
 /* Create a new linked list with 0 as default value. */
+    lsr r3, sp, #2
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r4, r0

@@ -2,6 +2,7 @@ package Imm.AsN;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
@@ -12,6 +13,7 @@ import Imm.ASM.Structural.ASMSeperator;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
 import PreP.PreProcessor;
+import Snips.CompilerDriver;
 import Util.Util;
 
 public class AsNTranslationUnit extends AsNNode {
@@ -45,8 +47,7 @@ public class AsNTranslationUnit extends AsNNode {
 	 * Appends the given instruction to the given section.
 	 */
 	public void append(ASMInstruction instruction, SECTION section) {
-		List<ASMInstruction> instructions = new ArrayList();
-		instructions.add(instruction);
+		List<ASMInstruction> instructions = Arrays.asList(instruction);
 		this.append(instructions, section);
 	}
 	
@@ -73,7 +74,10 @@ public class AsNTranslationUnit extends AsNNode {
 	public List<ASMInstruction> buildTranslationUnit() {
 		List<ASMInstruction> out = new ArrayList();
 		
-		out.add(new ASMDirective(".version " + this.versionID));
+		long idUsed = this.versionID;
+		if (!CompilerDriver.useDefaultVersionID && CompilerDriver.inputFile.getPath().equals(this.sourceFile)) idUsed = 0;
+		
+		out.add(new ASMDirective(".version " + idUsed));
 		out.add(new ASMSeperator());
 		
 		/* Add imports */

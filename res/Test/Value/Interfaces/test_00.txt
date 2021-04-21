@@ -23,15 +23,7 @@ int main() {
 TESTCASES
 25
 OUTPUT
-.version 9078852048
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 X: .word 0
@@ -42,17 +34,6 @@ HEAP_START: .word 0
 
 .text
     b main
-
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
 
 .global X.get
 X.get:                                       /* Function: X.get */
@@ -82,10 +63,10 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P338047979_X
     push { r0 }
+    mov r12, #0                              /* Offset to Inter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, r3                               /* Evaluate Expression */
-    mov r12, #0                              /* Offset to Inter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]

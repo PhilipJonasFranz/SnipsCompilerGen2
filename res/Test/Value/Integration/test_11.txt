@@ -31,14 +31,10 @@ int main() {
 TESTCASES
 12
 OUTPUT
-.version 33013976592
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
 .include maybe free.s
 .include linked_list.s
 
@@ -50,17 +46,6 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global X.get_P_1
 X.get_P_1:                                   /* Function: X.get, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -69,12 +54,11 @@ X.get_P_1:                                   /* Function: X.get, Provisos: INT *
 
 .global X.set_P_1
 X.set_P_1:                                   /* Function: X.set, Provisos: INT */
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 .global X.create_P_1
@@ -87,8 +71,8 @@ X.create_P_1:                                /* Function: X.create, Provisos: IN
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
@@ -116,3 +100,15 @@ main:                                        /* Function: main */
     bl X.get_P_1                             /* Call X.get */
     pop { pc }
 .P321637213_NULL: .word NULL
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

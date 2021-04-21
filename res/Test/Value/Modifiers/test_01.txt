@@ -19,15 +19,7 @@ int main() {
 TESTCASES
 15
 OUTPUT
-.version 3915511449
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 Test.S: .word 0
@@ -37,31 +29,20 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global Test.getter
 Test.getter:                                 /* Function: Test.getter */
     push { fp }
     mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
     mov r1, #10
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     ldr r0, .P1892863495_Test.S
     push { r0 }
     mov r2, sp
     mov sp, fp
     pop { fp }
-    mov r0, #12
     add r1, r2, #12
+    mov r0, #12
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
@@ -78,3 +59,15 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

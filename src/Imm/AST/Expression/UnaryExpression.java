@@ -1,12 +1,16 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -24,7 +28,7 @@ public abstract class UnaryExpression extends Expression {
 	private UnaryOperator operator;
 	
 	/** The expression operand */
-	private Expression operand;
+	public Expression operand;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -41,7 +45,7 @@ public abstract class UnaryExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + this.operator.toString());
+		CompilerDriver.outs.println(Util.pad(d) + this.operator.toString());
 		if (rec) this.operand.print(d + this.printDepthStep, rec);
 	}
 	
@@ -53,6 +57,17 @@ public abstract class UnaryExpression extends Expression {
 		
 		CompilerDriver.lastSource = temp;
 		return t;
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.operand.visit(visitor));
+
+		return result;
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {

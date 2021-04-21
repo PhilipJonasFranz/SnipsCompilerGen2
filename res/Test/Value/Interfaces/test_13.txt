@@ -34,15 +34,10 @@ int main() {
 TESTCASES
 30
 OUTPUT
-.version -5995861233
+.version 0
 
-.include maybe __op_div.s
-.include maybe __op_mod.s
 .include maybe resv.s
-.include maybe isa.s
 .include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
 
 .data
 A_P_1: .word 0
@@ -54,17 +49,6 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global A.get_P_1
 A.get_P_1:                                   /* Function: A.get, Provisos: INT */
     mov r10, #0
@@ -75,12 +59,11 @@ A.get_P_1:                                   /* Function: A.get, Provisos: INT *
 .global A.set_P_1
 A.set_P_1:                                   /* Function: A.set, Provisos: INT */
     mov r10, #0
-    push { r3 }
-    mov r3, r0
-    mov r0, r1                               /* Evaluate Expression */
-    lsl r1, r3, #2                           /* Convert to bytes */
-    str r0, [r1, #4]                         /* Store value to struct field */
-    pop { r3 }
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
     bx lr
 
 A_P_1_GetSet:                                /* Relay: GetSet -> A */
@@ -105,26 +88,26 @@ main:                                        /* Function: main */
     ldr r0, .P1311439113_A_P_1
     push { r0 }
     bl init_P_2                              /* Call init */
-    mov r3, r0
     mov r12, #0                              /* Offset to GetSet.get */
+    mov r3, r0
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
     ldr r10, .P1311439113_GetSet_P_1
     add lr, pc, #8
     mov pc, r12
+    mov r12, #4                              /* Offset to GetSet.set */
     mov r4, r0
     mov r1, #20
     mov r0, r3
-    mov r12, #4                              /* Offset to GetSet.set */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
     ldr r10, .P1311439113_GetSet_P_1
     add lr, pc, #8
     mov pc, r12
-    mov r0, r3                               /* Evaluate Expression */
     mov r12, #0                              /* Offset to GetSet.get */
+    mov r0, r3                               /* Evaluate Expression */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]

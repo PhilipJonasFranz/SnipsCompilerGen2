@@ -1,14 +1,20 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Lhs.LhsId;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -55,7 +61,7 @@ public class Assignment extends Statement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Assign, arith = " + this.assignArith.toString());
+		CompilerDriver.outs.println(Util.pad(d) + "Assign, arith = " + this.assignArith.toString());
 		
 		if (rec) {
 			this.lhsId.print(d + this.printDepthStep, rec);
@@ -73,13 +79,56 @@ public class Assignment extends Statement {
 		return t;
 	}
 	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optAssignment(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.lhsId.visit(visitor));
+		result.addAll(this.value.visit(visitor));
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		this.value.setContext(context);
 		this.lhsId.setContext(context);
 	}
 
 	public Assignment clone() {
-		return new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+		Assignment assign = new Assignment(this.assignArith, this.lhsId.clone(), this.value.clone(), this.getSource().clone());
+		assign.copyDirectivesFrom(this);
+		return assign;
+	}
+
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String a = "";
+		
+		if (this.assignArith == ASSIGN_ARITH.ADD_ASSIGN) a = "+";
+		if (this.assignArith == ASSIGN_ARITH.AND_ASSIGN) a = "&&";
+		if (this.assignArith == ASSIGN_ARITH.BIT_AND_ASSIGN) a = "&";
+		if (this.assignArith == ASSIGN_ARITH.BIT_ORR_ASSIGN) a = "|";
+		if (this.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) a = "^";
+		if (this.assignArith == ASSIGN_ARITH.DIV_ASSIGN) a = "/";
+		if (this.assignArith == ASSIGN_ARITH.LSL_ASSIGN) a = "<<";
+		if (this.assignArith == ASSIGN_ARITH.LSR_ASSIGN) a = ">>";
+		if (this.assignArith == ASSIGN_ARITH.MOD_ASSIGN) a = "%";
+		if (this.assignArith == ASSIGN_ARITH.MUL_ASSIGN) a = "*";
+		if (this.assignArith == ASSIGN_ARITH.ORR_ASSIGN) a = "||";
+		if (this.assignArith == ASSIGN_ARITH.SUB_ASSIGN) a = "-";
+		
+		String s = this.lhsId.codePrint() + " " + a + "= " + this.value.codePrint() + ";";
+		
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 
 } 

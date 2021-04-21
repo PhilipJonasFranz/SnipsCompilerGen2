@@ -1,15 +1,21 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -36,7 +42,7 @@ public class IDRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -48,7 +54,20 @@ public class IDRef extends Expression {
 		CompilerDriver.lastSource = temp;
 		return t;
 	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optIDRef(this);
+	}
 
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
+	}
+	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.origin != null) 
 			this.setType(this.origin.getType().clone());
@@ -59,7 +78,16 @@ public class IDRef extends Expression {
 	public Expression clone() {
 		IDRef r = new IDRef(this.path.clone(), this.getSource().clone());
 		r.origin = this.origin;
+		
+		if (this.getType() != null) 
+			r.setType(this.getType().clone());
+		
+		r.copyDirectivesFrom(this);
 		return r;
+	}
+
+	public String codePrint() {
+		return this.path.build();
 	}
 
 } 

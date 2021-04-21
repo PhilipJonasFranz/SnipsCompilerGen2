@@ -19,15 +19,7 @@ TESTCASES
 3 2 10
 4 2 18
 OUTPUT
-.version 17184212368
-
-.include maybe __op_div.s
-.include maybe __op_mod.s
-.include maybe resv.s
-.include maybe isa.s
-.include maybe init.s
-.include maybe hsize.s
-.include maybe free.s
+.version 0
 
 .data
 NULL: .word 0
@@ -36,45 +28,34 @@ HEAP_START: .word 0
 .text
     b main
 
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r0
+    mov r4, r1
+    mov r3, r0
     cmp r0, #3
     bne main.L1
     mov r0, #5                               /* Evaluate Expression */
+    stmfd sp!, {r0, r4}
+    mov r0, #3
     push { r0 }
-    push { r4 }
-    push { r3 }
-    add r0, r3, r4
     ldr r2, [fp, #-4]
-    add r5, r0, r2
+    add r1, r4, r2
+    add r5, r1, #3
     add sp, sp, #12
     b main.L0
 main.L1: 
     cmp r3, #4
     bne main.L0
-    mov r0, #12                              /* Evaluate Expression */
     mov r1, #5
-    stmfd sp!, {r0, r1}
-    push { r4 }
-    push { r3 }
-    add r0, r3, r4
+    mov r0, #12                              /* Evaluate Expression */
+    stmfd sp!, {r0, r1, r4}
+    mov r0, #4
+    push { r0 }
     ldr r2, [fp, #-4]
-    add r5, r0, r2
+    add r1, r4, r2
+    add r5, r1, #4
     add sp, sp, #16
 main.L0: 
     mov r0, r5                               /* Evaluate Expression */

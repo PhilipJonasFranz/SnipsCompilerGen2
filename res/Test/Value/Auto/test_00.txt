@@ -1,0 +1,10 @@
+SOURCE
+#include <linked_list.hn>
+
+int main() {
+	auto list = LinkedList::create<int>(0);
+	list->add(12);
+	return list->get(0);
+}
+TESTCASES
+12
