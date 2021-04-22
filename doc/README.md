@@ -637,7 +637,7 @@ Currently available AST-Optimizer directives are:
  | inline                 | -                              | Attatch to a function to indicate that this function should be inlined when possible.       |
  | unsafe                 | -                              | Attatch to function to exclude from optimizer, indicates it is performing unsafe operations.|
  | strategy               | &lt;always, on_improvement&gt; | Attatch to function to overwrite default optimization strategy for function scope.          |
- | predicate              | -                              | If set to a function, it is considered non-state changing. Allows for further optimizations.|
+ | predicate              | -                              | If set to a function, it is considered non-state changing. Allows for further optimizations. A state is considered as the values of the Stack, Global Variables and Heap. Ideally, the function should only depend on the given parameters. |
 
 ### Header Files
 
