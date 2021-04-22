@@ -55,7 +55,7 @@ int main() {
 }
 ```
  
- You can find more information about the language in the [Quick-start Documentation](doc/README.md). For a more in-depth guide and information about the included libraries, see [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
+ You can find more information about the language in the [Snips Language Documentation](doc/README.md). For a more in-depth guide and information about the included libraries, see [Full Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
  
 ## The compiler
  The compiler pipeline consists out of these stages:
