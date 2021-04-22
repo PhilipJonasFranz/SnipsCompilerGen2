@@ -1,15 +1,10 @@
 package Tst;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import Exc.CGEN_EXC;
 import Exc.CTEX_EXC;
@@ -110,12 +105,12 @@ public class TestDriver {
 		List<String> paths = new ArrayList();
 		
 		/* Add add files to the paths list */
-		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+		if (args.length == 0) paths.addAll(Util.fileWalk("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
 			for (String s : args) {
 				if (s.endsWith(".sn")) paths.add(s);
 				else {
-					paths.addAll(this.getTestFiles(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+					paths.addAll(Util.fileWalk(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 				}
 			}
 		}
@@ -616,19 +611,4 @@ public class TestDriver {
 		return (List<String>) out [0];
 	}
 	
-	/**
-	 * Recursiveley get all test files from the res/Test/ directory
-	 * @return A list of all file names.
-	 */
-	public List<String> getTestFiles(String path) {
-		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-			List<String> result = walk.filter(Files::isRegularFile)
-				.map(x -> x.toString()).collect(Collectors.toList());
-			return result;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 }

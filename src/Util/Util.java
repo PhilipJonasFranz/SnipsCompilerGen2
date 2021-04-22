@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,17 @@ public class Util {
 		}
 		
 		return true;
+	}
+	
+	public static List<String> fileWalk(String path) {
+		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
+			List<String> result = walk.filter(Files::isRegularFile)
+				.map(x -> x.toString()).collect(Collectors.toList());
+			return result;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public static String formatNum(long num) {

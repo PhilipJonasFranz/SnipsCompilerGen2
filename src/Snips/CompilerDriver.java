@@ -912,6 +912,25 @@ public class CompilerDriver {
 			new Message("Failed to parse system configuration!", Type.FAIL);
 			System.exit(0);
 		}
+		
+		/* Create list of aliases for system library */
+		XMLNode library = new XMLNode("Library");
+		
+		List<String> paths = new ArrayList();
+		paths.addAll(Util.fileWalk("release/lib/").stream().filter(x -> !x.endsWith(".s")).collect(Collectors.toList()));
+		paths.stream().forEach(x -> {
+			/* Cut off 'release/' from path */
+			x = x.substring(8);
+			
+			File file = new File(x);
+			
+			XMLNode alias = new XMLNode("Alias");
+			alias.setValue((file.getName() + ":" + x).replace("\\", "/"));
+			
+			library.getChildren().add(alias);
+		});
+		
+		sys_config.getChildren().add(library);
 	}
 	
 	/**
