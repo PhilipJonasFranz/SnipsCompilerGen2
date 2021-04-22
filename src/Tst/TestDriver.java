@@ -122,6 +122,8 @@ public class TestDriver {
 		
 		amount = paths.size();
 		
+		//if (amount == 1) printResult = true;
+		
 		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
 			new Message("Could not find any tests, make sure the path starts from the res/ folder.", LogPoint.Type.WARN);

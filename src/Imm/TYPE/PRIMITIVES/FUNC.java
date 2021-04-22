@@ -45,7 +45,7 @@ public class FUNC extends PRIMITIVE<Function> {
 				if (f0.funcHead.parameters.size() != this.funcHead.parameters.size()) equal = false;
 				else {
 					for (int i = 0; i < this.funcHead.parameters.size(); i++) equal &= f0.funcHead.parameters.get(i).getType().isEqual(this.funcHead.parameters.get(i).getType());
-					equal &= this.funcHead.getReturnType().isEqual(f0.funcHead.getReturnType());
+					equal &= this.funcHead.getReturnTypeDirect().isEqual(f0.funcHead.getReturnTypeDirect());
 				}
 			}
 			
@@ -80,7 +80,7 @@ public class FUNC extends PRIMITIVE<Function> {
 			
 			s += " -> ";
 			
-			s += this.funcHead.getReturnType().typeString();
+			s += this.funcHead.getReturnTypeDirect().typeString();
 		}
 		else {
 			s += "?";

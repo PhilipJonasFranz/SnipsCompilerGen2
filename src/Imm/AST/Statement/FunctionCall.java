@@ -51,6 +51,20 @@ public class FunctionCall extends Statement implements Callee {
 	public Expression baseRef = null;
 	
 	
+			/* ---< CONSTRUCTORS >--- */
+	/**
+	 * Default constructor.
+	 * @param source See {@link #source}
+	 */
+	public FunctionCall(NamespacePath path, List<TYPE> proviso, List<Expression> parameters, Source source) {
+		super(source);
+		this.path = path;
+		this.proviso = proviso;
+		this.parameters = parameters;
+	}
+
+	
+			/* ---< METHODS >--- */
 	public Statement clone() {
 		List<TYPE> provClone = new ArrayList();
 		for (TYPE t : this.proviso) provClone.add(t.clone());
@@ -75,20 +89,6 @@ public class FunctionCall extends Statement implements Callee {
 		return ic;
 	}
 	
-			/* ---< CONSTRUCTORS >--- */
-	/**
-	 * Default constructor.
-	 * @param source See {@link #source}
-	 */
-	public FunctionCall(NamespacePath path, List<TYPE> proviso, List<Expression> parameters, Source source) {
-		super(source);
-		this.path = path;
-		this.proviso = proviso;
-		this.parameters = parameters;
-	}
-
-	
-			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path.build());
 		if (this.proviso != null && !this.proviso.isEmpty()) {

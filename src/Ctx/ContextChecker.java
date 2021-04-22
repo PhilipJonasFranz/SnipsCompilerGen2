@@ -1631,12 +1631,42 @@ public class ContextChecker {
 				if (!found)
 					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
 			
-				/* Dynamically inject proviso from interface declaration */
+				/* Use auto provisos for not given proviso types */
 				if (c.getProviso().isEmpty()) {
-					List<TYPE> copy = new ArrayList();
-					s.proviso.stream().forEach(x -> copy.add(x.clone()));
-					c.setProviso(copy);
+					c.setAutoProviso(true);
 					
+					/* Attempt to find auto-proviso mapping */
+					List<TYPE> iParamTypes = new ArrayList();
+					
+					for (int a = 0; a < c.getParams().size(); a++) {
+						/* Apply parameter type if atom is placeholder */
+						if (c.getParams().get(a) instanceof TempAtom) {
+							TempAtom atom = (TempAtom) c.getParams().get(a);
+							atom.inheritType = f.parameters.get(a).getType();
+						}
+						
+						iParamTypes.add(c.getParams().get(a).check(this));
+					}	
+					
+					List<TYPE> functionTypes = new ArrayList();
+					
+					for (Declaration d : f.parameters) 
+						functionTypes.add(d.getRawType());
+					
+					/* Replace void* type of implicit self parameter with interface pointer type for auto-proviso */
+					functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
+					
+					/* Attempt to auto-map proviso types */
+					List<TYPE> mapping = this.autoProviso(f.provisosTypes, functionTypes, iParamTypes, c.getCallee().getSource());
+					
+					/* For the found mapping, wrap the mapped types in the corresponding proviso types */
+					for (int i = 0; i < mapping.size(); i++) {
+						PROVISO prov0 = (PROVISO) f.provisosTypes.get(i).clone();
+						prov0.setContext(mapping.get(i).clone());
+						mapping.set(i, prov0);
+					}
+					
+					c.setProviso(mapping);
 					f.setContext(c.getProviso());
 				}
 				
@@ -1723,7 +1753,34 @@ public class ContextChecker {
 					for (Declaration d : f.parameters) 
 						functionTypes.add(d.getRawType());
 					
+					if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
+						INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
+						
+						/* Replace void* type of implicit self parameter with interface pointer type for auto-proviso */
+						functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
+					}
+					
+					if (iParamTypes.get(0).isInterface()) {
+						/* Must be pointer to interface */
+						iParamTypes.set(0, new POINTER(iParamTypes.get(0)));
+					}
+					
 					c.setProviso(this.autoProviso(f.provisosTypes, functionTypes, iParamTypes, c.getCallee().getSource()));
+				}
+				
+				if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
+					INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
+					
+					/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
+					for (StructTypedef def : s.getTypedef().implementers) {
+						for (Function f0 : def.functions) {
+							/* Only do this if mapping is not present already, may cause stack overflow */
+							if (!f0.containsMapping(c.getProviso()) && f0.path.getLast().equals(f.path.getLast())) {
+								f0.setContext(c.getProviso());
+								f0.check(this);
+							}
+						}
+					}
 				}
 				
 				if (f.containsMapping(c.getProviso())) {
@@ -2252,7 +2309,7 @@ public class ContextChecker {
 						ind = a;
 					}
 					else {
-						if (!mapped.typeString().equals(map0.typeString())) 
+						if (!mapped.provisoFree().typeString().equals(map0.provisoFree().typeString())) 
 							/* Found two possible types for proviso, abort */
 							throw new CTEX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree().typeString(), ind + 1, map0.provisoFree().typeString(), a + 1);
 					}

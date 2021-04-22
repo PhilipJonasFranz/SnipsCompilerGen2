@@ -518,18 +518,57 @@ public class ASTOptimizer {
 			
 			if (!this.state.getAll(dec)) {
 				
+				List<Expression> added = new ArrayList();
+				
+				/* Inline Calls are considered state-changing, so we have to keep the declaration. */
+				List<InlineCall> ics = new ArrayList();
+				if (dec.value != null) ics = dec.value.visit(x -> x instanceof InlineCall);
+				
 				List<IDRefWriteback> idwb = new ArrayList();
 				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);
 				
+				added.addAll(idwb);
+				
+				for (InlineCall ic : ics) {
+					for (int i = 0; i < added.size(); i++) {
+						Expression e = added.get(i);
+						if (Matcher.isSubExpression(ic, e)) {
+							added.remove(i--);
+						}
+					}
+					
+					added.add(ic);
+				}
+				
 				/*
-				 * Get all writeback sub-expressions from the expression
-				 * that is going to be removed. We have to wrap them in
-				 * AssignWriteback statements and add them to the body
+				 * Get all writeback and inline call sub-expressions from 
+				 * the expression that is going to be removed. We have 
+				 * to wrap them in Statements and add them to the body
 				 * in order to keep the program's functionality.
 				 */
-				List<AssignWriteback> awb = new ArrayList();
-				for (IDRefWriteback idwb0 : idwb) 
-					awb.add(new AssignWriteback(idwb0, idwb0.getSource()));
+				List<Statement> transform = new ArrayList();
+				for (Expression e : added) {
+					if (e instanceof IDRefWriteback) {
+						transform.add(new AssignWriteback(e, e.getSource()));
+					}
+					else {
+						InlineCall ic = (InlineCall) e;
+						
+						FunctionCall fc = new FunctionCall(ic.path.clone(), ic.proviso, ic.parameters, ic.getSource());
+						fc.calledFunction = ic.calledFunction;
+						fc.watchpoint = ic.watchpoint;
+						fc.anonTarget = ic.anonTarget;
+						fc.hasAutoProviso = ic.hasAutoProviso;
+						fc.isNestedCall = ic.isNestedCall;
+						fc.nestedDeref = ic.nestedDeref;
+						fc.baseRef = ic.getBaseRef();
+						
+						fc.setType(ic.getType().clone());
+						fc.copyDirectivesFrom(ic);
+						
+						transform.add(fc);
+					}
+				}
 				
 				if (body.contains(dec)) {
 					int index = body.indexOf(dec);
@@ -538,12 +577,12 @@ public class ASTOptimizer {
 					OPT_DONE();
 					
 					/* 
-					 * Add all writeback operations of the removed expression
+					 * Add all wrapped statements of the removed expression
 					 * as standalone statements at the location of the removed
 					 * declaration.
 					 */
-					for (AssignWriteback awb0 : awb) 
-						body.add(index++, awb0);
+					for (Statement s : transform) 
+						body.add(index++, s);
 				}
 				removed.add(dec);
 			}

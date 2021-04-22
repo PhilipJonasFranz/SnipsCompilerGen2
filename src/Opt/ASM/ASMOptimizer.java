@@ -977,7 +977,8 @@ public class ASMOptimizer {
 					for (int k = i + 1; k < ins0.size(); k++) {
 						ASMInstruction ins1 = ins0.get(k);
 						
-						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch) break;
+						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch || 
+							ins1 instanceof ASMLdr || ins1 instanceof ASMLdrStack) break;
 						
 						if (ASMOptimizer.overwritesReg(ins1, REG.PC)) break;
 						

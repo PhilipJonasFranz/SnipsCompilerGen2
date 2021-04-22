@@ -1,0 +1,33 @@
+SOURCE
+#include <linked_list.hn>
+#include <stream.hn>
+
+int main() {
+	Collection<int> col0 = LinkedList::create<int>(0);
+	
+	col0.add(12);
+	col0.add(9);
+	col0.add(4);
+	col0.add(3);
+	col0.add(8);
+	
+	/* 12, 9, 4, 3, 8 */
+	Stream<int>* stream0 = init<>(Stream::create<int>(col0));
+	
+	/* 17, 14, 9, 8, 13 */
+	stream0->forEach((int x -> int) : { return x + 5; });
+	
+	
+	/* true, true, false, false, true */
+	Collection<bool> col1 = LinkedList::create<bool>(false);
+	Stream<bool>* stream1 = stream0->map(col1, (int x -> bool) : { return (x >= 10)? true : false; });
+	
+	
+	/* 10, 10, 5, 5, 10 */
+	Collection<int> col2 = LinkedList::create<int>(0);
+	Stream<int>* stream2 = stream1->map(col2, (bool x -> int) : { return (x)? 10 : 5; });
+	
+	return stream2->fold<int, int>(0, (int x, int y -> int) : { return x * 2 + y; });
+}
+TESTCASES
+280

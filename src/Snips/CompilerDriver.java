@@ -95,7 +95,7 @@ public class CompilerDriver {
 		printObjectIDs = 				false,	/* Print object IDs when generating type strings.				*/
 		printErrors = 					false,	/* Print stacktraces, used for debug. 							*/
 		expectError =					false,	/* Expect an error during compilation, used for debug. 			*/
-		useDefaultVersionID = 					true;   /* Set to false to prevent .version directive.					*/
+		useDefaultVersionID = 			true;   /* Set to false to prevent .version directive.					*/
 	
 	
 			/* ---< FORMATTING --- */

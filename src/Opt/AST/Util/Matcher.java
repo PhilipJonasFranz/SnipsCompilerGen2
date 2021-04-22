@@ -151,4 +151,8 @@ public class Matcher {
 		return result;
 	}
 	
+	public static boolean isSubExpression(Expression base, Expression sub) {
+		return base.visit(x -> true).contains(sub);
+	}
+	
 }
