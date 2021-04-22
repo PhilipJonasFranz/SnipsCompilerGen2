@@ -1,6 +1,6 @@
-# Introduction to the Snips language
+# Snips Language Guide
 
- This document aims to give a brief introduction to the language and its basic mechanisms. If you want a more in-depth guide and information about included libraries, see the [Official Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
+ This document aims to give an overview of the Snips programming language and it's mechanisms. If you want a more in-depth guide and information about included libraries, see the [Full Documentation](https://github.com/PhilipJonasFranz/SnipsCompilerGen2/blob/develop/doc/Snips%20Documentation.pdf).
 
 ## Contents
 
