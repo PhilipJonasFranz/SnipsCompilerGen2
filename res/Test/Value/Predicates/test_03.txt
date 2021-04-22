@@ -1,4 +1,5 @@
 SOURCE
+# predicate
 T add5<T>(T a) {
 	return (T) ((int) a + 5);
 }

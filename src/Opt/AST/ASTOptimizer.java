@@ -522,7 +522,14 @@ public class ASTOptimizer {
 				
 				/* Inline Calls are considered state-changing, so we have to keep the declaration. */
 				List<InlineCall> ics = new ArrayList();
-				if (dec.value != null) ics = dec.value.visit(x -> x instanceof InlineCall);
+				if (dec.value != null) ics = dec.value.visit(x -> {
+					if (x instanceof InlineCall) {
+						InlineCall ic = (InlineCall) x;
+						if (ic.calledFunction != null && ic.calledFunction.hasDirective(DIRECTIVE.PREDICATE)) return false;
+						else return true;
+					}
+					return false;
+				});
 				
 				List<IDRefWriteback> idwb = new ArrayList();
 				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);

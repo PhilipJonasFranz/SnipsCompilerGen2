@@ -89,6 +89,8 @@ main:                                        /* Function: main */
     ldr r0, [r2] #-4
     ldr r1, [r2] #-4
     stmfd sp!, {r0, r1}
+    ldr r0, [r2] #-4
+    ldr r1, [r2] #-4
     stmfd sp!, {r0, r1}
     mov r1, r4
     mov r0, r3

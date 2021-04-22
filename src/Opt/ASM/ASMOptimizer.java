@@ -963,7 +963,8 @@ public class ASMOptimizer {
 			ASMInstruction ins = ins0.get(i);
 			
 			if (ins instanceof ASMPushStack || ins instanceof ASMPopStack || 
-				ins instanceof ASMLdr || ins instanceof ASMStr) continue;
+				ins instanceof ASMLdr || ins instanceof ASMStr ||
+				ins instanceof ASMLdrStack || ins instanceof ASMStrStack) continue;
 			
 			for (int a = 0; a < 10; a++) {
 				REG reg = RegOp.toReg(a);
@@ -977,8 +978,7 @@ public class ASMOptimizer {
 					for (int k = i + 1; k < ins0.size(); k++) {
 						ASMInstruction ins1 = ins0.get(k);
 						
-						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch || 
-							ins1 instanceof ASMLdr || ins1 instanceof ASMLdrStack) break;
+						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch) break;
 						
 						if (ASMOptimizer.overwritesReg(ins1, REG.PC)) break;
 						

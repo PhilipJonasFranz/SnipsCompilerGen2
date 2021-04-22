@@ -35,7 +35,8 @@ HEAP_START: .word 0
 
 .global insert_P_1
 insert_P_1:                                  /* Function: insert, Provisos: INT */
-    bx lr
+    mov r0, #4                               /* Load parameters */
+    b resv                                   /* Call resv */
 
 .global main
 main:                                        /* Function: main */

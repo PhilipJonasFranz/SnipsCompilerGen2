@@ -32,5 +32,9 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
+    push { lr }
+    ldr r0, .P1584188262_NULL                /* Load parameters */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r0, #0                               /* Evaluate Expression */
-    bx lr
+    pop { pc }
+.P1584188262_NULL: .word NULL

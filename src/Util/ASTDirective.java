@@ -43,7 +43,15 @@ public class ASTDirective {
 		 * 		- always			: Sets the strategy 'ALWAYS' for the target function.
 		 * 		- on_improvement	: Sets the strategy 'ON_IMPROVEMENT' for the target function.
 		 */
-		STRATEGY;
+		STRATEGY,
+		
+		/**
+		 * If set to a function, this function is considered not state changing. This
+		 * means that the function ensures that it only depends on input variables
+		 * and does not change the programs state by calling other functions, modifying
+		 * global variables or the heap etc.
+		 */
+		PREDICATE;
 		
 	}
 	

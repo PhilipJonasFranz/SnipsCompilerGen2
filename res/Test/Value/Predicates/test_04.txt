@@ -1,4 +1,5 @@
 SOURCE
+# predicate
 T add5<T>(T a) {
 	if ((bool) a) {
 		a = (T) (((int) a) - 2);
