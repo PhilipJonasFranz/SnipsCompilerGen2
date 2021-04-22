@@ -52,6 +52,7 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
+import Util.Logging.ProgressMessage;
 
 /**
  * This optimizer can simplify a sequence of asm instructions. By doing so
@@ -71,7 +72,11 @@ public class ASMOptimizer {
 	
 			/* ---< METHODS >--- */
 	/** Optimize given body. */
-	public void optimize(List<ASMInstruction> ins) {
+	public double optimize(List<ASMInstruction> ins, boolean isMainFile) {
+		double before = ins.size();
+		
+		ProgressMessage aopt_progress = null;
+		if (isMainFile) aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
 		
 		/* While an optimization was done in this iteration */
 		while (OPT_DONE) {
@@ -391,6 +396,9 @@ public class ASMOptimizer {
 				}
 			}
 		}
+		
+		if (isMainFile) aopt_progress.finish();
+		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
 	}
 	
 	public void replaceR0R1R2LdrWithLdm(List<ASMInstruction> ins0) {

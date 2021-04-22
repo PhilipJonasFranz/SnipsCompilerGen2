@@ -42,11 +42,10 @@ import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.ASM.ASMOptimizer;
 import Opt.AST.Util.Matcher;
-import PreP.PreProcessor;
 import Res.Const;
+import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
 import Util.Pair;
-import Util.Util;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
@@ -124,13 +123,13 @@ public class AsNFunction extends AsNCompoundStatement {
 					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
 				
 				/* Replace .hn with .sn in module link */
-				String source = Util.toASMPath(f.getSource().sourceFile);
+				String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
 				
 				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix()));
 				
 				/* Check if required module exists */
-				String mappedPath = PreProcessor.resolveToPath(source);
-				if (PreProcessor.getFile(mappedPath) == null) {
+				String mappedPath = RessourceManager.instance.resolve(source);
+				if (RessourceManager.instance.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
 					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
 					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);

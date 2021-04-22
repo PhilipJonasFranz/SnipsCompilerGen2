@@ -15,6 +15,7 @@ import Exc.SNIPS_EXC;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
+import Res.Manager.FileUtil;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
@@ -105,12 +106,12 @@ public class TestDriver {
 		List<String> paths = new ArrayList();
 		
 		/* Add add files to the paths list */
-		if (args.length == 0) paths.addAll(Util.fileWalk("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+		if (args.length == 0) paths.addAll(FileUtil.fileWalk("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
 			for (String s : args) {
 				if (s.endsWith(".sn")) paths.add(s);
 				else {
-					paths.addAll(Util.fileWalk(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+					paths.addAll(FileUtil.fileWalk(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 				}
 			}
 		}
@@ -233,7 +234,7 @@ public class TestDriver {
 		List<Message> buffer = new ArrayList();
 		try {
 			/* Read content of test file */
-			List<String> content = Util.readFile(new File(file));
+			List<String> content = FileUtil.readFile(new File(file));
 		
 			/* Extract contents */
 			List<String> code = new ArrayList();
@@ -445,7 +446,7 @@ public class TestDriver {
 				if (writebackResults) {
 					content.add("OUTPUT");
 					content.addAll(copy);
-					Util.writeInFile(content, path);
+					FileUtil.writeInFile(content, path);
 				}
 			}
 			

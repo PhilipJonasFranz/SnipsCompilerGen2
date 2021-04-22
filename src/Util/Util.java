@@ -1,20 +1,11 @@
 package Util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import Imm.AST.Program;
-import PreP.PreProcessor;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
@@ -24,42 +15,6 @@ import Util.Logging.Message;
 public class Util {
 
 			/* ---< METHODS >--- */
-	/** Reads the contents of given file and returns a list containing each line as a string. */
-	public static List<String> readFile(File file) {
-		try (Stream<String> s = Files.lines(Paths.get(file.getAbsolutePath()))) {
-			return s.collect(Collectors.toList());
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	/** Writes in given file path, each string in a seperate file. */
-	public static boolean writeInFile(List<String> content, String filePath) {
-		File file = new File(filePath);
-		try (FileWriter w = new FileWriter(file.getPath())) {
-			for (String s : content) {
-				w.write(s);
-				w.write(System.getProperty("line.separator"));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;
-	}
-	
-	public static List<String> fileWalk(String path) {
-		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-			List<String> result = walk.filter(Files::isRegularFile)
-				.map(x -> x.toString()).collect(Collectors.toList());
-			return result;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 	public static String formatNum(long num) {
 		String [] sp = ("" + num).split("");
 		String r = "";
@@ -94,31 +49,6 @@ public class Util {
 		
 		/* Field not found, or not externalized */
 		return "UNKNOWN_FIELD";
-	}
-	
-	public static String toASMPath(String path) {
-		if (path.endsWith(".sn") || path.endsWith(".hn")) 
-			path = path.substring(0, path.length() - 2) + "s";
-		return path;
-	}
-	
-	public static long computeHashSum(String path) {
-		long sum = 0;
-		
-		String mappedPath = PreProcessor.resolveToPath(path);
-		List<String> lines = Util.readFile(new File(mappedPath));
-		
-		if (lines != null) {
-			for (String s : lines) {
-				/* Exclude version number directive */
-				if (!s.startsWith(".version")) 
-					sum += s.hashCode();
-				else sum = 0;
-			}
-		}
-		else new Message("Failed to locate file '" + path + "', cannot compute hashsum.", Type.WARN);
-		
-		return sum;
 	}
 	
 	public static void plot(List<Double> history) {

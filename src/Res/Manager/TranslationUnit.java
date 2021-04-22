@@ -1,4 +1,4 @@
-package Imm.AsN;
+package Res.Manager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,13 +10,12 @@ import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Structural.ASMSectionAnnotation;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Structural.ASMSeperator;
+import Imm.AsN.AsNNode;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
-import PreP.PreProcessor;
 import Snips.CompilerDriver;
-import Util.Util;
 
-public class AsNTranslationUnit extends AsNNode {
+public class TranslationUnit extends AsNNode {
 
 	public LinkerUnit existingUnit;
 	
@@ -30,11 +29,11 @@ public class AsNTranslationUnit extends AsNNode {
 	
 	public List<ASMInstruction> textSection = new ArrayList();
 	
-	public AsNTranslationUnit(String sourceFile) {
+	public TranslationUnit(String sourceFile) {
 		this.sourceFile = sourceFile;
 		
-		String mappedPath = PreProcessor.resolveToPath(sourceFile);
-		List<String> existingModule = Util.readFile(new File(mappedPath));
+		String mappedPath = RessourceManager.instance.resolve(sourceFile);
+		List<String> existingModule = FileUtil.readFile(new File(mappedPath));
 		if (existingModule != null) 
 			this.existingUnit = Linker.parseLinkerUnit(existingModule);
 	}

@@ -5,7 +5,7 @@ import java.util.List;
 
 import Exc.LINK_EXC;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
-import PreP.PreProcessor;
+import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
@@ -26,6 +26,7 @@ public class Linker {
 		public List<String> textSection = new ArrayList();
 		
 		public List<String> build() {
+			/* Make sure linker resolved all stated imports */
 			assert imports.isEmpty() : "Attempted to build output with imports!";
 			
 			List<String> output = new ArrayList();
@@ -127,7 +128,7 @@ public class Linker {
 			String label = null;
 			if (sp.length > 1) label = sp [1];
 			
-			String mappedPath = PreProcessor.resolveToPath(filePath);
+			String mappedPath = RessourceManager.instance.resolve(filePath);
 			
 			if (mappedPath.equals(unit.sourceFile)) {
 				buffer.add(new Message("LINK -> Found self-import in file '" + unit.sourceFile + "'", Type.WARN));
@@ -138,7 +139,7 @@ public class Linker {
 			else included.add(incPath);
 			
 			/* Recursive linking */
-			List<String> lines = PreProcessor.getFile(mappedPath);
+			List<String> lines = RessourceManager.instance.getFile(mappedPath);
 			
 			if (lines == null) {
 				if (isMaybeInclude)
