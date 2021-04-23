@@ -8,7 +8,6 @@ import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.StructureInit;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
@@ -24,9 +23,7 @@ public class SignalStatement extends Statement {
 			/* ---< FIELDS >--- */
 	public SyntaxElement watchpoint;
 	
-	private Expression shadowRef;
-	
-	public StructureInit exceptionInit;
+	public Expression exceptionBuilder;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -36,23 +33,18 @@ public class SignalStatement extends Statement {
 	 */
 	public SignalStatement(Expression shadowRef, Source source) {
 		super(source);
-		this.shadowRef = shadowRef;
+		this.exceptionBuilder = shadowRef;
 	}
 	
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Signal");
-		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
+		if (rec) this.exceptionBuilder.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		ctx.pushTrace(this);
-		
-		if (this.shadowRef instanceof StructureInit) {
-			this.exceptionInit = (StructureInit) this.shadowRef;
-		}
-		else throw new CTEX_EXC(this.getSource(), "Expected structure init, but got " + this.shadowRef.getClass().getName());
 		
 		TYPE t = ctx.checkSignal(this);
 		
@@ -70,23 +62,20 @@ public class SignalStatement extends Statement {
 		if (visitor.visit(this))
 			result.add((T) this);
 		
-		result.addAll(this.shadowRef.visit(visitor));
+		result.addAll(this.exceptionBuilder.visit(visitor));
 		
 		return result;
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		if (this.shadowRef != null) 
-			this.shadowRef.setContext(context);
+		if (this.exceptionBuilder != null) 
+			this.exceptionBuilder.setContext(context);
 	}
 
 	public Statement clone() {
-		SignalStatement s = new SignalStatement(this.shadowRef.clone(), this.getSource().clone());
+		SignalStatement s = new SignalStatement(this.exceptionBuilder.clone(), this.getSource().clone());
 		if (this.watchpoint != null) 
 			s.watchpoint = this.watchpoint;
-		
-		if (this.exceptionInit != null)
-			s.exceptionInit = this.exceptionInit;
 		
 		s.copyDirectivesFrom(this);
 		return s;
@@ -94,7 +83,7 @@ public class SignalStatement extends Statement {
 	
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
-		code.add(Util.pad(d) + "signal " + this.exceptionInit.codePrint() + ";");
+		code.add(Util.pad(d) + "signal " + this.exceptionBuilder.codePrint() + ";");
 		return code;
 	}
 

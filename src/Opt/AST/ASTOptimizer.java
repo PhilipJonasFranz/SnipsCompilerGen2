@@ -1717,7 +1717,7 @@ public class ASTOptimizer {
 	}
 
 	public Statement optSignalStatement(SignalStatement signalStatement) throws OPT0_EXC {
-		signalStatement.exceptionInit = (StructureInit) signalStatement.exceptionInit.opt(this);
+		signalStatement.exceptionBuilder = signalStatement.exceptionBuilder.opt(this);
 		
 		return signalStatement;
 	}
@@ -1775,6 +1775,8 @@ public class ASTOptimizer {
 	}
 
 	public Statement optWatchStatement(WatchStatement watchStatement) throws OPT0_EXC {
+		watchStatement.watched.opt(this);
+		
 		watchStatement.body = this.optBody(watchStatement.body, false, true);
 		
 		return watchStatement;

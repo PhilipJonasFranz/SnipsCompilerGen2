@@ -1430,7 +1430,7 @@ public class ASMOptimizer {
 					for (int a = 0; a < ins0.size(); a++) {
 						if (ins0.get(a) instanceof ASMLabel) {
 							ASMLabel l = (ASMLabel) ins0.get(a);
-							if (l.name.equals(label.label.name)) {
+							if (label.label != null && l.name.equals(label.label.name)) {
 								x = a;
 								break;
 							}
@@ -1474,7 +1474,7 @@ public class ASMOptimizer {
 					for (int a = 0; a < ins0.size(); a++) {
 						if (ins0.get(a) instanceof ASMLabel) {
 							ASMLabel l = (ASMLabel) ins0.get(a);
-							if (l.name.equals(label.label.name)) {
+							if (label.label != null && l.name.equals(label.label.name)) {
 								x = a;
 								break;
 							}
@@ -2794,12 +2794,15 @@ public class ASMOptimizer {
 				/* Label is used by default if its a function header or a data label */
 				if (label.isFunctionLabel || label instanceof ASMDataLabel || 
 						label.name.equals("main_init") || label.name.equals("name") ||
-							label.optFlags.contains(OPT_FLAG.LABEL_USED)) 
+							label.optFlags.contains(OPT_FLAG.LABEL_USED)) {
+					
 					usedLabels.add((ASMLabel) ins);
+				}
 			}
 			if (ins instanceof ASMBranch) {
 				ASMBranch b = (ASMBranch) ins;
-				if (b.target instanceof LabelOp) usedLabels.add(((LabelOp) b.target).label);
+				if (b.target instanceof LabelOp && ((LabelOp) b.target).label != null) 
+					usedLabels.add(((LabelOp) b.target).label);
 			}
 		}
 		

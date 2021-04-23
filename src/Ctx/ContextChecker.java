@@ -598,7 +598,11 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkSignal(SignalStatement e) throws CTEX_EXC {
-		TYPE exc = e.exceptionInit.check(this);
+		TYPE exc = e.exceptionBuilder.check(this);
+		
+		if (!exc.isStruct()) 
+			throw new CTEX_EXC(e.getSource(), Const.EXPECTED_STRUCT_TYPE, exc);
+		
 		e.watchpoint = this.watchpointStack.peek();
 		
 		/* Add to signal stack */

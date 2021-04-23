@@ -22,7 +22,7 @@ import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.TryStatement;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
-import Imm.AsN.Expression.AsNStructureInit;
+import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
 
@@ -31,16 +31,16 @@ public class AsNSignalStatement extends AsNStatement {
 	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSignalStatement sig = new AsNSignalStatement();
 		
-		STRUCT excType = (STRUCT) s.exceptionInit.getType();
+		STRUCT excType = (STRUCT) s.exceptionBuilder.getType();
 		
 		/* Load Exception */
-		sig.instructions.addAll(AsNStructureInit.cast(s.exceptionInit, r, map, st).getInstructions());
+		sig.instructions.addAll(AsNExpression.cast(s.exceptionBuilder, r, map, st).getInstructions());
 	
 		/* Move Struct ID into R12 to signal a thrown exception */
 		excType.getTypedef().loadSIDInReg(sig, REG.R12, excType.proviso);
 		
 		/* Move word size of thrown exception into r0 to be used in the copy loop */
-		ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(s.exceptionInit.getType().wordsize() * 4));
+		ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(s.exceptionBuilder.getType().wordsize() * 4));
 		mov.optFlags.add(OPT_FLAG.WRITEBACK);
 		sig.instructions.add(mov);
 		
