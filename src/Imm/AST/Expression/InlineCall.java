@@ -207,7 +207,7 @@ public class InlineCall extends Expression implements Callee {
 		String s = this.path.build();
 		
 		if (!this.proviso.isEmpty()) 
-			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		s += "(";
 		

@@ -547,7 +547,7 @@ public class Function extends CompoundStatement {
 		s += this.path.build();
 		
 		if (!this.provisoTypes.isEmpty()) 
-			s += this.provisoTypes.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
+			s += this.provisoTypes.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		s += "(";
 		

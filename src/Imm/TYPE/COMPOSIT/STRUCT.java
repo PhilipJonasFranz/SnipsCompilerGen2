@@ -264,7 +264,7 @@ public class STRUCT extends COMPOSIT {
 		String s = this.getTypedef().path.build();
 		
 		if (!this.proviso.isEmpty()) 
-			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		return s;
 	}
