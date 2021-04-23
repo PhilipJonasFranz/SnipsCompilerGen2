@@ -330,10 +330,10 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = Util.pad(d) + "Struct Typedef<" + this.path.build() + ">";
+		String s = Util.pad(d) + "Struct Typedef<" + this.path + ">";
 		
 		if (this.extension != null)
-			s += ":extends:" + this.extension.path.build() + ",";
+			s += ":extends:" + this.extension.path + ",";
 		
 		if (!this.implemented.isEmpty()) {
 			if (this.extension != null)
@@ -345,7 +345,7 @@ public class StructTypedef extends SyntaxElement {
 		}
 		
 		for (INTERFACE def : this.implemented)
-			s += def.getTypedef().path.build() + ",";
+			s += def.getTypedef().path + ",";
 		
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);
@@ -409,7 +409,7 @@ public class StructTypedef extends SyntaxElement {
 		if (this.modifier != MODIFIER.SHARED)
 			s += this.modifier.toString().toLowerCase() + " ";
 		
-		s += "struct " + this.path.build();
+		s += "struct " + this.path;
 		
 		if (!this.proviso.isEmpty()) 
 			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));

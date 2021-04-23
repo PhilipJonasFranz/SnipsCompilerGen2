@@ -74,14 +74,14 @@ public class Scope {
 	 */
 	public Message checkDuplicate(Declaration dec) throws CTEX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
-			throw new CTEX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path.build());
+			throw new CTEX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path);
 		}
 		else {
 			if (this.parentScope != null) {
 				Declaration dec0 = null;
 				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
 					if (!CompilerDriver.disableWarnings) {
-						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path.build(), dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), LogPoint.Type.WARN, true);
+						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path, dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), LogPoint.Type.WARN, true);
 					}
 				}
 			}
@@ -130,14 +130,14 @@ public class Scope {
 					if (decs.size() == 1) return decs.get(0);
 					/* Multiple results, cannot determine correct one, return null */
 					else if (decs.isEmpty()) {
-						throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
+						throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path);
 					}
 					else {
 						String s = decs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
-						throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
+						throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path, s);
 					}
 				}
-				else throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
+				else throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path);
 			}
 		}
 	}

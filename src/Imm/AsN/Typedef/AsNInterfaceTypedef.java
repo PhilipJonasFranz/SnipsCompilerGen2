@@ -47,11 +47,11 @@ public class AsNInterfaceTypedef extends AsNNode {
 		List<ASMInstruction> table = new ArrayList();
 		
 		String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
-		String name = sdef.path.build() + postfix + "_" + idef.path.build();
+		String name = sdef.path + postfix + "_" + idef.path;
 		
 		ASMLabel relayTableHead = new ASMLabel(name);
 		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-		relayTableHead.comment = new ASMComment("Relay: " + idef.path.build() + " -> " + sdef.path.build());
+		relayTableHead.comment = new ASMComment("Relay: " + idef.path + " -> " + sdef.path);
 		table.add(relayTableHead);
 		
 		mapping.resolverLabelMap.put(idef, relayTableHead);
@@ -91,7 +91,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			}
 			
 			/* Make sure the function was found */
-			assert f0 != null : "Failed to locate function '" + f.path.build() + "'!";
+			assert f0 != null : "Failed to locate function '" + f.path + "'!";
 			
 			/* Get the proviso postfix from the function in the struct with the current mapping */
 			String post = f0.getProvisoPostfix(mapping.getProvidedProvisos());
@@ -155,12 +155,12 @@ public class AsNInterfaceTypedef extends AsNNode {
 		List<ASMInstruction> table = new ArrayList();
 		
 		String postfix = LabelUtil.getProvisoPostfix(mapping.getProvidedProvisos());
-		String name = sdef.path.build() + postfix + "_resolver";
+		String name = sdef.path + postfix + "_resolver";
 		
 		/* Create table head */
 		ASMLabel relayTableHead = new ASMLabel(name);
 		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-		relayTableHead.comment = new ASMComment("Relay: " + sdef.path.build() + " -> INTF");
+		relayTableHead.comment = new ASMComment("Relay: " + sdef.path + " -> INTF");
 		table.add(relayTableHead);
 		
 		for (int i = 0; i < sdef.implemented.size(); i++) {

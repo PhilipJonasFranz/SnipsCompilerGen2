@@ -54,7 +54,7 @@ public class FunctionRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Function Ref: " + this.path + "<" + ((this.getType() != null)? this.getType() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

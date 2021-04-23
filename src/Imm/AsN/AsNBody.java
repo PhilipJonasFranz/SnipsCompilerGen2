@@ -209,16 +209,16 @@ public class AsNBody extends AsNNode {
 							}
 							
 							String extPostfix = LabelUtil.getProvisoPostfix(extTypes);
-							ASMDataLabel entry = new ASMDataLabel(def.extension.path.build() + extPostfix, new MemoryWordOp(0));
+							ASMDataLabel entry = new ASMDataLabel(def.extension.path + extPostfix, new MemoryWordOp(0));
 							parent = new MemoryWordRefOp(entry);
 						}
 						
-						ASMDataLabel entry = new ASMDataLabel(def.path.build() + postfix, parent);
+						ASMDataLabel entry = new ASMDataLabel(def.path + postfix, parent);
 						dataBlock.add(entry);
 						def.SIDLabelMap.put(postfix, entry);
 						
 						if (!def.implemented.isEmpty()) {
-							String name = def.path.build() + postfix + "_resolver";
+							String name = def.path + postfix + "_resolver";
 							
 							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
 							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
@@ -281,7 +281,7 @@ public class AsNBody extends AsNNode {
 						/* Inject instruction for .data Section */
 						MemoryOperand parent = new MemoryWordOp(0);
 						
-						ASMDataLabel entry = new ASMDataLabel(idef.path.build() + postfix, parent);
+						ASMDataLabel entry = new ASMDataLabel(idef.path + postfix, parent);
 						AsNBody.addToTranslationUnit(entry, idef.getSource(), SECTION.DATA);
 						
 						idef.IIDLabelMap.put(postfix, entry);

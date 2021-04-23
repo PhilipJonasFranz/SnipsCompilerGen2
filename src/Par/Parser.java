@@ -2269,7 +2269,7 @@ public class Parser {
 			
 			if (current.type == TokenType.COLON && tokenStream.get(0).type == TokenType.COLON) {
 				this.progress.abort();
-				throw new SNIPS_EXC("Unknown namespace '" + path.build() + "', " + source.getSourceMarker());
+				throw new SNIPS_EXC("Unknown namespace '" + path + "', " + source.getSourceMarker());
 			}
 			
 			/* Convert next token */
@@ -2306,7 +2306,7 @@ public class Parser {
 				
 				if (current.type != TokenType.ENUMLIT) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path, source.getSourceMarker());
 				}
 				
 				/* Actual enum field value */
@@ -2317,7 +2317,7 @@ public class Parser {
 				
 				if (def == null) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path, source.getSourceMarker());
 				}
 				
 				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), source));
@@ -2562,7 +2562,7 @@ public class Parser {
 		else {
 			this.progress.abort();
 			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 	
@@ -2620,7 +2620,7 @@ public class Parser {
 		else {
 			this.progress.abort();
 			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 
@@ -2715,7 +2715,7 @@ public class Parser {
 			/* Nothing found, error */
 			if (enu == null && stru == null && intf == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path.build(), token.source().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path, token.source().getSourceMarker());
 			}
 		}
 		

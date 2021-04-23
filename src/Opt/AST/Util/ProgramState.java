@@ -243,7 +243,7 @@ public class ProgramState {
 		for (Entry<Declaration, VarState> entry : this.cState.entrySet()) {
 			VarState state = entry.getValue();
 			
-			String s = entry.getKey().path.build() + " ";
+			String s = entry.getKey().path + " ";
 			
 			if (state.read) s += "read, ";
 			if (state.referenced) s += "referenced, ";

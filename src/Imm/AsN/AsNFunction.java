@@ -126,13 +126,13 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Replace .hn with .sn in module link */
 				String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
 				
-				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix()));
+				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path + f.provisosCalls.get(k).getProvisoPostfix()));
 				
 				/* Check if required module exists */
 				String mappedPath = RessourceManager.instance.resolve(source);
 				if (RessourceManager.instance.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
-					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("Module '" + f.path + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
 					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
 				}
 				
@@ -184,10 +184,10 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
 			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
-				com = "Function: " + f.path.build();
+				com = "Function: " + f.path;
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {

@@ -64,7 +64,7 @@ public class InlineCall extends Expression implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path);
 		if (this.calledFunction != null) {
 			for (TYPE t : this.proviso) CompilerDriver.outs.print(", " + t);
 			CompilerDriver.outs.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));

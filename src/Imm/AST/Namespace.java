@@ -54,7 +54,7 @@ public class Namespace extends SyntaxElement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Namespace: " + this.path.build());
+		CompilerDriver.outs.println(Util.pad(d) + "Namespace: " + this.path);
 		if (rec) for (SyntaxElement e : this.programElements) {
 			e.print(d + this.printDepthStep, rec);
 		}
@@ -90,7 +90,7 @@ public class Namespace extends SyntaxElement {
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
 		
-		String s = "namespace " + this.path.build() + "{";
+		String s = "namespace " + this.path + "{";
 		code.add(Util.pad(d) + s);
 		
 		for (SyntaxElement s0 : this.programElements) {

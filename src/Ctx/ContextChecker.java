@@ -260,7 +260,7 @@ public class ContextChecker {
 							this.functions.remove(f0);
 							break;
 						}
-						else throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+						else throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				
 				STRUCT.useProvisoFreeInCheck = true;
@@ -337,7 +337,7 @@ public class ContextChecker {
 			for (int i = 0; i < f.parameters.size(); i++) {
 				for (int a = i + 1; a < f.parameters.size(); a++) {
 					if (f.parameters.get(i).path.build().equals(f.parameters.get(a).path.build())) 
-						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_PARAMETER_NAME, f.parameters.get(i).path.build(), f.path.build());
+						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_PARAMETER_NAME, f.parameters.get(i).path, f.path);
 				}
 			}
 		}
@@ -363,12 +363,10 @@ public class ContextChecker {
 		
 		/* Check for signaled types that are not thrown */
 		for (TYPE t : f.signalsTypes) {
-			boolean contains = false;
-			for (int i = 0; i < this.signalStack.peek().size(); i++) 
-				contains |= this.signalStack.peek().get(i).isEqual(t);
+			boolean contains = this.signalStack.peek().stream().filter(x -> x.isEqual(t)).count() > 0;
 			
 			if (!contains) 
-				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree(), f.path.build(), f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
+				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree(), f.path, f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		/* Remove function signaled exceptions */
@@ -384,7 +382,7 @@ public class ContextChecker {
 		/* Exception types are not watched or signaled */
 		if (!this.signalStack.peek().isEmpty()) {
 			String unwatched = this.signalStack.peek().stream().map(TYPE::toString).collect(Collectors.joining(", "));
-			throw new CTEX_EXC(f.getSource(), Const.UNWATCHED_EXCEPTIONS_FOR_FUNCTION, f.path.build(), unwatched);
+			throw new CTEX_EXC(f.getSource(), Const.UNWATCHED_EXCEPTIONS_FOR_FUNCTION, f.path, unwatched);
 		}
 		
 		this.watchpointStack.pop();
@@ -451,7 +449,7 @@ public class ContextChecker {
 					/* Check for duplicate function name */
 					for (Function f0 : this.functions) {
 						if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
-							throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+							throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				}
 				
@@ -488,7 +486,7 @@ public class ContextChecker {
 					 */
 					if (!missing.isEmpty() && !e.inheritedFunctions.contains(f)) {
 						String s = missing.stream().map(TYPE::toString).collect(Collectors.joining(", "));
-						throw new CTEX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path.build(), s);
+						throw new CTEX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path, s);
 					}
 				}
 			}
@@ -519,7 +517,7 @@ public class ContextChecker {
 					}
 					
 					if (!found) 
-						throw new CTEX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.getTypedef().path.build());
+						throw new CTEX_EXC(e.getSource(), Const.IMPLEMENTED_FUNCTION_MISSING, f.path.getLast(), inter.getTypedef().path);
 				}
 			}
 			
@@ -578,7 +576,7 @@ public class ContextChecker {
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
 					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
-						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path.build());
+						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
 				}
 			}
 			
@@ -615,7 +613,7 @@ public class ContextChecker {
 				 */
 				if (!missing.isEmpty()) {
 					String s = missing.stream().map(TYPE::toString).collect(Collectors.joining(", "));
-					throw new CTEX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path.build(), s);
+					throw new CTEX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path, s);
 				}
 			}
 		}
@@ -1263,7 +1261,7 @@ public class ContextChecker {
 				if (d.hadAutoType)
 					throw new CTEX_EXC(d.getSource(), Const.AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION);
 				else
-					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, d.path.build(), t.provisoFree(), d.getType().provisoFree());
+					throw new CTEX_EXC(d.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION, d.path, t.provisoFree(), d.getType().provisoFree());
 			}
 		}
 		else {
@@ -1275,7 +1273,7 @@ public class ContextChecker {
 		if (d.getType() instanceof FUNC) {
 			for (Function f0 : this.functions) {
 				if (f0.path.getLast().equals(d.path.getLast()) && f0.path.path.size() == 1) 
-					throw new CTEX_EXC(d.getSource(), Const.PREDICATE_SHADOWS_FUNCTION, d.path.build());
+					throw new CTEX_EXC(d.getSource(), Const.PREDICATE_SHADOWS_FUNCTION, d.path);
 			}
 		}
 		
@@ -1606,7 +1604,7 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s.getTypedef().path);
 			}
 			else {
 				INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
@@ -1622,7 +1620,7 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s.getTypedef().path.build());
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s.getTypedef().path);
 			
 				/* Use auto provisos for not given proviso types */
 				if (c.getProviso().isEmpty()) {
@@ -1683,7 +1681,7 @@ public class ContextChecker {
 		else {
 			/* Found function is nested, should not be able to access it */
 			if (this.nestedFunctions.contains(f))
-				throw new CTEX_EXC(c.getCallee().getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path.build());
+				throw new CTEX_EXC(c.getCallee().getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, f.path);
 		}
 		
 		c.setCalledFunction(f);
@@ -1694,7 +1692,7 @@ public class ContextChecker {
 		if (f != null) {
 			/* Inline calls made during global setup may not signal, since exception cannot be watched */
 			if (c.getCallee() instanceof InlineCall && f.signals() && this.scopes.size() == 1) {
-				throw new CTEX_EXC(c.getCallee().getSource(), Const.CALL_DURING_INIT_CANNOT_SIGNAL, f.path.build());
+				throw new CTEX_EXC(c.getCallee().getSource(), Const.CALL_DURING_INIT_CANNOT_SIGNAL, f.path);
 			}
 			else if (c.getCallee() instanceof FunctionCall && c.getBaseRef() != null) {
 				TYPE t = c.getBaseRef().check(this);
@@ -1713,7 +1711,7 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path.build(), s);
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s);
 			}
 			
 			checkModifier(f.modifier, f.path, c.getCallee().getSource());
@@ -1903,7 +1901,7 @@ public class ContextChecker {
 			
 			return i.getType();
 		}
-		else throw new CTEX_EXC(i.getSource(), Const.UNKNOWN_VARIABLE, i.path.build());
+		else throw new CTEX_EXC(i.getSource(), Const.UNKNOWN_VARIABLE, i.path);
 	}
 	
 	public TYPE checkInlineFunction(InlineFunction i) throws CTEX_EXC {
@@ -1949,16 +1947,16 @@ public class ContextChecker {
 				}
 				
 				if (!found)
-					throw new CTEX_EXC(r.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, lambda.path.build(), s.getTypedef().path.build());
+					throw new CTEX_EXC(r.getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, lambda.path, s.getTypedef().path);
 			}
 			else {
 				if (this.nestedFunctions.contains(lambda))
-					throw new CTEX_EXC(r.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, lambda.path.build());
+					throw new CTEX_EXC(r.getSource(), Const.NESTED_FUNCTION_CANNOT_BE_ACCESSED, lambda.path);
 			}
 		}
 		
 		if (lambda == null) 
-			throw new CTEX_EXC(r.getSource(), Const.UNKNOWN_PREDICATE, r.path.build());
+			throw new CTEX_EXC(r.getSource(), Const.UNKNOWN_PREDICATE, r.path);
 		
 		/* Provided number of provisos does not match number of provisos of lambda */
 		if (lambda.provisoTypes.size() != r.proviso.size()) 
@@ -2341,7 +2339,7 @@ public class ContextChecker {
 			/* Next type in chain */
 			return ref0.getType();
 		}
-		else throw new CTEX_EXC(ref0.getSource(), Const.FIELD_NOT_IN_STRUCT, ref0.path.build(), struct.provisoFree());
+		else throw new CTEX_EXC(ref0.getSource(), Const.FIELD_NOT_IN_STRUCT, ref0.path, struct.provisoFree());
 	}
 	
 	/**
@@ -2363,18 +2361,18 @@ public class ContextChecker {
 			if (!currentPath.startsWith(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path, this.currentFunction.peek().path, source.getSourceMarker()), LogPoint.Type.WARN, true));
 				}
-				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
+				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path, this.currentFunction.peek().path);
 			}
 		}
 		else if (mod == MODIFIER.EXCLUSIVE) {
 			if (!currentPath.equals(path.buildPathOnly())) {
 				if (CompilerDriver.disableModifiers) {
 					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path.build(), this.currentFunction.peek().path.build(), source.getSourceMarker()), LogPoint.Type.WARN, true));
+						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path, this.currentFunction.peek().path, source.getSourceMarker()), LogPoint.Type.WARN, true));
 				}
-				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path.build(), this.currentFunction.peek().path.build());
+				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path, this.currentFunction.peek().path);
 			}
 		}
 	}
@@ -2478,7 +2476,7 @@ public class ContextChecker {
 			
 			/* Multiple results, cannot determine correct one, throw an exception */
 			String s = funcs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
-			throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path.build(), s);
+			throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, ((isPredicate)? "predicate" : "function"), path, s);
 		}
 	}
 	
@@ -2576,7 +2574,7 @@ public class ContextChecker {
 				
 				/* Provisos of call must be empty in case of predicate. */
 				if (!proviso.isEmpty()) 
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path.build());
+					throw new CTEX_EXC(c.getCallee().getSource(), Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path);
 				
 				/* Proviso types are provided through lambda */
 				proviso = f0.proviso;

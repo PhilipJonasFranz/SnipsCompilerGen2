@@ -91,7 +91,7 @@ public class FunctionCall extends Statement implements Callee {
 	}
 	
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path);
 		if (this.proviso != null && !this.proviso.isEmpty()) {
 			String s = this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "{", "}"));
 			CompilerDriver.outs.print(s);

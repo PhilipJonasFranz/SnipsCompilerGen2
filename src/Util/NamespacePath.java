@@ -106,4 +106,11 @@ public class NamespacePath {
 		return clone;
 	}
 	
+	/**
+	 * Relays to {@link #build()}.
+	 */
+	public String toString() {
+		return this.build();
+	}
+	
 } 

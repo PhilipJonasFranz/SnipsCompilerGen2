@@ -44,7 +44,7 @@ public class ENUM extends PRIMITIVE<String> {
 	}
 	
 	public String typeString() {
-		return "ENUM<" + this.def.path.build() + ">";
+		return "ENUM<" + this.def.path + ">";
 	}
 
 	public String sourceCodeRepresentation() {

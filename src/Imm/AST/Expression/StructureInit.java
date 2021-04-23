@@ -97,7 +97,7 @@ public class StructureInit extends Expression {
 	}
 
 	public String codePrint() {
-		String s = this.structType.getTypedef().path.build() + "::(";
+		String s = this.structType.getTypedef().path + "::(";
 		s += this.elements.stream().map(Expression::codePrint).collect(Collectors.joining(", "));
 		s += ")";
 		return s;

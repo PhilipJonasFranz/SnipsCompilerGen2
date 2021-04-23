@@ -193,7 +193,7 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType + "> " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType + "> " + this.path);
 		
 		if (!this.provisoTypes.isEmpty()) {
 			CompilerDriver.outs.print("<");
@@ -207,7 +207,7 @@ public class Function extends CompoundStatement {
 		CompilerDriver.outs.print("(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			CompilerDriver.outs.print("<" + dec.getRawType() + "> " + dec.path.build());
+			CompilerDriver.outs.print("<" + dec.getRawType() + "> " + dec.path);
 			if (i < this.parameters.size() - 1) CompilerDriver.outs.print(", ");
 		}
 		CompilerDriver.outs.print(")");
@@ -553,7 +553,7 @@ public class Function extends CompoundStatement {
 		s += "(";
 		
 		if (!this.parameters.isEmpty()) 
-			s += this.parameters.stream().map(x -> x.getType().codeString() + " " + x.path.build())
+			s += this.parameters.stream().map(x -> x.getType().codeString() + " " + x.path)
 				.collect(Collectors.joining(", "));
 		
 		s += ")";

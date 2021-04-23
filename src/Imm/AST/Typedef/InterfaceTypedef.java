@@ -193,7 +193,7 @@ public class InterfaceTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Interface Typedef:<" + this.path + ">");
 		
 		if (rec) for (Function f : this.functions)
 			f.print(d + this.printDepthStep, rec);
@@ -255,7 +255,7 @@ public class InterfaceTypedef extends SyntaxElement {
 		if (this.modifier != MODIFIER.SHARED)
 			s += this.modifier.toString().toLowerCase() + " ";
 		
-		s += "interface " + this.path.build();
+		s += "interface " + this.path;
 		
 		if (!this.proviso.isEmpty()) 
 			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
