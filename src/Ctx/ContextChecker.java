@@ -359,9 +359,7 @@ public class ContextChecker {
 		/* Check for signaled types that are not thrown */
 		for (TYPE t : f.signalsTypes) {
 			boolean contains = this.signalStack.peek().stream().filter(x -> x.isEqual(t)).count() > 0;
-			
-			if (!contains) 
-				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree(), f.path, f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
+			if (!contains) messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree(), f.path, f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		/* Remove function signaled exceptions */
@@ -456,25 +454,14 @@ public class ContextChecker {
 					f.check(this);
 				
 				if (f.modifier != MODIFIER.STATIC) {
-					/* Check if all required provisos are present */
-					List<TYPE> missing = e.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
 					
-					for (int i = 0; i < missing.size(); i++) {
-						for (int a = 0; a < f.provisoTypes.size(); a++) {
-							if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) f.provisoTypes.get(a)).placeholderName)) {
-								missing.remove(i);
-								i--;
-								break;
-							}
-						}
-					}
-					
-					/* 
-					 * There are provisos missing and the function is not inherited, throw an error. 
-					 * If the function is inherited, the same check has been done to the function by
-					 * the parent, so we dont need to check it here.
-					 */
+					List<TYPE> missing = this.missingProvisoTypes(f.provisoTypes, e.proviso);
 					if (!missing.isEmpty() && !e.inheritedFunctions.contains(f)) {
+						/* 
+						 * There are provisos missing and the function is not inherited, throw an error. 
+						 * If the function is inherited, the same check has been done to the function by
+						 * the parent, so we dont need to check it here.
+						 */
 						String s = missing.stream().map(TYPE::toString).collect(Collectors.joining(", "));
 						throw new CTEX_EXC(e.getSource(), Const.FUNCTION_MISSING_REQUIRED_PROVISOS, f.path.getLast(), e.path, s);
 					}
@@ -579,17 +566,7 @@ public class ContextChecker {
 			
 			if (f.modifier != MODIFIER.STATIC) {
 				/* Check if all required provisos are present */
-				List<TYPE> missing = e.proviso.stream().map(TYPE::clone).collect(Collectors.toList());
-				
-				for (int i = 0; i < missing.size(); i++) {
-					for (int a = 0; a < f.provisoTypes.size(); a++) {
-						if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) f.provisoTypes.get(a)).placeholderName)) {
-							missing.remove(i);
-							i--;
-							break;
-						}
-					}
-				}
+				List<TYPE> missing = this.missingProvisoTypes(f.provisoTypes, e.proviso);
 				
 				/* 
 				 * There are provisos missing and the function is not inherited, throw an error. 
@@ -2557,6 +2534,30 @@ public class ContextChecker {
 			s.check(this);
 		}
 		if (pushScope) this.scopes.pop();
+	}
+	
+	/**
+	 * Returns a list of all proviso types that are in the first given list, 
+	 * but are not in the second list.
+	 * 
+	 * @param expectedProviso The proviso types that are required for an operation.
+	 * @param providedProviso The proviso types that were provided.
+	 * @return
+	 */
+	public List<TYPE> missingProvisoTypes(List<TYPE> expectedProviso, List<TYPE> providedProviso) {
+		List<TYPE> missing = providedProviso.stream().map(TYPE::clone).collect(Collectors.toList());
+		
+		for (int i = 0; i < missing.size(); i++) {
+			for (int a = 0; a < expectedProviso.size(); a++) {
+				if (((PROVISO) missing.get(i)).placeholderName.equals(((PROVISO) expectedProviso.get(a)).placeholderName)) {
+					missing.remove(i);
+					i--;
+					break;
+				}
+			}
+		}
+		
+		return missing;
 	}
 	
 } 

@@ -78,8 +78,10 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
 		code.add(Util.pad(d) + "while (" + this.condition.codePrint() + ") {");
+		
 		for (Statement s : this.body)
 			code.addAll(s.codePrint(d + this.printDepthStep));
+		
 		code.add(Util.pad(d) + "}");
 		return code;
 	}
