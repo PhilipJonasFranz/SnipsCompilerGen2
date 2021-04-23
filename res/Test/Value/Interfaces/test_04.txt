@@ -47,8 +47,8 @@ X.get_P_1:                                   /* Function: X.get, Provisos: INT |
     bx lr
 
 X_P_1_Inter:                                 /* Relay: Inter -> X */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b X.get_P_1

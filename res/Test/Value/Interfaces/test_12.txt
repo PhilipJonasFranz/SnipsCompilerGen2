@@ -56,8 +56,8 @@ A.get_P_1:                                   /* Function: A.get, Provisos: INT *
     bx lr
 
 A_P_1_Getter:                                /* Relay: Getter -> A */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b A.get_P_1
@@ -76,8 +76,8 @@ B.get_P_1:                                   /* Function: B.get, Provisos: INT *
     bx lr
 
 B_P_1_Getter:                                /* Relay: Getter -> B */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b B.get_P_1

@@ -192,8 +192,8 @@ List.LinkedList.size_P_1.L2:
 .P481193735_NULL: .word NULL
 
 List.LinkedList_P_1_List.Iterable:           /* Relay: List.Iterable -> List.LinkedList */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b List.LinkedList.size_P_1

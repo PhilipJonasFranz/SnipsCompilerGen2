@@ -56,8 +56,8 @@ A.get:                                       /* Function: A.get */
     bx lr
 
 A_Getter:                                    /* Relay: Getter -> A */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b A.get
@@ -76,8 +76,8 @@ B.get:                                       /* Function: B.get */
     bx lr
 
 B_Getter:                                    /* Relay: Getter -> B */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b B.get

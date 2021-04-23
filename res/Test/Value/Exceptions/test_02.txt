@@ -173,8 +173,8 @@ main:                                        /* Function: main */
     mov r0, #8                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     mov r4, #0
-    mov r0, #3                               /* Evaluate Expression */
     push { sp }
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r3}
     sub r0, fp, #12
     lsr r0, r0, #2

@@ -84,8 +84,8 @@ X.set:                                       /* Function: X.set */
     bx lr
 
 X_Inter:                                     /* Relay: Inter -> X */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b X.get
@@ -117,8 +117,8 @@ Y.set:                                       /* Function: Y.set */
     bx lr
 
 Y_Inter:                                     /* Relay: Inter -> Y */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b Y.get

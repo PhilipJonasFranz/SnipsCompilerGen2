@@ -67,8 +67,8 @@ A.set_P_1:                                   /* Function: A.set, Provisos: INT *
     bx lr
 
 A_P_1_GetSet:                                /* Relay: GetSet -> A */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b A.get_P_1

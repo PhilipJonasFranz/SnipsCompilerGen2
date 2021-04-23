@@ -64,8 +64,8 @@ X.get@3.L1:
     bx lr
 
 X_Getter:                                    /* Relay: Getter -> X */
-    pop { r12 }
     mov r10, #0
+    pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
     b X.get@2
