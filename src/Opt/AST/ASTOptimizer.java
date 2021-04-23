@@ -194,6 +194,8 @@ public class ASTOptimizer {
 	/** The function that is currently optimized */
 	private Function currentFunction = null;
 	
+	public static List<Integer> complexity = new ArrayList();
+	
 	/**
 	 * Signals that an optimization has been made at some location. Will
 	 * trigger another optimization cycle. Marking an optimization should
@@ -213,6 +215,8 @@ public class ASTOptimizer {
 	
 	public Program optProgram(Program AST, Program AST0) throws OPT0_EXC {
 		try {
+			complexity.clear();
+			
 			if (PRINT_RESULT) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
 
 			/*
@@ -236,6 +240,9 @@ public class ASTOptimizer {
 			 * of the optimization algorithm.
 			 */
 			while (OPT_DONE || CYCLES < MIN_CYCLES) {
+				
+				/* Keep track of the size complexity of the AST */
+				complexity.add((int) AST0.visit(x -> true).stream().count());
 				
 				/* 
 				 * Keep track what LAST_ROUND was at each start of cycle, later

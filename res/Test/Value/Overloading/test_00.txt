@@ -22,13 +22,13 @@ HEAP_START: .word 0
 .text
     b main
 
-.global get@0
-get@0:                                       /* Function: get */
+.global get_0
+get_0:                                       /* Function: get */
     add r0, r0, r1
     bx lr
 
-.global get@1
-get@1:                                       /* Function: get */
+.global get_1
+get_1:                                       /* Function: get */
     lsl r0, r0, #1
     bx lr
 
@@ -36,10 +36,10 @@ get@1:                                       /* Function: get */
 main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
-    bl get@1                                 /* Call get */
+    bl get_1                                 /* Call get */
     mov r3, r0
     mov r1, #1
     mov r0, #5
-    bl get@0                                 /* Call get */
+    bl get_0                                 /* Call get */
     add r0, r3, r0
     pop { pc }

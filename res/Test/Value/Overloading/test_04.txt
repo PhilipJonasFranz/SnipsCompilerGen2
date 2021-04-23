@@ -39,27 +39,27 @@ HEAP_START: .word 0
 .text
     b main
 
-.global X.get@2_P_1
-X.get@2_P_1:                                 /* Function: X.get, Provisos: INT */
+.global X.get_2_P_1
+X.get_2_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
 
-.global X.get@3_P_1
-X.get@3_P_1:                                 /* Function: X.get, Provisos: INT */
+.global X.get_3_P_1
+X.get_3_P_1:                                 /* Function: X.get, Provisos: INT */
     mov r10, #0
     push { r3 }
     mov r3, r0
     cmp r1, #0
-    beq X.get_P_1@3.L0
+    beq X.get_P_1_3.L0
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
-    b X.get_P_1@3.L1
-X.get_P_1@3.L0: 
+    b X.get_P_1_3.L1
+X.get_P_1_3.L0: 
     mov r0, #2
-X.get_P_1@3.L1: 
+X.get_P_1_3.L1: 
     pop { r3 }
     bx lr
 
@@ -68,8 +68,8 @@ X_P_1_Getter:                                /* Relay: Getter -> X */
     pop { r12 }
     add r12, r12, #4
     add pc, pc, r12
-    b X.get@2_P_1
-    b X.get@3_P_1
+    b X.get_2_P_1
+    b X.get_3_P_1
 
 X_P_1_resolver:                              /* Relay: X -> INTF */
     ldr r12, .P1144089514_Getter_P_1

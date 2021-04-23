@@ -100,6 +100,46 @@ public class Util {
 		CompilerDriver.outs.println(s + "\n");
 	}
 	
+	public static void printOPT0Graph(List<Integer> complexity) {
+		new Message("SNIPS_OPT0 -> Program Complexity History: ", LogPoint.Type.INFO);
+		
+		List<Double> inter = new ArrayList();
+		
+		double stepSize = (double) complexity.size() / 100;
+		
+		double max = 0;
+		double step = 0;
+		for (int i = 0; i < 100; i++) {
+			double v = (double) complexity.get((int) step);
+			if (v > max) max = v;
+			inter.add(v);
+			step += stepSize;
+		}
+		
+		if (max > 20) {
+			for (int i = 0; i < inter.size(); i++)
+				inter.set(i, inter.get(i) / max * 20);
+			max = 20;
+		}
+		
+		for (int i = (int) max; i >= 0; i--) {
+			CompilerDriver.outs.print("|");
+			
+			for (int a = 0; a < 100; a++) {
+				if (inter.get(a) > i) CompilerDriver.outs.print("\u2588");
+				else CompilerDriver.outs.print(" ");
+			}
+			
+			CompilerDriver.outs.println();
+		}
+		
+		CompilerDriver.outs.print(" ");
+		for (int i = 0; i < 100; i++) {
+			CompilerDriver.outs.print("-");
+		}
+		CompilerDriver.outs.println();
+	}
+	
 	public static void printStats(CompilerDriver driver) {
 		double [] rate = {0, 0};
 		CompilerDriver.compressions0.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions0.size());

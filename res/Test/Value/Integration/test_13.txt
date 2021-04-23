@@ -103,7 +103,7 @@ NULL: .word 0
 HEAP_START: .word 0
 
 .text
-    b main
+    b main_init
 
 .global foo
 foo:                                         /* Function: foo */
@@ -113,7 +113,7 @@ foo:                                         /* Function: foo */
 .global ZBase.Z.getMember
 ZBase.Z.getMember:                           /* Function: ZBase.Z.getMember */
     lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #8]                         /* Load field from struct */
+    ldr r0, [r1, #12]                        /* Load field from struct */
     bx lr
 
 .global ZBase.Z.equals
@@ -152,11 +152,40 @@ ZBase.Z.create:                              /* Function: ZBase.Z.create */
     add sp, sp, #4
     ldr r0, .P264378911_ZBase.Z
     push { r0 }
-    bl init_P_3                              /* Call init */
+    bl init_P_4                              /* Call init */
     pop { pc }
 .P264378911_ZBase.Z: .word ZBase.Z
 
 .global main
+
+/* Initialize the global variables */
+main_init: 
+    sub sp, sp, #12
+    stmea sp, {r0-r2}
+    mov r2, #99
+    mov r1, #116
+    mov r0, #0
+    stmfd sp!, {r0-r2}
+    mov r2, #98
+    mov r1, #106
+    mov r0, #101
+    stmfd sp!, {r0-r2}
+    ldr r1, .P264378910_ObjectBase.objSname  /* Load from .data section */
+    mov r0, #79
+    str r0, [r1]
+    pop { r0 }
+    str r0, [r1, #4]
+    pop { r0 }
+    str r0, [r1, #8]
+    pop { r0 }
+    str r0, [r1, #12]
+    pop { r0 }
+    str r0, [r1, #16]
+    pop { r0 }
+    str r0, [r1, #20]
+    pop { r0 }
+    str r0, [r1, #24]
+    ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
@@ -230,7 +259,7 @@ main:                                        /* Function: main */
     bl ZBase.Z.create                        /* Call ZBase.Z.create */
     mov r9, r0
     bl ObjectBase.Object.create              /* Evaluate Expression */
-    bl init_P_2                              /* Call init */
+    bl init_P_3                              /* Call init */
 /* 7 */
     mov r1, r9
     push { r0 }
@@ -255,7 +284,7 @@ main.L0:
 main.L2: 
     lsl r1, r9, #2                           /* Convert to bytes */
     mov r0, #25                              /* Evaluate Expression */
-    str r0, [r1, #8]                         /* Store value to struct field */
+    str r0, [r1, #12]                        /* Store value to struct field */
     mov r1, r9
     mov r0, r8
     bl ZBase.Z.equals                        /* Call ZBase.Z.equals */
@@ -294,6 +323,7 @@ main.L4:
 .P264378910_Y: .word Y
 .P264378910_Collection_P_2: .word Collection_P_2
 .P264378910_Collection_P_1: .word Collection_P_1
+.P264378910_ObjectBase.objSname: .word ObjectBase.objSname
 
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

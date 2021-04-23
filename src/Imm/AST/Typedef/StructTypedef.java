@@ -223,6 +223,10 @@ public class StructTypedef extends SyntaxElement {
 				Function f0 = f.clone();
 				f0.path = base;
 				
+				/* Apply new source file */
+				String file = this.getSource().sourceFile;
+				f0.visit(x -> true).stream().forEach(x -> x.getSource().sourceFile = file);
+				
 				f0.translateProviso(this.extension.proviso, this.extProviso);
 				
 				/* Temporarily disable the provisoFree() part in the isEqualExtended() method */

@@ -89,6 +89,7 @@ public class CompilerDriver {
 		pruneModules = 					false,	/* Prune all exisiting modules and start from scratch.			*/
 		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
+		printStats = 					false,	/* Print out optimizer statistics.						 		*/
 		linkOnly = 						false;	/* Only link the given input							 		*/
 		
 
@@ -386,6 +387,11 @@ public class CompilerDriver {
 				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL));		
 		
 		log.clear();
+		
+		if (printStats) {
+			Util.printOPT0Graph(ASTOptimizer.complexity);
+			Util.printStats(this);
+		}
 		
 		if (outputPath != null && output != null) {
 			FileUtil.writeInFile(output, outputPath);
@@ -785,6 +791,7 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))		useTerminalColors = false;
 				else if (args [i].equals("-imm")) 	imm = true;
+				else if (args [i].equals("-stat")) 	printStats = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
 				else if (args [i].equals("-opt0"))  useASTOptimizer = false;
@@ -856,6 +863,7 @@ public class CompilerDriver {
 				"-L        : Link the given assembly file. Requires the input file to be a .s file.",
 				"-F        : Pass define flags to the PreProcessor to use in #ifdef directives.",
 				"-imm      : Print out immediate representations",
+				"-stat     : Print out statistics",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"
 		};
@@ -941,6 +949,8 @@ public class CompilerDriver {
 		null_referenced = false;
 		expectError = false;
 		AsNBody.translationUnits.clear();
+		
+		ASTOptimizer.complexity.clear();
 		
 		PreProcessor.importsPerFile.clear();
 		PreProcessor.passedFlags.clear();
