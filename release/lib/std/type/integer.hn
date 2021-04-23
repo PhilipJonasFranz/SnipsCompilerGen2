@@ -1,0 +1,21 @@
+#include<linked_list.hn>
+
+/*
+ * This package contains utility functions for int values and int arrays.
+ */
+namespace Integer {
+
+	/*
+	 * Parses the given String to an int. The String has to have the form 
+	 * (-)*+([0-9])*NULL or ([0-9])*NULL. If the String does not match the regex, -1 is returned.
+	 * The String must be terminated with the NULL char, otherwise the function will
+	 * run infiniteley.
+	 */
+	shared int parseInt(char* c);
+	
+	/*
+	 * Converts given int to a String representation.
+	 */
+	shared char* toString(int num);
+	
+} 

@@ -35,7 +35,7 @@ public class LabelUtil {
 			
 		return funcPrefix + prov + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
 							  funcPrefix.equals("resv") || funcPrefix.equals("free") || 
-							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "@"  + funcUID)
+							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "_"  + funcUID)
 				+ ".L" + c++;
 	}
 	

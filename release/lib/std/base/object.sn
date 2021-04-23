@@ -1,5 +1,5 @@
-#include <integer.sn>
-#include <string.sn>
+#include <integer.hn>
+#include <string.hn>
 
 namespace ObjectBase {
 	
@@ -10,17 +10,16 @@ namespace ObjectBase {
 		}
 		
 		shared char* toString() {
-			auto base = "Object@";
 			char* oidc = Integer::toString(self->oid);
 			
-			char* id = String::concat(&base, oidc);
+			char* id = String::concat(self->sname, oidc);
 			
 			free(oidc);
 			return id;
 		}
 		
 		static Object create() {
-			return Object::(ObjectBase::OIDCnt++);
+			return Object::(&ObjectBase::objSname, ObjectBase::OIDCnt++);
 		}
 
 	}

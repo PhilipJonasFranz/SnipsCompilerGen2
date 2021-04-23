@@ -2,6 +2,8 @@
 
 namespace ExceptionBase {
 	
+	restricted auto excsname = "Exception";
+	
 	restricted struct Exception : Object {
 
 		char* message;

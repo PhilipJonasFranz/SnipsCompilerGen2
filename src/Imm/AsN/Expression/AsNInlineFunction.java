@@ -41,7 +41,7 @@ public class AsNInlineFunction extends AsNExpression {
 		AsNBody.addToTranslationUnit(funcCast.getInstructions(), i.getSource(), SECTION.TEXT);
 		
 		/* Construct label name for function lambda target with provided provisos */
-		String label = i.inlineFunction.path + ((i.inlineFunction.requireUIDInLabel)? "@" + i.inlineFunction.UID : "");
+		String label = i.inlineFunction.path + ((i.inlineFunction.requireUIDInLabel)? "_" + i.inlineFunction.UID : "");
 		ASMDataLabel entry = new ASMDataLabel(label, new MemoryWordOp(0));
 		
 		LabelOp operand = new LabelOp(entry);

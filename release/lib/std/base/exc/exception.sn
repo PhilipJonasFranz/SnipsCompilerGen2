@@ -9,7 +9,9 @@ namespace ExceptionBase {
 		}
 		
 		static Exception create(char* message) {
-			return Exception::(super(), message);
+			Exception exc = Exception::(super(), message);
+			exc.sname = &ExceptionBase::excsname;
+			return exc;
 		}
 
 	}

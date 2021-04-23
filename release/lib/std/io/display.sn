@@ -72,7 +72,7 @@ namespace Display {
 		
 		/* Prints the string the given char pointer points to. */
 		#unsafe
-		shared void printString(char* str) {
+		shared void print(char* str) {
 			int c = 0;
 			while ((int) (*(str + c)) != 0) {
 				char c0 = *(str + c);
@@ -83,8 +83,8 @@ namespace Display {
 		
 		/* Prints out given string and a new line */
 		#unsafe
-		shared void printlnString(char* str) {
-			printString(str);
+		shared void println(char* str) {
+			print(str);
 			println();
 		}
 		
@@ -107,13 +107,13 @@ namespace Display {
 						/* Format int */
 						int toFormat = *(f + fi);
 						char* str = Integer::toString(toFormat);
-						printString(str);
+						print(str);
 						free(str);
 					}
 					else if (c0 == 's') {
 						/* Print templated string */
 						char* toFormat = *(f + fi);
-						printString(toFormat);
+						print(toFormat);
 					}
 					
 					fi++;
@@ -157,7 +157,7 @@ namespace Display {
 		#unsafe
 		shared char* scanf() {
 			/* Create a list where the input is temporarily stored */
-			LinkedList<char>* input = LinkedList::create<>((char) 0);
+			LinkedList<char>* input = LinkedList::create((char) 0);
 			
 			while (true) {
 				char c = Display::getChar();
@@ -168,7 +168,7 @@ namespace Display {
 				
 				/* Input is a new character, add to input */
 				if ((int) c != 0) {
-					input->add<>(c);
+					input->add(c);
 					putChar(c);
 				}
 			}
@@ -180,7 +180,7 @@ namespace Display {
 			char* arr = resv(size + 1);
 			
 			for (int i = 0; i < size; i++) 
-				*(arr + i) = input->get<>(i);
+				*(arr + i) = input->get(i);
 
 			/* Insert 0 char termination */
 			*(arr + size) = (char) 0;

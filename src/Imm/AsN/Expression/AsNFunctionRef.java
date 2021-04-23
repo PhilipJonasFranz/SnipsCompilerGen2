@@ -20,7 +20,7 @@ public class AsNFunctionRef extends AsNExpression {
 		i.castedNode = ref;
 		
 		/* Construct label name for function lambda target with provided provisos */
-		String label = i.origin.path + ((i.origin.requireUIDInLabel)? "@" + i.origin.UID : "") + i.origin.getProvisoPostfix(i.proviso);
+		String label = i.origin.path + ((i.origin.requireUIDInLabel)? "_" + i.origin.UID : "") + i.origin.getProvisoPostfix(i.proviso);
 		
 		ASMDataLabel entry = new ASMDataLabel(label, new MemoryWordOp(0));
 		
