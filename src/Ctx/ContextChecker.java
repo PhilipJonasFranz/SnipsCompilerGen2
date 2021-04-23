@@ -250,7 +250,7 @@ public class ContextChecker {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				for (Function f0 : this.functions) 
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false)) {
+					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false)) {
 						/* 
 						 * Already seen function has no body, this function has body,
 						 * so already seen function is from a header file, this function
@@ -336,7 +336,7 @@ public class ContextChecker {
 		if (f.parameters.size() > 1) {
 			for (int i = 0; i < f.parameters.size(); i++) {
 				for (int a = i + 1; a < f.parameters.size(); a++) {
-					if (f.parameters.get(i).path.build().equals(f.parameters.get(a).path.build())) 
+					if (f.parameters.get(i).path.equals(f.parameters.get(a).path)) 
 						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_PARAMETER_NAME, f.parameters.get(i).path, f.path);
 				}
 			}
@@ -353,12 +353,7 @@ public class ContextChecker {
 		
 		/* Check body */
 		this.currentFunction.push(f);
-		if (f.body != null) {
-			for (Statement s : f.body) {
-				currentStatement = s;
-				s.check(this);
-			}
-		}
+		if (f.body != null) this.checkBody(f.body, false, false);
 		this.currentFunction.pop();
 		
 		/* Check for signaled types that are not thrown */
@@ -403,7 +398,7 @@ public class ContextChecker {
 		 */
 		boolean addedToHeaderDef = false;
 		for (StructTypedef def : this.structTypedefs) {
-			if (def.path.build().equals(e.path.build()) && !def.equals(e)) {
+			if (def.path.equals(e.path) && !def.equals(e)) {
 				for (int i = 0; i < def.functions.size(); i++) {
 					Function f = def.functions.get(i);
 					if (f.body == null) {
@@ -434,9 +429,7 @@ public class ContextChecker {
 					/* Dynamically add-in the struct head provisos, if not present already */
 					if (!e.inheritedFunctions.contains(f)) {
 						for (TYPE t : e.proviso) {
-							boolean found = false;
-							for (TYPE t0 : f.provisoTypes)
-								found |= t0.isEqual(t);
+							boolean found = f.provisoTypes.stream().filter(x -> x.isEqual(t)).count() > 0;
 							
 							/* Add the proviso to the function signature */
 							if (!found) f.provisoTypes.add(t.clone());
@@ -448,7 +441,7 @@ public class ContextChecker {
 				 
 					/* Check for duplicate function name */
 					for (Function f0 : this.functions) {
-						if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
+						if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
 							throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				}
@@ -464,10 +457,7 @@ public class ContextChecker {
 				
 				if (f.modifier != MODIFIER.STATIC) {
 					/* Check if all required provisos are present */
-					List<TYPE> missing = new ArrayList();
-					
-					for (TYPE t : e.proviso) 
-						missing.add(t.clone());
+					List<TYPE> missing = e.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
 					
 					for (int i = 0; i < missing.size(); i++) {
 						for (int a = 0; a < f.provisoTypes.size(); a++) {
@@ -562,9 +552,7 @@ public class ContextChecker {
 
 				/* Dynamically add-in the struct head provisos, if not present already */
 				for (TYPE t : e.proviso) {
-					boolean found = false;
-					for (TYPE t0 : f.provisoTypes)
-						found |= t0.isEqual(t);
+					boolean found = f.provisoTypes.stream().filter(x -> x.isEqual(t)).count() > 0;
 					
 					/* Add the proviso to the function signature */
 					if (!found) f.provisoTypes.add(t.clone());
@@ -575,7 +563,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.build().equals(f.path.build()) && Function.signatureMatch(f0, f, false, true, false))
+					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
 						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
 				}
 			}
@@ -591,10 +579,7 @@ public class ContextChecker {
 			
 			if (f.modifier != MODIFIER.STATIC) {
 				/* Check if all required provisos are present */
-				List<TYPE> missing = new ArrayList();
-				
-				for (TYPE t : e.proviso) 
-					missing.add(t.clone());
+				List<TYPE> missing = e.proviso.stream().map(TYPE::clone).collect(Collectors.toList());
 				
 				for (int i = 0; i < missing.size(); i++) {
 					for (int a = 0; a < f.provisoTypes.size(); a++) {
@@ -648,10 +633,7 @@ public class ContextChecker {
 		/* Setup new watchpoint target */
 		this.watchpointStack.push(e);
 		
-		for (Statement s : e.body) {
-			currentStatement = s;
-			s.check(this);
-		}
+		this.checkBody(e.body, false, false);
 		
 		for (int i = 0; i < e.watchpoints.size(); i++) {
 			for (int a = i + 1; a < e.watchpoints.size(); a++) {
@@ -694,10 +676,7 @@ public class ContextChecker {
 		
 		e.watched.check(this);
 		
-		for (Statement s : e.body) {
-			currentStatement = s;
-			s.check(this);
-		}
+		this.checkBody(e.body, false, false);
 		
 		this.scopes.pop();
 		return new VOID();
@@ -955,7 +934,7 @@ public class ContextChecker {
 						
 						this.scopes.pop();
 					}
-					else throw new CTEX_EXC(selection.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, sel0.selector.getClass().getName());
+					else throw new CTEX_EXC(selection.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, sel0.selector.getClass().getSimpleName());
 					
 					/* Next selection in chain */
 					selection = sel0.selection;
@@ -1004,7 +983,7 @@ public class ContextChecker {
 					
 					break;
 				}
-				else throw new CTEX_EXC(e.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, selection.getClass().getName());
+				else throw new CTEX_EXC(e.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, selection.getClass().getSimpleName());
 			}
 			else throw new CTEX_EXC(e.getSource(), Const.CANNOT_SELECT_FROM_NON_STRUCT, type.provisoFree());
 			
@@ -1029,13 +1008,8 @@ public class ContextChecker {
 		if (cond.wordsize() > 1) 
 			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
-		this.scopes.push(new Scope(this.scopes.peek(), true));
-		for (Statement s : w.body) {
-			currentStatement = s;
-			s.check(this);
-		}
-		this.scopes.pop();
-
+		this.checkBody(w.body, true, true);
+		
 		this.compoundStack.pop();
 		return null;
 	}
@@ -1047,12 +1021,7 @@ public class ContextChecker {
 		if (cond.wordsize() > 1) 
 			throw new CTEX_EXC(w.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
-		this.scopes.push(new Scope(this.scopes.peek(), true));
-		for (Statement s : w.body) {
-			currentStatement = s;
-			s.check(this);
-		}
-		this.scopes.pop();
+		this.checkBody(w.body, true, true);
 
 		this.compoundStack.pop();
 		return null;
@@ -1090,10 +1059,7 @@ public class ContextChecker {
 		
 		f.increment.check(this);
 		
-		for (Statement s : f.body) {
-			currentStatement = s;
-			s.check(this);
-		}
+		this.checkBody(f.body, false, false);
 		
 		this.scopes.pop();
 		this.scopes.pop();
@@ -1169,10 +1135,7 @@ public class ContextChecker {
 		
 		this.scopes.push(new Scope(this.scopes.peek(), true));
 		
-		for (Statement s : f.body) {
-			currentStatement = s;
-			s.check(this);
-		}
+		this.checkBody(f.body, false, false);
 		
 		this.scopes.pop();
 		this.scopes.pop();
@@ -1195,14 +1158,7 @@ public class ContextChecker {
 				throw new CTEX_EXC(i.getSource(), Const.MULTIPLE_ELSE_STATEMENTS);
 		}
 		
-		this.scopes.push(new Scope(this.scopes.peek()));
-		
-		for (Statement s : i.body) {
-			currentStatement = s;
-			s.check(this);
-		}
-		
-		this.scopes.pop();
+		this.checkBody(i.body, true, false);
 		
 		if (i.elseStatement != null) 
 			i.elseStatement.check(this);
@@ -1383,22 +1339,12 @@ public class ContextChecker {
 		if (!type.isEqual(c.superStatement.condition.getType())) 
 			throw new CTEX_EXC(c.condition.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE, type.provisoFree(), c.superStatement.condition.getType().provisoFree());
 		
-		this.scopes.push(new Scope(this.scopes.peek(), true));
-		for (Statement s : c.body) {
-			currentStatement = s;
-			s.check(this);
-		}
-		this.scopes.pop();
+		this.checkBody(c.body, true, true);
 		return null;
 	}
 	
 	public TYPE checkDefaultStatement(DefaultStatement d) throws CTEX_EXC {
-		this.scopes.push(new Scope(this.scopes.peek(), true));
-		for (Statement s : d.body) {
-			currentStatement = s;
-			s.check(this);
-		}
-		this.scopes.pop();
+		this.checkBody(d.body, true, true);
 		return null;
 	}
 	
@@ -1702,16 +1648,9 @@ public class ContextChecker {
 				
 				STRUCT s = (STRUCT) t.getCoreType();
 				
-				boolean found = false;
-				for (Function f0 : s.getTypedef().functions) {
-					if (f0.path.build().equals(f.path.build())) {
-						found = true;
-						break;
-					}
-				}
-				
-				if (!found)
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s);
+				/* Check if typedef contains a function with the called path */
+				boolean found = s.getTypedef().functions.stream().filter(x -> x.path.equals(f.path)).count() > 0;
+				if (!found) throw new CTEX_EXC(c.getCallee().getSource(), Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s);
 			}
 			
 			checkModifier(f.modifier, f.path, c.getCallee().getSource());
@@ -2407,10 +2346,7 @@ public class ContextChecker {
 	 * @return True if it is contained, false if not.
 	 */
 	public boolean signalStackContains(TYPE newSignal) {
-		for (TYPE t : this.signalStack.peek()) 
-			if (t.isEqual(newSignal)) return true;
-		
-		return false;
+		return this.signalStack.peek().stream().filter(x -> x.isEqual(newSignal)).count() > 0;
 	}
 	
 	/**
@@ -2427,13 +2363,9 @@ public class ContextChecker {
 	 */
 	public Function findFunction(NamespacePath path, Source source, boolean isPredicate, String prefix, List<TYPE> types) throws CTEX_EXC {
 		
-		/* Collect functions that match this namespace path. */
-		List<Function> funcs = new ArrayList();
-		
-		/* Filter on exact namespace path match */
-		for (Function f : this.functions) 
-			if (f.path.build().equals(path.build())) 
-				funcs.add(f);
+		/* Collect functions that match this namespace path, start with exact namespace path matches */
+		List<Function> funcs = this.functions.stream()
+			.filter(x -> x.path.equals(path)).collect(Collectors.toList());
 		
 		Function f0 = this.filterFromFunctions(funcs, path, prefix, types);
 		if (f0 != null) return f0;
@@ -2616,6 +2548,15 @@ public class ContextChecker {
 			INTERFACE s = (INTERFACE) e.check(this).getCoreType();
 			return s.getTypedef().path.build();
 		}
+	}
+	
+	public void checkBody(List<Statement> body, boolean pushScope, boolean loopedScope) throws CTEX_EXC {
+		if (pushScope) this.scopes.push(new Scope(this.scopes.peek(), loopedScope));
+		for (Statement s : body) {
+			currentStatement = s;
+			s.check(this);
+		}
+		if (pushScope) this.scopes.pop();
 	}
 	
 } 

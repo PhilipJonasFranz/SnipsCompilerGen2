@@ -2333,7 +2333,7 @@ public class Parser {
 				for (int i = this.scopes.size() - 1; i >= 0; i--) {
 					List<Declaration> scope = this.scopes.get(i);
 					for (int a = 0; a < scope.size(); a++) 
-						if (scope.get(a).path.build().equals(path.build())) 
+						if (scope.get(a).path.equals(path)) 
 							/* Path referres to a variable, set lambda to null */
 							lambda = null;
 				}
@@ -2513,7 +2513,7 @@ public class Parser {
 		Function lambda = null;
 		
 		for (Pair<NamespacePath, Function> p : this.functions) 
-			if (p.first.build().equals(path.build())) 
+			if (p.first.equals(path)) 
 				return p.second;
 
 		if (lambda == null) {
@@ -2547,7 +2547,7 @@ public class Parser {
 	 */
 	public InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<InterfaceTypedef> defs = new ArrayList();
@@ -2578,7 +2578,7 @@ public class Parser {
 	 */
 	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<StructTypedef> defs = new ArrayList();
@@ -2605,7 +2605,7 @@ public class Parser {
 	 */
 	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<EnumTypedef> defs = new ArrayList();

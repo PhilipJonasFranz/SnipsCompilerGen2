@@ -113,4 +113,8 @@ public class NamespacePath {
 		return this.build();
 	}
 	
+	public boolean equals(Object object) {
+		return object instanceof NamespacePath && this.toString().equals(object.toString());
+	}
+	
 } 

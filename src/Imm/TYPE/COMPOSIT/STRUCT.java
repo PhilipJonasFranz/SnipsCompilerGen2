@@ -155,7 +155,7 @@ public class STRUCT extends COMPOSIT {
 		for (int i = 0; i < this.typedef.getFields().size(); i++) {
 			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
 			
-			if (dec.path.build().equals(path.build())) {
+			if (dec.path.equals(path)) {
 				return offset * 4;
 			}
 			else offset += dec.getType().wordsize();

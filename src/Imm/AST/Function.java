@@ -480,7 +480,7 @@ public class Function extends CompoundStatement {
 		/* Match function name, not namespace path */
 		match &= f0.path.getLast().equals(f1.path.getLast());
 		
-		if (matchFullNames) match &= f0.path.build().equals(f1.path.build());
+		if (matchFullNames) match &= f0.path.equals(f1.path);
 		
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;

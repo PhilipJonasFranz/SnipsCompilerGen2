@@ -236,7 +236,7 @@ public class StructTypedef extends SyntaxElement {
 		Declaration dec = null;
 		
 		for (int i = 0; i < this.fields.size(); i++) {
-			if (this.fields.get(i).path.build().equals(path.build())) {
+			if (this.fields.get(i).path.equals(path)) {
 				/* Copy field and apply field type */
 				dec = this.fields.get(i).clone();
 				dec.setType(match.effectiveFieldTypes.get(i).clone().provisoFree());
