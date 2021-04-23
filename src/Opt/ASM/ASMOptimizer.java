@@ -1815,11 +1815,12 @@ public class ASMOptimizer {
 			if (ins0.get(i) instanceof ASMPushStack) {
 				ASMPushStack push = (ASMPushStack) ins0.get(i);
 				
+				REG reg = push.operands.get(0).reg;
+				if (RegOp.toInt(reg) >= 10) continue;
+				
 				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !push.optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
 					
 					ins0.remove(i);
-					
-					REG reg = push.operands.get(0).reg;
 					
 					boolean afterFPExchange = false;
 					int line = i;
@@ -1827,7 +1828,8 @@ public class ASMOptimizer {
 						if (overwritesReg(ins0.get(line), reg) || 
 								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
 								ins0.get(line) instanceof ASMStackOp || ins0.get(line) instanceof ASMPushStack ||
-								ins0.get(line) instanceof ASMLdr || ins0.get(line) instanceof ASMPopStack) {
+								ins0.get(line) instanceof ASMLdr || ins0.get(line) instanceof ASMPopStack ||
+								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
 							break;
 						}
 						else if (readsReg(ins0.get(line), REG.SP)) break;
@@ -1852,17 +1854,19 @@ public class ASMOptimizer {
 			if (ins0.get(i) instanceof ASMPopStack) {
 				ASMPopStack pop = (ASMPopStack) ins0.get(i);
 				
+				REG reg = pop.operands.get(0).reg;
+				if (RegOp.toInt(reg) >= 10) continue;
+				
 				if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 					ins0.remove(i);
-					
-					REG reg = pop.operands.get(0).reg;
 					
 					int line = i - 1;
 					while (true) {
 						if (readsReg(ins0.get(line), reg) || overwritesReg(ins0.get(line), reg) ||
 								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
 								ins0.get(line) instanceof ASMStackOp || 
-								ins0.get(line) instanceof ASMStr || ins0.get(line) instanceof ASMPushStack ) {
+								ins0.get(line) instanceof ASMStr || ins0.get(line) instanceof ASMPushStack ||
+								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
 							break;
 						}
 						

@@ -1,0 +1,32 @@
+#include <integer.sn>
+#include <string.sn>
+
+namespace ObjectBase {
+	
+	restricted int OIDCnt = 0;
+	
+	restricted struct Object {
+
+		int oid;
+		
+		/*
+		 * Returns true iff this object is equal to
+		 * the given object. This is done by comparing
+		 * their Object-IDs.
+		 */
+		shared bool equals(Object* object);
+		
+		/*
+		 * Creates a string-representation of this object.
+		 * The created string has the format 'Object@[OID]'.
+		 */
+		shared char* toString();
+		
+		/*
+		 * Creates a new object with a unique object-id.
+		 */
+		static Object create();
+
+	}
+
+}

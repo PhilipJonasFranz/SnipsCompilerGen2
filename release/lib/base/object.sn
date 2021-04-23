@@ -1,0 +1,28 @@
+#include <integer.sn>
+#include <string.sn>
+
+namespace ObjectBase {
+	
+	restricted struct Object {
+
+		shared bool equals(Object* object) {
+			return self->oid == object->oid;
+		}
+		
+		shared char* toString() {
+			auto base = "Object@";
+			char* oidc = Integer::toString(self->oid);
+			
+			char* id = String::concat(&base, oidc);
+			
+			free(oidc);
+			return id;
+		}
+		
+		static Object create() {
+			return Object::(ObjectBase::OIDCnt++);
+		}
+
+	}
+
+}
