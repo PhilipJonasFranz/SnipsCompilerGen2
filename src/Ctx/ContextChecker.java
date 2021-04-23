@@ -393,6 +393,8 @@ public class ContextChecker {
 	
 	public TYPE checkStructTypedef(StructTypedef e) throws CTEX_EXC {
 		
+		e.copyInheritedFunctions();
+		
 		boolean useProvisoFree = STRUCT.useProvisoFreeInCheck;
 		STRUCT.useProvisoFreeInCheck = false;
 		

@@ -64,6 +64,8 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
+	private boolean copiedInheritedFunctions = false;
+	
 	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
@@ -140,8 +142,6 @@ public class StructTypedef extends SyntaxElement {
 	 * overwritten functions.
 	 */
 	public void postInitialize() {
-		int c = 0;
-		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
@@ -179,6 +179,33 @@ public class StructTypedef extends SyntaxElement {
 					i.getTypedef().implementers.add(this);
 				}
 			}
+		}
+		
+		if (proviso.isEmpty()) {
+			/* Add default proviso mapping if no provisos exist */
+			List<TYPE> fieldTypes = new ArrayList();
+			for (Declaration d : this.fields)
+				fieldTypes.add(d.getType().clone());
+			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
+		}
+	}
+	
+	/**
+	 * Copy all the functions of the extension to this extension. This needs to be done
+	 * when this struct typedef is checked first during context checking. This is due
+	 * to the fact that the extension may come from two sources, header and implementation.
+	 * 
+	 * This means that at the point, where {@link #postInitialize()} is called, they have 
+	 * not been fused yet. So, we have to call it during context checking. Cloning the 
+	 * function bodies at this moment is not an issue, since they will be re-checked
+	 * anyways, so all references will be updated to the new tree.
+	 */
+	public void copyInheritedFunctions() {
+		if (copiedInheritedFunctions) return;
+		else copiedInheritedFunctions = true;
+		
+		if (this.extension != null) {
+			int c = 0;
 			
 			/* 
 			 * For every function in the extension, copy the function, 
@@ -191,7 +218,7 @@ public class StructTypedef extends SyntaxElement {
 				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
-
+	
 				/* Create a copy of the function, but keep reference on body */
 				Function f0 = f.clone();
 				f0.path = base;
@@ -210,17 +237,9 @@ public class StructTypedef extends SyntaxElement {
 					this.functions.add(c++, f0);
 					this.inheritedFunctions.add(f0);
 				}
-
+	
 				STRUCT.useProvisoFreeInCheck = true;
 			}
-		}
-		
-		if (proviso.isEmpty()) {
-			/* Add default proviso mapping if no provisos exist */
-			List<TYPE> fieldTypes = new ArrayList();
-			for (Declaration d : this.fields)
-				fieldTypes.add(d.getType().clone());
-			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
 		}
 	}
 	
