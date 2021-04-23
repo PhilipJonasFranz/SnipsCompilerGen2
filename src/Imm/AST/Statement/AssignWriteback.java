@@ -44,12 +44,11 @@ public class AssignWriteback extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkAssignWriteback(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

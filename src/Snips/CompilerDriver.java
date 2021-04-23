@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
@@ -148,6 +149,8 @@ public class CompilerDriver {
 	/* Counts the total sum of all instructions */
 	public static int instructionsGenerated = 0;
 	
+	public static Stack<SyntaxElement> stackTrace;
+	
 	
 			/* ---< ACCESSIBILITY --- */
 	public static List<Message> log = new ArrayList();
@@ -163,8 +166,6 @@ public class CompilerDriver {
 	public Exception thrownException = null;
 	
 	public static PIPE_STAGE currentStage = null;
-	
-	public static Source lastSource = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES >--- */
@@ -355,10 +356,10 @@ public class CompilerDriver {
 					
 					/* Give rough estimate where error occurred */
 					
-					String approx = "Pipeline Stage: " + currentStage.name + ", ";
+					String approx = "Pipeline Stage: " + currentStage.name;
 					
-					if (lastSource != null) 
-						approx += "at location estimate: " + lastSource.getSourceMarker();
+					if (stackTrace != null) 
+						approx += ", at location estimate: " + stackTrace.peek().getSource().getSourceMarker();
 					else
 						approx = approx.substring(0, approx.length() - 2);
 					
@@ -585,7 +586,6 @@ public class CompilerDriver {
 	
 			/* ---< COMPILER PIPELINE STAGES >--- */
 	private static List<LineObject> STAGE_PREP(List<String> codeIn, String filePath) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.PREP;
 		PreProcessor preProcess = new PreProcessor(codeIn, inputFile.getPath());
 		List<LineObject> preCode = preProcess.getProcessed();
@@ -596,7 +596,6 @@ public class CompilerDriver {
 	}
 	
 	private static List<Token> STAGE_SCAN(List<LineObject> code) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.SCAN;
 		ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
 		Scanner scanner = new Scanner(code, scan_progress);
@@ -606,7 +605,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_PARS(List<Token> dequeue) throws PARS_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.PARS;
 		ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
 		Parser parser = new Parser(dequeue, parse_progress);
@@ -616,7 +614,6 @@ public class CompilerDriver {
 	}
 
 	private static SyntaxElement STAGE_PRE1(SyntaxElement AST) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.IMPM;
 		Program p = (Program) AST;
 		p.fileName = inputFile.getPath();
@@ -640,7 +637,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_NAME(SyntaxElement AST) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.NAMM;
 		NamespaceProcessor nameProc = new NamespaceProcessor();
 		nameProc.process((Program) AST);
@@ -648,7 +644,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_CTEX(SyntaxElement AST) throws CTEX_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.CTEX;
 		ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
 		ContextChecker ctx = new ContextChecker(AST, ctx_progress);
@@ -660,7 +655,6 @@ public class CompilerDriver {
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) throws OPT0_EXC {
 		if (useASTOptimizer) {
 			double nodes_before = AST.visit(x -> { return true; }).size();
-			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
 			ASTOptimizer opt0 = new ASTOptimizer();
@@ -686,7 +680,6 @@ public class CompilerDriver {
 	}
 	
 	private static AsNBody STAGE_CGEN(SyntaxElement AST) throws CGEN_EXC, CTEX_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.CGEN;
 		ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
 		AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
@@ -706,7 +699,6 @@ public class CompilerDriver {
 	
 	private static AsNBody STAGE_OPT1(AsNBody body) {
 		if (useASMOptimizer) {
-			lastSource = null;
 			currentStage = PIPE_STAGE.OPT1;
 			
 			double rate = new ASMOptimizer().optimize(body.instructions, true);

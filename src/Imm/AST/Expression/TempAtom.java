@@ -51,15 +51,14 @@ public class TempAtom extends Expression {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
 			throw new CTEX_EXC(this.getSource(), "Placeholder atom is not available at this location");
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

@@ -208,6 +208,8 @@ public class ContextChecker {
 	
 	protected StructTypedef reCheckTypedef = null;
 	
+	public Stack<SyntaxElement> stackTrace = new Stack();
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ContextChecker(SyntaxElement AST, ProgressMessage progress) {
@@ -218,11 +220,15 @@ public class ContextChecker {
 	
 			/* ---< AST Check MethodS >--- */
 	public TYPE check() throws CTEX_EXC {
+		/* Set reference to own trace */
+		CompilerDriver.stackTrace = this.stackTrace;
+		
 		this.checkProgram((Program) AST);
 		
 		/* Flush warn messages */
 		for (Message m : this.messages) m.flush();
 		
+		CompilerDriver.stackTrace = null;
 		return null;
 	}
 	
@@ -2558,6 +2564,14 @@ public class ContextChecker {
 		}
 		
 		return missing;
+	}
+	
+	public void pushTrace(SyntaxElement s) {
+		this.stackTrace.push(s);
+	}
+	
+	public void popTrace() {
+		this.stackTrace.pop();
 	}
 	
 } 

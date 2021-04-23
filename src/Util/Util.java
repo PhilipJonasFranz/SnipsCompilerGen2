@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import Imm.AST.Program;
+import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.Expression;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
@@ -223,6 +225,55 @@ public class Util {
 		
 		if (n2 < 0) return Integer.MAX_VALUE;
 		return n2;
+	}
+	
+	/**
+	 * Converts a camel-case formatted string into a lowercase, space-seperated string:
+	 * Example: AbstractCompoundStatement -> abstract compound statement
+	 */
+	public static String revCamelCase(String s) {
+		String [] sp = s.split("");
+		String out = "";
+		for (String s0 : sp) {
+			if (Character.isUpperCase(s0.charAt(0))) out += " ";
+			out += s0.toLowerCase();
+		}
+		
+		return out.trim();
+	}
+	
+	public static void buildStackTrace(String initialSource) {
+		String last = initialSource;
+		
+		while (!CompilerDriver.stackTrace.isEmpty()) {
+			SyntaxElement s = CompilerDriver.stackTrace.pop();
+			
+			String loc = s.getSource().getSourceMarkerWithoutFile() + " ";
+			if (last == null || !s.getSource().sourceFile.equals(last)) {
+				loc = s.getSource().getSourceMarker() + " ";
+				last = s.getSource().sourceFile;
+			}
+			
+			String trace = "  at " + Util.revCamelCase(s.getClass().getSimpleName()) + ", " + loc;
+			
+			if (s instanceof Expression) {
+				Expression e = (Expression) s;
+				trace += "[" + e.codePrint() + "]";
+			}
+			else {
+				List<String> code = s.codePrint(0);
+				if (code != null && !code.isEmpty()) {
+					String line = code.get(0);
+					
+					if (line.endsWith(";") || line.endsWith("{")) 
+						line = line.substring(0, line.length() - 1);
+					
+					trace += "[" + line.trim() + "]";
+				}
+			}
+			
+			CompilerDriver.log.add(new Message(trace, LogPoint.Type.FAIL));
+		}
 	}
 	
 } 

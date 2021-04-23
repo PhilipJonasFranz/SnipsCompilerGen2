@@ -238,7 +238,7 @@ public class Parser {
 	protected Token accept() {
 		
 		/* Store the current source, is used to give aproximation when crash occurs */
-		CompilerDriver.lastSource = current.source;
+		//CompilerDriver.lastSource = current.source;
 		
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 

@@ -139,6 +139,9 @@ public class AsNFunction extends AsNCompoundStatement {
 				continue;
 			}
 			
+			if (f.body == null) 
+				throw new CGEN_EXC("Attempted to cast function without body: " + f.path.build());
+			
 			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
 			
 			/* Reset regs and stack */

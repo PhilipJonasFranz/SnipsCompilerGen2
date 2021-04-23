@@ -80,8 +80,7 @@ public class InlineCall extends Expression implements Callee {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkCall(this);
 		
@@ -97,7 +96,7 @@ public class InlineCall extends Expression implements Callee {
 			}
 		}
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

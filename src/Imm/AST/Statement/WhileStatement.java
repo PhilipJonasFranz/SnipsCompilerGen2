@@ -43,12 +43,11 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkWhileStatement(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

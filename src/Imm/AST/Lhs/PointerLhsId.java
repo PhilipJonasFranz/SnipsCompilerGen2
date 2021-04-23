@@ -44,8 +44,7 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		if (!(this.shadowDeref instanceof Deref)) {
 			throw new CTEX_EXC(this.getSource(), "Left hand identifer is not a dereference");
@@ -54,7 +53,7 @@ public class PointerLhsId extends LhsId {
 		
 		this.expressionType = deref.check(ctx);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return this.expressionType;
 	}
 	
@@ -107,7 +106,7 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public String codePrint() {
-		return this.deref.codePrint();
+		return this.shadowDeref.codePrint();
 	}
 	
 } 
