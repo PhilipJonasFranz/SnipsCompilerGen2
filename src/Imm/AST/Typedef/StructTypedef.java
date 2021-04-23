@@ -3,6 +3,7 @@ package Imm.AST.Typedef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
@@ -235,7 +236,7 @@ public class StructTypedef extends SyntaxElement {
 		Declaration dec = null;
 		
 		for (int i = 0; i < this.fields.size(); i++) {
-			if (this.fields.get(i).path.build().equals(path.build())) {
+			if (this.fields.get(i).path.equals(path)) {
 				/* Copy field and apply field type */
 				dec = this.fields.get(i).clone();
 				dec.setType(match.effectiveFieldTypes.get(i).clone().provisoFree());
@@ -329,10 +330,10 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = Util.pad(d) + "Struct Typedef<" + this.path.build() + ">";
+		String s = Util.pad(d) + "Struct Typedef<" + this.path + ">";
 		
 		if (this.extension != null)
-			s += ":extends:" + this.extension.path.build() + ",";
+			s += ":extends:" + this.extension.path + ",";
 		
 		if (!this.implemented.isEmpty()) {
 			if (this.extension != null)
@@ -344,7 +345,7 @@ public class StructTypedef extends SyntaxElement {
 		}
 		
 		for (INTERFACE def : this.implemented)
-			s += def.getTypedef().path.build() + ",";
+			s += def.getTypedef().path + ",";
 		
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);
@@ -361,12 +362,11 @@ public class StructTypedef extends SyntaxElement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkStructTypedef(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -408,36 +408,26 @@ public class StructTypedef extends SyntaxElement {
 		if (this.modifier != MODIFIER.SHARED)
 			s += this.modifier.toString().toLowerCase() + " ";
 		
-		s += "struct " + this.path.build();
+		s += "struct " + this.path;
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
 		
 		if (!this.implemented.isEmpty() || this.extension != null) {
 			s += " : ";
 			
-			if (this.extension != null) {
+			if (this.extension != null) 
 				s += this.extension.codePrint(0).get(0) + ", ";
-			}
 			
-			for (INTERFACE i : this.implemented) {
-				s += i.codeString() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
+			s += this.implemented.stream().map(TYPE::codeString).collect(Collectors.joining(", "));
 		}
 		
 		s += " {";
 		
 		code.add(Util.pad(d) + s);
 		
-		for (Declaration d0 : this.fields) {
+		for (Declaration d0 : this.fields) 
 			code.addAll(d0.codePrint(d + this.printDepthStep));
-		}
 		
 		if (!this.fields.isEmpty() && !this.functions.isEmpty())
 			code.add("");

@@ -3,6 +3,7 @@ package Exc;
 import Ctx.ContextChecker;
 import Snips.CompilerDriver;
 import Util.Source;
+import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
@@ -26,10 +27,12 @@ public class CTEX_EXC extends Exception {
 		
 		ContextChecker.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+		
+		Util.buildStackTrace(source.sourceFile);
 	}
 	
 	public String getExcFieldName() {
-		return Util.Util.getExceptionFieldName(this.message);
+		return Util.getExceptionFieldName(this.message);
 	}
 	
 	public String getMessage() {

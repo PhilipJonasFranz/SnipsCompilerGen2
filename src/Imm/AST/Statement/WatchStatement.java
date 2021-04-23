@@ -37,19 +37,18 @@ public class WatchStatement extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Watch<" + this.watched.getType().typeString() + " " + this.watched.path.build() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Watch<" + this.watched.getType() + " " + this.watched.path + ">");
 		
 		if (rec) for (Statement s : this.body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkWatchStatement(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

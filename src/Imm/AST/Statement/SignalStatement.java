@@ -47,8 +47,7 @@ public class SignalStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		if (this.shadowRef instanceof StructureInit) {
 			this.exceptionInit = (StructureInit) this.shadowRef;
@@ -57,7 +56,7 @@ public class SignalStatement extends Statement {
 		
 		TYPE t = ctx.checkSignal(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

@@ -57,7 +57,7 @@ public class AsNFunctionCall extends AsNStatement {
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
 			if (fc.calledFunction.castedNode == null && fc.calledFunction.definedInInterface == null) 
-				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path.build(), fc.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path, fc.getSource().getSourceMarker());
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
@@ -194,7 +194,7 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 			
 			/* Make sure the function was found */
-			assert found : "Failed to locate function '" + f.path.build() + "'!";
+			assert found : "Failed to locate function '" + f.path + "'!";
 			
 			boolean nestedDeref = false;
 			if (callee instanceof InlineCall)
@@ -208,7 +208,7 @@ public class AsNFunctionCall extends AsNStatement {
 			
 			/* Load and push the function offset for later use */
 			ASMMov offsetMov = new ASMMov(new RegOp(REG.R12), new ImmOp(offset));
-			offsetMov.comment = new ASMComment("Offset to " + f.path.build());
+			offsetMov.comment = new ASMComment("Offset to " + f.path);
 			call.instructions.add(offsetMov);
 			call.instructions.add(new ASMPushStack(new RegOp(REG.R12)));
 			
@@ -257,7 +257,7 @@ public class AsNFunctionCall extends AsNStatement {
 			ASMLabel functionLabel = new ASMLabel(target);
 			
 			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
-			branch.comment = new ASMComment("Call " + f.path.build());
+			branch.comment = new ASMComment("Call " + f.path);
 			call.instructions.add(branch);
 		}
 		

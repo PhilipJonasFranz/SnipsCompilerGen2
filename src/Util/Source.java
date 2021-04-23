@@ -28,6 +28,10 @@ public class Source {
 		return "line: " + this.row + ", column: " + this.col + " (" + this.sourceFile + ")";
 	}
 	
+	public String getSourceMarkerWithoutFile() {
+		return "line: " + this.row + ", column: " + this.col;
+	}
+	
 	public Source clone() {
 		return new Source(this.sourceFile, this.row, this.col);
 	}

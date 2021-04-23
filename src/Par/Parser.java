@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Exc.CTEX_EXC;
@@ -237,7 +238,7 @@ public class Parser {
 	protected Token accept() {
 		
 		/* Store the current source, is used to give aproximation when crash occurs */
-		CompilerDriver.lastSource = current.source;
+		//CompilerDriver.lastSource = current.source;
 		
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
@@ -1630,7 +1631,7 @@ public class Parser {
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
 				this.progress.abort();
-				throw new SNIPS_EXC(new CTEX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type.typeString()).getMessage());
+				throw new SNIPS_EXC(new CTEX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type).getMessage());
 			}
 			
 			accept(TokenType.COLON);
@@ -2268,7 +2269,7 @@ public class Parser {
 			
 			if (current.type == TokenType.COLON && tokenStream.get(0).type == TokenType.COLON) {
 				this.progress.abort();
-				throw new SNIPS_EXC("Unknown namespace '" + path.build() + "', " + source.getSourceMarker());
+				throw new SNIPS_EXC("Unknown namespace '" + path + "', " + source.getSourceMarker());
 			}
 			
 			/* Convert next token */
@@ -2305,7 +2306,7 @@ public class Parser {
 				
 				if (current.type != TokenType.ENUMLIT) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path, source.getSourceMarker());
 				}
 				
 				/* Actual enum field value */
@@ -2316,7 +2317,7 @@ public class Parser {
 				
 				if (def == null) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path, source.getSourceMarker());
 				}
 				
 				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), source));
@@ -2332,7 +2333,7 @@ public class Parser {
 				for (int i = this.scopes.size() - 1; i >= 0; i--) {
 					List<Declaration> scope = this.scopes.get(i);
 					for (int a = 0; a < scope.size(); a++) 
-						if (scope.get(a).path.build().equals(path.build())) 
+						if (scope.get(a).path.equals(path)) 
 							/* Path referres to a variable, set lambda to null */
 							lambda = null;
 				}
@@ -2512,7 +2513,7 @@ public class Parser {
 		Function lambda = null;
 		
 		for (Pair<NamespacePath, Function> p : this.functions) 
-			if (p.first.build().equals(path.build())) 
+			if (p.first.equals(path)) 
 				return p.second;
 
 		if (lambda == null) {
@@ -2546,7 +2547,7 @@ public class Parser {
 	 */
 	public InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<InterfaceTypedef> defs = new ArrayList();
@@ -2559,11 +2560,9 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (InterfaceTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 	
@@ -2579,7 +2578,7 @@ public class Parser {
 	 */
 	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<StructTypedef> defs = new ArrayList();
@@ -2606,7 +2605,7 @@ public class Parser {
 	 */
 	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<EnumTypedef> defs = new ArrayList();
@@ -2619,11 +2618,9 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (EnumTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 
@@ -2718,7 +2715,7 @@ public class Parser {
 			/* Nothing found, error */
 			if (enu == null && stru == null && intf == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path.build(), token.source().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path, token.source().getSourceMarker());
 			}
 		}
 		

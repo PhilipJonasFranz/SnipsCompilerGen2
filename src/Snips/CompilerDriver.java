@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
@@ -28,7 +29,6 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode.MODIFIER;
-import Imm.AsN.AsNTranslationUnit;
 import Imm.TYPE.PRIMITIVES.INT;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
@@ -40,6 +40,9 @@ import Par.Token;
 import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
+import Res.Manager.FileUtil;
+import Res.Manager.RessourceManager;
+import Res.Manager.TranslationUnit;
 import Util.BufferedPrintStream;
 import Util.NamespacePath;
 import Util.Source;
@@ -146,6 +149,8 @@ public class CompilerDriver {
 	/* Counts the total sum of all instructions */
 	public static int instructionsGenerated = 0;
 	
+	public static Stack<SyntaxElement> stackTrace;
+	
 	
 			/* ---< ACCESSIBILITY --- */
 	public static List<Message> log = new ArrayList();
@@ -161,8 +166,6 @@ public class CompilerDriver {
 	public Exception thrownException = null;
 	
 	public static PIPE_STAGE currentStage = null;
-	
-	public static Source lastSource = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES >--- */
@@ -208,7 +211,7 @@ public class CompilerDriver {
 		}
 		
 		/* Read code from input file... */
-		List<String> code = Util.readFile(inputFile);
+		List<String> code = FileUtil.readFile(inputFile);
 		
 		/* ...and compile! */
 		scd.compile(inputFile, code);
@@ -345,26 +348,27 @@ public class CompilerDriver {
 								e instanceof OPT0_EXC || e instanceof SNIPS_EXC;
 			
 			/* Exception is not ordinary and internal, print message and stack trace */
-			if (!customExc) 
-				log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
-			
-			if (printErrors || !customExc) e.printStackTrace();
-			
-			if (!customExc) {
-				log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
+			if (printErrors || !customExc) {
+				if (!customExc) {
+					log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
+					
+					log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
+					
+					/* Give rough estimate where error occurred */
+					
+					String approx = "Pipeline Stage: " + currentStage.name;
+					
+					if (stackTrace != null) 
+						approx += ", at location estimate: " + stackTrace.peek().getSource().getSourceMarker();
+					else
+						approx = approx.substring(0, approx.length() - 2);
+					
+					log.add(new Message(approx, LogPoint.Type.FAIL));
+				}
 				
-				/* Give rough estimate where error occurred */
-				
-				String approx = "Pipeline Stage: " + currentStage.name + ", ";
-				
-				if (lastSource != null) 
-					approx += "at location estimate: " + lastSource.getSourceMarker();
-				else
-					approx = approx.substring(0, approx.length() - 2);
-				
-				log.add(new Message(approx, LogPoint.Type.FAIL));
+				e.printStackTrace();
 			}
-		
+			
 			this.thrownException = e;
 			if (expectError) return null;
 		}
@@ -384,7 +388,7 @@ public class CompilerDriver {
 		log.clear();
 		
 		if (outputPath != null && output != null) {
-			Util.writeInFile(output, outputPath);
+			FileUtil.writeInFile(output, outputPath);
 			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
 		}
 		
@@ -397,34 +401,18 @@ public class CompilerDriver {
 			String [] sp = path.replace('\\', '/').split("/");
 			path = path.substring(0, path.length() - sp [sp.length - 1].length());
 			
-			Util.writeInFile(out, path + "compile.log");
+			FileUtil.writeInFile(out, path + "compile.log");
 		}
 		
 		return output;
 	}
 	
-	public double optimizeInstructionList(List<ASMInstruction> ins, boolean isMainFile) {
-		double before = ins.size();
-		
-		ProgressMessage aopt_progress = null;
-		
-		if (isMainFile)
-			aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
-		
-		ASMOptimizer opt = new ASMOptimizer();
-		opt.optimize(ins);
-	
-		if (isMainFile) aopt_progress.finish();
-		
-		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
-	}
-	
-	public List<String> buildOutput(AsNTranslationUnit unit, boolean isModule) {
+	public List<String> buildOutput(TranslationUnit unit, boolean isModule) {
 		
 		List<ASMInstruction> unitBuild = unit.buildTranslationUnit();
 		List<String> output = new ArrayList();
 		
-		boolean isMainFile = unit.sourceFile.equals(Util.toASMPath(inputFile.getPath()));
+		boolean isMainFile = unit.sourceFile.equals(RessourceManager.instance.toASMPath(inputFile.getPath()));
 		
 		if (unit.hasVersionChanged() || isMainFile || pruneModules) {
 			
@@ -535,19 +523,9 @@ public class CompilerDriver {
 		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
-			for (XMLNode c : sys_config.getNode("Library").getChildren()) {
-				String [] v = c.getValue().split(":");
-				if (v [0].equals(filePath)) 
-					filePath = v [1];
-			}
 			
-			File file = new File(filePath);
-			
-			/* Read from file */
-			List<String> code = Util.readFile(file);
-			
-			if (code == null) 
-				code = Util.readFile(new File("release\\" + filePath));
+			File file = new File(RessourceManager.instance.resolve(filePath));
+			List<String> code = RessourceManager.instance.getFile(filePath);
 			
 			/* Libary was not found */
 			if (code == null) 
@@ -608,7 +586,6 @@ public class CompilerDriver {
 	
 			/* ---< COMPILER PIPELINE STAGES >--- */
 	private static List<LineObject> STAGE_PREP(List<String> codeIn, String filePath) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.PREP;
 		PreProcessor preProcess = new PreProcessor(codeIn, inputFile.getPath());
 		List<LineObject> preCode = preProcess.getProcessed();
@@ -619,7 +596,6 @@ public class CompilerDriver {
 	}
 	
 	private static List<Token> STAGE_SCAN(List<LineObject> code) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.SCAN;
 		ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
 		Scanner scanner = new Scanner(code, scan_progress);
@@ -629,7 +605,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_PARS(List<Token> dequeue) throws PARS_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.PARS;
 		ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
 		Parser parser = new Parser(dequeue, parse_progress);
@@ -639,7 +614,6 @@ public class CompilerDriver {
 	}
 
 	private static SyntaxElement STAGE_PRE1(SyntaxElement AST) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.IMPM;
 		Program p = (Program) AST;
 		p.fileName = inputFile.getPath();
@@ -663,7 +637,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_NAME(SyntaxElement AST) {
-		lastSource = null;
 		currentStage = PIPE_STAGE.NAMM;
 		NamespaceProcessor nameProc = new NamespaceProcessor();
 		nameProc.process((Program) AST);
@@ -671,7 +644,6 @@ public class CompilerDriver {
 	}
 	
 	private static SyntaxElement STAGE_CTEX(SyntaxElement AST) throws CTEX_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.CTEX;
 		ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
 		ContextChecker ctx = new ContextChecker(AST, ctx_progress);
@@ -683,7 +655,6 @@ public class CompilerDriver {
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) throws OPT0_EXC {
 		if (useASTOptimizer) {
 			double nodes_before = AST.visit(x -> { return true; }).size();
-			lastSource = null;
 			currentStage = PIPE_STAGE.OPT0;
 			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
 			ASTOptimizer opt0 = new ASTOptimizer();
@@ -709,7 +680,6 @@ public class CompilerDriver {
 	}
 	
 	private static AsNBody STAGE_CGEN(SyntaxElement AST) throws CGEN_EXC, CTEX_EXC {
-		lastSource = null;
 		currentStage = PIPE_STAGE.CGEN;
 		ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
 		AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
@@ -729,13 +699,12 @@ public class CompilerDriver {
 	
 	private static AsNBody STAGE_OPT1(AsNBody body) {
 		if (useASMOptimizer) {
-			lastSource = null;
 			currentStage = PIPE_STAGE.OPT1;
 			
-			double rate = driver.optimizeInstructionList(body.instructions, true);
+			double rate = new ASMOptimizer().optimize(body.instructions, true);
 			
-			for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
-				rate += driver.optimizeInstructionList(entry.getValue().textSection, false);
+			for (Entry<String, TranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+				rate += new ASMOptimizer().optimize(entry.getValue().textSection, false);
 			
 			rate /= AsNBody.translationUnits.size();
 			
@@ -754,18 +723,18 @@ public class CompilerDriver {
 		return body;
 	}
 	
-	private static void STAGE_DUMP(HashMap<String, AsNTranslationUnit> translationUnits) {
+	private static void STAGE_DUMP(HashMap<String, TranslationUnit> translationUnits) {
 		if (buildModulesRecurse) {
-			for (Entry<String, AsNTranslationUnit> entry : translationUnits.entrySet()) {
-				String path = PreProcessor.resolveToPath(entry.getKey());
+			for (Entry<String, TranslationUnit> entry : translationUnits.entrySet()) {
+				String path = RessourceManager.instance.resolve(entry.getKey());
 
 				/* Build main file seperately */
-				String excludeMainPath = Util.toASMPath(inputFile.getPath());
+				String excludeMainPath = RessourceManager.instance.toASMPath(inputFile.getPath());
 				if (entry.getKey().equals(excludeMainPath)) continue;
 				
 				List<String> module = driver.buildOutput(entry.getValue(), true);
 				
-				boolean write = Util.writeInFile(module, path);
+				boolean write = FileUtil.writeInFile(module, path);
 				if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
 			}
 		}
@@ -903,8 +872,8 @@ public class CompilerDriver {
 			/* --- RESSOURCES --- */
 	public void readConfig() {
 		/* Read Configuration */
-		List<String> conf = Util.readFile(new File("release\\sys-inf.xml"));
-		if (conf == null) conf = Util.readFile(new File("sys-inf.xml"));
+		List<String> conf = FileUtil.readFile(new File("release\\sys-inf.xml"));
+		if (conf == null) conf = FileUtil.readFile(new File("sys-inf.xml"));
 		
 		try {
 			sys_config  = XMLParser.parse(conf);
@@ -917,7 +886,7 @@ public class CompilerDriver {
 		XMLNode library = new XMLNode("Library");
 		
 		List<String> paths = new ArrayList();
-		paths.addAll(Util.fileWalk("release/lib/").stream().filter(x -> !x.endsWith(".s")).collect(Collectors.toList()));
+		paths.addAll(FileUtil.fileWalk("release/lib/").stream().filter(x -> !x.endsWith(".s")).collect(Collectors.toList()));
 		paths.stream().forEach(x -> {
 			/* Cut off 'release/' from path */
 			x = x.substring(8);

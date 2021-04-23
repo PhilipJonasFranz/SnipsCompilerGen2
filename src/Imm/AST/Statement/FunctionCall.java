@@ -2,6 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
@@ -90,12 +91,9 @@ public class FunctionCall extends Statement implements Callee {
 	}
 	
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "Function Call: " + this.path);
 		if (this.proviso != null && !this.proviso.isEmpty()) {
-			String s = "{";
-			for (TYPE t : this.proviso) s += t.typeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += "}";
+			String s = this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "{", "}"));
 			CompilerDriver.outs.print(s);
 		}
 		
@@ -106,12 +104,11 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkCall(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -132,10 +129,9 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		if (this.anonTarget == null) {
+		if (this.anonTarget == null) 
 			for (int i = 0; i < this.proviso.size(); i++) 
 				ProvisoUtil.mapNTo1(this.proviso.get(i), context);
-		}
 		
 		for (Expression e : this.parameters) 
 			e.setContext(context);
@@ -145,21 +141,13 @@ public class FunctionCall extends Statement implements Callee {
 		List<String> code = new ArrayList();
 		String s = this.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		s += "(";
 		
-		if (!this.parameters.isEmpty()) {
-			for (Expression e : this.parameters)
-				s += e.codePrint() + ", ";
-			s = s.substring(0, s.length() - 2);
-		}
+		if (!this.parameters.isEmpty()) 
+			s += this.parameters.stream().map(Expression::codePrint).collect(Collectors.joining(", "));
 		
 		s += ");";
 		code.add(Util.pad(d) + s);

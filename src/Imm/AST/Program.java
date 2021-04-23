@@ -47,7 +47,12 @@ public class Program extends SyntaxElement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		return ctx.check();
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.check();
+		
+		ctx.popTrace();
+		return t;
 	}
 
 	public Program opt(ASTOptimizer opt) throws OPT0_EXC {

@@ -30,7 +30,12 @@ public abstract class BoolNFoldExpression extends NFoldExpression {
 	
 			/* ---< METHODS >--- */
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		return ctx.checkBoolNFoldExpression(this);
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkBoolNFoldExpression(this);
+		
+		ctx.popTrace();
+		return t;
 	}
 	
 } 

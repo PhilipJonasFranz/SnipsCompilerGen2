@@ -42,16 +42,15 @@ public class IDRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "IDRef: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "IDRef: " + this.path + "<" + ((this.getType() != null)? this.getType() : "?") + ">");
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkIDRef(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

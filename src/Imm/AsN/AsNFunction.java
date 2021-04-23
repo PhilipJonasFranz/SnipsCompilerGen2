@@ -2,6 +2,7 @@ package Imm.AsN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.MemoryMap;
 import CGen.RegSet;
@@ -42,11 +43,10 @@ import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Opt.ASM.ASMOptimizer;
 import Opt.AST.Util.Matcher;
-import PreP.PreProcessor;
 import Res.Const;
+import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
 import Util.Pair;
-import Util.Util;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
@@ -124,20 +124,23 @@ public class AsNFunction extends AsNCompoundStatement {
 					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
 				
 				/* Replace .hn with .sn in module link */
-				String source = Util.toASMPath(f.getSource().sourceFile);
+				String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
 				
-				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix()));
+				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path + f.provisosCalls.get(k).getProvisoPostfix()));
 				
 				/* Check if required module exists */
-				String mappedPath = PreProcessor.resolveToPath(source);
-				if (PreProcessor.getFile(mappedPath) == null) {
+				String mappedPath = RessourceManager.instance.resolve(source);
+				if (RessourceManager.instance.getFile(mappedPath) == null) {
 					AsNBody.progress.abort();
-					new Message("Module '" + f.path.build() + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
+					new Message("Module '" + f.path + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
 					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
 				}
 				
 				continue;
 			}
+			
+			if (f.body == null) 
+				throw new CGEN_EXC("Attempted to cast function without body: " + f.path.build());
 			
 			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
 			
@@ -184,20 +187,17 @@ public class AsNFunction extends AsNCompoundStatement {
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
 			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
-				com = "Function: " + f.path.build();
+				com = "Function: " + f.path;
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisosTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
 					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
-						for (int x = 0; x < types.size(); x++) 
-							com += types.get(x).provisoFree().typeString() + ", ";
-						
-						com = com.trim().substring(0, com.trim().length() - 1);
+						com += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
 						
 						if (z < f.provisosCalls.size() - 1) com += " | ";
 					}
@@ -424,7 +424,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) 
 				func.instructions.add(new ASMSeperator());
 			
-			if (!f.provisosTypes.isEmpty()) {
+			if (!f.provisoTypes.isEmpty()) {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
@@ -432,7 +432,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			LabelUtil.currentContext = null;
 		}
 		
-		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
+		if (!f.provisoTypes.isEmpty()) func.instructions.addAll(all);
 	
 		return func;
 	}

@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Ctx.Util.CheckUtil.Callee;
@@ -63,9 +64,9 @@ public class InlineCall extends Expression implements Callee {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + ((this.anonTarget == null)? "" : "Anonymous ") + "Inline Call: " + this.path);
 		if (this.calledFunction != null) {
-			for (TYPE t : this.proviso) CompilerDriver.outs.print(", " + t.typeString());
+			for (TYPE t : this.proviso) CompilerDriver.outs.print(", " + t);
 			CompilerDriver.outs.println(" " + ((this.calledFunction != null)? this.calledFunction.toString().split("@") [1] : "?"));
 		}
 		else {
@@ -79,8 +80,7 @@ public class InlineCall extends Expression implements Callee {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkCall(this);
 		
@@ -96,7 +96,7 @@ public class InlineCall extends Expression implements Callee {
 			}
 		}
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -206,21 +206,13 @@ public class InlineCall extends Expression implements Callee {
 	public String codePrint() {
 		String s = this.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		s += "(";
 		
-		if (!this.parameters.isEmpty()) {
-			for (Expression e : this.parameters)
-				s += e.codePrint() + ", ";
-			s = s.substring(0, s.length() - 2);
-		}
+		if (!this.parameters.isEmpty()) 
+			s += this.parameters.stream().map(Expression::codePrint).collect(Collectors.joining(", "));
 		
 		s += ")";
 		return s;

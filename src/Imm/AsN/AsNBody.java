@@ -53,9 +53,11 @@ import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
 import PreP.PreProcessor;
+import Res.Manager.FileUtil;
+import Res.Manager.RessourceManager;
+import Res.Manager.TranslationUnit;
 import Snips.CompilerDriver;
 import Util.Source;
-import Util.Util;
 import Util.Logging.ProgressMessage;
 
 public class AsNBody extends AsNNode {
@@ -70,9 +72,9 @@ public class AsNBody extends AsNNode {
 	
 	public static LiteralUtil literalManager;
 	
-	public static HashMap<String, AsNTranslationUnit> translationUnits = new HashMap();
+	public static HashMap<String, TranslationUnit> translationUnits = new HashMap();
 	
-	public AsNTranslationUnit originUnit;
+	public TranslationUnit originUnit;
 	
 	private static List<ASMInstruction> globalVarReferences;
 	
@@ -92,9 +94,9 @@ public class AsNBody extends AsNNode {
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		
-		originPath = Util.toASMPath(CompilerDriver.inputFile.getPath());
-		body.originUnit = new AsNTranslationUnit(originPath);
-		body.originUnit.versionID = Util.computeHashSum(CompilerDriver.inputFile.getPath());
+		originPath = RessourceManager.instance.toASMPath(CompilerDriver.inputFile.getPath());
+		body.originUnit = new TranslationUnit(originPath);
+		body.originUnit.versionID = FileUtil.computeHashSum(CompilerDriver.inputFile.getPath());
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
 		map = new MemoryMap();
@@ -207,16 +209,16 @@ public class AsNBody extends AsNNode {
 							}
 							
 							String extPostfix = LabelUtil.getProvisoPostfix(extTypes);
-							ASMDataLabel entry = new ASMDataLabel(def.extension.path.build() + extPostfix, new MemoryWordOp(0));
+							ASMDataLabel entry = new ASMDataLabel(def.extension.path + extPostfix, new MemoryWordOp(0));
 							parent = new MemoryWordRefOp(entry);
 						}
 						
-						ASMDataLabel entry = new ASMDataLabel(def.path.build() + postfix, parent);
+						ASMDataLabel entry = new ASMDataLabel(def.path + postfix, parent);
 						dataBlock.add(entry);
 						def.SIDLabelMap.put(postfix, entry);
 						
 						if (!def.implemented.isEmpty()) {
-							String name = def.path.build() + postfix + "_resolver";
+							String name = def.path + postfix + "_resolver";
 							
 							MemoryWordRefOp tableRef = new MemoryWordRefOp(new ASMDataLabel(name, new MemoryWordOp(0)));
 							ASMDataLabel relay = new ASMDataLabel(name + "_relay", tableRef);
@@ -279,7 +281,7 @@ public class AsNBody extends AsNNode {
 						/* Inject instruction for .data Section */
 						MemoryOperand parent = new MemoryWordOp(0);
 						
-						ASMDataLabel entry = new ASMDataLabel(idef.path.build() + postfix, parent);
+						ASMDataLabel entry = new ASMDataLabel(idef.path + postfix, parent);
 						AsNBody.addToTranslationUnit(entry, idef.getSource(), SECTION.DATA);
 						
 						idef.IIDLabelMap.put(postfix, entry);
@@ -377,9 +379,9 @@ public class AsNBody extends AsNNode {
 		}
 		
 		/* Add all system libraries that were used */
-		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
+		for (Entry<String, TranslationUnit> entry : AsNBody.translationUnits.entrySet()) {
 	
-			AsNTranslationUnit unit = entry.getValue();
+			TranslationUnit unit = entry.getValue();
 			
 			/* Imports made by the source of this translation unit */
 			List<String> imports = PreProcessor.importsPerFile.get(entry.getValue().sourceFile);
@@ -411,7 +413,7 @@ public class AsNBody extends AsNNode {
 						/* Map path to dynamic imports, check if import was used */
 						String iPath = imp.split(" ") [1];
 						iPath = iPath.substring(0, iPath.length() - 1) + "sn";
-						iPath = PreProcessor.resolveToPath(iPath);
+						iPath = RessourceManager.instance.resolve(iPath);
 						
 						if (!CompilerDriver.buildModulesRecurse || CompilerDriver.driver.referencedLibaries.contains(iPath))
 							unit.imports.add(imp);
@@ -421,7 +423,7 @@ public class AsNBody extends AsNNode {
 		}
 		
 		/* Build the literal pool labels for all created translation units */
-		for (Entry<String, AsNTranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+		for (Entry<String, TranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
 			body.buildLiteralPools(entry.getValue().textSection, map, entry.getValue().sourceFile);
 		
 		progress.incProgress(1);
@@ -504,16 +506,16 @@ public class AsNBody extends AsNNode {
 	 * @param source The source of the ressource that generated the assembly
 	 */
 	public static void addToTranslationUnit(List<ASMInstruction> ins, Source source, SECTION section) {
-		String path = Util.toASMPath(source.sourceFile);
+		String path = RessourceManager.instance.toASMPath(source.sourceFile);
 			
 		if (!AsNBody.translationUnits.containsKey(path)) {
-			AsNTranslationUnit unit = new AsNTranslationUnit(path);
-			unit.versionID = Util.computeHashSum(source.sourceFile);
+			TranslationUnit unit = new TranslationUnit(path);
+			unit.versionID = FileUtil.computeHashSum(source.sourceFile);
 			AsNBody.translationUnits.put(unit.sourceFile, unit);
 			unit.append(ins, section);
 		}
 		else {
-			AsNTranslationUnit unit = AsNBody.translationUnits.get(path);
+			TranslationUnit unit = AsNBody.translationUnits.get(path);
 			unit.append(ins, section);
 		}
 	}

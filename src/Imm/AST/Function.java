@@ -3,6 +3,7 @@ package Imm.AST;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
@@ -97,7 +98,7 @@ public class Function extends CompoundStatement {
 	/** 
 	 * List of the provisos types this function is templated with 
 	 */
-	public List<TYPE> provisosTypes;
+	public List<TYPE> provisoTypes;
 	
 	/** 
 	 * A list that contains the combinations of types this function was templated with. 
@@ -182,7 +183,7 @@ public class Function extends CompoundStatement {
 		
 		this.modifier = modifier;
 		
-		this.provisosTypes = proviso;
+		this.provisoTypes = proviso;
 		
 		if (path.build().equals("main")) 
 			/* Add default mapping */
@@ -192,13 +193,13 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType + "> " + this.path);
 		
-		if (!this.provisosTypes.isEmpty()) {
+		if (!this.provisoTypes.isEmpty()) {
 			CompilerDriver.outs.print("<");
-			for (int i = 0; i < this.provisosTypes.size(); i++) {
-				CompilerDriver.outs.print(this.provisosTypes.get(i).typeString());
-				if (i < this.provisosTypes.size() - 1) CompilerDriver.outs.print(", ");
+			for (int i = 0; i < this.provisoTypes.size(); i++) {
+				CompilerDriver.outs.print(this.provisoTypes.get(i).typeString());
+				if (i < this.provisoTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
 			CompilerDriver.outs.print(">");
 		}
@@ -206,7 +207,7 @@ public class Function extends CompoundStatement {
 		CompilerDriver.outs.print("(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			CompilerDriver.outs.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
+			CompilerDriver.outs.print("<" + dec.getRawType() + "> " + dec.path);
 			if (i < this.parameters.size() - 1) CompilerDriver.outs.print(", ");
 		}
 		CompilerDriver.outs.print(")");
@@ -226,12 +227,11 @@ public class Function extends CompoundStatement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkFunction(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -290,14 +290,14 @@ public class Function extends CompoundStatement {
 	 * new proviso-free mapping and store it in the proviso calls.
 	 */
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		if (context.size() != this.provisosTypes.size()) 
-			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
+		if (context.size() != this.provisoTypes.size()) 
+			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
 		
-		ProvisoUtil.mapNToN(this.provisosTypes, context);
+		ProvisoUtil.mapNToN(this.provisoTypes, context);
 
 		/* Copy proviso types with applied context */
 		List<TYPE> clone = new ArrayList();
-		for (TYPE t : this.provisosTypes) clone.add(t.clone());
+		for (TYPE t : this.provisoTypes) clone.add(t.clone());
 		
 		ProvisoUtil.mapNTo1(this.returnType, clone);
 		
@@ -399,8 +399,8 @@ public class Function extends CompoundStatement {
 	public void translateProviso(List<TYPE> source, List<TYPE> target) {
 		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
 		
-		for (int i = 0; i < this.provisosTypes.size(); i++)
-			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
+		for (int i = 0; i < this.provisoTypes.size(); i++)
+			this.provisoTypes.set(i, ProvisoUtil.translate(this.provisoTypes.get(i), source, target));
 		
 		for (Declaration d : this.parameters)
 			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
@@ -443,7 +443,7 @@ public class Function extends CompoundStatement {
 	 */
 	public Function cloneSignature() {
 		List<TYPE> provClone = new ArrayList();
-		for (TYPE t : this.provisosTypes)
+		for (TYPE t : this.provisoTypes)
 			provClone.add(t.clone());
 		
 		List<Declaration> params = new ArrayList();
@@ -479,7 +479,7 @@ public class Function extends CompoundStatement {
 		/* Match function name, not namespace path */
 		match &= f0.path.getLast().equals(f1.path.getLast());
 		
-		if (matchFullNames) match &= f0.path.build().equals(f1.path.build());
+		if (matchFullNames) match &= f0.path.equals(f1.path);
 		
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;
@@ -546,22 +546,14 @@ public class Function extends CompoundStatement {
 		
 		s += this.path.build();
 		
-		if (!this.provisosTypes.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.provisosTypes)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.provisoTypes.isEmpty()) 
+			s += this.provisoTypes.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		s += "(";
 		
-		if (!this.parameters.isEmpty()) {
-			for (Declaration p : this.parameters) {
-				s += p.getType().codeString() + " " + p.path.build() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
-		}
+		if (!this.parameters.isEmpty()) 
+			s += this.parameters.stream().map(x -> x.getType().codeString() + " " + x.path)
+				.collect(Collectors.joining(", "));
 		
 		s += ")";
 		

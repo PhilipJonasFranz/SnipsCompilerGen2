@@ -1,11 +1,11 @@
 package Imm.TYPE.PRIMITIVES;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Function;
-import Imm.AST.Statement.Declaration;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
@@ -72,19 +72,11 @@ public class FUNC extends PRIMITIVE<Function> {
 	public String typeString() {
 		String s = "FUNC<";
 		if (this.funcHead != null) {
-			for (Declaration dec : this.funcHead.parameters) {
-				s += dec.getType().typeString() + ",";
-			}
-			
-			if (!this.funcHead.parameters.isEmpty()) s = s.substring(0, s.length() - 1);
-			
+			s += this.funcHead.parameters.stream().map(x -> x.getType().toString()).collect(Collectors.joining(","));
 			s += " -> ";
-			
 			s += this.funcHead.getReturnTypeDirect().typeString();
 		}
-		else {
-			s += "?";
-		}
+		else s += "?";
 		
 		s += ">";
 		return s;

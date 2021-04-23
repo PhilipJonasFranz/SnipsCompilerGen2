@@ -1,20 +1,19 @@
 package PreP;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.SNIPS_EXC;
 import Res.Const;
+import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Source;
-import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
-import XMLParser.XMLParser.XMLNode;
 
 public class PreProcessor {
 
@@ -152,14 +151,14 @@ public class PreProcessor {
 					}
 					
 					/* Keep track which imports were made by which file */
-					String asmPath = Util.toASMPath(this.process.get(i).fileName);
+					String asmPath = RessourceManager.instance.toASMPath(this.process.get(i).fileName);
 					List<String> importsFromFile = new ArrayList();
 					if (importsPerFile.containsKey(asmPath))
 						importsFromFile = importsPerFile.get(asmPath);
 					else
 						importsPerFile.put(asmPath, importsFromFile);
 					
-					String imp = Util.toASMPath(path);
+					String imp = RessourceManager.instance.toASMPath(path);
 					if (!importsFromFile.contains(imp))
 						importsFromFile.add(imp);
 					
@@ -173,7 +172,7 @@ public class PreProcessor {
 					 */
 					if (path.endsWith(".sn")) {
 						String modPath = path.substring(0, path.length() - 2) + "hn";
-						if (getFile(modPath) != null) 
+						if (RessourceManager.instance.ressourceExists(modPath)) 
 							i = this.includeLines(modPath, i, passedFlags0);
 					}
 					
@@ -186,7 +185,7 @@ public class PreProcessor {
 					 */
 					if (CompilerDriver.buildModulesRecurse && path.endsWith(".hn")) {
 						String modPath = path.substring(0, path.length() - 2) + "sn";
-						if (getFile(modPath) != null) 
+						if (RessourceManager.instance.ressourceExists(modPath)) 
 							i = this.includeLines(modPath, i, passedFlags0);
 					}
 					
@@ -210,10 +209,7 @@ public class PreProcessor {
 		String incPath = path;
 		if (!passedFlags.isEmpty()) {
 			incPath += " | ";
-			for (Pair<String, String> flag : passedFlags) {
-				incPath += flag.first + "=" + flag.second + ", ";
-			}
-			incPath = incPath.substring(0, incPath.length() - 2);
+			incPath += passedFlags.stream().map(x -> x.first + "=" + x.second).collect(Collectors.joining(", "));
 		}
 		
 		if (!imports.contains(incPath)) {
@@ -221,7 +217,7 @@ public class PreProcessor {
 				imports.add(incPath);
 				modulesIncluded++;
 				
-				List<String> code = getFile(path);
+				List<String> code = RessourceManager.instance.getFile(path);
 				
 				PreProcessor processor = new PreProcessor(code, path);
 				List<LineObject> lines = processor.getProcessedR(passedFlags);
@@ -237,71 +233,6 @@ public class PreProcessor {
 		}
 		
 		return i;
-	}
-	
-	public static List<String> getFile(String filePath) {
-		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").getChildren()) {
-			String [] v = c.getValue().split(":");
-			if (v [0].equals(filePath)) {
-				filePath = v [1];
-			}
-		}
-		
-		File file = new File(filePath);
-		
-		/* Read from file */
-		List<String> code = Util.readFile(file);
-		
-		/* Read from release library */
-		if (code == null) {
-			file = new File("release\\" + filePath);
-			code = Util.readFile(file);
-		}
-		
-		/* Use path relative to input file */
-		if (code == null) {
-			file = new File(CompilerDriver.inputFile.getParent() + "\\" + filePath);
-			code = Util.readFile(file);
-		}
-		
-		return code;
-	}
-	
-	public static String resolveToPath(String filePath) {
-		for (XMLNode c : CompilerDriver.sys_config.getNode("Library").getChildren()) {
-			String [] v = c.getValue().split(":");
-			
-			String modPath = v [0];
-			if (modPath.equals(filePath)) {
-				return "release/" + v [1];
-			}
-			
-			modPath = Util.toASMPath(v [0]);
-			if (modPath.equals(filePath)) {
-				return "release/" + Util.toASMPath(v [1]);
-			}
-		}
-		
-		File file = new File(filePath);
-		
-		/* Read from file */
-		List<String> code = Util.readFile(file);
-		
-		if (code != null) return filePath;
-		else {
-			file = new File("release/" + filePath);
-			code = Util.readFile(file);
-		}
-		
-		if (code != null) {
-			return "release/" + filePath;
-		}
-		else {
-			filePath = filePath.replace("\\", "/");
-			String [] sp = filePath.split("/") ;
-			String in = CompilerDriver.inputFile.getParent();
-			return in + "/" + sp [sp.length - 1];
-		}
 	}
 	
 	public static boolean evaluate(String cond) {

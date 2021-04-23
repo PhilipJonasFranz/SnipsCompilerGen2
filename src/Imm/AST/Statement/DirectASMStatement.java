@@ -2,6 +2,7 @@ package Imm.AST.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
@@ -61,12 +62,11 @@ public class DirectASMStatement extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkDirectASMStatement(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -111,14 +111,9 @@ public class DirectASMStatement extends Statement {
 		
 		String s = "asm";
 		
-		if (!this.dataIn.isEmpty()) {
-			s += "(";
-			for (Pair<Expression, REG> p : this.dataIn) {
-				s += p.first.codePrint() + " : " + p.second.toString().toLowerCase() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
-			s += ")";
-		}
+		if (!this.dataIn.isEmpty()) 
+			s += this.dataIn.stream().map(x -> x.first.codePrint() + " : " + x.second.toString().toLowerCase())
+				.collect(Collectors.joining(", ", "(", ")"));
 		
 		s += " {";
 		code.add(Util.pad(d) + s);
@@ -130,14 +125,9 @@ public class DirectASMStatement extends Statement {
 		
 		s = "}";
 		
-		if (!this.dataOut.isEmpty()) {
-			s += " (";
-			for (Pair<Expression, REG> p : this.dataOut) {
-				s += p.second.toString().toLowerCase() + " : " + p.first.codePrint() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
-			s += ")";
-		}
+		if (!this.dataOut.isEmpty()) 
+			s += this.dataOut.stream().map(x -> x.second.toString().toLowerCase() + " : " + x.first.codePrint())
+					.collect(Collectors.joining(", ", "(", ")"));
 		
 		s += ";";
 		code.add(Util.pad(d) + s);

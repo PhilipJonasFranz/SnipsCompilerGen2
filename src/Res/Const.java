@@ -190,7 +190,7 @@ public class Const {
 	
 	public static final String DIRECT_ASM_HAS_NO_OUTPUTS = "Direct ASM Operation has no explicit outputs, %s";
 	
-	public static final String FAILED_TO_CHECK_PARAMETER = "Failed to check parameter %d or function call %s";
+	public static final String FAILED_TO_CHECK_PARAMETER = "Failed to check parameter %d of function call %s";
 	
 	
 			/* ---< PROVISO RELATED >--- */

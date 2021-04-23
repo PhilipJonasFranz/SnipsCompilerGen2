@@ -24,7 +24,12 @@ public abstract class BoolUnaryExpression extends UnaryExpression {
 	
 			/* ---< METHODS >--- */
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		return ctx.checkBoolUnaryExpression(this);
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkBoolUnaryExpression(this);
+		
+		ctx.popTrace();
+		return t;
 	}
 	
 } 

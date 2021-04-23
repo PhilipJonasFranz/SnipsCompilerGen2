@@ -41,8 +41,7 @@ public class StructSelectLhsId extends LhsId {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkStructSelect(this.select);
 		if (this.select.selector instanceof IDRef) {
@@ -54,7 +53,7 @@ public class StructSelectLhsId extends LhsId {
 			this.origin = sel.idRef.origin;
 		}
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	

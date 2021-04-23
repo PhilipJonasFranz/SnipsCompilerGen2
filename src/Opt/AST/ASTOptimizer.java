@@ -687,7 +687,7 @@ public class ASTOptimizer {
 		
 		/* Make sure declaration was registered */
 		if (!this.state.getCState().containsKey(idRef.origin))
-			throw new OPT0_EXC("Unknown declaration: " + idRef.path.build());
+			throw new OPT0_EXC("Unknown declaration: " + idRef.path);
 		
 		/* 
 		 * If variable has not been modified, and not been referenced,

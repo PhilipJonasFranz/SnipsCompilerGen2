@@ -35,7 +35,26 @@ public class Assignment extends Statement {
 		ORR_ASSIGN, AND_ASSIGN,
 		
 		/* Bitwise Operation */
-		BIT_ORR_ASSIGN, BIT_AND_ASSIGN, BIT_XOR_ASSIGN
+		BIT_ORR_ASSIGN, BIT_AND_ASSIGN, BIT_XOR_ASSIGN;
+		
+		public String toString() {
+			String a = "";
+			
+			if (this == ASSIGN_ARITH.ADD_ASSIGN) a = "+";
+			if (this == ASSIGN_ARITH.AND_ASSIGN) a = "&&";
+			if (this == ASSIGN_ARITH.BIT_AND_ASSIGN) a = "&";
+			if (this == ASSIGN_ARITH.BIT_ORR_ASSIGN) a = "|";
+			if (this == ASSIGN_ARITH.BIT_XOR_ASSIGN) a = "^";
+			if (this == ASSIGN_ARITH.DIV_ASSIGN) a = "/";
+			if (this == ASSIGN_ARITH.LSL_ASSIGN) a = "<<";
+			if (this == ASSIGN_ARITH.LSR_ASSIGN) a = ">>";
+			if (this == ASSIGN_ARITH.MOD_ASSIGN) a = "%";
+			if (this == ASSIGN_ARITH.MUL_ASSIGN) a = "*";
+			if (this == ASSIGN_ARITH.ORR_ASSIGN) a = "||";
+			if (this == ASSIGN_ARITH.SUB_ASSIGN) a = "-";
+			
+			return a;
+		}
 	}
 	
 	
@@ -70,12 +89,11 @@ public class Assignment extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkAssignment(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -110,22 +128,7 @@ public class Assignment extends Statement {
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
 		
-		String a = "";
-		
-		if (this.assignArith == ASSIGN_ARITH.ADD_ASSIGN) a = "+";
-		if (this.assignArith == ASSIGN_ARITH.AND_ASSIGN) a = "&&";
-		if (this.assignArith == ASSIGN_ARITH.BIT_AND_ASSIGN) a = "&";
-		if (this.assignArith == ASSIGN_ARITH.BIT_ORR_ASSIGN) a = "|";
-		if (this.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) a = "^";
-		if (this.assignArith == ASSIGN_ARITH.DIV_ASSIGN) a = "/";
-		if (this.assignArith == ASSIGN_ARITH.LSL_ASSIGN) a = "<<";
-		if (this.assignArith == ASSIGN_ARITH.LSR_ASSIGN) a = ">>";
-		if (this.assignArith == ASSIGN_ARITH.MOD_ASSIGN) a = "%";
-		if (this.assignArith == ASSIGN_ARITH.MUL_ASSIGN) a = "*";
-		if (this.assignArith == ASSIGN_ARITH.ORR_ASSIGN) a = "||";
-		if (this.assignArith == ASSIGN_ARITH.SUB_ASSIGN) a = "-";
-		
-		String s = this.lhsId.codePrint() + " " + a + "= " + this.value.codePrint() + ";";
+		String s = this.lhsId.codePrint() + " " + this.assignArith.toString() + "= " + this.value.codePrint() + ";";
 		
 		code.add(Util.pad(d) + s);
 		return code;

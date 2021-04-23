@@ -71,7 +71,7 @@ public class AsNDirectASMStatement extends AsNStatement {
 				r.print();
 				st.print();
 				
-				if (off == -1) throw new SNIPS_EXC(ref.path.build() + " is not loaded!");
+				if (off == -1) throw new SNIPS_EXC(ref.path + " is not loaded!");
 				
 				asm.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}

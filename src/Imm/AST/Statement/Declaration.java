@@ -81,9 +81,9 @@ public class Declaration extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
-			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type + "> " + this.path);
 		} catch (Exception e) {
-			CompilerDriver.outs.println(Util.pad(d) + "Declaration <?> " + this.path.build());
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <?> " + this.path);
 		}
 		
 		if (rec && this.value != null) 
@@ -91,12 +91,11 @@ public class Declaration extends Statement {
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkDeclaration(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -161,7 +160,7 @@ public class Declaration extends Statement {
 
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
-		String s = this.type.codeString() + " " + this.path.build();
+		String s = this.type.codeString() + " " + this.path;
 		if (this.value != null)
 			s += " = " + this.value.codePrint() + ";";
 		code.add(Util.pad(d) + s);

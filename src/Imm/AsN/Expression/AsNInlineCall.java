@@ -30,7 +30,7 @@ public class AsNInlineCall extends AsNExpression {
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
 			if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead && ic.calledFunction.definedInInterface == null) {
-				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, ic.calledFunction.path.build(), ic.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, ic.calledFunction.path, ic.getSource().getSourceMarker());
 			}
 		}
 		

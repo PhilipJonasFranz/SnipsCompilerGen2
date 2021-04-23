@@ -2,6 +2,7 @@ package Imm.TYPE.COMPOSIT;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.Util.ProvisoUtil;
 import Imm.AST.Typedef.InterfaceTypedef;
@@ -52,14 +53,8 @@ public class INTERFACE extends COMPOSIT {
 	public String typeString() {
 		String s = this.typedef.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso) {
-				s += t.typeString() + ",";
-			}
-			s = s.substring(0, s.length() - 1);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(",", "<", ">"));
 		
 		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 		return s;
@@ -67,12 +62,10 @@ public class INTERFACE extends COMPOSIT {
 	
 	public String getProvisoString() {
 		String s = "";
-		if (!this.proviso.isEmpty()) {
-			s += " {";
-			for (TYPE t : this.proviso) s += t.typeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += "}";
-		}
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", " {", "}"));
+		
 		return s;
 	}
 
@@ -145,13 +138,9 @@ public class INTERFACE extends COMPOSIT {
 	
 	public String codeString() {
 		String s = this.getTypedef().path.build();
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
 		
 		return s;
 	}

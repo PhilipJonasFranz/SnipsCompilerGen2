@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
@@ -42,19 +43,18 @@ public class StructureInit extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType() : "?") + ">");
 		
 		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
-		Source temp = CompilerDriver.lastSource;
-		CompilerDriver.lastSource = this.getSource();
+		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkStructureInit(this);
 		
-		CompilerDriver.lastSource = temp;
+		ctx.popTrace();
 		return t;
 	}
 	
@@ -96,10 +96,8 @@ public class StructureInit extends Expression {
 	}
 
 	public String codePrint() {
-		String s = this.structType.getTypedef().path.build() + "::(";
-		for (Expression e : this.elements)
-			s += e.codePrint() + ", ";
-		s = s.substring(0, s.length() - 2);
+		String s = this.structType.getTypedef().path + "::(";
+		s += this.elements.stream().map(Expression::codePrint).collect(Collectors.joining(", "));
 		s += ")";
 		return s;
 	}
