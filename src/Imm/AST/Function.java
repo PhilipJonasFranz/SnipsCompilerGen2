@@ -164,6 +164,12 @@ public class Function extends CompoundStatement {
 	public int LAST_UPDATE = 0;
 	
 	/**
+	 * If this function is not null, the cast of this function
+	 * will simply relay to this function.
+	 */
+	public Function inheritLink = null;
+	
+	/**
 	 * If set to true, the '...@UID' will be included in the function
 	 * head asm label.
 	 */
@@ -188,6 +194,8 @@ public class Function extends CompoundStatement {
 		if (path.build().equals("main")) 
 			/* Add default mapping */
 			this.addProvisoMapping(null, new ArrayList());
+		
+		this.UID = Math.abs(this.signatureToString().hashCode());
 	}
 	
 	
@@ -520,6 +528,16 @@ public class Function extends CompoundStatement {
 									 this.path.build().equals("init")|| this.path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "_" + this.UID)
 				+ this.getProvisoPostfix(provisos);
 	}
+	
+	public String buildInheritedCallLabel(List<TYPE> provisos) {
+		NamespacePath path = this.inheritLink.path;
+		
+		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
+		return path.build() + ((path.build().startsWith("__") || path.build().equals("main")|| 
+									 path.build().equals("resv")|| path.build().equals("free") || path.build().equals("isa") || path.build().equals("isar") || 
+									 path.build().equals("init")|| path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "_" + this.UID)
+				+ this.getProvisoPostfix(provisos);
+	}
 
 	public Function clone() {
 		Function f = this.cloneSignature();
@@ -534,9 +552,7 @@ public class Function extends CompoundStatement {
 		return f;
 	}
 	
-	public List<String> codePrint(int d) {
-		List<String> code = new ArrayList();
-		
+	public String signatureToString() {
 		String s = "";
 		
 		if (this.modifier != MODIFIER.SHARED)
@@ -556,6 +572,14 @@ public class Function extends CompoundStatement {
 				.collect(Collectors.joining(", "));
 		
 		s += ")";
+		
+		return s;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = this.signatureToString();
 		
 		if (this.body != null) {
 			s += " {";

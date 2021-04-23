@@ -115,32 +115,67 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
 			
-			/* 
-			 * Body is null, insert include directive instead, or build 
-			 * object file only and this function is not from the main file
-			 */
-			if (!CompilerDriver.buildModulesRecurse && 
-					(f.body == null || 
-					!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
-				
-				/* Replace .hn with .sn in module link */
-				String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
-				
-				func.instructions.add(new ASMDirective(".include " + source + "@" + f.path + f.provisosCalls.get(k).getProvisoPostfix()));
-				
-				/* Check if required module exists */
-				String mappedPath = RessourceManager.instance.resolve(source);
-				if (RessourceManager.instance.getFile(mappedPath) == null) {
-					AsNBody.progress.abort();
-					new Message("Module '" + f.path + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
-					new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
+			if (f.inheritLink == null) {
+				/* 
+				 * Body is null, insert include directive instead, or build 
+				 * object file only and this function is not from the main file
+				 */
+				if (!CompilerDriver.buildModulesRecurse && 
+						(f.body == null || 
+						!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
+					
+					/* Replace .hn with .sn in module link */
+					String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
+					
+					func.instructions.add(new ASMDirective(".include " + source + "@" + f.path + f.provisosCalls.get(k).getProvisoPostfix()));
+					
+					/* Check if required module exists */
+					String mappedPath = RessourceManager.instance.resolve(source);
+					if (RessourceManager.instance.getFile(mappedPath) == null) {
+						AsNBody.progress.abort();
+						new Message("Module '" + f.path + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
+						new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
+					}
+					
+					continue;
 				}
 				
-				continue;
+				if (f.body == null) 
+					throw new CGEN_EXC("Attempted to cast function without body: " + f.path.build());
 			}
 			
-			if (f.body == null) 
-				throw new CGEN_EXC("Attempted to cast function without body: " + f.path.build());
+			/*
+			 * Function was inherited into struct but not overridden there.
+			 * We can relay to the cast of the parent implementation here.
+			 * But, we still need to create the symbolic function so the linker/assembler
+			 * recognizes it.
+			 */
+			if (f.inheritLink != null) {
+				/* Create the function head label */
+				String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
+				
+				func.generatedLabels.add(funcLabel);
+				
+				/* Add .global label */
+				ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+				func.instructions.add(globalFunction);
+				
+				
+				/* Function Header and Entry Label, add proviso specific postfix */
+				ASMLabel label = new ASMLabel(funcLabel, true);
+				f.headLabelMap.put(LabelUtil.getProvisoPostfix(f.provisosCalls.get(k).provisoMapping), label);
+				func.instructions.add(label);
+				
+				
+				String call = f.buildInheritedCallLabel(f.provisosCalls.get(k).provisoMapping);
+				
+				ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(call)));
+				branch.optFlags.add(OPT_FLAG.SYS_JMP);
+				branch.comment = new ASMComment("Relay to inherited " + call);
+				
+				func.instructions.add(branch);
+				continue;
+			}
 			
 			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
 			

@@ -388,6 +388,22 @@ public class ContextChecker {
 		this.signalStack.pop();
 		scopes.pop();
 		
+		if (f.inheritLink != null) {
+			/* 
+			 * This function is part of a struct type and was inherited by an extension.
+			 * The function was not overridden in the child, so this acts as a reference
+			 * to the parent function. We need to also check the parent function here to
+			 * register a mapping so it is casted / it is symbolically called. During casting,
+			 * this function will become a relay to the cast of the parent function.
+			 * 
+			 * We also have to set the proviso here, but since they are a 1 to 1 mapping,
+			 * we can just get the context and apply it to the function.
+			 */
+			List<TYPE> context = f.provisoTypes.stream().map(x -> x.provisoFree()).collect(Collectors.toList());
+			f.inheritLink.setContext(context);
+			f.inheritLink.check(this);
+		}
+		
 		return f.getReturnType().clone();
 	}
 	

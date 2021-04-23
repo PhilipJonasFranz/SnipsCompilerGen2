@@ -221,6 +221,8 @@ public class StructTypedef extends SyntaxElement {
 	
 				/* Create a copy of the function, but keep reference on body */
 				Function f0 = f.clone();
+				f0.inheritLink = f;
+				f0.body = null;
 				f0.path = base;
 				
 				/* Apply new source file */
