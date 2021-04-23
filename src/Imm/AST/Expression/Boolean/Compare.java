@@ -2,12 +2,13 @@ package Imm.AST.Expression.Boolean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
@@ -20,7 +21,20 @@ public class Compare extends NFoldExpression {
 	public enum COMPARATOR {
 		EQUAL, NOT_EQUAL,
 		LESS_SAME, LESS_THAN, 
-		GREATER_SAME, GREATER_THAN
+		GREATER_SAME, GREATER_THAN;
+		
+		public String toString() {
+			String comp = "";
+			
+			if (this == COMPARATOR.EQUAL) comp = "==";
+			if (this == COMPARATOR.GREATER_SAME) comp = ">=";
+			if (this == COMPARATOR.GREATER_THAN) comp = ">";
+			if (this == COMPARATOR.LESS_SAME) comp = "<=";
+			if (this == COMPARATOR.LESS_THAN) comp = "<";
+			if (this == COMPARATOR.NOT_EQUAL) comp = "!=";
+			
+			return comp;
+		}
 	}
 	
 	
@@ -76,20 +90,8 @@ public class Compare extends NFoldExpression {
 	}
 	
 	public String codePrint() {
-		String comp = "";
-		if (this.comparator == COMPARATOR.EQUAL) comp = "==";
-		if (this.comparator == COMPARATOR.GREATER_SAME) comp = ">=";
-		if (this.comparator == COMPARATOR.GREATER_THAN) comp = ">";
-		if (this.comparator == COMPARATOR.LESS_SAME) comp = "<=";
-		if (this.comparator == COMPARATOR.LESS_THAN) comp = "<";
-		if (this.comparator == COMPARATOR.NOT_EQUAL) comp = "!=";
-		
-		String s = "";
-		for (Expression e : this.operands) 
-			s += e.codePrint() + " " + comp + " ";
-		
-		s = s.substring(0, s.length() - (2 + comp.length()));
-		return s;
+		String comp = this.comparator.toString();
+		return this.operands.stream().map(Expression::codePrint).collect(Collectors.joining(" " + comp + " "));
 	}
 	
 } 

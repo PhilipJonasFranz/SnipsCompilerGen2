@@ -38,7 +38,7 @@ public class SizeOfType extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "SizeOf");
-		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.sizeType.typeString()); 
+		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.sizeType); 
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

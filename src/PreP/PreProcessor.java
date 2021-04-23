@@ -3,6 +3,7 @@ package PreP;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.SNIPS_EXC;
 import Res.Const;
@@ -208,10 +209,7 @@ public class PreProcessor {
 		String incPath = path;
 		if (!passedFlags.isEmpty()) {
 			incPath += " | ";
-			for (Pair<String, String> flag : passedFlags) {
-				incPath += flag.first + "=" + flag.second + ", ";
-			}
-			incPath = incPath.substring(0, incPath.length() - 2);
+			incPath += passedFlags.stream().map(x -> x.first + "=" + x.second).collect(Collectors.joining(", "));
 		}
 		
 		if (!imports.contains(incPath)) {

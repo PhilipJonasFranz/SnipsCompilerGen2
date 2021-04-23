@@ -3,6 +3,7 @@ package Imm.AST.Typedef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
@@ -143,12 +144,6 @@ public class InterfaceTypedef extends SyntaxElement {
 		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(newMapping), clone);
 		this.registeredMappings.add(mapping);
 		
-		String s = "";
-		for (TYPE t : newMapping)
-			s += t.typeString() + ",";
-		if (!newMapping.isEmpty())
-			s = s.substring(0, s.length() - 1);
-		
 		return mapping;
 	}
 
@@ -172,9 +167,9 @@ public class InterfaceTypedef extends SyntaxElement {
 					f0.parameters.get(a).setType(this.quickTranslate(t0, providedProvisos));
 				}
 				
-				for (int a = 0; a < f.provisosTypes.size(); a++) {
-					TYPE t0 = f0.provisosTypes.get(a);
-					f0.provisosTypes.set(a, this.quickTranslate(t0, providedProvisos));
+				for (int a = 0; a < f.provisoTypes.size(); a++) {
+					TYPE t0 = f0.provisoTypes.get(a);
+					f0.provisoTypes.set(a, this.quickTranslate(t0, providedProvisos));
 				}
 				
 				return f0;
@@ -262,20 +257,12 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		s += "interface " + this.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
 		
 		if (!this.implemented.isEmpty()) {
 			s += " : ";
-			for (INTERFACE i : this.implemented) {
-				s += i.codeString() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
+			s += this.implemented.stream().map(x -> x.codeString()).collect(Collectors.joining(", "));
 		}
 		
 		s += " {";

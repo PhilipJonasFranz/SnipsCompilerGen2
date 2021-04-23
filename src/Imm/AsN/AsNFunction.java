@@ -2,6 +2,7 @@ package Imm.AsN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.MemoryMap;
 import CGen.RegSet;
@@ -186,17 +187,14 @@ public class AsNFunction extends AsNCompoundStatement {
 				com = "Function: " + f.path.build();
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisosTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
 					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
-						for (int x = 0; x < types.size(); x++) 
-							com += types.get(x).provisoFree().typeString() + ", ";
-						
-						com = com.trim().substring(0, com.trim().length() - 1);
+						com += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
 						
 						if (z < f.provisosCalls.size() - 1) com += " | ";
 					}
@@ -423,7 +421,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) 
 				func.instructions.add(new ASMSeperator());
 			
-			if (!f.provisosTypes.isEmpty()) {
+			if (!f.provisoTypes.isEmpty()) {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
@@ -431,7 +429,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			LabelUtil.currentContext = null;
 		}
 		
-		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
+		if (!f.provisoTypes.isEmpty()) func.instructions.addAll(all);
 	
 		return func;
 	}

@@ -45,8 +45,8 @@ public class TempAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
-		CompilerDriver.outs.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Placeholder Atom <" + this.getType() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType : "?") + ">");
 		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 

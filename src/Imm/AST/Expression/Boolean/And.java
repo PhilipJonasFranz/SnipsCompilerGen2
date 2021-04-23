@@ -2,6 +2,7 @@ package Imm.AST.Expression.Boolean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
@@ -35,12 +36,7 @@ public class And extends BoolNFoldExpression {
 	}
 	
 	public String codePrint() {
-		String s = "";
-		for (Expression e : this.operands)
-			s += e.codePrint() + " && ";
-		
-		s = s.substring(0, s.length() - 4);
-		return s;
+		return this.operands.stream().map(Expression::codePrint).collect(Collectors.joining(" && "));
 	}
 
 } 

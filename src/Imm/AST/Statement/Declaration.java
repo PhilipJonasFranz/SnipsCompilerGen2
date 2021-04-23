@@ -81,7 +81,7 @@ public class Declaration extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
-			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type + "> " + this.path.build());
 		} catch (Exception e) {
 			CompilerDriver.outs.println(Util.pad(d) + "Declaration <?> " + this.path.build());
 		}

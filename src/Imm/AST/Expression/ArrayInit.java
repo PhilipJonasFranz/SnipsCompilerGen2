@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
@@ -39,7 +40,7 @@ public class ArrayInit extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType().typeString() : "?"));
+		CompilerDriver.outs.println(Util.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType() : "?"));
 		
 		if (rec) for (Expression e : this.elements) 
 			e.print(d + this.printDepthStep, rec);
@@ -92,10 +93,7 @@ public class ArrayInit extends Expression {
 		if (this.dontCareTypes) s = "[";
 		else s = "{";
 		
-		for (Expression e : this.elements) 
-			s += e.codePrint() + ", ";
-			
-		s = s.substring(0, s.length() - 2);
+		s += this.elements.stream().map(Expression::codePrint).collect(Collectors.joining(", "));
 		
 		if (this.dontCareTypes) s += "]";
 		else s += "}";

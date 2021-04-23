@@ -41,7 +41,7 @@ public class TypeCast extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "TypeCast");
-		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.castType.typeString());
+		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.castType);
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 

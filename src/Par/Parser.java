@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Exc.CTEX_EXC;
@@ -1630,7 +1631,7 @@ public class Parser {
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
 				this.progress.abort();
-				throw new SNIPS_EXC(new CTEX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type.typeString()).getMessage());
+				throw new SNIPS_EXC(new CTEX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type).getMessage());
 			}
 			
 			accept(TokenType.COLON);
@@ -2559,10 +2560,8 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (InterfaceTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
 			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}
@@ -2619,10 +2618,8 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (EnumTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
 			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
 		}
 	}

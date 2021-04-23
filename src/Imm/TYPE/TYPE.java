@@ -120,7 +120,6 @@ public abstract class TYPE<T> {
 	
 	public abstract TYPE mappable(TYPE mapType, String searchedProviso);
 	
-	
 	public boolean isPointer() { return this instanceof POINTER; };
 	
 	public boolean isArray() { return this instanceof ARRAY; };
@@ -166,6 +165,9 @@ public abstract class TYPE<T> {
 	 */
 	public boolean isStackType() { return this.isArray() || this.isStruct(); };
 	
+	/**
+	 * Relays to {@link #typeString()}.
+	 */
 	public String toString() {
 		return this.typeString();
 	}

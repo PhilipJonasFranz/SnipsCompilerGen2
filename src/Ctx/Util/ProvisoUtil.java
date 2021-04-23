@@ -144,7 +144,7 @@ public class ProvisoUtil {
 			/* Relay to array target type */
 			map1To1(a.elementType, source);
 		}
-		else throw new SNIPS_EXC(Const.CANNOT_MAP_TYPE_TO_PROVISO, source.typeString(), target.typeString());
+		else throw new SNIPS_EXC(Const.CANNOT_MAP_TYPE_TO_PROVISO, source, target);
 	}
 	
 	/**

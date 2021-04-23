@@ -50,7 +50,7 @@ public class RegisterAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Register Value <" + this.getType().typeString() + " : " + this.spelling + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Register Value <" + this.getType() + " : " + this.spelling + ">");
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

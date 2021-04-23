@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
@@ -132,9 +133,7 @@ public class Scope {
 						throw new CTEX_EXC(source, Const.UNKNOWN_VARIABLE, path.build());
 					}
 					else {
-						String s = "";
-						for (Declaration d0 : decs) s += d0.path.build() + ", ";
-						s = s.substring(0, s.length() - 2);
+						String s = decs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
 						throw new CTEX_EXC(source, Const.MULTIPLE_MATCHES_FOR_X, "field", path.build(), s);
 					}
 				}

@@ -3,6 +3,7 @@ package Imm.AST.Typedef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
@@ -410,34 +411,24 @@ public class StructTypedef extends SyntaxElement {
 		
 		s += "struct " + this.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso)
-				s += t.codeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
 		
 		if (!this.implemented.isEmpty() || this.extension != null) {
 			s += " : ";
 			
-			if (this.extension != null) {
+			if (this.extension != null) 
 				s += this.extension.codePrint(0).get(0) + ", ";
-			}
 			
-			for (INTERFACE i : this.implemented) {
-				s += i.codeString() + ", ";
-			}
-			s = s.substring(0, s.length() - 2);
+			s += this.implemented.stream().map(TYPE::codeString).collect(Collectors.joining(", "));
 		}
 		
 		s += " {";
 		
 		code.add(Util.pad(d) + s);
 		
-		for (Declaration d0 : this.fields) {
+		for (Declaration d0 : this.fields) 
 			code.addAll(d0.codePrint(d + this.printDepthStep));
-		}
 		
 		if (!this.fields.isEmpty() && !this.functions.isEmpty())
 			code.add("");
