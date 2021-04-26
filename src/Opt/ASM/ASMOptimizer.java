@@ -71,6 +71,11 @@ public class ASMOptimizer {
 	long opts = 0;
 	
 			/* ---< METHODS >--- */
+	public void OPT_DONE() {
+		this.OPT_DONE = true;
+		opts++;
+	}
+	
 	/** Optimize given body. */
 	public double optimize(List<ASMInstruction> ins, boolean isMainFile) {
 		double before = ins.size();
@@ -529,11 +534,6 @@ public class ASMOptimizer {
 		}
 	}
 	
-	public void markOpt() {
-		OPT_DONE = true;
-		opts++;
-	}
-	
 	/**
 	 * Check if given register is overwritten by given instruction.
 	 */
@@ -842,7 +842,7 @@ public class ASMOptimizer {
 						if (!ASMOptimizer.readsReg(ins1, reg)) {
 							ins0.remove(z);
 							ins0.add(z - 1, ins1);
-							OPT_DONE = true;
+							OPT_DONE();
 						}
 						else break;
 					}
@@ -878,13 +878,13 @@ public class ASMOptimizer {
 							
 							if (d.op0 != null && d.op0.reg == mov.target.reg && d.op0.reg != reg) {
 								d.op0.reg = reg;
-								markOpt();
+								OPT_DONE();
 							}
 							if (d.op1 instanceof RegOp) {
 								RegOp op1 = (RegOp) d.op1;
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -893,13 +893,13 @@ public class ASMOptimizer {
 							
 							if (d.op0.reg == mov.target.reg) {
 								d.op0.reg = reg;
-								markOpt();
+								OPT_DONE();
 							}
 							if (d.op1 instanceof RegOp) {
 								RegOp op1 = (RegOp) d.op1;
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -908,20 +908,20 @@ public class ASMOptimizer {
 							
 							if (d.target.reg == mov.target.reg) {
 								d.target.reg = reg;
-								markOpt();
+								OPT_DONE();
 							}
 							if (d.op0 instanceof RegOp) {
 								RegOp op = (RegOp) d.op0;
 								if (op.reg == mov.target.reg && op.reg != reg) {
 									op.reg = reg;
-									markOpt();
+									OPT_DONE();
 								}
 							}
 							if (d.op1 instanceof RegOp) {
 								RegOp op1 = (RegOp) d.op1;
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -938,7 +938,7 @@ public class ASMOptimizer {
 					if (remove) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -958,7 +958,7 @@ public class ASMOptimizer {
 					if (branch0.target instanceof LabelOp && ((LabelOp) branch0.target).label.equals(label)) {
 						branch1.cond = new Cond(cond.negate());
 						ins0.remove(i - 2);
-						OPT_DONE = true;
+						OPT_DONE();
 						i--;
 					}
 				}
@@ -1000,7 +1000,7 @@ public class ASMOptimizer {
 								/* Same instruction, can remove */
 								ins0.remove(k);
 								k--;
-								OPT_DONE = true;
+								OPT_DONE();
 							}
 							else break;
 						}
@@ -1107,7 +1107,7 @@ public class ASMOptimizer {
 							
 							ins0.remove(currentPosition);
 							ins0.add(insertPosition++, ins);
-							OPT_DONE = true;
+							OPT_DONE();
 						}
 					}
 					else {
@@ -1145,7 +1145,7 @@ public class ASMOptimizer {
 					ins0.clear();
 					ins0.addAll(ins1);
 				}
-				else OPT_DONE = true;
+				else OPT_DONE();
 			}
 		}
 	}
@@ -1215,7 +1215,7 @@ public class ASMOptimizer {
 								i = ins0.indexOf(mov0) + 1;
 								ins0.remove(mov0);
 								
-								markOpt();
+								OPT_DONE();
 							}
 						}
 					}
@@ -1286,7 +1286,7 @@ public class ASMOptimizer {
 						branch.type = BRANCH_TYPE.B;
 						branch.optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 						
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -1304,7 +1304,7 @@ public class ASMOptimizer {
 						pop.operands.set(pop.operands.size() - 1, new RegOp(REG.PC));
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -1373,7 +1373,7 @@ public class ASMOptimizer {
 					int sub = 0;
 					
 					for (int k = i + 1; k < ins0.indexOf(push.popCounterpart) - 1; k++) ins.add(ins0.get(k));
-					
+
 					/* Check betweeen interval */
 					for (int x = 0; x < push.operands.size(); x++) {
 						RegOp reg = push.operands.get(x);
@@ -1393,19 +1393,16 @@ public class ASMOptimizer {
 								sub += 4;
 								
 								x--;
-								markOpt();
+								OPT_DONE();
 								done = true;
 							}
 						}
 					}
 					
-					/* Jump forward */
-					i = ins0.indexOf(push.popCounterpart);
-					
 					if (push.operands.isEmpty()) {
 						ins0.remove(push);
 						ins0.remove(pop);
-						markOpt();
+						OPT_DONE();
 						
 						if (i > 0) i--;
 					}
@@ -1449,7 +1446,7 @@ public class ASMOptimizer {
 										branch.optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 										branch.target = b0.target.clone();
 										
-										markOpt();
+										OPT_DONE();
 									}
 								}
 							}
@@ -1492,7 +1489,7 @@ public class ASMOptimizer {
 										if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp && ((LabelOp) branch.target).label.equals(label.label)) {
 											ins0.set(a, pop.clone());
 											ins0.get(a).cond = branch.cond;
-											markOpt();
+											OPT_DONE();
 										}
 									}
 								}
@@ -1547,7 +1544,7 @@ public class ASMOptimizer {
 						ins0.remove(i - 2);
 						ins0.remove(i - 2);
 						
-						markOpt();
+						OPT_DONE();
 					}
 				}
 				else if (op1 != null) {
@@ -1557,7 +1554,7 @@ public class ASMOptimizer {
 						ins0.set(i, new ASMLsl(mul.target, mul.op0, new ImmOp(log)));
 						ins0.remove(i - 1);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -1577,7 +1574,7 @@ public class ASMOptimizer {
 						ins0.set(i - 1, mla);
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -1692,7 +1689,7 @@ public class ASMOptimizer {
 					
 					ins0.remove(i - 1);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -1744,7 +1741,7 @@ public class ASMOptimizer {
 							if (!used) {
 								ins0.remove(k);
 								i--;
-								markOpt();
+								OPT_DONE();
 							}
 						}
 					}
@@ -1787,7 +1784,7 @@ public class ASMOptimizer {
 					else if (overwritesReg(ins, reg) && !readsReg(ins, reg)) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 						break;
 					}
 				}
@@ -1802,7 +1799,7 @@ public class ASMOptimizer {
 					else if (ins instanceof ASMLabel && ((ASMLabel) ins).isFunctionLabel || a == ins0.size() - 1) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 						break;
 					}
 				}
@@ -1844,7 +1841,7 @@ public class ASMOptimizer {
 						}
 					}
 					
-					if (line != i || afterFPExchange) markOpt();
+					if (line != i || afterFPExchange) OPT_DONE();
 					if (!afterFPExchange) ins0.add(line, push);
 				}
 			}
@@ -1873,7 +1870,7 @@ public class ASMOptimizer {
 						line--;
 					}
 					
-					if (line != i - 1) markOpt();
+					if (line != i - 1) OPT_DONE();
 					ins0.add(line + 1, pop);
 					
 					i = line + 2;
@@ -1897,7 +1894,7 @@ public class ASMOptimizer {
 					op0.value += op1.value;
 					ins0.remove(i);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -1919,7 +1916,7 @@ public class ASMOptimizer {
 					op0.value += op1.value;
 					ins0.remove(i - 1);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -1949,13 +1946,13 @@ public class ASMOptimizer {
 					if (push0.operands.stream().filter(x -> x.reg == reg.reg).count() == 0) {
 						push0.operands.add(0, reg);
 						push1.operands.remove(a--);
-						OPT_DONE = true;
+						OPT_DONE();
 					}
 				}
 				
 				if (push1.operands.isEmpty()) {
 					ins0.remove(i--);
-					OPT_DONE = true;
+					OPT_DONE();
 				}
 			}
 		}
@@ -1970,7 +1967,7 @@ public class ASMOptimizer {
 					ImmOp imm = (ImmOp) lsl.op1;
 					if (imm.value == 0) {
 						ins0.set(i, new ASMMov(lsl.target, lsl.op0, lsl.cond));
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -1980,7 +1977,7 @@ public class ASMOptimizer {
 					ImmOp imm = (ImmOp) lsr.op1;
 					if (imm.value == 0) {
 						ins0.set(i, new ASMMov(lsr.target, lsr.op0, lsr.cond));
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2002,7 +1999,7 @@ public class ASMOptimizer {
 						subOp.value -= addOp.value;
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2024,7 +2021,7 @@ public class ASMOptimizer {
 					
 					ins0.remove(i - 1);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -2046,7 +2043,7 @@ public class ASMOptimizer {
 					
 					ins0.remove(i - 1);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -2065,7 +2062,7 @@ public class ASMOptimizer {
 					
 					ins0.remove(i - 1);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -2082,7 +2079,7 @@ public class ASMOptimizer {
 					if (imm.value == 0) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2093,7 +2090,7 @@ public class ASMOptimizer {
 					if (imm.value == 0) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2185,7 +2182,7 @@ public class ASMOptimizer {
 							ins0.set(ins0.indexOf(pop), new ASMMov(new RegOp(newReg), new RegOp(pushReg)));
 							ins0.remove(push);
 							
-							markOpt();
+							OPT_DONE();
 							i--;
 						}
 					}
@@ -2217,7 +2214,7 @@ public class ASMOptimizer {
 							ASMBinaryData data = (ASMBinaryData) ins0.get(i - 1);
 							if (data.target.reg == reg && replace) {
 								data.target = mov.target;
-								markOpt();
+								OPT_DONE();
 								patchUp = true;
 							}
 						}
@@ -2225,7 +2222,7 @@ public class ASMOptimizer {
 							ASMMult mul = (ASMMult) ins0.get(i - 1);
 							if (mul.target.reg == reg && replace) {
 								mul.target = mov.target;
-								markOpt();
+								OPT_DONE();
 								patchUp = true;
 							}
 						}
@@ -2253,7 +2250,7 @@ public class ASMOptimizer {
 						
 						if (ldr.target.reg == reg) {
 							ldr.target.reg = mov.target.reg;
-							markOpt();
+							OPT_DONE();
 							ins0.remove(i);
 							i--;
 						}
@@ -2263,7 +2260,7 @@ public class ASMOptimizer {
 						
 						if (ldr.target.reg == reg) {
 							ldr.target.reg = mov.target.reg;
-							markOpt();
+							OPT_DONE();
 							ins0.remove(i);
 							i--;
 						}
@@ -2286,7 +2283,7 @@ public class ASMOptimizer {
 						
 						if (str.target.reg == mov.target.reg) {
 							str.target.reg = reg;
-							markOpt();
+							OPT_DONE();
 							ins0.remove(i - 1);
 							i--;
 						}
@@ -2296,7 +2293,7 @@ public class ASMOptimizer {
 						
 						if (str.target.reg == mov.target.reg) {
 							str.target.reg = reg;
-							markOpt();
+							OPT_DONE();
 							ins0.remove(i - 1);
 							i--;
 						}
@@ -2318,7 +2315,7 @@ public class ASMOptimizer {
 							if (cmp.op0 != null && cmp.op0.reg == RegOp.toReg(a)) {
 								/* Replace */
 								cmp.op0 = (RegOp) mov.op1;
-								markOpt();
+								OPT_DONE();
 								
 								ins0.remove(i - 1);
 								i--;
@@ -2326,7 +2323,7 @@ public class ASMOptimizer {
 							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == RegOp.toReg(a)) {
 								/* Replace */
 								cmp.op1 = (RegOp) mov.op1;
-								markOpt();
+								OPT_DONE();
 								
 								ins0.remove(i - 1);
 								i--;
@@ -2364,7 +2361,7 @@ public class ASMOptimizer {
 						ins0.remove(i - 1);
 						str.target = (RegOp) mov.op1;
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2388,14 +2385,14 @@ public class ASMOptimizer {
 							if (data.op0 != null && data.op0.reg == RegOp.toReg(a)) {
 								/* Replace */
 								data.op0 = target;
-								markOpt();
+								OPT_DONE();
 								remove = true;
 							}
 							
 							if (data.op1 != null && data.op1 instanceof RegOp && ((RegOp) data.op1).reg == RegOp.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
-								markOpt();
+								OPT_DONE();
 								remove = true;
 							}
 							
@@ -2410,14 +2407,14 @@ public class ASMOptimizer {
 							if (mul.op0 != null && mul.op0.reg == RegOp.toReg(a)) {
 								/* Replace */
 								mul.op0 = target;
-								markOpt();
+								OPT_DONE();
 								remove = true;
 							}
 							
 							if (mul.op1 != null && mul.op1 instanceof RegOp && ((RegOp) mul.op1).reg == RegOp.toReg(a)) {
 								/* Replace */
 								mul.op1 = target;
-								markOpt();
+								OPT_DONE();
 								remove = true;
 							}
 							
@@ -2441,14 +2438,14 @@ public class ASMOptimizer {
 								if (mul.op0 != null && mul.op0.reg == RegOp.toReg(a)) {
 									/* Replace */
 									mul.op0 = target;
-									markOpt();
+									OPT_DONE();
 									remove = true;
 								}
 								
 								if (mul.op1 != null && mul.op1 instanceof RegOp && mul.op1.reg == RegOp.toReg(a)) {
 									/* Replace */
 									mul.op1 = target;
-									markOpt();
+									OPT_DONE();
 									remove = true;
 								}
 								
@@ -2477,7 +2474,7 @@ public class ASMOptimizer {
 							push.operands.get(0).reg = ((RegOp) mov.op1).reg;
 							ins0.remove(i - 1);
 							i--;
-							markOpt();
+							OPT_DONE();
 						}
 					}
 				}
@@ -2497,7 +2494,7 @@ public class ASMOptimizer {
 					if (op.label.name.equals(label.name)) {
 						ins0.remove(i - 1);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2517,7 +2514,7 @@ public class ASMOptimizer {
 					if (op0.reg == move1.target.reg && move0.target.reg == op1.reg) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2532,7 +2529,7 @@ public class ASMOptimizer {
 				if (mov.op1 instanceof RegOp && ((RegOp) mov.op1).reg == mov.target.reg) {
 					ins0.remove(i);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
@@ -2582,7 +2579,7 @@ public class ASMOptimizer {
 							
 							if (move0.op1 instanceof RegOp && ((RegOp) move0.op1).reg == target) {
 								move0.op1 = new ImmOp(val);
-								markOpt();
+								OPT_DONE();
 							}
 						}
 						else if (ins0.get(a) instanceof ASMMvn) {
@@ -2595,7 +2592,7 @@ public class ASMOptimizer {
 							
 							if (move0.op1 instanceof RegOp && ((RegOp) move0.op1).reg == target) {
 								move0.op1 = new ImmOp(val);
-								markOpt();
+								OPT_DONE();
 							}
 						}
 						else if (ins0.get(a) instanceof ASMBinaryData) {
@@ -2608,7 +2605,7 @@ public class ASMOptimizer {
 							
 							if (dataP.op1 instanceof RegOp && ((RegOp) dataP.op1).reg == target) {
 								dataP.op1 = new ImmOp(val);
-								markOpt();
+								OPT_DONE();
 								
 								if (!move.optFlags.contains(OPT_FLAG.WRITEBACK)) hardClear = true;
 							}
@@ -2630,7 +2627,7 @@ public class ASMOptimizer {
 									}
 									
 									ins0.set(a, ins);
-									markOpt();
+									OPT_DONE();
 									a -= 2;
 								}
 								else clear = false;
@@ -2666,7 +2663,7 @@ public class ASMOptimizer {
 							
 							if (cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == target) {
 								cmp.op1 = new ImmOp(val);
-								markOpt();
+								OPT_DONE();
 							}
 							
 							if (cmp.op0.reg == target) {
@@ -2708,7 +2705,7 @@ public class ASMOptimizer {
 								RegOp r = (RegOp) p.op1;
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -2726,7 +2723,7 @@ public class ASMOptimizer {
 								RegOp r = (RegOp) p.op1;
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -2745,7 +2742,7 @@ public class ASMOptimizer {
 								RegOp r = (RegOp) p.op1;
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
-									markOpt();
+									OPT_DONE();
 								}
 							}
 						}
@@ -2777,7 +2774,7 @@ public class ASMOptimizer {
 					if (clear || hardClear) {
 						ins0.remove(i);
 						i--;
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2816,7 +2813,7 @@ public class ASMOptimizer {
 				
 				if (!contained) {
 					ins0.remove(i);
-					markOpt();
+					OPT_DONE();
 					while (i < ins0.size() && !(ins instanceof ASMLabel)) {
 						ins0.remove(i);
 					}
@@ -2840,7 +2837,7 @@ public class ASMOptimizer {
 							continue;
 						}
 						ins0.remove(i + 1);
-						markOpt();
+						OPT_DONE();
 					}
 				}
 			}
@@ -2858,7 +2855,7 @@ public class ASMOptimizer {
 					l1.name = l0.name;
 					ins0.remove(i);
 					i--;
-					markOpt();
+					OPT_DONE();
 				}
 			}
 		}
