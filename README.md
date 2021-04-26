@@ -129,6 +129,9 @@ All instructions do support the condition field. If you compile your assembly co
 ### Utility
  Under `src/REv/Modules/Tools/Util.java` you can find some [Utility Functions](src/REv/Modules/Tools/Util.java) for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
  
+## Known Issues
+- Merging Header file with implementation discards global variables and imports from implementation file
+
 ## License and Copyright
  © Philip Jonas Franz
  
