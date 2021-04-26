@@ -8,8 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AsN.Expression.AsNExpression;
@@ -36,7 +35,7 @@ public class AsNTernary extends AsNExpression {
 		
 		/* Condition was false, no else, skip first result */
 		if (cond != COND.NO)
-			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(loadFalse)));
+			tern.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(loadFalse)));
 		
 		/* Load true result */
 		tern.instructions.addAll(AsNExpression.cast(t.left, r, map, st).getInstructions());

@@ -22,12 +22,12 @@ HEAP_START: .word 0
 .text
     b main
 
-.global get_0
-get_0:                                       /* Function: get */
+.global get_1461183196
+get_1461183196:                              /* Function: get */
     bx lr
 
-.global get_1
-get_1:                                       /* Function: get */
+.global get_290971493
+get_290971493:                               /* Function: get */
     lsl r0, r0, #1
     bx lr
 
@@ -35,9 +35,9 @@ get_1:                                       /* Function: get */
 main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
-    bl get_1                                 /* Call get */
+    bl get_290971493                         /* Call get */
     mov r3, r0
     mov r0, #1                               /* Load parameters */
-    bl get_0                                 /* Call get */
+    bl get_1461183196                        /* Call get */
     add r0, r3, r0
     pop { pc }

@@ -9,8 +9,7 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -48,7 +47,7 @@ public class AsNOr extends AsNNFoldExpression {
 				or.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 				
 				/* Move #1 into R0 when expression is not 0 */
-				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.NE)));
+				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.NE));
 			}
 		}
 		else if (o.operands.get(1) instanceof Atom) {
@@ -63,7 +62,7 @@ public class AsNOr extends AsNNFoldExpression {
 				or.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 				
 				/* Move #1 into R0 when expression is not 0 */
-				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.NE)));
+				or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.NE));
 			}
 		}
 		else {
@@ -74,8 +73,8 @@ public class AsNOr extends AsNNFoldExpression {
 			orr.updateCondField();
 			or.instructions.add(orr);
 			
-			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.NE)));
-			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.EQ)));
+			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.NE));
+			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.EQ));
 			
 			return or;
 		}

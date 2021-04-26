@@ -38,8 +38,7 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Shift.SHIFT;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -953,10 +952,10 @@ public class ASMOptimizer {
 				ASMLabel label = (ASMLabel) ins0.get(i);
 				
 				if (branch0.cond != null && branch1.cond == null) {
-					COND cond = branch0.cond.cond;
+					COND cond = branch0.cond;
 					
 					if (branch0.target instanceof LabelOp && ((LabelOp) branch0.target).label.equals(label)) {
-						branch1.cond = new Cond(cond.negate());
+						branch1.cond = cond.negate();
 						ins0.remove(i - 2);
 						OPT_DONE();
 						i--;

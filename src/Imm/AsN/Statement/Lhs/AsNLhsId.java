@@ -24,8 +24,7 @@ import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -176,17 +175,17 @@ public class AsNLhsId extends AsNStatement {
 			and0.updateCondField();
 			inj.add(and0);
 			
-			inj.add(new ASMMov(new RegOp(combineOperand), new ImmOp(1), new Cond(COND.NE)));
+			inj.add(new ASMMov(new RegOp(combineOperand), new ImmOp(1), COND.NE));
 			
 			inj.add(new ASMCmp(new RegOp(sourceOperand), new ImmOp(0)));
 			
 			if (!directInjection) {
-				inj.add(new ASMMov(new RegOp(REG.R0), new RegOp(combineOperand), new Cond(COND.NE)));
-				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.EQ)));
+				inj.add(new ASMMov(new RegOp(REG.R0), new RegOp(combineOperand), COND.NE));
+				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.EQ));
 			}
 			else {
-				inj.add(new ASMMov(new RegOp(sourceOperand), new RegOp(combineOperand), new Cond(COND.NE)));
-				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), new Cond(COND.EQ)));
+				inj.add(new ASMMov(new RegOp(sourceOperand), new RegOp(combineOperand), COND.NE));
+				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), COND.EQ));
 			}
 		}
 		else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
@@ -195,12 +194,12 @@ public class AsNLhsId extends AsNStatement {
 			inj.add(orr);
 			
 			if (!directInjection) {
-				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.NE)));
-				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.EQ)));
+				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.NE));
+				inj.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.EQ));
 			}
 			else {
-				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(1), new Cond(COND.NE)));
-				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), new Cond(COND.EQ)));
+				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(1), COND.NE));
+				inj.add(new ASMMov(new RegOp(sourceOperand), new ImmOp(0), COND.EQ));
 			}
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);

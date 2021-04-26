@@ -15,8 +15,7 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -111,7 +110,7 @@ public class AsNTempAtom extends AsNExpression {
 					
 					/* Counter is zero, branch to end */
 					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(0)));
-					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(end)));
+					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(end)));
 					
 					/* Load current dataword */
 					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R2)));

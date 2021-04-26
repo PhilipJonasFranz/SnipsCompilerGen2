@@ -65,11 +65,8 @@ A_resolver:                                  /* Relay: A -> INTF */
 .P1225551659_Getter: .word Getter
 
 .global B.get
-B.get:                                       /* Function: B.get */
-    mov r10, #0
-    lsl r1, r0, #2                           /* Convert to bytes */
-    ldr r0, [r1, #4]                         /* Load field from struct */
-    bx lr
+B.get: 
+    b A.get                                  /* Relay to inherited A.get */
 
 B_Getter:                                    /* Relay: Getter -> B */
     mov r10, #0

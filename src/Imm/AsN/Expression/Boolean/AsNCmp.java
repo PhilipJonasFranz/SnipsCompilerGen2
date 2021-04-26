@@ -8,8 +8,7 @@ import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -64,10 +63,10 @@ public class AsNCmp extends AsNNFoldExpression {
 		cmp.neg = cmp.trueC.negate();
 		
 		/* Move #1 into R0 when condition is true with comparator of c */
-		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(cmp.trueC)));
+		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), cmp.trueC));
 		
 		/* Move #0 into R0 when condition is false with negated operator of c */
-		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(cmp.neg)));
+		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), cmp.neg));
 	
 		r.free(0, 1);
 		

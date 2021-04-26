@@ -11,7 +11,7 @@ import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -50,7 +50,7 @@ public class AsNSignalStatement extends AsNStatement {
 		return sig;
 	}
 	
-	public static void injectWatchpointBranch(AsNNode node, SyntaxElement watchpoint, Cond cond) {
+	public static void injectWatchpointBranch(AsNNode node, SyntaxElement watchpoint, COND cond) {
 		ASMLabel escape = null;
 		
 		/* Branch to escape target */

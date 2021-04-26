@@ -1,7 +1,7 @@
 package Imm.ASM.Branch;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.Operand;
 import Snips.CompilerDriver;
 
@@ -36,7 +36,7 @@ public class ASMBranch extends ASMInstruction {
 		this.target = target;
 	}
 	
-	public ASMBranch(BRANCH_TYPE type, Cond cond, Operand target) {
+	public ASMBranch(BRANCH_TYPE type, COND cond, Operand target) {
 		super(cond);
 		this.type = type;
 		this.target = target;

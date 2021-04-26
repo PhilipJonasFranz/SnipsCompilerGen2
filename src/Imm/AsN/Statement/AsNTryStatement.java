@@ -15,8 +15,7 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
@@ -75,7 +74,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 			
 			watched.getTypedef().loadSIDInReg(tr0, REG.R10, watched.proviso);
 			tr0.instructions.add(new ASMCmp(new RegOp(REG.R12), new RegOp(REG.R10)));
-			tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.NE), new LabelOp(skip)));
+			tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.NE, new LabelOp(skip)));
 			
 			tr0.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(watched.wordsize() * 4)));
 			tr0.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(watched.wordsize() * 4)));
@@ -109,7 +108,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 				STRUCT s0 = (STRUCT) t;
 				s0.getTypedef().loadSIDInReg(tr0, REG.R10, s0.proviso);
 				tr0.instructions.add(new ASMCmp(new RegOp(REG.R12), new RegOp(REG.R10)));
-				tr0.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s0.wordsize() * 4), new Cond(COND.EQ)));
+				tr0.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s0.wordsize() * 4), COND.EQ));
 			}
 			
 			tr0.instructions.add(new ASMMov(new RegOp(REG.R10), new ImmOp(0)));

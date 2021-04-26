@@ -6,8 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -28,10 +27,10 @@ public class AsNNot extends AsNUnaryExpression {
 		not.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 	
 		/* Move #1 into R0 when condition is false */
-		not.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), new Cond(COND.EQ)));
+		not.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.EQ));
 		
 		/* Move #0 into R0 when condition is true */
-		not.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), new Cond(COND.NE)));
+		not.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.NE));
 		
 		r.free(0);
 		

@@ -23,8 +23,7 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.Operand;
@@ -115,7 +114,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		
-		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
+		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(forEnd)));
 		
 		/* Free the counter from the reg set */
 		r.free(0);

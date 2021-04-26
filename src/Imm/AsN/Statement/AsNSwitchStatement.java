@@ -8,8 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
@@ -34,7 +33,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 			COND cond = injectConditionEvaluation(sw, AsNExpression.cast(cs.condition, r, map, st), cs.condition);
 			
 			/* Condition was false, skip body */
-			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(next)));
+			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(next)));
 			
 			/* Add body */
 			sw.addBody(cs, r, map, st);

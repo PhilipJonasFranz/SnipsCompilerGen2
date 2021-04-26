@@ -12,8 +12,7 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -94,7 +93,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.addAll(com.getInstructions());
 			
 			/* Condition was false, no else, skip body */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, neg, new LabelOp(forEnd)));
 		}
 		else {
 			/* Default condition evaluation */
@@ -104,7 +103,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
 			/* Condition was false, jump to else */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(forEnd)));
 		}
 		
 		

@@ -6,8 +6,7 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -39,7 +38,7 @@ public class AsNInlineCall extends AsNExpression {
 		if (ic.anonTarget == null && ic.calledFunction.signals()) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
-			AsNSignalStatement.injectWatchpointBranch(call, ic.watchpoint, new Cond(COND.NE));
+			AsNSignalStatement.injectWatchpointBranch(call, ic.watchpoint, COND.NE);
 		}
 		
 		return call;

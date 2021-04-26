@@ -15,8 +15,7 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -196,7 +195,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 					
 					table.addAll(intf.getTypedef().loadIIDInReg(REG.R12, intfTypes));
 					table.add(new ASMCmp(new RegOp(REG.R10), new RegOp(REG.R12)));
-					table.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(mapping.resolverLabelMap.get(intf.getTypedef()))));
+					table.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(mapping.resolverLabelMap.get(intf.getTypedef()))));
 				}
 			}
 		}

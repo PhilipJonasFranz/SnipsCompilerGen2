@@ -8,8 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.IfStatement;
 import Imm.AsN.Expression.AsNExpression;
@@ -36,10 +35,10 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				if (cond != COND.NO) {
 					if (currentIf.elseStatement != null) 
 						/* Condition was false, jump to else */
-						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(elseTarget)));
 					else 
 						/* Condition was false, no else, skip body */
-						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(endTarget)));
 				}
 			}
 			

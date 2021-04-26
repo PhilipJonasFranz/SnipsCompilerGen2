@@ -10,8 +10,7 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.Expression.AsNExpression;
@@ -35,7 +34,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		
 		if (cond != COND.NO) {
 			/* Condition was false, no else, skip body */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
+			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(w.breakJump)));
 		}
 		
 		/* Add Body */

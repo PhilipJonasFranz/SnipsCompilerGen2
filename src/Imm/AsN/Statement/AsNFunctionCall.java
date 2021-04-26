@@ -22,8 +22,7 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -64,7 +63,7 @@ public class AsNFunctionCall extends AsNStatement {
 		if (fc.anonTarget == null && fc.calledFunction.signals()) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
-			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
+			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, COND.NE);
 		}
 		
 		call.freeDecs(r, fc);

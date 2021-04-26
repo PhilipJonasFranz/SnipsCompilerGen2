@@ -1,7 +1,7 @@
 package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
@@ -41,7 +41,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 		this.op1 = op1;
 	}
 	
-	public ASMBinaryData(RegOp target, RegOp op0, Operand op1, Cond cond) {
+	public ASMBinaryData(RegOp target, RegOp op0, Operand op1, COND cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;

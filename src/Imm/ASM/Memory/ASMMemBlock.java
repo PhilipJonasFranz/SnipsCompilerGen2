@@ -3,7 +3,7 @@ package Imm.ASM.Memory;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
@@ -29,7 +29,7 @@ public class ASMMemBlock extends ASMInstruction {
 	
 			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr/str r0, [r1] */
-	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList, Cond cond) {
+	public ASMMemBlock(MEM_BLOCK_MODE mode, boolean writeback, RegOp target, List<RegOp> registerList, COND cond) {
 		super(cond);
 		this.target = target;
 		this.registerList = registerList;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 
 /**
  * Acts as a base class for all assembly instructions.
@@ -77,7 +77,7 @@ public abstract class ASMInstruction {
 	/**
 	 * The condition operand of this instruction for conditional instruction execution. 
 	 */
-	public Cond cond;
+	public COND cond;
 	
 	/**
 	 * A comment attatched to this instruction. Will be added after the instruction when building.
@@ -93,7 +93,7 @@ public abstract class ASMInstruction {
 	/**
 	 * Constructor for instruction with conditional.
 	 */
-	public ASMInstruction(Cond cond) {
+	public ASMInstruction(COND cond) {
 		this.cond = cond;
 	}
 	

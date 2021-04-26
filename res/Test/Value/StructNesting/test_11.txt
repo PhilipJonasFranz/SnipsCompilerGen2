@@ -74,14 +74,18 @@ HEAP_START: .word 0
 .text
     b main
 
-.global C.A.incr_P_1
-C.A.incr_P_1:                                /* Function: C.A.incr, Provisos: INT */
+.global C.B.incr_P_1
+C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: INT */
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r2, [r1]
     add r0, r2, #1
     str r0, [r1]                             /* Store value to struct field */
     bx lr
+
+.global C.A.incr_P_1
+C.A.incr_P_1: 
+    b C.B.incr_P_1                           /* Relay to inherited C.B.incr_P_1 */
 
 .global C.A.pipe_P_1
 C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: INT */

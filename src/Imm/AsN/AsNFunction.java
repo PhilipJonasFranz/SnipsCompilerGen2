@@ -26,8 +26,7 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
@@ -408,7 +407,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			ASMLabel singleWordSkip = new ASMLabel(LabelUtil.getLabel());
 			if (f.getReturnType().wordsize() == 1 && f.signals()) 
-				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
+				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(singleWordSkip)));
 			
 			
 			if (f.getReturnType().wordsize() > 1 || f.signals()) {
@@ -417,7 +416,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					 * No exception, move word size of return type in R0, if execption 
 					 * were thrown, the word size would already be in R0 
 					 */
-					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), new Cond(COND.EQ));
+					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), COND.EQ);
 					mov.optFlags.add(OPT_FLAG.WRITEBACK);
 					func.instructions.add(mov);
 				}
