@@ -219,4 +219,8 @@ public class FunctionCall extends Statement implements Callee {
 		return this.nestedDeref;
 	}
 	
+	public void setPath(NamespacePath path) {
+		this.path = path;
+	}
+	
 } 

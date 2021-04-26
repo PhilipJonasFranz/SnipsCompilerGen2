@@ -43,6 +43,8 @@ public class CheckUtil {
 		
 		public void setType(TYPE t);
 		
+		public void setPath(NamespacePath path);
+		
 		public void setCalledFunction(Function f);
 		
 		public void setWatchpoint(SyntaxElement w);

@@ -1540,7 +1540,42 @@ public class ContextChecker {
 			}
 		}
 		
-		Function f = this.linkFunction(c, types);
+		Function func = null;
+		
+		/* Calls to super constructor, switch out with call to constructor */
+		if (c.getPath().build().equals("super")) {
+			
+			Function f0 = this.currentFunction.peek();
+			
+			/* We are in a constructor */
+			if (f0.modifier == MODIFIER.STATIC && f0.path.build().endsWith("create") && f0.getReturnType().isStruct()) {
+				STRUCT struct = (STRUCT) f0.getReturnType();
+				StructTypedef def = struct.getTypedef();
+				
+				if (def.extension == null) 
+					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_NO_EXTENSION, struct);
+				
+				boolean found = false;
+				
+				/* Search for constructor of extension */
+				for (Function f1 : def.extension.functions) 
+					if (f1.path.build().endsWith("create") && f1.modifier == MODIFIER.STATIC) {
+						/* Found static constructor, switch out 'super' with path to constructor */
+						c.setPath(f1.path.clone());
+						func = f1;
+						found = true;
+						break;
+					}
+				
+				/* No super constructor was found */
+				if (!found)
+					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_NO_CONSTRUCTOR, def.extension.self);
+			}
+		}
+		
+		/* Super constructor was not used, search for function */
+		if (func == null) func = this.linkFunction(c, types);
+		Function f = func;
 		
 		if (c.isNestedCall()) {
 			if (c.getParams().get(0).check(this).getCoreType().isStruct()) {

@@ -217,5 +217,9 @@ public class InlineCall extends Expression implements Callee {
 		s += ")";
 		return s;
 	}
+
+	public void setPath(NamespacePath path) {
+		this.path = path;
+	}
 	
 } 
