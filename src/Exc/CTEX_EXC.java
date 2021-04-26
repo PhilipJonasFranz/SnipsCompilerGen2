@@ -20,6 +20,17 @@ public class CTEX_EXC extends Exception {
 	
 	Object [] format;
 	
+	public CTEX_EXC(String message, Object...format) {
+		this.location = CompilerDriver.stackTrace.peek().getSource();
+		this.message = message;
+		this.format = format;
+		
+		ContextChecker.progress.abort();
+		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+		
+		Util.buildStackTrace(this.location.sourceFile);
+	}
+	
 	public CTEX_EXC(Source source, String message, Object...format) {
 		this.location = source;
 		this.message = message;
@@ -28,7 +39,7 @@ public class CTEX_EXC extends Exception {
 		ContextChecker.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 		
-		Util.buildStackTrace(source.sourceFile);
+		Util.buildStackTrace(this.location.sourceFile);
 	}
 	
 	public String getExcFieldName() {

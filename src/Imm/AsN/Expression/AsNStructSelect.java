@@ -293,12 +293,12 @@ public class AsNStructSelect extends AsNExpression {
 				}
 			}
 			
-			/* Keep selecting */
 			if (selection instanceof StructSelect) 
+				/* Keep selecting */
 				sel0 = (StructSelect) sel0.selection;
-			
-			/* Base Case reached */
-			else break;
+			else 
+				/* Base Case reached */
+				break;
 		}
 		
 		return false;

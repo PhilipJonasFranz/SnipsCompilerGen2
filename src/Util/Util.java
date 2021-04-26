@@ -274,8 +274,12 @@ public class Util {
 	public static String revCamelCase(String s) {
 		String [] sp = s.split("");
 		String out = "";
-		for (String s0 : sp) {
-			if (Character.isUpperCase(s0.charAt(0))) out += " ";
+		for (int i = 0; i < sp.length; i++) {
+			String s0 = sp [i];
+			
+			boolean shortened = i + 1 < sp.length && Character.isUpperCase(sp [i + 1].charAt(0));
+			
+			if (Character.isUpperCase(s0.charAt(0)) && !shortened) out += " ";
 			out += s0.toLowerCase();
 		}
 		
