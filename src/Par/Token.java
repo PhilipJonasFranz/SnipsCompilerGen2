@@ -9,7 +9,7 @@ public class Token {
 	
 	String spelling;
 	
-	Source source;
+	public Source source;
 	
 	
 			/* ---< CONSTRUCTORS >--- */

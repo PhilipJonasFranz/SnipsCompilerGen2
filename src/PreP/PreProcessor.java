@@ -21,7 +21,7 @@ public class PreProcessor {
 	
 	public static HashMap<String, List<String>> importsPerFile = new HashMap();
 	
-	public class LineObject {
+	public static class LineObject {
 		
 				/* ---< FIELDS >--- */
 		public int lineNumber;
@@ -74,11 +74,10 @@ public class PreProcessor {
 		for (int i = 0; i < this.process.size(); i++) {
 			String line = this.process.get(i).line.trim();
 			if (line.startsWith("#ifdef")) {
-				String s = this.process.remove(i).line.trim();
-				String [] sp = s.split(" ");
 				
-				String cond = line.substring(sp [0].length() + 1);
-				boolean eval = PreProcessor.evaluate(cond);
+				/* Evaluate the condition, remove directive from code */
+				boolean eval = new BTermParser(this.process.get(i), passedFlags).evaluate();
+				this.process.remove(i);
 				
 				int c = 1;
 				if (eval) {
@@ -233,17 +232,6 @@ public class PreProcessor {
 		}
 		
 		return i;
-	}
-	
-	public static boolean evaluate(String cond) {
-		cond = cond.trim();
-		if (cond.equals("true")) return true;
-		else if (cond.equals("false")) return false;
-		else if (passedFlags.contains(cond)) return true;
-		else {
-			/* TODO: Implement ||, &&, ! */
-			return false;
-		}
 	}
 	
 } 

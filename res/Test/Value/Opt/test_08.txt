@@ -1,23 +1,22 @@
 SOURCE
-#define accum true
+#define C0 true
+#define C1 false
+#define C2 true
 
-#ifdef accum
-
+#ifdef C0
 int add() {
 	return 10;
 }
-
 #end
 
 int main(int x) {
 	int sum = 12;
-	
-#ifdef accum	
+#ifdef (C0 && C1) || C2
 	sum = sum + add();
 #end
-	
 	return sum;
 }
+
 TESTCASES
 22
 OUTPUT
