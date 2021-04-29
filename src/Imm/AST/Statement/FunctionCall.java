@@ -191,6 +191,10 @@ public class FunctionCall extends Statement implements Callee {
 		return this.proviso;
 	}
 
+	public void setNestedCall(boolean b) {
+		this.isNestedCall = b;
+	}
+
 	public void setAutoProviso(boolean b) {
 		this.hasAutoProviso = b;
 	}

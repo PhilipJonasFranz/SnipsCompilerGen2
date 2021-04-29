@@ -235,9 +235,14 @@ public class StructTypedef extends SyntaxElement {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				boolean override = false;
-				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false, true, false))
+				for (Function fs : this.functions) {
+					if (Function.signatureMatch(fs, f0, false, true, false)) {
 						override = true;
+						
+						/* Set link to actual inherited function */
+						fs.inheritLink = f;
+					}
+				}
 				
 				if (!override) {
 					this.functions.add(c++, f0);

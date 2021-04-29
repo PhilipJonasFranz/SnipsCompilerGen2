@@ -50,6 +50,8 @@ public class Const {
 	
 	public static final String UNDEFINED_FUNCTION_OR_PREDICATE = "Undefined function or predicate '%s'";
 	
+	public static final String UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER = "Undefined function or predicate '%s' in super type '%s'";
+	
 	public static final String EXPECTED_TYPE_ACTUAL = "Expected %s, actual %s";
 	
 	public static final String EXPECTED_RETURN_VALUE = "Expected return value from inline call";
@@ -70,9 +72,11 @@ public class Const {
 	
 	public static final String CAN_ONLY_COVER_WITH_STRUCT = "Can only cover params with STRUCT type, actual %s";
 	
-	public static final String CANNOT_INVOKE_SUPER_NO_EXTENSION = "Cannot invoke super constructor, struct '%s' does not have an extension";
+	public static final String CANNOT_INVOKE_SUPER_NO_EXTENSION = "Cannot invoke super, struct '%s' does not have an extension";
 	
-	public static final String CANNOT_INVOKE_SUPER_NO_CONSTRUCTOR = "Cannot invoke super constructor, struct '%s' does not have a constructor";
+	public static final String CANNOT_INVOKE_SUPER_OUTSIDE_STRUCT = "Cannot invoke super outside of a struct";
+	
+	public static final String CANNOT_INVOKE_SUPER_NO_CONSTRUCTOR = "Cannot invoke super, struct '%s' does not have a constructor";
 	
 	public static final String OPERAND_TYPES_DO_NOT_MATCH = "Operand types do not match: %s vs. %s";
 	

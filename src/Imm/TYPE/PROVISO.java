@@ -7,6 +7,8 @@ import Snips.CompilerDriver;
 
 public class PROVISO extends TYPE<Void> {
 
+	public static boolean COMPARE_NAMES = true;
+	
 			/* ---< FIELDS >--- */
 	public String placeholderName;
 	
@@ -60,7 +62,8 @@ public class PROVISO extends TYPE<Void> {
 	public boolean isEqual(TYPE type) {
 		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
-			return p.placeholderName.equals(this.placeholderName);
+			if (!PROVISO.COMPARE_NAMES) return true;
+			else return p.placeholderName.equals(this.placeholderName);
 		}
 		else {
 			if (this.context == null) {

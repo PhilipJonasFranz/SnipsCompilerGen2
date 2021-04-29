@@ -41,6 +41,12 @@ HEAP_START: .word 0
 .text
     b main
 
+.global C.B.get
+C.B.get:                                     /* Function: C.B.get */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+
 .global C.A.get
 C.A.get:                                     /* Function: C.A.get */
     lsl r1, r0, #2                           /* Convert to bytes */

@@ -35,6 +35,8 @@ public class CheckUtil {
 		
 		public List<TYPE> getProviso();
 		
+		public void setNestedCall(boolean b);
+		
 		public void setAutoProviso(boolean b);
 		
 		public void setProviso(List<TYPE> proviso);

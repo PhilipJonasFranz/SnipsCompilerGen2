@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import Ctx.Util.CheckUtil.Callee;
 import Ctx.Util.ProvisoUtil;
+import Ctx.Util.CtxCallUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -1519,17 +1520,21 @@ public class ContextChecker {
 	 */
 	public TYPE checkCall(Callee c) throws CTEX_EXC {
 		
+		/* Check if call is call to super function, if yes, transform call and target */
+		CtxCallUtil.transformNestedSuperCall(c, this.getCurrentFunction());
+		
+		/* Check here to get types for function search */
 		List<TYPE> types = new ArrayList();
-		/* Check here to get types for linking */
 		for (int i = 0; i < c.getParams().size(); i++) {
 			Expression e = c.getParams().get(i);
+			
 			try {
 				types.add(e.check(this).clone());
 			} catch (Exception exc) {
 				/* 
 				 * A temp atom cannot determine its inherited type at this location,
 				 * since the function is required for this. But this loop has to be
-				 * executed before the linking takes place. When checking the temp atom,
+				 * executed before the function search takes place. When checking the temp atom,
 				 * an exception will be thrown. This is not a major problem, since in
 				 * the most cases, it is solved later on.
 				 */
@@ -1540,58 +1545,35 @@ public class ContextChecker {
 			}
 		}
 		
-		Function func = null;
-		
-		/* Calls to super constructor, switch out with call to constructor */
-		if (c.getPath().build().equals("super")) {
-			
-			Function f0 = this.currentFunction.peek();
-			
-			/* We are in a constructor */
-			if (f0.modifier == MODIFIER.STATIC && f0.path.build().endsWith("create") && f0.getReturnType().isStruct()) {
-				STRUCT struct = (STRUCT) f0.getReturnType();
-				StructTypedef def = struct.getTypedef();
-				
-				if (def.extension == null) 
-					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_NO_EXTENSION, struct);
-				
-				boolean found = false;
-				
-				/* Search for constructor of extension */
-				for (Function f1 : def.extension.functions) 
-					if (f1.path.build().endsWith("create") && f1.modifier == MODIFIER.STATIC) {
-						/* Found static constructor, switch out 'super' with path to constructor */
-						c.setPath(f1.path.clone());
-						func = f1;
-						found = true;
-						break;
-					}
-				
-				/* No super constructor was found */
-				if (!found)
-					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_NO_CONSTRUCTOR, def.extension.self);
-			}
-		}
+		/* Call is call to super constructor, replace with explicit call, returns called constructor */
+		Function func = CtxCallUtil.transformSuperConstructorCall(c, this.getCurrentFunction());
 		
 		/* Super constructor was not used, search for function */
-		if (func == null) func = this.linkFunction(c, types);
+		if (func == null) func = this.searchFunction(c, types);
 		Function f = func;
 		
 		if (c.isNestedCall()) {
+			/* Call to struct nested function */
 			if (c.getParams().get(0).check(this).getCoreType().isStruct()) {
 				STRUCT s = (STRUCT) c.getParams().get(0).check(this).getCoreType();
+				StructTypedef def = s.getTypedef();
 				
 				boolean found = false;
-				for (Function nested : s.getTypedef().functions) {
-					if (nested.equals(f)) {
-						found = true;
-						break;
+				while (def != null) {
+					for (Function nested : def.functions) {
+						if (nested.equals(f)) {
+							found = true;
+							break;
+						}
 					}
+					
+					def = def.extension;
 				}
 				
 				if (!found)
 					throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s.getTypedef().path);
 			}
+			/* Call to interface via struct pointer instance */
 			else {
 				INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
 				
@@ -1599,7 +1581,6 @@ public class ContextChecker {
 				for (Function nested : s.getTypedef().functions) {
 					if (nested.equals(f)) {
 						nested.wasCalled = true;
-						
 						found = true;
 						break;
 					}
@@ -2525,7 +2506,7 @@ public class ContextChecker {
 	 * @return The found function.
 	 * @throws CTEX_EXC Thrown if the callee has provisos in a predicate call, or if the function cannot be found.
 	 */
-	public Function linkFunction(Callee c, List<TYPE> types) throws CTEX_EXC {
+	public Function searchFunction(Callee c, List<TYPE> types) throws CTEX_EXC {
 		List<TYPE> proviso = c.getProviso();
 
 		/* Extract path from typedef for more extensive function searching */
@@ -2629,6 +2610,15 @@ public class ContextChecker {
 	
 	public void popTrace() {
 		this.stackTrace.pop();
+	}
+	
+	/**
+	 * Returns either the current function or null
+	 * if the currentFunction-stack is empty.
+	 */
+	public Function getCurrentFunction() {
+		if (this.currentFunction.isEmpty()) return null;
+		else return this.currentFunction.peek();
 	}
 	
 } 

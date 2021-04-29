@@ -149,7 +149,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			 * But, we still need to create the symbolic function so the linker/assembler
 			 * recognizes it.
 			 */
-			if (f.inheritLink != null) {
+			if (f.inheritLink != null && f.body == null) {
 				/* Create the function head label */
 				String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 				

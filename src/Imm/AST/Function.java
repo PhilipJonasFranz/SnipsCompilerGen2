@@ -164,8 +164,8 @@ public class Function extends CompoundStatement {
 	public int LAST_UPDATE = 0;
 	
 	/**
-	 * If this function is not null, the cast of this function
-	 * will simply relay to this function.
+	 * If this function is not null, and the body of this function is null,
+	 * the cast of this function will simply relay to this function.
 	 */
 	public Function inheritLink = null;
 	
@@ -593,5 +593,11 @@ public class Function extends CompoundStatement {
 		
 		return code;
 	}
+	
+	public boolean isConstructor() { 
+		return this.modifier == MODIFIER.STATIC && 
+				this.path.build().endsWith("create") && 
+				this.getReturnType().isStruct();
+	};
 	
 } 
