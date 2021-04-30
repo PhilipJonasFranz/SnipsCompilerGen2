@@ -673,9 +673,6 @@ public class ContextChecker {
 					break;
 				}
 			}
-			
-			if (!w.hasTarget) 
-				messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_TRY, w.watched.getType().provisoFree(), e.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		
 		/* Add all unwatched to the previous signal level */
@@ -1651,11 +1648,6 @@ public class ContextChecker {
 					}
 				}
 			}
-			
-			/* Generate warning if instance is not a pointer, but is derefed in call */
-			if (c.isNestedDeref() && !c.getParams().get(0).getType().isPointer())
-				if (!CompilerDriver.disableWarnings) 
-					this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, c.getParams().get(0).getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 		}
 		else {
 			/* Found function is nested, should not be able to access it */
@@ -2037,12 +2029,6 @@ public class ContextChecker {
 		}
 		else throw new CTEX_EXC(deref.expression.getSource(), Const.CANNOT_DEREF_TYPE, t.provisoFree());
 		
-		/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
-		if (t.isPrimitive()) {
-			if (!CompilerDriver.disableWarnings) 
-				this.messages.add(new Message(String.format(Const.OPERAND_IS_NOT_A_POINTER, deref.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
-		}
-		
 		return deref.getType();
 	}
 	
@@ -2056,9 +2042,6 @@ public class ContextChecker {
 			if (ic.calledFunction == null) {
 				ic.setType(tc.castType);
 				t = tc.castType;
-				
-				if (!CompilerDriver.disableWarnings) 
-					messages.add(new Message(String.format(Const.USING_IMPLICIT_ANONYMOUS_TYPE, tc.castType.provisoFree(), tc.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
 			}
 		}
 		

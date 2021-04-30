@@ -10,7 +10,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Statement.FunctionCall;
 import Lnt.LRule;
-import Snips.CompilerDriver;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 
@@ -28,7 +27,7 @@ public class DanglingPointerLRule extends LRule {
 		}).isEmpty();
 	}
 	
-	public void lint(Program AST) {
+	public void getResults(Program AST) {
 		List<SyntaxElement> result = new ArrayList();
 		
 		List<SyntaxElement> calls = AST.visit(x -> {
@@ -54,7 +53,7 @@ public class DanglingPointerLRule extends LRule {
 		this.result = result;
 	}
 
-	public void report() {
+	public void reportResults() {
 		for (SyntaxElement s : this.result) {
 			if (s instanceof FunctionCall) {
 				FunctionCall fc = (FunctionCall) s;
@@ -67,13 +66,7 @@ public class DanglingPointerLRule extends LRule {
 			if (s instanceof Expression) code.add("    " + ((Expression) s).codePrint());
 			else code.addAll(s.codePrint(4));
 			
-			code.stream().forEach(CompilerDriver.outs::println);
-			
-			CompilerDriver.outs.print("    ^");
-			for (int i = 0; i < code.get(code.size() - 1).length() - 5; i++)
-				CompilerDriver.outs.print("~");
-			
-			CompilerDriver.outs.println();
+			this.printResultSourceCode(code);
 		}
 	}
 

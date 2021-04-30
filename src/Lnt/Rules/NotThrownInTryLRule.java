@@ -1,6 +1,7 @@
 package Lnt.Rules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,6 @@ import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Lnt.LRule;
-import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
@@ -18,7 +18,7 @@ public class NotThrownInTryLRule extends LRule {
 
 	private List<Pair<SyntaxElement, List<TYPE>>> result = new ArrayList();
 	
-	public void lint(Program AST) {
+	public void getResults(Program AST) {
 		List<Function> result = AST.visit(x -> {
 			return x instanceof Function;
 		});
@@ -39,7 +39,7 @@ public class NotThrownInTryLRule extends LRule {
 		}
 	}
 
-	public void report() {
+	public void reportResults() {
 		for (Pair<SyntaxElement, List<TYPE>> p : this.result) {
 			if (p.first instanceof Function) {
 				Function f = (Function) p.first;
@@ -48,13 +48,8 @@ public class NotThrownInTryLRule extends LRule {
 				new Message("Function '" + f.path.build() + "' signals not thrown types: " + types + ", " + p.first.getSource().getSourceMarker(), Type.WARN);
 				
 				String code = "    " + ((Function) p.first).signatureToString();
-				CompilerDriver.outs.println(code);
 				
-				CompilerDriver.outs.print("    ^");
-				for (int i = 0; i < code.length() - 5; i++)
-					CompilerDriver.outs.print("~");
-				
-				CompilerDriver.outs.println();
+				this.printResultSourceCode(Arrays.asList(code));
 			}
 		}
 	}
