@@ -99,6 +99,16 @@ import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
 
+/**
+ * When applied to a given AST, the Context-Checker
+ * sets references, fields, and enforces grammar rules
+ * and type safety. If a rule is violated, a CTEX_EXC
+ * is generated and thrown. The exception will contain
+ * a message with a description of the rule that was violated,
+ * and at which location in the code. Also, a trace dump
+ * will be generated, which contains locations throughout
+ * the path in the AST where the exception was generated.
+ */
 public class ContextChecker {
 
 			/* ---< FIELDS >--- */
@@ -201,14 +211,28 @@ public class ContextChecker {
 	protected List<Message> messages = new ArrayList();
 	
 	/**
-	 *  Contains the structs that have no extensions.
+	 * Contains all registered struct typedefs. When a struct typedef
+	 * is checked, it will be added once all checks are finished.
 	 */
-	protected List<StructTypedef> tLStructs = new ArrayList();
-	
 	protected List<StructTypedef> structTypedefs = new ArrayList();
 	
+	/**
+	 * During struct-typedef checking, this field will be set to a
+	 * struct typedef that is the signature of a header file. When
+	 * the implementation is merged with the header typedef, the function
+	 * bodies are transferred. To ensure that declaration-references
+	 * are correctly set to the new function head, we need to check
+	 * the result of the merge again.
+	 */
 	protected StructTypedef reCheckTypedef = null;
-	
+	 
+	/**
+	 * Contains the current trace. Everytime a SyntaxElement
+	 * is checked, the syntax element pushes itself
+	 * on the stack. When the check method returns, the
+	 * element is popped of the stack. When a CTEX_EXC is thrown,
+	 * this stack is used to create the check-trace.
+	 */
 	public Stack<SyntaxElement> stackTrace = new Stack();
 	
 	
@@ -227,7 +251,7 @@ public class ContextChecker {
 		this.checkProgram((Program) AST);
 		
 		/* Flush warn messages */
-		for (Message m : this.messages) m.flush();
+		this.messages.stream().forEach(Message::flush);
 		
 		CompilerDriver.stackTrace = null;
 		return null;
@@ -530,13 +554,6 @@ public class ContextChecker {
 			
 			if (e.extension != null && e.extension.proviso.size() != e.extProviso.size()) 
 				throw new CTEX_EXC(Const.MISSMATCHING_NUMBER_OF_PROVISOS_EXTENSION, e.extension.self.provisoFree(), e.extension.proviso.size(), e.extProviso.size());
-			
-			/* 
-			 * Add to topLevelStructExtenders, since this typedef is the root
-			 * of an extension tree, and is used to assign SIDs.
-			 */
-			if (e.extension == null && this.tLStructs.contains(e))
-				this.tLStructs.add(e);
 			
 			if (!this.structTypedefs.contains(e))
 				this.structTypedefs.add(e);

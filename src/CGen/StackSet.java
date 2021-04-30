@@ -115,7 +115,7 @@ public class StackSet {
 	 */
 	public void push(Declaration...dec) {
 		for (Declaration dec0 : dec) this.stack.push(new StackCell(dec0));
-		this.newDecsOnStack = true;
+		if (dec.length > 0) this.newDecsOnStack = true;
 	}
 	
 	/** Push all given registers on the stack and wrap them in stack cells. 
