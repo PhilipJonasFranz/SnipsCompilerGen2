@@ -373,11 +373,7 @@ public class ContextChecker {
 			}
 		}
 		
-		for (Declaration d : f.parameters) {
-			d.check(this);
-			if (d.getType().getCoreType().isVoid() && !CompilerDriver.disableWarnings) 
-				messages.add(new Message(String.format(Const.UNCHECKED_TYPE_VOID, new VOID(), d.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
-		}
+		for (Declaration d : f.parameters) d.check(this);
 		
 		if (f.signals() && f.signalsTypes.isEmpty()) 
 			throw new CTEX_EXC(Const.MUST_SIGNAL_AT_LEAST_ONE_TYPE);
@@ -387,11 +383,8 @@ public class ContextChecker {
 		if (f.body != null) this.checkBody(f.body, false, false);
 		this.currentFunction.pop();
 		
-		/* Check for signaled types that are not thrown */
-		for (TYPE t : f.signalsTypes) {
-			boolean contains = this.signalStack.peek().stream().filter(x -> x.isEqual(t)).count() > 0;
-			if (!contains) messages.add(new Message(String.format(Const.WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION, t.provisoFree(), f.path, f.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
-		}
+		/* Set actual signaled types for linter */
+		f.actualSignals.addAll(this.signalStack.peek());
 		
 		/* Remove function signaled exceptions */
 		for (TYPE t : f.signalsTypes) {
@@ -667,6 +660,8 @@ public class ContextChecker {
 		
 		this.scopes.pop();
 		this.watchpointStack.pop();
+		
+		e.actualSignals.addAll(this.signalStack.peek());
 		
 		for (WatchStatement w : e.watchpoints) {
 			w.check(this);

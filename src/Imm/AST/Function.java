@@ -126,6 +126,11 @@ public class Function extends CompoundStatement {
 	 */
 	public List<TYPE> signalsTypes;
 	
+	/**
+	 * The types this function actually signals.
+	 */
+	public List<TYPE> actualSignals = new ArrayList();
+	
 	/* Flags for lambda targeting */
 	public Declaration lambdaDeclaration;
 	

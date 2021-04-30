@@ -32,6 +32,7 @@ import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PRIMITIVES.INT;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
+import Lnt.Linter;
 import Opt.ASM.ASMOptimizer;
 import Opt.AST.ASTOptimizer;
 import Par.Parser;
@@ -83,11 +84,11 @@ public class CompilerDriver {
 		useExperimentalOptimizer =		false,	/* If true, new and potentially buggy opt features are used.	*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
+		useLinter = 					false,	/* The linter pipeline stage is run.							*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
 		buildModulesRecurse = 			false,	/* Builds all modules in the input and saves them.				*/
 		pruneModules = 					false,	/* Prune all exisiting modules and start from scratch.			*/
-		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
 		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
 		printStats = 					false,	/* Print out optimizer statistics.						 		*/
 		linkOnly = 						false;	/* Only link the given input							 		*/
@@ -115,6 +116,7 @@ public class CompilerDriver {
 		IMPM("Import Manager"),
 		NAMM("Namespace Manager"),
 		CTEX("Context Checker"),
+		LINT("Linter"),
 		OPT0("AST Optimizer"),
 		CGEN("Code Generation"),
 		OPT1("ASM Optimizer");
@@ -277,7 +279,7 @@ public class CompilerDriver {
 				
 				log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
 				
-						/* --- PRE-PROCESSING --- */
+						/* ---< PRE-PROCESSING >--- */
 				List<LineObject> preCode = STAGE_PREP(code, inputFile.getPath());
 				
 				if (imm) {
@@ -285,7 +287,7 @@ public class CompilerDriver {
 					preCode.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x.line));
 				}
 				
-						/* --- SCANNING --- */
+						/* ---< SCANNING >--- */
 				List<Token> dequeue = STAGE_SCAN(preCode);
 				
 				/* If needed, create a cache of the tokens here */
@@ -294,19 +296,22 @@ public class CompilerDriver {
 					for (Token t : dequeue)
 						dupeCache.add(t);
 				
-						/* --- PARSING --- */
+						/* ---< PARSING >--- */
 				SyntaxElement AST = STAGE_PARS(dequeue);
 				
 						/* --- PROCESS DYNAMIC IMPORTS >--- */
 				AST = STAGE_PRE1(AST);
 				
-						/* ---< NAMESPACE MANAGER --- */
+						/* ---< NAMESPACE MANAGER >--- */
 				AST = STAGE_NAME(AST);
 				
 				if (imm) AST.print(4, true);
 				
-						/* ---< CONTEXT CHECKING --- */
+						/* ---< CONTEXT CHECKING >--- */
 				AST = STAGE_CTEX(AST);
+				
+						/* ---< LINTER >--- */
+				if (useLinter) AST = STAGE_LINT(AST);
 				
 				if (imm) AST.print(4, true);
 				
@@ -315,23 +320,23 @@ public class CompilerDriver {
 				
 				if (imm) AST.print(4, true);
 				
-						/* ---< CODE GENERATION --- */
+						/* ---< CODE GENERATION >--- */
 				AsNBody body = STAGE_CGEN(AST);
 	
 						/* ---< ASM OPTIMIZER >--- */
 				body = STAGE_OPT1(body);
 				
-						/* --- OUTPUT BUILDING --- */
+						/* ---< OUTPUT BUILDING >--- */
 				output = this.buildOutput(body.originUnit, false);
 			
-						/* --- BUILD AND DUMP MODULES --- */
+						/* ---< BUILD AND DUMP MODULES >--- */
 				STAGE_DUMP(AsNBody.translationUnits);
 				
 			}
 			else output = code;
 			
 			
-					/* --- LINKING --- */
+					/* ---< LINKING >--- */
 			output = STAGE_LINK(output);
 			
 			
@@ -658,6 +663,16 @@ public class CompilerDriver {
 		return AST;
 	}
 	
+	private static SyntaxElement STAGE_LINT(SyntaxElement AST) throws CTEX_EXC {
+		currentStage = PIPE_STAGE.LINT;
+		ProgressMessage lnt_progress = new ProgressMessage("LINT -> Starting", 30, LogPoint.Type.INFO);
+		Linter lnt = new Linter((Program) AST);
+		lnt.lint();
+		lnt_progress.finish();
+		lnt.report();
+		return AST;
+	}
+	
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) throws OPT0_EXC {
 		if (useASTOptimizer) {
 			double nodes_before = AST.visit(x -> { return true; }).size();
@@ -793,6 +808,7 @@ public class CompilerDriver {
 				else if (args [i].equals("-imm")) 	imm = true;
 				else if (args [i].equals("-stat")) 	printStats = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
+				else if (args [i].equals("-lnt")) 	useLinter = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
 				else if (args [i].equals("-opt0"))  useASTOptimizer = false;
 				else if (args [i].equals("-opt1"))  useASMOptimizer = false;
@@ -850,6 +866,7 @@ public class CompilerDriver {
 				"-logs     : Print out log and compile information, save log to file",
 				"-com      : Remove comments from assembly",
 				"-warn     : Disable warnings",
+				"-lnt      : Find potential issues in the code, print out warnings.",
 				"-imp      : Print out all imports",
 				"-opt0     : Disable AST Optimizer",
 				"-opt1     : Disable ASM Optimizer",
