@@ -121,7 +121,7 @@ public class ContextChecker {
 	/**
 	 * The Root AST Syntax Element.
 	 */
-	protected Program AST;
+	private Program AST;
 	
 	/**
 	 * Contains all functions in the AST, as well as
@@ -129,7 +129,7 @@ public class ContextChecker {
 	 * process, this list is filled. This way the total 
 	 * dependency order of the functions can be ensured.
 	 */
-	protected List<Function> functions = new ArrayList();
+	private List<Function> functions = new ArrayList();
 	
 	/**
 	 * This stack is filled with functions when a program
@@ -139,14 +139,14 @@ public class ContextChecker {
 	 * function is pushed. Since then this function is checked,
 	 * the cycle may continue.
 	 */
-	protected Stack<Function> currentFunction = new Stack();
+	private Stack<Function> currentFunction = new Stack();
 	
 	/**
 	 * This list contains all struct nested functions. The list is used,
 	 * when a function is called, to determine wether the function is a nested
 	 * function or not, and thus can be accessed or not.
 	 */
-	protected List<Function> nestedFunctions = new ArrayList();
+	private List<Function> nestedFunctions = new ArrayList();
 	
 	/**
 	 * This stack is filled with compound statements when
@@ -154,7 +154,7 @@ public class ContextChecker {
 	 * stack is used to determine the next highest super-loop
 	 * when checking break and continue statements.
 	 */
-	protected Stack<CompoundStatement> compoundStack = new Stack();
+	private Stack<CompoundStatement> compoundStack = new Stack();
 	
 	/**
 	 * This stack is filled with scopes when a program is
@@ -164,7 +164,7 @@ public class ContextChecker {
 	 * at any point, to link origins and to check for duplicate
 	 * variable names.
 	 */
-	protected Stack<Scope> scopes = new Stack();
+	private Stack<Scope> scopes = new Stack();
 	
 	/**
 	 * This stack is filled with exception type lists when
@@ -178,7 +178,7 @@ public class ContextChecker {
 	 * of the remaining exception types needs to be signaled in
 	 * the function header.
 	 */
-	protected Stack<List<TYPE>> signalStack = new Stack();
+	private Stack<List<TYPE>> signalStack = new Stack();
 	
 	/**
 	 * This stack is filled with syntax elements when a program
@@ -188,7 +188,7 @@ public class ContextChecker {
 	 * calls or a signal statement, the watchpoint is set to the 
 	 * highest scoped watchpoint.
 	 */
-	protected Stack<SyntaxElement> watchpointStack = new Stack();
+	private Stack<SyntaxElement> watchpointStack = new Stack();
 	
 	/**
 	 * This statement is always set to the statement that is 
@@ -197,24 +197,24 @@ public class ContextChecker {
 	 * at one point where the IDRef is not being used anymore, 
 	 * the register can be freed.
 	 */
-	protected Statement currentStatement = null;
+	private Statement currentStatement = null;
 	
 	/**
 	 * Contains a collection of all declarations in the AST.
 	 */
-	protected List<Declaration> declarations = new ArrayList();
+	private List<Declaration> declarations = new ArrayList();
 	
 	/**
 	 * All generated (WARN) messages. These messages will
 	 * be flushed after the context checking process is over.
 	 */
-	protected List<Message> messages = new ArrayList();
+	private List<Message> messages = new ArrayList();
 	
 	/**
 	 * Contains all registered struct typedefs. When a struct typedef
 	 * is checked, it will be added once all checks are finished.
 	 */
-	protected List<StructTypedef> structTypedefs = new ArrayList();
+	private List<StructTypedef> structTypedefs = new ArrayList();
 	
 	/**
 	 * During struct-typedef checking, this field will be set to a
@@ -224,7 +224,7 @@ public class ContextChecker {
 	 * are correctly set to the new function head, we need to check
 	 * the result of the merge again.
 	 */
-	protected StructTypedef reCheckTypedef = null;
+	private StructTypedef reCheckTypedef = null;
 	 
 	/**
 	 * Contains the current trace. Everytime a SyntaxElement
@@ -233,7 +233,7 @@ public class ContextChecker {
 	 * element is popped of the stack. When a CTEX_EXC is thrown,
 	 * this stack is used to create the check-trace.
 	 */
-	public Stack<SyntaxElement> stackTrace = new Stack();
+	private Stack<SyntaxElement> stackTrace = new Stack();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -852,7 +852,7 @@ public class ContextChecker {
 		}
 		
 		/* Struct may have modifier restrictions */
-		this.checkModifier(e.structType.getTypedef().modifier, e.structType.getTypedef().path, e.getSource());
+		e.modifierViolated = this.checkModifier(e.structType.getTypedef().modifier, e.structType.getTypedef().path, e.getSource());
 		
 		/* Check if all required provisos are present */
 		e.structType.checkProvisoPresent(e.getSource());
@@ -1264,7 +1264,7 @@ public class ContextChecker {
 			INTERFACE i = (INTERFACE) d.getType().getCoreType();
 			
 			/* Check for modifier restrictions */
-			this.checkModifier(i.getTypedef().modifier, i.getTypedef().path, d.getSource());
+			d.modifierViolated = this.checkModifier(i.getTypedef().modifier, i.getTypedef().path, d.getSource());
 		}
 
 		/* No need to set type here, is done while parsing */
@@ -1589,7 +1589,6 @@ public class ContextChecker {
 				boolean found = false;
 				for (Function nested : s.getTypedef().functions) {
 					if (nested.equals(f)) {
-						nested.wasCalled = true;
 						found = true;
 						break;
 					}
@@ -1678,7 +1677,7 @@ public class ContextChecker {
 				if (!found) throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s);
 			}
 			
-			checkModifier(f.modifier, f.path, c.getCallee().getSource());
+			c.getCallee().modifierViolated = this.checkModifier(f.modifier, f.path, c.getCallee().getSource());
 			
 			if (f.signals()) 
 				/* Add signaled types if not contained already */
@@ -1845,7 +1844,7 @@ public class ContextChecker {
 			i.setType(d.getType());
 			
 			/* Check for modifier restrictions */
-			this.checkModifier(i.origin.modifier, i.origin.path, i.getSource());
+			i.modifierViolated = this.checkModifier(i.origin.modifier, i.origin.path, i.getSource());
 
 			boolean contains = false;
 			for (int a = this.scopes.size() - 1; a >= 0; a--) {
@@ -1870,7 +1869,6 @@ public class ContextChecker {
 	
 	public TYPE checkInlineFunction(InlineFunction i) throws CTEX_EXC {
 		i.inlineFunction.check(this);
-		i.inlineFunction.wasCalled = true;
 		i.inlineFunction.addProvisoMapping(i.inlineFunction.getReturnType(), new ArrayList());
 		return new FUNC(i.inlineFunction, new ArrayList());
 	}
@@ -1943,9 +1941,6 @@ public class ContextChecker {
 		this.scopes.pop();
 		
 		r.origin = lambda;
-		
-		/* Set flag that this function was targeted as a lambda */
-		lambda.isLambdaTarget = true;
 		
 		r.setType(new FUNC(lambda, r.proviso));
 		return r.getType();
@@ -2213,11 +2208,6 @@ public class ContextChecker {
 				throw new CTEX_EXC(p.first.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree());
 		}
 		
-		if (d.dataOut.isEmpty()) {
-			if (!CompilerDriver.disableWarnings) 
-				messages.add(new Message(String.format(Const.DIRECT_ASM_HAS_NO_OUTPUTS, d.getSource().getSourceMarker()), LogPoint.Type.WARN, true));
-		}
-		
 		return new VOID();
 	}
 	
@@ -2308,28 +2298,24 @@ public class ContextChecker {
 	 * @param source The source of the AST node that initiated the check.
 	 * @throws CTEX_EXC Thrown if a modifier violation is detected.
 	 */
-	public void checkModifier(MODIFIER mod, NamespacePath path, Source source) throws CTEX_EXC {
+	public boolean checkModifier(MODIFIER mod, NamespacePath path, Source source) throws CTEX_EXC {
 		String currentPath = (this.currentFunction.isEmpty())? "" : this.currentFunction.peek().path.buildPathOnly();
 		
-		if (mod == MODIFIER.SHARED || mod == MODIFIER.STATIC) return;
+		if (mod == MODIFIER.SHARED || mod == MODIFIER.STATIC) return false;
 		else if (mod == MODIFIER.RESTRICTED) {
 			if (!currentPath.startsWith(path.buildPathOnly())) {
-				if (CompilerDriver.disableModifiers) {
-					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path, this.currentFunction.peek().path, source.getSourceMarker()), LogPoint.Type.WARN, true));
-				}
+				if (CompilerDriver.disableModifiers) return true;
 				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path, this.currentFunction.peek().path);
 			}
 		}
 		else if (mod == MODIFIER.EXCLUSIVE) {
 			if (!currentPath.equals(path.buildPathOnly())) {
-				if (CompilerDriver.disableModifiers) {
-					if (!CompilerDriver.disableWarnings) 
-						this.messages.add(new Message(String.format(Const.MODIFIER_VIOLATION_AT, path, this.currentFunction.peek().path, source.getSourceMarker()), LogPoint.Type.WARN, true));
-				}
+				if (CompilerDriver.disableModifiers) return true;
 				else throw new CTEX_EXC(source, Const.MODIFIER_VIOLATION, path, this.currentFunction.peek().path);
 			}
 		}
+		
+		return false;
 	}
 	
 	/**

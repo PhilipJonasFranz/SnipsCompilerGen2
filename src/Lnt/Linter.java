@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.AST.Program;
-import Lnt.Rules.DanglingPointerLRule;
-import Lnt.Rules.ImplicitAnonymousTypeLRule;
-import Lnt.Rules.NotThrownInTryLRule;
-import Lnt.Rules.OperandNotPointerLRule;
-import Lnt.Rules.VoidParamLRule;
+import Lnt.Rules.*;
 
 public class Linter {
 
@@ -24,6 +20,8 @@ public class Linter {
 		rules.add(new NotThrownInTryLRule());
 		rules.add(new OperandNotPointerLRule());
 		rules.add(new ImplicitAnonymousTypeLRule());
+		rules.add(new ModifierViolationLRule());
+		rules.add(new DirectASMNoOutputLRule());
 	}
 	
 	public void lint() {

@@ -26,7 +26,7 @@ public class Scanner {
 		INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 	}
 	
-	public class ScannableToken {
+	private class ScannableToken {
 	
 		String base;
 		
@@ -68,7 +68,7 @@ public class Scanner {
 	/**
 	 * All simple scannable tokens, represented in base/reset token format.
 	 */
-	protected ScannableToken [] scannables = {
+	private ScannableToken [] scannables = {
 			new ScannableToken("(",			TokenType.LPAREN,		ACC_STATE.NONE,			""),
 			new ScannableToken(")",			TokenType.RPAREN,		ACC_STATE.NONE,			""),
 			new ScannableToken("{",			TokenType.LBRACE,		ACC_STATE.NONE,			""),
@@ -140,18 +140,18 @@ public class Scanner {
 			new ScannableToken(">=",		TokenType.CMPGE,		ACC_STATE.NONE,			"")
 	};
 	
-	protected static ScannableToken [] staticScannables;
+	private static ScannableToken [] staticScannables;
 	
 	/** 
 	 * A map containing all combinations of scannable token bases and reset 
 	 * tokens appended, used to quick check for a complete token.
 	 * This map is setup once.
 	 */
-	static HashMap<String, ScannableToken> scannableMap = new HashMap();
+	private static HashMap<String, ScannableToken> scannableMap = new HashMap();
 	
-	List<LineObject> input;
+	private List<LineObject> input;
 	
-	public ProgressMessage progress;
+	private ProgressMessage progress;
 	
 	
 			/* ---< CONSTRUCTORS >--- */

@@ -24,7 +24,7 @@ public class Scope {
 
 			/* ---< FIELDS >--- */
 	/** Reference to the parent scope. Is null if this is the super scope. */
-	Scope parentScope;
+	private Scope parentScope;
 	
 	/** Set to true if scope is part of a loop */
 	boolean isLoopedScope = false;

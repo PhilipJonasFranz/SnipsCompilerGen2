@@ -14,11 +14,11 @@ public class PARS_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
-	TokenType actual;
+	private TokenType actual;
 	
-	TokenType [] expected;
+	private TokenType [] expected;
 	
-	Source location;
+	private Source location;
 	
 	public PARS_EXC(Source source, TokenType actual, TokenType...expected) {
 		this.location = source;

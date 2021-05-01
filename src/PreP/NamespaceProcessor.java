@@ -60,7 +60,7 @@ public class NamespaceProcessor {
 		}
 	}
 	
-	protected void flatten(List<SyntaxElement> target, Namespace name) {
+	private void flatten(List<SyntaxElement> target, Namespace name) {
 		for (SyntaxElement s : name.programElements) {
 			if (s instanceof Namespace) {
 				Namespace n = (Namespace) s;
@@ -93,7 +93,7 @@ public class NamespaceProcessor {
 		}
 	}
 	
-	protected void merge(List<Namespace> namespaces) {
+	private void merge(List<Namespace> namespaces) {
 		for (int i = 0; i < namespaces.size(); i++) {
 			List<Namespace> name = getNamespaces(namespaces.get(i));
 			
@@ -116,7 +116,7 @@ public class NamespaceProcessor {
 		}
 	}
 	
-	public List<Namespace> getNamespaces(Namespace n) {
+	private List<Namespace> getNamespaces(Namespace n) {
 		List<Namespace> name = new ArrayList();
 		
 		for (SyntaxElement s : n.programElements) 

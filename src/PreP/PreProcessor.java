@@ -40,7 +40,7 @@ public class PreProcessor {
 		
 	}
 	
-	List<LineObject> process = new ArrayList();
+	private List<LineObject> process = new ArrayList();
 	
 	public static List<String> imports = new ArrayList();
 	
@@ -70,13 +70,13 @@ public class PreProcessor {
 	/**
 	 * Convert the input to line objects and resolve #include directives, while maintaining correct file markers.
 	 */
-	public List<LineObject> getProcessedR(List<Pair<String, String>> passedFlags) {
+	private List<LineObject> getProcessedR(List<Pair<String, String>> passedFlags) {
 		for (int i = 0; i < this.process.size(); i++) {
 			String line = this.process.get(i).line.trim();
 			if (line.startsWith("#ifdef")) {
 				
 				/* Evaluate the condition, remove directive from code */
-				boolean eval = new BTermParser(this.process.get(i), passedFlags).evaluate();
+				boolean eval = new BTermParser(this.process.get(i)).evaluate();
 				this.process.remove(i);
 				
 				int c = 1;
@@ -200,7 +200,7 @@ public class PreProcessor {
 		return this.process;
 	}
 	
-	public int includeLines(String path, int i, List<Pair<String, String>> passedFlags) {
+	private int includeLines(String path, int i, List<Pair<String, String>> passedFlags) {
 		/* 
 		 * Build the include path that reflects the imported file and 
 		 * the passed flags from the include directive.
