@@ -55,5 +55,9 @@ public class ASMBranch extends ASMInstruction {
 				/* Branch target */
 				+ " " + this.target.toString();
 	}
+	
+	public int getRequiredCPUCycles() {
+		return 3; // +N +2S
+	}
 
 } 

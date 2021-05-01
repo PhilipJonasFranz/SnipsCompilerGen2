@@ -5,6 +5,7 @@ import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public abstract class ASMBinaryData extends ASMInstruction {
@@ -66,6 +67,16 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	
 	public boolean isUpdatingCondField() {
 		return this.updateConditionField;
+	}
+	
+	public int getRequiredCPUCycles() {
+		int sum = 1; // +S
+		
+		if (this.target.reg == REG.PC && this.shift != null) sum = 4; // +I +N +2S
+		else if (this.shift != null) sum = 2; // +I +S
+		else if (this.target.reg == REG.PC) sum = 3; // +N +2S
+		
+		return sum;
 	}
 
 } 

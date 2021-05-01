@@ -21,4 +21,8 @@ public class ASMDirective extends ASMInstruction {
 		return this.hardCode;
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 0;
+	}
+	
 } 

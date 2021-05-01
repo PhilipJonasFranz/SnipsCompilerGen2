@@ -12,4 +12,8 @@ public class ASMSeperator extends ASMInstruction {
 		return "";
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 0;
+	}
+	
 } 

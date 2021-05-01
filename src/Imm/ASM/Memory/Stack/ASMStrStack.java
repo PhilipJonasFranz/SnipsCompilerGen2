@@ -19,4 +19,8 @@ public class ASMStrStack extends ASMStackOp {
 		return super.build("str");
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 2; // +N +N
+	}
+	
 } 

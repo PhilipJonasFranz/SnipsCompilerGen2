@@ -164,7 +164,6 @@ public class TestDriver {
 		}
 		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);
 		
-		
 		System.exit(0);
 	}
 	

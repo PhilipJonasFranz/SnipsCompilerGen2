@@ -21,4 +21,8 @@ public class ASMComment extends ASMInstruction {
 		return s + "/* " + this.comment + " */";
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 0;
+	}
+	
 } 

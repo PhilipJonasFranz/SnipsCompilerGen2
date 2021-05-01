@@ -182,7 +182,7 @@ public class ASTOptimizer {
 	 * improvement over the current one. Different metrics can impact how
 	 * the AST is optimized.
 	 */
-	public static OPT_METRIC METRIC = OPT_METRIC.EXPECTED_INSTRUCTIONS;
+	public static OPT_METRIC METRIC = OPT_METRIC.AST_SIZE;
 	
 	/**
 	 * If set to true, the AST before and after the optimization will be
@@ -249,8 +249,8 @@ public class ASTOptimizer {
 			 */
 			while (OPT_DONE || CYCLES < MIN_CYCLES) {
 				
-				/* Keep track of the size complexity of the AST */
-				complexity.add((int) AST0.visit(x -> true).stream().count());
+				/* Keep track of the current heuristic value of the AST */
+				complexity.add(this.getCurrentHeuristic(AST0));
 				
 				/* 
 				 * Keep track what LAST_ROUND was at each start of cycle, later
@@ -389,18 +389,10 @@ public class ASTOptimizer {
 		if (f.ASTOptCounterpart != null && STRATEGY == OPT_STRATEGY.ON_IMPROVEMENT) {
 				
 			/* Node # of optimized body */
-			int opt_f0 = 0;
-			
-			if (METRIC == OPT_METRIC.AST_SIZE) opt_f0 = f.ASTOptCounterpart.size();
-			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) opt_f0 = f.ASTOptCounterpart.expectedInstructionAmount();
-			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) opt_f0 = f.ASTOptCounterpart.expectedCycleAmount();
+			int opt_f0 = this.getCurrentHeuristic(f.ASTOptCounterpart);
 			
 			/* Node # of original body */
-			int nodes_f = 0;
-			
-			if (METRIC == OPT_METRIC.AST_SIZE) nodes_f = f.size();
-			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) nodes_f = f.expectedInstructionAmount();
-			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) nodes_f = f.expectedCycleAmount();
+			int nodes_f = this.getCurrentHeuristic(f);
 			
 			/**
 			 * At this point, the AST-Counterpart-Function could not make an optimization that
@@ -442,7 +434,10 @@ public class ASTOptimizer {
 			 */
 			if (phase == 2) LAST_ROUND = lRoundHist.get(CYCLES - repeat + i);
 			
+			/* Register function parameters */
 			for (Declaration dec : f.parameters) dec.opt(this);
+			
+			/* Optimize Body */
 			f.body = this.optBody(f.body, false, false);
 			
 			this.popContext();
@@ -1838,6 +1833,18 @@ public class ASTOptimizer {
 		ProgramState state = this.cStack.pop();
 		state.transferContextChangeToParent();
 		this.state = this.cStack.peek();
+	}
+	
+	/**
+	 * Returns the value of the selected heuristic for the given AST. Generally, less
+	 * is better, as it indicates a reduction in size, amount of instructions, or required cycles.
+	 * @param AST The AST to measuree the heuristic from.
+	 * @return The heuristic value for the AST.
+	 */
+	private int getCurrentHeuristic(SyntaxElement AST) {
+		if (METRIC == OPT_METRIC.AST_SIZE) return AST.size();
+		else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) return AST.expectedInstructionAmount();
+		else return AST.expectedCycleAmount();
 	}
 	
 }

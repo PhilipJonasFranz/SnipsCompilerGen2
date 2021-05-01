@@ -21,4 +21,8 @@ public class ASMLabel extends ASMInstruction {
 		return this.name + ": ";
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 0;
+	}
+	
 } 

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {
@@ -38,6 +39,13 @@ public class ASMPopStack extends ASMInstruction {
 		ASMPopStack pop = new ASMPopStack();
 		for (RegOp op : this.operands) pop.operands.add(op.clone());
 		return pop;
+	}
+	
+	public int getRequiredCPUCycles() {
+		if (this.operands.stream().filter(x -> x.reg == REG.PC).count() > 0) {
+			return this.operands.size() + 4; // +N +(n-1)S +I +N +2S
+		}
+		else return this.operands.size() + 2; // +N +(n-1)S +I +S
 	}
 	
 } 

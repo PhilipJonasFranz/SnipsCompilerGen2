@@ -36,4 +36,8 @@ public class ASMPushStack extends ASMInstruction {
 		return s;
 	}
 	
+	public int getRequiredCPUCycles() {
+		return this.operands.size() + 2; // +N +(n-1)S +I +S
+	}
+	
 } 
