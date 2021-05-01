@@ -22,13 +22,14 @@ import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNCompare;
 import Opt.AST.Util.Matcher;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForStatement f = new AsNForStatement();
+		f.pushOnCreatorStack();
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */
@@ -79,9 +80,9 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
-		if (expr instanceof AsNCmp) {
+		if (expr instanceof AsNCompare) {
 			/* Top Comparison */
-			AsNCmp com = (AsNCmp) expr;
+			AsNCompare com = (AsNCompare) expr;
 			
 			COND neg = com.neg;
 			
@@ -147,6 +148,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		f.freeDecs(r, a);
+		f.registerMetric();
 		return f;
 	}
 	

@@ -34,10 +34,10 @@ import Imm.AsN.Expression.Arith.AsNBitOr;
 import Imm.AsN.Expression.Arith.AsNBitXor;
 import Imm.AsN.Expression.Arith.AsNLsl;
 import Imm.AsN.Expression.Arith.AsNLsr;
-import Imm.AsN.Expression.Arith.AsNMult;
+import Imm.AsN.Expression.Arith.AsNMul;
 import Imm.AsN.Expression.Arith.AsNSub;
 import Imm.AsN.Expression.Boolean.AsNAnd;
-import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNCompare;
 import Imm.AsN.Expression.Boolean.AsNOr;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Res.Const;
@@ -65,10 +65,10 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			node = AsNSub.cast((Sub) e, r, map, st);
 		}
 		else if (e instanceof Mul) {
-			node = AsNMult.cast((Mul) e, r, map, st);
+			node = AsNMul.cast((Mul) e, r, map, st);
 		}
 		else if (e instanceof Compare) {
-			node = AsNCmp.cast((Compare) e, r, map, st);
+			node = AsNCompare.cast((Compare) e, r, map, st);
 		}
 		else if (e instanceof Lsl) {
 			return AsNLsl.cast((Lsl) e, r, map, st);

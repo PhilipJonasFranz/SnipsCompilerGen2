@@ -15,9 +15,12 @@ public class AsNBitXor extends AsNNFoldExpression {
 
 	public static AsNBitXor cast(BitXor b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitXor xor = new AsNBitXor();
+		xor.pushOnCreatorStack();
+		b.castedNode = xor;
 		
 		xor.evalExpression(xor, b, r, map, st, (x, y) -> x ^ y);
 			
+		xor.registerMetric();
 		return xor;
 	}
 	

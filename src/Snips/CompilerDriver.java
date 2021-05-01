@@ -46,6 +46,7 @@ import Res.Manager.RessourceManager;
 import Res.Manager.TranslationUnit;
 import Util.BufferedPrintStream;
 import Util.NamespacePath;
+import Util.Pair;
 import Util.Source;
 import Util.Util;
 import Util.Logging.LogPoint;
@@ -165,6 +166,10 @@ public class CompilerDriver {
 	public static CompilerDriver driver;
 	
 	public static XMLNode sys_config;
+	
+	public static XMLNode metrics_config;
+	
+	public static HashMap<String, Pair<Integer, Integer>> node_metrics = new HashMap();
 	
 	public Exception thrownException = null;
 	
@@ -897,11 +902,23 @@ public class CompilerDriver {
 			/* --- RESSOURCES --- */
 	public void readConfig() {
 		/* Read Configuration */
-		List<String> conf = FileUtil.readFile(new File("release\\sys-inf.xml"));
-		if (conf == null) conf = FileUtil.readFile(new File("sys-inf.xml"));
-		
 		try {
-			sys_config  = XMLParser.parse(conf);
+			/* Load library config */
+			List<String> sysconf = FileUtil.readFile(new File("release\\sys-inf.xml"));
+			if (sysconf == null) sysconf = FileUtil.readFile(new File("sys-inf.xml"));
+			sys_config  = XMLParser.parse(sysconf);
+			
+			/* Load node-to-instruction ratio config */
+			List<String> meconf = FileUtil.readFile(new File("release\\metric-inf.xml"));
+			if (meconf == null) meconf = FileUtil.readFile(new File("metric-inf.xml"));
+			metrics_config  = XMLParser.parse(meconf);
+			
+			/* Pre-Cache Ratios */
+			for (XMLNode child : metrics_config.getChildren()) {
+				String [] sp = child.getValue().split(" ");
+				Pair<Integer, Integer> ic = new Pair(Integer.parseInt(sp [0]), Integer.parseInt(sp [1]));
+				node_metrics.put(child.getID(), ic);
+			}
 		} catch (MalformedXMLException e) {
 			new Message("Failed to parse system configuration!", Type.FAIL);
 			System.exit(0);

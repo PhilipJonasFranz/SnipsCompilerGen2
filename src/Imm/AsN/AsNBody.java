@@ -65,7 +65,7 @@ public class AsNBody extends AsNNode {
 	public static ProgressMessage progress;
 	
 	/* Label to the stack copy routine */
-	public static ASMLabel stackCopyRoutine = new ASMLabel("_routine_stack_copy_");
+	public static ASMLabel stackCopyRoutine;
 	
 	/* Set to true to signal that a part of the program used the routine */
 	public static boolean usedStackCopyRoutine = false;
@@ -88,11 +88,12 @@ public class AsNBody extends AsNNode {
 		AsNBody.usedStackCopyRoutine = false;
 		AsNBody.literalManager = new LiteralUtil();
 		
-		stackCopyRoutine = new ASMLabel("_routine_stack_copy_");
-		
 		AsNBody body = new AsNBody();
+		body.pushOnCreatorStack();
 		p.castedNode = body;
 		AsNBody.progress = progress;
+		
+		stackCopyRoutine = new ASMLabel("_routine_stack_copy_");
 		
 		originPath = RessourceManager.instance.toASMPath(CompilerDriver.inputFile.getPath());
 		body.originUnit = new TranslationUnit(originPath);
@@ -427,6 +428,7 @@ public class AsNBody extends AsNNode {
 			body.buildLiteralPools(entry.getValue().textSection, map, entry.getValue().sourceFile);
 		
 		progress.incProgress(1);
+		body.registerMetric();
 		return body;
 	}
 	

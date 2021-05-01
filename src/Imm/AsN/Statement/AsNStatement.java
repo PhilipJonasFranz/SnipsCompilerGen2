@@ -36,13 +36,13 @@ public abstract class AsNStatement extends AsNNode {
 			node = AsNFunctionCall.cast((FunctionCall) s, r, map, st); 
 		}
 		else if (s instanceof ReturnStatement) {
-			node = AsNReturn.cast((ReturnStatement) s, r, map, st); 
+			node = AsNReturnStatement.cast((ReturnStatement) s, r, map, st); 
 		}
 		else if (s instanceof BreakStatement) {
-			node = AsNBreak.cast((BreakStatement) s, r, map, st); 
+			node = AsNBreakStatement.cast((BreakStatement) s, r, map, st); 
 		}
 		else if (s instanceof ContinueStatement) {
-			node = AsNContinue.cast((ContinueStatement) s, r, map, st); 
+			node = AsNContinueStatement.cast((ContinueStatement) s, r, map, st); 
 		}
 		else if (s instanceof Declaration) {
 			node = AsNDeclaration.cast((Declaration) s, r, map, st);

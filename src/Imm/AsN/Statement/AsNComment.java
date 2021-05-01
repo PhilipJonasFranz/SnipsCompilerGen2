@@ -11,9 +11,12 @@ public class AsNComment extends AsNStatement {
 
 	public static AsNComment cast(Comment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNComment com = new AsNComment();
+		com.pushOnCreatorStack();
+		a.castedNode = com;
 		
 		com.instructions.add(new ASMComment(a.comment));
 		
+		com.registerMetric();
 		return com;
 	}
 	

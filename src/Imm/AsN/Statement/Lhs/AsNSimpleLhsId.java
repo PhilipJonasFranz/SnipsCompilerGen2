@@ -32,6 +32,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 	public static AsNSimpleLhsId cast(SimpleLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNSimpleLhsId id = new AsNSimpleLhsId();
+		id.pushOnCreatorStack();
 		lhs.castedNode = id;
 
 		IDRef ref = lhs.ref;
@@ -126,6 +127,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		
 		r.free(0, 1, 2);
 		
+		id.registerMetric();
 		return id;
 	}
 	

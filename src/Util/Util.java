@@ -2,17 +2,21 @@ package Util;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AsN.AsNNode;
 import Res.Const;
+import Res.Manager.FileUtil;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import XMLParser.XMLParser.XMLNode;
 
 public class Util {
 
@@ -318,6 +322,26 @@ public class Util {
 			
 			CompilerDriver.log.add(new Message(trace, LogPoint.Type.FAIL));
 		}
+	}
+	
+	public static void flushAsNNodeMetrics() {
+		HashMap<String, Pair<Integer, Pair<Integer, Integer>>> map = AsNNode.metricsMap;
+		XMLNode node = CompilerDriver.metrics_config;
+		
+		for (Entry<String, Pair<Integer, Pair<Integer, Integer>>> entry : map.entrySet()) {
+			XMLNode child = node.getNode(entry.getKey());
+			if (child == null) {
+				child = new XMLNode(entry.getKey());
+				node.getChildren().add(child);
+			}
+			
+			double ratioI = ((double) entry.getValue().second.first) / entry.getValue().first;
+			double ratioC = ((double) entry.getValue().second.second) / entry.getValue().first;
+			child.setValue("" + (int) ratioI + " " + (int) ratioC);
+		}
+		
+		List<String> out = node.asString();
+		FileUtil.writeInFile(out, "release/metric-inf.xml");
 	}
 	
 } 

@@ -4,6 +4,12 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implements the functions println(String), println, and print.
+ * The strings printed are buffered in a list, so they can be
+ * read-out later. The print calls are relayed to the printstream
+ * defined by the member {@link #outs}.
+ */
 public class BufferedPrintStream {
 
 	private PrintStream outs;

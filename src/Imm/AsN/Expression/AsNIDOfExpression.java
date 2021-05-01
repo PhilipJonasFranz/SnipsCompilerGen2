@@ -13,6 +13,7 @@ public class AsNIDOfExpression extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNIDOfExpression cast(IDOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNIDOfExpression s = new AsNIDOfExpression();
+		s.pushOnCreatorStack();
 		soe.castedNode = s;
 		
 		r.free(0);
@@ -20,6 +21,7 @@ public class AsNIDOfExpression extends AsNExpression {
 		STRUCT struct = (STRUCT) soe.type;
 		struct.getTypedef().loadSIDInReg(s, REG.R0, struct.proviso);
 		
+		s.registerMetric();
 		return s;
 	}
 	

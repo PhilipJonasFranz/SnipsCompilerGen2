@@ -17,6 +17,8 @@ public class AsNUnaryMinus extends AsNUnaryExpression {
 			/* ---< METHODS >--- */
 	public static AsNUnaryMinus cast(UnaryMinus m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNUnaryMinus minus = new AsNUnaryMinus();
+		minus.pushOnCreatorStack();
+		m.castedNode = minus;
 		
 		/* Clear only R0 */
 		minus.clearReg(r, st, 0);
@@ -27,6 +29,7 @@ public class AsNUnaryMinus extends AsNUnaryExpression {
 		/* 0 - Operand */
 		minus.instructions.add(new ASMRsb(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(0)));
 		
+		minus.registerMetric();
 		return minus;
 	}
 	

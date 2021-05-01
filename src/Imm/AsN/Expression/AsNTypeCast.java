@@ -11,6 +11,7 @@ public class AsNTypeCast extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNTypeCast cast(TypeCast tc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNTypeCast t = new AsNTypeCast();
+		t.pushOnCreatorStack();
 		tc.castedNode = t;
 		
 		/* 
@@ -19,6 +20,7 @@ public class AsNTypeCast extends AsNExpression {
 		 */
 		t.instructions.addAll(AsNExpression.cast(tc.expression, r, map, st).getInstructions());
 		
+		t.registerMetric();
 		return t;
 	}
 	

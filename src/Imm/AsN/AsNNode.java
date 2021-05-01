@@ -1,10 +1,13 @@
 package Imm.AsN;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 import CGen.RegSet;
 import CGen.StackSet;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
@@ -14,9 +17,16 @@ import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Util.Pair;
 
 public abstract class AsNNode {
 
+	public static Stack<AsNNode> creatorStack = new Stack();
+	
+	/* AsNNode, Amount of Commits to this Node Type, Instruction Size, Cycles */
+	public static HashMap<String, Pair<Integer, Pair<Integer, Integer>>> metricsMap = new HashMap();
+	
+	
 			/* ---< NESTED >--- */
 	public enum MODIFIER {
 		
@@ -66,6 +76,38 @@ public abstract class AsNNode {
 				r.free(reg);
 			}
 		}
+	}
+	
+	public void pushOnCreatorStack() {
+		creatorStack.push(this);
+	}
+	
+	public void registerMetric() {
+		if (creatorStack.isEmpty()) throw new SNIPS_EXC("Attempted to pop from empty creator stack!");
+		else if (!creatorStack.peek().equals(this)) throw new SNIPS_EXC("Creator stack is not lined up!");
+		
+		creatorStack.pop();
+		
+		String key = this.getClass().getSimpleName();
+		
+		if (!metricsMap.containsKey(key)) 
+			metricsMap.put(key, new Pair<>(0, new Pair<>(0, 0)));
+		
+		Pair<Integer, Pair<Integer, Integer>> pair = metricsMap.get(key);
+		
+		pair.first++;
+		
+		int cycles = 0;
+		int sum = 0;
+		for (ASMInstruction ins : this.getInstructions()) {
+			if (ins.creator.equals(this)) {
+				cycles += ins.getRequiredCPUCycles();
+				sum++;
+			}
+		}
+		
+		pair.second.first += sum;
+		pair.second.second += cycles;
 	}
 	
 } 

@@ -30,6 +30,8 @@ public class AsNSignalStatement extends AsNStatement {
 
 	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSignalStatement sig = new AsNSignalStatement();
+		sig.pushOnCreatorStack();
+		s.castedNode = sig;
 		
 		STRUCT excType = (STRUCT) s.exceptionBuilder.getType();
 		
@@ -47,6 +49,7 @@ public class AsNSignalStatement extends AsNStatement {
 		/* Add the branch to the watchpoint */
 		injectWatchpointBranch(sig, s.watchpoint, null);
 		
+		sig.registerMetric();
 		return sig;
 	}
 	

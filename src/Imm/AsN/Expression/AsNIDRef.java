@@ -27,6 +27,7 @@ public class AsNIDRef extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNIDRef ref = new AsNIDRef();
+		ref.pushOnCreatorStack();
 		i.castedNode = ref;
 		
 		/* Declaration is already loaded in Reg Stack */
@@ -104,6 +105,7 @@ public class AsNIDRef extends AsNExpression {
 			}
 		}
 		
+		ref.registerMetric();
 		return ref;
 	}
 	

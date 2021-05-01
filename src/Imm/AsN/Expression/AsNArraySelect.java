@@ -42,6 +42,7 @@ public class AsNArraySelect extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNArraySelect select = new AsNArraySelect();
+		select.pushOnCreatorStack();
 		s.castedNode = select;
 		
 		r.free(0, 1, 2);
@@ -85,6 +86,7 @@ public class AsNArraySelect extends AsNExpression {
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
 		
+		select.registerMetric();
 		return select;
 	}
 	

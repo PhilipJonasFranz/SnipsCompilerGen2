@@ -83,6 +83,7 @@ import Opt.AST.Util.CompoundStatementRules;
 import Opt.AST.Util.Makro;
 import Opt.AST.Util.Matcher;
 import Opt.AST.Util.Morpher;
+import Opt.AST.Util.OPT_METRIC;
 import Opt.AST.Util.OPT_STRATEGY;
 import Opt.AST.Util.ProgramState;
 import Opt.AST.Util.UnrollStatementUtil;
@@ -175,6 +176,13 @@ public class ASTOptimizer {
 	 * to under or over-optimized ASTs.
 	 */
 	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
+	
+	/**
+	 * Sets the used metric to determine if the current optimized AST is an 
+	 * improvement over the current one. Different metrics can impact how
+	 * the AST is optimized.
+	 */
+	public static OPT_METRIC METRIC = OPT_METRIC.EXPECTED_INSTRUCTIONS;
 	
 	/**
 	 * If set to true, the AST before and after the optimization will be
@@ -382,11 +390,17 @@ public class ASTOptimizer {
 				
 			/* Node # of optimized body */
 			int opt_f0 = 0;
-			for (Statement s : f.ASTOptCounterpart.body) opt_f0 += s.visit(x -> { return true; }).size();
+			
+			if (METRIC == OPT_METRIC.AST_SIZE) opt_f0 = f.ASTOptCounterpart.size();
+			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) opt_f0 = f.ASTOptCounterpart.expectedInstructionAmount();
+			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) opt_f0 = f.ASTOptCounterpart.expectedCycleAmount();
 			
 			/* Node # of original body */
 			int nodes_f = 0;
-			for (Statement s : f.body) nodes_f += s.visit(x -> { return true; }).size();
+			
+			if (METRIC == OPT_METRIC.AST_SIZE) nodes_f = f.size();
+			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) nodes_f = f.expectedInstructionAmount();
+			else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) nodes_f = f.expectedCycleAmount();
 			
 			/**
 			 * At this point, the AST-Counterpart-Function could not make an optimization that
