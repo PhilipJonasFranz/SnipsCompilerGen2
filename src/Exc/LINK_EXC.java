@@ -12,9 +12,9 @@ public class LINK_EXC extends Exception {
 
 	private static final long serialVersionUID = 5791314197219757362L;
 
-	String message;
+	private String message;
 	
-	Object [] format;
+	private Object [] format;
 	
 	public LINK_EXC(String message, Object...format) {
 		this.message = message;

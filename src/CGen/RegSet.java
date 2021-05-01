@@ -7,7 +7,7 @@ public class RegSet {
 
 			/* ---< NESTED >--- */
 	/** Used to identify the state of a register */
-	public enum STATUS {
+	private enum STATUS {
 		USED, FREE, RESERVED;
 	}
 	
@@ -20,7 +20,7 @@ public class RegSet {
 		
 				/* ---< FIELDS >--- */
 		/** The status of the Register */
-		public STATUS status = STATUS.FREE;
+		private STATUS status = STATUS.FREE;
 		
 		/** The declaration that is currently in the register. */
 		public Declaration declaration;

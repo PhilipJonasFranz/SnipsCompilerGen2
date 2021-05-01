@@ -57,9 +57,9 @@ public class ASTDirective {
 	
 	
 			/* ---< FIELDS >--- */
-	public DIRECTIVE type;
+	private DIRECTIVE type;
 	
-	public HashMap<String, String> properties;
+	private HashMap<String, String> properties;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -84,6 +84,10 @@ public class ASTDirective {
 	
 	public DIRECTIVE type() {
 		return this.type;
+	}
+	
+	public HashMap<String, String> properties() {
+		return this.properties;
 	}
 	
 	

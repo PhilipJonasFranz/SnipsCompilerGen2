@@ -16,7 +16,6 @@ import Par.Token;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Logging.LogPoint.Type;
-import Util.Pair;
 import Util.Logging.Message;
 
 /**
@@ -26,18 +25,15 @@ import Util.Logging.Message;
 public class BTermParser {
 
 				/* ---< FIELDS >--- */
-		List<Pair<String, String>> passedFlags;
-	
-		List<Token> dequeue;
+		private List<Token> dequeue;
 		
-		Token current;
+		private Token current;
 		
-		LineObject expression;
+		private LineObject expression;
 	
 		
 				/* ---< CONSTRUCTORS >--- */
-		public BTermParser(LineObject expression, List<Pair<String, String>> passedFlags) {
-			this.passedFlags = passedFlags;
+		public BTermParser(LineObject expression) {
 			this.expression = expression;
 			
 			/* Remove #ifdef from start of line */
@@ -63,7 +59,7 @@ public class BTermParser {
 				expr = this.parseExpression();
 				
 				if (!this.dequeue.isEmpty() && !(this.dequeue.get(0).type() == TokenType.EOF)) 
-					throw new PARS_EXC(current.source, current.type(), TokenType.LPAREN, TokenType.BOOLLIT, TokenType.AND, TokenType.OR);
+					throw new PARS_EXC(current.source(), current.type(), TokenType.LPAREN, TokenType.BOOLLIT, TokenType.AND, TokenType.OR);
 			} catch (PARS_EXC e) {
 				new Message("Failed to parse condition '" + this.expression.line.trim() + "', line " + this.expression.lineNumber + " (" + this.expression.fileName + ")", Type.FAIL);
 				throw new SNIPS_EXC(e.getMessage());
@@ -73,38 +69,38 @@ public class BTermParser {
 		}
 		
 				/* ---< EVALUATION >--- */
-		public boolean evaluateExpression(Expression expr) {
+		private boolean evaluateExpression(Expression expr) {
 			if (expr instanceof Or) return this.evaluateOr((Or) expr);
 			else if (expr instanceof And) return this.evaluateAnd((And) expr);
 			else return this.evaluateAtom((Atom) expr);
 		}
 		
-		public boolean evaluateOr(Or or) {
+		private boolean evaluateOr(Or or) {
 			boolean val = false;
 			for (Expression op : or.operands)
 				val |= this.evaluateExpression(op);
 			return val;
 		}
 		
-		public boolean evaluateAnd(And and) {
+		private boolean evaluateAnd(And and) {
 			boolean val = true;
 			for (Expression op : and.operands)
 				val &= this.evaluateExpression(op);
 			return val;
 		}
 		
-		public boolean evaluateAtom(Atom atom) {
+		private boolean evaluateAtom(Atom atom) {
 			BOOL bool = (BOOL) atom.getType();
 			return bool.value;
 		}
 		
 				/* ---< PARSER >--- */
-		protected Token accept(TokenType tokenType) throws PARS_EXC {
+		private Token accept(TokenType tokenType) throws PARS_EXC {
 			if (current.type() == tokenType) return accept();
-			else throw new PARS_EXC(current.source, current.type(), tokenType);
+			else throw new PARS_EXC(current.source(), current.type(), tokenType);
 		}
 		
-		protected Token accept() {
+		private Token accept() {
 			Token old = current;
 			
 			if (!dequeue.isEmpty()) {
@@ -115,33 +111,33 @@ public class BTermParser {
 			return old;
 		}
 		
-		public Expression parseExpression() throws PARS_EXC {
+		private Expression parseExpression() throws PARS_EXC {
 			return this.parseOr();
 		}
 		
-		public Expression parseOr() throws PARS_EXC {
+		private Expression parseOr() throws PARS_EXC {
 			Expression left = this.parseAnd();
 			
 			while (current.type() == TokenType.OR) {
 				accept();
-				left = new Or(left, this.parseExpression(), current.source);
+				left = new Or(left, this.parseExpression(), current.source());
 			}
 			
 			return left;
 		}
 		
-		public Expression parseAnd() throws PARS_EXC {
+		private Expression parseAnd() throws PARS_EXC {
 			Expression left = this.parseAtom();
 			
 			while (current.type() == TokenType.AND) {
 				accept();
-				left = new And(left, this.parseExpression(), current.source);
+				left = new And(left, this.parseExpression(), current.source());
 			}
 			
 			return left;
 		}
 		
-		public Expression parseAtom() throws PARS_EXC {
+		private Expression parseAtom() throws PARS_EXC {
 			if (current.type() == TokenType.LPAREN) {
 				accept();
 				Expression e = this.parseExpression();
@@ -150,9 +146,9 @@ public class BTermParser {
 			}
 			else if (current.type() == TokenType.BOOLLIT) {
 				Token token = accept();
-				return new Atom(new BOOL(token.spelling()), token.source);
+				return new Atom(new BOOL(token.spelling()), token.source());
 			}
-			else throw new PARS_EXC(current.source, current.type(), TokenType.LPAREN, TokenType.BOOLLIT);
+			else throw new PARS_EXC(current.source(), current.type(), TokenType.LPAREN, TokenType.BOOLLIT);
 		}
 
 }

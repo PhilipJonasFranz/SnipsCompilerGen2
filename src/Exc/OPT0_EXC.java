@@ -10,11 +10,11 @@ public class OPT0_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
-	String message;
+	private String message;
 	
-	Source location;
+	private Source location;
 	
-	Object [] format;
+	private Object [] format;
 	
 	public OPT0_EXC(Source source, String message, Object...format) {
 		this.location = source;

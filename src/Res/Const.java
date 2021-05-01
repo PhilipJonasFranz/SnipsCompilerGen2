@@ -22,10 +22,6 @@ public class Const {
 	
 	public static final String MUST_SIGNAL_AT_LEAST_ONE_TYPE = "Function must signal at least one exception type";
 	
-	public static final String WATCHED_EXCEPTION_NOT_THROWN_IN_FUNCTION = "Watched exception %s is not thrown in function '%s', %s";
-	
-	public static final String WATCHED_EXCEPTION_NOT_THROWN_IN_TRY = "Watched exception type %s is not thrown in try block, %s";
-	
 	public static final String MULTIPLE_WATCHPOINTS_FOR_EXCEPTION = "Found multiple watchpoints for exception %s";
 	
 	public static final String UNWATCHED_EXCEPTIONS_FOR_FUNCTION = "Unwatched exceptions for function %s: %s";
@@ -37,8 +33,6 @@ public class Const {
 	public static final String USED_RESERVED_NAME = "The identifier '%s' is reserved, %s";
 	
 	public static final String DUPLICATE_FIELD_NAME = "Duplicate field name: %s";
-	
-	public static final String UNCHECKED_TYPE_VOID = "Unchecked type %s, %s";
 	
 	public static final String UNKNOWN_VARIABLE = "Unknown variable: %s";
 	
@@ -52,8 +46,6 @@ public class Const {
 	
 	public static final String UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER = "Undefined function or predicate '%s' in super type '%s'";
 	
-	public static final String EXPECTED_TYPE_ACTUAL = "Expected %s, actual %s";
-	
 	public static final String EXPECTED_RETURN_VALUE = "Expected return value from inline call";
 	
 	public static final String NO_RETURN_VALUE = "Return statement has no return value, expected %s";
@@ -65,8 +57,6 @@ public class Const {
 	public static final String PREDICATE_SHADOWS_FUNCTION = "Predicate name shadows function name '%s'";
 	
 	public static final String MODIFIER_VIOLATION = "Modifier violation: %s from %s";
-	
-	public static final String MODIFIER_VIOLATION_AT = "Modifier violation: %s from %s at %s";
 	
 	public static final String MISSMATCHING_ARGUMENT_NUMBER = "Missmatching argument number: Expected %d, but got %d";
 	
@@ -128,8 +118,6 @@ public class Const {
 	
 	public static final String CANNOT_DEREF_TYPE = "Cannot deref type %s";
 	
-	public static final String OPERAND_IS_NOT_A_POINTER = "Operand is not a pointer, may cause unexpected behaviour, %s";
-	
 	public static final String POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE = "Pointer arithmetic is only supported for %s, actual %s";
 	
 	public static final String CLASS_CANNOT_BE_SELECTOR = "%s cannot be a selector";
@@ -178,21 +166,15 @@ public class Const {
 	
 	public static final String CAN_ONLY_CONTINUE_IN_LOOP = "Can only continue in the scope of a loop";
 	
-	public static final String SID_DISABLED_NO_INSTANCEOF = "SID headers are disabled, instanceof is not available";
-	
 	public static final String SID_DISABLED_NO_INTERFACES = "SID headers are disabled, interfaces are not available";
 	
 	public static final String FIELD_NOT_IN_STRUCT = "The selected field %s in the structure %s does not exist";
 	
 	public static final String PREDICATE_IS_ANONYMOUS = "Unsafe operation, predicate '%s' is anonymous, %s";
 	
-	public static final String USING_IMPLICIT_ANONYMOUS_TYPE = "Using implicit anonymous type %s, %s";
-	
 	public static final String CAN_ONLY_GET_ADDRESS_OF_VARIABLE_REF_OR_ARRAY_SELECT = "Can only get address of variable reference or array select";
 	
 	public static final String TYPE_CANNOT_BE_ALIGNED_TO =  "%s cannot be aligned to %s";
-	
-	public static final String DIRECT_ASM_HAS_NO_OUTPUTS = "Direct ASM Operation has no explicit outputs, %s";
 	
 	public static final String FAILED_TO_CHECK_PARAMETER = "Failed to check parameter %d of function call %s";
 	
@@ -275,8 +257,6 @@ public class Const {
 	public static final String FUNCTION_UNDEFINED_AT_THIS_POINT = "Function %s is undefined at this point, %s";
 	
 	public static final String OPERATION_NOT_IMPLEMENTED = "Operation not implemented!";
-	
-	public static final String CANNOT_CHECK_REFERENCES = "Cannot check references for %s";
 	
 	public static final String UNKNOWN_WATCHPOINT_TYPE = "Unknown watchpoint type %s, %s";
 	

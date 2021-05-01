@@ -84,13 +84,6 @@ public class Function extends CompoundStatement {
 	public boolean requireR10Reset = false;
 	
 	/**
-	 * Set to true when this function is called at least once. This is required
-	 * when this function is part of an interface typedef, its nessesary to determine
-	 * which functions need to be included in the relay table.
-	 */
-	public boolean wasCalled = false;
-	
-	/**
 	 * The flattened namespace path of this function.
 	 */
 	public NamespacePath path;
@@ -126,15 +119,13 @@ public class Function extends CompoundStatement {
 	 */
 	public List<TYPE> signalsTypes;
 	
+	/**
+	 * The types this function actually signals.
+	 */
+	public List<TYPE> actualSignals = new ArrayList();
+	
 	/* Flags for lambda targeting */
 	public Declaration lambdaDeclaration;
-	
-	/**
-	 * Set to true when a function predicate targets this
-	 * function. Will cause a lambda target to be injected
-	 * during the casting process.
-	 */
-	public boolean isLambdaTarget = false;
 	
 	/**
 	 * Set to true when this function is used as a function

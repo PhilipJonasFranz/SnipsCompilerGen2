@@ -96,7 +96,6 @@ public class TestDriver {
 		
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
-		CompilerDriver.includeMetaInformation = false;
 		CompilerDriver.buildModulesRecurse = true;
 		CompilerDriver.buildObjectFileOnly = true;
 		CompilerDriver.pruneModules = true;

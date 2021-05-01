@@ -38,6 +38,8 @@ public abstract class SyntaxElement {
 	
 	public List<ASTDirective> activeAnnotations = new ArrayList();
 	
+	public boolean modifierViolated = false;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -129,12 +131,12 @@ public abstract class SyntaxElement {
 	}
 	
 	public boolean hasDirective(DIRECTIVE annotation) {
-		return this.activeAnnotations.stream().filter(x -> x.type == annotation).count() > 0;
+		return this.activeAnnotations.stream().filter(x -> x.type() == annotation).count() > 0;
 	}
 	
 	public ASTDirective getDirective(DIRECTIVE annotation) {
 		for (ASTDirective x : this.activeAnnotations)
-			if (x.type == annotation) return x;
+			if (x.type() == annotation) return x;
 		return null;
 	}
 	

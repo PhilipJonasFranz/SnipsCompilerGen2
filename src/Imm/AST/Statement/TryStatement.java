@@ -26,6 +26,8 @@ public class TryStatement extends CompoundStatement {
 	
 	public List<TYPE> unwatched = new ArrayList();
 	
+	public List<TYPE> actualSignals = new ArrayList();
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**

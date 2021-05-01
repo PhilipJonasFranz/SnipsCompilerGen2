@@ -25,7 +25,7 @@ public class StackSet {
 	/** 
 	 * Used to identify the contents of a stack cell. 
 	 */
-	public enum CONTENT_TYPE {
+	private enum CONTENT_TYPE {
 		REGISTER, DECLARATION;
 	}
 	
