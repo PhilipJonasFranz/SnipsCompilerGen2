@@ -66,6 +66,7 @@ int main() {
  - Parsing the token stream, creating an AST
  - Processing dynamic imports
  - Context checking and creating the DAST
+ - Linter, spot potential problems with rule-based static code analysis
  - AST Optimizer, rule-based AST transformations
  - Code Generation, create list of Assembly instructions
  - Assembly Optimizer, rule-based optimizations
@@ -85,6 +86,7 @@ int main() {
  | `-info`          | Print compiler version                                    | `false`            |
  | `-log`           | Print log in console                                      | `false`            |
  | `-com`           | Remove comments from output                               | `false`            |
+ | `-lnt`           | Enable the linter pipeline stage                          | `false`            |
  | `-warn`          | Disable warnings in console                               | `false`            |
  | `-imp`           | Print out imported libraries                              | `false`            |
  | `-opt`           | Disable all optimizers                                    | `false`            |
