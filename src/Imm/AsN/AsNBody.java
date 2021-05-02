@@ -307,6 +307,8 @@ public class AsNBody extends AsNNode {
 				if (dec.value != null && !(dec.value instanceof Atom)) {
 					addGlobalInit = true;
 					
+					LabelUtil.funcPrefix = "main.init";
+					
 					/* Cast Expression before main call */
 					globalsInit.addAll(AsNExpression.cast(dec.value, r, map, st).getInstructions());
 					

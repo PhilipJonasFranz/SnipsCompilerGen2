@@ -982,6 +982,9 @@ public class CompilerDriver {
 		heap_referenced = false;
 		null_referenced = false;
 		expectError = false;
+		
+		LabelUtil.c.clear();
+		
 		AsNBody.translationUnits.clear();
 		
 		ASTOptimizer.complexity.clear();

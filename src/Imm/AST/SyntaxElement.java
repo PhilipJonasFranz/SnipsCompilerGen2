@@ -146,7 +146,7 @@ public abstract class SyntaxElement {
 	 * Computes the expected amount of generated asm instructions.
 	 * This value is determined by the metrics-inf of the compiler driver. This metric
 	 * is created based on the Test-Driver sample.
-	 * @return The amount of expected cycles.
+	 * @return The amount of expected instructions.
 	 */
 	public int expectedInstructionAmount() {
 		int sum = 0;

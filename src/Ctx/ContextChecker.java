@@ -2055,9 +2055,6 @@ public class ContextChecker {
 			
 			TYPE t = ref.check(this);
 			
-			if (!t.isPrimitive()) 
-				throw new CTEX_EXC(i.idRef.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
-			
 			i.setType(t);
 		}
 		else throw new CTEX_EXC(Const.CAN_ONLY_APPLY_TO_IDREF);

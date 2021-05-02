@@ -12,7 +12,7 @@ public class LabelUtil {
 
 			/* ---< FIELDS >--- */
 	/** Internal counter used to create labels */
-	private static int c = 0;
+	public static HashMap<String, Integer> c = new HashMap();
 	
 	/** Unique ID number */
 	private static int n = 0;
@@ -32,11 +32,16 @@ public class LabelUtil {
 		String prov = "";
 		if (currentContext != null)
 			prov = currentContext;
-			
+		
+		if (!c.containsKey(funcPrefix)) c.put(funcPrefix, 0);
+		
+		int c0 = c.get(funcPrefix);
+		c.replace(funcPrefix, c0 + 1);
+		
 		return funcPrefix + prov + ((funcPrefix.startsWith("__") || funcPrefix.equals("main") || 
 							  funcPrefix.equals("resv") || funcPrefix.equals("free") || 
 							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "_"  + funcUID)
-				+ ".L" + c++;
+				+ ".L" + c0;
 	}
 	
 	/**
@@ -67,7 +72,6 @@ public class LabelUtil {
 	 * guaranteed to be unique.
 	 */
 	public static void reset() {
-		c = 0;
 		poolLabels.clear();
 		funcPrefix = "";
 		funcUID = -1;

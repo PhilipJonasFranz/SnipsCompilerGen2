@@ -52,14 +52,14 @@ X.get_586492511_P_1:                         /* Function: X.get, Provisos: INT *
     push { r3 }
     mov r3, r0
     cmp r1, #0
-    beq X.get_P_1_586492511.L0
+    beq X.get_P_1_586492511.L2
     lsl r1, r3, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
-    b X.get_P_1_586492511.L1
-X.get_P_1_586492511.L0: 
+    b X.get_P_1_586492511.L3
+X.get_P_1_586492511.L2: 
     mov r0, #2
-X.get_P_1_586492511.L1: 
+X.get_P_1_586492511.L3: 
     pop { r3 }
     bx lr
 

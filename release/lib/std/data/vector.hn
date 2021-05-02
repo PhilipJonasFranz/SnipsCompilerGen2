@@ -1,0 +1,59 @@
+#include <iterable.hn>
+
+namespace VectorArray {
+	
+	restricted struct Vector<T> : Iterable<T> {
+		
+		T* begin;
+		
+		T* end;
+		
+		/* 
+		 * Returns a pointer to the start of the
+		 * vector data storage in memory.
+		 */
+		shared T* begin();
+		
+		/*
+		 * Returns a pointer that points to the dataword
+		 * after the end of the vector data storage in memory.
+		 */
+		shared T* end();
+		
+		/*
+		 * Sets the value at the given index to 
+		 * the given value.
+		 */
+		shared void set(int i, T val);
+		
+		/*
+		 * Returns the element at the given index.
+		 */
+		shared T get(int i);
+		
+		
+		/*
+		 * Returns the length of this vector in
+		 * data words. 
+		 */
+		shared int length();
+		
+		/*
+		 * Returns the amount of elements in this
+		 * vector.
+		 */
+		shared int size();
+		
+		/*
+		 * Fill the vector with the given predicate.
+		 * For each index, the predicate is called.
+		 * The returned value will be stored at the
+		 * index the value was created for.
+		 */
+		shared void fill(func int -> T pred);
+		
+		static Vector<T> create<T>(int length);
+		
+	}
+	
+} 
