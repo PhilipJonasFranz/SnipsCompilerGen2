@@ -48,6 +48,7 @@ public class AsNFunctionCall extends AsNStatement {
 			/* ---< METHODS >--- */
 	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNFunctionCall call = new AsNFunctionCall();
+		call.pushOnCreatorStack(fc);
 		fc.castedNode = call;
 		
 		if (fc.anonTarget == null) 
@@ -67,6 +68,7 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		
 		call.freeDecs(r, fc);
+		call.registerMetric();
 		return call;
 	}
 	

@@ -5,6 +5,7 @@ import java.util.List;
 
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.COND;
+import Imm.AsN.AsNNode;
 
 /**
  * Acts as a base class for all assembly instructions.
@@ -84,10 +85,16 @@ public abstract class ASMInstruction {
 	 */
 	public ASMComment comment;
 	
+	/**
+	 * The AsNNode that was active when this instruction was created.
+	 */
+	public AsNNode creator;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ASMInstruction() {
-		
+		if (!AsNNode.creatorStack.isEmpty())
+			this.creator = AsNNode.creatorStack.peek();
 	}
 	
 	/**
@@ -95,6 +102,9 @@ public abstract class ASMInstruction {
 	 */
 	public ASMInstruction(COND cond) {
 		this.cond = cond;
+		
+		if (!AsNNode.creatorStack.isEmpty())
+			this.creator = AsNNode.creatorStack.peek();
 	}
 	
 	
@@ -104,5 +114,9 @@ public abstract class ASMInstruction {
 	 * @return
 	 */
 	public abstract String build();
+	
+	public int getRequiredCPUCycles() {
+		return 1;
+	}
 	
 } 

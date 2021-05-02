@@ -19,5 +19,9 @@ public class ASMCmp extends ASMInstruction {
 	public String build() {
 		return CompilerDriver.printDepth + "cmp" + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.op0.toString() + ", " + this.op1.toString();
 	}
+	
+	public int getRequiredCPUCycles() {
+		return 1; // +S
+	}
 
 } 

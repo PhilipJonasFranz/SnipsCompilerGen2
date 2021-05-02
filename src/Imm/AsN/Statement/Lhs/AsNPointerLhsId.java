@@ -23,6 +23,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 	public static AsNPointerLhsId cast(PointerLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNPointerLhsId id = new AsNPointerLhsId();
+		id.pushOnCreatorStack(lhs);
 		lhs.castedNode = id;
 
 		Deref dref = lhs.deref;
@@ -54,6 +55,7 @@ public class AsNPointerLhsId extends AsNLhsId {
 		}
 		else StackUtil.copyToAddressFromStack(lhs.assign.value.getType().wordsize(), id, st);
 		
+		id.registerMetric();
 		return id;
 	}
 	

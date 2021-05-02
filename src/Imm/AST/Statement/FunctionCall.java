@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
-import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;

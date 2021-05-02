@@ -157,6 +157,9 @@ public class TestDriver {
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
+			new Message("Created new node metrics config.", LogPoint.Type.INFO);
+			Util.flushAsNNodeMetrics();
+			
 			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}
 		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);

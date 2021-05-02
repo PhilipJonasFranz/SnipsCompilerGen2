@@ -19,7 +19,7 @@ import Imm.AST.Statement.IfStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNCompare;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Res.Const;
 
@@ -75,8 +75,8 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 			}
 		}
 		
-		if (expr instanceof AsNCmp) {
-			AsNCmp com = (AsNCmp) expr;
+		if (expr instanceof AsNCompare) {
+			AsNCompare com = (AsNCompare) expr;
 			
 			cond = com.neg;
 

@@ -10,10 +10,12 @@ import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.BreakStatement;
 
-public class AsNBreak extends AsNStatement {
+public class AsNBreakStatement extends AsNStatement {
 
-	public static AsNBreak cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNBreak br = new AsNBreak();
+	public static AsNBreakStatement cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		AsNBreakStatement br = new AsNBreakStatement();
+		br.pushOnCreatorStack(b);
+		b.castedNode = br;
 		
 		/* Retrieve the jump label target from the super loop */
 		ASMLabel target = ((AsNConditionalCompoundStatement) b.superLoop.castedNode).breakJump;
@@ -27,6 +29,7 @@ public class AsNBreak extends AsNStatement {
 		/* Jump to the loop escape label */
 		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));
 		
+		br.registerMetric();
 		return br;
 	}
 	

@@ -15,9 +15,12 @@ public class AsNBitAnd extends AsNNFoldExpression {
 
 	public static AsNBitAnd cast(BitAnd b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitAnd and = new AsNBitAnd();
+		and.pushOnCreatorStack(b);
+		b.castedNode = and;
 		
 		and.evalExpression(and, b, r, map, st, (x, y) -> x & y);
 			
+		and.registerMetric();
 		return and;
 	}
 	

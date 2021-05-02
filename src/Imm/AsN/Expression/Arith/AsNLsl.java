@@ -15,9 +15,12 @@ public class AsNLsl extends AsNNFoldExpression {
 
 	public static AsNLsl cast(Lsl l, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNLsl lsl = new AsNLsl();
+		lsl.pushOnCreatorStack(l);
+		l.castedNode = lsl;
 		
 		lsl.evalExpression(lsl, l, r, map, st, (x, y) -> x << y);
 			
+		lsl.registerMetric();
 		return lsl;
 	}
 	

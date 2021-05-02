@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.Callee;
+import Ctx.Util.CallUtil;
 import Ctx.Util.ProvisoUtil;
-import Ctx.Util.CtxCallUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
@@ -75,7 +75,6 @@ import Imm.AST.Statement.WatchStatement;
 import Imm.AST.Statement.WhileStatement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
-import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -92,6 +91,7 @@ import Res.Const;
 import Snips.CompilerDriver;
 import Util.ASTDirective;
 import Util.ASTDirective.DIRECTIVE;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
@@ -1530,7 +1530,7 @@ public class ContextChecker {
 	public TYPE checkCall(Callee c) throws CTEX_EXC {
 		
 		/* Check if call is call to super function, if yes, transform call and target */
-		CtxCallUtil.transformNestedSuperCall(c, this.getCurrentFunction());
+		CallUtil.transformNestedSuperCall(c, this.getCurrentFunction());
 		
 		/* Check here to get types for function search */
 		List<TYPE> types = new ArrayList();
@@ -1555,7 +1555,7 @@ public class ContextChecker {
 		}
 		
 		/* Call is call to super constructor, replace with explicit call, returns called constructor */
-		Function func = CtxCallUtil.transformSuperConstructorCall(c, this.getCurrentFunction());
+		Function func = CallUtil.transformSuperConstructorCall(c, this.getCurrentFunction());
 		
 		/* Super constructor was not used, search for function */
 		if (func == null) func = this.searchFunction(c, types);

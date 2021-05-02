@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
-import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
@@ -17,10 +17,10 @@ import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
-import Util.ASTDirective.DIRECTIVE;
 
 public class InlineCall extends Expression implements Callee {
 

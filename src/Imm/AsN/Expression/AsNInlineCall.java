@@ -20,6 +20,7 @@ public class AsNInlineCall extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNInlineCall cast(InlineCall ic, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNInlineCall call = new AsNInlineCall();
+		call.pushOnCreatorStack(ic);
 		ic.castedNode = call;
 		
 		/* Function may be null when its an anonymous call */
@@ -41,6 +42,7 @@ public class AsNInlineCall extends AsNExpression {
 			AsNSignalStatement.injectWatchpointBranch(call, ic.watchpoint, COND.NE);
 		}
 		
+		call.registerMetric();
 		return call;
 	}
 	

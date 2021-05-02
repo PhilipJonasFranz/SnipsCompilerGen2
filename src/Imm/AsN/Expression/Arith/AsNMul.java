@@ -11,13 +11,16 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Arith.Mul;
 import Imm.AsN.Expression.AsNNFoldExpression;
 
-public class AsNMult extends AsNNFoldExpression {
+public class AsNMul extends AsNNFoldExpression {
 
-	public static AsNMult cast(Mul m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNMult mul = new AsNMult();
-
+	public static AsNMul cast(Mul m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		AsNMul mul = new AsNMul();
+		mul.pushOnCreatorStack(m);
+		m.castedNode = mul;
+		
 		mul.evalExpression(mul, m, r, map, st, (x, y) -> x * y);
 		
+		mul.registerMetric();
 		return mul;
 	}
 	

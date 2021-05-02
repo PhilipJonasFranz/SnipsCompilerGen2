@@ -10,10 +10,12 @@ import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.ContinueStatement;
 
-public class AsNContinue extends AsNStatement {
+public class AsNContinueStatement extends AsNStatement {
 
-	public static AsNContinue cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNContinue con = new AsNContinue();
+	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		AsNContinueStatement con = new AsNContinueStatement();
+		con.pushOnCreatorStack(c);
+		c.castedNode = con;
 		
 		/* Retrieve the jump label target from the super loop */
 		ASMLabel target = ((AsNConditionalCompoundStatement) c.superLoop.castedNode).continueJump;
@@ -27,6 +29,7 @@ public class AsNContinue extends AsNStatement {
 		/* Jump to the label */
 		con.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));
 		
+		con.registerMetric();
 		return con;
 	}
 	

@@ -20,7 +20,7 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.NULL;
 
-public class AsNCmp extends AsNNFoldExpression {
+public class AsNCompare extends AsNNFoldExpression {
 
 			/* ---< FIELDS >--- */
 	public COND trueC, neg;
@@ -31,8 +31,10 @@ public class AsNCmp extends AsNNFoldExpression {
 	 * Compare both operands based on the set Comparator. Move #1 in into R0 if the
 	 * expression is true, #0 if not.
 	 */
-	public static AsNCmp cast(Compare c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNCmp cmp = new AsNCmp();
+	public static AsNCompare cast(Compare c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		AsNCompare cmp = new AsNCompare();
+		cmp.pushOnCreatorStack(c);
+		c.castedNode = cmp;
 		
 		if (c.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
@@ -70,6 +72,7 @@ public class AsNCmp extends AsNNFoldExpression {
 	
 		r.free(0, 1);
 		
+		cmp.registerMetric();
 		return cmp;
 	}
 

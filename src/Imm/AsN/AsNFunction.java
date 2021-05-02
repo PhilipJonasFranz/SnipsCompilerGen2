@@ -75,6 +75,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 */
 	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTEX_EXC {
 		AsNFunction func = new AsNFunction();
+		func.pushOnCreatorStack(f);
 		f.castedNode = func;
 		func.source = f;
 		
@@ -468,6 +469,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		if (!f.provisoTypes.isEmpty()) func.instructions.addAll(all);
 	
+		func.registerMetric();
 		return func;
 	}
 	

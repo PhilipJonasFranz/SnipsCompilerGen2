@@ -22,4 +22,8 @@ public class ASMStr extends ASMMemOp {
 		return super.build("str");
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 2; // +N +N
+	}
+	
 } 

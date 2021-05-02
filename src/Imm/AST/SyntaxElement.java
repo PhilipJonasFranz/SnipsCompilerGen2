@@ -9,9 +9,11 @@ import Exc.OPT0_EXC;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.ASTDirective;
 import Util.ASTDirective.DIRECTIVE;
+import Util.Pair;
 import Util.Source;
 
 /**
@@ -116,9 +118,58 @@ public abstract class SyntaxElement {
 	 * this syntax element.
 	 */
 	public int size() {
-		return this.visit(x -> { return true; }).size();
+		return this.visit(x -> true).size();
 	}
 	
+	/**
+	 * Computes the expected amount of cycles this AST will require to be computed.
+	 * This value is determined by the metrics-inf of the compiler driver. This metric
+	 * is created based on the Test-Driver sample.
+	 * @return The amount of expected cycles.
+	 */
+	public int expectedCycleAmount() {
+		int sum = 0;
+		List<SyntaxElement> elements = this.visit(x -> true);
+		for (SyntaxElement s : elements) {
+			String key = "AsN" + s.getClass().getSimpleName();
+			
+			if (!CompilerDriver.node_metrics.containsKey(key)) continue;
+			
+			Pair<Integer, Integer> metric = CompilerDriver.node_metrics.get(key);
+			sum += metric.second;
+		}
+		
+		return sum;
+	}
+	
+	/**
+	 * Computes the expected amount of generated asm instructions.
+	 * This value is determined by the metrics-inf of the compiler driver. This metric
+	 * is created based on the Test-Driver sample.
+	 * @return The amount of expected cycles.
+	 */
+	public int expectedInstructionAmount() {
+		int sum = 0;
+		List<SyntaxElement> elements = this.visit(x -> true);
+		for (SyntaxElement s : elements) {
+			String key = "AsN" + s.getClass().getSimpleName();
+			
+			if (!CompilerDriver.node_metrics.containsKey(key)) continue;
+			
+			Pair<Integer, Integer> metric = CompilerDriver.node_metrics.get(key);
+			sum += metric.first;
+		}
+		
+		return sum;
+	}
+	
+	/**
+	 * Creates a copy of this syntax element and its entire subtree.
+	 * It is not always possible to create a perfect copy of an AST,
+	 * since references to declarations etc. cannot be set correctly.
+	 * That's why it it is not recommended to clone after context-checking.
+	 * Cloning Expressions on the other hand is relatively safe.
+	 */
 	public abstract SyntaxElement clone();
 	
 	/**

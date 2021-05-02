@@ -20,6 +20,7 @@ public class AsNDeref extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNDeref cast(Deref a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNDeref ref = new AsNDeref();
+		ref.pushOnCreatorStack(a);
 		a.castedNode = ref;
 		
 		ref.clearReg(r, st, 0, 1);
@@ -69,6 +70,7 @@ public class AsNDeref extends AsNExpression {
 			}
 		}
 		
+		ref.registerMetric();
 		return ref;
 	}
 	

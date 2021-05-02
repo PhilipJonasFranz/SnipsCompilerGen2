@@ -30,6 +30,7 @@ public class AsNTempAtom extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNTempAtom cast(TempAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNTempAtom atom = new AsNTempAtom();
+		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;
 
 		STRUCT struct = null;
@@ -171,6 +172,7 @@ public class AsNTempAtom extends AsNExpression {
 			}
 		}
 		
+		atom.registerMetric();
 		return atom;
 	}
 	

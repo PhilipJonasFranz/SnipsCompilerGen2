@@ -35,6 +35,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 	
 	public static AsNTryStatement cast(TryStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNTryStatement tr0 = new AsNTryStatement();
+		tr0.pushOnCreatorStack(s);
 		s.castedNode = tr0;
 		
 		/* Create the watchpoint jump target label */
@@ -123,6 +124,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		tr0.instructions.add(endBranch);
 		
 		tr0.freeDecs(r, s);
+		tr0.registerMetric();
 		return tr0;
 	}
 	

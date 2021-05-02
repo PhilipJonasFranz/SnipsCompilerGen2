@@ -5,6 +5,7 @@ import java.util.List;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public class ASMMemBlock extends ASMInstruction {
@@ -106,6 +107,13 @@ public class ASMMemBlock extends ASMInstruction {
 		
 		op += "}";
 		return (CompilerDriver.printDepth + op).toLowerCase();
+	}
+	
+	public int getRequiredCPUCycles() {
+		if (this.registerList.stream().filter(x -> x.reg == REG.PC).count() > 0) {
+			return this.registerList.size() + 4; // +N +(n-1)S +I +N +2S
+		}
+		else return this.registerList.size() + 2; // +N +(n-1)S +I +S
 	}
 	
 } 

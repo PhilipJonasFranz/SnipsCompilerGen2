@@ -13,6 +13,7 @@ public class AsNRegisterAtom extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNRegisterAtom cast(RegisterAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNRegisterAtom atom = new AsNRegisterAtom();
+		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;
 		
 		r.free(0);
@@ -20,6 +21,7 @@ public class AsNRegisterAtom extends AsNExpression {
 		/* Simply move the requested register into R0 */
 		atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(a.reg)));
 		
+		atom.registerMetric();
 		return atom;
 	}
 	

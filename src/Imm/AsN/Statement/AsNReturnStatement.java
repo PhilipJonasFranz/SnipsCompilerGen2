@@ -12,10 +12,12 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AsN.Expression.AsNExpression;
 
-public class AsNReturn extends AsNStatement {
+public class AsNReturnStatement extends AsNStatement {
 
-	public static AsNReturn cast(ReturnStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNReturn ret = new AsNReturn();
+	public static AsNReturnStatement cast(ReturnStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+		AsNReturnStatement ret = new AsNReturnStatement();
+		ret.pushOnCreatorStack(s);
+		s.castedNode = ret;
 		
 		if (s.value != null) {
 			ret.instructions.addAll(AsNExpression.cast(s.value, r, map, st).getInstructions());
@@ -25,6 +27,7 @@ public class AsNReturn extends AsNStatement {
 		ret.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
 		
 		ret.freeDecs(r, s);
+		ret.registerMetric();
 		return ret;
 	}
 	

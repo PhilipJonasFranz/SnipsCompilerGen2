@@ -23,28 +23,43 @@ import Util.Logging.Message;
 public class Scope {
 
 			/* ---< FIELDS >--- */
-	/** Reference to the parent scope. Is null if this is the super scope. */
+	/** 
+	 * Reference to the parent scope. Is null if this is the super scope. 
+	 */
 	private Scope parentScope;
 	
-	/** Set to true if scope is part of a loop */
+	/** 
+	 * Set to true if scope is part of a loop 
+	 */
 	boolean isLoopedScope = false;
 	
-	/** Stores all the declarations made in this scope. */
+	/** 
+	 * Stores all the declarations made in this scope. 
+	 */
 	HashMap<String, Pair<Declaration, NamespacePath>> declarations = new HashMap();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
-	/** Create a new scope and set the parent scope. */
+	/** 
+	 * Create a new scope and set the parent scope. 
+	 */
 	public Scope(Scope parentScope) {
 		this.parentScope = parentScope;
 	}
 	
+	/**
+	 * Create a new scope and set parent scope. Also tag this scope
+	 * as a looped scope. Looped means that it is for examplee the 
+	 * scope created for the body of a for-loop.
+	 */
 	public Scope(Scope parentScope, boolean isLoopedScope) {
 		this.parentScope = parentScope;
 		this.isLoopedScope = isLoopedScope;
 	}
 	
-	/** Print out the current scope and all parent scopes and the stored declarations */
+	/** 
+	 * Print out the current scope and all parent scopes and the stored declarations 
+	 */
 	public void print(int d) {
 		if (d != 0) CompilerDriver.outs.println("--- SCOPE ---");
 		else CompilerDriver.outs.println("--- TOP SCOPE ---");
@@ -55,7 +70,9 @@ public class Scope {
 		if (this.parentScope != null) this.parentScope.print(d + 4);
 	}
 	
-	/** Add a new declaration to this scope. Checks for duplicates if checkDups is true. */
+	/** 
+	 * Add a new declaration to this scope. Checks for duplicates if checkDups is true. 
+	 */
 	public void addDeclaration(Declaration dec, boolean checkDups) throws CTEX_EXC {
 		if (checkDups) this.checkDuplicate(dec);
 		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
@@ -90,6 +107,10 @@ public class Scope {
 		return null;
 	}
 	
+	/**
+	 * Internal recursive function to check for duplicate declaration names. 
+	 * Checks through the parent scopes.
+	 */
 	private Declaration checkDuplicateRec(Declaration dec) throws CTEX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
 			return this.declarations.get(dec.path.build()).first;
@@ -116,7 +137,10 @@ public class Scope {
 				return this.parentScope.getField(path, source);
 			}
 			else {
-				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return null */
+				/* 
+				 * Path can be null, for example through a deref lhs: 
+				 * *(p + 2) -> No path available, just return null 
+				 */
 				if (path == null) return null;
 				
 				if (path.path.size() == 1) {
@@ -155,7 +179,10 @@ public class Scope {
 				return this.parentScope.getFieldNull(path, source);
 			}
 			else {
-				/* Path can be null, for example through a deref lhs: *(p + 2) -> No path available, just return 0 */
+				/* 
+				 * Path can be null, for example through a deref lhs: 
+				 * *(p + 2) -> No path available, just return 0 
+				 */
 				if (path == null) return null;
 				
 				if (path.path.size() == 1) {

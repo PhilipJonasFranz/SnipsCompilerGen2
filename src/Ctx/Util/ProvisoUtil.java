@@ -194,6 +194,14 @@ public class ProvisoUtil {
 		return isEqual;
 	}
 	
+	/**
+	 * Checks if two given mappings are equal. This means that they have to be of equal length, and 
+	 * for every two types, the proviso-free type string has to be equal. The types are compared
+	 * without calling proviso-free on them.
+	 * @param map0 The first proviso map.
+	 * @param map1 The second proviso map.
+	 * @return True if the maps are equal, false if not.
+	 */
 	public static boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
 		boolean isEqual = true;
 		for (int a = 0; a < map0.size(); a++) 
@@ -202,12 +210,12 @@ public class ProvisoUtil {
 		return isEqual;
 	}
 	
+	/**
+	 * Check if the given proviso mapping has no type that contains
+	 * a capsuled proviso type.
+	 */
 	public static boolean isProvisoFreeMapping(List<TYPE> mapping) {
-		boolean provisoFree = true;
-		
-		for (TYPE t : mapping) provisoFree &= !t.hasProviso();
-		
-		return provisoFree;
+		return mapping.stream().filter(TYPE::hasProviso).count() == 0;
 	}
 
 	/**

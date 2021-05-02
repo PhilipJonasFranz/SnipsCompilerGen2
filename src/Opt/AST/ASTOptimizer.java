@@ -83,6 +83,7 @@ import Opt.AST.Util.CompoundStatementRules;
 import Opt.AST.Util.Makro;
 import Opt.AST.Util.Matcher;
 import Opt.AST.Util.Morpher;
+import Opt.AST.Util.OPT_METRIC;
 import Opt.AST.Util.OPT_STRATEGY;
 import Opt.AST.Util.ProgramState;
 import Opt.AST.Util.UnrollStatementUtil;
@@ -177,6 +178,13 @@ public class ASTOptimizer {
 	public static OPT_STRATEGY STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
 	
 	/**
+	 * Sets the used metric to determine if the current optimized AST is an 
+	 * improvement over the current one. Different metrics can impact how
+	 * the AST is optimized.
+	 */
+	public static OPT_METRIC METRIC = OPT_METRIC.AST_SIZE;
+	
+	/**
 	 * If set to true, the AST before and after the optimization will be
 	 * print out in Snips-Code representation.
 	 */
@@ -241,8 +249,8 @@ public class ASTOptimizer {
 			 */
 			while (OPT_DONE || CYCLES < MIN_CYCLES) {
 				
-				/* Keep track of the size complexity of the AST */
-				complexity.add((int) AST0.visit(x -> true).stream().count());
+				/* Keep track of the current heuristic value of the AST */
+				complexity.add(this.getCurrentHeuristic(AST0));
 				
 				/* 
 				 * Keep track what LAST_ROUND was at each start of cycle, later
@@ -381,12 +389,10 @@ public class ASTOptimizer {
 		if (f.ASTOptCounterpart != null && STRATEGY == OPT_STRATEGY.ON_IMPROVEMENT) {
 				
 			/* Node # of optimized body */
-			int opt_f0 = 0;
-			for (Statement s : f.ASTOptCounterpart.body) opt_f0 += s.visit(x -> { return true; }).size();
+			int opt_f0 = this.getCurrentHeuristic(f.ASTOptCounterpart);
 			
 			/* Node # of original body */
-			int nodes_f = 0;
-			for (Statement s : f.body) nodes_f += s.visit(x -> { return true; }).size();
+			int nodes_f = this.getCurrentHeuristic(f);
 			
 			/**
 			 * At this point, the AST-Counterpart-Function could not make an optimization that
@@ -428,7 +434,10 @@ public class ASTOptimizer {
 			 */
 			if (phase == 2) LAST_ROUND = lRoundHist.get(CYCLES - repeat + i);
 			
+			/* Register function parameters */
 			for (Declaration dec : f.parameters) dec.opt(this);
+			
+			/* Optimize Body */
 			f.body = this.optBody(f.body, false, false);
 			
 			this.popContext();
@@ -1824,6 +1833,18 @@ public class ASTOptimizer {
 		ProgramState state = this.cStack.pop();
 		state.transferContextChangeToParent();
 		this.state = this.cStack.peek();
+	}
+	
+	/**
+	 * Returns the value of the selected heuristic for the given AST. Generally, less
+	 * is better, as it indicates a reduction in size, amount of instructions, or required cycles.
+	 * @param AST The AST to measuree the heuristic from.
+	 * @return The heuristic value for the AST.
+	 */
+	private int getCurrentHeuristic(SyntaxElement AST) {
+		if (METRIC == OPT_METRIC.AST_SIZE) return AST.size();
+		else if (METRIC == OPT_METRIC.EXPECTED_INSTRUCTIONS) return AST.expectedInstructionAmount();
+		else return AST.expectedCycleAmount();
 	}
 	
 }

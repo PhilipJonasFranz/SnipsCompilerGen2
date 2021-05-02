@@ -19,6 +19,8 @@ public class AsNNot extends AsNUnaryExpression {
 			/* ---< METHODS >--- */
 	public static AsNNot cast(Not n, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNNot not = new AsNNot();
+		not.pushOnCreatorStack(n);
+		n.castedNode = not;
 		
 		/* Clear only R0 */
 		r.free(0);
@@ -34,6 +36,7 @@ public class AsNNot extends AsNUnaryExpression {
 		
 		r.free(0);
 		
+		not.registerMetric();
 		return not;
 	}
 	
