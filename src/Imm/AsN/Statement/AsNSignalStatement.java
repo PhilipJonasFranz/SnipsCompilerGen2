@@ -30,7 +30,7 @@ public class AsNSignalStatement extends AsNStatement {
 
 	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSignalStatement sig = new AsNSignalStatement();
-		sig.pushOnCreatorStack();
+		sig.pushOnCreatorStack(s);
 		s.castedNode = sig;
 		
 		STRUCT excType = (STRUCT) s.exceptionBuilder.getType();

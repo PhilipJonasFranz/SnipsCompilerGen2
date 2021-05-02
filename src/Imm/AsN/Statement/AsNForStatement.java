@@ -29,7 +29,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForStatement f = new AsNForStatement();
-		f.pushOnCreatorStack();
+		f.pushOnCreatorStack(a);
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */

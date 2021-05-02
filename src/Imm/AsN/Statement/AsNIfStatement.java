@@ -17,7 +17,7 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNIfStatement cast(IfStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIfStatement if0 = new AsNIfStatement();
-		if0.pushOnCreatorStack();
+		if0.pushOnCreatorStack(a);
 		a.castedNode = if0;
 		
 		/* Used to iterate over if-chain */

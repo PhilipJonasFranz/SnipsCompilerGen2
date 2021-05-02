@@ -29,7 +29,7 @@ public class AsNDirectASMStatement extends AsNStatement {
 
 	public static AsNDirectASMStatement cast(DirectASMStatement d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDirectASMStatement asm = new AsNDirectASMStatement();
-		asm.pushOnCreatorStack();
+		asm.pushOnCreatorStack(d);
 		d.castedNode = asm;
 		
 		/* Load data in */

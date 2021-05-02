@@ -22,7 +22,7 @@ public class AsNInlineFunction extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNInlineFunction cast(InlineFunction i, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNInlineFunction ifunc = new AsNInlineFunction();
-		ifunc.pushOnCreatorStack();
+		ifunc.pushOnCreatorStack(i);
 		i.castedNode = ifunc;
 		
 		AsNFunction funcCast;

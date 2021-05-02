@@ -21,7 +21,7 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 	public static AsNStructSelectLhsId cast(StructSelectLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNStructSelectLhsId id = new AsNStructSelectLhsId();
-		id.pushOnCreatorStack();
+		id.pushOnCreatorStack(lhs);
 		lhs.castedNode = id;
 		
 		if (lhs.select.getType().wordsize() == 1) 

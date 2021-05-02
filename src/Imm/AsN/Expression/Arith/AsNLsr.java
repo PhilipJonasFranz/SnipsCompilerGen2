@@ -15,7 +15,7 @@ public class AsNLsr extends AsNNFoldExpression {
 
 	public static AsNLsr cast(Lsr l, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNLsr lsr = new AsNLsr();
-		lsr.pushOnCreatorStack();
+		lsr.pushOnCreatorStack(l);
 		l.castedNode = lsr;
 		
 		lsr.evalExpression(lsr, l, r, map, st, (x, y) -> x >> y);

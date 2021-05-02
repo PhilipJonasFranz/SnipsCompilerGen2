@@ -12,7 +12,7 @@ public class AsNSizeOfType extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNSizeOfType cast(SizeOfType sot, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNSizeOfType s = new AsNSizeOfType();
-		s.pushOnCreatorStack();
+		s.pushOnCreatorStack(sot);
 		sot.castedNode = s;
 		
 		r.free(0);

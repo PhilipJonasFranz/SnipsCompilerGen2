@@ -325,18 +325,18 @@ public class Util {
 	}
 	
 	public static void flushAsNNodeMetrics() {
-		HashMap<String, Pair<Integer, Pair<Integer, Integer>>> map = AsNNode.metricsMap;
+		HashMap<String, Pair<Integer, Pair<Double, Double>>> map = AsNNode.metricsMap;
 		XMLNode node = CompilerDriver.metrics_config;
 		
-		for (Entry<String, Pair<Integer, Pair<Integer, Integer>>> entry : map.entrySet()) {
+		for (Entry<String, Pair<Integer, Pair<Double, Double>>> entry : map.entrySet()) {
 			XMLNode child = node.getNode(entry.getKey());
 			if (child == null) {
 				child = new XMLNode(entry.getKey());
 				node.getChildren().add(child);
 			}
 			
-			double ratioI = ((double) entry.getValue().second.first) / entry.getValue().first;
-			double ratioC = ((double) entry.getValue().second.second) / entry.getValue().first;
+			double ratioI = entry.getValue().second.first / entry.getValue().first;
+			double ratioC = entry.getValue().second.second / entry.getValue().first;
 			child.setValue("" + (int) ratioI + " " + (int) ratioC);
 		}
 		

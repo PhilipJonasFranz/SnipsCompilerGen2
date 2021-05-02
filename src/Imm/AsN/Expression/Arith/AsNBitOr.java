@@ -15,7 +15,7 @@ public class AsNBitOr extends AsNNFoldExpression {
 
 	public static AsNBitOr cast(BitOr b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitOr or = new AsNBitOr();
-		or.pushOnCreatorStack();
+		or.pushOnCreatorStack(b);
 		b.castedNode = or;
 		
 		or.evalExpression(or, b, r, map, st, (x, y) -> x | y);

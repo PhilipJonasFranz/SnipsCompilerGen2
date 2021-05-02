@@ -1,6 +1,5 @@
 package Ctx.Util;
 
-import Ctx.Util.CheckUtil.Callee;
 import Exc.CTEX_EXC;
 import Imm.AST.Function;
 import Imm.AST.Expression.IDRef;
@@ -16,7 +15,7 @@ import Util.NamespacePath;
  * call path conversion.
  *
  */
-public class CtxCallUtil {
+public class CallUtil {
 
 	public static void transformNestedSuperCall(Callee c, Function currentFunction) throws CTEX_EXC {
 		if (!c.getParams().isEmpty() && c.getParams().get(0) instanceof IDRef) {

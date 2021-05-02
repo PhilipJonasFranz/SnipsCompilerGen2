@@ -23,7 +23,7 @@ public class AsNDeclaration extends AsNStatement {
 
 	public static AsNDeclaration cast(Declaration d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDeclaration dec = new AsNDeclaration();
-		dec.pushOnCreatorStack();
+		dec.pushOnCreatorStack(d);
 		d.castedNode = dec;
 		
 		/* Load value, either in R0 or on the stack */

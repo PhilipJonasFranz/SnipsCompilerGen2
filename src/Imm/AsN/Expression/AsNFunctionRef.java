@@ -17,7 +17,7 @@ public class AsNFunctionRef extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNFunctionRef cast(FunctionRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNFunctionRef ref = new AsNFunctionRef();
-		ref.pushOnCreatorStack();
+		ref.pushOnCreatorStack(i);
 		i.castedNode = ref;
 		
 		/* Construct label name for function lambda target with provided provisos */

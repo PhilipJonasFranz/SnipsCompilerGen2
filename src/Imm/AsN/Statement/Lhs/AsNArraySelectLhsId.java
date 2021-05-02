@@ -22,7 +22,7 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 	public static AsNArraySelectLhsId cast(ArraySelectLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNArraySelectLhsId id = new AsNArraySelectLhsId();
-		id.pushOnCreatorStack();
+		id.pushOnCreatorStack(lhs);
 		lhs.castedNode = id;
 		
 		ArraySelect select = lhs.selection;

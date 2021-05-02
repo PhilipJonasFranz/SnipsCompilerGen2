@@ -17,7 +17,7 @@ public class AsNUnaryMinus extends AsNUnaryExpression {
 			/* ---< METHODS >--- */
 	public static AsNUnaryMinus cast(UnaryMinus m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNUnaryMinus minus = new AsNUnaryMinus();
-		minus.pushOnCreatorStack();
+		minus.pushOnCreatorStack(m);
 		m.castedNode = minus;
 		
 		/* Clear only R0 */

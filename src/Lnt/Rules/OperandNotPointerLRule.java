@@ -3,7 +3,7 @@ package Lnt.Rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import Ctx.Util.CheckUtil.Callee;
+import Ctx.Util.Callee;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Deref;

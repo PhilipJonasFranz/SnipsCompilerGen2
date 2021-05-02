@@ -89,7 +89,7 @@ public class AsNBody extends AsNNode {
 		AsNBody.literalManager = new LiteralUtil();
 		
 		AsNBody body = new AsNBody();
-		body.pushOnCreatorStack();
+		body.pushOnCreatorStack(p);
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		

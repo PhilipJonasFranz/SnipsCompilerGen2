@@ -19,7 +19,7 @@ public class AsNTernary extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNTernary tern = new AsNTernary();
-		tern.pushOnCreatorStack();
+		tern.pushOnCreatorStack(t);
 		t.castedNode = tern;
 		
 		r.free(0, 1, 2);

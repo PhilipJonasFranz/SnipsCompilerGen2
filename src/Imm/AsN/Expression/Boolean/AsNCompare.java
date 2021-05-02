@@ -33,7 +33,7 @@ public class AsNCompare extends AsNNFoldExpression {
 	 */
 	public static AsNCompare cast(Compare c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNCompare cmp = new AsNCompare();
-		cmp.pushOnCreatorStack();
+		cmp.pushOnCreatorStack(c);
 		c.castedNode = cmp;
 		
 		if (c.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");

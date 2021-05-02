@@ -19,7 +19,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNWhileStatement cast(WhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNWhileStatement w = new AsNWhileStatement();
-		w.pushOnCreatorStack();
+		w.pushOnCreatorStack(a);
 		a.castedNode = w;
 		
 		/* Generate labels for targets within this loop and set them to the casted node */

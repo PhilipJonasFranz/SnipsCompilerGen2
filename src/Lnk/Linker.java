@@ -11,20 +11,66 @@ import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
 
+/**
+ * The linker is responsible for resolving '.include' directives
+ * in the generated assembly to the actual assembly modules.
+ * 
+ * The modules are included and packed into a single translation
+ * unit. The .text and .data Sections are merged. The output is
+ * a list of strings that represent the linked executable.
+ */
 public class Linker {
 
+			/* ---< NESTED >--- */
+	/**
+	 * Represents a single, asm-translated module. The module
+	 * contains a list of imports, a data and text section, a
+	 * version, and a source file. The version is read from the 
+	 * source file from the .version directive.
+	 */
 	public static class LinkerUnit {
 		
+				/* ---< FIELDS >--- */
+		/**
+		 * Version ID of the module. Used to check if the module
+		 * has changed and should be recompiled. The version number
+		 * is determined by hashing the source code representation
+		 * of the module.
+		 */
 		public long versionID = 0;
 		
+		/**
+		 * The assembly source file this LinkerUnit was loaded and
+		 * parsed from.
+		 */
 		public String sourceFile;
 		
+		/**
+		 * A list of imports that this linker unit states via 
+		 * .include directives.
+		 */
 		public List<String> imports = new ArrayList();
 		
+		/**
+		 * The .data section if this unit.
+		 */
 		public List<String> dataSection = new ArrayList();
 		
+		/**
+		 * The .text section of this unit.
+		 */
 		public List<String> textSection = new ArrayList();
 		
+		
+				/* ---< METHODS >--- */
+		/**
+		 * Build out this unit to a List of strings. Inserts
+		 * .data and .text annotations between the sections.
+		 * Requires all imports to be resolved when the method
+		 * is called.
+		 * @return A list of strings representing the assembly of
+		 * 		this linker unit.
+		 */
 		public List<String> build() {
 			/* Make sure linker resolved all stated imports */
 			assert imports.isEmpty() : "Attempted to build output with imports!";
@@ -71,6 +117,9 @@ public class Linker {
 			return output;
 		}
 		
+		/**
+		 * Prints out this linker unit to the Compiler output stream.
+		 */
 		public void print() {
 			CompilerDriver.outs.println("LinkerUnit | Source File: " + ((this.sourceFile != null)? this.sourceFile : "Unknown"));
 			this.build().stream().forEach(x -> CompilerDriver.outs.println(x));
@@ -79,6 +128,12 @@ public class Linker {
 		
 	}
 	
+	/**
+	 * Parse a LinkerUnit from the given assembly. The given assembly
+	 * should be loaded from a .s module file.
+	 * @param asm The assembly loaded from a .s file.
+	 * @return The parsed linker unit.
+	 */
 	public static LinkerUnit parseLinkerUnit(List<String> asm) {
 		LinkerUnit unit = new LinkerUnit();
 		
@@ -108,6 +163,15 @@ public class Linker {
 	
 	public static List<Message> buffer = new ArrayList();
 	
+	/**
+	 * For the given LinkerUnit, resolve all imports. Ignores duplicate and duplicate-transitive
+	 * imports. In the included-list, all included imports are listed. Initialize this list to an empty list.
+	 * The imports are added to the given linker unit.
+	 * @param included All currently included imports. Initialize to empty list.
+	 * @param unit The unit to link.
+	 * @return All imports that were included within this method call. These are added to the included list.
+	 * @throws LINK_EXC Thrown if an included module cannot be located.
+	 */
 	public static List<String> linkProgram(List<String> included, LinkerUnit unit) throws LINK_EXC {
 		for (int i = unit.imports.size() - 1; i >= 0; i--) {
 			String imp = unit.imports.get(i);

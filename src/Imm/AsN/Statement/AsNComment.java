@@ -11,7 +11,7 @@ public class AsNComment extends AsNStatement {
 
 	public static AsNComment cast(Comment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNComment com = new AsNComment();
-		com.pushOnCreatorStack();
+		com.pushOnCreatorStack(a);
 		a.castedNode = com;
 		
 		com.instructions.add(new ASMComment(a.comment));

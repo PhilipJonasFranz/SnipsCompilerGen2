@@ -23,7 +23,7 @@ public class AsNOr extends AsNNFoldExpression {
 			/* ---< METHODS >--- */
 	public static AsNOr cast(Or o, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNOr or = new AsNOr();
-		or.pushOnCreatorStack();
+		or.pushOnCreatorStack(o);
 		o.castedNode = or;
 		
 		if (o.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");

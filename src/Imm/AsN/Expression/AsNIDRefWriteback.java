@@ -12,7 +12,7 @@ public class AsNIDRefWriteback extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNIDRefWriteback cast(IDRefWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIDRefWriteback w = new AsNIDRefWriteback();
-		w.pushOnCreatorStack();
+		w.pushOnCreatorStack(wb);
 		wb.castedNode = w;
 		
 		r.free(0, 1, 2);

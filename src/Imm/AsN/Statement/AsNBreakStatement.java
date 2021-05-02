@@ -14,7 +14,7 @@ public class AsNBreakStatement extends AsNStatement {
 
 	public static AsNBreakStatement cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBreakStatement br = new AsNBreakStatement();
-		br.pushOnCreatorStack();
+		br.pushOnCreatorStack(b);
 		b.castedNode = br;
 		
 		/* Retrieve the jump label target from the super loop */

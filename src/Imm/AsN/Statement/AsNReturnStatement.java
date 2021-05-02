@@ -16,7 +16,7 @@ public class AsNReturnStatement extends AsNStatement {
 
 	public static AsNReturnStatement cast(ReturnStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNReturnStatement ret = new AsNReturnStatement();
-		ret.pushOnCreatorStack();
+		ret.pushOnCreatorStack(s);
 		s.castedNode = ret;
 		
 		if (s.value != null) {

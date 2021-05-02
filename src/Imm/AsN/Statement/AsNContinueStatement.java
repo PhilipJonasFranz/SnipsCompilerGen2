@@ -14,7 +14,7 @@ public class AsNContinueStatement extends AsNStatement {
 
 	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNContinueStatement con = new AsNContinueStatement();
-		con.pushOnCreatorStack();
+		con.pushOnCreatorStack(c);
 		c.castedNode = con;
 		
 		/* Retrieve the jump label target from the super loop */

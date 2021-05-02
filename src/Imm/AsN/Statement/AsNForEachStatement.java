@@ -49,7 +49,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForEachStatement cast(ForEachStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForEachStatement f = new AsNForEachStatement();
-		f.pushOnCreatorStack();
+		f.pushOnCreatorStack(a);
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */

@@ -13,7 +13,7 @@ public class AsNIDOfExpression extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNIDOfExpression cast(IDOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNIDOfExpression s = new AsNIDOfExpression();
-		s.pushOnCreatorStack();
+		s.pushOnCreatorStack(soe);
 		soe.castedNode = s;
 		
 		r.free(0);

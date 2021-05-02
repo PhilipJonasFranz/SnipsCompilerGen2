@@ -15,7 +15,7 @@ public class AsNSub extends AsNNFoldExpression {
 	
 	public static AsNSub cast(Sub s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSub sub = new AsNSub();
-		sub.pushOnCreatorStack();
+		sub.pushOnCreatorStack(s);
 		s.castedNode = sub;
 		
 		sub.evalExpression(sub, s, r, map, st, (x, y) -> x - y);

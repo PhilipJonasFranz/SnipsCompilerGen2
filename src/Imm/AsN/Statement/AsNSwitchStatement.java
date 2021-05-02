@@ -20,7 +20,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNSwitchStatement cast(SwitchStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSwitchStatement sw = new AsNSwitchStatement();
-		sw.pushOnCreatorStack();
+		sw.pushOnCreatorStack(s);
 		s.castedNode = sw;
 		
 		/* Capsule expressions in compare statements */

@@ -16,7 +16,7 @@ public class AsNBitNot extends AsNUnaryExpression {
 			/* ---< METHODS >--- */
 	public static AsNBitNot cast(BitNot b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBitNot not = new AsNBitNot();
-		not.pushOnCreatorStack();
+		not.pushOnCreatorStack(b);
 		b.castedNode = not;
 		
 		/* Clear only R0 */

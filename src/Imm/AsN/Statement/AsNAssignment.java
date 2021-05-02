@@ -13,7 +13,7 @@ public class AsNAssignment extends AsNStatement {
 
 	public static AsNAssignment cast(Assignment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNAssignment assign = new AsNAssignment();
-		assign.pushOnCreatorStack();
+		assign.pushOnCreatorStack(a);
 		a.castedNode = assign;
 		
 		/* Compute value */

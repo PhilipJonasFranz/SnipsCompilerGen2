@@ -18,7 +18,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDoWhileStatement w = new AsNDoWhileStatement();
-		w.pushOnCreatorStack();
+		w.pushOnCreatorStack(a);
 		a.castedNode = w;
 
 		/* End of while loop */

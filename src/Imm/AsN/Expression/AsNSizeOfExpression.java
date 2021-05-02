@@ -12,7 +12,7 @@ public class AsNSizeOfExpression extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNSizeOfExpression cast(SizeOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNSizeOfExpression s = new AsNSizeOfExpression();
-		s.pushOnCreatorStack();
+		s.pushOnCreatorStack(soe);
 		soe.castedNode = s;
 		
 		r.free(0);
