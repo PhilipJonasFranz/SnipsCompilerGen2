@@ -15,14 +15,14 @@
     <AsNUnaryMinus>1 1</AsNUnaryMinus>
     <AsNSimpleLhsId>1 1</AsNSimpleLhsId>
     <AsNIfStatement>3 6</AsNIfStatement>
-    <AsNInlineCall>3 9</AsNInlineCall>
+    <AsNInlineCall>2 6</AsNInlineCall>
     <AsNArrayInit>0 3</AsNArrayInit>
     <AsNTypeCast>0 0</AsNTypeCast>
     <AsNAnd>6 8</AsNAnd>
     <AsNBitXor>1 1</AsNBitXor>
-    <AsNAdd>4 4</AsNAdd>
+    <AsNAdd>2 3</AsNAdd>
     <AsNTernary>4 6</AsNTernary>
-    <AsNFunction>7 11</AsNFunction>
+    <AsNFunction>6 9</AsNFunction>
     <AsNAssignWriteback>3 4</AsNAssignWriteback>
     <AsNBitNot>1 1</AsNBitNot>
     <AsNBreakStatement>1 3</AsNBreakStatement>
@@ -59,4 +59,5 @@
     <AsNSizeOfExpression>1 1</AsNSizeOfExpression>
     <AsNReturnStatement>1 1</AsNReturnStatement>
     <AsNOperatorExpression>0 0</AsNOperatorExpression>
+    <AsNOperatorStatement>0 0</AsNOperatorStatement>
 </NodeMetrics>

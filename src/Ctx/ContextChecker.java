@@ -68,6 +68,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -308,6 +309,9 @@ public class ContextChecker {
 				
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisoTypes.isEmpty()) f.check(this);
+				
+				if (f.hasDirective(DIRECTIVE.OPERATOR))
+					this.operators.add(f);
 			}
 			else {
 				s.check(this);
@@ -425,9 +429,6 @@ public class ContextChecker {
 			f.inheritLink.setContext(context);
 			f.inheritLink.check(this);
 		}
-		
-		if (f.hasDirective(DIRECTIVE.OPERATOR))
-			this.operators.add(f);
 		
 		return f.getReturnType().clone();
 	}
@@ -758,7 +759,7 @@ public class ContextChecker {
 			for (Expression x : e.elements) 
 				provided.add(x.check(this));
 			
-			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource());
+			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource(), true);
 		}
 		
 		/* Map the current function provisos to the resulting struct type */
@@ -1437,25 +1438,6 @@ public class ContextChecker {
 			if (e.getType().wordsize() > 1) 
 				throw new CTEX_EXC(e.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree());
 		
-		boolean gotPointer = false;
-		for (Expression e : b.operands) {
-			if (e.getType().isPointer()) {
-				gotPointer = true;
-				for (Expression e0 : b.operands) {
-					if (e.equals(e0)) continue;
-					if (!(e0.getType().getCoreType() instanceof INT)) 
-						throw new CTEX_EXC(Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT(), e0.getType().provisoFree());
-				}
-			}
-		}
-		
-		if (!gotPointer) {
-			for (Expression e : b.operands) {
-				if (!e.getType().isEqual(b.operands.get(0).getType()))
-					throw new CTEX_EXC(Const.OPERAND_TYPES_DO_NOT_MATCH, b.operands.get(0).getType().provisoFree(), e.getType().provisoFree());
-			}
-		}
-		
 		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
@@ -1473,10 +1455,25 @@ public class ContextChecker {
 			
 			NFoldExpression nfold = (NFoldExpression) op.actualExpression;
 			
+			List<TYPE> mapping = new ArrayList();
+			
+			if (!f.provisoTypes.isEmpty()) {
+				List<TYPE> proviso = f.provisoTypes.stream().map(x -> x.clone()).collect(Collectors.toList());
+				List<TYPE> paramTypes = f.parameters.stream().map(x -> x.getRawType().clone()).collect(Collectors.toList());
+				List<TYPE> provided = nfold.operands.stream().map(x -> x.getType().clone()).collect(Collectors.toList());
+				
+				List<TYPE> mapping0 = this.autoProviso(proviso, paramTypes, provided, op.getSource(), false);
+				
+				if (mapping0 == null) continue;
+				else mapping = mapping0;
+				
+				f.setContext(mapping);
+				f.check(this);
+			}
+
 			isOperator &= f.parameters.get(0).getType().isEqual(nfold.operands.get(0).getType());
-			
 			isOperator &= f.parameters.get(1).getType().isEqual(nfold.operands.get(1).getType());
-			
+		
 			ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 			Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
 			String symbol = first.get().getKey();
@@ -1485,7 +1482,8 @@ public class ContextChecker {
 			
 			if (isOperator) {
 				op.calledFunction = f;
-				op.setType(f.getReturnType());
+				op.setType(f.getReturnType().clone());
+				op.provisoTypes = mapping;
 			}
 		}
 		
@@ -1494,12 +1492,21 @@ public class ContextChecker {
 			Function f = op.calledFunction;
 			
 			if (f.provisoTypes.isEmpty()) {
+				/* 
+				 * Add default proviso mapping. If function has proviso, 
+				 * it will be checked above automatically. 
+				 */
 				f.addProvisoMapping(f.getReturnType().clone(), new ArrayList());
 				f.check(this);
 			}
 		}
 		
 		return op.getType();
+	}
+	
+	public TYPE checkOperatorStatement(OperatorStatement op) throws CTEX_EXC {
+		TYPE t = op.expression.check(this);
+		return t;
 	}
 	
 	/**
@@ -1672,7 +1679,7 @@ public class ContextChecker {
 					functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
 					
 					/* Attempt to auto-map proviso types */
-					List<TYPE> mapping = this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource());
+					List<TYPE> mapping = this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource(), true);
 					
 					/* For the found mapping, wrap the mapped types in the corresponding proviso types */
 					for (int i = 0; i < mapping.size(); i++) {
@@ -1768,7 +1775,7 @@ public class ContextChecker {
 						iParamTypes.set(0, new POINTER(iParamTypes.get(0)));
 					}
 					
-					c.setProviso(this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource()));
+					c.setProviso(this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource(), true));
 				}
 				
 				if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
@@ -2268,7 +2275,7 @@ public class ContextChecker {
 	 * @return The missing proviso mapping for the target.
 	 * @throws CTEX_EXC If the mapping is not clear or a mapping cannot be determined.
 	 */
-	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source) throws CTEX_EXC {
+	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source, boolean throwOnFail) throws CTEX_EXC {
 		List<TYPE> foundMapping = new ArrayList();
 		
 		if (expectedTypes.size() != providedTypes.size())
@@ -2291,16 +2298,20 @@ public class ContextChecker {
 						ind = a;
 					}
 					else {
-						if (!mapped.provisoFree().typeString().equals(map0.provisoFree().typeString())) 
+						if (!mapped.provisoFree().typeString().equals(map0.provisoFree().typeString())) {
 							/* Found two possible types for proviso, abort */
-							throw new CTEX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree(), ind + 1, map0.provisoFree(), a + 1);
+							if (throwOnFail) throw new CTEX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree(), ind + 1, map0.provisoFree(), a + 1);
+							else return null;
+						}
 					}
 				}
 			}
 			
-			if (mapped == null) 
+			if (mapped == null) {
 				/* None of the types held the searched proviso, proviso cannot be auto-ed, abort. */
-				throw new CTEX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov);
+				if (throwOnFail) throw new CTEX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov);
+				else return null;
+			}
 			
 			foundMapping.add(mapped.clone());
 		}

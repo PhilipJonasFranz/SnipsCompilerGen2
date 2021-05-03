@@ -76,6 +76,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -296,14 +297,27 @@ public class Parser {
 						 * the operator to operator tokens. 
 						 */
 						String symbol = first.get().getKey();
+						
+						for (int i = 0; i < this.tokenStream.size(); i++) {
+							Token t = this.tokenStream.get(i);
 							
-						for (Token t : this.tokenStream) {
 							String spelling = t.spelling;
 							if (spelling == null) 
 								spelling = t.type().spelling();
 							
-							if (spelling.equals(symbol)) {
-								t.type = TokenType.OPERATOR;
+							if (symbol.startsWith(spelling)) {
+								String buffer = spelling;
+								for (int a = i + 1; a < this.tokenStream.size(); a++) {
+									if (buffer.length() > symbol.length()) break;
+									else {
+										if (buffer.equals(symbol)) {
+											t.type = TokenType.OPERATOR;
+											t.operatorLookahead = a - i;
+											break;
+										}
+										else buffer += this.tokenStream.get(a).spelling;
+									}
+								}
 							}
 						}
 					}
@@ -369,6 +383,12 @@ public class Parser {
 		
 		while (current.source.row == type.source.row) {
 			String key = accept().spelling;
+			
+			while (current.source.row == type.source.row && 
+					!(current.type == TokenType.LET || current.type == TokenType.COMMA)) {
+				key += accept().spelling;
+			}
+			
 			String value = null;
 			
 			if (current.type == TokenType.LET) {
@@ -946,12 +966,8 @@ public class Parser {
 				return call;
 			}
 			else {
-				if (this.progress != null) this.progress.abort();
-				throw new PARS_EXC(current.source, current.type, 
-				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
-				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
-				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
-				TokenType.IF);
+				/* Use this as default, multiple edge-cases are handled here */
+				return this.parseAssignment(false);
 			}
 		}
 	}
@@ -1344,7 +1360,10 @@ public class Parser {
 		else {
 			SyntaxElement expr = this.parseLhsIdentifer();
 			
-			if (expr instanceof InlineCall) {
+			if (expr instanceof OperatorStatement) {
+				return (OperatorStatement) expr;
+			}
+			else if (expr instanceof InlineCall) {
 				InlineCall ic = (InlineCall) expr;
 				
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
@@ -1508,11 +1527,21 @@ public class Parser {
 			else if (target instanceof StructSelect) {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
+			else if (target instanceof OperatorExpression) {
+				accept(TokenType.SEMICOLON);
+				return new OperatorStatement((OperatorExpression) target, target.getSource());
+			}
 			else if (target instanceof InlineCall) 
 				return target;
 			else {
 				this.progress.abort();
-				throw new PARS_EXC(current.source, current.type, TokenType.IDENTIFIER);
+				
+				if (this.progress != null) this.progress.abort();
+				throw new PARS_EXC(current.source, current.type, 
+				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+				TokenType.IF);
 			}
 		}
 	}
@@ -2273,16 +2302,28 @@ public class Parser {
 		
 		Expression ref = this.parseAtom();
 		
+		/* Previous parse got stuck at operator token */
 		if (current.type == TokenType.OPERATOR) {
 			Token operator = current;
 			
+			/* Extract operator symbol */
+			String symbol = operator.spelling;
+			if (operator.operatorLookahead > 1) {
+				for (int a = 0; a < operator.operatorLookahead - 1; a++) {
+					symbol += this.tokenStream.get(a).spelling;
+				}
+			}
+			
+			/* Reset token stream */
 			operator.type = operator.originalType;
 			this.tokenStream = tokenStreamCopy;
 			this.current = curr1;
 			
+			/* Parse again */
 			ref = this.parseExpression();
-			
-			return new OperatorExpression(ref, operator.spelling, operator.source);
+		
+			/* Wrap in operator expression */
+			return new OperatorExpression(ref, symbol, operator.source);
 		}
 		else return ref;
 	}

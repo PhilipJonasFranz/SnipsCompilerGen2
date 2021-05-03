@@ -2,6 +2,7 @@ package Imm.AST.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
@@ -28,6 +29,8 @@ public class OperatorExpression extends Expression {
 	
 	public Function calledFunction;
 	
+	public List<TYPE> provisoTypes;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -45,7 +48,13 @@ public class OperatorExpression extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		CompilerDriver.outs.println(Util.pad(d) + "Operator<" + this.operator + ">");
+		CompilerDriver.outs.print(Util.pad(d) + "Operator< " + this.operator + " >");
+		
+		if (this.calledFunction != null)
+			CompilerDriver.outs.print(" (" + this.calledFunction.signatureToString() + ")");
+		
+		CompilerDriver.outs.println();
+		
 		if (rec) {
 			this.actualExpression.print(d + this.printDepthStep, rec);
 		}
@@ -84,6 +93,12 @@ public class OperatorExpression extends Expression {
 		
 		if (this.getType() != null)
 			op.setType(this.getType().clone());
+		
+		op.calledFunction = this.calledFunction;
+		
+		if (this.provisoTypes != null) {
+			op.provisoTypes = this.provisoTypes.stream().map(x -> x.clone()).collect(Collectors.toList());
+		}
 		
 		return op;
 	}

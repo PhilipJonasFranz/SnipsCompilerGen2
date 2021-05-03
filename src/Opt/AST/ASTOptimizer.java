@@ -67,6 +67,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -1621,6 +1622,14 @@ public class ASTOptimizer {
 		doWhileStatement.body = this.optBody(doWhileStatement.body, true, true);
 		
 		return doWhileStatement;
+	}
+	
+	public Statement optOperatorStatement(OperatorStatement op) throws OPT0_EXC {
+		this.state.pushSetting(Setting.PROBE, true);
+		op.expression.clone().opt(this);
+		this.state.popSetting(Setting.PROBE);
+		
+		return op;
 	}
 
 	public Statement optForEachStatement(ForEachStatement forEachStatement) throws OPT0_EXC {

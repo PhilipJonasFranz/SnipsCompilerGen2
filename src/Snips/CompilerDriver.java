@@ -369,7 +369,7 @@ public class CompilerDriver {
 					
 					String approx = "Pipeline Stage: " + currentStage.name;
 					
-					if (stackTrace != null) 
+					if (stackTrace != null && !stackTrace.isEmpty()) 
 						approx += ", at location estimate: " + stackTrace.peek().getSource().getSourceMarker();
 					else
 						approx = approx.substring(0, approx.length() - 2);

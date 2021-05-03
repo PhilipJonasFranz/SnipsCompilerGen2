@@ -293,34 +293,36 @@ public class Util {
 	public static void buildStackTrace(String initialSource) {
 		String last = initialSource;
 		
-		while (!CompilerDriver.stackTrace.isEmpty()) {
-			SyntaxElement s = CompilerDriver.stackTrace.pop();
-			
-			String loc = s.getSource().getSourceMarkerWithoutFile() + " ";
-			if (last == null || !s.getSource().sourceFile.equals(last)) {
-				loc = s.getSource().getSourceMarker() + " ";
-				last = s.getSource().sourceFile;
-			}
-			
-			String trace = "  at " + Util.revCamelCase(s.getClass().getSimpleName()) + ", " + loc;
-			
-			if (s instanceof Expression) {
-				Expression e = (Expression) s;
-				trace += "[" + e.codePrint() + "]";
-			}
-			else {
-				List<String> code = s.codePrint(0);
-				if (code != null && !code.isEmpty()) {
-					String line = code.get(0);
-					
-					if (line.endsWith(";") || line.endsWith("{")) 
-						line = line.substring(0, line.length() - 1);
-					
-					trace += "[" + line.trim() + "]";
+		if (CompilerDriver.stackTrace != null) {
+			while (!CompilerDriver.stackTrace.isEmpty()) {
+				SyntaxElement s = CompilerDriver.stackTrace.pop();
+				
+				String loc = s.getSource().getSourceMarkerWithoutFile() + " ";
+				if (last == null || !s.getSource().sourceFile.equals(last)) {
+					loc = s.getSource().getSourceMarker() + " ";
+					last = s.getSource().sourceFile;
 				}
+				
+				String trace = "  at " + Util.revCamelCase(s.getClass().getSimpleName()) + ", " + loc;
+				
+				if (s instanceof Expression) {
+					Expression e = (Expression) s;
+					trace += "[" + e.codePrint() + "]";
+				}
+				else {
+					List<String> code = s.codePrint(0);
+					if (code != null && !code.isEmpty()) {
+						String line = code.get(0);
+						
+						if (line.endsWith(";") || line.endsWith("{")) 
+							line = line.substring(0, line.length() - 1);
+						
+						trace += "[" + line.trim() + "]";
+					}
+				}
+				
+				CompilerDriver.log.add(new Message(trace, LogPoint.Type.FAIL));
 			}
-			
-			CompilerDriver.log.add(new Message(trace, LogPoint.Type.FAIL));
 		}
 	}
 	

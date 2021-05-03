@@ -24,6 +24,7 @@ public class AsNOperatorExpression extends AsNExpression {
 			NFoldExpression nfold = (NFoldExpression) op.actualExpression;
 			InlineCall ic = new InlineCall(op.calledFunction.path.clone(), new ArrayList(), nfold.operands, op.getSource());
 			ic.calledFunction = op.calledFunction;
+			ic.proviso = op.provisoTypes;
 			
 			op0.instructions.addAll(AsNInlineCall.cast(ic, r, map, st).getInstructions());
 		}

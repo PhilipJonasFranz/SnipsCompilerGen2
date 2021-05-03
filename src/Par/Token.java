@@ -13,6 +13,8 @@ public class Token {
 	
 	Source source;
 	
+	int operatorLookahead = 0;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Token(TokenType type, Source source, String spelling) {
