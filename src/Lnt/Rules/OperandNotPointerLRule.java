@@ -23,7 +23,8 @@ public class OperandNotPointerLRule extends LRule {
 			/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
 			if (x instanceof Deref) {
 				Deref deref = (Deref) x;
-				return deref.expression.getType().isPrimitive();
+				if (deref.expression.getType() != null)
+					return deref.expression.getType().isPrimitive();
 			}
 			else if (x instanceof FunctionCall || x instanceof InlineCall) {
 				Callee c = (Callee) x;

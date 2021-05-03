@@ -1,8 +1,11 @@
 package Imm.ASM.Util.Operands.Memory;
 
 import Imm.ASM.Util.Operands.Operand;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.PRIMITIVES.CHAR;
 
 public class MemoryWordOp extends MemoryOperand {
 
@@ -31,16 +34,29 @@ public class MemoryWordOp extends MemoryOperand {
 	}
 	
 	private String toString(Expression val) {
-		String s = "";
 		if (val instanceof Atom) {
 			Atom atom = (Atom) val;
-			s += ".word " + atom.getType().sourceCodeRepresentation();
-		}
-		else {
-			return ".skip " + val.getType().wordsize() * 4;
+			return ".word " + atom.getType().sourceCodeRepresentation();
 		}
 		
-		return s;
+		if (val instanceof ArrayInit && ((ARRAY) val.getType()).elementType instanceof CHAR) {
+			ArrayInit init = (ArrayInit) val;
+			
+			if (init.elements.stream().filter(x -> !(x instanceof Atom)).count() == 0) {
+				String s = ".asciz \"";
+				
+				for (int i = 0; i < init.elements.size() - 1; i++) {
+					Atom atom = (Atom) init.elements.get(i);
+					s += (char) Integer.parseInt(atom.getType().sourceCodeRepresentation());
+				}
+				
+				s += "\"";
+				
+				return s;
+			}
+		}
+		
+		return ".skip " + val.getType().wordsize() * 4;
 	}
 
 	public MemoryOperand clone() {

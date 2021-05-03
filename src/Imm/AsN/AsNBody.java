@@ -40,6 +40,7 @@ import Imm.ASM.Util.Operands.Memory.MemoryWordRefOp;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
@@ -52,6 +53,8 @@ import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.COMPOSIT.ARRAY;
+import Imm.TYPE.PRIMITIVES.CHAR;
 import PreP.PreProcessor;
 import Res.Manager.FileUtil;
 import Res.Manager.RessourceManager;
@@ -303,8 +306,18 @@ public class AsNBody extends AsNNode {
 			if (s instanceof Declaration) {
 				Declaration dec = (Declaration) s;
 				
+				boolean directInitialization = dec.value instanceof Atom;
+				
+				/* .asciz initialization */
+				if (dec.value instanceof ArrayInit && ((ARRAY) dec.value.getType()).elementType instanceof CHAR) {
+					ArrayInit init = (ArrayInit) dec.value;
+					if (init.elements.stream().filter(x -> !(x instanceof Atom)).count() == 0) {
+						directInitialization = true;
+					}
+				}
+				
 				/* Has value, cast assembly into globalsInit */
-				if (dec.value != null && !(dec.value instanceof Atom)) {
+				if (dec.value != null && !directInitialization) {
 					addGlobalInit = true;
 					
 					LabelUtil.funcPrefix = "main.init";

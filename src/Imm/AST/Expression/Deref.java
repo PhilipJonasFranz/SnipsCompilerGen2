@@ -70,7 +70,10 @@ public class Deref extends Expression {
 
 	public Expression clone() {
 		Deref d = new Deref(this.expression.clone(), this.getSource().clone());
-		d.setType(this.getType().clone());
+		
+		if (this.getType() != null)
+			d.setType(this.getType().clone());
+		
 		d.copyDirectivesFrom(this);
 		return d;
 	}

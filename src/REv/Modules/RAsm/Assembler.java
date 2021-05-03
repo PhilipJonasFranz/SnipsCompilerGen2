@@ -38,6 +38,31 @@ public class Assembler {
 			String s = input.get(i).toLowerCase();
 			String [] sp = s.split("\n");
 			for (String s0 : sp) {
+				if (s0.contains(".asciz")) {
+					String buffer = "";
+					
+					/* Transfer first half with " */
+					while (s0.charAt(0) != '"') {
+						buffer += ("" + s0.charAt(0)).toLowerCase();
+						s0 = s0.substring(1);
+					}
+					
+					buffer += "\"";
+					s0 = s0.substring(1);
+					
+					/* Transfer String */
+					while (s0.charAt(0) != '"') {
+						buffer += s0.charAt(0);
+						s0 = s0.substring(1);
+					}
+					
+					/* Transfer rest */
+					buffer += s0.toLowerCase();
+					
+					s0 = buffer;
+				}
+				else s0 = s0.toLowerCase();
+				
 				in.add(new Instruction(s0, c++));
 			}
 		}
@@ -222,6 +247,39 @@ public class Assembler {
 						}
 						else for (int a = 0; a < n >> 2; a++)in.add(i, new Instruction(".word 0", i));
 					}
+				}
+				
+				if (in.get(i).getInstruction().contains(".asciz")) {
+					if (mode == MODE.TEXT)
+						log.add(new Message("Misplaced statement in line " + in.get(i).getLine() + ": .skip in .text section", Type.FAIL));
+					
+					String s = in.remove(i).getInstruction().trim();
+					
+					String label = s.split(":") [0] + ":";
+					
+					String string = "";
+					
+					/* Transfer first half with " */
+					while (s.charAt(0) != '"') {
+						s = s.substring(1);
+					}
+					
+					s = s.substring(1);
+					
+					/* Transfer String */
+					while (s.charAt(0) != '"') {
+						string += s.charAt(0);
+						s = s.substring(1);
+					}
+					
+					for (int a = 0; a < string.length(); a++) {
+						String newLine = "";
+						if (a == 0) newLine += label + " ";
+						newLine += ".word " + (int) string.charAt(a);
+						in.add(i + a, new Instruction(newLine, i));
+					}
+					
+					in.add(i + string.length(), new Instruction(".word 0", i));
 				}
 			}
 		} catch (Exception e) {
