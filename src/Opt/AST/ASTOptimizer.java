@@ -22,6 +22,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -86,8 +87,8 @@ import Opt.AST.Util.Morpher;
 import Opt.AST.Util.OPT_METRIC;
 import Opt.AST.Util.OPT_STRATEGY;
 import Opt.AST.Util.ProgramState;
-import Opt.AST.Util.UnrollStatementUtil;
 import Opt.AST.Util.ProgramState.VarState;
+import Opt.AST.Util.UnrollStatementUtil;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.ASTDirective;
@@ -1374,6 +1375,16 @@ public class ASTOptimizer {
 		ternary.right = ternary.right.opt(this);
 		
 		return ternary;
+	}
+	
+	public Expression optOperatorExpression(OperatorExpression op) throws OPT0_EXC {
+		this.state.pushSetting(Setting.PROBE, true);
+		op.actualExpression.clone().opt(this);
+		this.state.popSetting(Setting.PROBE);
+		
+		/* Operator was not overloaded, safe to return actual expression */
+		if (op.calledFunction == null) return op.actualExpression;
+		else return op;
 	}
 
 	public LhsId optArraySelectLhsId(ArraySelectLhsId arraySelectLhsId) throws OPT0_EXC {

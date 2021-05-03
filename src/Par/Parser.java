@@ -3,6 +3,8 @@ package Par;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -279,6 +282,33 @@ public class Parser {
 				elements.add(element);
 			}
 			else push = false;
+			
+			if (element instanceof Function) {
+				Function f = (Function) element;
+				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
+					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
+					
+					Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+					
+					if (first.isPresent()) {
+						/* 
+						 * Transform all tokens that use the symbol of 
+						 * the operator to operator tokens. 
+						 */
+						String symbol = first.get().getKey();
+							
+						for (Token t : this.tokenStream) {
+							String spelling = t.spelling;
+							if (spelling == null) 
+								spelling = t.type().spelling();
+							
+							if (spelling.equals(symbol)) {
+								t.type = TokenType.OPERATOR;
+							}
+						}
+					}
+				}
+			}
 		}
 		
 		accept(TokenType.EOF);
@@ -338,7 +368,7 @@ public class Parser {
 		HashMap<String, String> arguments = new HashMap();
 		
 		while (current.source.row == type.source.row) {
-			String key = accept(TokenType.IDENTIFIER).spelling;
+			String key = accept().spelling;
 			String value = null;
 			
 			if (current.type == TokenType.LET) {
@@ -2222,7 +2252,7 @@ public class Parser {
 	 * 		<code>EXPRESSION([EXPRESSION])+</code>
 	 */
 	private Expression parseArraySelect() throws PARS_EXC {
-		Expression ref = this.parseAtom();
+		Expression ref = this.parseOperator();
 		
 		if (current.type == TokenType.LBRACKET) {
 			List<Expression> selection = new ArrayList();
@@ -2233,6 +2263,26 @@ public class Parser {
 			}
 			
 			return new ArraySelect(ref, selection, ref.getSource());
+		}
+		else return ref;
+	}
+	
+	private Expression parseOperator() throws PARS_EXC {
+		Token curr1 = this.current;
+		List<Token> tokenStreamCopy = this.tokenStream.stream().collect(Collectors.toList());
+		
+		Expression ref = this.parseAtom();
+		
+		if (current.type == TokenType.OPERATOR) {
+			Token operator = current;
+			
+			operator.type = operator.originalType;
+			this.tokenStream = tokenStreamCopy;
+			this.current = curr1;
+			
+			ref = this.parseExpression();
+			
+			return new OperatorExpression(ref, operator.spelling, operator.source);
 		}
 		else return ref;
 	}

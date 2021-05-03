@@ -7,6 +7,8 @@ public class Token {
 			/* ---< FIELDS >--- */
 	TokenType type;
 	
+	TokenType originalType;
+	
 	String spelling;
 	
 	Source source;
@@ -15,12 +17,16 @@ public class Token {
 			/* ---< CONSTRUCTORS >--- */
 	public Token(TokenType type, Source source, String spelling) {
 		this.type = type;
+		this.originalType = type;
+		
 		this.spelling = spelling; 
 		this.source = source;
 	}
 	
 	public Token(TokenType type, Source source) {
 		this.type = type;
+		this.originalType = type;
+		
 		this.source = source;
 		this.spelling = type.spelling;
 	}
@@ -103,6 +109,9 @@ public class Token {
 		SHARED("shared", 			TokenGroup.MODIFIER),
 		RESTRICTED("restricted", 	TokenGroup.MODIFIER),
 		EXCLUSIVE("exclusive", 		TokenGroup.MODIFIER),
+		
+		/* Overloaded Operator */
+		OPERATOR("operator"),
 		
 		/* Arithmetic Operators */
 		ADD("+"),

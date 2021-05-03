@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import Ctx.Util.Callee;
 import Ctx.Util.CallUtil;
+import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
@@ -30,6 +31,7 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
 import Imm.AST.Expression.NFoldExpression;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -215,6 +217,8 @@ public class ContextChecker {
 	 * is checked, it will be added once all checks are finished.
 	 */
 	private List<StructTypedef> structTypedefs = new ArrayList();
+	
+	private List<Function> operators = new ArrayList();
 	
 	/**
 	 * During struct-typedef checking, this field will be set to a
@@ -421,6 +425,9 @@ public class ContextChecker {
 			f.inheritLink.setContext(context);
 			f.inheritLink.check(this);
 		}
+		
+		if (f.hasDirective(DIRECTIVE.OPERATOR))
+			this.operators.add(f);
 		
 		return f.getReturnType().clone();
 	}
@@ -1451,6 +1458,48 @@ public class ContextChecker {
 		
 		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
+	}
+	
+	public TYPE checkOperatorExpression(OperatorExpression op) throws CTEX_EXC {
+		
+		op.actualExpression.check(this);
+		
+		if (!(op.actualExpression instanceof NFoldExpression)) {
+			throw new CTEX_EXC("Expected nfold!");
+		}
+		
+		for (Function f : this.operators) {
+			boolean isOperator = true;
+			
+			NFoldExpression nfold = (NFoldExpression) op.actualExpression;
+			
+			isOperator &= f.parameters.get(0).getType().isEqual(nfold.operands.get(0).getType());
+			
+			isOperator &= f.parameters.get(1).getType().isEqual(nfold.operands.get(1).getType());
+			
+			ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
+			Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+			String symbol = first.get().getKey();
+			
+			isOperator &= nfold.operator.codeRepresentation().toLowerCase().equals(symbol.toLowerCase());
+			
+			if (isOperator) {
+				op.calledFunction = f;
+				op.setType(f.getReturnType());
+			}
+		}
+		
+		if (op.calledFunction == null) op.setType(op.actualExpression.getType().clone());
+		else {
+			Function f = op.calledFunction;
+			
+			if (f.provisoTypes.isEmpty()) {
+				f.addProvisoMapping(f.getReturnType().clone(), new ArrayList());
+				f.check(this);
+			}
+		}
+		
+		return op.getType();
 	}
 	
 	/**

@@ -8,7 +8,6 @@ import Imm.AST.Expression.AddressOf;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
@@ -17,6 +16,8 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.NFoldExpression;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -103,6 +104,9 @@ public abstract class AsNExpression extends AsNNode {
 		}
 		else if (e instanceof InlineFunction) {
 			node = AsNInlineFunction.cast((InlineFunction) e, r, map, st); 
+		}
+		else if (e instanceof OperatorExpression) {
+			node = AsNOperatorExpression.cast((OperatorExpression) e, r, map, st); 
 		}
 		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
 	
