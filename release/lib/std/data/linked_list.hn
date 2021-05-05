@@ -117,4 +117,18 @@ namespace List {
 	#operator <<
 	static LinkedList<T>* op_add<T>(LinkedList<T>* list, T value);
 	
+	/*
+	 * Operator that adds all elements to list, that are contained
+	 * in the second list and returns the list for chaining. Operator can be chained.
+	 */
+	#operator <<
+	static LinkedList<T>* op_addAll<T>(LinkedList<T>* list, LinkedList<T>* toAdd);
+	
+	/*
+	 * Apply predicate to all elements in the list and return
+	 * list for chaining. Operator can be chained.
+	 */
+	#operator <<
+	static LinkedList<T>* op_apply<T>(LinkedList<T>* list, func T -> T pred);
+	
 } 

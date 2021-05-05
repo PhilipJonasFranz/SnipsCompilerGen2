@@ -256,4 +256,29 @@ namespace List {
 		return list;
 	}
 	
+	#operator <<
+	static LinkedList<T>* op_addAll<T>(LinkedList<T>* list, LinkedList<T>* toAdd) {
+		auto node = toAdd->head;
+		
+		while (node != null) {
+			list->add(node->value);
+			node = node->next;
+		}
+		
+		return list;
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_apply<T>(LinkedList<T>* list, func T -> T pred) {
+		auto node = list->head;
+		
+		while (node != null) {
+			T nVal = pred(node->value);
+			node->value = nVal;
+			node = node->next;
+		}
+		
+		return list;
+	}
+	
 } 

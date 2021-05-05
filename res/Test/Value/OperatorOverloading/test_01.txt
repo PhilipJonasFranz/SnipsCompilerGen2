@@ -28,11 +28,13 @@ int main(int a) {
 	
 	stack << 3 << 9;
 	
+	list << ((int x -> int) : { return x + 5; });
+	
 	return (a << list) + stack--;
 }
 TESTCASES
-0 19
-1 34
+0 24
+1 39
 OUTPUT
 .version 0
 
@@ -69,6 +71,11 @@ op_get_246833433_P_1:                        /* Function: op_get, Provisos: INT 
 .global op_get_743855972_P_1
 op_get_743855972_P_1:                        /* Function: op_get, Provisos: INT */
     b Stack.StackedList.pop_P_1              /* Call Stack.StackedList.pop */
+
+.global ANON77
+ANON77:                                      /* Function: ANON77 */
+    add r0, r0, #5
+    bx lr
 
 .global main
 main:                                        /* Function: main */
@@ -108,6 +115,9 @@ main:                                        /* Function: main */
     bl Stack.op_add_1736088713_P_1           /* Call Stack.op_add */
     pop { r1 }
     bl Stack.op_add_1736088713_P_1           /* Call Stack.op_add */
+    ldr r1, .P2088630673_ANON77              /* Load parameters */
+    mov r0, r4
+    bl List.op_apply_1632481998_P_1          /* Call List.op_apply */
     mov r1, r4
     mov r0, r3
     bl op_get_246833433_P_1                  /* Call op_get */
@@ -117,3 +127,4 @@ main:                                        /* Function: main */
     pop { r1 }
     add r0, r1, r0
     pop { pc }
+.P2088630673_ANON77: .word ANON77

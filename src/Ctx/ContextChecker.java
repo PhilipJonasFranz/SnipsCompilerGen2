@@ -1479,7 +1479,7 @@ public class ContextChecker {
 				if (mapping0 == null) continue;
 				else mapping = mapping0;
 				
-				f.setContext(mapping);
+				f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
 				f.check(this);
 			}
 			
@@ -1944,7 +1944,8 @@ public class ContextChecker {
 	public TYPE checkInlineFunction(InlineFunction i) throws CTEX_EXC {
 		i.inlineFunction.check(this);
 		i.inlineFunction.addProvisoMapping(i.inlineFunction.getReturnType(), new ArrayList());
-		return new FUNC(i.inlineFunction, new ArrayList());
+		i.setType(new FUNC(i.inlineFunction, new ArrayList()));
+		return i.getType();
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTEX_EXC {
