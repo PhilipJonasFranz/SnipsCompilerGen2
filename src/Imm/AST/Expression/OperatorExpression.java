@@ -1,6 +1,7 @@
 package Imm.AST.Expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class OperatorExpression extends Expression {
 	
 	public Function calledFunction;
 	
-	public List<TYPE> provisoTypes;
+	public List<TYPE> provisoTypes = new ArrayList();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -105,6 +106,21 @@ public class OperatorExpression extends Expression {
 
 	public String codePrint() {
 		return this.actualExpression.codePrint();
+	}
+	
+	public List<Expression> extractOperands() {
+		List<Expression> operands = null;
+		
+		if (this.actualExpression instanceof NFoldExpression) {
+			NFoldExpression nfold = (NFoldExpression) this.actualExpression;
+			operands = nfold.operands;
+		}
+		else if (this.actualExpression instanceof IDRefWriteback) {
+			IDRefWriteback idwb = (IDRefWriteback) this.actualExpression;
+			operands = Arrays.asList(idwb.idRef);
+		}
+		
+		return operands;
 	}
 	
 } 

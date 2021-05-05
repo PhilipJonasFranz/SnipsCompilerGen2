@@ -7,28 +7,24 @@ public class Token {
 			/* ---< FIELDS >--- */
 	TokenType type;
 	
-	TokenType originalType;
-	
 	String spelling;
 	
 	Source source;
 	
-	int operatorLookahead = 0;
+	boolean markedAsOperator = false;
+	
+	String operatorSymbol;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Token(TokenType type, Source source, String spelling) {
 		this.type = type;
-		this.originalType = type;
-		
 		this.spelling = spelling; 
 		this.source = source;
 	}
 	
 	public Token(TokenType type, Source source) {
 		this.type = type;
-		this.originalType = type;
-		
 		this.source = source;
 		this.spelling = type.spelling;
 	}
@@ -40,7 +36,10 @@ public class Token {
 	}
 	
 	public Token clone() {
-		return new Token(this.type, this.source.clone(), this.spelling);
+		Token token = new Token(this.type, this.source.clone(), this.spelling);
+		token.markedAsOperator = this.markedAsOperator;
+		token.operatorSymbol = this.operatorSymbol;
+		return token;
 	}
 	
 	public TokenType type() {

@@ -3,9 +3,9 @@ package Ctx;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import Ctx.Util.CallUtil;
@@ -98,6 +98,7 @@ import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
+import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -429,6 +430,15 @@ public class ContextChecker {
 			f.inheritLink.setContext(context);
 			f.inheritLink.check(this);
 		}
+		
+		/*
+		 * We have to require the UID in the function labels, 
+		 * since the operator functions may have the same name
+		 * and the only difference is their parameters and the
+		 * operator symbols.
+		 */
+		if (f.hasDirective(DIRECTIVE.OPERATOR))
+			f.requireUIDInLabel = true;
 		
 		return f.getReturnType().clone();
 	}
@@ -1446,21 +1456,23 @@ public class ContextChecker {
 		
 		op.actualExpression.check(this);
 		
-		if (!(op.actualExpression instanceof NFoldExpression)) {
-			throw new CTEX_EXC("Expected nfold!");
-		}
+		List<Expression> operands = op.extractOperands();
+		
+		if (operands == null)
+			throw new CTEX_EXC(Const.OPERATOR_OVERLOADING_NO_SUPPORTED_FOR, Util.revCamelCase(op.actualExpression.getClass().getSimpleName()));
 		
 		for (Function f : this.operators) {
 			boolean isOperator = true;
 			
-			NFoldExpression nfold = (NFoldExpression) op.actualExpression;
+			if (f.parameters.size() != operands.size()) continue;
 			
 			List<TYPE> mapping = new ArrayList();
 			
 			if (!f.provisoTypes.isEmpty()) {
+				/* Attempt to auto-map provisos for inline call */
 				List<TYPE> proviso = f.provisoTypes.stream().map(x -> x.clone()).collect(Collectors.toList());
 				List<TYPE> paramTypes = f.parameters.stream().map(x -> x.getRawType().clone()).collect(Collectors.toList());
-				List<TYPE> provided = nfold.operands.stream().map(x -> x.getType().clone()).collect(Collectors.toList());
+				List<TYPE> provided = operands.stream().map(x -> x.getType().clone()).collect(Collectors.toList());
 				
 				List<TYPE> mapping0 = this.autoProviso(proviso, paramTypes, provided, op.getSource(), false);
 				
@@ -1470,17 +1482,23 @@ public class ContextChecker {
 				f.setContext(mapping);
 				f.check(this);
 			}
-
-			isOperator &= f.parameters.get(0).getType().isEqual(nfold.operands.get(0).getType());
-			isOperator &= f.parameters.get(1).getType().isEqual(nfold.operands.get(1).getType());
-		
+			
+			for (int i = 0; i < operands.size(); i++) 
+				isOperator &= f.parameters.get(i).getType().isEqual(operands.get(i).getType());
+			
+			/* Extract overloaded operator symbol from function */
 			ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 			Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
 			String symbol = first.get().getKey();
 			
-			isOperator &= nfold.operator.codeRepresentation().toLowerCase().equals(symbol.toLowerCase());
+			isOperator &= op.actualExpression.operatorSymbolOverride.toLowerCase().equals(symbol.toLowerCase());
 			
 			if (isOperator) {
+				/* Found multiple matches */
+				if (op.calledFunction != null) 
+					throw new CTEX_EXC(Const.MULTIPLE_MATCHES_FOR_X, "operator", symbol.toLowerCase(), op.calledFunction.path.build() + ", " + f.path.build());
+				
+				/* Found function, wire data */
 				op.calledFunction = f;
 				op.setType(f.getReturnType().clone());
 				op.provisoTypes = mapping;
@@ -2278,8 +2296,10 @@ public class ContextChecker {
 	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source, boolean throwOnFail) throws CTEX_EXC {
 		List<TYPE> foundMapping = new ArrayList();
 		
-		if (expectedTypes.size() != providedTypes.size())
-			throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, expectedTypes.size(), providedTypes.size());
+		if (expectedTypes.size() != providedTypes.size()) {
+			if (throwOnFail) throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, expectedTypes.size(), providedTypes.size());
+			else return null;
+		}
 			
 		for (int i = 0; i < targetProviso.size(); i++) {
 			PROVISO prov = (PROVISO) targetProviso.get(i);

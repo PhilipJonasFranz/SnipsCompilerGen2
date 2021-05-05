@@ -1,13 +1,14 @@
 package Imm.AsN.Expression;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.NFoldExpression;
 import Imm.AST.Expression.OperatorExpression;
 
 public class AsNOperatorExpression extends AsNExpression {
@@ -21,8 +22,9 @@ public class AsNOperatorExpression extends AsNExpression {
 		if (op.calledFunction == null) 
 			op0.instructions.addAll(AsNExpression.cast(op.actualExpression, r, map, st).getInstructions());
 		else {
-			NFoldExpression nfold = (NFoldExpression) op.actualExpression;
-			InlineCall ic = new InlineCall(op.calledFunction.path.clone(), new ArrayList(), nfold.operands, op.getSource());
+			List<Expression> operands = op.extractOperands();
+			
+			InlineCall ic = new InlineCall(op.calledFunction.path.clone(), new ArrayList(), operands, op.getSource());
 			ic.calledFunction = op.calledFunction;
 			ic.proviso = op.provisoTypes;
 			

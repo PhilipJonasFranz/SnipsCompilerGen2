@@ -17,6 +17,8 @@ public abstract class Expression extends SyntaxElement {
 			/* ---< FIELDS >--- */
 	private TYPE type;
 	
+	public String operatorSymbolOverride;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**

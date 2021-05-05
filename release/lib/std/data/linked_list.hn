@@ -110,4 +110,11 @@ namespace List {
 		
 	}
 	
+	/*
+	 * Operator that adds element to list, and returns
+	 * list for chaining. Operator can be chained.
+	 */
+	#operator <<
+	static LinkedList<T>* op_add<T>(LinkedList<T>* list, T value);
+	
 } 

@@ -983,7 +983,7 @@ public class CompilerDriver {
 		null_referenced = false;
 		expectError = false;
 		
-		LabelUtil.c.clear();
+		LabelUtil.reset();
 		
 		AsNBody.translationUnits.clear();
 		
