@@ -1224,5 +1224,19 @@ We specified that the operator `+` should be overloaded for the operand types `I
 
 Overloaded operators inherit the precedence and associativity from the original operator. Operators can be overloaded multiple times, the only restriction is that every function signature that overloads a single symbol has to differ from one another, so the correct function can be uniquely identified. Two functions can be differentiated if their arguments types are not equal or if they do not have the same amount of arguments.
 
+It is also worth noting that unbound expressions via operator overloading are possible via operator overloading:
+
+```c
+  #include <linked_list.hn>
+  
+  int main(int x) {
+    LinkedList<int>* list = LinkedList::create<int>(0);
+    list << x;
+    ...
+  }
+```
+
+The `<<` operator is overloaded to add elements to the list. In this scenario, an expression can be written without having a data target. Since the expression is transformed to a function call, this is not an issue. But keep in mind that if the operator that overloads `<<` is not found, the translated code potentially has an unbound expression casted.
+
 Note that functions that have operator directives still can be called explicitly like normal functions.
 
