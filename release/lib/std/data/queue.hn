@@ -90,4 +90,7 @@ namespace Queue {
 	
 	}
 	
+	#operator <<
+	static CyclicQueue<T>* op_add<T>(CyclicQueue<T>* queue, T value);
+	
 } 
