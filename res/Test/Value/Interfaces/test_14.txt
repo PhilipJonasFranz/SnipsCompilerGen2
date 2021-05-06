@@ -52,28 +52,28 @@ HEAP_START: .word 0
 .text
     b main
 
-.global ANON72
-ANON72:                                      /* Function: ANON72 */
+.global ANON78
+ANON78:                                      /* Function: ANON78 */
     add r0, r0, #5
     bx lr
 
-.global ANON74
-ANON74:                                      /* Function: ANON74 */
+.global ANON80
+ANON80:                                      /* Function: ANON80 */
     cmp r0, #10
-    blt ANON74.L0
+    blt ANON80.L0
     mov r0, #1
     bx lr
-ANON74.L0: 
+ANON80.L0: 
     mov r0, #0
     bx lr
 
-.global ANON76
-ANON76:                                      /* Function: ANON76 */
+.global ANON82
+ANON82:                                      /* Function: ANON82 */
     cmp r0, #0
-    beq ANON76.L0
+    beq ANON82.L0
     mov r0, #10
     bx lr
-ANON76.L0: 
+ANON82.L0: 
     mov r0, #5
     bx lr
 
@@ -135,14 +135,14 @@ main:                                        /* Function: main */
     bl init_P_2                              /* Call init */
 /* 17, 14, 9, 8, 13 */
     mov r5, r0
-    ldr r1, .P1340068263_ANON72              /* Load parameters */
+    ldr r1, .P1340068263_ANON78              /* Load parameters */
     mov r0, r5
     bl Streamable.Stream.forEach_P_1         /* Call Streamable.Stream.forEach */
 /* true, true, false, false, true */
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r6, r0
-    ldr r0, .P1340068263_ANON74              /* Evaluate Expression */
+    ldr r0, .P1340068263_ANON80              /* Evaluate Expression */
     stmfd sp!, {r0, r6}
     mov r0, r5
     ldmfd sp!, {r1, r2}
@@ -152,7 +152,7 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r8, r0
-    ldr r0, .P1340068263_ANON76              /* Load parameters */
+    ldr r0, .P1340068263_ANON82              /* Load parameters */
     stmfd sp!, {r0, r8}
     mov r0, r7
     ldmfd sp!, {r1, r2}
@@ -167,9 +167,9 @@ main:                                        /* Function: main */
     add lr, pc, #8
     mov pc, r12
     pop { pc }
-.P1340068263_ANON76: .word ANON76
-.P1340068263_ANON74: .word ANON74
-.P1340068263_ANON72: .word ANON72
+.P1340068263_ANON82: .word ANON82
+.P1340068263_ANON80: .word ANON80
+.P1340068263_ANON78: .word ANON78
 .P1340068263_Collection_P_1: .word Collection_P_1
 
 /* System Routine, used to copy memory on the stack */

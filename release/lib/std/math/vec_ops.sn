@@ -52,7 +52,7 @@ namespace Vector {
 	}
 	
 	/*
-	 * Adds the two given vectors and returns the resulting
+	 * Subtracts the two given vectors and returns the resulting
 	 * vector. No allocations are made.
 	 */
 	#operator -
@@ -66,7 +66,7 @@ namespace Vector {
 	}
 	
 	/*
-	 * Adds the two given vectors and returns the resulting
+	 * Negates the given vector and returns the resulting
 	 * vector. No allocations are made.
 	 */
 	#operator -
