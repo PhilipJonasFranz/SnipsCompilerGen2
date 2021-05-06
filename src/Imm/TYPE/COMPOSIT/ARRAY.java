@@ -66,13 +66,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public String typeString() {
-		String s = this.elementType.typeString().split(":") [0] + "[" + this.getLength() + "]";
-		TYPE t = this.elementType;
-		while (t.isArray()) {
-			s += "[" + ((ARRAY) t).getLength() + "]";
-			t = ((ARRAY) t).elementType;
-		}
-		return s;
+		return this.elementType.typeString() + "[" + this.getLength() + "]";
 	}
 
 	public void setValue(String value) {
@@ -129,8 +123,7 @@ public class ARRAY extends COMPOSIT {
 	}
 	
 	public String codeString() {
-		String s = this.elementType.codeString() + " [" + this.length + "]";
-		return s;
+		return this.elementType.codeString() + " [" + this.getLength() + "]";
 	}
 
 } 

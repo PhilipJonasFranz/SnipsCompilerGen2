@@ -1,10 +1,10 @@
 #define dim 3
+#define T int
 
 /*
  * [BASE-PACKAGE]
  *
  * This package contains utility for vectors and various vector operations.
- * The operators are implemented as overloaded operators.
  */
 namespace Vector {
 
@@ -13,9 +13,11 @@ namespace Vector {
 	 * Returns the result. No allocations are made.
 	 */
 	#operator *
-	static T op_scalar_prod_dim<T>(T [dim] v0, T [dim] v1) {
+	#strategy always
+	static T op_scalar_prod_dim(T [dim] v0, T [dim] v1) {
 		T sum = 0;
 		
+		#unroll dim
 		for (int i = 0; i < dim; i++) 
 			sum += v0 [i] * v1 [i];
 		
@@ -27,9 +29,11 @@ namespace Vector {
 	 * returns the resulting vector. No allocations are made.
 	 */
 	#operator *
-	static T [dim] op_scale_dim<T>(T [dim] v0, T scalar) {
+	#strategy always
+	static T [dim] op_scale_dim(T [dim] v0, T scalar) {
 		T [dim] r = ...;
 		
+		#unroll dim
 		for (int i = 0; i < dim; i++) 
 			r [i] = v0 [i]  * scalar;
 		
@@ -41,9 +45,11 @@ namespace Vector {
 	 * vector. No allocations are made.
 	 */
 	#operator +
-	static T [dim] op_add_dim<T>(T [dim] v0, T [dim] v1) {
+	#strategy always
+	static T [dim] op_add_dim(T [dim] v0, T [dim] v1) {
 		T [dim] r = ...;
 		
+		#unroll dim
 		for (int i = 0; i < dim; i++) {
 			r [i] = v0 [i] + v1 [i];
 		}
@@ -56,9 +62,11 @@ namespace Vector {
 	 * vector. No allocations are made.
 	 */
 	#operator -
-	static T [dim] op_sub_dim<T>(T [dim] v0, T [dim] v1) {
+	#strategy always
+	static T [dim] op_sub_dim(T [dim] v0, T [dim] v1) {
 		T [dim] r = ...;
 		
+		#unroll dim
 		for (int i = 0; i < dim; i++) 
 			r [i] = v0 [i] - v1 [i];
 		
@@ -70,9 +78,11 @@ namespace Vector {
 	 * vector. No allocations are made.
 	 */
 	#operator -
-	static T [dim] op_neg_dim<T>(T [dim] v0) {
+	#strategy always
+	static T [dim] op_neg_dim(T [dim] v0) {
 		T [dim] r = ...;
 		
+		#unroll dim
 		for (int i = 0; i < dim; i++) 
 			r [i] = -v0 [i];
 		

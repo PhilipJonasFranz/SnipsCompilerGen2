@@ -1483,7 +1483,23 @@ public class ContextChecker {
 				
 				if (!f.containsMapping(mapping)) {
 					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
-					f.check(this);
+					
+					/* 
+					 * Temporarily disable active logging of ctex exceptions, 
+					 * since the mapping we just applied may cause an exception
+					 * when checking. This is not an issue, since this mapping
+					 * is not guaranteed to be fitting. In this case we know
+					 * that this cannot be the function we are looking for.
+					 */
+					boolean temp = CTEX_EXC.isProbe;
+					CTEX_EXC.isProbe = true;
+					
+					try {
+						/* Attempt to check function */
+						f.check(this);
+					} catch (CTEX_EXC e) {}
+					
+					CTEX_EXC.isProbe = temp;
 				}
 				else {
 					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));

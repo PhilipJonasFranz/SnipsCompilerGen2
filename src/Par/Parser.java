@@ -1515,7 +1515,7 @@ public class Parser {
 			
 			Expression target = this.parseStructSelect();
 			
-			if (current.markedAsOperator) {
+			if (current.markedAsOperator && (tokenStream.get(0).type != TokenType.LET && tokenStream.get(1).type != TokenType.LET)) {
 				this.tokenStream = tokenStreamCopy;
 				this.current = curr1;
 				

@@ -1400,6 +1400,8 @@ public class ASTOptimizer {
 		
 		this.state.setWrite(arraySelectLhsId.selection.idRef.origin, true);
 		
+		arraySelectLhsId.selection.opt(this);
+		
 		return arraySelectLhsId;
 	}
 
