@@ -115,9 +115,13 @@ public class OperatorExpression extends Expression {
 			NFoldExpression nfold = (NFoldExpression) this.actualExpression;
 			operands = nfold.operands;
 		}
+		else if (this.actualExpression instanceof UnaryExpression) {
+			UnaryExpression unary = (UnaryExpression) this.actualExpression;
+			operands = Arrays.asList(unary.operand);
+		}
 		else if (this.actualExpression instanceof IDRefWriteback) {
 			IDRefWriteback idwb = (IDRefWriteback) this.actualExpression;
-			operands = Arrays.asList(idwb.idRef);
+			operands = Arrays.asList(idwb.getShadowRef());
 		}
 		
 		return operands;

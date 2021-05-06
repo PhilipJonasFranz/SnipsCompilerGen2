@@ -1,0 +1,73 @@
+SOURCE
+#include <vec_ops.sn> <dim = 2>
+
+int main(int a) {
+	int [2] v0 = [3, 6];
+	int [2] v1 = [8, 2];
+	
+	int [2] r = v0 - -v1;
+
+	return r [a] + v0  * v1 * 2;
+}
+TESTCASES
+0 83
+1 80
+OUTPUT
+.version 0
+
+.include vec_ops.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r1, #3
+    mov r0, #6                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    mov r1, #8
+    mov r0, #2                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
+    ldr r1, [fp, #-8]
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-12]                       /* Load parameters */
+    ldr r1, [fp, #-16]
+    stmfd sp!, {r0, r1}
+    bl Vector.op_neg_2_110680881_P_1         /* Call Vector.op_neg_2 */
+    bl Vector.op_sub_2_2113730452_P_1        /* Call Vector.op_sub_2 */
+    lsl r2, r3, #2
+    sub r0, fp, #24
+    ldr r0, [r0, r2]
+    push { r0 }
+    ldr r0, [fp, #-4]                        /* Load parameters */
+    ldr r1, [fp, #-8]
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-12]
+    ldr r1, [fp, #-16]
+    stmfd sp!, {r0, r1}
+    bl Vector.op_scalar_prod_2_182991050_P_1 /* Call Vector.op_scalar_prod_2 */
+    pop { r1 }
+    lsl r2, r0, #1
+    add r0, r1, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

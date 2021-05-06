@@ -311,7 +311,7 @@ public class ContextChecker {
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisoTypes.isEmpty()) f.check(this);
 				
-				if (f.hasDirective(DIRECTIVE.OPERATOR))
+				if (f.hasDirective(DIRECTIVE.OPERATOR) && !this.operators.contains(f))
 					this.operators.add(f);
 			}
 			else {
@@ -1454,13 +1454,15 @@ public class ContextChecker {
 	
 	public TYPE checkOperatorExpression(OperatorExpression op) throws CTEX_EXC {
 		
-		op.actualExpression.check(this);
-		
 		List<Expression> operands = op.extractOperands();
 		
-		if (operands == null)
-			throw new CTEX_EXC(Const.OPERATOR_OVERLOADING_NO_SUPPORTED_FOR, Util.revCamelCase(op.actualExpression.getClass().getSimpleName()));
+		/* Cannot get operands, operator-overloading might not be available for this expression type */
+		if (operands == null) throw new CTEX_EXC(Const.OPERATOR_OVERLOADING_NO_SUPPORTED_FOR, Util.revCamelCase(op.actualExpression.getClass().getSimpleName()));
 		
+		/* Check operands so we can use their types */
+		for (Expression operand : operands) operand.check(this);
+		
+		/* Search function that matches search criteria */
 		for (Function f : this.operators) {
 			boolean isOperator = true;
 			
@@ -1479,8 +1481,13 @@ public class ContextChecker {
 				if (mapping0 == null) continue;
 				else mapping = mapping0;
 				
-				f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
-				f.check(this);
+				if (!f.containsMapping(mapping)) {
+					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
+					f.check(this);
+				}
+				else {
+					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
+				}
 			}
 			
 			for (int i = 0; i < operands.size(); i++) 
@@ -1495,7 +1502,7 @@ public class ContextChecker {
 			
 			if (isOperator) {
 				/* Found multiple matches */
-				if (op.calledFunction != null) 
+				if (op.calledFunction != null && !op.calledFunction.equals(f)) 
 					throw new CTEX_EXC(Const.MULTIPLE_MATCHES_FOR_X, "operator", symbol.toLowerCase(), op.calledFunction.path.build() + ", " + f.path.build());
 				
 				/* Found function, wire data */
@@ -1505,7 +1512,11 @@ public class ContextChecker {
 			}
 		}
 		
-		if (op.calledFunction == null) op.setType(op.actualExpression.getType().clone());
+		if (op.calledFunction == null) {
+			/* No function was found, check actual expression */
+			op.actualExpression.check(this);
+			op.setType(op.actualExpression.getType().clone());
+		}
 		else {
 			Function f = op.calledFunction;
 			

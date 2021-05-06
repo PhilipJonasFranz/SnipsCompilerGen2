@@ -109,4 +109,21 @@ public class ASTDirective {
 		return this.properties.get(key.toLowerCase());
 	}
 	
+	public String toString() {
+		String s = "#" + this.type.toString().toLowerCase();
+		
+		for (Entry<String, String> property : this.properties.entrySet()) {
+			s += " " + property.getKey();
+			if (property.getValue() != null)
+				s += "=" + property.getValue();
+			
+			s += ", ";
+		}
+		
+		if (s.endsWith(", "))
+			s = s.substring(0, s.length() - 2);
+		
+		return s;
+	}
+	
 } 

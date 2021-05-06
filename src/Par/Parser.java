@@ -267,10 +267,23 @@ public class Parser {
 	private Program parseProgram() throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
+		
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF);
+		accept(TokenType.EOF);
+		
+		Program program = new Program(elements, source);
+		
+		for (Message m : buffered) m.flush();
+		
+		this.scopes.pop();
+		return program;
+	}
+	
+	private List<SyntaxElement> parseProgramElements(TokenType close) throws PARS_EXC {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		boolean push = true;
-		while (this.current.type != TokenType.EOF) {
+		while (this.current.type != close) {
 			this.activeProvisos.clear();
 			
 			if (push) this.bufferedAnnotations.push(new ArrayList());
@@ -286,6 +299,7 @@ public class Parser {
 			
 			if (element instanceof Function) {
 				Function f = (Function) element;
+				
 				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
 					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 					
@@ -325,14 +339,7 @@ public class Parser {
 			}
 		}
 		
-		accept(TokenType.EOF);
-		
-		Program program = new Program(elements, source);
-		
-		for (Message m : buffered) m.flush();
-		
-		this.scopes.pop();
-		return program;
+		return elements;
 	}
 	
 	private Namespace parseNamespace() throws PARS_EXC {
@@ -344,21 +351,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = new ArrayList();
-		
-		boolean push = true;
-		while (current.type != TokenType.RBRACE) {
-			if (push) this.bufferedAnnotations.push(new ArrayList());
-			push = true;
-			
-			SyntaxElement element = this.parseProgramElement();
-			
-			if (element != null) {
-				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
-				elements.add(element);
-			}
-			else push = false;
-		}
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE);
 		
 		this.namespaces.pop();
 		
@@ -396,16 +389,15 @@ public class Parser {
 				value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
 			}
 			
-			if (arguments.containsKey(key.toLowerCase())) {
+			if (arguments.containsKey(key.toLowerCase())) 
 				throw new SNIPS_EXC("Found duplicate directive argument key: " + key + ", " + type.source.getSourceMarker());
-			}
 			
 			arguments.put(key, value);
 			
 			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
 			else break;
 		}
-			
+		
 		return new ASTDirective(type0, arguments);
 	}
 	

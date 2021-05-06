@@ -37,7 +37,6 @@ public class ARRAY extends COMPOSIT {
 			this.coreType = elementType.getCoreType();
 		}
 		this.length = length;
-		this.wordSize = elementType.wordsize() * length;
 	}
 	
 	public int getLength() {
@@ -45,7 +44,6 @@ public class ARRAY extends COMPOSIT {
 		else {
 			this.length = ((INT) ((Atom) this.length0).getType()).value;
 			this.length0 = null;
-			this.wordSize = this.elementType.wordsize() * this.length;
 			return this.length;
 		}
 	}
@@ -86,14 +84,8 @@ public class ARRAY extends COMPOSIT {
 		return null;
 	}
 
-	@Override
 	public int wordsize() {
-		if (this.length0 != null) {
-			this.length = ((INT) ((Atom) this.length0).getType()).value;
-			this.wordSize = this.elementType.wordsize() * this.length;
-		}
-		
-		return this.wordSize;
+		return this.elementType.wordsize() * this.getLength();
 	}
 
 	public TYPE clone() {

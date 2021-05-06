@@ -5,6 +5,7 @@
  * operations.
  */
 namespace Matrix {
+	
 	/*
 	 * Multiplicate the given matricies. The first matrix has to have dim0
 	 * columns, and the second matrix has to have dim1 columns. The resulting

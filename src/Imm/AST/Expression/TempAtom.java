@@ -81,8 +81,8 @@ public class TempAtom extends Expression {
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.inheritType != null)
 			ProvisoUtil.mapNTo1(this.inheritType, context);
-		
-		this.base.setContext(context);
+		if (this.base != null)
+			this.base.setContext(context);
 	}
 
 	public Expression clone() {

@@ -30,7 +30,10 @@ public class And extends BoolNFoldExpression {
 			op0.add(e.clone());
 		
 		And e = new And(op0, this.getSource().clone());
-		e.setType(this.getType().clone());
+		
+		if (this.getType() != null)
+			e.setType(this.getType().clone());
+		
 		e.copyDirectivesFrom(this);
 		return e;
 	}

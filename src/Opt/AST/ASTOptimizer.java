@@ -1379,13 +1379,21 @@ public class ASTOptimizer {
 	}
 	
 	public Expression optOperatorExpression(OperatorExpression op) throws OPT0_EXC {
-		this.state.pushSetting(Setting.PROBE, true);
-		op.actualExpression.clone().opt(this);
-		this.state.popSetting(Setting.PROBE);
+		if (op.calledFunction == null) {
+			op.actualExpression = op.actualExpression.opt(this);
+			return op.actualExpression;
+		}
+		else {
+			this.state.pushSetting(Setting.PROBE, true);
+			
+			List<Expression> ops = op.extractOperands();
+			for (Expression e : ops) 
+				e.clone().opt(this);
+			
+			this.state.popSetting(Setting.PROBE);
+		}
 		
-		/* Operator was not overloaded, safe to return actual expression */
-		if (op.calledFunction == null) return op.actualExpression;
-		else return op;
+		return op;
 	}
 
 	public LhsId optArraySelectLhsId(ArraySelectLhsId arraySelectLhsId) throws OPT0_EXC {

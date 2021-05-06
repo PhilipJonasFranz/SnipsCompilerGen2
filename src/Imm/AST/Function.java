@@ -219,7 +219,10 @@ public class Function extends CompoundStatement {
 			}
 		}
 		
-		CompilerDriver.outs.println(" " + this.toString().split("@") [1]);
+		if (!this.activeAnnotations.isEmpty()) 
+			CompilerDriver.outs.print(" " + this.activeAnnotations.toString());
+		
+		CompilerDriver.outs.println();
 		
 		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
