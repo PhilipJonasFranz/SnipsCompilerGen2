@@ -224,8 +224,14 @@ public class PreProcessor {
 				this.process.addAll(i, lines);
 				i += lines.size();
 				
-				if (CompilerDriver.buildModulesRecurse)
-					new Message("Recompiling module: " + path, Type.INFO);
+				if (CompilerDriver.buildModulesRecurse) {
+					boolean print = true;
+					
+					if (incPath.endsWith(".hn") && imports.contains(incPath.substring(0, incPath.length() - 2) + "sn")) print = false;
+					if (incPath.endsWith(".sn") && imports.contains(incPath.substring(0, incPath.length() - 2) + "hn")) print = false;
+					
+					if (print) new Message("Recompiling module '" + path.substring(0, path.length() - 3) + "'", Type.INFO);
+				}
 			} catch (NullPointerException e) {
 				throw new SNIPS_EXC(Const.CANNOT_RESOLVE_IMPORT, path, new Source(this.process.get(i).fileName, this.process.get(i).lineNumber, 0).getSourceMarker());
 			}

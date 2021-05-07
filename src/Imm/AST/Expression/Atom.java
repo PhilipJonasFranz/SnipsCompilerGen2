@@ -8,6 +8,7 @@ import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Imm.TYPE.PRIMITIVES.CHAR;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
@@ -69,8 +70,12 @@ public class Atom extends Expression {
 	}
 
 	public String codePrint() {
-		if (this.getType().value != null)
-			return this.getType().value.toString();
+		if (this.getType().value != null) {
+			if (this.getType() instanceof CHAR) {
+				return "'" + this.getType().value.toString() + "'";
+			}
+			else return this.getType().value.toString();
+		}
 		else return this.getType().codeString();
 	}
 

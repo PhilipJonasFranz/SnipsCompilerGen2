@@ -234,7 +234,7 @@ public class AsNFunction extends AsNCompoundStatement {
 						
 						com += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
 						
-						if (z < f.provisosCalls.size() - 1) com += " | ";
+						if (z < f.provisosCalls.size() - 2) com += " | ";
 					}
 				}
 			}

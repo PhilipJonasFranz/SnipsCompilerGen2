@@ -72,7 +72,6 @@ public class LabelUtil {
 	 * guaranteed to be unique.
 	 */
 	public static void reset() {
-		c.clear();
 		poolLabels.clear();
 		funcPrefix = "";
 		funcUID = -1;

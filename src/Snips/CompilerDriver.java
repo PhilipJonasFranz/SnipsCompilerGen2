@@ -687,6 +687,8 @@ public class CompilerDriver {
 			AST = opt0.optProgram((Program) AST, (Program) AST0);
 			opt_progress.finish();
 			
+			if (imm) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
+			
 			double nodes_after = AST.visit(x -> { return true; }).size();
 			
 			double rate = Math.round(1 / (nodes_before / 100) * (nodes_before - nodes_after) * 100) / 100.0;
@@ -983,7 +985,7 @@ public class CompilerDriver {
 		null_referenced = false;
 		expectError = false;
 		
-		LabelUtil.reset();
+		LabelUtil.c.clear();
 		
 		AsNBody.translationUnits.clear();
 		
