@@ -56,7 +56,7 @@ public class TempAtom extends Expression {
 		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
-			throw new CTEX_EXC(this.getSource(), "Placeholder atom is not available at this location");
+			throw new CTEX_EXC(this, "Placeholder atom is not available at this location");
 		
 		ctx.popTrace();
 		return t;

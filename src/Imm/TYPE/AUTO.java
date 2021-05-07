@@ -9,10 +9,6 @@ public class AUTO extends TYPE<Void> {
 		
 	}
 
-	public void setValue(String value) {
-		throw new SNIPS_EXC("Cannot apply value to type AUTO!");
-	}
-
 	public boolean isEqual(TYPE type) {
 		return type instanceof AUTO;
 	}
@@ -23,10 +19,6 @@ public class AUTO extends TYPE<Void> {
 
 	public String codeString() {
 		return "auto";
-	}
-
-	public String sourceCodeRepresentation() {
-		throw new SNIPS_EXC("Cannot get Source-Code Representation of type AUTO!");
 	}
 
 	public int wordsize() {

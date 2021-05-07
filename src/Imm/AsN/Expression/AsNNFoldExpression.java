@@ -249,12 +249,12 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		/* Partial Atomic Loading Left */
 		if (e0 instanceof Atom) {
 			this.loadOperand(e1, 2, r, map, st);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().sourceCodeRepresentation()), 1);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().toPrimitive().sourceCodeRepresentation()), 1);
 		}
 		/* Partial Atomic Loading Right */
 		else if (e1 instanceof Atom) {
 			this.loadOperand(e0, 1, r, map, st);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().sourceCodeRepresentation()), 2);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2);
 		}
 		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2);
 	}

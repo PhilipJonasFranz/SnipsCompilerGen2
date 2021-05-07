@@ -293,7 +293,7 @@ public class Function extends CompoundStatement {
 	 */
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (context.size() != this.provisoTypes.size()) 
-			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
+			throw new CTEX_EXC(this, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
 		
 		ProvisoUtil.mapNToN(this.provisoTypes, context);
 

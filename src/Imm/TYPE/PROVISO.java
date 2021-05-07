@@ -54,11 +54,6 @@ public class PROVISO extends TYPE<Void> {
 		this.context = null;
 	}
 	
-	public void setValue(String value) {
-		if (this.context != null) this.context.setValue(value);
-		else this.defaultContext.setValue(value);
-	}
-	
 	public boolean isEqual(TYPE type) {
 		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
@@ -87,12 +82,6 @@ public class PROVISO extends TYPE<Void> {
 		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 			
 		return s;
-	}
-	
-	public String sourceCodeRepresentation() {
-		if (this.context != null) return this.context.sourceCodeRepresentation();
-		else if (this.defaultContext != null) return this.defaultContext.sourceCodeRepresentation();
-		else return null;
 	}
 	
 	public int wordsize() {
@@ -146,7 +135,6 @@ public class PROVISO extends TYPE<Void> {
 	public boolean hasProviso() {
 		return true;
 	}
-
 
 	public String codeString() {
 		String s = this.placeholderName;

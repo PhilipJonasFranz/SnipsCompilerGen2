@@ -36,7 +36,7 @@ public class MemoryWordOp extends MemoryOperand {
 	private String toString(Expression val) {
 		if (val instanceof Atom) {
 			Atom atom = (Atom) val;
-			return ".word " + atom.getType().sourceCodeRepresentation();
+			return ".word " + atom.getType().toPrimitive().sourceCodeRepresentation();
 		}
 		
 		if (val instanceof ArrayInit && ((ARRAY) val.getType()).elementType instanceof CHAR) {
@@ -47,7 +47,7 @@ public class MemoryWordOp extends MemoryOperand {
 				
 				for (int i = 0; i < init.elements.size() - 1; i++) {
 					Atom atom = (Atom) init.elements.get(i);
-					s += (char) Integer.parseInt(atom.getType().sourceCodeRepresentation());
+					s += (char) Integer.parseInt(atom.getType().toPrimitive().sourceCodeRepresentation());
 				}
 				
 				s += "\"";

@@ -47,7 +47,7 @@ public class PointerLhsId extends LhsId {
 		ctx.pushTrace(this);
 		
 		if (!(this.shadowDeref instanceof Deref)) {
-			throw new CTEX_EXC(this.getSource(), "Left hand identifer is not a dereference");
+			throw new CTEX_EXC(this, "Left hand identifer is not a dereference");
 		}
 		else this.deref = (Deref) this.shadowDeref;
 		

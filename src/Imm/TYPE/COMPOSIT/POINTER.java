@@ -12,7 +12,6 @@ public class POINTER extends COMPOSIT {
 	public TYPE coreType;
 	
 	public POINTER(TYPE targetType) {
-		super(null);
 		this.targetType = targetType;
 		this.coreType = this.targetType.getCoreType();
 	}
@@ -52,18 +51,6 @@ public class POINTER extends COMPOSIT {
 			if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 			return s;
 		}
-	}
-
-	public void setValue(String value) {
-		return;
-	}
-
-	public String sourceCodeRepresentation() {
-		return null;
-	}
-
-	public int wordsize() {
-		return 1;
 	}
 
 	public TYPE clone() {

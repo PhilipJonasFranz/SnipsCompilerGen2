@@ -1,6 +1,5 @@
 package Imm.TYPE.COMPOSIT;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,6 @@ public class STRUCT extends COMPOSIT {
 	public List<TYPE> proviso;
 	
 	public STRUCT(StructTypedef typedef, List<TYPE> proviso) {
-		super(null);
 		this.typedef = typedef;
 		this.proviso = proviso;
 	}
@@ -183,16 +181,9 @@ public class STRUCT extends COMPOSIT {
 		return s;
 	}
 
-	public void setValue(String value) {
-		return;
-	}
-
-	public String sourceCodeRepresentation() {
-		return null;
-	}
-
 	public int wordsize() {
 		int sum = 0;
+		
 		for (int i = 0; i < this.typedef.getFields().size(); i++) { 
 			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
 			sum += dec.getType().wordsize();
@@ -211,17 +202,16 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public STRUCT clone() {
-		List<TYPE> prov0 = new ArrayList();
-		
-		for (TYPE t : this.proviso) 
-			prov0.add(t.clone());
-		
+		List<TYPE> prov0 = this.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
 		return new STRUCT(this.typedef, prov0);
 	}
 
 	public TYPE provisoFree() {
 		STRUCT s = (STRUCT) this.clone();
-		for (int i = 0; i < s.proviso.size(); i++) s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
+		for (int i = 0; i < s.proviso.size(); i++) 
+			s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
 		return s;
 	}
 
@@ -254,10 +244,7 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public boolean hasProviso() {
-		for (TYPE t : this.proviso)
-			if (t.hasProviso())
-				return true;
-		return false;
+		return this.proviso.stream().filter(x -> x.hasProviso()).count() > 0;
 	}
 	
 	public String codeString() {
