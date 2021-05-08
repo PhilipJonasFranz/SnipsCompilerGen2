@@ -3,20 +3,21 @@ package Imm.TYPE.PRIMITIVES;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Util.FBinConverter;
 
-public class BOOL extends PRIMITIVE<Boolean> {
+public class FLOAT extends PRIMITIVE<Float> {
 
-	public BOOL() {
+	public FLOAT() {
 	
 	}
 	
-	public BOOL(String initial) {
+	public FLOAT(String initial) {
 		super(initial);
 		this.setValue(initial);
 	}
 	
 	public void setValue(String value) {
-		this.value = Boolean.parseBoolean(value);
+		this.value = Float.parseFloat(value);
 	}
 
 	public boolean isEqual(TYPE type) {
@@ -27,27 +28,32 @@ public class BOOL extends PRIMITIVE<Boolean> {
 		}
 		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
-			return p.getCoreType() instanceof BOOL;
+			return p.getCoreType() instanceof FLOAT;
 		}
-		return type instanceof BOOL;
+		else return type instanceof FLOAT;
 	}
-	
+
 	public String sourceCodeRepresentation() {
-		return (this.value)? "1" : "0";
+		/* Use packed int to represent float in asm */
+		return "" + FBinConverter.toDecimal(FBinConverter.toFBin(this.value));
 	}
 	
 	public Integer toInt() {
-		return (this.value)? 1 : 0;
+		return null;
 	}
-
+	
+	public boolean hasInt() {
+		return false;
+	}
+	
 	public TYPE clone() {
-		BOOL b = new BOOL();
+		FLOAT b = new FLOAT();
 		if (this.value != null) b.setValue(this.value + "");
 		return b;
 	}
 	
 	public String codeString() {
-		return "bool";
+		return "float";
 	}
 	
 } 

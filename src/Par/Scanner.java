@@ -23,7 +23,7 @@ public class Scanner {
 		ID, STRUCT_ID, INTERFACE_ID, NAMESPACE_ID, ENUM_ID, 
 		
 		/* Literals */
-		INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
+		INT, HEX_INT, BIN_INT, COMMENT, CHARLIT, STRINGLIT
 	}
 	
 	private class ScannableToken {
@@ -103,6 +103,7 @@ public class Scanner {
 			new ScannableToken("auto",		TokenType.AUTO,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("float",		TokenType.FLOAT,		ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("bool",		TokenType.BOOL,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("return",	TokenType.RETURN,		ACC_STATE.NONE,			" ", ";"),

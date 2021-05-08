@@ -145,6 +145,7 @@ public class Token {
 		AUTO("auto", 				TokenGroup.TYPE),
 		FUNC("func", 				TokenGroup.TYPE),
 		INT("int", 					TokenGroup.TYPE),
+		FLOAT("float", 				TokenGroup.TYPE),
 		CHAR("char",				TokenGroup.TYPE),
 		BOOL("bool", 				TokenGroup.TYPE),
 		PROVISO("",					TokenGroup.TYPE), 

@@ -96,6 +96,7 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Imm.TYPE.PRIMITIVES.CHAR;
+import Imm.TYPE.PRIMITIVES.FLOAT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.NULL;
@@ -2561,6 +2562,19 @@ public class Parser {
 		}
 		else if (current.type == TokenType.INTLIT) {
 			Token token = accept();
+			
+			/* INT.INT = FLOAT */
+			if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.INTLIT) {
+				accept();
+				Token token0 = accept();
+				return this.wrapPlaceholder(new Atom(new FLOAT(token.spelling + "." + token0.spelling), token.source));
+			}
+			/* INT[F] = FLOAT */
+			else if (current.type == TokenType.IDENTIFIER && current.spelling.toLowerCase().equals("f")) {
+				accept();
+				return this.wrapPlaceholder(new Atom(new FLOAT(token.spelling), token.source));
+			}
+			
 			return this.wrapPlaceholder(new Atom(new INT(token.spelling), token.source));
 		}
 		else if (current.type == TokenType.CHARLIT) {
@@ -2988,6 +3002,7 @@ public class Parser {
 		else {
 			/* Create a new type from the token type */
 			if (token.type() == TokenType.INT) type = new INT();
+			else if (token.type() == TokenType.FLOAT) type = new FLOAT();
 			else if (token.type() == TokenType.BOOL) type = new BOOL();
 			else if (token.type() == TokenType.CHAR) type = new CHAR();
 			else if (token.type() == TokenType.VOID) type = new VOID();

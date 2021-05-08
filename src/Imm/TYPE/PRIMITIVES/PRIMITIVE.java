@@ -31,6 +31,10 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		return 1;
 	}
 	
+	public String typeString() {
+		return this.getClass().getSimpleName();
+	}
+	
 	public TYPE getCoreType() {
 		return this;
 	}

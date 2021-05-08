@@ -1,0 +1,26 @@
+SOURCE
+float a = 2.482;
+
+float main() {
+	return (int) (10 + a);
+}
+
+TESTCASES
+12
+OUTPUT
+.version 0
+
+.data
+a: .word 1075763479
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    ldr r1, .P1208180730_LIT_1075763479      /* Evaluate Expression */
+    add r0, r1, #10
+    bx lr
+.P1208180730_LIT_1075763479: .word 1075763479

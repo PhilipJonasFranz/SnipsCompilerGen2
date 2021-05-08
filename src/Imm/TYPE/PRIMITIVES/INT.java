@@ -32,10 +32,6 @@ public class INT extends PRIMITIVE<Integer> {
 		else return type instanceof INT;
 	}
 	
-	public String typeString() {
-		return "INT";
-	}
-
 	public String sourceCodeRepresentation() {
 		return "" + this.value;
 	}

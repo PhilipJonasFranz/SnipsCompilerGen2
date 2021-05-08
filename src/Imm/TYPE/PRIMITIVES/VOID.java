@@ -17,10 +17,6 @@ public class VOID extends PRIMITIVE<Void> {
 		return true;
 	}
 	
-	public String typeString() {
-		return "VOID";
-	}
-
 	public String sourceCodeRepresentation() {
 		return null;
 	}

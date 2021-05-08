@@ -6,6 +6,7 @@ import Imm.TYPE.COMPOSIT.COMPOSIT;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.PRIMITIVES.FLOAT;
 import Imm.TYPE.PRIMITIVES.NULL;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Imm.TYPE.PRIMITIVES.VOID;
@@ -106,6 +107,8 @@ public abstract class TYPE<T> {
 	public boolean isInterface() { return this instanceof INTERFACE; };
 	
 	public boolean isPrimitive() { return this instanceof PRIMITIVE; };
+	
+	public boolean isFloat() { return this instanceof FLOAT; };
 	
 	public boolean isComposit() { return this instanceof COMPOSIT; };
 	

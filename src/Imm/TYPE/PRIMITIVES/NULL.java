@@ -13,10 +13,6 @@ public class NULL extends PRIMITIVE<Object> {
 		return type.isPointer() || type.isNull();
 	}
 	
-	public String typeString() {
-		return "NULL";
-	}
-	
 	public String sourceCodeRepresentation() {
 		// TODO: Implement mechanism that replaces this with the address of the nullpointer
 		return "NULL";

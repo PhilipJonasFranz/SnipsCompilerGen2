@@ -6,10 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="XMLParser.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/jonas.franz/Documents/GitHub/XMLParser/doc/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/jonas.franz/Documents/GitHub/SnipsCompilerGen2/jars/XMLParser.jar"/>
+	<classpathentry kind="lib" path="jars/FBin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

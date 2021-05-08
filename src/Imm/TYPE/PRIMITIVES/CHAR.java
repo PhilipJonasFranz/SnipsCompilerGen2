@@ -35,10 +35,6 @@ public class CHAR extends PRIMITIVE<Character> {
 		else return type instanceof CHAR;
 	}
 	
-	public String typeString() {
-		return "CHAR";
-	}
-
 	public String sourceCodeRepresentation() {
 		return "" + (int) this.value;
 	}
