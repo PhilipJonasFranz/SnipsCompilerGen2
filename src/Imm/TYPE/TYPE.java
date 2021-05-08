@@ -23,23 +23,7 @@ public abstract class TYPE<T> {
 	public T value;
 	
 	
-			/* ---< CONSTRUCTORS >--- */
-	/**
-	 * Default constructor, creates new type without value.
-	 */
-	public TYPE() {
-		
-	}
-	
-	
 			/* ---< METHODS >--- */
-	/**
-	 * Sets the value of this type. Types extending from this type use different parsing
-	 * methods to convert the given string to a parameterized value format.
-	 * @param value The value to set to this type.
-	 */
-	public abstract void setValue(String value);
-	
 	/**
 	 * Check if this type is equal to the given type.
 	 */
@@ -54,13 +38,6 @@ public abstract class TYPE<T> {
 	 * Return a string representation of this type as if written in Snips-Code.
 	 */
 	public abstract String codeString();
-	
-	/**
-	 * Returns the value of this type in a form that can be written into the generated assembly
-	 * file. For example, an int would just return the stored number, a char would return the UTF-8 value
-	 * of the stored character.
-	 */
-	public abstract String sourceCodeRepresentation();
 	
 	/**
 	 * Returns the size of this type in datawords. All primitive types are f.E 1 word large,
@@ -137,6 +114,8 @@ public abstract class TYPE<T> {
 	public boolean isNull() { return this instanceof NULL; };
 	
 	public boolean isProviso() { return this instanceof PROVISO; };
+	
+	public PRIMITIVE toPrimitive() { return (PRIMITIVE) this; };
 	
 	/**
 	 * Attempts to convert the type to a numeric representation.

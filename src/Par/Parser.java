@@ -3,6 +3,8 @@ package Par;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -73,6 +76,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -263,10 +267,23 @@ public class Parser {
 	private Program parseProgram() throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
+		
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF);
+		accept(TokenType.EOF);
+		
+		Program program = new Program(elements, source);
+		
+		for (Message m : buffered) m.flush();
+		
+		this.scopes.pop();
+		return program;
+	}
+	
+	private List<SyntaxElement> parseProgramElements(TokenType close) throws PARS_EXC {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		boolean push = true;
-		while (this.current.type != TokenType.EOF) {
+		while (this.current.type != close) {
 			this.activeProvisos.clear();
 			
 			if (push) this.bufferedAnnotations.push(new ArrayList());
@@ -279,16 +296,50 @@ public class Parser {
 				elements.add(element);
 			}
 			else push = false;
+			
+			if (element instanceof Function) {
+				Function f = (Function) element;
+				
+				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
+					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
+					
+					Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+					
+					if (first.isPresent()) {
+						/* 
+						 * Transform all tokens that use the symbol of 
+						 * the operator to operator tokens. 
+						 */
+						String symbol = first.get().getKey();
+						
+						for (int i = 0; i < this.tokenStream.size(); i++) {
+							Token t = this.tokenStream.get(i);
+							
+							String spelling = t.spelling;
+							if (spelling == null) 
+								spelling = t.type().spelling();
+							
+							if (symbol.startsWith(spelling)) {
+								String buffer = spelling;
+								for (int a = i + 1; a < this.tokenStream.size(); a++) {
+									if (buffer.length() > symbol.length()) break;
+									else {
+										if (buffer.equals(symbol)) {
+											t.markedAsOperator = true;
+											t.operatorSymbol = symbol;
+											break;
+										}
+										else buffer += this.tokenStream.get(a).spelling;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 		
-		accept(TokenType.EOF);
-		
-		Program program = new Program(elements, source);
-		
-		for (Message m : buffered) m.flush();
-		
-		this.scopes.pop();
-		return program;
+		return elements;
 	}
 	
 	private Namespace parseNamespace() throws PARS_EXC {
@@ -300,21 +351,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = new ArrayList();
-		
-		boolean push = true;
-		while (current.type != TokenType.RBRACE) {
-			if (push) this.bufferedAnnotations.push(new ArrayList());
-			push = true;
-			
-			SyntaxElement element = this.parseProgramElement();
-			
-			if (element != null) {
-				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
-				elements.add(element);
-			}
-			else push = false;
-		}
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE);
 		
 		this.namespaces.pop();
 		
@@ -338,7 +375,13 @@ public class Parser {
 		HashMap<String, String> arguments = new HashMap();
 		
 		while (current.source.row == type.source.row) {
-			String key = accept(TokenType.IDENTIFIER).spelling;
+			String key = accept().spelling;
+			
+			while (current.source.row == type.source.row && 
+					!(current.type == TokenType.LET || current.type == TokenType.COMMA)) {
+				key += accept().spelling;
+			}
+			
 			String value = null;
 			
 			if (current.type == TokenType.LET) {
@@ -346,16 +389,15 @@ public class Parser {
 				value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
 			}
 			
-			if (arguments.containsKey(key.toLowerCase())) {
+			if (arguments.containsKey(key.toLowerCase())) 
 				throw new SNIPS_EXC("Found duplicate directive argument key: " + key + ", " + type.source.getSourceMarker());
-			}
 			
 			arguments.put(key, value);
 			
 			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
 			else break;
 		}
-			
+		
 		return new ASTDirective(type0, arguments);
 	}
 	
@@ -781,7 +823,8 @@ public class Parser {
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
-			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
+			if (tokenStream.get(i).type == TokenType.LPAREN || (tokenStream.get(i).type == TokenType.CMPLT && 
+					!(tokenStream.get(i).markedAsOperator && tokenStream.get(i).operatorSymbol.equals("<<")))) {
 				if (tokenStream.get(i + 1).type == TokenType.CMPLE) functionCheck = false;
 				break;
 			}
@@ -916,12 +959,8 @@ public class Parser {
 				return call;
 			}
 			else {
-				if (this.progress != null) this.progress.abort();
-				throw new PARS_EXC(current.source, current.type, 
-				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
-				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
-				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
-				TokenType.IF);
+				/* Use this as default, multiple edge-cases are handled here */
+				return this.parseAssignment(false);
 			}
 		}
 	}
@@ -1314,7 +1353,10 @@ public class Parser {
 		else {
 			SyntaxElement expr = this.parseLhsIdentifer();
 			
-			if (expr instanceof InlineCall) {
+			if (expr instanceof OperatorStatement) {
+				return (OperatorStatement) expr;
+			}
+			else if (expr instanceof InlineCall) {
 				InlineCall ic = (InlineCall) expr;
 				
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
@@ -1468,7 +1510,18 @@ public class Parser {
 			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
+			Token curr1 = this.current;
+			List<Token> tokenStreamCopy = this.tokenStream.stream().collect(Collectors.toList());
+			
 			Expression target = this.parseStructSelect();
+			
+			if (current.markedAsOperator && (tokenStream.get(0).type != TokenType.LET && tokenStream.get(1).type != TokenType.LET)) {
+				this.tokenStream = tokenStreamCopy;
+				this.current = curr1;
+				
+				target = this.parseExpression();
+			}
+			
 			if (target instanceof ArraySelect) {
 				return new ArraySelectLhsId((ArraySelect) target, target.getSource());
 			}
@@ -1478,11 +1531,21 @@ public class Parser {
 			else if (target instanceof StructSelect) {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
+			else if (target instanceof OperatorExpression) {
+				accept(TokenType.SEMICOLON);
+				return new OperatorStatement((OperatorExpression) target, target.getSource());
+			}
 			else if (target instanceof InlineCall) 
 				return target;
 			else {
 				this.progress.abort();
-				throw new PARS_EXC(current.source, current.type, TokenType.IDENTIFIER);
+				
+				if (this.progress != null) this.progress.abort();
+				throw new PARS_EXC(current.source, current.type, 
+				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+				TokenType.IF);
 			}
 		}
 	}
@@ -1708,8 +1771,13 @@ public class Parser {
 		Expression left = this.parseAnd();
 		
 		while (current.type == TokenType.OR) {
-			accept();
+			Token orT = accept();
 			left = new Or(left, this.parseAnd(), current.source);
+			
+			if (orT.markedAsOperator && orT.operatorSymbol.equals("||")) {
+				left.operatorSymbolOverride = "||";
+				left = new OperatorExpression(left, orT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1726,8 +1794,13 @@ public class Parser {
 		Expression left = this.parseBitOr();
 		
 		while (current.type == TokenType.AND) {
-			accept();
+			Token andT = accept();
 			left = new And(left, this.parseBitOr(), current.source);
+			
+			if (andT.markedAsOperator && andT.operatorSymbol.equals("&&")) {
+				left.operatorSymbolOverride = "&&";
+				left = new OperatorExpression(left, andT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1744,8 +1817,13 @@ public class Parser {
 		Expression left = this.parseBitXor();
 		
 		while (current.type == TokenType.BITOR) {
-			accept();
+			Token orT = accept();
 			left = new BitOr(left, this.parseBitXor(), current.source);
+			
+			if (orT.markedAsOperator && orT.operatorSymbol.equals("|")) {
+				left.operatorSymbolOverride = "|";
+				left = new OperatorExpression(left, orT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1762,8 +1840,13 @@ public class Parser {
 		Expression left = this.parseBitAnd();
 		
 		while (current.type == TokenType.XOR) {
-			accept();
+			Token xorT = accept();
 			left = new BitXor(left, this.parseBitAnd(), current.source);
+			
+			if (xorT.markedAsOperator && xorT.operatorSymbol.equals("^")) {
+				left.operatorSymbolOverride = "^";
+				left = new OperatorExpression(left, xorT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1780,8 +1863,13 @@ public class Parser {
 		Expression left = this.parseCompare();
 		
 		while (current.type == TokenType.ADDROF) {
-			accept();
+			Token andT = accept();
 			left = new BitAnd(left, this.parseCompare(), current.source);
+			
+			if (andT.markedAsOperator && andT.operatorSymbol.equals("&")) {
+				left.operatorSymbolOverride = "&";
+				left = new OperatorExpression(left, andT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1796,30 +1884,41 @@ public class Parser {
 		Expression left = this.parseShift();
 		
 		if (current.type.group() == TokenGroup.COMPARE) {
+			Token cmpT = current;
+			
+			Compare cmp = null;
+			
 			Source source = current.source();
 			if (current.type == TokenType.CMPEQ) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
 			}
 			else if (current.type == TokenType.CMPNE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.NOT_EQUAL, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.NOT_EQUAL, source);
 			}
 			else if (current.type == TokenType.CMPGE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_SAME, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.GREATER_SAME, source);
 			}
 			else if (current.type == TokenType.CMPGT) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_THAN, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.GREATER_THAN, source);
 			}
 			else if (current.type == TokenType.CMPLE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.LESS_SAME, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.LESS_SAME, source);
 			}
 			else if (current.type == TokenType.CMPLT) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.LESS_THAN, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.LESS_THAN, source);
+			}
+			
+			left = cmp;
+			
+			if (cmpT.markedAsOperator && cmpT.operatorSymbol.equals(cmp.comparator.toString())) {
+				left.operatorSymbolOverride = cmpT.operatorSymbol;
+				left = new OperatorExpression(left, cmpT.operatorSymbol, left.getSource());
 			}
 		}
 		
@@ -1839,14 +1938,24 @@ public class Parser {
 		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
 			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
 			if (current.type == TokenType.CMPLT) {
-				accept();
+				Token lslT = accept();
 				accept();
 				left = new Lsl(left, this.parseAddSub(), current.source);
+				
+				if (lslT.markedAsOperator && lslT.operatorSymbol.equals("<<")) {
+					left.operatorSymbolOverride = "<<";
+					left = new OperatorExpression(left, lslT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				accept();
+				Token lsrT = accept();
 				accept();
 				left = new Lsr(left, this.parseAddSub(), current.source);
+				
+				if (lsrT.markedAsOperator && lsrT.operatorSymbol.equals(">>")) {
+					left.operatorSymbolOverride = ">>";
+					left = new OperatorExpression(left, lsrT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -1865,12 +1974,22 @@ public class Parser {
 		
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
-				accept();
+				Token addT = accept();
 				left = new Add(left, this.parseMulDivMod(), current.source);
+				
+				if (addT.markedAsOperator && addT.operatorSymbol.equals("+")) {
+					left.operatorSymbolOverride = "+";
+					left = new OperatorExpression(left, addT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				accept();
+				Token subT = accept();
 				left = new Sub(left, this.parseMulDivMod(), current.source);
+				
+				if (subT.markedAsOperator && subT.operatorSymbol.equals("-")) {
+					left.operatorSymbolOverride = "-";
+					left = new OperatorExpression(left, subT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -1889,11 +2008,18 @@ public class Parser {
 		
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
-				accept();
+				Token mulT = accept();
 				left = new Mul(left, this.parseSizeOf(), current.source);
+				
+				if (mulT.markedAsOperator && mulT.operatorSymbol.equals("*")) {
+					left.operatorSymbolOverride = "*";
+					left = new OperatorExpression(left, mulT.operatorSymbol, left.getSource());
+				}
 			}
 			else if (current.type == TokenType.DIV) {
-				Source source = accept().source();
+				Token divT = accept();
+				Source source = divT.source;
+				
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
@@ -1901,9 +2027,16 @@ public class Parser {
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
 				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
+				
+				if (divT.markedAsOperator && divT.operatorSymbol.equals("/")) {
+					left.operatorSymbolOverride = "/";
+					left = new OperatorExpression(left, divT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				Source source = accept().source();
+				Token modT = accept();
+				Source source = modT.source;
+				
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
@@ -1911,6 +2044,11 @@ public class Parser {
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_mod"), new ArrayList(), params, source);
 				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
+				
+				if (modT.markedAsOperator && modT.operatorSymbol.equals("%")) {
+					left.operatorSymbolOverride = "%";
+					left = new OperatorExpression(left, modT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -2071,12 +2209,26 @@ public class Parser {
 	private Expression parseNot() throws PARS_EXC {
 		if (current.type == TokenType.NEG || current.type == TokenType.NOT) {
 			if (current.type == TokenType.NEG) {
-				accept();
-				return new Not(this.parseNot(), current.source);
+				Token negT = accept();
+				Expression left = new Not(this.parseNot(), current.source);
+				
+				if (negT.markedAsOperator && negT.operatorSymbol.equals("!")) {
+					left.operatorSymbolOverride = "!";
+					left = new OperatorExpression(left, negT.operatorSymbol, left.getSource());
+				}
+					
+				return left;
 			}
 			else {
-				accept(TokenType.NOT);
-				return new BitNot(this.parseNot(), current.source);
+				Token notT = accept(TokenType.NOT);
+				Expression left = new BitNot(this.parseNot(), current.source);
+				
+				if (notT.markedAsOperator && notT.operatorSymbol.equals("~")) {
+					left.operatorSymbolOverride = "~";
+					left = new OperatorExpression(left, notT.operatorSymbol, left.getSource());
+				}
+				
+				return left;
 			}
 		}
 		else return this.parseUnaryMinus();
@@ -2089,8 +2241,15 @@ public class Parser {
 	 */
 	private Expression parseUnaryMinus() throws PARS_EXC {
 		if (current.type == TokenType.SUB) {
-			accept();
-			return new UnaryMinus(this.parseUnaryMinus(), current.source);
+			Token subT = accept();
+			Expression left = new UnaryMinus(this.parseUnaryMinus(), current.source);
+			
+			if (subT.markedAsOperator && subT.operatorSymbol.equals("-")) {
+				left.operatorSymbolOverride = "-";
+				left = new OperatorExpression(left, subT.operatorSymbol, left.getSource());
+			}
+			
+			return left;
 		}
 		else return this.parseIncrDecr();
 	}
@@ -2106,16 +2265,34 @@ public class Parser {
 		if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
 			Source source = current.source();
 			if (current.type == TokenType.INCR) {
-				accept();
+				Token incrT = accept();
+				Expression e = null;
+				
 				if (ref instanceof IDRef)
-					return new IDRefWriteback(WRITEBACK.INCR, ref, source);
-				else return new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+					e = new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else e = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+				
+				if (incrT.markedAsOperator && incrT.operatorSymbol.equals("++")) {
+					e.operatorSymbolOverride = "++";
+					e = new OperatorExpression(e, incrT.operatorSymbol, e.getSource());
+				}
+				
+				return e;
 			}
 			else {
-				accept();
+				Token decrT = accept();
+				Expression e = null;
+				
 				if (ref instanceof IDRef)
-					return new IDRefWriteback(WRITEBACK.DECR, ref, source);
-				else return new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+					e = new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else e = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+				
+				if (decrT.markedAsOperator && decrT.operatorSymbol.equals("--")) {
+					e.operatorSymbolOverride = "--";
+					e = new OperatorExpression(e, decrT.operatorSymbol, e.getSource());
+				}
+				
+				return e;
 			}
 		}
 		else return ref;
@@ -2433,7 +2610,7 @@ public class Parser {
 			}
 			else {
 				if (curr0 == current) {
-					this.progress.abort();
+					if (this.progress != null) this.progress.abort();
 					throw new PARS_EXC(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 				}
 				else {

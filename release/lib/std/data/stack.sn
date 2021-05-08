@@ -60,4 +60,10 @@ namespace Stack {
 		
 	}
 	
+	#operator <<
+	static StackedList<T>* op_add<T>(StackedList<T>* stack, T value) {
+		stack->push(value);
+		return stack;
+	}
+	
 } 

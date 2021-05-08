@@ -56,4 +56,11 @@ namespace Stack {
 		
 	}
 	
+	/*
+	 * Operator that pushes elements on the stack, and returns
+	 * the stack for chaining. Operator can be chained.
+	 */
+	#operator <<
+	static StackedList<T>* op_add<T>(StackedList<T>* stack, T value);
+	
 } 

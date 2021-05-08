@@ -174,8 +174,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 * comparing the proviso postfixes.
 			 */
 			List<TYPE> intfTypes = new ArrayList();
-			for (int a = 0; a < intf.proviso.size(); a++) {
-				PROVISO intfClone = (PROVISO) intf.proviso.get(a).clone();
+			for (TYPE type : intf.proviso) {
+				PROVISO intfClone = (PROVISO) type.clone();
 				ProvisoUtil.mapNTo1(intfClone, sdefProviso);
 				intfTypes.add(intfClone);
 			}
@@ -183,7 +183,6 @@ public class AsNInterfaceTypedef extends AsNNode {
 			postfix = LabelUtil.getProvisoPostfix(intfTypes);
 			
 			for (InterfaceProvisoMapping imapping : intf.getTypedef().registeredMappings) {
-				
 				/*
 				 * Check if the mapping is valid - this can be done by checking if the 
 				 * imapping can be derived from the given struct mapping.

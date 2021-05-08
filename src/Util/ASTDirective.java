@@ -51,7 +51,17 @@ public class ASTDirective {
 		 * and does not change the programs state by calling other functions, modifying
 		 * global variables or the heap etc.
 		 */
-		PREDICATE;
+		PREDICATE,
+		
+		/**
+		 * If set to a function, the function will be treated as an operator for the two
+		 * parameters. When the operator symbol is used, and the two types of the function
+		 * parameters are present, this function will be called with the respective parameters.
+		 * 
+		 * Properties:
+		 * 		- [Symbol]			: The Symbol this operator is overriding. 
+		 */
+		OPERATOR;
 		
 	}
 	
@@ -97,6 +107,23 @@ public class ASTDirective {
 	
 	public String getProperty(String key) {
 		return this.properties.get(key.toLowerCase());
+	}
+	
+	public String toString() {
+		String s = "#" + this.type.toString().toLowerCase();
+		
+		for (Entry<String, String> property : this.properties.entrySet()) {
+			s += " " + property.getKey();
+			if (property.getValue() != null)
+				s += "=" + property.getValue();
+			
+			s += ", ";
+		}
+		
+		if (s.endsWith(", "))
+			s = s.substring(0, s.length() - 2);
+		
+		return s;
 	}
 	
 } 

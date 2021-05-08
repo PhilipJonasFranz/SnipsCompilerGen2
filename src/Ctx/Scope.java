@@ -91,7 +91,7 @@ public class Scope {
 	 */
 	public Message checkDuplicate(Declaration dec) throws CTEX_EXC {
 		if (this.declarations.containsKey(dec.path.build())) {
-			throw new CTEX_EXC(dec.getSource(), Const.DUPLICATE_FIELD_NAME, dec.path);
+			throw new CTEX_EXC(dec, Const.DUPLICATE_FIELD_NAME, dec.path);
 		}
 		else {
 			if (this.parentScope != null) {

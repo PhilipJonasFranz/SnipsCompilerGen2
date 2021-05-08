@@ -10,7 +10,7 @@ namespace List {
 			auto node = init<>(ListNode<T>::(null, x));
 		
 			if (self->head == null) self->head = node;
-			else self->tail->next = node;
+			if (self->tail != null) self->tail->next = node;
 			
 			self->tail = node;
 			self->size++;
@@ -248,6 +248,37 @@ namespace List {
 			return init<>(LinkedList<T>::(null, null, 0, defValue));
 		}
 		
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_add<T>(LinkedList<T>* list, T value) {
+		list->add(value);
+		return list;
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_addAll<T>(LinkedList<T>* list, LinkedList<T>* toAdd) {
+		auto node = toAdd->head;
+		
+		while (node != null) {
+			list->add(node->value);
+			node = node->next;
+		}
+		
+		return list;
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_apply<T>(LinkedList<T>* list, func T -> T pred) {
+		auto node = list->head;
+		
+		while (node != null) {
+			T nVal = pred(node->value);
+			node->value = nVal;
+			node = node->next;
+		}
+		
+		return list;
 	}
 	
 } 

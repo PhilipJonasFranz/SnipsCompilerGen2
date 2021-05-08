@@ -1,6 +1,7 @@
 package Exc;
 
 import Ctx.ContextChecker;
+import Imm.AST.SyntaxElement;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
@@ -12,6 +13,8 @@ import Util.Logging.Message;
  */
 public class CTEX_EXC extends Exception {
 
+	public static boolean isProbe = false;
+	
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private String message;
@@ -25,10 +28,12 @@ public class CTEX_EXC extends Exception {
 		this.message = message;
 		this.format = format;
 		
-		ContextChecker.progress.abort();
-		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
-		
-		Util.buildStackTrace(this.location.sourceFile);
+		if (!isProbe) {
+			ContextChecker.progress.abort();
+			CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+			
+			Util.buildStackTrace(this.location.sourceFile);
+		}
 	}
 	
 	public CTEX_EXC(Source source, String message, Object...format) {
@@ -36,10 +41,25 @@ public class CTEX_EXC extends Exception {
 		this.message = message;
 		this.format = format;
 		
-		ContextChecker.progress.abort();
-		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+		if (!isProbe) {
+			ContextChecker.progress.abort();
+			CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+			
+			Util.buildStackTrace(this.location.sourceFile);
+		}
+	}
+	
+	public CTEX_EXC(SyntaxElement s, String message, Object...format) {
+		this.location = s.getSource();
+		this.message = message;
+		this.format = format;
 		
-		Util.buildStackTrace(this.location.sourceFile);
+		if (!isProbe) {
+			ContextChecker.progress.abort();
+			CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
+			
+			Util.buildStackTrace(this.location.sourceFile);
+		}
 	}
 	
 	public String getExcFieldName() {

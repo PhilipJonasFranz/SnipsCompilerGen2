@@ -22,6 +22,7 @@ import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -66,6 +67,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -86,8 +88,8 @@ import Opt.AST.Util.Morpher;
 import Opt.AST.Util.OPT_METRIC;
 import Opt.AST.Util.OPT_STRATEGY;
 import Opt.AST.Util.ProgramState;
-import Opt.AST.Util.UnrollStatementUtil;
 import Opt.AST.Util.ProgramState.VarState;
+import Opt.AST.Util.UnrollStatementUtil;
 import Res.Setting;
 import Snips.CompilerDriver;
 import Util.ASTDirective;
@@ -1375,10 +1377,30 @@ public class ASTOptimizer {
 		
 		return ternary;
 	}
+	
+	public Expression optOperatorExpression(OperatorExpression op) throws OPT0_EXC {
+		if (op.calledFunction == null) {
+			op.actualExpression = op.actualExpression.opt(this);
+			return op.actualExpression;
+		}
+		else {
+			this.state.pushSetting(Setting.PROBE, true);
+			
+			List<Expression> ops = op.extractOperands();
+			for (Expression e : ops) 
+				e.clone().opt(this);
+			
+			this.state.popSetting(Setting.PROBE);
+		}
+		
+		return op;
+	}
 
 	public LhsId optArraySelectLhsId(ArraySelectLhsId arraySelectLhsId) throws OPT0_EXC {
 		
 		this.state.setWrite(arraySelectLhsId.selection.idRef.origin, true);
+		
+		arraySelectLhsId.selection.opt(this);
 		
 		return arraySelectLhsId;
 	}
@@ -1610,6 +1632,14 @@ public class ASTOptimizer {
 		doWhileStatement.body = this.optBody(doWhileStatement.body, true, true);
 		
 		return doWhileStatement;
+	}
+	
+	public Statement optOperatorStatement(OperatorStatement op) throws OPT0_EXC {
+		this.state.pushSetting(Setting.PROBE, true);
+		op.expression.clone().opt(this);
+		this.state.popSetting(Setting.PROBE);
+		
+		return op;
 	}
 
 	public Statement optForEachStatement(ForEachStatement forEachStatement) throws OPT0_EXC {

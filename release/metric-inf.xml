@@ -58,4 +58,6 @@
     <AsNMul>2 3</AsNMul>
     <AsNSizeOfExpression>1 1</AsNSizeOfExpression>
     <AsNReturnStatement>1 1</AsNReturnStatement>
+    <AsNOperatorExpression>0 0</AsNOperatorExpression>
+    <AsNOperatorStatement>0 0</AsNOperatorStatement>
 </NodeMetrics>

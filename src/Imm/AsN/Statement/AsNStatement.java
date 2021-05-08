@@ -13,6 +13,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -64,6 +65,9 @@ public abstract class AsNStatement extends AsNNode {
 		}
 		else if (s instanceof Comment) {
 			node = AsNComment.cast((Comment) s, r, map, st); 
+		}
+		else if (s instanceof OperatorStatement) {
+			node = AsNOperatorStatement.cast((OperatorStatement) s, r, map, st); 
 		}
 		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());
 	

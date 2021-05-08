@@ -11,6 +11,10 @@ public class Token {
 	
 	Source source;
 	
+	boolean markedAsOperator = false;
+	
+	String operatorSymbol;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public Token(TokenType type, Source source, String spelling) {
@@ -32,7 +36,10 @@ public class Token {
 	}
 	
 	public Token clone() {
-		return new Token(this.type, this.source.clone(), this.spelling);
+		Token token = new Token(this.type, this.source.clone(), this.spelling);
+		token.markedAsOperator = this.markedAsOperator;
+		token.operatorSymbol = this.operatorSymbol;
+		return token;
 	}
 	
 	public TokenType type() {
@@ -103,6 +110,9 @@ public class Token {
 		SHARED("shared", 			TokenGroup.MODIFIER),
 		RESTRICTED("restricted", 	TokenGroup.MODIFIER),
 		EXCLUSIVE("exclusive", 		TokenGroup.MODIFIER),
+		
+		/* Overloaded Operator */
+		OPERATOR("operator"),
 		
 		/* Arithmetic Operators */
 		ADD("+"),

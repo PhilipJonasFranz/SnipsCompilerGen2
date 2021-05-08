@@ -56,7 +56,7 @@ public class TempAtom extends Expression {
 		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
-			throw new CTEX_EXC(this.getSource(), "Placeholder atom is not available at this location");
+			throw new CTEX_EXC(this, "Placeholder atom is not available at this location");
 		
 		ctx.popTrace();
 		return t;
@@ -81,8 +81,8 @@ public class TempAtom extends Expression {
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.inheritType != null)
 			ProvisoUtil.mapNTo1(this.inheritType, context);
-		
-		this.base.setContext(context);
+		if (this.base != null)
+			this.base.setContext(context);
 	}
 
 	public Expression clone() {

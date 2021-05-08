@@ -1,6 +1,5 @@
 package Imm.TYPE.COMPOSIT;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ public class INTERFACE extends COMPOSIT {
 	public List<TYPE> proviso;
 	
 	public INTERFACE(InterfaceTypedef typedef, List<TYPE> proviso) {
-		super(null);
 		this.typedef = typedef;
 		this.proviso = proviso;
 		
@@ -37,7 +35,7 @@ public class INTERFACE extends COMPOSIT {
 			if (intf.getTypedef().equals(this.typedef)) {
 				for (int i = 0; i < this.proviso.size(); i++) 
 					if (!this.proviso.get(i).isEqual(intf.proviso.get(i)))
-							return false;
+						return false;
 				
 				return true;
 			}
@@ -69,18 +67,6 @@ public class INTERFACE extends COMPOSIT {
 		return s;
 	}
 
-	public void setValue(String value) {
-		return;
-	}
-
-	public String sourceCodeRepresentation() {
-		return null;
-	}
-
-	public int wordsize() {
-		return 1;
-	}
-
 	public TYPE getCoreType() {
 		/* Struct acts as its own type, so its is own core type. */
 		return this;
@@ -91,17 +77,16 @@ public class INTERFACE extends COMPOSIT {
 	}
 
 	public INTERFACE clone() {
-		List<TYPE> prov0 = new ArrayList();
-		
-		for (TYPE t : this.proviso) 
-			prov0.add(t.clone());
-		
+		List<TYPE> prov0 = this.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
 		return new INTERFACE(this.typedef, prov0);
 	}
 
 	public TYPE provisoFree() {
 		INTERFACE s = (INTERFACE) this.clone();
-		for (int i = 0; i < s.proviso.size(); i++) s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
+		for (int i = 0; i < s.proviso.size(); i++) 
+			s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
 		return s;
 	}
 
@@ -130,10 +115,7 @@ public class INTERFACE extends COMPOSIT {
 	}
 
 	public boolean hasProviso() {
-		for (TYPE t : this.proviso)
-			if (t.hasProviso())
-				return true;
-		return false;
+		return this.proviso.stream().filter(x -> x.hasProviso()).count() > 0;
 	}
 	
 	public String codeString() {

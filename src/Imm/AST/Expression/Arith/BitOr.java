@@ -38,7 +38,10 @@ public class BitOr extends NFoldExpression {
 			op0.add(e.clone());
 		
 		BitOr e = new BitOr(op0, this.getSource().clone());
-		e.setType(this.getType().clone());
+		
+		if (this.getType() != null)
+			e.setType(this.getType().clone());
+		
 		e.copyDirectivesFrom(this);
 		return e;
 	}

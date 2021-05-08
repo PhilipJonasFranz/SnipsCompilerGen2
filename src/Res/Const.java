@@ -128,6 +128,8 @@ public class Const {
 	
 	public static final String EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_ASSIGN_OP = "Expression type %s is not applicable for assign operator";
 	
+	public static final String OPERATOR_OVERLOADING_NO_SUPPORTED_FOR = "Operator overloading is not supported for %s";
+	
 	public static final String ONLY_APPLICABLE_FOR_ONE_WORD_TYPE = "Only applicable for 1-Word types";
 	
 	public static final String ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL = "Only applicable for 1-Word types, got %s";

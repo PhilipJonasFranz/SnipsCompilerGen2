@@ -13,6 +13,20 @@ public abstract class PRIMITIVE<T> extends TYPE<T> {
 		this.setValue(initialValue);
 	}
 	
+	/**
+	 * Sets the value of this type. Types extending from this type use different parsing
+	 * methods to convert the given string to a parameterized value format.
+	 * @param value The value to set to this type.
+	 */
+	public abstract void setValue(String value);
+	
+	/**
+	 * Returns the value of this type in a form that can be written into the generated assembly
+	 * file. For example, an int would just return the stored number, a char would return the UTF-8 value
+	 * of the stored character.
+	 */
+	public abstract String sourceCodeRepresentation();
+	
 	public int wordsize() {
 		return 1;
 	}

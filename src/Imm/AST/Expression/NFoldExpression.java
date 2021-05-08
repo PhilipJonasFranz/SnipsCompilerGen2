@@ -11,6 +11,8 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 /**
  * Describes an operation that is applied to two or more operands.
@@ -22,6 +24,23 @@ public abstract class NFoldExpression extends Expression {
 		MUL, ADD, SUB, ORR,
 		LSL, LSR, CMP, AND,
 		BOR, BAN, BXR;
+		
+		public String codeRepresentation() {
+			if (this == MUL) return "*";
+			if (this == ADD) return "+";
+			if (this == SUB) return "-";
+			if (this == ORR) return "||";
+			if (this == LSL) return "<<";
+			if (this == LSR) return ">>";
+			if (this == AND) return "&&";
+			if (this == BOR) return "|";
+			if (this == BAN) return "&";
+			if (this == BXR) return "^";
+			
+			new Message("Cannot translate operator " + this + " to string!", Type.WARN);
+			
+			return "?";
+		}
 	}
 	
 	

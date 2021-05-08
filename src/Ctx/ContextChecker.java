@@ -3,12 +3,13 @@ package Ctx;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import Ctx.Util.Callee;
 import Ctx.Util.CallUtil;
+import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
@@ -30,6 +31,7 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.InlineFunction;
 import Imm.AST.Expression.NFoldExpression;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -66,6 +68,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -95,6 +98,7 @@ import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
+import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
@@ -216,6 +220,8 @@ public class ContextChecker {
 	 */
 	private List<StructTypedef> structTypedefs = new ArrayList();
 	
+	private List<Function> operators = new ArrayList();
+	
 	/**
 	 * During struct-typedef checking, this field will be set to a
 	 * struct typedef that is the signature of a header file. When
@@ -275,7 +281,7 @@ public class ContextChecker {
 				/* Check main function as entrypoint, if a function is called, 
 				 * context is provided and then checked */
 				if (f.path.build().equals(Const.MAIN) && !f.provisoTypes.isEmpty()) 
-					throw new CTEX_EXC(f.getSource(), Const.MAIN_CANNOT_HOLD_PROVISOS);
+					throw new CTEX_EXC(f, Const.MAIN_CANNOT_HOLD_PROVISOS);
 				
 				/* Check for duplicate function name */
 				STRUCT.useProvisoFreeInCheck = false;
@@ -291,7 +297,7 @@ public class ContextChecker {
 							this.functions.remove(f0);
 							break;
 						}
-						else throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
+						else throw new CTEX_EXC(f, Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				
 				STRUCT.useProvisoFreeInCheck = true;
@@ -304,6 +310,9 @@ public class ContextChecker {
 				
 				/* Check only functions with no provisos, proviso functions will be hot checked. */
 				if (f.provisoTypes.isEmpty()) f.check(this);
+				
+				if (f.hasDirective(DIRECTIVE.OPERATOR) && !this.operators.contains(f))
+					this.operators.add(f);
 			}
 			else {
 				s.check(this);
@@ -340,11 +349,9 @@ public class ContextChecker {
 		}
 		
 		/* Did not find a function that matches main signature */
-		if (!gotMain) 
-			throw new CTEX_EXC(p.getSource(), Const.MISSING_MAIN_FUNCTION);
+		if (!gotMain) throw new CTEX_EXC(p, Const.MISSING_MAIN_FUNCTION);
 		
-		if (progress != null) 
-			progress.finish();
+		if (progress != null) progress.finish();
 
 		/* If the declarations is not used, add itself to the free list. */
 		for (Declaration d : declarations) 
@@ -422,6 +429,15 @@ public class ContextChecker {
 			f.inheritLink.check(this);
 		}
 		
+		/*
+		 * We have to require the UID in the function labels, 
+		 * since the operator functions may have the same name
+		 * and the only difference is their parameters and the
+		 * operator symbols.
+		 */
+		if (f.hasDirective(DIRECTIVE.OPERATOR))
+			f.requireUIDInLabel = true;
+		
 		return f.getReturnType().clone();
 	}
 	
@@ -482,7 +498,7 @@ public class ContextChecker {
 					/* Check for duplicate function name */
 					for (Function f0 : this.functions) {
 						if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
-							throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
+							throw new CTEX_EXC(f, Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				}
 				
@@ -586,7 +602,7 @@ public class ContextChecker {
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
 					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
-						throw new CTEX_EXC(f.getSource(), Const.DUPLICATE_FUNCTION_NAME, f.path);
+						throw new CTEX_EXC(f, Const.DUPLICATE_FUNCTION_NAME, f.path);
 				}
 			}
 			
@@ -751,7 +767,7 @@ public class ContextChecker {
 			for (Expression x : e.elements) 
 				provided.add(x.check(this));
 			
-			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource());
+			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource(), true);
 		}
 		
 		/* Map the current function provisos to the resulting struct type */
@@ -899,7 +915,7 @@ public class ContextChecker {
 				POINTER p0 = (POINTER) type;
 				type = p0.targetType;
 			}
-			else throw new CTEX_EXC(e.selector.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree());
+			else throw new CTEX_EXC(e.selector, Const.CANNOT_DEREF_NON_POINTER, type.provisoFree());
 		}
 		
 		Expression selection = e.selection;
@@ -920,7 +936,7 @@ public class ContextChecker {
 						
 						if (sel0.deref) {
 							if (!type.isPointer()) 
-								throw new CTEX_EXC(selection.getSource(), Const.CANNOT_DEREF_NON_POINTER, type.provisoFree());
+								throw new CTEX_EXC(selection, Const.CANNOT_DEREF_NON_POINTER, type.provisoFree());
 							else 
 								/* Unwrap pointer, selection does dereference */
 								type = type.getContainedType();
@@ -949,7 +965,7 @@ public class ContextChecker {
 						
 						this.scopes.pop();
 					}
-					else throw new CTEX_EXC(selection.getSource(), Const.CLASS_CANNOT_BE_SELECTOR, sel0.selector.getClass().getSimpleName());
+					else throw new CTEX_EXC(selection, Const.CLASS_CANNOT_BE_SELECTOR, sel0.selector.getClass().getSimpleName());
 					
 					/* Next selection in chain */
 					selection = sel0.selection;
@@ -1334,11 +1350,11 @@ public class ContextChecker {
 	
 	public TYPE checkSwitchStatement(SwitchStatement s) throws CTEX_EXC {
 		if (!(s.condition instanceof IDRef)) 
-			throw new CTEX_EXC(s.condition.getSource(), Const.SWITCH_COND_MUST_BE_VARIABLE);
+			throw new CTEX_EXC(s.condition, Const.SWITCH_COND_MUST_BE_VARIABLE);
 		
 		TYPE type = s.condition.check(this);
 		if (!type.isPrimitive()) 
-			throw new CTEX_EXC(s.condition.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+			throw new CTEX_EXC(s.condition, Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 		
 		if (s.defaultStatement == null) 
 			throw new CTEX_EXC(Const.MISSING_DEFAULT_STATEMENT);
@@ -1352,7 +1368,7 @@ public class ContextChecker {
 		TYPE type = c.condition.check(this);
 		
 		if (!type.isEqual(c.superStatement.condition.getType())) 
-			throw new CTEX_EXC(c.condition.getSource(), Const.EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE, type.provisoFree(), c.superStatement.condition.getType().provisoFree());
+			throw new CTEX_EXC(c.condition, Const.EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE, type.provisoFree(), c.superStatement.condition.getType().provisoFree());
 		
 		this.checkBody(c.body, true, true);
 		return null;
@@ -1371,7 +1387,7 @@ public class ContextChecker {
 			
 			/* There was a return statement with no return value previously */
 			if (this.currentFunction.peek().noReturn != null) 
-				throw new CTEX_EXC(this.currentFunction.peek().noReturn.getSource(), Const.NO_RETURN_VALUE, this.currentFunction.peek().getReturnType().provisoFree());
+				throw new CTEX_EXC(this.currentFunction.peek().noReturn, Const.NO_RETURN_VALUE, this.currentFunction.peek().getReturnType().provisoFree());
 			
 			if (t.isEqual(this.currentFunction.peek().getReturnType())) 
 				return t;
@@ -1393,22 +1409,22 @@ public class ContextChecker {
 	public TYPE checkTernary(Ternary t) throws CTEX_EXC {
 		TYPE type = t.condition.check(this);
 		if (type.wordsize() > 1) 
-			throw new CTEX_EXC(t.condition.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT, type.provisoFree());
+			throw new CTEX_EXC(t.condition, Const.CONDITION_TYPE_MUST_BE_32_BIT, type.provisoFree());
 		
 		if (t.condition instanceof ArrayInit) 
-			throw new CTEX_EXC(t.condition.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+			throw new CTEX_EXC(t.condition, Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		TYPE t0 = t.left.check(this);
 		TYPE t1 = t.right.check(this);
 		
 		if (t.left instanceof ArrayInit) 
-			throw new CTEX_EXC(t.left.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+			throw new CTEX_EXC(t.left, Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (t.right instanceof ArrayInit) 
-			throw new CTEX_EXC(t.right.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+			throw new CTEX_EXC(t.right, Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (!t0.isEqual(t1)) 
-			throw new CTEX_EXC(t.condition.getSource(), Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree(), t1.provisoFree());
+			throw new CTEX_EXC(t.condition, Const.OPERAND_TYPES_DO_NOT_MATCH, t0.provisoFree(), t1.provisoFree());
 		
 		t.setType(t0);
 		return t.getType();
@@ -1420,37 +1436,120 @@ public class ContextChecker {
 		
 		for (Expression e : b.operands)
 			if (e.getType().isNull()) 
-				throw new CTEX_EXC(e.getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+				throw new CTEX_EXC(e, Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		for (Expression e : b.operands)
 			if (e instanceof ArrayInit) 
-				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+				throw new CTEX_EXC(e, Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		for (Expression e : b.operands)
 			if (e.getType().wordsize() > 1) 
-				throw new CTEX_EXC(e.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree());
-		
-		boolean gotPointer = false;
-		for (Expression e : b.operands) {
-			if (e.getType().isPointer()) {
-				gotPointer = true;
-				for (Expression e0 : b.operands) {
-					if (e.equals(e0)) continue;
-					if (!(e0.getType().getCoreType() instanceof INT)) 
-						throw new CTEX_EXC(Const.POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE, new INT(), e0.getType().provisoFree());
-				}
-			}
-		}
-		
-		if (!gotPointer) {
-			for (Expression e : b.operands) {
-				if (!e.getType().isEqual(b.operands.get(0).getType()))
-					throw new CTEX_EXC(Const.OPERAND_TYPES_DO_NOT_MATCH, b.operands.get(0).getType().provisoFree(), e.getType().provisoFree());
-			}
-		}
+				throw new CTEX_EXC(e, Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree());
 		
 		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
+	}
+	
+	public TYPE checkOperatorExpression(OperatorExpression op) throws CTEX_EXC {
+		
+		List<Expression> operands = op.extractOperands();
+		
+		/* Cannot get operands, operator-overloading might not be available for this expression type */
+		if (operands == null) throw new CTEX_EXC(Const.OPERATOR_OVERLOADING_NO_SUPPORTED_FOR, Util.revCamelCase(op.actualExpression.getClass().getSimpleName()));
+		
+		/* Check operands so we can use their types */
+		for (Expression operand : operands) operand.check(this);
+		
+		/* Search function that matches search criteria */
+		for (Function f : this.operators) {
+			boolean isOperator = true;
+			
+			if (f.parameters.size() != operands.size()) continue;
+			
+			List<TYPE> mapping = new ArrayList();
+			
+			if (!f.provisoTypes.isEmpty()) {
+				/* Attempt to auto-map provisos for inline call */
+				List<TYPE> proviso = f.provisoTypes.stream().map(x -> x.clone()).collect(Collectors.toList());
+				List<TYPE> paramTypes = f.parameters.stream().map(x -> x.getRawType().clone()).collect(Collectors.toList());
+				List<TYPE> provided = operands.stream().map(x -> x.getType().clone()).collect(Collectors.toList());
+				
+				List<TYPE> mapping0 = this.autoProviso(proviso, paramTypes, provided, op.getSource(), false);
+				
+				if (mapping0 == null) continue;
+				else mapping = mapping0;
+				
+				if (!f.containsMapping(mapping)) {
+					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
+					
+					/* 
+					 * Temporarily disable active logging of ctex exceptions, 
+					 * since the mapping we just applied may cause an exception
+					 * when checking. This is not an issue, since this mapping
+					 * is not guaranteed to be fitting. In this case we know
+					 * that this cannot be the function we are looking for.
+					 */
+					boolean temp = CTEX_EXC.isProbe;
+					CTEX_EXC.isProbe = true;
+					
+					try {
+						/* Attempt to check function */
+						f.check(this);
+					} catch (CTEX_EXC e) {}
+					
+					CTEX_EXC.isProbe = temp;
+				}
+				else {
+					f.setContext(mapping.stream().map(x -> x.clone()).collect(Collectors.toList()));
+				}
+			}
+			
+			for (int i = 0; i < operands.size(); i++) 
+				isOperator &= f.parameters.get(i).getType().isEqual(operands.get(i).getType());
+			
+			/* Extract overloaded operator symbol from function */
+			ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
+			Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+			String symbol = first.get().getKey();
+			
+			isOperator &= op.actualExpression.operatorSymbolOverride.toLowerCase().equals(symbol.toLowerCase());
+			
+			if (isOperator) {
+				/* Found multiple matches */
+				if (op.calledFunction != null && !op.calledFunction.equals(f)) 
+					throw new CTEX_EXC(Const.MULTIPLE_MATCHES_FOR_X, "operator", symbol.toLowerCase(), op.calledFunction.path.build() + ", " + f.path.build());
+				
+				/* Found function, wire data */
+				op.calledFunction = f;
+				op.setType(f.getReturnType().clone());
+				op.provisoTypes = mapping;
+			}
+		}
+		
+		if (op.calledFunction == null) {
+			/* No function was found, check actual expression */
+			op.actualExpression.check(this);
+			op.setType(op.actualExpression.getType().clone());
+		}
+		else {
+			Function f = op.calledFunction;
+			
+			if (f.provisoTypes.isEmpty()) {
+				/* 
+				 * Add default proviso mapping. If function has proviso, 
+				 * it will be checked above automatically. 
+				 */
+				f.addProvisoMapping(f.getReturnType().clone(), new ArrayList());
+				f.check(this);
+			}
+		}
+		
+		return op.getType();
+	}
+	
+	public TYPE checkOperatorStatement(OperatorStatement op) throws CTEX_EXC {
+		TYPE t = op.expression.check(this);
+		return t;
 	}
 	
 	/**
@@ -1462,7 +1561,7 @@ public class ContextChecker {
 		for (Expression e : b.operands) {
 			e.check(this);
 			if (e.getType().wordsize() > 1) 
-				throw new CTEX_EXC(e.getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
+				throw new CTEX_EXC(e, Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		}
 
 		b.setType(b.operands.get(0).getType().clone());
@@ -1478,7 +1577,7 @@ public class ContextChecker {
 		TYPE t = b.getOperand().check(this);
 		
 		if (t.wordsize() > 1) 
-			throw new CTEX_EXC(b.getOperand().getSource(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
+			throw new CTEX_EXC(b.getOperand(), Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		
 		b.setType(t);
 		return b.getType();
@@ -1488,10 +1587,10 @@ public class ContextChecker {
 		TYPE op = u.getOperand().check(this);
 		
 		if (op.isNull()) 
-			throw new CTEX_EXC(u.getOperand().getSource(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
+			throw new CTEX_EXC(u.getOperand(), Const.CANNOT_PERFORM_ARITH_ON_NULL);
 		
 		if (u.getOperand() instanceof ArrayInit) 
-			throw new CTEX_EXC(u.getOperand().getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+			throw new CTEX_EXC(u.getOperand(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		
 		if (u instanceof BitNot && op instanceof PRIMITIVE) {
 			u.setType(op);
@@ -1516,7 +1615,7 @@ public class ContextChecker {
 			}
 			
 			if (e instanceof ArrayInit) 
-				throw new CTEX_EXC(e.getSource(), Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
+				throw new CTEX_EXC(e, Const.STRUCT_INIT_CAN_ONLY_BE_SUB_EXPRESSION_OF_STRUCT_INIT);
 		}
 		
 		c.setType(new BOOL());
@@ -1548,7 +1647,7 @@ public class ContextChecker {
 				 * the most cases, it is solved later on.
 				 */
 				if (!(e instanceof TempAtom))
-					throw new CTEX_EXC(e.getSource(), Const.FAILED_TO_CHECK_PARAMETER, i + 1, c.getPath().build());
+					throw new CTEX_EXC(e, Const.FAILED_TO_CHECK_PARAMETER, i + 1, c.getPath().build());
 				else
 					types.add(null);
 			}
@@ -1586,16 +1685,8 @@ public class ContextChecker {
 			else {
 				INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
 				
-				boolean found = false;
-				for (Function nested : s.getTypedef().functions) {
-					if (nested.equals(f)) {
-						found = true;
-						break;
-					}
-				}
-				
-				if (!found)
-					throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s.getTypedef().path);
+				boolean found = s.getTypedef().functions.contains(f);
+				if (!found) throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, f.path, s.getTypedef().path);
 			
 				/* Use auto provisos for not given proviso types */
 				if (c.getProviso().isEmpty()) {
@@ -1623,7 +1714,7 @@ public class ContextChecker {
 					functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
 					
 					/* Attempt to auto-map proviso types */
-					List<TYPE> mapping = this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource());
+					List<TYPE> mapping = this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource(), true);
 					
 					/* For the found mapping, wrap the mapped types in the corresponding proviso types */
 					for (int i = 0; i < mapping.size(); i++) {
@@ -1719,7 +1810,7 @@ public class ContextChecker {
 						iParamTypes.set(0, new POINTER(iParamTypes.get(0)));
 					}
 					
-					c.setProviso(this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource()));
+					c.setProviso(this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource(), true));
 				}
 				
 				if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
@@ -1787,9 +1878,9 @@ public class ContextChecker {
 						a -= 1;
 					
 					if (this.checkPolymorphViolation(paramType, functionParamType))
-						throw new CTEX_EXC(c.getParams().get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree(), functionParamType.provisoFree());
+						throw new CTEX_EXC(c.getParams().get(a), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH_POLY, paramNumber, paramType.provisoFree(), functionParamType.provisoFree());
 					
-					throw new CTEX_EXC(c.getParams().get(a).getSource(), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree(), functionParamType.provisoFree());
+					throw new CTEX_EXC(c.getParams().get(a), Const.PARAMETER_TYPE_INDEX_DOES_NOT_MATCH, paramNumber, paramType.provisoFree(), functionParamType.provisoFree());
 				}
 			}
 			
@@ -1870,7 +1961,8 @@ public class ContextChecker {
 	public TYPE checkInlineFunction(InlineFunction i) throws CTEX_EXC {
 		i.inlineFunction.check(this);
 		i.inlineFunction.addProvisoMapping(i.inlineFunction.getReturnType(), new ArrayList());
-		return new FUNC(i.inlineFunction, new ArrayList());
+		i.setType(new FUNC(i.inlineFunction, new ArrayList()));
+		return i.getType();
 	}
 	
 	public TYPE checkFunctionRef(FunctionRef r) throws CTEX_EXC {
@@ -1900,16 +1992,8 @@ public class ContextChecker {
 			if (r.base != null) {
 				STRUCT s = (STRUCT) r.base.check(this).getCoreType();
 				
-				boolean found = false;
-				for (Function nested : s.getTypedef().functions) {
-					if (nested.equals(lambda)) {
-						found = true;
-						break;
-					}
-				}
-				
-				if (!found)
-					throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, lambda.path, s.getTypedef().path);
+				boolean found = s.getTypedef().functions.contains(lambda);
+				if (!found) throw new CTEX_EXC(Const.FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE, lambda.path, s.getTypedef().path);
 			}
 			else {
 				if (this.nestedFunctions.contains(lambda))
@@ -2022,7 +2106,7 @@ public class ContextChecker {
 		else if (t.isPointer()) {
 			deref.setType(t.getContainedType());
 		}
-		else throw new CTEX_EXC(deref.expression.getSource(), Const.CANNOT_DEREF_TYPE, t.provisoFree());
+		else throw new CTEX_EXC(deref.expression, Const.CANNOT_DEREF_TYPE, t.provisoFree());
 		
 		return deref.getType();
 	}
@@ -2070,7 +2154,7 @@ public class ContextChecker {
 			TYPE t = ref.check(this);
 			
 			if (!t.isPrimitive()) 
-				throw new CTEX_EXC(i.select.getSource(), Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
+				throw new CTEX_EXC(i.select, Const.CAN_ONLY_APPLY_TO_PRIMITIVE);
 			
 			i.setType(t);
 		}
@@ -2108,7 +2192,7 @@ public class ContextChecker {
 			select.idRef = (IDRef) ref0.selector;
 			ref = ref0;
 		}
-		else throw new CTEX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_FROM_VARIABLE_REF);
+		else throw new CTEX_EXC(select.getShadowRef(), Const.CAN_ONLY_SELECT_FROM_VARIABLE_REF);
 		
 		TYPE type0 = ref.check(this);
 		
@@ -2119,11 +2203,11 @@ public class ContextChecker {
 		for (int i = 0; i < select.selection.size(); i++) {
 			TYPE stype = select.selection.get(i).check(this);
 			if (!(stype instanceof INT)) 
-				throw new CTEX_EXC(select.selection.get(i).getSource(), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree());
+				throw new CTEX_EXC(select.selection.get(i), Const.ARRAY_SELECTION_HAS_TO_BE_OF_TYPE, stype.provisoFree());
 			else {
 				/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
 				if (!(chain.isArray() || (i == 0 && (type0.isPointer() || chain.isVoid())))) 
-					throw new CTEX_EXC(select.selection.get(i).getSource(), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree());
+					throw new CTEX_EXC(select.selection.get(i), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree());
 				else if (chain.isArray()) {
 					ARRAY arr = (ARRAY) chain;
 					
@@ -2131,7 +2215,7 @@ public class ContextChecker {
 						Atom a = (Atom) select.selection.get(i);
 						int value = (int) a.getType().getValue();
 						if (value < 0 || value >= arr.getLength()) 
-							throw new CTEX_EXC(select.selection.get(i).getSource(), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree());
+							throw new CTEX_EXC(select.selection.get(i), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree());
 					}
 					
 					chain = arr.elementType;
@@ -2145,7 +2229,7 @@ public class ContextChecker {
 					}
 					
 					if (select.selection.size() > 1) 
-						throw new CTEX_EXC(select.getShadowRef().getSource(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
+						throw new CTEX_EXC(select.getShadowRef(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
 				}
 			}
 		}
@@ -2192,17 +2276,17 @@ public class ContextChecker {
 			TYPE t = p.first.check(this);
 			
 			if (t.wordsize() > 1) 
-				throw new CTEX_EXC(p.first.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree());
+				throw new CTEX_EXC(p.first, Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree());
 		}
 		
 		for (Pair<Expression, REG> p : d.dataOut) {
 			TYPE t = p.first.check(this);
 			
 			if (!(p.first instanceof IDRef)) 
-				throw new CTEX_EXC(p.first.getSource(), Const.EXPECTED_IDREF_ACTUAL, p.first.getClass().getName());
+				throw new CTEX_EXC(p.first, Const.EXPECTED_IDREF_ACTUAL, p.first.getClass().getName());
 			
 			if (t.wordsize() > 1) 
-				throw new CTEX_EXC(p.first.getSource(), Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree());
+				throw new CTEX_EXC(p.first, Const.ONLY_APPLICABLE_FOR_ONE_WORD_TYPE_ACTUAL, t.provisoFree());
 		}
 		
 		return new VOID();
@@ -2219,11 +2303,13 @@ public class ContextChecker {
 	 * @return The missing proviso mapping for the target.
 	 * @throws CTEX_EXC If the mapping is not clear or a mapping cannot be determined.
 	 */
-	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source) throws CTEX_EXC {
+	public List<TYPE> autoProviso(List<TYPE> targetProviso, List<TYPE> expectedTypes, List<TYPE> providedTypes, Source source, boolean throwOnFail) throws CTEX_EXC {
 		List<TYPE> foundMapping = new ArrayList();
 		
-		if (expectedTypes.size() != providedTypes.size())
-			throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, expectedTypes.size(), providedTypes.size());
+		if (expectedTypes.size() != providedTypes.size()) {
+			if (throwOnFail) throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, expectedTypes.size(), providedTypes.size());
+			else return null;
+		}
 			
 		for (int i = 0; i < targetProviso.size(); i++) {
 			PROVISO prov = (PROVISO) targetProviso.get(i);
@@ -2242,16 +2328,20 @@ public class ContextChecker {
 						ind = a;
 					}
 					else {
-						if (!mapped.provisoFree().typeString().equals(map0.provisoFree().typeString())) 
+						if (!mapped.provisoFree().typeString().equals(map0.provisoFree().typeString())) {
 							/* Found two possible types for proviso, abort */
-							throw new CTEX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree(), ind + 1, map0.provisoFree(), a + 1);
+							if (throwOnFail) throw new CTEX_EXC(source, Const.MULTIPLE_AUTO_MAPS_FOR_PROVISO, prov.placeholderName, mapped.provisoFree(), ind + 1, map0.provisoFree(), a + 1);
+							else return null;
+						}
 					}
 				}
 			}
 			
-			if (mapped == null) 
+			if (mapped == null) {
 				/* None of the types held the searched proviso, proviso cannot be auto-ed, abort. */
-				throw new CTEX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov);
+				if (throwOnFail) throw new CTEX_EXC(source, Const.CANNOT_AUTO_MAP_PROVISO, prov);
+				else return null;
+			}
 			
 			foundMapping.add(mapped.clone());
 		}
@@ -2281,7 +2371,7 @@ public class ContextChecker {
 			/* Next type in chain */
 			return ref0.getType();
 		}
-		else throw new CTEX_EXC(ref0.getSource(), Const.FIELD_NOT_IN_STRUCT, ref0.path, struct.provisoFree());
+		else throw new CTEX_EXC(ref0, Const.FIELD_NOT_IN_STRUCT, ref0.path, struct.provisoFree());
 	}
 	
 	/**
@@ -2383,15 +2473,17 @@ public class ContextChecker {
 		}
 			
 		/* Search through predicate declarations */
-		if (!this.currentFunction.isEmpty()) for (Declaration d : this.currentFunction.peek().parameters) {
-			if (d.getType() instanceof FUNC) {
-				FUNC f = (FUNC) d.getType();
-				
-				if (f.funcHead != null) 
-					f.funcHead.lambdaDeclaration = d;
-				
-				if (d.path.getLast().equals(path.getLast())) 
-					funcs.add(f.funcHead);
+		if (!this.currentFunction.isEmpty()) {
+			for (Declaration d : this.currentFunction.peek().parameters) {
+				if (d.getType() instanceof FUNC) {
+					FUNC f = (FUNC) d.getType();
+					
+					if (f.funcHead != null) 
+						f.funcHead.lambdaDeclaration = d;
+					
+					if (d.path.getLast().equals(path.getLast())) 
+						funcs.add(f.funcHead);
+				}
 			}
 		}
 		
@@ -2419,7 +2511,6 @@ public class ContextChecker {
 			/* Found one match, return this match */
 			return funcs.get(0);
 		
-		
 		/* Check for match with prefix */
 		List<Function> prefixMatchers = new ArrayList();
 		for (Function f0 : funcs) 
@@ -2429,44 +2520,18 @@ public class ContextChecker {
 		/* Only one prefix matcher, found our function */
 		if (prefixMatchers.size() == 1) return prefixMatchers.get(0);
 
-		
 		/* At this point, functions can only be differentiated by the parameters. All require the UID in the label. */
 		funcs.stream().forEach(x -> x.requireUIDInLabel = true);
 		
 		/* Check for match with parameters */
 		if (types != null) {
-			List<Function> filtered = new ArrayList();
-			for (Function f0 : funcs) {
-				if (f0.parameters.size() == types.size()) {
-					boolean match = true;
-					for (int i = 0; i < types.size(); i++) 
-						if (types.get(i) != null) 
-							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
-					
-					if (match)
-						filtered.add(f0);
-				}
-			}
-			
+			List<Function> filtered = this.filterFromFuncs(funcs, types);
 			if (filtered.size() == 1) return filtered.get(0);
 		}
 		
-
 		/* Check for match with parameters and prefix matches */
 		if (types != null) {
-			List<Function> filtered = new ArrayList();
-			for (Function f0 : prefixMatchers) {
-				if (f0.parameters.size() == types.size()) {
-					boolean match = true;
-					for (int i = 0; i < types.size(); i++) 
-						if (types.get(i) != null) 
-							match &= f0.parameters.get(i).getType().isEqual(types.get(i));
-					
-					if (match)
-						filtered.add(f0);
-				}
-			}
-			
+			List<Function> filtered = this.filterFromFuncs(prefixMatchers, types);
 			if (filtered.size() == 1) return filtered.get(0);
 		}
 		
@@ -2505,7 +2570,7 @@ public class ContextChecker {
 				
 				/* Provisos of call must be empty in case of predicate. */
 				if (!proviso.isEmpty()) 
-					throw new CTEX_EXC(c.getCallee().getSource(), Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path);
+					throw new CTEX_EXC(c.getCallee(), Const.PROVISO_ARE_PROVIDED_BY_PREDICATE, anonTarget.path);
 				
 				/* Proviso types are provided through lambda */
 				proviso = f0.proviso;
@@ -2524,7 +2589,7 @@ public class ContextChecker {
 		
 		/* Neither regular function or predicate was found, undefined */
 		if (f == null && anonTarget == null) 
-			throw new CTEX_EXC(c.getCallee().getSource(), Const.UNDEFINED_FUNCTION_OR_PREDICATE, c.getPath().build());
+			throw new CTEX_EXC(c.getCallee(), Const.UNDEFINED_FUNCTION_OR_PREDICATE, c.getPath().build());
 		
 		/* Write back anon target and provisos */
 		c.setProviso(proviso);
@@ -2556,6 +2621,25 @@ public class ContextChecker {
 			s.check(this);
 		}
 		if (pushScope) this.scopes.pop();
+	}
+	
+	/**
+	 * Returns all functions from parameter funcs that have the same parameter number
+	 * as the size of the types parameter, and all parameter's types match the
+	 * one-to-one indexed type in types.
+	 */
+	private List<Function> filterFromFuncs(List<Function> funcs, List<TYPE> types) {
+		return funcs.stream().filter(f0 -> {
+			boolean match = true;
+			
+			if (f0.parameters.size() == types.size()) {
+				for (int i = 0; i < types.size(); i++) 
+					if (types.get(i) != null) 
+						match &= f0.parameters.get(i).getType().isEqual(types.get(i));
+				return match;
+			}
+			else return false;
+		}).collect(Collectors.toList());
 	}
 	
 	/**

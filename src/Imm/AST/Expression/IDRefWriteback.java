@@ -80,16 +80,23 @@ public class IDRefWriteback extends Expression {
 
 	public Expression clone() {
 		IDRefWriteback idwb = new IDRefWriteback(this.writeback, this.shadowRef.clone(), this.getSource().clone());
-		idwb.setType(this.getType().clone());
-		if (this.idRef != null) idwb.idRef = (IDRef) idwb.getShadowRef();
+		
+		if (this.getType() != null)
+			idwb.setType(this.getType().clone());
+		
+		if (this.idRef != null) 
+			idwb.idRef = (IDRef) idwb.getShadowRef();
+		
 		idwb.copyDirectivesFrom(this);
 		return idwb;
 	}
 
 	public String codePrint() {
 		String s = this.shadowRef.codePrint();
+		
 		if (this.writeback == WRITEBACK.INCR) s += "++";
 		else s += "--";
+		
 		return s;
 	}
 	

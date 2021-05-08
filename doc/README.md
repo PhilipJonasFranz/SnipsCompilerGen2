@@ -36,6 +36,8 @@
    - [Predicates and Inline Functions](#predicates-and-inline-functions)
    - [Variable Shadowing](#variable-shadowing)
    - [Dont care arrays](#dont-care-arrays)
+   - [Operator Overloading](#operator-overloading)
+
 ## Type System
 
 The type-system is a big part of the foundation of the language. While being strict in some areas, the type system still leaves space for more free usage of types.
@@ -107,7 +109,6 @@ Now, with the defined operators, we can inductiveley define expressions. For exa
 - `*(p + 4) % 5`
 - `(int) ((b)? true : eval(a, c))`
 - `Data::(5, true, 'c');`
-
 
 ## Statements
 
@@ -638,6 +639,7 @@ Currently available AST-Optimizer directives are:
  | unsafe                 | -                              | Attatch to function to exclude from optimizer, indicates it is performing unsafe operations.|
  | strategy               | &lt;always, on_improvement&gt; | Attatch to function to overwrite default optimization strategy for function scope.          |
  | predicate              | -                              | If set to a function, it is considered non-state changing. Allows for further optimizations. A state is considered as the values of the Stack, Global Variables and Heap. Ideally, the function should only depend on the given parameters. |
+ | operator               | &lt;symbol&gt;                 | If set to a function, the function is used as operator for the specified symbol. Everytime when this operator is used with the function parameters as operands, a call to this function will be made instead. |
 
 ### Header Files
 
@@ -1194,3 +1196,47 @@ It is possible to create arrays and disable the type-checking of the array eleme
 ```
 
 The only limitation is that the combined data-word size of the array elements have to be equal to the specified array size.
+
+### Operator Overloading
+
+Operators can be overloaded using the `#operator [Symbol]` directive. Let's look at an example:
+
+```c
+  #operator +
+  static int add(int a, int b) {
+    return a + b + 5;
+  }
+  
+  int main(int x) {
+    return x + 5;
+  }
+```
+
+We specified that the operator `+` should be overloaded for the operand types `INT, INT` by the function `add`. In the function main, we use this operator with the specified types. So, instead of adding the numbers, behind the scenes the AST is transformed to:
+
+```c
+  ...
+  
+  int main(int x) {
+    return add(x, 5);
+  }
+```
+
+Overloaded operators inherit the precedence and associativity from the original operator. Operators can be overloaded multiple times, the only restriction is that every function signature that overloads a single symbol has to differ from one another, so the correct function can be uniquely identified. Two functions can be differentiated if their arguments types are not equal or if they do not have the same amount of arguments.
+
+It is also worth noting that unbound expressions are possible via operator overloading:
+
+```c
+  #include <linked_list.hn>
+  
+  int main(int x) {
+    LinkedList<int>* list = LinkedList::create<int>(0);
+    list << x;
+    ...
+  }
+```
+
+The `<<` operator is overloaded to add elements to the list. In this scenario, an expression can be written without having a data target. Since the expression is transformed to a function call, this is not an issue. But keep in mind that if the operator that overloads `<<` is not found, the translated code potentially has an unbound expression casted.
+
+Note that functions that have operator directives still can be called explicitly like normal functions.
+

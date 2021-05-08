@@ -68,6 +68,9 @@ public class TestDriver {
 	/** Print the compiler immediate representations */
 	public boolean displayCompilerImmediateRepresentations = false;
 	
+	/** If true, the metrics-inf.xml file will be updated. */
+	public boolean updateNodeMetrics = false;
+	
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
@@ -157,8 +160,10 @@ public class TestDriver {
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
-			new Message("Created new node metrics config.", LogPoint.Type.INFO);
-			Util.flushAsNNodeMetrics();
+			if (paths.size() > 1 && updateNodeMetrics) {
+				new Message("Created new node metrics config.", LogPoint.Type.INFO);
+				Util.flushAsNNodeMetrics();
+			}
 			
 			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}

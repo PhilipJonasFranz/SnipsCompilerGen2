@@ -219,7 +219,10 @@ public class Function extends CompoundStatement {
 			}
 		}
 		
-		CompilerDriver.outs.println(" " + this.toString().split("@") [1]);
+		if (!this.activeAnnotations.isEmpty()) 
+			CompilerDriver.outs.print(" " + this.activeAnnotations.toString());
+		
+		CompilerDriver.outs.println();
 		
 		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
@@ -290,7 +293,7 @@ public class Function extends CompoundStatement {
 	 */
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (context.size() != this.provisoTypes.size()) 
-			throw new CTEX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
+			throw new CTEX_EXC(this, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
 		
 		ProvisoUtil.mapNToN(this.provisoTypes, context);
 

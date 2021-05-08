@@ -1,0 +1,92 @@
+#define dim 3
+#define T int
+
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility for vectors and various vector operations.
+ */
+namespace Vector {
+
+	/*
+	 * Calculates the scalar product of the two given vectors.
+	 * Returns the result. No allocations are made.
+	 */
+	#operator *
+	#strategy always
+	static T op_scalar_prod_dim(T [dim] v0, T [dim] v1) {
+		T sum = 0;
+		
+		#unroll dim
+		for (int i = 0; i < dim; i++) 
+			sum += v0 [i] * v1 [i];
+		
+		return sum;
+	}
+	
+	/*
+	 * Scales the given vector by the given scalar and
+	 * returns the resulting vector. No allocations are made.
+	 */
+	#operator *
+	#strategy always
+	static T [dim] op_scale_dim(T [dim] v0, T scalar) {
+		T [dim] r = ...;
+		
+		#unroll dim
+		for (int i = 0; i < dim; i++) 
+			r [i] = v0 [i]  * scalar;
+		
+		return r;
+	}
+	
+	/*
+	 * Adds the two given vectors and returns the resulting
+	 * vector. No allocations are made.
+	 */
+	#operator +
+	#strategy always
+	static T [dim] op_add_dim(T [dim] v0, T [dim] v1) {
+		T [dim] r = ...;
+		
+		#unroll dim
+		for (int i = 0; i < dim; i++) {
+			r [i] = v0 [i] + v1 [i];
+		}
+		
+		return r;
+	}
+	
+	/*
+	 * Subtracts the two given vectors and returns the resulting
+	 * vector. No allocations are made.
+	 */
+	#operator -
+	#strategy always
+	static T [dim] op_sub_dim(T [dim] v0, T [dim] v1) {
+		T [dim] r = ...;
+		
+		#unroll dim
+		for (int i = 0; i < dim; i++) 
+			r [i] = v0 [i] - v1 [i];
+		
+		return r;
+	}
+	
+	/*
+	 * Negates the given vector and returns the resulting
+	 * vector. No allocations are made.
+	 */
+	#operator -
+	#strategy always
+	static T [dim] op_neg_dim(T [dim] v0) {
+		T [dim] r = ...;
+		
+		#unroll dim
+		for (int i = 0; i < dim; i++) 
+			r [i] = -v0 [i];
+		
+		return r;
+	}
+	
+} 

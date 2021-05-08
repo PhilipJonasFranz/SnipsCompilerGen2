@@ -2,11 +2,11 @@ package Imm.AST.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -76,7 +76,29 @@ public class InlineFunction extends Expression {
 	}
 
 	public String codePrint() {
-		throw new SNIPS_EXC("Not implemented!");
+		String s = "";
+		
+		s += "(";
+		
+		s += this.inlineFunction.parameters.stream()
+				.map(x -> x.getType().codeString() + " " + x.path.build())
+				.collect(Collectors.joining(", "));
+		
+		s += " -> ";
+		
+		s += this.inlineFunction.getReturnType().codeString();
+		
+		s += ") : { ";
+		
+		s += this.inlineFunction.body.stream()
+			.map(x -> x.codePrint(0))
+				.map(x -> x.stream()
+				.collect(Collectors.joining(" ")))
+			.collect(Collectors.joining(" "));
+		
+		s += " }";
+		
+		return s;
 	}
 
 } 

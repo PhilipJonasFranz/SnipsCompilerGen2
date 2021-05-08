@@ -369,7 +369,7 @@ public class CompilerDriver {
 					
 					String approx = "Pipeline Stage: " + currentStage.name;
 					
-					if (stackTrace != null) 
+					if (stackTrace != null && !stackTrace.isEmpty()) 
 						approx += ", at location estimate: " + stackTrace.peek().getSource().getSourceMarker();
 					else
 						approx = approx.substring(0, approx.length() - 2);
@@ -686,6 +686,8 @@ public class CompilerDriver {
 			ASTOptimizer opt0 = new ASTOptimizer();
 			AST = opt0.optProgram((Program) AST, (Program) AST0);
 			opt_progress.finish();
+			
+			if (imm) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
 			
 			double nodes_after = AST.visit(x -> { return true; }).size();
 			

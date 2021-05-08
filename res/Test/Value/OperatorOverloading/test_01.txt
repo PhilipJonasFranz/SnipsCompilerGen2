@@ -1,0 +1,130 @@
+SOURCE
+#include <linked_list.sn>
+#include <stack.sn>
+
+#operator >>
+LinkedList<T>* op_remove<T>(LinkedList<T>* list, int index) {
+	list->remove(index);
+	return list;
+}
+
+#operator <<
+T op_get<T>(int index, LinkedList<T>* list) {
+	return list->get(index);
+}
+
+#operator --
+T op_get<T>(StackedList<T>* stack) {
+	return stack->pop();
+}
+
+int main(int a) {
+	LinkedList<int>* list = LinkedList::create(0);
+	StackedList<int>* stack = StackedList::create<int>(0);
+	
+	list << 12 << 15 << 10 << 25;
+	
+	list >> a >> a;
+	
+	stack << 3 << 9;
+	
+	list << ((int x -> int) : { return x + 5; });
+	
+	return (a << list) + stack--;
+}
+TESTCASES
+0 24
+1 39
+OUTPUT
+.version 0
+
+.include maybe resv.s
+.include maybe init.s
+.include maybe free.s
+.include stack.s
+.include linked_list.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global op_remove_730158206_P_1
+op_remove_730158206_P_1:                     /* Function: op_remove, Provisos: INT */
+    push { r3, lr }
+    mov r3, r0
+    bl List.LinkedList.remove_P_1            /* Call List.LinkedList.remove */
+    mov r0, r3                               /* Evaluate Expression */
+    ldmfd sp!, {r3, pc}
+
+.global op_get_246833433_P_1
+op_get_246833433_P_1:                        /* Function: op_get, Provisos: INT */
+    push { r4, lr }
+    mov r4, r1
+    mov r1, r0
+    mov r0, r4
+    bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
+    ldmfd sp!, {r4, pc}
+
+.global op_get_743855972_P_1
+op_get_743855972_P_1:                        /* Function: op_get, Provisos: INT */
+    b Stack.StackedList.pop_P_1              /* Call Stack.StackedList.pop */
+
+.global ANON77
+ANON77:                                      /* Function: ANON77 */
+    add r0, r0, #5
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
+    mov r4, r0
+    mov r0, #0                               /* Evaluate Expression */
+    bl Stack.StackedList.create_P_1          /* Call Stack.StackedList.create */
+    mov r5, r0
+    mov r0, #25                              /* Load parameters */
+    push { r0 }
+    mov r0, #10                              /* Load parameters */
+    push { r0 }
+    mov r0, #15                              /* Load parameters */
+    push { r0 }
+    mov r1, #12
+    mov r0, r4
+    bl List.op_add_1650652839_P_1            /* Call List.op_add */
+    pop { r1 }
+    bl List.op_add_1650652839_P_1            /* Call List.op_add */
+    pop { r1 }
+    bl List.op_add_1650652839_P_1            /* Call List.op_add */
+    pop { r1 }
+    bl List.op_add_1650652839_P_1            /* Call List.op_add */
+    push { r3 }
+    mov r1, r3
+    mov r0, r4
+    bl op_remove_730158206_P_1               /* Call op_remove */
+    pop { r1 }
+    bl op_remove_730158206_P_1               /* Call op_remove */
+    mov r0, #9                               /* Load parameters */
+    push { r0 }
+    mov r1, #3
+    mov r0, r5
+    bl Stack.op_add_1736088713_P_1           /* Call Stack.op_add */
+    pop { r1 }
+    bl Stack.op_add_1736088713_P_1           /* Call Stack.op_add */
+    ldr r1, .P2088630673_ANON77              /* Load parameters */
+    mov r0, r4
+    bl List.op_apply_1632481998_P_1          /* Call List.op_apply */
+    mov r1, r4
+    mov r0, r3
+    bl op_get_246833433_P_1                  /* Call op_get */
+    push { r0 }
+    mov r0, r5                               /* Load parameters */
+    bl op_get_743855972_P_1                  /* Call op_get */
+    pop { r1 }
+    add r0, r1, r0
+    pop { pc }
+.P2088630673_ANON77: .word ANON77

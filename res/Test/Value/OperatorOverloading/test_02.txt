@@ -1,0 +1,116 @@
+SOURCE
+#include <vec_ops.sn> <dim = 2>
+#include <mat_ops.sn> <dimX = 2, dimY = 2>
+
+int main(int a, int b) {
+	int [2] v0 = [3, 6];
+	int [2] v1 = [8, 2];
+	
+	int [2] r = v0 - -v1;
+
+	int [2] [2] m0 = {{1, 2}, {3, 4}};
+	int [2] [2] m1 = {{5, 6}, {7, 8}};
+	
+	int [2] [2] mat = m0 * m1;
+
+	return r [a] + v0 * v1 * 2 + mat [a] [b];
+}
+TESTCASES
+0 0 102
+0 1 105
+1 0 123
+1 1 130
+OUTPUT
+.version 0
+
+.include maybe resv.s
+.include mat_ops.s
+.include vec_ops.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r4, r1
+    mov r3, r0
+    mov r1, #3
+    mov r0, #6                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    mov r1, #8
+    mov r0, #2                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-4]                        /* Evaluate Expression */
+    ldr r1, [fp, #-8]
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-12]                       /* Load parameters */
+    ldr r1, [fp, #-16]
+    stmfd sp!, {r0, r1}
+    bl Vector.op_neg_2_495802639             /* Call Vector.op_neg_2 */
+    bl Vector.op_sub_2_1801347739            /* Call Vector.op_sub_2 */
+    mov r1, #3
+    mov r0, #4                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    mov r1, #1
+    mov r0, #2
+    stmfd sp!, {r0, r1}
+    mov r1, #7
+    mov r0, #8                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    mov r1, #5
+    mov r0, #6
+    stmfd sp!, {r0, r1}
+    sub r0, fp, #28
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #-40]
+    push { r0 }
+    sub r0, fp, #44
+    ldmfa r0, {r0-r2}
+    stmfd sp!, {r0-r2}
+    ldr r0, [fp, #-56]
+    push { r0 }
+    bl Matrix.op_mult_2_2_30765600           /* Call Matrix.op_mult_2_2 */
+    lsl r2, r3, #2
+    sub r0, fp, #24
+    ldr r0, [r0, r2]
+    push { r0 }
+    ldr r0, [fp, #-4]                        /* Load parameters */
+    ldr r1, [fp, #-8]
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-12]
+    ldr r1, [fp, #-16]
+    stmfd sp!, {r0, r1}
+    bl Vector.op_scalar_prod_2_1388787447    /* Call Vector.op_scalar_prod_2 */
+    pop { r1 }
+    lsl r2, r0, #1
+    add r0, r1, r2
+    mov r2, #0                               /* Calculate offset of sub structure */
+    mov r1, r0
+    lsl r0, r3, #3
+    add r2, r2, r0
+    lsl r0, r4, #2
+    add r2, r2, r0
+    sub r0, fp, #72
+    ldr r2, [r0, r2]
+    add r0, r1, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

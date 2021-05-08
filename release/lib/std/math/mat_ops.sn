@@ -1,0 +1,84 @@
+#define dimX 3
+#define dimY 3
+#define T int
+
+/*
+ * [BASE-PACKAGE]
+ *
+ * This package contains utility for matricies and various matrix operations.
+ */
+namespace Matrix {
+
+	/*
+	 * Multiplicate the given matricies. The first matrix has to have dimX
+	 * columns, and the second matrix has to have dimY columns. The resulting
+	 * matrix will have the dimensions dimX x dimY. Does not check if the matrix
+	 * multiplication is defined on the matrices. 
+	 * Returns a pointer to the resulting matrix.
+	 */
+	#strategy always
+	shared int* mult(int* m, int* n) {
+		int* r = (int*) resv(dimX * dimY);
+		
+		int sum = 0;
+		
+		/* For each row of the result */
+		#unroll dimX
+		for (int i = 0; i < dimX; i++) {
+			/* For each column of the result */
+			#unroll dimY
+			for (int a = 0; a < dimY; a++) {
+				sum = 0;
+				
+				#unroll dimX
+				for (int k = 0; k < dimX; k++) 
+					sum += *(m + (i * dimX) + k) * *(n + (k * dimY) + a);
+				
+				*(r + (i * dimY) + a) = sum;
+			}
+		}
+		
+		return r;
+	}
+	
+	#operator *
+	#strategy always
+	static T [dimX] [dimY] op_mult_dimX_dimY(T [dimX] [dimY] mat0, T [dimX] [dimY] mat1) {
+		T [dimX] [dimY] result = ...;
+		
+		int sum = 0;
+		
+		#unroll dimX
+		for (int i = 0; i < dimX; i++) {
+			#unroll dimY
+			for (int a = 0; a < dimY; a++) {
+				sum = 0;
+				
+				#unroll dimX
+				for (int k = 0; k < dimX; k++) 
+					sum += mat0 [i] [k] * mat1 [k] [a];
+				
+				result [i] [a] = sum;
+			}
+		}
+		
+		return result;
+	}
+	
+	#operator +
+	#strategy always
+	static T [dimX] [dimY] op_add_dimX_dimY(T [dimX] [dimY] mat0, T [dimX] [dimY] mat1) {
+		T [dimX] [dimY] result = ...;
+		
+		#unroll dimX
+		for (int i = 0; i < dimX; i++) {
+			#unroll dimY
+			for (int a = 0; a < dimY; a++) {
+				result [i] [a] = mat0 [i] [a] + mat1 [i] [a];
+			}
+		}
+		
+		return result;
+	}
+
+} 

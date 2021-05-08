@@ -46,11 +46,11 @@ public class AsNCompare extends AsNNFoldExpression {
 			
 			TYPE t = ((Atom) c.operands.get(1)).getType();
 			
-			if (Integer.parseInt(t.sourceCodeRepresentation()) < 255) {
-				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(Integer.parseInt(t.sourceCodeRepresentation()))));
+			if (Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()) < 255) {
+				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()))));
 			}
 			else {
-				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.sourceCodeRepresentation()), 1);
+				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()), 1);
 				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
 		}
