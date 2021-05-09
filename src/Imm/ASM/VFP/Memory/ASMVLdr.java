@@ -1,20 +1,14 @@
 package Imm.ASM.VFP.Memory;
 
-import Imm.ASM.Processing.ASMBinaryData;
-import Imm.ASM.Util.COND;
+import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 import Snips.CompilerDriver;
 
-public class ASMVLdr extends ASMBinaryData {
+public class ASMVLdr extends ASMLdr {
 
 	public ASMVLdr(RegOp target, Operand op1) {
 		super(target, null, op1);
-	}
-	
-	public ASMVLdr(RegOp target, Operand op1, COND cond) {
-		/* Op0 is null by default */
-		super(target, null, op1, cond);
 	}
 	
 	public String build() {

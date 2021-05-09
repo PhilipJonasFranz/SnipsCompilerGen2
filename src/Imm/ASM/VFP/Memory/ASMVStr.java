@@ -1,10 +1,10 @@
 package Imm.ASM.VFP.Memory;
 
-import Imm.ASM.Memory.ASMMemOp;
+import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
 
-public class ASMVStr extends ASMMemOp {
+public class ASMVStr extends ASMStr {
 
 			/* ---< CONSTRUCTORS >--- */
 	public ASMVStr(RegOp target, Operand op0, Operand op1) {
@@ -21,10 +21,6 @@ public class ASMVStr extends ASMMemOp {
 	 */
 	public String build() {
 		return super.build("vstr");
-	}
-	
-	public int getRequiredCPUCycles() {
-		return 2; // +N +N
 	}
 	
 } 

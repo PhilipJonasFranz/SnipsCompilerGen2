@@ -1,18 +1,12 @@
 package Imm.ASM.VFP.Memory;
 
 import Imm.ASM.Memory.ASMLdrLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 
 public class ASMVLdrLabel extends ASMLdrLabel {
-
-	public String prefix = "";
-	
-	public Declaration dec;
-	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/** Example Usage: ldr r0, a_label */
@@ -39,15 +33,6 @@ public class ASMVLdrLabel extends ASMLdrLabel {
 		RegOp r = new RegOp(this.target.reg);
 		LabelOp l = new LabelOp(((LabelOp) this.op0).label);
 		return new ASMVLdrLabel(r, l, this.dec);
-	}
-	
-	public String getName() {
-		return this.prefix + target.toString();
-	}
-	
-	public int getRequiredCPUCycles() {
-		if (this.target.reg == REG.PC) return 5; // +N +I +N + 2S
-		else return 3; // +N +I +S
 	}
 	
 } 
