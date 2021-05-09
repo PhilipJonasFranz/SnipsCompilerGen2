@@ -9,9 +9,9 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AsN.AsNBody;
@@ -50,7 +50,7 @@ public class AsNCompare extends AsNNFoldExpression {
 				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()))));
 			}
 			else {
-				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()), 1);
+				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()), 1, false);
 				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
 		}
@@ -78,6 +78,10 @@ public class AsNCompare extends AsNNFoldExpression {
 
 	public ASMInstruction buildInjector() {
 		throw new SNIPS_EXC("No injector available for 'Cmp'!");
+	}
+	
+	public ASMInstruction buildVInjector() {
+		throw new SNIPS_EXC("No VFP injector available for 'Cmp'!");
 	}
 	
 } 

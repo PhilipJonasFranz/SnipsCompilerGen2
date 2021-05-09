@@ -1,8 +1,8 @@
 package Imm.ASM.Memory;
 
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 

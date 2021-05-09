@@ -13,8 +13,8 @@ import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
@@ -86,7 +86,6 @@ import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.BOOL;
-import Imm.TYPE.PRIMITIVES.FLOAT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
 import Imm.TYPE.PRIMITIVES.PRIMITIVE;
@@ -259,6 +258,8 @@ public class ContextChecker {
 		
 		/* Flush warn messages */
 		this.messages.stream().forEach(Message::flush);
+		
+		AST.print(0, true);
 		
 		CompilerDriver.stackTrace = null;
 		return null;
@@ -1447,21 +1448,10 @@ public class ContextChecker {
 			if (e.getType().wordsize() > 1) 
 				throw new CTEX_EXC(e, Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree());
 		
-		if (b.operands.stream().filter(x -> x.getType().isFloat()).count() != b.operands.size()) {
-			for (int i = 0; i < b.operands.size(); i++) {
-				Expression op = b.operands.get(i);
-				if (op.getType().isFloat()) {
-					op = new TypeCast(op, new FLOAT(), op.getSource());
-					op.check(this);
-					b.operands.set(i, op);
-				}
-			}
-			
-			b.setType(new FLOAT());
-		}
-		else 
-			b.setType(b.operands.get(0).getType().clone());
+		int fOps = (int) b.operands.stream().filter(x -> x.getType().isFloat()).count();
+		if (fOps > 0 && fOps != b.operands.size()) throw new CTEX_EXC(b, "E");
 		
+		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}
 	

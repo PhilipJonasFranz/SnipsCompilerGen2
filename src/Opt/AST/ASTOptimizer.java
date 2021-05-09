@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 import Exc.OPT0_EXC;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.REG;
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;

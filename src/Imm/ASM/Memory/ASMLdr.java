@@ -1,8 +1,8 @@
 package Imm.ASM.Memory;
 
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 
 public class ASMLdr extends ASMMemOp {
 

@@ -27,12 +27,12 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
@@ -557,7 +557,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (x instanceof ASMMov) {
 				REG reg = ((ASMMov) x).target.reg;
 				
-				boolean included = RegOp.toInt(reg) > 2 && RegOp.toInt(reg) < 10;
+				boolean included = reg.toInt() > 2 && reg.toInt() < 10;
 				
 				if (included && used.stream().filter(y -> y == reg).count() == 0) used.add(reg);
 			}

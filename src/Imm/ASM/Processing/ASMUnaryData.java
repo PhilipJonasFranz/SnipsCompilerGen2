@@ -2,9 +2,9 @@ package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 
 public abstract class ASMUnaryData extends ASMInstruction {
 	

@@ -4,8 +4,8 @@ import java.util.List;
 
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public class ASMMemBlock extends ASMInstruction {
@@ -44,7 +44,7 @@ public class ASMMemBlock extends ASMInstruction {
 		if (operands.size() == 1) return true;
 		else {
 			for (int i = 1; i < operands.size(); i++) {
-				if (RegOp.toInt(operands.get(i - 1).reg) > RegOp.toInt(operands.get(i).reg)) 
+				if (operands.get(i - 1).reg.toInt() > operands.get(i).reg.toInt()) 
 					return false;
 			}
 			
@@ -65,30 +65,30 @@ public class ASMMemBlock extends ASMInstruction {
 		int streak = -1;
 		for (int i = 0; i < this.registerList.size(); i++) {
 			if (streak == -1) {
-				streak = RegOp.toInt(this.registerList.get(i).reg);
+				streak = this.registerList.get(i).reg.toInt();
 			}
 			else {
-				if (RegOp.toInt(this.registerList.get(i).reg) != RegOp.toInt(this.registerList.get(i - 1).reg) + 1) {
+				if (this.registerList.get(i).reg.toInt() != this.registerList.get(i - 1).reg.toInt() + 1) {
 					/* End Streak */
-					if (RegOp.toInt(this.registerList.get(i - 1).reg) - streak < 2) {
-						op += RegOp.toReg(streak) + ", ";
-						if (RegOp.toInt(this.registerList.get(i - 1).reg) != streak) op += this.registerList.get(i - 1).reg.toString() + ", ";
+					if (this.registerList.get(i - 1).reg.toInt() - streak < 2) {
+						op += REG.toReg(streak) + ", ";
+						if (this.registerList.get(i - 1).reg.toInt() != streak) op += this.registerList.get(i - 1).reg.toString() + ", ";
 					}
 					else {
-						op += RegOp.toReg(streak) + "-";
-						if (RegOp.toInt(this.registerList.get(i - 1).reg) != streak) op += this.registerList.get(i - 1).reg.toString() + ", ";
+						op += REG.toReg(streak) + "-";
+						if (this.registerList.get(i - 1).reg.toInt() != streak) op += this.registerList.get(i - 1).reg.toString() + ", ";
 					}
 					
-					streak = RegOp.toInt(this.registerList.get(i).reg);
+					streak = this.registerList.get(i).reg.toInt();
 				}
 				else if (i == this.registerList.size() - 1) {
 					/* End Streak */
-					if (RegOp.toInt(this.registerList.get(i).reg) - streak < 2) {
-						op += RegOp.toReg(streak) + ", ";
+					if (this.registerList.get(i).reg.toInt() - streak < 2) {
+						op += REG.toReg(streak) + ", ";
 						op += this.registerList.get(i).reg.toString() + ", ";
 					}
 					else {
-						op += RegOp.toReg(streak) + "-";
+						op += REG.toReg(streak) + "-";
 						op += this.registerList.get(i).reg.toString() + ", ";
 					}
 					
@@ -99,7 +99,7 @@ public class ASMMemBlock extends ASMInstruction {
 		}
 		
 		if (streak != -1) {
-			op += RegOp.toReg(streak) + ", ";
+			op += REG.toReg(streak) + ", ";
 		}
 		
 		op = op.trim();

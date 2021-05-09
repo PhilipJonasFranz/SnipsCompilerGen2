@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 import Exc.CGEN_EXC;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Res.Const;

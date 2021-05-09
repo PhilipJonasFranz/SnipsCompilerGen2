@@ -8,8 +8,10 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -98,6 +100,8 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 	}
 	
 	public abstract ASMInstruction buildInjector();
+	
+	public abstract ASMInstruction buildVInjector();
 	
 	
 		/* --- OPERAND LOADING --- */
@@ -189,11 +193,14 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 	
 	protected void evalExpression(AsNNFoldExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
 		this.clearReg(r, st, 0, 1, 2);
+
+		boolean isVFP = b.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
 		
-		generateLoaderCode(m, b, b.operands.get(0), b.operands.get(1), r, map, st, solver);
+		generateLoaderCode(m, b, b.operands.get(0), b.operands.get(1), r, map, st, solver, isVFP);
 		
 		/* Inject calculation into loader code */
-		m.instructions.add(m.buildInjector());
+		if (!isVFP) m.instructions.add(m.buildInjector());
+		else m.instructions.add(m.buildVInjector());
 		
 		if (b.operands.size() > 2) {
 			for (int i = 2; i < b.operands.size(); i++) {
@@ -222,7 +229,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 				
 				r.free(2);
 				
-				loadOperand(b.operands.get(i), 2, r, map, st);
+				loadOperand(b.operands.get(i), 2, r, map, st, isVFP);
 				
 				if (requireClear) {
 					if (free != -1) {
@@ -237,39 +244,50 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 				}
 				
 				/* Inject calculation into loader code */
-				m.instructions.add(m.buildInjector());
+				if (!isVFP) m.instructions.add(m.buildInjector());
+				else m.instructions.add(m.buildVInjector());
 			}
 		}
+		
+		/* Move result from VFP to regular registers */
+		if (isVFP) m.instructions.add(new ASMVMov(new RegOp(REG.R0), new VRegOp(REG.S0)));
 		
 		/* Clean up Reg Set */
 		r.free(0, 1, 2);
 	}
 	
-	protected void generateLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
+	protected void generateLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, boolean isVFP) throws CGEN_EXC {
 		/* Partial Atomic Loading Left */
 		if (e0 instanceof Atom) {
-			this.loadOperand(e1, 2, r, map, st);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().toPrimitive().sourceCodeRepresentation()), 1);
+			this.loadOperand(e1, 2, r, map, st, isVFP);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().toPrimitive().sourceCodeRepresentation()), 1, isVFP);
 		}
 		/* Partial Atomic Loading Right */
 		else if (e1 instanceof Atom) {
-			this.loadOperand(e0, 1, r, map, st);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2);
+			this.loadOperand(e0, 1, r, map, st, isVFP);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2, isVFP);
 		}
 		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2);
 	}
 	
-	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
 		/* Operand is ID Reference and can be loaded directley into the target register, 
 		 * 		no need for intermidiate result in R0 */
 		if (e instanceof IDRef) {
 			this.instructions.addAll(AsNIDRef.cast((IDRef) e, r, map, st, target).getInstructions());
+			if (isVFP) this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.R0)));
 		}
 		else {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());
 			if (target != 0) {
-				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(0)));
-				r.copy(0, target);
+				if (isVFP) {
+					this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.S0)));
+					r.copyToVFP(0, target);
+				}
+				else {
+					this.instructions.add(new ASMMov(new RegOp(target), new RegOp(REG.R0)));
+					r.copy(0, target);
+				}
 			}
 		}
 	}

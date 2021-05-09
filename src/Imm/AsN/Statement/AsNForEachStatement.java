@@ -24,13 +24,13 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Statement.ForEachStatement;
@@ -209,7 +209,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		 */
 		boolean isDeref = a.shadowRef instanceof Deref;
 		if (isDeref) {
-			AsNBody.literalManager.loadValue(f, a.iterator.getType().wordsize(), 0);
+			AsNBody.literalManager.loadValue(f, a.iterator.getType().wordsize(), 0, false);
 			incrOp = new RegOp(REG.R0);
 		}
 		

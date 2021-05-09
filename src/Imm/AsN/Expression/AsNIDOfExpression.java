@@ -4,7 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.REG;
 import Imm.AST.Expression.IDOfExpression;
 import Imm.TYPE.COMPOSIT.STRUCT;
 

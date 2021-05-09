@@ -1,18 +1,9 @@
 package Imm.ASM.Util.Operands;
 
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Shift;
 
 public class RegOp extends Operand {
-
-	public enum REG {
-		R0, R1, R2, R3, 
-		R4, R5, R6, R7, 
-		R8, R9, R10, FP, 
-		R12, SP, LR, PC,
-		
-		/* Special Reg, used to signal unbound data on stack. See AsNAddressOf. */
-		RX;
-	}
 	
 	public REG reg;
 	
@@ -23,37 +14,7 @@ public class RegOp extends Operand {
 	}
 	
 	public RegOp(int reg) {
-		this.reg = toReg(reg);
-	}
-	
-	public static REG toReg(int reg0) {
-		REG reg;
-		if (reg0 == 11) reg = REG.FP;
-		else if (reg0 == 13) reg = REG.SP;
-		else if (reg0 == 14) reg = REG.LR;
-		else if (reg0 == 15) reg = REG.PC;
-		else reg = REG.valueOf("R" + reg0);
-		return reg;
-	}
-	
-	public static int toInt(REG reg) {
-		if (reg == REG.R0) return 0;
-		if (reg == REG.R1) return 1;
-		if (reg == REG.R2) return 2;
-		if (reg == REG.R3) return 3;
-		if (reg == REG.R4) return 4;
-		if (reg == REG.R5) return 5;
-		if (reg == REG.R6) return 6;
-		if (reg == REG.R7) return 7;
-		if (reg == REG.R8) return 8;
-		if (reg == REG.R9) return 9;
-		if (reg == REG.R10) return 10;
-		if (reg == REG.FP) return 11;
-		if (reg == REG.R12) return 12;
-		if (reg == REG.SP) return 13;
-		if (reg == REG.LR) return 14;
-		if (reg == REG.PC) return 15;
-		return -1;
+		this.reg = REG.toReg(reg);
 	}
 
 	public String toString() {
@@ -78,7 +39,7 @@ public class RegOp extends Operand {
 						return null;
 					}
 					
-					return RegOp.toReg(regNum);
+					return REG.toReg(regNum);
 				} catch (NumberFormatException e) {
 					return null;
 				}

@@ -6,7 +6,7 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.REG;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.INT;

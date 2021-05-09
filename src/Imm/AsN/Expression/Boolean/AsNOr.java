@@ -10,9 +10,9 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AsN.Expression.AsNExpression;
@@ -85,6 +85,10 @@ public class AsNOr extends AsNNFoldExpression {
 
 	public ASMInstruction buildInjector() {
 		throw new SNIPS_EXC("No injector available for 'Or'!");
+	}
+	
+	public ASMInstruction buildVInjector() {
+		throw new SNIPS_EXC("No VFP injector available for 'Or'!");
 	}
 
 } 

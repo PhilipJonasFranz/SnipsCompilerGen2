@@ -7,8 +7,8 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AsN.Expression.AsNExpression;
 

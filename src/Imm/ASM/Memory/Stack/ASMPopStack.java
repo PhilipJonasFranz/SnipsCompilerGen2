@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import Imm.ASM.ASMInstruction;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public class ASMPopStack extends ASMInstruction {

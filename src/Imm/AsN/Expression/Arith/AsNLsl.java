@@ -4,10 +4,11 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMLsl;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.Arith.Lsl;
 import Imm.AsN.Expression.AsNNFoldExpression;
 
@@ -26,6 +27,10 @@ public class AsNLsl extends AsNNFoldExpression {
 	
 	public ASMInstruction buildInjector() {
 		return new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2));
+	}
+	
+	public ASMInstruction buildVInjector() {
+		throw new SNIPS_EXC("No VFP injector available for 'BitLsl'!");
 	}
 	
 } 

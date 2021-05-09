@@ -7,7 +7,7 @@ public class RegSet {
 
 			/* ---< NESTED >--- */
 	/** Used to identify the state of a register */
-	private enum STATUS {
+	public static enum STATUS {
 		USED, FREE, RESERVED;
 	}
 	
@@ -57,12 +57,20 @@ public class RegSet {
 	/** The register array. */
 	private Reg [] regs = new Reg [16]; 
 	
+	private VRegSet vRegSet;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	/** Create a new RegSet object, initialize the regs, set regs 11-15 to reserved. */
 	public RegSet() {
 		for (int i = 0; i < regs.length; i++) regs [i] = new Reg();
 		for (int i = 10; i < regs.length; i++) regs [i].status = STATUS.RESERVED;
+		
+		this.vRegSet = new VRegSet();
+	}
+	
+	public VRegSet getVRegSet() {
+		return this.vRegSet;
 	}
 	
 	/** Returns the {@link num} reg. */
@@ -88,6 +96,16 @@ public class RegSet {
 	public void copy(int from, int to) {
 		this.regs [to].status = this.regs [from].status;
 		this.regs [to].declaration = this.regs [from].declaration;
+	}
+	
+	public void copyToVFP(int from, int to) {
+		this.getVRegSet().regs [to].status = this.regs [from].status;
+		this.getVRegSet().regs [to].declaration = this.regs [from].declaration;
+	}
+	
+	public void copyFromVFP(int from, int to) {
+		this.regs [to].status = this.getVRegSet().regs [from].status;
+		this.regs [to].declaration = this.getVRegSet().regs [from].declaration;
 	}
 	
 	/** 

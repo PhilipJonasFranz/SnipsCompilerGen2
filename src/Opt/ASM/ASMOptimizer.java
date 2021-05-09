@@ -39,6 +39,7 @@ import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Shift.SHIFT;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -47,7 +48,6 @@ import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
@@ -804,7 +804,7 @@ public class ASMOptimizer {
 				ins instanceof ASMLdr || ins instanceof ASMLdrStack) continue;
 			
 			for (int a = 0; a < 10; a++) {
-				REG reg = RegOp.toReg(a);
+				REG reg = REG.toReg(a);
 				if (ASMOptimizer.overwritesReg(ins, reg)) {
 					for (int z = i + 1; z < ins0.size(); z++) {
 						ASMInstruction ins1 = ins0.get(z);
@@ -817,7 +817,7 @@ public class ASMOptimizer {
 						 */
 						boolean skip = false;
 						for (int k = 0; k < 10; k++) {
-							REG reg0 = RegOp.toReg(k);
+							REG reg0 = REG.toReg(k);
 							if (ASMOptimizer.overwritesReg(ins1, reg0) && (k <= a || ASMOptimizer.readsReg(ins, reg0))) {
 								skip = true;
 							}
@@ -860,7 +860,7 @@ public class ASMOptimizer {
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
 				
-					if (RegOp.toInt(reg) > 9 || RegOp.toInt(mov.target.reg) > 9) continue;
+					if (reg.toInt() > 9 || mov.target.reg.toInt() > 9) continue;
 
 					boolean remove = true;
 					
@@ -974,13 +974,13 @@ public class ASMOptimizer {
 				ins instanceof ASMLdrStack || ins instanceof ASMStrStack) continue;
 			
 			for (int a = 0; a < 10; a++) {
-				REG reg = RegOp.toReg(a);
+				REG reg = REG.toReg(a);
 				if (ASMOptimizer.overwritesReg(ins, reg)) {
 					
 					List<REG> read = new ArrayList();
 					for (int k = 0; k < 10; k++)
-						if (ASMOptimizer.readsReg(ins, RegOp.toReg(k)))
-							read.add(RegOp.toReg(k));
+						if (ASMOptimizer.readsReg(ins, REG.toReg(k)))
+							read.add(REG.toReg(k));
 					
 					for (int k = i + 1; k < ins0.size(); k++) {
 						ASMInstruction ins1 = ins0.get(k);
@@ -1116,8 +1116,8 @@ public class ASMOptimizer {
 						 * is overwritten, we have to stop.
 						 */
 						for (int a = 0; a < 11; a++) {
-							REG reg = RegOp.toReg(a);
-							if (ASMOptimizer.readsReg(ins, RegOp.toReg(a)) && !regsReadByInitial.contains(reg)) {
+							REG reg = REG.toReg(a);
+							if (ASMOptimizer.readsReg(ins, REG.toReg(a)) && !regsReadByInitial.contains(reg)) {
 								regsReadByInitial.add(reg);
 							}
 						}
@@ -1378,7 +1378,7 @@ public class ASMOptimizer {
 						RegOp reg = push.operands.get(x);
 						
 						/* Only for regular registers */
-						if (RegOp.toInt(reg.reg) < 10) {
+						if (reg.reg.toInt() < 10) {
 							
 							/* Check if register was strictly not used */
 							boolean regInteraction = false;
@@ -1515,7 +1515,7 @@ public class ASMOptimizer {
 				
 				if (ins0.get(i - 2) instanceof ASMMov) {
 					ASMMov mov = (ASMMov) ins0.get(i - 2);
-					if (RegOp.toInt(mov.target.reg) < 3 && mov.op1 instanceof ImmOp) {
+					if (mov.target.reg.toInt() < 3 && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) op1 = (ImmOp) mov.op1;
 					}
@@ -1523,7 +1523,7 @@ public class ASMOptimizer {
 				
 				if (ins0.get(i - 1) instanceof ASMMov) {
 					ASMMov mov = (ASMMov) ins0.get(i - 1);
-					if (RegOp.toInt(mov.target.reg) < 3 && mov.op1 instanceof ImmOp) {
+					if (mov.target.reg.toInt() < 3 && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) {
 							op1 = (ImmOp) mov.op1;
@@ -1713,7 +1713,7 @@ public class ASMOptimizer {
 						if (probed.contains(reg)) continue;
 						else probed.add(reg);
 						
-						if (RegOp.toInt(reg) > 2 && RegOp.toInt(reg) < 10) {
+						if (reg.toInt() > 2 && reg.toInt() < 10) {
 							boolean used = false;
 							for (int a = k + 1; a < ins0.size(); a++) {
 								if (ins0.get(a) instanceof ASMLabel && ((ASMLabel) ins0.get(a)).isFunctionLabel) {
@@ -1773,7 +1773,7 @@ public class ASMOptimizer {
 			
 			if (reg == null) continue;
 			
-			if (RegOp.toInt(reg) < 3) {
+			if (reg.toInt() < 3) {
 				for (int a = i + 1; a < ins0.size(); a++) {
 					ASMInstruction ins = ins0.get(a);
 					
@@ -1788,7 +1788,7 @@ public class ASMOptimizer {
 					}
 				}
 			}
-			else if (RegOp.toInt(reg) < 10) {
+			else if (reg.toInt() < 10) {
 				for (int a = i + 1; a < ins0.size(); a++) {
 					ASMInstruction ins = ins0.get(a);
 					
@@ -1812,7 +1812,7 @@ public class ASMOptimizer {
 				ASMPushStack push = (ASMPushStack) ins0.get(i);
 				
 				REG reg = push.operands.get(0).reg;
-				if (RegOp.toInt(reg) >= 10) continue;
+				if (reg.toInt() >= 10) continue;
 				
 				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !push.optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
 					
@@ -1851,7 +1851,7 @@ public class ASMOptimizer {
 				ASMPopStack pop = (ASMPopStack) ins0.get(i);
 				
 				REG reg = pop.operands.get(0).reg;
-				if (RegOp.toInt(reg) >= 10) continue;
+				if (reg.toInt() >= 10) continue;
 				
 				if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 					ins0.remove(i);
@@ -1905,7 +1905,7 @@ public class ASMOptimizer {
 				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
 				ASMAdd add1 = (ASMAdd) ins0.get(i);
 				
-				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && RegOp.toInt(add0.target.reg) < 3) {
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && add0.target.reg.toInt() < 3) {
 					ImmOp op0 = (ImmOp) add0.op1;
 					ImmOp op1 = (ImmOp) add1.op1;
 					
@@ -1927,8 +1927,8 @@ public class ASMOptimizer {
 				ASMPushStack push0 = (ASMPushStack) ins0.get(i - 1);
 				ASMPushStack push1 = (ASMPushStack) ins0.get(i);
 				
-				if (push0.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
-				if (push1.operands.stream().filter(x -> RegOp.toInt(x.reg) >= 10).count() > 0) continue;
+				if (push0.operands.stream().filter(x -> x.reg.toInt() >= 10).count() > 0) continue;
+				if (push1.operands.stream().filter(x -> x.reg.toInt() >= 10).count() > 0) continue;
 				
 				List<REG> op0 = push0.operands.stream().map(x -> x.reg).collect(Collectors.toList());
 				List<REG> op1 = push1.operands.stream().map(x -> x.reg).collect(Collectors.toList());
@@ -2242,7 +2242,7 @@ public class ASMOptimizer {
 					REG reg = ((RegOp) mov.op1).reg;
 					
 					/* Only perform action if target is a operand register. */
-					if (RegOp.toInt(reg) > 2) continue;
+					if (reg.toInt() > 2) continue;
 					
 					if (ins0.get(i - 1) instanceof ASMLdrStack) {
 						ASMLdrStack ldr = (ASMLdrStack) ins0.get(i - 1);
@@ -2308,10 +2308,10 @@ public class ASMOptimizer {
 				ASMMov mov = (ASMMov) ins0.get(i - 1);
 				/* For all operand regs */
 				for (int a = 0; a < 2; a++) {
-					if (mov.target.reg == RegOp.toReg(a) && mov.op1 instanceof RegOp) {
+					if (mov.target.reg == REG.toReg(a) && mov.op1 instanceof RegOp) {
 						if (ins0.get(i) instanceof ASMCmp) {
 							ASMCmp cmp = (ASMCmp) ins0.get(i);
-							if (cmp.op0 != null && cmp.op0.reg == RegOp.toReg(a)) {
+							if (cmp.op0 != null && cmp.op0.reg == REG.toReg(a)) {
 								/* Replace */
 								cmp.op0 = (RegOp) mov.op1;
 								OPT_DONE();
@@ -2319,7 +2319,7 @@ public class ASMOptimizer {
 								ins0.remove(i - 1);
 								i--;
 							}
-							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == RegOp.toReg(a)) {
+							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == REG.toReg(a)) {
 								/* Replace */
 								cmp.op1 = (RegOp) mov.op1;
 								OPT_DONE();
@@ -2370,7 +2370,7 @@ public class ASMOptimizer {
 			if (ins0.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) ins0.get(i - 1);
 				for (int a = 0; a < 10; a++) {
-					if (mov.target.reg == RegOp.toReg(a) && mov.op1 instanceof RegOp) {
+					if (mov.target.reg == REG.toReg(a) && mov.op1 instanceof RegOp) {
 						RegOp target = (RegOp) mov.op1;
 						
 						/* Writeback flag is set, cannot substitute, since mov copies operand */
@@ -2381,14 +2381,14 @@ public class ASMOptimizer {
 						if (ins0.get(i) instanceof ASMBinaryData && !(ins0.get(i) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) ins0.get(i);
 							boolean remove = false;
-							if (data.op0 != null && data.op0.reg == RegOp.toReg(a)) {
+							if (data.op0 != null && data.op0.reg == REG.toReg(a)) {
 								/* Replace */
 								data.op0 = target;
 								OPT_DONE();
 								remove = true;
 							}
 							
-							if (data.op1 != null && data.op1 instanceof RegOp && ((RegOp) data.op1).reg == RegOp.toReg(a)) {
+							if (data.op1 != null && data.op1 instanceof RegOp && ((RegOp) data.op1).reg == REG.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
 								OPT_DONE();
@@ -2403,14 +2403,14 @@ public class ASMOptimizer {
 						else if (ins0.get(i) instanceof ASMMult) {
 							ASMMult mul = (ASMMult) ins0.get(i);
 							boolean remove = false;
-							if (mul.op0 != null && mul.op0.reg == RegOp.toReg(a)) {
+							if (mul.op0 != null && mul.op0.reg == REG.toReg(a)) {
 								/* Replace */
 								mul.op0 = target;
 								OPT_DONE();
 								remove = true;
 							}
 							
-							if (mul.op1 != null && mul.op1 instanceof RegOp && ((RegOp) mul.op1).reg == RegOp.toReg(a)) {
+							if (mul.op1 != null && mul.op1 instanceof RegOp && ((RegOp) mul.op1).reg == REG.toReg(a)) {
 								/* Replace */
 								mul.op1 = target;
 								OPT_DONE();
@@ -2434,14 +2434,14 @@ public class ASMOptimizer {
 								
 								if (overwritesReg(ins1, target.reg)) continue;
 								
-								if (mul.op0 != null && mul.op0.reg == RegOp.toReg(a)) {
+								if (mul.op0 != null && mul.op0.reg == REG.toReg(a)) {
 									/* Replace */
 									mul.op0 = target;
 									OPT_DONE();
 									remove = true;
 								}
 								
-								if (mul.op1 != null && mul.op1 instanceof RegOp && mul.op1.reg == RegOp.toReg(a)) {
+								if (mul.op1 != null && mul.op1 instanceof RegOp && mul.op1.reg == REG.toReg(a)) {
 									/* Replace */
 									mul.op1 = target;
 									OPT_DONE();

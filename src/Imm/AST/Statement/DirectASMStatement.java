@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.ASM.Util.REG;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;

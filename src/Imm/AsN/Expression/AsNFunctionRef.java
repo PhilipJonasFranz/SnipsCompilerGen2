@@ -6,9 +6,9 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
 import Imm.AST.Expression.FunctionRef;
 

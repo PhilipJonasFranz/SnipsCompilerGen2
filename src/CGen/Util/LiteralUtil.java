@@ -3,6 +3,7 @@ package CGen.Util;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMvn;
@@ -11,7 +12,10 @@ import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
+import Imm.ASM.VFP.Memory.ASMVLdrLabel;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AsN.AsNNode;
 
 /**
@@ -52,24 +56,36 @@ public class LiteralUtil {
 	 * target reg. If the value is too large ( > 255), the routine will be to load it
 	 * from an external literal pool.
 	 */
-	public void loadValue(AsNNode node, int value, int target) {
+	public void loadValue(AsNNode node, int value, int target, boolean isVFP) {
 		if (value > 255) {
 			ASMDataLabel label = requestLabel(value);
 			
-			/* Create the new LDR statement, that loads the value stored at the label in the target reg */
-			ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null);
-			ldr.comment = new ASMComment("Literal is too large, load from literal pool");
-			
-			node.instructions.add(ldr);
+			if (isVFP) {
+				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
+				ASMVLdrLabel ldr = new ASMVLdrLabel(new VRegOp(target), new LabelOp(label), null);
+				ldr.comment = new ASMComment("Literal is too large, load from literal pool");
+				
+				node.instructions.add(ldr);
+			}
+			else {
+				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
+				ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null);
+				ldr.comment = new ASMComment("Literal is too large, load from literal pool");
+				
+				node.instructions.add(ldr);
+			}
 		}
 		else {
-			if (value >= 0)
+			if (value >= 0) {
 				/* Load the value directley, fits in value range */
-				node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+				if (isVFP) node.instructions.add(new ASMVMov(new VRegOp(target), new ImmOp(value)));
+				else node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+			}
 			else {
 				/* Load the value directley, fits in value range, but use mvn */
 				int inverse = -(value + 1);
-				node.instructions.add(new ASMMvn(new RegOp(target), new ImmOp(inverse)));
+				if (isVFP) throw new SNIPS_EXC("MVN not available for VFP!");
+				else node.instructions.add(new ASMMvn(new RegOp(target), new ImmOp(inverse)));
 			}
 		}
 	}
