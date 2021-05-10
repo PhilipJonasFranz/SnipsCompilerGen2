@@ -13,6 +13,8 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
@@ -61,7 +63,7 @@ public class AsNStructureInit extends AsNExpression {
 			}
 		}
 		
-		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st);
+		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st, false);
 		
 		init.registerMetric();
 		return init;
@@ -76,7 +78,7 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, boolean coveredParam, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, boolean coveredParam, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -90,7 +92,7 @@ public class AsNStructureInit extends AsNExpression {
 				
 				/* If group size is 3, push them on the stack */
 				if (regs == 3) {
-					flush(regs, node);
+					flush(regs, node, isVFP);
 					regs = 0;
 				}
 				
@@ -100,7 +102,7 @@ public class AsNStructureInit extends AsNExpression {
 				TempAtom atom = (TempAtom) elements.get(i);
 				
 				if (atom.getType().wordsize() > 1) {
-					flush(regs, node);
+					flush(regs, node, isVFP);
 					regs = 0;
 				}
 				
@@ -110,14 +112,15 @@ public class AsNStructureInit extends AsNExpression {
 			}
 			else {
 				/* Flush all atoms to clear regs */
-				flush(regs, node);
+				flush(regs, node, isVFP);
 				regs = 0;
 				
 				node.instructions.addAll(AsNExpression.cast(elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
 				if (!elements.get(i).getType().isStackType()) {
-					node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+					if (isVFP) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S0))));
+					else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
 					st.pushDummy();
 				}
 			}
@@ -130,7 +133,7 @@ public class AsNStructureInit extends AsNExpression {
 		 * it can not be optimized for performance as well, but the file size is smaller.
 		 */
 		if (isTopLevel && !CompilerDriver.optimizeFileSize) {
-			flush(regs, node);
+			flush(regs, node, isVFP);
 			regs = 0;
 		}
 		
@@ -150,7 +153,7 @@ public class AsNStructureInit extends AsNExpression {
 		}
 		
 		/* Flush remaining atoms */
-		flush(regs, node);
+		flush(regs, node, isVFP);
 	}
 	
 	/**
@@ -160,11 +163,20 @@ public class AsNStructureInit extends AsNExpression {
 	 * The push order is so that f.E. R2 would end up at a higher address in the stack than R0.<br>
 	 * Requires that regs is between 0 and 3.
 	 */
-	public static void flush(int regs, AsNNode node) {
-		if (regs > 0) {
-			if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R1), new RegOp(REG.R0))));
-			else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R1), new RegOp(REG.R0))));
-			else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+	public static void flush(int regs, AsNNode node, boolean isVFP) {
+		if (isVFP) {
+			if (regs > 0) {
+				if (regs == 3) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S2), new VRegOp(REG.S1), new VRegOp(REG.S0))));
+				else if (regs == 2) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S1), new VRegOp(REG.S0))));
+				else node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S0))));
+			}
+		}
+		else {
+			if (regs > 0) {
+				if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R1), new RegOp(REG.R0))));
+				else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R1), new RegOp(REG.R0))));
+				else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+			}
 		}
 	}
 	

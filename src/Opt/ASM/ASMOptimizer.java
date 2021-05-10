@@ -51,6 +51,9 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.ASM.VFP.Memory.ASMVLdrLabel;
+import Imm.ASM.VFP.Memory.ASMVMemBlock;
+import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVCvt;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Snips.CompilerDriver;
@@ -501,7 +504,11 @@ public class ASMOptimizer {
 				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 					ins0.set(i, new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(push.operands.size() * 4)));
 					
-					ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
+					ASMMemBlock block = null;
+					
+					if (push instanceof ASMVPushStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
+					else block = new ASMMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
+					
 					ins0.add(i + 1, block);
 				}
 				else {
@@ -510,7 +517,11 @@ public class ASMOptimizer {
 					for (RegOp r : push.operands) ops.add(0, r);
 					
 					if (ASMMemBlock.checkInOrder(ops) && push.operands.size() > 1) {
-						ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
+						ASMMemBlock block = null;
+						
+						if (push instanceof ASMVPushStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
+						else block = new ASMMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
+						
 						ins0.set(i, block);
 					}
 				}
@@ -519,7 +530,11 @@ public class ASMOptimizer {
 				ASMPopStack pop = (ASMPopStack) ins0.get(i);
 				
 				if (ASMMemBlock.checkInOrder(pop.operands) && pop.operands.size() > 1) {
-					ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
+					ASMMemBlock block = null;
+					
+					if (pop instanceof ASMVPopStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
+					else block = new ASMMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
+					
 					ins0.set(i, block);
 				}
 				else {
@@ -530,7 +545,11 @@ public class ASMOptimizer {
 					if (ASMMemBlock.checkInOrder(ops) && pop.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 						ins0.set(i, new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(ops.size() * 4)));
 						
-						ASMMemBlock block = new ASMMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
+						ASMMemBlock block = null;
+						
+						if (pop instanceof ASMVPopStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
+						else block = new ASMMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
+						
 						ins0.add(i + 1, block);
 					}
 				}
@@ -1387,7 +1406,7 @@ public class ASMOptimizer {
 						RegOp reg = push.operands.get(x);
 						
 						/* Only for regular registers */
-						if (reg.reg.toInt() < 10) {
+						if (!reg.reg.isSpecialReg()) {
 							
 							/* Check if register was strictly not used */
 							boolean regInteraction = false;
@@ -1524,7 +1543,7 @@ public class ASMOptimizer {
 				
 				if (ins0.get(i - 2) instanceof ASMMov) {
 					ASMMov mov = (ASMMov) ins0.get(i - 2);
-					if (mov.target.reg.toInt() < 3 && mov.op1 instanceof ImmOp) {
+					if (mov.target.reg.isOperandReg() && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) op1 = (ImmOp) mov.op1;
 					}
@@ -1532,7 +1551,7 @@ public class ASMOptimizer {
 				
 				if (ins0.get(i - 1) instanceof ASMMov) {
 					ASMMov mov = (ASMMov) ins0.get(i - 1);
-					if (mov.target.reg.toInt() < 3 && mov.op1 instanceof ImmOp) {
+					if (mov.target.reg.isOperandReg() && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) {
 							op1 = (ImmOp) mov.op1;
@@ -1722,7 +1741,7 @@ public class ASMOptimizer {
 						if (probed.contains(reg)) continue;
 						else probed.add(reg);
 						
-						if (reg.toInt() > 2 && reg.toInt() < 10) {
+						if (reg.toInt() > 2 && !reg.isSpecialReg()) {
 							boolean used = false;
 							for (int a = k + 1; a < ins0.size(); a++) {
 								if (ins0.get(a) instanceof ASMLabel && ((ASMLabel) ins0.get(a)).isFunctionLabel) {
@@ -1782,7 +1801,7 @@ public class ASMOptimizer {
 			
 			if (reg == null) continue;
 			
-			if (reg.toInt() < 3) {
+			if (reg.isOperandReg()) {
 				for (int a = i + 1; a < ins0.size(); a++) {
 					ASMInstruction ins = ins0.get(a);
 					
@@ -1797,7 +1816,7 @@ public class ASMOptimizer {
 					}
 				}
 			}
-			else if (reg.toInt() < 10) {
+			else if (!reg.isSpecialReg()) {
 				for (int a = i + 1; a < ins0.size(); a++) {
 					ASMInstruction ins = ins0.get(a);
 					
@@ -1916,7 +1935,7 @@ public class ASMOptimizer {
 				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
 				ASMAdd add1 = (ASMAdd) ins0.get(i);
 				
-				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && add0.target.reg.toInt() < 3) {
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && add0.target.reg.isOperandReg()) {
 					ImmOp op0 = (ImmOp) add0.op1;
 					ImmOp op1 = (ImmOp) add1.op1;
 					
@@ -1938,8 +1957,8 @@ public class ASMOptimizer {
 				ASMPushStack push0 = (ASMPushStack) ins0.get(i - 1);
 				ASMPushStack push1 = (ASMPushStack) ins0.get(i);
 				
-				if (push0.operands.stream().filter(x -> x.reg.toInt() >= 10).count() > 0) continue;
-				if (push1.operands.stream().filter(x -> x.reg.toInt() >= 10).count() > 0) continue;
+				if (push0.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
+				if (push1.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
 				
 				List<REG> op0 = push0.operands.stream().map(x -> x.reg).collect(Collectors.toList());
 				List<REG> op1 = push1.operands.stream().map(x -> x.reg).collect(Collectors.toList());
@@ -2259,7 +2278,7 @@ public class ASMOptimizer {
 					REG reg = ((RegOp) mov.op1).reg;
 					
 					/* Only perform action if target is a operand register. */
-					if (reg.toInt() > 2) continue;
+					if (!reg.isOperandReg()) continue;
 					
 					if (ins0.get(i - 1) instanceof ASMLdrStack) {
 						ASMLdrStack ldr = (ASMLdrStack) ins0.get(i - 1);

@@ -185,14 +185,14 @@ public class StackUtil {
 					regs++;
 				}
 				if (regs == 3) {
-					AsNStructureInit.flush(regs, node);
+					AsNStructureInit.flush(regs, node, false);
 					regs = 0;
 				}
 				offset -= 4;
 				st.pushDummy();
 			}
 			
-			AsNStructureInit.flush(regs, node);
+			AsNStructureInit.flush(regs, node, false);
 		}
 		/* Origin is in global map */
 		else if (map.declarationLoaded(i.origin)) {
@@ -212,7 +212,7 @@ public class StackUtil {
 					regs++;
 				}
 				if (regs == 2) {
-					AsNStructureInit.flush(regs, node);
+					AsNStructureInit.flush(regs, node, false);
 					regs = 0;
 				}
 				st.pushDummy();
@@ -230,14 +230,14 @@ public class StackUtil {
 					regs++;
 				}
 				if (regs == 3) {
-					AsNStructureInit.flush(regs, node);
+					AsNStructureInit.flush(regs, node, false);
 					regs = 0;
 				}
 				offset += 4;
 				st.pushDummy();
 			}
 			
-			AsNStructureInit.flush(regs, node);
+			AsNStructureInit.flush(regs, node, false);
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}

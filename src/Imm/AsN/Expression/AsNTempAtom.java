@@ -153,7 +153,7 @@ public class AsNTempAtom extends AsNExpression {
 						}
 						
 						if (regs == 3) {
-							AsNStructureInit.flush(regs, atom);
+							AsNStructureInit.flush(regs, atom, a.base.getType().isFloat());
 							regs = 0;
 						}
 						
@@ -161,7 +161,7 @@ public class AsNTempAtom extends AsNExpression {
 						st.pushDummy();
 					}
 					
-					AsNStructureInit.flush(regs, atom);
+					AsNStructureInit.flush(regs, atom, a.base.getType().isFloat());
 				}
 				else 
 					/* If the target type is only one large, we should not be required to push the SID */

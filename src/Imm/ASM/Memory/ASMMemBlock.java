@@ -12,9 +12,8 @@ public class ASMMemBlock extends ASMInstruction {
 
 			/* ---< NESTED >--- */
 	public enum MEM_BLOCK_MODE {
-		LDMED, LDMFD, LDMEA, LDMFA,
-		
-		STMFA, STMEA, STMFD, STMED;
+		LDMED,  LDMFD,  LDMEA,  LDMFA,
+		STMFA,  STMEA,  STMFD,  STMED;
 	}
 	
 			/* ---< FIELDS >--- */
