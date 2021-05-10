@@ -5,13 +5,15 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Util.COND;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
+import Imm.ASM.VFP.Processing.Logic.ASMVCmp;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AsN.AsNBody;
@@ -41,26 +43,36 @@ public class AsNCompare extends AsNNFoldExpression {
 		if (c.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
 		/* Clear only R0, R1 since R2 is not needed */
-		r.free(0, 1);
+		if (isVFP) r.getVRegSet().free(0, 1);
+		else r.free(0, 1);
 		
 		if (c.operands.get(1) instanceof Atom && !(((Atom) c.operands.get(1)).getType() instanceof NULL)) {
 			cmp.instructions.addAll(AsNExpression.cast(c.operands.get(0), r, map, st).getInstructions());
 			
 			TYPE t = ((Atom) c.operands.get(1)).getType();
+			int value = Integer.parseInt(t.toPrimitive().sourceCodeRepresentation());
 			
-			if (Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()) < 255) {
-				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()))));
+			if (value < 255) {
+				if (isVFP) {
+					cmp.instructions.add(new ASMVMov(new VRegOp(REG.S1), new ImmOp(value)));
+					cmp.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new VRegOp(REG.S1)));
+				}
+				else cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(value)));
 			}
 			else {
-				AsNBody.literalManager.loadValue(cmp, Integer.parseInt(t.toPrimitive().sourceCodeRepresentation()), 1, false);
+				AsNBody.literalManager.loadValue(cmp, value, 1, t.isFloat(), t.value.toString());
 				cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
+				
+				if (isVFP) cmp.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new VRegOp(REG.S1)));
+				else cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */
 			cmp.generatePrimitiveLoaderCode(cmp, c, c.operands.get(0), c.operands.get(1), r, map, st, 0, 1, isVFP);
 			
-			cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
+			if (isVFP) cmp.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new VRegOp(REG.S1)));
+			else cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 	
 		cmp.trueC = COND.toCondition(c.comparator);
@@ -72,18 +84,11 @@ public class AsNCompare extends AsNNFoldExpression {
 		/* Move #0 into R0 when condition is false with negated operator of c */
 		cmp.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), cmp.neg));
 	
-		r.free(0, 1);
+		if (isVFP) r.getVRegSet().free(0, 1);
+		else r.free(0, 1);
 		
 		cmp.registerMetric();
 		return cmp;
-	}
-
-	public ASMInstruction buildInjector() {
-		throw new SNIPS_EXC("No injector available for 'Cmp'!");
-	}
-	
-	public ASMInstruction buildVInjector() {
-		throw new SNIPS_EXC("No VFP injector available for 'Cmp'!");
 	}
 	
 } 

@@ -6,6 +6,8 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.RegisterAtom;
 
 public class AsNRegisterAtom extends AsNExpression {
@@ -19,7 +21,10 @@ public class AsNRegisterAtom extends AsNExpression {
 		r.free(0);
 		
 		/* Simply move the requested register into R0 */
-		atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(a.reg)));
+		if (a.reg.toInt() < 16)
+			atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(a.reg)));
+		else 
+			atom.instructions.add(new ASMVMov(new RegOp(target), new VRegOp(a.reg)));
 		
 		atom.registerMetric();
 		return atom;

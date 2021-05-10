@@ -56,21 +56,23 @@ public class LiteralUtil {
 	 * target reg. If the value is too large ( > 255), the routine will be to load it
 	 * from an external literal pool.
 	 */
-	public void loadValue(AsNNode node, int value, int target, boolean isVFP) {
+	public void loadValue(AsNNode node, int value, int target, boolean isVFP, String actualValue) {
 		if (value > 255) {
 			ASMDataLabel label = requestLabel(value);
+			
+			ASMComment comment = new ASMComment("Load value '" + actualValue + "' from pool");
 			
 			if (isVFP) {
 				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
 				ASMVLdrLabel ldr = new ASMVLdrLabel(new VRegOp(target), new LabelOp(label), null);
-				ldr.comment = new ASMComment("Literal is too large, load from literal pool");
+				ldr.comment = comment;
 				
 				node.instructions.add(ldr);
 			}
 			else {
 				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
 				ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null);
-				ldr.comment = new ASMComment("Literal is too large, load from literal pool");
+				ldr.comment = comment;
 				
 				node.instructions.add(ldr);
 			}

@@ -71,7 +71,7 @@ public class StackUtil {
 			}
 			else {
 				/* Load value via literal manager */
-				AsNBody.literalManager.loadValue(node, size * 4, 2, false);
+				AsNBody.literalManager.loadValue(node, size * 4, 2, false, (size * 4) + "");
 				
 				/* Move counter in R2 */
 				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R1)));

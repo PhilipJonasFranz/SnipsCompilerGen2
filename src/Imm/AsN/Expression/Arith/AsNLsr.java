@@ -4,7 +4,6 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
-import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Util.REG;
@@ -27,10 +26,6 @@ public class AsNLsr extends AsNNFoldExpression {
 	
 	public ASMInstruction buildInjector() {
 		return new ASMLsr(new RegOp(REG.R0), new RegOp(REG.R1), new RegOp(REG.R2));
-	}
-	
-	public ASMInstruction buildVInjector() {
-		throw new SNIPS_EXC("No VFP injector available for 'Lsr'!");
 	}
 	
 } 

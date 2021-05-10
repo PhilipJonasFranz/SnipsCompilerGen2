@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -90,12 +89,4 @@ public class AsNAnd extends AsNNFoldExpression {
 		return and;
 	}
 
-	public ASMInstruction buildInjector() {
-		throw new SNIPS_EXC("No injector available for 'And'!");
-	}
-
-	public ASMInstruction buildVInjector() {
-		throw new SNIPS_EXC("No VFP injector available for 'And'!");
-	}
-	
 } 

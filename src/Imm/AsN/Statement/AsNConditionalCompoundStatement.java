@@ -10,6 +10,8 @@ import Imm.ASM.Util.COND;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Logic.ASMVCmp;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.ConditionalCompoundStatement;
@@ -91,8 +93,14 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 			/* Evaluate Condition */
 			node.instructions.addAll(expr.getInstructions());
 			
-			/* Check if expression was evaluated to false */
-			node.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
+			if (expr0.getType().isFloat()) {
+				/* Check if expression was evaluated to false */
+				node.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new ImmOp(0)));
+			}
+			else {
+				/* Check if expression was evaluated to false */
+				node.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
+			}
 		}
 		
 		return cond;

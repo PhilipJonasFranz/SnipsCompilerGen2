@@ -249,7 +249,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		 */
 		boolean isDeref = a.shadowRef instanceof Deref;
 		if (isDeref) {
-			AsNBody.literalManager.loadValue(f, a.iterator.getType().wordsize(), 0, false);
+			AsNBody.literalManager.loadValue(f, a.iterator.getType().wordsize(), 0, false, a.iterator.getType().wordsize() + "");
 			incrOp = new RegOp(REG.R0);
 		}
 		

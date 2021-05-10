@@ -140,6 +140,10 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			int loc = r.declarationRegLocation(dec);
 			r.getReg(loc).free();
 		}
+		else if (r.getVRegSet().declarationLoaded(dec)) {
+			int loc = r.getVRegSet().declarationRegLocation(dec);
+			r.getVRegSet().getReg(loc).free();
+		}
 		else {
 			int add = st.closeScope(a, true);
 			if (add != 0) {

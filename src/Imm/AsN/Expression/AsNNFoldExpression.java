@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -99,10 +100,14 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		return node;
 	}
 	
-	public abstract ASMInstruction buildInjector();
+	public ASMInstruction buildInjector() {
+		throw new SNIPS_EXC("No injector available for '" + this.getClass().getSimpleName() + "'!");
+	}
 	
-	public abstract ASMInstruction buildVInjector();
-	
+	public ASMInstruction buildVInjector() {
+		throw new SNIPS_EXC("No VFP injector available for '" + this.getClass().getSimpleName() + "'!");
+	}
+
 	
 		/* --- OPERAND LOADING --- */
 	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1, boolean isVFP) throws CGEN_EXC {
@@ -269,12 +274,12 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		/* Partial Atomic Loading Left */
 		if (e0 instanceof Atom) {
 			this.loadOperand(e1, 2, r, map, st, isVFP);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().toPrimitive().sourceCodeRepresentation()), 1, isVFP);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e0.getType().toPrimitive().sourceCodeRepresentation()), 1, isVFP, e0.getType().value.toString());
 		}
 		/* Partial Atomic Loading Right */
 		else if (e1 instanceof Atom) {
 			this.loadOperand(e0, 1, r, map, st, isVFP);
-			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2, isVFP);
+			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2, isVFP, e1.getType().value.toString());
 		}
 		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2, isVFP);
 	}

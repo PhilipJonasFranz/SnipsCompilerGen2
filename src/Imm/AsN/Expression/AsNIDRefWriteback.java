@@ -15,7 +15,8 @@ public class AsNIDRefWriteback extends AsNExpression {
 		w.pushOnCreatorStack(wb);
 		wb.castedNode = w;
 		
-		r.free(0, 1, 2);
+		if (wb.idRef.getType().isFloat()) r.getVRegSet().free(0, 1, 2);
+		else r.free(0, 1, 2);
 		
 		AsNAssignWriteback.injectWriteback(w, wb, r, map, st, true);
 		

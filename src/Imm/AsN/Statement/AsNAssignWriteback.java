@@ -21,6 +21,10 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVAdd;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
+import Imm.ASM.VFP.Processing.Arith.ASMVSub;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
@@ -51,7 +55,8 @@ public class AsNAssignWriteback extends AsNStatement {
 			IDRefWriteback wb = (IDRefWriteback) reference;
 			IDRef ref = wb.idRef;
 			
-			r.free(0, 1, 2);
+			if (wb.idRef.getType().isFloat()) r.getVRegSet().free(0, 1, 2);
+			else r.free(0, 1, 2);
 			
 			/* Load value of id ref */
 			node.instructions.addAll(AsNIDRef.cast(ref, r, map, st, 0).getInstructions());
@@ -61,11 +66,18 @@ public class AsNAssignWriteback extends AsNStatement {
 				int reg = r.declarationRegLocation(ref.origin);
 				
 				/* Apply writeback operation */
-				injectWriteback(node, wb.writeback, reg, partOfExpression);
+				injectWriteback(node, wb.writeback, REG.toReg(reg), partOfExpression);
+			}
+			/* Write back to source */
+			else if (r.getVRegSet().declarationLoaded(ref.origin)) {
+				int reg = 16 + r.getVRegSet().declarationRegLocation(ref.origin);
+				
+				/* Apply writeback operation */
+				injectWriteback(node, wb.writeback, REG.toReg(reg), partOfExpression);
 			}
 			else {
 				/* Apply writeback operation */
-				injectWriteback(node, wb.writeback, 1, partOfExpression);
+				injectWriteback(node, wb.writeback, REG.R1, partOfExpression);
 				
 				if (map.declarationLoaded(ref.origin)) {
 					/* Load value from memory */
@@ -106,18 +118,28 @@ public class AsNAssignWriteback extends AsNStatement {
 			node.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			
 			/* Apply writeback operation */
-			injectWriteback(node, sel.writeback, 2, partOfExpression);
+			injectWriteback(node, sel.writeback, REG.R2, partOfExpression);
 
 			node.instructions.add(new ASMStr(new RegOp(REG.R2), new RegOp(REG.R1)));
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED, reference.getClass().getName(), reference.getSource().getSourceMarker());
 	}
 	
-	private static void injectWriteback(AsNNode node, WRITEBACK wb, int target, boolean partOfExpression) {
-		if (wb == WRITEBACK.INCR) 
-			node.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
-		else 
-			node.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
+	private static void injectWriteback(AsNNode node, WRITEBACK wb, REG target, boolean partOfExpression) {
+		if (target.toInt() < 16) {
+			if (wb == WRITEBACK.INCR) 
+				node.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
+			else 
+				node.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
+		}
+		else {
+			node.instructions.add(new ASMVMov(new VRegOp(REG.S1), new ImmOp(1)));
+			
+			if (wb == WRITEBACK.INCR) 
+				node.instructions.add(new ASMVAdd(new VRegOp(target), new VRegOp(REG.S0), new VRegOp(REG.S1)));
+			else 
+				node.instructions.add(new ASMVSub(new VRegOp(target), new VRegOp(REG.S0), new VRegOp(REG.S1)));
+		}
 		
 		/* 
 		 * Add opt flag for optimizer, but only if this writeback is part of an expression, meaning that the result

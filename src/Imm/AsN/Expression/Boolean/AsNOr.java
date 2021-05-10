@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMOrr;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -83,14 +82,6 @@ public class AsNOr extends AsNNFoldExpression {
 		
 		or.registerMetric();
 		return or;
-	}
-
-	public ASMInstruction buildInjector() {
-		throw new SNIPS_EXC("No injector available for 'Or'!");
-	}
-	
-	public ASMInstruction buildVInjector() {
-		throw new SNIPS_EXC("No VFP injector available for 'Or'!");
 	}
 
 } 
