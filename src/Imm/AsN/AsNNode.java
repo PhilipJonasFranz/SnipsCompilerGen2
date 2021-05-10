@@ -7,6 +7,7 @@ import java.util.Stack;
 
 import CGen.RegSet;
 import CGen.StackSet;
+import CGen.VRegSet;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
@@ -17,6 +18,8 @@ import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.SyntaxElement;
 import Util.Pair;
 
@@ -59,27 +62,55 @@ public abstract class AsNNode {
 	 * @param r The current RegSet
 	 * @param regs The Register to clear
 	 */
-	public void clearReg(RegSet r, StackSet st, int...regs) {
-		for (int reg : regs) {
-			if (!r.getReg(reg).isFree()) {
-				int free = r.findFree();
-				
-				if (free == -1) {
-					this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOp(reg), new RegOp(REG.SP), 
-						new PatchableImmOp(PATCH_DIR.DOWN, -4)));
-					st.push(r.getReg(reg).declaration);
-				}
-				else {
-					ASMMov mov = new ASMMov(new RegOp(free), new RegOp(reg));
+	public void clearReg(RegSet r, StackSet st, boolean isVFP, int...regs) {
+		if (isVFP) {
+			VRegSet v = r.getVRegSet();
+			
+			for (int reg : regs) {
+				if (!v.getReg(reg).isFree()) {
+					int free = v.findFree();
 					
-					/* Mark for optimizer to prevent double crossing optimization */
-					mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+					if (free == -1) {
+						this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new VRegOp(reg), new RegOp(REG.SP), 
+							new PatchableImmOp(PATCH_DIR.DOWN, -4)));
+						st.push(v.getReg(reg).declaration);
+					}
+					else {
+						ASMVMov mov = new ASMVMov(new VRegOp(free), new VRegOp(reg));
+						
+						/* Mark for optimizer to prevent double crossing optimization */
+						mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+						
+						this.instructions.add(mov);
+						v.copy(reg, free);
+					}
 					
-					this.instructions.add(mov);
-					r.copy(reg, free);
+					v.free(reg);
 				}
-				
-				r.free(reg);
+			}
+		}
+		else {
+			for (int reg : regs) {
+				if (!r.getReg(reg).isFree()) {
+					int free = r.findFree();
+					
+					if (free == -1) {
+						this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new RegOp(reg), new RegOp(REG.SP), 
+							new PatchableImmOp(PATCH_DIR.DOWN, -4)));
+						st.push(r.getReg(reg).declaration);
+					}
+					else {
+						ASMMov mov = new ASMMov(new RegOp(free), new RegOp(reg));
+						
+						/* Mark for optimizer to prevent double crossing optimization */
+						mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+						
+						this.instructions.add(mov);
+						r.copy(reg, free);
+					}
+					
+					r.free(reg);
+				}
 			}
 		}
 	}

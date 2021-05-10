@@ -23,7 +23,7 @@ public class AsNDeref extends AsNExpression {
 		ref.pushOnCreatorStack(a);
 		a.castedNode = ref;
 		
-		ref.clearReg(r, st, 0, 1);
+		ref.clearReg(r, st, a.getType().isFloat(), 0, 1);
 		
 		/* Load Expression */
 		ref.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());

@@ -203,10 +203,11 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 	}
 	
 	protected void evalExpression(AsNNFoldExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
-		this.clearReg(r, st, 0, 1, 2);
-
+		
 		boolean isVFP = b.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
 		
+		this.clearReg(r, st, isVFP, 0, 1, 2);
+
 		generateLoaderCode(m, b, b.operands.get(0), b.operands.get(1), r, map, st, solver, isVFP);
 		
 		/* Inject calculation into loader code */
@@ -288,8 +289,8 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());
 			if (target != 0) {
 				if (isVFP) {
-					this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.R0)));
-					r.copyToVFP(0, target);
+					this.instructions.add(new ASMVMov(new VRegOp(target), new VRegOp(REG.S0)));
+					r.getVRegSet().copy(0, target);
 				}
 				else {
 					this.instructions.add(new ASMMov(new RegOp(target), new RegOp(REG.R0)));

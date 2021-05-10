@@ -27,6 +27,9 @@ import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
@@ -39,7 +42,6 @@ import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
 import Util.Pair;
 
@@ -74,17 +76,26 @@ public class AsNFunctionCall extends AsNStatement {
 	
 	public static List<Pair<Expression, Integer>> getDefaultMapping(List<Expression> params) {
 		int r = 0;
+		int s = 0;
+		
 		List<Pair<Expression, Integer>> mapping = new ArrayList();
 		
 		for (Expression e : params) {
-			if (e.getType().wordsize() == 1 && r < 3 && !(e.getType() instanceof STRUCT)) {
-				/* Load in register */
-				mapping.add(new Pair(e, r));
-				r++;
+			if (e.getType().wordsize() == 1 && !e.getType().isStruct()) {
+				if (e.getType().isFloat() && s < 3) {
+					/* Load in Sx register */
+					mapping.add(new Pair(e, 16 + s++));
+					continue;
+				}
+				else if (r < 3) {
+					/* Load in Rx register */
+					mapping.add(new Pair(e, r++));
+					continue;
+				}
 			}
-			else 
-				/* Load in stack */
-				mapping.add(new Pair(e, -1));
+			 
+			/* Load in stack */
+			mapping.add(new Pair(e, -1));
 		}
 		return mapping;
 	}
@@ -100,8 +111,6 @@ public class AsNFunctionCall extends AsNStatement {
 				e.printStackTrace();
 			}
 		}
-		
-		int regMapping = 0;
 		
 		List<Integer> sMap = new ArrayList();
 		
@@ -135,43 +144,50 @@ public class AsNFunctionCall extends AsNStatement {
 				}
 				
 				/* Push Parameter in R0 on the stack, but only if parameter is not an atom placeholder that pushes itself on the stack */
-				if (parameters.get(i).getType().wordsize() == 1 && !placeholder && !(parameters.get(i).getType() instanceof STRUCT)) 
-					call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				if (parameters.get(i).getType().wordsize() == 1 && !placeholder && !parameters.get(i).getType().isStruct()) {
+					if (parameters.get(i).getType().isFloat())
+						call.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
+					else
+						call.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				}
 				
 				while (st.getStack().size() != s) st.pop();
 				
-				r.free(0);
+				if (parameters.get(i).getType().isFloat()) r.getVRegSet().free(0);
+				else r.free(0);
 			}
 		}
+		
+		List<REG> toPopRegs = new ArrayList();
 		
 		/* Load Parameters in the registers */
 		for (int i = sMap.size() - 1; i >= 0; i--) {
 			if (sMap.get(i) != -1) {
-				regMapping++;
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
-				/* Leave First Parameter directley in R0 */
-				if (sMap.get(i) > 0) {
-					ASMPushStack push = new ASMPushStack(new RegOp(REG.R0));
-					
-					/* Add Opt flag so optimizer does not clear it */
-					push.optFlags.add(OPT_FLAG.STRUCT_INIT);
-					
-					call.instructions.add(push);
-				}
+				ASMPushStack push = null;
 				
-				r.free(0);
+				if (parameters.get(i).getType().isFloat()) push = new ASMVPushStack(new VRegOp(REG.S0));
+				else push = new ASMPushStack(new RegOp(REG.R0));
+				
+				toPopRegs.add(0, REG.toReg(sMap.get(i)));
+				
+				/* Add Opt flag so optimizer does not clear it */
+				push.optFlags.add(OPT_FLAG.STRUCT_INIT);
+				
+				call.instructions.add(push);
+				
+				if (!parameters.get(i).getType().isFloat()) r.free(0);
+				else r.getVRegSet().free(0);
 			}
 		}
 		
-		/* 
-		 * Pop Parameters on the stack into the correct registers, 
-		 * Parameter for R0 is already located in reg 
-		 */
-		if (regMapping >= 3) 
-			call.instructions.add(new ASMPopStack(new RegOp(REG.R1), new RegOp(REG.R2)));
-		else if (regMapping == 2) 
-			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
+		while (!toPopRegs.isEmpty()) {
+			REG reg0 = toPopRegs.remove(0);
+			
+			if (reg0.toInt() < 16) call.instructions.add(new ASMPopStack(new RegOp(reg0)));
+			else call.instructions.add(new ASMVPopStack(new VRegOp(reg0)));
+		}
 		
 		if (f != null && f.definedInInterface != null) {
 			

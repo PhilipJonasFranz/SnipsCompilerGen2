@@ -20,7 +20,7 @@ public class AsNBitNot extends AsNUnaryExpression {
 		b.castedNode = not;
 		
 		/* Clear only R0 */
-		not.clearReg(r, st, 0);
+		not.clearReg(r, st, false, 0);
 		
 		/* Load Operand */
 		not.instructions.addAll(AsNExpression.cast(b.getOperand(), r, map, st).getInstructions());

@@ -21,7 +21,8 @@ public class AsNAtom extends AsNExpression {
 		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;
 		
-		r.free(0);
+		if (a.getType().isFloat()) r.getVRegSet().free(0);
+		else r.free(0);
 		
 		/* Make sure only primitives can be in an atom */
 		assert(a.getType().isPrimitive() || a.getType().isNull());

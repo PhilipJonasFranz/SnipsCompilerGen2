@@ -24,7 +24,8 @@ public enum REG {
 		else if (reg0 == 13) reg = REG.SP;
 		else if (reg0 == 14) reg = REG.LR;
 		else if (reg0 == 15) reg = REG.PC;
-		else reg = REG.valueOf("R" + reg0);
+		else if (reg0 < 16) reg = REG.valueOf("R" + reg0);
+		else reg = REG.valueOf("S" + (reg0 - 16));
 		return reg;
 	}
 	

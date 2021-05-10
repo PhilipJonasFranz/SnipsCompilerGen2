@@ -33,6 +33,8 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
@@ -199,9 +201,16 @@ public class AsNFunction extends AsNCompoundStatement {
 				if (p.getSecond() == -1) 
 					/* Paramter is in stack, push in stackSet */
 					st.push(p.getFirst());
-				else 
-					/* Load Declaration into register */
-					r.getReg(p.getSecond()).setDeclaration(p.getFirst());
+				else {
+					if (p.getSecond() < 16) {
+						/* Load Declaration into Rx register */
+						r.getReg(p.getSecond()).setDeclaration(p.getFirst());
+					}
+					else {
+						/* Load Declaration into Sx register */
+						r.getVRegSet().getReg(p.getSecond() - 16).setDeclaration(p.getFirst());
+					}
+				}
 			}
 			
 			/* Create the function head label */
@@ -284,7 +293,34 @@ public class AsNFunction extends AsNCompoundStatement {
 						st.push(d);
 						r.free(i);
 					}
-					else func.clearReg(r, st, i);
+					else func.clearReg(r, st, false, i);
+				}
+			}
+			
+			/* Do the same for the VRegSet */
+			for (int i = 0; i < 3; i++) {
+				if (r.getVRegSet().getReg(i).declaration != null) {
+					Declaration d = r.getVRegSet().getReg(i).declaration;
+					
+					boolean hasRef = false;
+					for (Statement s : f.body) 
+						hasRef |= Matcher.hasAddressReference(s, d);
+					
+					if (hasRef) {
+						ASMVPushStack init = new ASMVPushStack(new VRegOp(i));
+						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
+						init.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+						
+						/* Only do it if variable was used */
+						if (d.last == null || !d.last.equals(d)) {
+							func.instructions.add(init);
+							paramsWithRef++;
+						}
+						
+						st.push(d);
+						r.getVRegSet().free(i);
+					}
+					else func.clearReg(r, st, true, i);
 				}
 			}
 			
@@ -397,7 +433,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			int size = 0;
-			for (Pair<Declaration, Integer> p  : func.getParameterMapping()) {
+			for (Pair<Declaration, Integer> p  : func.parameterMapping) {
 				if (p.getSecond() == -1) {
 					/* Stack shrinks by parameter word size */
 					size += p.getFirst().getType().wordsize();
@@ -574,17 +610,26 @@ public class AsNFunction extends AsNCompoundStatement {
 	 */
 	public List<Pair<Declaration, Integer>> getParameterMapping() {
 		int r = 0;
+		int s = 0;
+		
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
-			if (dec.getType().wordsize() == 1 && r < 3 && !dec.getType().isStruct()) {
-				/* Load in register */
-				mapping.add(new Pair(dec, r));
-				r++;
+			if (dec.getType().wordsize() == 1 && !dec.getType().isStruct()) {
+				if (dec.getType().isFloat() && s < 3) {
+					/* Load in Sx register */
+					mapping.add(new Pair(dec, 16 + s++));
+					continue;
+				}
+				else if (r < 3) {
+					/* Load in Rx register */
+					mapping.add(new Pair(dec, r++));
+					continue;
+				}
 			}
-			else 
-				/* Load in stack */
-				mapping.add(new Pair(dec, -1));
+			 
+			/* Load in stack */
+			mapping.add(new Pair(dec, -1));
 		}
 		
 		return mapping;

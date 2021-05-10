@@ -21,7 +21,7 @@ public class AsNUnaryMinus extends AsNUnaryExpression {
 		m.castedNode = minus;
 		
 		/* Clear only R0 */
-		minus.clearReg(r, st, 0);
+		minus.clearReg(r, st, false, 0);
 		
 		/* Load Operand */
 		minus.instructions.addAll(AsNExpression.cast(m.getOperand(), r, map, st).getInstructions());

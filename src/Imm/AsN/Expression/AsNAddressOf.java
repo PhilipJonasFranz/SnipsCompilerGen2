@@ -36,7 +36,7 @@ public class AsNAddressOf extends AsNExpression {
 		aof.pushOnCreatorStack(a);
 		a.castedNode = aof;
 		
-		aof.clearReg(r, st, 0, 1);
+		aof.clearReg(r, st, false, 0, 1);
 		
 		if (a.expression instanceof IDRef || a.expression instanceof IDRefWriteback) {
 			IDRef ref = null;

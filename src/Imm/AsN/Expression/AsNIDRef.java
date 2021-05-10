@@ -86,7 +86,7 @@ public class AsNIDRef extends AsNExpression {
 		}
 		/* Load declaration from global memory */
 		else if (map.declarationLoaded(i.origin)) {
-			ref.clearReg(r, st, target);
+			ref.clearReg(r, st, false, target);
 			
 			if (i.origin.getType().isRegType()) {
 				/* Load value from memory */
@@ -113,7 +113,7 @@ public class AsNIDRef extends AsNExpression {
 			}
 			/* Load in register */
 			else {
-				ref.clearReg(r, st, target);
+				ref.clearReg(r, st, false, target);
 				
 				if (st.getParameterByteOffset(i.origin) != -1) {
 					/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
