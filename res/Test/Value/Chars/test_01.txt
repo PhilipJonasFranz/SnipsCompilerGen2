@@ -40,13 +40,10 @@ main:                                        /* Function: main */
     mov r1, #69
     mov r0, #65
     stmfd sp!, {r0-r2}
-    mov r0, #5                               /* Evaluate Expression */
-    push { r0 }
-    mov r0, #2
-    push { r0 }
+    mov r2, #5
+    mov r1, #2
     sub r0, fp, #40
     lsr r0, r0, #2
-    ldmfd sp!, {r1, r2}
     bl String.substring                      /* Call String.substring */
     mov r1, r0
     sub r0, fp, #16

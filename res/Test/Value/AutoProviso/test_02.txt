@@ -55,54 +55,33 @@ main:                                        /* Function: main */
     mov r0, #10
     bl Map.HashMap.create_P_1_1              /* Call Map.HashMap.create */
     mov r5, r0
-    mov r0, #1                               /* Load parameters */
-    push { r0 }
-    mov r0, #99
-    push { r0 }
+    mov r2, #1
+    mov r1, #99
     mov r0, r5
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.put_P_1_1                 /* Call Map.HashMap.put */
-    mov r0, #20                              /* Load parameters */
-    push { r0 }
-    mov r0, #11
-    push { r0 }
+    mov r2, #20
+    mov r1, #11
     mov r0, r4
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.put_P_1_1                 /* Call Map.HashMap.put */
-    mov r0, #0                               /* Load parameters */
-    push { r0 }
-    mov r0, #98
-    push { r0 }
+    mov r2, #0
+    mov r1, #98
     mov r0, r5
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.put_P_1_1                 /* Call Map.HashMap.put */
-    mov r0, #30                              /* Load parameters */
-    push { r0 }
-    mov r0, #2
-    push { r0 }
+    mov r2, #30
+    mov r1, #2
     mov r0, r4
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.put_P_1_1                 /* Call Map.HashMap.put */
-    mov r0, #25                              /* Load parameters */
-    push { r0 }
-    mov r0, #11
-    push { r0 }
+    mov r2, #25
+    mov r1, #11
     mov r0, r4
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.replace_P_1_1             /* Call Map.HashMap.replace */
-    mov r0, #0                               /* Load parameters */
-    push { r0 }
-    mov r0, #99
-    push { r0 }
+    mov r2, #0
+    mov r1, #99
     mov r0, r5
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.replace_P_1_1             /* Call Map.HashMap.replace */
-    mov r0, #25                              /* Load parameters */
-    push { r0 }
-    mov r0, #11
-    push { r0 }
+    mov r2, #25
+    mov r1, #11
     mov r0, r4
-    ldmfd sp!, {r1, r2}
     bl Map.HashMap.replace_P_1_1             /* Call Map.HashMap.replace */
 /* Remove key 1 from map, results in -1 value */
     mov r1, #1

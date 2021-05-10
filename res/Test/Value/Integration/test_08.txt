@@ -205,7 +205,8 @@ main:                                        /* Function: main */
     push { r0 }
     lsl r1, r4, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
-    ldmfd sp!, {r1, r2}
+    pop { r1 }
+    pop { r2 }
     bl GameObject.Items.set                  /* Call GameObject.Items.set */
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */

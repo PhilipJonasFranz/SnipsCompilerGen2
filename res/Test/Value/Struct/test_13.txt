@@ -80,47 +80,29 @@ main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     bl Tree.TreeNode.create_P_1              /* Call Tree.TreeNode.create */
     mov r6, r0
-    mov r0, #5                               /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #5
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
-    mov r0, #12                              /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #12
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
-    mov r0, #11                              /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #11
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
-    mov r0, #15                              /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #15
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
-    mov r0, #7                               /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #7
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
-    mov r0, #2                               /* Load parameters */
-    push { r0 }
-    ldr r0, .P1995050259_relation
-    push { r0 }
+    ldr r1, .P1995050259_relation
+    mov r2, #2
     mov r0, r6
-    ldmfd sp!, {r1, r2}
     bl Tree.TreeNode.insert_P_1              /* Call Tree.TreeNode.insert */
     cmp r3, #1
     bne main.L1

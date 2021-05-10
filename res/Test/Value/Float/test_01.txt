@@ -29,9 +29,9 @@ main:                                        /* Function: main */
     vldr s1, .P1236809881_LIT_1067450368     /* Literal is too large, load from literal pool */
     vldr s2, .P1236809881_LIT_1075838976     /* Literal is too large, load from literal pool */
     stmfd sp!, {r0-r2}
-    vmov s0, #0                              /* Evaluate Expression */
-    vmov s3, #0
     vmov s4, #0
+    vmov s3, #0
+    vmov s0, #0                              /* Evaluate Expression */
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
 main.L1: 
@@ -40,14 +40,15 @@ main.L1:
     lsl r2, r3, #2
     sub r0, fp, #12
     vldr s4, [r0, r2]
-    vmov s1, s3                              /* Evaluate Expression */
     vmov s2, s4
+    vmov s1, s3                              /* Evaluate Expression */
     vadd s3, s3, s4
     add r3, r3, #1
     b main.L1
 main.L2: 
     vmov s0, s3                              /* Evaluate Expression */
-    vcvt.F32.S32 r0, s3
+    vcvt.F32.S32 s0, s3
+    vmov r0, s0
     mov sp, fp
     bx lr
 .P1236809881_LIT_1075838976: .word 1075838976

@@ -85,11 +85,10 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     mov r4, #0
     push { sp }
-    mov r0, #3                               /* Evaluate Expression */
-    stmfd sp!, {r0, r3}
+    mov r2, #3
+    mov r1, r3
     sub r0, fp, #12
     lsr r0, r0, #2
-    ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     cmp r12, #0
     bne main.L0                              /* Exception thrown, branch to escape target */

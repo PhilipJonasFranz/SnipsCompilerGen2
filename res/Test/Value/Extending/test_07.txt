@@ -81,11 +81,9 @@ Y.create_P_1:                                /* Function: Y.create, Provisos: BO
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #1                               /* Evaluate Expression */
-    push { r0 }
-    push { r0 }
+    mov r2, #1
+    mov r1, #1
     mov r0, #15
-    ldmfd sp!, {r1, r2}
     bl Y.create_P_1                          /* Call Y.create */
     ldr r0, [fp, #-12]                       /* Load field from struct */
     ldr r2, [fp, #-8]                        /* Load field from struct */

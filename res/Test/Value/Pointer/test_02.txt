@@ -56,10 +56,11 @@ main:                                        /* Function: main */
     mov r2, #1
     mov r1, #2
     mov r0, #3
-    push { r3, r4, r2, r1, r0 }
+    stmfd sp!, {r0-r2, r4}
+    pop { r2 }
+    mov r1, r3
     sub r0, fp, #36
     lsr r0, r0, #2
-    ldmfd sp!, {r1, r2}
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}

@@ -105,13 +105,10 @@ main:                                        /* Function: main */
     mov r1, #6
     mov r0, #3
     stmfd sp!, {r0, r1}
-    ldr r0, .P78746759_sortPred              /* Load parameters */
-    push { r0 }
-    mov r0, #5
-    push { r0 }
+    ldr r2, .P78746759_sortPred              /* Load parameters */
+    mov r1, #5
     sub r0, fp, #20
     lsr r0, r0, #2
-    ldmfd sp!, {r1, r2}
     bl sort                                  /* Call sort */
     lsl r2, r3, #2
     sub r0, fp, #20
