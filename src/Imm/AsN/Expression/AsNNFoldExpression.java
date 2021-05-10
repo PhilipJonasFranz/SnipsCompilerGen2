@@ -281,7 +281,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());
 			if (target != 0) {
 				if (isVFP) {
-					this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.S0)));
+					this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.R0)));
 					r.copyToVFP(0, target);
 				}
 				else {

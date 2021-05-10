@@ -6,7 +6,6 @@ import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
@@ -24,7 +23,6 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Res.Const;
 
 public class AsNSimpleLhsId extends AsNLhsId {
@@ -40,12 +38,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		/* Declaration already loaded, just move value into register */
 		if (r.declarationLoaded(ref.origin)) {
 			int reg = r.declarationRegLocation(ref.origin);
-			
-			/* Create the injection, use direct targeting of register */
-			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				id.instructions.addAll(id.buildInjector(lhs.assign, reg, 0, true, false));
-			}
-			else id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
+			id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
 		}
 		/* Variable is global variable and type is primitive, store to memory.
 		 * 		Other types in memory are handled down below. */
@@ -56,13 +49,6 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			id.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
 			
 			if (ref.origin.getType().wordsize() == 1) {
-				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
-					
-					/* Injector will calculate assignment arith into R0 */
-					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
-				}
-				
 				/* Store computed to memory */
 				id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
@@ -74,14 +60,6 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		else {
 			if (ref.origin.getType().isRegType()) {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
-				
-				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.FP), 
-							new PatchableImmOp(PATCH_DIR.DOWN, -off)));
-					
-					/* R1 can be overwritten, offset is known */
-					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, false));
-				}
 				
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
 					new PatchableImmOp(PATCH_DIR.DOWN, -off)));

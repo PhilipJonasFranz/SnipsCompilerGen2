@@ -27,7 +27,7 @@ public class ArraySelectLhsId extends LhsId {
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ArraySelectLhsId(ArraySelect selection, Source source) {
-		super(source);
+		super(selection, source);
 		this.selection = selection;
 	}
 	

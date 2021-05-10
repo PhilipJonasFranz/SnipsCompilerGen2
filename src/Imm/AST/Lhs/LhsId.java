@@ -6,6 +6,7 @@ import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
+import Imm.AST.Expression.Expression;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Declaration;
 import Imm.TYPE.TYPE;
@@ -19,6 +20,9 @@ import Util.Source;
 public abstract class LhsId extends SyntaxElement {
 
 			/* ---< FIELDS >--- */
+	/* The expression that represents this lhs */
+	public Expression expression;
+	
 	/* Set during context checking */
 	public Declaration origin;
 	
@@ -28,8 +32,9 @@ public abstract class LhsId extends SyntaxElement {
 	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public LhsId(Source source) {
+	public LhsId(Expression expression, Source source) {
 		super(source);
+		this.expression = expression;
 	}
 	
 	

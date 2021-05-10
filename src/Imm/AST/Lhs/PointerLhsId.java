@@ -25,15 +25,13 @@ import Util.Util;
 public class PointerLhsId extends LhsId {
 
 			/* ---< FIELDS >--- */
-	private Expression shadowDeref;
-	
 	public Deref deref;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public PointerLhsId(Expression deref, Source source) {
-		super(source);
-		this.shadowDeref = deref;
+		super(deref, source);
+		this.expression = deref;
 	}
 	
 	
@@ -46,10 +44,10 @@ public class PointerLhsId extends LhsId {
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		ctx.pushTrace(this);
 		
-		if (!(this.shadowDeref instanceof Deref)) {
+		if (!(this.expression instanceof Deref)) {
 			throw new CTEX_EXC(this, "Left hand identifer is not a dereference");
 		}
-		else this.deref = (Deref) this.shadowDeref;
+		else this.deref = (Deref) this.expression;
 		
 		this.expressionType = deref.check(ctx);
 		
@@ -67,7 +65,7 @@ public class PointerLhsId extends LhsId {
 		if (visitor.visit(this))
 			result.add((T) this);
 		
-		result.addAll(this.shadowDeref.visit(visitor));
+		result.addAll(this.expression.visit(visitor));
 		
 		return result;
 	}
@@ -83,18 +81,18 @@ public class PointerLhsId extends LhsId {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		this.shadowDeref.setContext(context);
+		this.expression.setContext(context);
 	}
 
 	public Expression getShadowDeref() {
-		return this.shadowDeref;
+		return this.expression;
 	}
 
 	public PointerLhsId clone() {
-		PointerLhsId lhs = new PointerLhsId(this.shadowDeref.clone(), this.getSource().clone());
+		PointerLhsId lhs = new PointerLhsId(this.expression.clone(), this.getSource().clone());
 		
 		if (this.deref != null)
-			lhs.deref = (Deref) lhs.shadowDeref;
+			lhs.deref = (Deref) lhs.expression;
 		
 		lhs.origin = this.origin;
 		
@@ -106,7 +104,7 @@ public class PointerLhsId extends LhsId {
 	}
 
 	public String codePrint() {
-		return this.shadowDeref.codePrint();
+		return this.expression.codePrint();
 	}
 	
 } 

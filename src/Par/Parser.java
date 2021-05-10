@@ -2567,6 +2567,11 @@ public class Parser {
 			if (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.INTLIT) {
 				accept();
 				Token token0 = accept();
+				
+				/* Accept 'f' */
+				if (current.type == TokenType.IDENTIFIER && current.spelling.equals("f"))
+					accept(TokenType.IDENTIFIER);
+				
 				return this.wrapPlaceholder(new Atom(new FLOAT(token.spelling + "." + token0.spelling), token.source));
 			}
 			/* INT[F] = FLOAT */

@@ -4,8 +4,10 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Statement.Assignment;
+import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Statement.Lhs.AsNLhsId;
 
@@ -15,6 +17,9 @@ public class AsNAssignment extends AsNStatement {
 		AsNAssignment assign = new AsNAssignment();
 		assign.pushOnCreatorStack(a);
 		a.castedNode = assign;
+		
+		if (a.assignArith != ASSIGN_ARITH.NONE)
+			throw new SNIPS_EXC("Attempted to cast Assignment with assign arith, " + a.getSource().getSourceMarker());
 		
 		/* Compute value */
 		assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());

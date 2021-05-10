@@ -33,10 +33,11 @@ main:                                        /* Function: main */
 main.L1: 
     cmp r4, r3
     bge main.L2
+    add r2, r4, #1
+    ldr r1, .P1969102551_s                   /* Load from .data section */
+    ldr r1, [r1]
+    add r0, r1, r2
     ldr r1, .P1969102551_s
-    ldr r2, [r1]
-    add r0, r4, #1
-    add r0, r2, r0
     str r0, [r1]
     add r4, r4, #1
     b main.L1

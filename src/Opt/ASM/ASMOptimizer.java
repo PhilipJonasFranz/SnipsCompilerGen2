@@ -12,6 +12,7 @@ import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMLdr;
+import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMMemBlock;
 import Imm.ASM.Memory.ASMMemBlock.MEM_BLOCK_MODE;
 import Imm.ASM.Memory.ASMMemOp;
@@ -48,6 +49,9 @@ import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.VFP.Memory.ASMVLdr;
+import Imm.ASM.VFP.Memory.ASMVLdrLabel;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
@@ -2254,10 +2258,30 @@ public class ASMOptimizer {
 							i--;
 						}
 					}
+					else if (ins0.get(i - 1) instanceof ASMLdrLabel) {
+						ASMLdrLabel ldr = (ASMLdrLabel) ins0.get(i - 1);
+						
+						if (ldr.target.reg == reg) {
+							if (mov instanceof ASMVMov) {
+								ASMVLdrLabel ldrLabel = new ASMVLdrLabel(ldr.target, (LabelOp) ldr.op0, ldr.dec);
+								ldrLabel.prefix = ldr.prefix;
+								
+								ins0.set(i - 1, ldrLabel);
+							}
+							
+							ldr.target.reg = mov.target.reg;
+							OPT_DONE();
+							ins0.remove(i);
+							i--;
+						}
+					}
 					else if (ins0.get(i - 1) instanceof ASMLdr) {
 						ASMLdr ldr = (ASMLdr) ins0.get(i - 1);
 						
 						if (ldr.target.reg == reg) {
+							if (mov instanceof ASMVMov) 
+								ins0.set(i - 1, new ASMVLdr(ldr.target, ldr.op0, ldr.op1));
+							
 							ldr.target.reg = mov.target.reg;
 							OPT_DONE();
 							ins0.remove(i);

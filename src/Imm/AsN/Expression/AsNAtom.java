@@ -38,9 +38,8 @@ public class AsNAtom extends AsNExpression {
 		}
 		else {
 			/* Load value via literal manager, directley or via label */
-			int value = Integer.parseInt(a.getType().toPrimitive().sourceCodeRepresentation());
-			boolean isVFP = a.getType().isFloat();
-			AsNBody.literalManager.loadValue(atom, value, target, isVFP);
+			int value = Integer.parseInt(a.getType().toPrimitive().sourceCodeRepresentation());	
+			AsNBody.literalManager.loadValue(atom, value, target, false);
 		}
 		
 		atom.registerMetric();

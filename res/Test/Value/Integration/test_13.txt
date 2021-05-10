@@ -240,8 +240,7 @@ main:                                        /* Function: main */
     bl ZBase.Z.equals                        /* Call ZBase.Z.equals */
     cmp r0, #0
     beq main.L0
-    ldr r2, [fp, #-20]
-    add r0, r2, #7
+    mov r0, #7                               /* Evaluate Expression */
     str r0, [fp, #-20]
 main.L0: 
     ldr r1, [fp, #-16]                       /* Load parameters */
@@ -249,8 +248,8 @@ main.L0:
     bl ZBase.Z.equals                        /* Call ZBase.Z.equals */
     cmp r0, #0
     beq main.L2
-    ldr r2, [fp, #-20]
-    add r0, r2, #5
+    ldr r1, [fp, #-20]                       /* Evaluate Expression */
+    add r0, r1, #5
     str r0, [fp, #-20]
 main.L2: 
     lsl r1, r9, #2                           /* Convert to bytes */
@@ -261,8 +260,8 @@ main.L2:
     bl ZBase.Z.equals                        /* Call ZBase.Z.equals */
     cmp r0, #0
     beq main.L4
-    ldr r2, [fp, #-20]
-    add r0, r2, #10
+    ldr r1, [fp, #-20]                       /* Evaluate Expression */
+    add r0, r1, #10
     str r0, [fp, #-20]
 main.L4: 
     ldr r1, .P264378910_X                    /* Evaluate Expression */

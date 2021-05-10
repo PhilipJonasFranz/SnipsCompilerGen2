@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -13,7 +12,6 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Lhs.StructSelectLhsId;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNStructSelect;
 
 public class AsNStructSelectLhsId extends AsNLhsId {
@@ -40,14 +38,6 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 		else {
 			/* Load value from stack */
 			id.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
-			
-			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				/* Load current value in R2 */
-				id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
-				
-				/* Create injector, new result is in R0 */
-				id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
-			}
 			
 			/* Store value to location */
 			ASMStr store = new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1));

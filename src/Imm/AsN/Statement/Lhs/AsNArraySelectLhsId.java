@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -13,7 +12,6 @@ import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Lhs.ArraySelectLhsId;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNArraySelect;
 import Imm.AsN.Expression.AsNArraySelect.SELECT_TYPE;
 
@@ -58,19 +56,8 @@ public class AsNArraySelectLhsId extends AsNLhsId {
 			else 
 				AsNArraySelect.injectAddressLoader(SELECT_TYPE.LOCAL_SINGLE, id, select, r, map, st);
 			
-			/* Create assign injector */
-			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				/* Pop the value off the stack */
-				id.instructions.add(new ASMPopStack(new RegOp(REG.R2)));
-				
-				id.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R0)));
-				
-				/* Create assign injector */
-				id.instructions.addAll(id.buildInjector(lhs.assign, 1, 2, true, true));
-			}
-			else 
-				/* Pop the value off the stack */
-				id.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
+			/* Pop the value off the stack */
+			id.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 			
 			st.popXWords(1);
 			

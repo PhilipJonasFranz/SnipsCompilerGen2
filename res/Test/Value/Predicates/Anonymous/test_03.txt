@@ -60,9 +60,9 @@ main.L1:
     add r0, r5, #1
     add lr, pc, #8
     mov pc, r3
-    ldr r0, [fp, #-8]
+    ldr r2, [fp, #-8]
     add r5, r5, #1
-    add r4, r4, r0
+    add r4, r4, r2
     add sp, sp, #8
     b main.L1
 main.L2: 

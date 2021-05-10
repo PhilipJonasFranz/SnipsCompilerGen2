@@ -76,11 +76,14 @@ HEAP_START: .word 0
 
 .global C.B.incr_P_1
 C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: INT */
+    push { r3 }
+    mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
-    add r1, r1, #4
-    ldr r2, [r1]
-    add r0, r2, #1
-    str r0, [r1]                             /* Store value to struct field */
+    ldr r1, [r1, #4]                         /* Load field from struct */
+    add r0, r1, #1
+    lsl r1, r3, #2                           /* Convert to bytes */
+    str r0, [r1, #4]                         /* Store value to struct field */
+    pop { r3 }
     bx lr
 
 .global C.A.incr_P_1

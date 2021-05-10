@@ -27,7 +27,7 @@ public class SimpleLhsId extends LhsId {
 	
 			/* ---< CONSTRUCTORS >--- */
 	public SimpleLhsId(IDRef ref, Source source) {
-		super(source);
+		super(ref, source);
 		this.ref = ref;
 	}
 	

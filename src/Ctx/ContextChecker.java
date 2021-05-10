@@ -42,12 +42,20 @@ import Imm.AST.Expression.TempAtom;
 import Imm.AST.Expression.TypeCast;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.AST.Expression.Arith.Add;
+import Imm.AST.Expression.Arith.BitAnd;
 import Imm.AST.Expression.Arith.BitNot;
+import Imm.AST.Expression.Arith.BitOr;
+import Imm.AST.Expression.Arith.BitXor;
+import Imm.AST.Expression.Arith.Lsl;
+import Imm.AST.Expression.Arith.Lsr;
 import Imm.AST.Expression.Arith.Mul;
+import Imm.AST.Expression.Arith.Sub;
 import Imm.AST.Expression.Arith.UnaryMinus;
+import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.BoolNFoldExpression;
 import Imm.AST.Expression.Boolean.BoolUnaryExpression;
 import Imm.AST.Expression.Boolean.Compare;
+import Imm.AST.Expression.Boolean.Or;
 import Imm.AST.Expression.Boolean.Ternary;
 import Imm.AST.Lhs.ArraySelectLhsId;
 import Imm.AST.Lhs.LhsId;
@@ -258,8 +266,6 @@ public class ContextChecker {
 		
 		/* Flush warn messages */
 		this.messages.stream().forEach(Message::flush);
-		
-		AST.print(0, true);
 		
 		CompilerDriver.stackTrace = null;
 		return null;
@@ -1327,9 +1333,60 @@ public class ContextChecker {
 					throw new CTEX_EXC(Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_TYPE, t.provisoFree());
 			}
 			else if (a.assignArith != ASSIGN_ARITH.NONE) {
-				if (!(ctype instanceof INT)) 
+				if (!ctype.isPrimitive()) 
 					throw new CTEX_EXC(Const.EXPRESSIONT_TYPE_NOT_APPLICABLE_FOR_ASSIGN_OP, t.provisoFree());
 			}
+			
+			if (a.assignArith == ASSIGN_ARITH.ADD_ASSIGN) {
+				a.value = new Add(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.AND_ASSIGN) {
+				a.value = new And(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.BIT_AND_ASSIGN) {
+				a.value = new BitAnd(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.BIT_ORR_ASSIGN) {
+				a.value = new BitOr(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.BIT_XOR_ASSIGN) {
+				a.value = new BitXor(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) {
+				a.value = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), Arrays.asList(a.lhsId.expression, a.value), a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.LSL_ASSIGN) {
+				a.value = new Lsl(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.LSR_ASSIGN) {
+				a.value = new Lsr(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.MOD_ASSIGN) {
+				a.value = new InlineCall(new NamespacePath("__op_mod"), new ArrayList(), Arrays.asList(a.lhsId.expression, a.value), a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.MUL_ASSIGN) {
+				a.value = new Mul(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.ORR_ASSIGN) {
+				a.value = new Or(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			else if (a.assignArith == ASSIGN_ARITH.SUB_ASSIGN) {
+				a.value = new Sub(a.lhsId.expression, a.value, a.getSource());
+				a.value.check(this);
+			}
+			
+			a.assignArith = ASSIGN_ARITH.NONE;
 		}
 		
 		a.lhsId.expressionType = t;

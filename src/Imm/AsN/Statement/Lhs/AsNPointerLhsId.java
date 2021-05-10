@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
-import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -15,7 +14,6 @@ import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Lhs.PointerLhsId;
-import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
 
 public class AsNPointerLhsId extends AsNLhsId {
@@ -42,15 +40,6 @@ public class AsNPointerLhsId extends AsNLhsId {
 		
 		if (lhs.assign.value.getType().isRegType()) {
 			id.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
-			
-			/* Create assign injector */
-			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
-				
-				/* Create assign injector, save address in R1 */
-				id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
-			}
-			
 			id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		else StackUtil.copyToAddressFromStack(lhs.assign.value.getType().wordsize(), id, st);

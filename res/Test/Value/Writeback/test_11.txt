@@ -21,4 +21,4 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    b __op_mod
+    b __op_mod                               /* Call __op_mod */

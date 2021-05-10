@@ -20,4 +20,4 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    b __op_div
+    b __op_div                               /* Call __op_div */

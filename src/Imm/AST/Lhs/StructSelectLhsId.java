@@ -29,7 +29,7 @@ public class StructSelectLhsId extends LhsId {
 	
 			/* ---< CONSTRUCTORS >--- */
 	public StructSelectLhsId(StructSelect select, Source source) {
-		super(source);
+		super(select, source);
 		this.select = select;
 	}
 	

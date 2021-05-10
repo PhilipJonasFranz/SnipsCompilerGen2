@@ -30,16 +30,15 @@ main:                                        /* Function: main */
     push { r0 }
     ldr r0, .P1823275353_A
     push { r0 }
-    sub r1, fp, #4
-    ldr r2, [r1]
-    add r0, r2, #5
-    str r0, [r1]                             /* Store value to struct field */
-    ldr r2, [r1]
-    sub r0, r2, #3
-    str r0, [r1]                             /* Store value to struct field */
-    ldr r2, [r1]
-    lsl r0, r2, #2
-    str r0, [r1]                             /* Store value to struct field */
+    ldr r1, [fp, #-4]                        /* Load field from struct */
+    add r0, r1, #5
+    str r0, [fp, #-4]                        /* Store value to struct field */
+    ldr r1, [fp, #-4]                        /* Load field from struct */
+    sub r0, r1, #3
+    str r0, [fp, #-4]                        /* Store value to struct field */
+    ldr r1, [fp, #-4]                        /* Load field from struct */
+    lsl r0, r1, #2
+    str r0, [fp, #-4]                        /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bx lr
 .P1823275353_A: .word A

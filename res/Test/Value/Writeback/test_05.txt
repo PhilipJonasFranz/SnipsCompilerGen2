@@ -30,9 +30,9 @@ main:                                        /* Function: main */
 main.L1: 
     cmp r5, r3
     bge main.L2
-    add r0, r5, #1
+    add r2, r5, #1
     add r5, r5, #1
-    add r4, r4, r0
+    add r4, r4, r2
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */

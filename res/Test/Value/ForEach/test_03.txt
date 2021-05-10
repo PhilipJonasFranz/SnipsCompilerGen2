@@ -92,9 +92,9 @@ main.L4:
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
-    ldr r0, [fp, #-52]                       /* Load field from struct */
+    ldr r2, [fp, #-52]                       /* Load field from struct */
     add r5, r5, #1
-    add r3, r3, r0
+    add r3, r3, r2
     b main.L4
 main.L5: 
     add sp, sp, #8                           /* Reset stack, remove iterator and counter */
