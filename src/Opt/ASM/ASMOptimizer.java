@@ -51,6 +51,7 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.ASM.VFP.Memory.ASMVLdrLabel;
+import Imm.ASM.VFP.Processing.Arith.ASMVCvt;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
@@ -1820,7 +1821,7 @@ public class ASMOptimizer {
 				ASMPushStack push = (ASMPushStack) ins0.get(i);
 				
 				REG reg = push.operands.get(0).reg;
-				if (reg.toInt() >= 10) continue;
+				if (reg.isSpecialReg()) continue;
 				
 				if (push.operands.size() == 1 && !push.optFlags.contains(OPT_FLAG.FUNC_CLEAN) && !push.optFlags.contains(OPT_FLAG.STRUCT_INIT)) {
 					
@@ -1833,6 +1834,7 @@ public class ASMOptimizer {
 								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
 								ins0.get(line) instanceof ASMStackOp || ins0.get(line) instanceof ASMPushStack ||
 								ins0.get(line) instanceof ASMLdr || ins0.get(line) instanceof ASMPopStack ||
+								ins0.get(line) instanceof ASMPushStack ||
 								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
 							break;
 						}
@@ -1859,7 +1861,7 @@ public class ASMOptimizer {
 				ASMPopStack pop = (ASMPopStack) ins0.get(i);
 				
 				REG reg = pop.operands.get(0).reg;
-				if (reg.toInt() >= 10) continue;
+				if (reg.isSpecialReg()) continue;
 				
 				if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 					ins0.remove(i);
@@ -1870,6 +1872,7 @@ public class ASMOptimizer {
 								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
 								ins0.get(line) instanceof ASMStackOp || 
 								ins0.get(line) instanceof ASMStr || ins0.get(line) instanceof ASMPushStack ||
+								ins0.get(line) instanceof ASMPopStack ||
 								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
 							break;
 						}
@@ -2219,6 +2222,12 @@ public class ASMOptimizer {
 						boolean patchUp = false;
 						if (ins0.get(i - 1) instanceof ASMBinaryData && !(ins0.get(i - 1) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) ins0.get(i - 1);
+							
+							if (data instanceof ASMVCvt) {
+								patchUp = false;
+								break;
+							}
+							
 							if (data.target.reg == reg && replace) {
 								data.target = mov.target;
 								OPT_DONE();
@@ -2409,6 +2418,7 @@ public class ASMOptimizer {
 						
 						if (ins0.get(i) instanceof ASMBinaryData && !(ins0.get(i) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) ins0.get(i);
+							
 							boolean remove = false;
 							if (data.op0 != null && data.op0.reg == REG.toReg(a)) {
 								/* Replace */
