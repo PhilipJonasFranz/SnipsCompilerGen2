@@ -35,6 +35,8 @@ public class AsNCompare extends AsNNFoldExpression {
 		AsNCompare cmp = new AsNCompare();
 		cmp.pushOnCreatorStack(c);
 		c.castedNode = cmp;
+
+		boolean isVFP = c.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
 		
 		if (c.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
@@ -56,7 +58,7 @@ public class AsNCompare extends AsNNFoldExpression {
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */
-			cmp.generatePrimitiveLoaderCode(cmp, c, c.operands.get(0), c.operands.get(1), r, map, st, 0, 1);
+			cmp.generatePrimitiveLoaderCode(cmp, c, c.operands.get(0), c.operands.get(1), r, map, st, 0, 1, isVFP);
 			
 			cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}

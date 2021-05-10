@@ -45,7 +45,7 @@ public class VRegSet {
 	}
 	
 	public int findFree() {
-		for (int i = 3; i < 11; i++) 
+		for (int i = 3; i < regs.length; i++) 
 			if (regs [i].status == STATUS.FREE) return i;
 		
 		return -1;

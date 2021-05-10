@@ -807,8 +807,9 @@ public class ASMOptimizer {
 			if (ins instanceof ASMBranch || ins instanceof ASMPushStack || ins instanceof ASMPopStack || 
 				ins instanceof ASMLdr || ins instanceof ASMLdrStack) continue;
 			
-			for (int a = 0; a < 10; a++) {
-				REG reg = REG.toReg(a);
+			for (REG reg : REG.values()) {
+				if (reg.isSpecialReg()) continue;
+				
 				if (ASMOptimizer.overwritesReg(ins, reg)) {
 					for (int z = i + 1; z < ins0.size(); z++) {
 						ASMInstruction ins1 = ins0.get(z);
@@ -820,9 +821,9 @@ public class ASMOptimizer {
 						 * number descending, eventually no more pushdown can be done.
 						 */
 						boolean skip = false;
-						for (int k = 0; k < 10; k++) {
-							REG reg0 = REG.toReg(k);
-							if (ASMOptimizer.overwritesReg(ins1, reg0) && (k <= a || ASMOptimizer.readsReg(ins, reg0))) {
+						for (REG reg0 : REG.values()) {
+							if (reg0.isSpecialReg()) continue;
+							if (ASMOptimizer.overwritesReg(ins1, reg0) && (reg0.toInt() <= reg.toInt() || ASMOptimizer.readsReg(ins, reg0))) {
 								skip = true;
 							}
 						}
@@ -864,7 +865,7 @@ public class ASMOptimizer {
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
 				
-					if (reg.toInt() > 9 || mov.target.reg.toInt() > 9) continue;
+					if (reg.isSpecialReg() || mov.target.reg.isSpecialReg()) continue;
 
 					boolean remove = true;
 					
@@ -977,14 +978,17 @@ public class ASMOptimizer {
 				ins instanceof ASMLdr || ins instanceof ASMStr ||
 				ins instanceof ASMLdrStack || ins instanceof ASMStrStack) continue;
 			
-			for (int a = 0; a < 10; a++) {
-				REG reg = REG.toReg(a);
+			for (REG reg : REG.values()) {
+				if (reg.isSpecialReg()) continue;
+				
 				if (ASMOptimizer.overwritesReg(ins, reg)) {
 					
 					List<REG> read = new ArrayList();
-					for (int k = 0; k < 10; k++)
-						if (ASMOptimizer.readsReg(ins, REG.toReg(k)))
-							read.add(REG.toReg(k));
+					for (REG reg0 : REG.values()) {
+						if (reg0.isSpecialReg()) continue;
+						if (ASMOptimizer.readsReg(ins, reg0))
+							read.add(reg0);
+					}
 					
 					for (int k = i + 1; k < ins0.size(); k++) {
 						ASMInstruction ins1 = ins0.get(k);
@@ -2203,7 +2207,7 @@ public class ASMOptimizer {
 				
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
-					if (reg == REG.R0 || reg == REG.R1 || reg == REG.R2) {
+					if (reg.isOperandReg()) {
 						
 						boolean replace = true;
 						
@@ -2331,11 +2335,12 @@ public class ASMOptimizer {
 			if (ins0.get(i - 1) instanceof ASMMov) {
 				ASMMov mov = (ASMMov) ins0.get(i - 1);
 				/* For all operand regs */
-				for (int a = 0; a < 2; a++) {
-					if (mov.target.reg == REG.toReg(a) && mov.op1 instanceof RegOp) {
+				for (REG a : REG.values()) {
+					if (!a.isOperandReg()) continue;
+					if (mov.target.reg == a && mov.op1 instanceof RegOp) {
 						if (ins0.get(i) instanceof ASMCmp) {
 							ASMCmp cmp = (ASMCmp) ins0.get(i);
-							if (cmp.op0 != null && cmp.op0.reg == REG.toReg(a)) {
+							if (cmp.op0 != null && cmp.op0.reg == a) {
 								/* Replace */
 								cmp.op0 = (RegOp) mov.op1;
 								OPT_DONE();
@@ -2343,7 +2348,7 @@ public class ASMOptimizer {
 								ins0.remove(i - 1);
 								i--;
 							}
-							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == REG.toReg(a)) {
+							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == a) {
 								/* Replace */
 								cmp.op1 = (RegOp) mov.op1;
 								OPT_DONE();
@@ -2579,8 +2584,15 @@ public class ASMOptimizer {
 					/* Break is reg is overwritten */
 					
 					for (int a = i + 1; a < ins0.size(); a++) {
-						if (ins0.get(a) instanceof ASMBranch ||
-							ins0.get(a) instanceof ASMLabel ||
+						if (ins0.get(a) instanceof ASMBranch) {
+							ASMBranch branch = (ASMBranch) ins0.get(a);
+							if (branch.cond != null || branch.type != BRANCH_TYPE.B) {
+								clear = false;
+								break;
+							}
+						}
+						
+						if (ins0.get(a) instanceof ASMLabel ||
 							ins0.get(a) instanceof ASMMov && ((ASMMov) ins0.get(a)).target.reg == REG.PC) {
 							clear = false;
 							break;

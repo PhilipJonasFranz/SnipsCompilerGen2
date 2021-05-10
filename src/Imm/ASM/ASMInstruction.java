@@ -119,4 +119,8 @@ public abstract class ASMInstruction {
 		return 1;
 	}
 	
+	public boolean isVectorOperation() {
+		return this.getClass().getSimpleName().startsWith("ASMV");
+	}
+	
 } 

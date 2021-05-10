@@ -105,7 +105,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 	
 	
 		/* --- OPERAND LOADING --- */
-	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1) throws CGEN_EXC {
+	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1, boolean isVFP) throws CGEN_EXC {
 		
 		/* Some assertions for debug purposes */
 		if (e0 instanceof TypeCast) {
@@ -129,7 +129,9 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		else if (left instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
 			if (target1 != 0) {
-				m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
+				else m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+				
 				r.copy(0, target1);
 			}
 			
@@ -139,7 +141,9 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		else if (right instanceof IDRef) {
 			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
 			if (target0 != 0) {
-				m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(0)));
+				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target0), new VRegOp(0)));
+				else m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(0)));
+				
 				r.copy(0, target0);
 			}
 			
@@ -175,18 +179,25 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			
 			/* Check if instructions were added, if not, this means that the operand is already loaded in the correct location */
 			if (target1 != 0) {
-				m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
+				else m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+				
 				r.copy(0, target1);
 			}
 			
 			if (free == -1) {
 				/* Pop the left operand in the target register */
-				m.instructions.add(new ASMPopStack(new RegOp(target0)));
+				if (isVFP) {
+					m.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
+					m.instructions.add(new ASMVMov(new VRegOp(target0), new RegOp(REG.R0)));
+				}
+				else m.instructions.add(new ASMPopStack(new RegOp(target0)));
 				st.pop();
 			}
 			else {
 				r.free(free);
-				m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(free)));
+				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target0), new VRegOp(free)));
+				else m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(free)));
 			}
 		}
 	}
@@ -249,9 +260,6 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			}
 		}
 		
-		/* Move result from VFP to regular registers */
-		if (isVFP) m.instructions.add(new ASMVMov(new RegOp(REG.R0), new VRegOp(REG.S0)));
-		
 		/* Clean up Reg Set */
 		r.free(0, 1, 2);
 	}
@@ -267,7 +275,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			this.loadOperand(e0, 1, r, map, st, isVFP);
 			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2, isVFP);
 		}
-		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2);
+		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2, isVFP);
 	}
 	
 	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
@@ -275,7 +283,6 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		 * 		no need for intermidiate result in R0 */
 		if (e instanceof IDRef) {
 			this.instructions.addAll(AsNIDRef.cast((IDRef) e, r, map, st, target).getInstructions());
-			if (isVFP) this.instructions.add(new ASMVMov(new VRegOp(target), new RegOp(REG.R0)));
 		}
 		else {
 			this.instructions.addAll(AsNExpression.cast(e, r, map, st).getInstructions());

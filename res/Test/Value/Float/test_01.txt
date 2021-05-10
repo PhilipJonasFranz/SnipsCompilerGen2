@@ -25,30 +25,29 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    ldr r0, .P1236809881_LIT_1069899841      /* Evaluate Expression */
-    ldr r1, .P1236809881_LIT_1067450368      /* Literal is too large, load from literal pool */
-    ldr r2, .P1236809881_LIT_1075838976      /* Literal is too large, load from literal pool */
+    vldr s0, .P1236809881_LIT_1069899841     /* Evaluate Expression */
+    vldr s1, .P1236809881_LIT_1067450368     /* Literal is too large, load from literal pool */
+    vldr s2, .P1236809881_LIT_1075838976     /* Literal is too large, load from literal pool */
     stmfd sp!, {r0-r2}
-    mov r5, #0
-    mov r4, #0
+    vmov s0, #0                              /* Evaluate Expression */
+    vmov s3, #0
+    vmov s4, #0
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
 main.L1: 
-    cmp r4, #3
+    cmp r3, #3
     beq main.L2
-    lsl r2, r4, #2
+    lsl r2, r3, #2
     sub r0, fp, #12
-    ldr r5, [r0, r2]
-    vadd s0, s1, s2
-    add r4, r4, #1
-    mov r2, r5
-    mov r1, r3                               /* Evaluate Expression */
-    mov r3, s0
-    vmov r0, s0
+    vldr s4, [r0, r2]
+    vmov s1, s3                              /* Evaluate Expression */
+    vmov s2, s4
+    vadd s3, s3, s4
+    add r3, r3, #1
     b main.L1
 main.L2: 
-    vcvt.F32.S32 s0, r3
-    vmov r0, s0
+    vmov s0, s3                              /* Evaluate Expression */
+    vcvt.F32.S32 r0, s3
     mov sp, fp
     bx lr
 .P1236809881_LIT_1075838976: .word 1075838976

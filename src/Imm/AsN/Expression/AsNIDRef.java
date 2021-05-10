@@ -19,6 +19,8 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.IDRef;
 import Res.Const;
 
@@ -54,6 +56,32 @@ public class AsNIDRef extends AsNExpression {
 				/* Copy value in target reg */
 				ref.instructions.add(new ASMMov(new RegOp(target), new RegOp(location)));
 				r.copy(location, target);
+			}
+		}
+		/* Declaration is already loaded in Reg Stack */
+		else if (r.getVRegSet().declarationLoaded(i.origin)) {
+			int location = r.getVRegSet().declarationRegLocation(i.origin);
+			
+			/* Declaration is loaded in target reg, make copy */
+			if (location == target) {
+				int free = r.getVRegSet().findFree();
+				
+				if (free != -1) {
+					/* Copy declaration to other free location, leave result in target reg */
+					ref.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(target)));
+					r.getVRegSet().copy(target, free);
+				}
+				else {
+					/* No free reg to move copy to, save in stack */
+					ref.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new VRegOp(target), new RegOp(REG.SP), 
+						new PatchableImmOp(PATCH_DIR.DOWN, -4)));
+					st.push(i.origin);
+				}
+			}
+			else if (location != target) {
+				/* Copy value in target reg */
+				ref.instructions.add(new ASMVMov(new VRegOp(target), new VRegOp(location)));
+				r.getVRegSet().copy(location, target);
 			}
 		}
 		/* Load declaration from global memory */

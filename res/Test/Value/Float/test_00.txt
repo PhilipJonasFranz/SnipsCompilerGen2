@@ -20,11 +20,11 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    vldr s2, .P1208180730_LIT_1075763479
+    vldr s0, .P1208180730_LIT_1075763479     /* Evaluate Expression */
+    vmov s2, r0
     vldr s1, .P1208180730_LIT_1092616192     /* Literal is too large, load from literal pool */
-    vadd s0, s1, s2
-    vcvt.F32.S32 s0, s0
-    vmov r0, s0
+    vadd s0, s1, r0
+    vcvt.F32.S32 r0, s0
     bx lr
 .P1208180730_LIT_1092616192: .word 1092616192
 .P1208180730_LIT_1075763479: .word 1075763479

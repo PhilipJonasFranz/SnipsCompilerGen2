@@ -21,6 +21,8 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
 import Res.Const;
@@ -35,10 +37,15 @@ public class AsNSimpleLhsId extends AsNLhsId {
 
 		IDRef ref = lhs.ref;
 		
-		/* Declaration already loaded, just move value into register */
+		/* Declaration loaded in RegSet, just move value into register */
 		if (r.declarationLoaded(ref.origin)) {
 			int reg = r.declarationRegLocation(ref.origin);
 			id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
+		}
+		/* Declaration loaded in VFP, just move value into register */
+		else if (r.getVRegSet().declarationLoaded(ref.origin)) {
+			int reg = r.getVRegSet().declarationRegLocation(ref.origin);
+			id.instructions.add(new ASMVMov(new VRegOp(reg), new VRegOp(0)));
 		}
 		/* Variable is global variable and type is primitive, store to memory.
 		 * 		Other types in memory are handled down below. */

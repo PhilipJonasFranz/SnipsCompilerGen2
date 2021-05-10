@@ -25,6 +25,8 @@ public class AsNOr extends AsNNFoldExpression {
 		AsNOr or = new AsNOr();
 		or.pushOnCreatorStack(o);
 		o.castedNode = or;
+
+		boolean isVFP = o.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
 		
 		if (o.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
@@ -69,7 +71,7 @@ public class AsNOr extends AsNNFoldExpression {
 		}
 		else {
 			/* Load Operands */
-			or.generatePrimitiveLoaderCode(or, o, o.operands.get(0), o.operands.get(1), r, map, st, 0, 1);
+			or.generatePrimitiveLoaderCode(or, o, o.operands.get(0), o.operands.get(1), r, map, st, 0, 1, isVFP);
 			
 			ASMOrr orr = new ASMOrr(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R1));
 			orr.updateCondField();

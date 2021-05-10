@@ -50,7 +50,23 @@ public enum REG {
 		if (this == REG.SP) return 13;
 		if (this == REG.LR) return 14;
 		if (this == REG.PC) return 15;
+		
+		if (this.toString().startsWith("S")) {
+			String s = this.toString();
+			return 16 + Integer.parseInt(s.substring(1));
+		}
+		
 		return -1;
+	}
+	
+	public boolean isSpecialReg() {
+		return this == REG.R10 || this == REG.FP || this == REG.R12 ||
+				this == REG.SP || this == REG.LR || this == REG.PC;
+	}
+	
+	public boolean isOperandReg() {
+		return this == REG.R0 || this == REG.R1 || this == REG.R2 ||
+				this == REG.S0 || this == REG.S1 || this == REG.S2;
 	}
 	
 }

@@ -31,6 +31,8 @@ import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Statement.ForEachStatement;
@@ -157,6 +159,44 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			
 			/* Move value to location of iterator */
 			f.instructions.add(new ASMMov(new RegOp(loc), new RegOp(REG.R0)));
+		}
+		/* Load value in iterator depending on counter */
+		else if (r.getVRegSet().declarationLoaded(a.iterator)) {
+			/* In Reg Set */
+			int loc = r.getVRegSet().declarationRegLocation(a.iterator);
+			
+			if (a.select != null) {
+				if (a.select.getShadowRef() instanceof StructSelect) {
+					
+					StructSelect sel = (StructSelect) a.select.getShadowRef();
+
+					AsNStructSelect.injectAddressLoader(f, sel, r, map, st, false);
+					
+					/* Load counter */
+					f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 0).getInstructions());
+					
+					/* Multiply counter with word size */
+					if (a.counter.getType().wordsize() > 1) {
+						f.instructions.add(new ASMMov(new RegOp(REG.R2), new ImmOp(a.counter.getType().wordsize())));
+						f.instructions.add(new ASMMult(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R2)));
+					}
+					
+					f.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
+					
+					/** Counter offset to absolute address, final address now in R1 */
+					f.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R0)));
+					
+					/* Load value */
+					f.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1)));
+				}
+				else 
+					f.instructions.addAll(AsNArraySelect.cast(a.select, r, map, st).getInstructions());
+			}
+			else 
+				f.instructions.addAll(AsNDeref.cast(a.shadowRef, r, map, st).getInstructions());
+			
+			/* Move value to location of iterator */
+			f.instructions.add(new ASMVMov(new VRegOp(loc), new RegOp(REG.R0)));
 		}
 		else {
 			/* In Stack */
