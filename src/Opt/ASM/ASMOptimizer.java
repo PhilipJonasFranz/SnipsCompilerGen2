@@ -49,6 +49,7 @@ import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.ASM.VFP.Memory.ASMVLdrLabel;
 import Imm.ASM.VFP.Memory.ASMVMemBlock;
@@ -56,6 +57,7 @@ import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVCvt;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
+import Imm.ASM.VFP.Processing.Arith.ASMVNeg;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
@@ -148,7 +150,7 @@ public class ASMOptimizer {
 			 * ldr r0, [r1]
 			 * mov r4, r0
 			 * Replace with:
-			 * add r4, [r1]
+			 * ldr r4, [r1]
 			 */
 			this.removeLdrIndirectTargeting(ins);
 			
@@ -600,6 +602,10 @@ public class ASMOptimizer {
 		else if (ins instanceof ASMDirective) {
 			return false;
 		}
+		else if (ins instanceof ASMVNeg) {
+			ASMVNeg neg = (ASMVNeg) ins;
+			return neg.target.reg == reg;
+		}
 		else throw new SNIPS_EXC("Cannot check if instruction overwrites register: " + ins.getClass().getName());
 	}
 	
@@ -655,6 +661,10 @@ public class ASMOptimizer {
 		}
 		else if (ins instanceof ASMDirective) {
 			return false;
+		}
+		else if (ins instanceof ASMVNeg) {
+			ASMVNeg neg = (ASMVNeg) ins;
+			return ((RegOp) neg.op0).reg == reg;
 		}
 		else throw new SNIPS_EXC("Cannot check if instruction reads register: " + ins.getClass().getName());
 	}
@@ -1757,7 +1767,12 @@ public class ASMOptimizer {
 									 */
 									if (ins0.get(a) instanceof ASMBranch) {
 										ASMBranch branch = (ASMBranch) ins0.get(a);
-										if (branch.optFlags.contains(OPT_FLAG.LOOP_BRANCH)) {
+										
+										/* 
+										 * Either by a loop branch or a call branch with an operand register we have
+										 * to assume that the register is used.
+										 */
+										if (branch.optFlags.contains(OPT_FLAG.LOOP_BRANCH) || (branch.type == BRANCH_TYPE.BL && reg.isOperandReg())) {
 											used = true;
 											break;
 										}
@@ -2208,7 +2223,11 @@ public class ASMOptimizer {
 						}
 						
 						if (replace) {
-							ins0.set(ins0.indexOf(pop), new ASMMov(new RegOp(newReg), new RegOp(pushReg)));
+							if (push instanceof ASMVPushStack) 
+								ins0.set(ins0.indexOf(pop), new ASMVMov(new VRegOp(newReg), new VRegOp(pushReg)));
+							else
+								ins0.set(ins0.indexOf(pop), new ASMMov(new RegOp(newReg), new RegOp(pushReg)));
+							
 							ins0.remove(push);
 							
 							OPT_DONE();
