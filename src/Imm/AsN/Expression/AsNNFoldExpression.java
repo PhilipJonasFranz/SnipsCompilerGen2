@@ -12,6 +12,8 @@ import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -166,43 +168,68 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			 * Expression is inline call, which means that push/pop most likely
 			 * cannot be removed during optimizing. Attempt to move to other reg.
 			 */
-			if (right instanceof InlineCall) free = r.findFree();
+			if (right instanceof InlineCall) {
+				if (isVFP) free = r.getVRegSet().findFree();
+				else free = r.findFree();
+			}
 			
-			if (free != -1) {
-				m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
-				r.getReg(free).setDeclaration(null);
+			if (isVFP) {
+				if (free != -1) {
+					m.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(REG.S0)));
+					r.getVRegSet().getReg(free).setDeclaration(null);
+				}
+				else {
+					m.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
+					st.pushDummy();
+				}
 			}
 			else {
-				m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-				st.pushDummy();
+				if (free != -1) {
+					m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
+					r.getReg(free).setDeclaration(null);
+				}
+				else {
+					m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+					st.pushDummy();
+				}
 			}
 			
-			r.free(0);
+			if (isVFP) r.getVRegSet().free(0);
+			else r.free(0);
 			
 			/* Compute the right operand and move it to target location */
 			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
 			
 			/* Check if instructions were added, if not, this means that the operand is already loaded in the correct location */
 			if (target1 != 0) {
-				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
-				else m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
-				
-				r.copy(0, target1);
+				if (isVFP) {
+					m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
+					r.getVRegSet().copy(0, target1);
+				}
+				else {
+					m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+					r.copy(0, target1);
+				}
 			}
 			
 			if (free == -1) {
 				/* Pop the left operand in the target register */
 				if (isVFP) {
-					m.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
-					m.instructions.add(new ASMVMov(new VRegOp(target0), new RegOp(REG.R0)));
+					m.instructions.add(new ASMVPopStack(new VRegOp(REG.S0)));
+					m.instructions.add(new ASMVMov(new VRegOp(target0), new RegOp(REG.S0)));
 				}
 				else m.instructions.add(new ASMPopStack(new RegOp(target0)));
 				st.pop();
 			}
 			else {
-				r.free(free);
-				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target0), new VRegOp(free)));
-				else m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(free)));
+				if (isVFP) {
+					r.getVRegSet().free(free);
+					m.instructions.add(new ASMVMov(new VRegOp(target0), new VRegOp(free)));
+				}
+				else {
+					r.free(free);
+					m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(free)));
+				}
 			}
 		}
 	}
@@ -230,32 +257,53 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 				 * Expression is inline call, which means that push/pop most likely
 				 * cannot be removed during optimizing. Attempt to move to other reg.
 				 */
-				if (op0 instanceof InlineCall) free = r.findFree();
+				if (op0 instanceof InlineCall) {
+					if (isVFP) free = r.getVRegSet().findFree();
+					else free = r.findFree();
+				}
 				
 				if (requireClear) {
-					if (free != -1) {
-						m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
-						r.getReg(free).setDeclaration(null);
+					if (isVFP) {
+						if (free != -1) {
+							m.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(REG.S0)));
+							r.getVRegSet().getReg(free).setDeclaration(null);
+						}
+						else {
+							m.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
+							st.pushDummy();
+						}
 					}
 					else {
-						m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-						st.pushDummy();
+						if (free != -1) {
+							m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
+							r.getReg(free).setDeclaration(null);
+						}
+						else {
+							m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+							st.pushDummy();
+						}
 					}
 				}
-				else this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(REG.R0)));
+				else {
+					if (isVFP) this.instructions.add(new ASMVMov(new VRegOp(REG.S1), new VRegOp(REG.S0)));
+					else this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(REG.R0)));
+				}
 				
-				r.free(2);
+				if (isVFP) r.getVRegSet().free(2);
+				else r.free(2);
 				
 				loadOperand(b.operands.get(i), 2, r, map, st, isVFP);
 				
 				if (requireClear) {
 					if (free != -1) {
 						/* Move back from original reg */
-						this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(free)));
+						if (isVFP) this.instructions.add(new ASMVMov(new VRegOp(REG.S1), new RegOp(free)));
+						else this.instructions.add(new ASMMov(new RegOp(REG.R1), new RegOp(free)));
 						r.free(free);
 					}
 					else {
-						this.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
+						if (isVFP) this.instructions.add(new ASMVPopStack(new VRegOp(REG.S1)));
+						else this.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 						st.pop();
 					}
 				}
@@ -267,7 +315,8 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		}
 		
 		/* Clean up Reg Set */
-		r.free(0, 1, 2);
+		if (isVFP) r.getVRegSet().free(0, 1, 2);
+		else r.free(0, 1, 2);
 	}
 	
 	protected void generateLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, boolean isVFP) throws CGEN_EXC {

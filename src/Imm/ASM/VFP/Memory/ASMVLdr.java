@@ -7,7 +7,7 @@ import Imm.ASM.Util.Operands.RegOp;
 public class ASMVLdr extends ASMLdr {
 
 	public ASMVLdr(RegOp target, Operand op1) {
-		super(target, null, op1);
+		super(target, op1);
 	}
 	
 	public ASMVLdr(RegOp target, Operand op0, Operand op1) {

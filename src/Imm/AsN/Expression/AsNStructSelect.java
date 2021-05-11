@@ -22,6 +22,8 @@ import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -45,6 +47,8 @@ public class AsNStructSelect extends AsNExpression {
 		sel.pushOnCreatorStack(s);
 		s.castedNode = sel;
 		
+		boolean isVFP = s.getType().isFloat();
+		
 		if (s.selection instanceof InlineCall) {
 			/* Struct Select is nested struct call, simply extract called function and call it */
 			InlineCall ic = (InlineCall) s.selection;
@@ -65,7 +69,11 @@ public class AsNStructSelect extends AsNExpression {
 				}
 				else {
 					/* Load in register */
-					ASMLdr load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
+					ASMLdr load = null; 
+					
+					if (isVFP) load = new ASMVLdr(new VRegOp(REG.S0), new RegOp(REG.R1));
+					else load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
+					
 					load.comment = new ASMComment("Load field from struct");
 					sel.instructions.add(load);
 				}
