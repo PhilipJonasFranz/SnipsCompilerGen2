@@ -89,16 +89,16 @@ public class AsNStructureInit extends AsNExpression {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
 			if (elements.get(i) instanceof Atom) {
 				Atom atom = (Atom) elements.get(i);
-				
-				/* Load atom directley in destination */
-				node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
-				regs++;
-				
+
 				/* If group size is 3, push them on the stack */
 				if (regs == 3 || elements.get(i).getType().isFloat() != isVFP) {
 					flush(regs, node, isVFP);
 					regs = 0;
 				}
+				
+				/* Load atom directley in destination */
+				node.instructions.addAll(AsNAtom.cast(atom, r, map, st, regs).getInstructions());
+				regs++;
 				
 				st.pushDummy();
 			}

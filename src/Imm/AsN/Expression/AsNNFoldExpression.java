@@ -123,9 +123,9 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			assert(e1.getType().getCoreType() instanceof PRIMITIVE);
 		}
 		
-		/* If operands are TypeCasts, unrwrap expression from type cast */
-		Expression left = (e0 instanceof TypeCast)? ((TypeCast) e0).expression : e0;
-		Expression right = (e1 instanceof TypeCast)? ((TypeCast) e1).expression : e1;
+		/* If operands are TypeCasts and the TypeCast is trivial, unrwrap expression from type cast */
+		Expression left = (e0 instanceof TypeCast && ((TypeCast) e0).isTrivialCast())? ((TypeCast) e0).expression : e0;
+		Expression right = (e1 instanceof TypeCast && ((TypeCast) e1).isTrivialCast())? ((TypeCast) e1).expression : e1;
 		
 		/* Load both operands directley */
 		if (left instanceof IDRef && right instanceof IDRef) {

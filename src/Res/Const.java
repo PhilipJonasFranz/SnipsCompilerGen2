@@ -78,6 +78,8 @@ public class Const {
 	
 	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_DECLARATION = "Value type does not match the stated type for declaration '%s': %s vs %s";
 	
+	public static final String INCOMPATIBLE_TYPES_FOR_FLOP = "Incompatible operand types for FLOAT operation: %s";
+	
 	public static final String AUTO_TYPE_PROBLEMATIC_AT_THIS_LOCATION = "Using an AUTO type at this location is problematic, use actual type descriptor";
 	
 	public static final String EXPRESSION_TYPE_DOES_NOT_MATCH_VARIABLE = "Expression type does not match the variable type: %s vs %s";

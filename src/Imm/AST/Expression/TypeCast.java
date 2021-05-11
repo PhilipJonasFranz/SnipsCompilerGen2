@@ -86,5 +86,20 @@ public class TypeCast extends Expression {
 	public String codePrint() {
 		return "(" + this.castType.codeString() + ") " + this.expression.codePrint();
 	}
+	
+	/**
+	 * Returns true if this type cast is trivial. A trivial cast is a cast that, during AsN casting,
+	 * does not have to generate any additional assembly instructions. There are only two cases where
+	 * this is needed: <br>
+	 *  <br>
+	 * 		FLOAT -> Non-FLOAT <br>
+	 * 		Non-FLOAT -> FLOAT <br>
+	 *  <br>
+	 * In any other case the cast is trivial.
+	 */
+	public boolean isTrivialCast() {
+		return !((this.expression.getType().isFloat() && !this.castType.isFloat()) || 
+				(!this.expression.getType().isFloat() && this.castType.isFloat()));
+	}
 
 } 

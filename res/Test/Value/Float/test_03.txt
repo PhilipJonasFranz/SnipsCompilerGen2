@@ -2,17 +2,17 @@ SOURCE
 struct Vector3F {
 
 	float x;
-	float y;
+	int y;
 	float z;
 
 }
 
 float norm(Vector3F* vec) {
-	return vec->x + vec->y + vec->z;
+	return vec->x + (float) vec->y + vec->z;
 }
 
 int main() {
-	Vector3F vec = Vector3F::(2.5f, 1f, 0f);
+	Vector3F vec = Vector3F::(2.5f, 2, 0f);
 	return (int) norm(&vec);
 }
 
@@ -33,7 +33,10 @@ HEAP_START: .word 0
 norm:                                        /* Function: norm */
     lsl r1, r0, #2                           /* Convert to bytes */
     vldr s0, [r1, #4]                        /* Load field from struct */
-    vldr s2, [r1, #8]
+    vpush { s0 }
+    vldr s0, [r1, #8]
+    vcvt.S32.F32 s2, s0
+    vpop { s0 }
     vadd s0, s0, s2
     vldr s2, [r1, #12]
     vadd s0, s0, s2
@@ -43,10 +46,12 @@ norm:                                        /* Function: norm */
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    vldr s1, .P1294068183_LIT_1065353216     /* Load value '1.0' from pool */
-    vldr s2, .P1294068183_LIT_1075838976     /* Load value '2.5' from pool */
     vmov s0, #0                              /* Evaluate Expression */
-    vstmfd sp!, {s0-s2}
+    vpush { s0 }
+    mov r0, #2
+    push { r0 }
+    vldr s0, .P1294068183_LIT_1075838976     /* Load value '2.5' from pool */
+    vpush { s0 }
     ldr r0, .P1294068183_Vector3F
     push { r0 }
     sub r0, fp, #16                          /* Evaluate Expression */
@@ -58,4 +63,3 @@ main:                                        /* Function: main */
     ldmfd sp!, {fp, pc}
 .P1294068183_Vector3F: .word Vector3F
 .P1294068183_LIT_1075838976: .word 1075838976
-.P1294068183_LIT_1065353216: .word 1065353216

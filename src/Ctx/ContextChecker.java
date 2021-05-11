@@ -1506,7 +1506,10 @@ public class ContextChecker {
 				throw new CTEX_EXC(e, Const.CAN_ONLY_APPLY_TO_PRIMITIVE_OR_POINTER, e.getType().provisoFree());
 		
 		int fOps = (int) b.operands.stream().filter(x -> x.getType().isFloat()).count();
-		if (fOps > 0 && fOps != b.operands.size()) throw new CTEX_EXC(b, "E");
+		if (fOps > 0 && fOps != b.operands.size()) {
+			String s = b.operands.stream().filter(x -> !x.getType().isFloat()).map(x -> x.getType().toString()).collect(Collectors.joining(", "));
+			throw new CTEX_EXC(b, Const.INCOMPATIBLE_TYPES_FOR_FLOP, s);
+		}
 		
 		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();

@@ -2261,7 +2261,7 @@ public class ASMOptimizer {
 						if (ins0.get(i - 1) instanceof ASMBinaryData && !(ins0.get(i - 1) instanceof ASMMov)) {
 							ASMBinaryData data = (ASMBinaryData) ins0.get(i - 1);
 							
-							if (data instanceof ASMVCvt) {
+							if (data instanceof ASMVCvt && mov.target.reg.toInt() < 16) {
 								patchUp = false;
 								break;
 							}
