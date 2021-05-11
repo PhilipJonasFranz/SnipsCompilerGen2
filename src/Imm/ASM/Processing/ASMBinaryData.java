@@ -52,7 +52,23 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	
 			/* ---< METHODS >--- */
 	public String build(String operation) {
-		String s = CompilerDriver.printDepth + operation + ((this.updateConditionField)? "s" : "") + ((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
+		String s = CompilerDriver.printDepth + operation + 
+				((this.updateConditionField)? "s" : "") + 
+				((this.cond != null)? this.cond.getCondPostfix() : "" ) + " " + 
+				this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
+		
+		/* Append shift for op1 */
+		if (this.shift != null) 
+			s += this.shift.getShiftPostfix();
+		
+		return s;
+	}
+	
+	public String build(String operation, String op_postfix) {
+		String s = CompilerDriver.printDepth + operation + 
+				((this.updateConditionField)? "s" : "") + 
+				((this.cond != null)? this.cond.getCondPostfix() : "" ) + op_postfix + " " + 
+				this.target.toString() + ", " + this.op0.toString() + ", " + this.op1.toString();
 		
 		/* Append shift for op1 */
 		if (this.shift != null) 
