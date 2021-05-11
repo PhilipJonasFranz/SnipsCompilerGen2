@@ -1972,6 +1972,11 @@ public class ASMOptimizer {
 				ASMPushStack push0 = (ASMPushStack) ins0.get(i - 1);
 				ASMPushStack push1 = (ASMPushStack) ins0.get(i);
 				
+				/* Prevent merges of vfp and non-vfp pushes */
+				if (push0 instanceof ASMVPushStack && !(push1 instanceof ASMVPushStack) ||
+						!(push0 instanceof ASMVPushStack) && push1 instanceof ASMVPushStack) continue;
+				
+				/* Prevent merges of pushes with special registers */
 				if (push0.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
 				if (push1.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
 				

@@ -1,0 +1,31 @@
+SOURCE
+#include <fmath.sn>
+
+int main() {
+	return (int) sin(0.5f) * 100;
+}
+
+TESTCASES
+47
+OUTPUT
+.version 0
+
+.include fmath.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    vldr s0, .P1322697334_LIT_1069547520     /* Evaluate Expression */
+    bl FMath.sin                             /* Call FMath.sin */
+    vcvt.F32.S32 s0, s0
+    mov r2, #100
+    mul r0, s0, r2
+    pop { pc }
+.P1322697334_LIT_1069547520: .word 1069547520

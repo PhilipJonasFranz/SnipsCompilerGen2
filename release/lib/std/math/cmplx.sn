@@ -1,0 +1,25 @@
+namespace Cmplx {
+
+	restricted struct cmplx {
+		
+		float real;
+		
+		float imaginary;
+		
+		static cmplx create(float real, float imaginary) {
+			return cmplx::(real, imaginary);
+		}
+		
+	}
+	
+	#operator +
+	static cmplx op_add(cmplx c0, cmplx c1) {
+		return cmplx::create(c0.real + c1.real, c0.imaginary + c1.imaginary);
+	}
+	
+	#operator *
+	static cmplx op_mul(cmplx c0, cmplx c1) {
+		return cmplx::create(c0.real * c1.real - c0.imaginary * c1.imaginary, c0.imaginary * c1.real + c0.real * c1.imaginary);
+	}
+
+} 

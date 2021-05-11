@@ -1,0 +1,55 @@
+namespace FMath {
+
+	static float E = 2.71828182846f;
+	
+	static float PI = 3.14159265359f;
+
+	shared float fac(float n) {
+		float r = 1f;
+		while (n > 0f) {
+			r = r * n;
+			n -= 1f;
+		}
+		return r;
+	}
+
+	shared float pow(float x, int n) {
+		float r = 1f;
+		
+		while (n > 0) {
+			r = r * x;
+			n--;
+		}
+		
+		return r;
+	}
+
+	#strategy always
+	shared float sin(float x) {
+		float s = x;
+		
+		/* Calculate using the taylor series */
+		#unroll depth = 3
+		for (int i = 2; i < 14; i += 4) {
+			s -= FMath::pow(x, i) /	FMath::fac((float) i);
+			s += FMath::pow(x, i + 2) / FMath::fac((float) (i + 2));
+		}
+		
+		return s;
+	}
+	
+	#strategy always
+	shared float cos(float x) {
+		float s = 1f;
+		
+		/* Calculate using the taylor series */
+		#unroll depth = 3
+		for (int i = 3; i < 15; i += 4) {
+			s -= FMath::pow(x, i) / FMath::fac((float) i);
+			s += FMath::pow(x, i + 2) / FMath::fac((float) (i + 2));
+		}
+		
+		return s;
+	}
+
+} 

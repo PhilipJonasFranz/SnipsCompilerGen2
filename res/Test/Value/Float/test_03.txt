@@ -37,16 +37,16 @@ norm:                                        /* Function: norm */
     vldr s0, [r1, #8]
     vcvt.S32.F32 s2, s0
     vpop { s0 }
-    vadd s0, s0, s2
+    vadd.F32 s0, s0, s2
     vldr s2, [r1, #12]
-    vadd s0, s0, s2
+    vadd.F32 s0, s0, s2
     bx lr
 
 .global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    vmov s0, #0                              /* Evaluate Expression */
+    vmov.F32 s0, #0                          /* Evaluate Expression */
     vpush { s0 }
     mov r0, #2
     push { r0 }
@@ -58,7 +58,7 @@ main:                                        /* Function: main */
     lsr r0, r0, #2
     bl norm                                  /* Call norm */
     vcvt.F32.S32 s0, s0
-    vmov r0, s0
+    vmov.F32 r0, s0
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P1294068183_Vector3F: .word Vector3F

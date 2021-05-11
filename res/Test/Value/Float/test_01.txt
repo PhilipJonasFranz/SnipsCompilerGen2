@@ -31,9 +31,9 @@ main:                                        /* Function: main */
     vldr s1, .P1236809881_LIT_1067450368     /* Load value '1.25' from pool */
     vldr s2, .P1236809881_LIT_1075838976     /* Load value '2.5' from pool */
     vstmfd sp!, {s0-s2}
-    vmov s4, #0
-    vmov s3, #0
-    vmov s0, #0                              /* Evaluate Expression */
+    vmov.F32 s4, #0
+    vmov.F32 s3, #0
+    vmov.F32 s0, #0                          /* Evaluate Expression */
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
 main.L1: 
@@ -42,24 +42,24 @@ main.L1:
     lsl r2, r3, #2
     sub r0, fp, #12
     vldr s4, [r0, r2]
-    vmov s2, s4
-    vmov s1, s3                              /* Evaluate Expression */
-    vadd s3, s3, s4
+    vmov.F32 s2, s4
+    vmov.F32 s1, s3                          /* Evaluate Expression */
+    vadd.F32 s3, s3, s4
     add r3, r3, #1
     b main.L1
 main.L2: 
     vldr s1, .P1236809881_LIT_1075838976     /* Load value '2.5' from pool */
-    vmov s0, s3
+    vmov.F32 s0, s3
     cmp r0, r1
     vcmp s3, s1
     bne main.L3
     mov r0, #10                              /* Evaluate Expression */
     b main.L5
 main.L3: 
-    vmov s0, s3                              /* Evaluate Expression */
-    vneg s0, s0
+    vmov.F32 s0, s3                          /* Evaluate Expression */
+    vneg.F32 s0, s0
     vcvt.F32.S32 s0, s0
-    vmov r0, s0
+    vmov.F32 r0, s0
 main.L5: 
     mov sp, fp
     bx lr

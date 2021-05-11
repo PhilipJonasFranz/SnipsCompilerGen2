@@ -596,13 +596,13 @@ public class Assembler {
 						if (sp [k].endsWith("}")) sp [k] = sp [k].substring(0, sp [k].length() - 1);
 						if (sp [k].startsWith("{")) sp [k] = sp [k].substring(1);
 						
-						if (toInt(sp [k]) != -1) {
-							regListCode = replaceChar(regListCode, '1', 15 - toInt(sp [k]));
+						if (toIntR(sp [k]) != -1) {
+							regListCode = replaceChar(regListCode, '1', 15 - toIntR(sp [k]));
 						}
 						else {
 							String [] sp0 = sp [k].split("-");
-							int s = toInt(sp0 [0].trim());
-							int e = toInt(sp0 [1].trim());
+							int s = toIntR(sp0 [0].trim());
+							int e = toIntR(sp0 [1].trim());
 							
 							for (int z = s; z <= e; z++) 
 								regListCode = replaceChar(regListCode, '1', 15 - z);
@@ -985,7 +985,7 @@ public class Assembler {
 		throw new Exception();
 	}
 	
-	public static int toInt(String r) {
+	public static int toIntR(String r) {
 		r = r.trim();
 		if (r.equals("r0"))return 0;
 		if (r.equals("r1"))return 1;
@@ -1008,6 +1008,12 @@ public class Assembler {
 		if (r.equals("pc"))return 15;
 		if (r.equals("fp"))return 11;
 		return -1;
+	}
+	
+	public static int toIntS(String r) {
+		r = r.trim().toUpperCase();
+		if (!r.startsWith("S")) return -1;
+		else return Integer.parseInt(r.substring(1));
 	}
 	
 	public static String replaceChar(String str, char ch, int index) {

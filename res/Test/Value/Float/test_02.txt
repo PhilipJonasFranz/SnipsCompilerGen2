@@ -21,7 +21,7 @@ HEAP_START: .word 0
 
 .global addF
 addF:                                        /* Function: addF */
-    vadd s0, s0, s1
+    vadd.F32 s0, s0, s1
     bx lr
 
 .global main
@@ -31,7 +31,7 @@ main:                                        /* Function: main */
     vldr s0, .P1265439032_LIT_1075838976     /* Load value '2.5' from pool */
     bl addF                                  /* Call addF */
     vcvt.F32.S32 s0, s0
-    vmov r0, s0
+    vmov.F32 r0, s0
     pop { pc }
 .P1265439032_LIT_1075838976: .word 1075838976
 .P1265439032_LIT_1067383259: .word 1067383259
