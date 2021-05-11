@@ -41,7 +41,7 @@ public class ProcessorUnit {
 	public int [] map0       	= toBinary(255);
 
 	/* Control Flags */
-	public int pcSrc, memToReg, memWrite, shift, regWrite, srcOvr;
+	public int pcSrc, memToReg, memWrite, shift, regWrite, srcOvr, handToVFP;
 	
 	/* ALU Flags */
 	public int aluSrc, immSrc, setCond, n0, n1, carry, accum;
@@ -52,6 +52,9 @@ public class ProcessorUnit {
 	public int [] resSrc		= new int [1];
 	public int [] regSrc     	= new int [1 << 1];
 	public int [] aluControl   	= new int [1 << 2];
+	
+	/* Co-Processors */
+	VFPCoProcessor vfp = new VFPCoProcessor();
 	
 	
 	/* Main Processor */
@@ -97,65 +100,71 @@ public class ProcessorUnit {
 				
 				decodeInstruction();
 				
-				// Get operands rn, rd, rm
-				if (srcOvr == 0) {
-					rN = (regSrc [0] == 0)? new int [] {instr [19], instr [18], instr [17], instr [16]} : r15;
-					rD =                    new int [] {instr [15], instr [14], instr [13], instr [12]};
-					rM = (regSrc [1] == 0)? new int [] {instr  [3], instr  [2], instr  [1], instr  [0]} : rD;
+				if (handToVFP == 1) {
+					vfp.doInstruction(this, instr);
 				}
-				
-				int rNwb = toDecimal(rN);
-				
-				// Memory Access, Pre-Indexed
-				if (enMem == 1 && indexBit == 0) {
-					if (memToReg == 1)readData = readMem(regs [rNwb].clone());
-					if (memWrite == 1)writeMem(regs [toDecimal(rN)].clone(), regs [toDecimal(rD)].clone());
-				}
-				else if (blMem == 1) {
-					this.blockMemory();
-				}
-					
-				// Get operands for alu
-				srcA = regs [rNwb].clone();
-				srcB = (aluSrc == 0)? regs [toDecimal(rM)].clone() : imm.clone();
-				srcC = regs [toDecimal(rS)].clone();
-				
-				// Process Shift
-				if (shift == 1)processShift();
-				
-				// Execute Alu
-				if (resSrc [0] == 0)executeAlu();
-				else result = mul(srcB, srcC, srcA);
-				
-				if (setCond == 1)updateNZCV();
-
-				// Memory, Post-Indexed
-				if (enMem == 1) {
-					if (wb == 1)regs [rNwb] = result;
-					if (indexBit == 1) {
-						if (memToReg == 1)readData = readMem(result);
-						if (memWrite == 1)writeMem(result, regs [toDecimal(rD)]);
+				else {
+					/* Get operands rn, rd, rm */
+					if (srcOvr == 0) {
+						rN = (regSrc [0] == 0)? new int [] {instr [19], instr [18], instr [17], instr [16]} : r15;
+						rD =                    new int [] {instr [15], instr [14], instr [13], instr [12]};
+						rM = (regSrc [1] == 0)? new int [] {instr  [3], instr  [2], instr  [1], instr  [0]} : rD;
 					}
+					
+					int rNwb = toDecimal(rN);
+					
+					/* Memory Access, Pre-Indexed */
+					if (enMem == 1 && indexBit == 0) {
+						if (memToReg == 1) readData = readMem(regs [rNwb].clone());
+						if (memWrite == 1) writeMem(regs [toDecimal(rN)].clone(), regs [toDecimal(rD)].clone());
+					}
+					else if (blMem == 1) {
+						this.blockMemory();
+					}
+						
+					/* Get operands for alu */
+					srcA = regs [rNwb].clone();
+					srcB = (aluSrc == 0)? regs [toDecimal(rM)].clone() : imm.clone();
+					srcC = regs [toDecimal(rS)].clone();
+					
+					/* Process Shift */
+					if (shift == 1) processShift();
+					
+					/* Execute Alu */
+					if (resSrc [0] == 0) executeAlu();
+					else result = mul(srcB, srcC, srcA);
+					
+					if (setCond == 1) updateNZCV();
+	
+					/* Memory, Post-Indexed */
+					if (enMem == 1) {
+						if (wb == 1) regs [rNwb] = result;
+						if (indexBit == 1) {
+							if (memToReg == 1) readData = readMem(result);
+							if (memWrite == 1) writeMem(result, regs [toDecimal(rD)]);
+						}
+					}
+					
+					/* Writeback */
+					writeback = (memToReg == 1)? readData : result;
+					if (regWrite == 1) {
+						int rDd = toDecimal(rD);
+						regs [rDd] = writeback;
+						if (rDd == 15) pcSrc = 1;
+					}
+					
+					if (bLink == 1) regs [14] = add(add4, regs [15]);
+					if (pcSrc == 1) regs [15] = writeback;
 				}
-				
-				// Writeback
-				writeback = (memToReg == 1)? readData : result;
-				if (regWrite == 1) {
-					int rDd = toDecimal(rD);
-					regs [rDd] = writeback;
-					if (rDd == 15)pcSrc = 1;
-				}
-				if (bLink == 1)regs [14] = add(add4, regs [15]);
-				if (pcSrc == 1)regs [15] = writeback;
 			}
 			
-			// Debug Timeout Loop
-			if (debug == 1)Util.sleep();
-			while (step == 0 && debug == 1)Util.sleep();
-			if (debug == 1)step = 0;
+			/* Debug Timeout Loop */
+			if (debug == 1) Util.sleep();
+			while (step == 0 && debug == 1) Util.sleep();
+			if (debug == 1) step = 0;
 			
-			// Update PC
-			if (pcSrc == 0)regs [15] = add(regs [15], add4);
+			/* Update PC */
+			if (pcSrc == 0) regs [15] = add(regs [15], add4);
 		}
 	}
 	
@@ -215,6 +224,7 @@ public class ProcessorUnit {
 		setCond = 0;
 		shift = 0;
 		srcOvr = 0;
+		handToVFP = 0;
 		resSrc [0] = 0;
 		enMem = 0;
 		quantityBit = 0;
@@ -320,6 +330,10 @@ public class ProcessorUnit {
 			immSrc = 0;
 			wb = instr [21];
 			indexBit = instr [24];
+		}
+		// 110, 1110 - Co-Processor
+		else if (instr [27] == 1 && instr [26] == 1 && (instr [25] == 0 || instr [25] == 1 && instr [24] == 0)) {
+			handToVFP = 1;
 		}
 	}
 	
