@@ -32,6 +32,7 @@ public class AsNStructureInit extends AsNExpression {
 		s.castedNode = init;
 		
 		r.free(0, 1, 2);
+		r.getVRegSet().free(0, 1, 2);
 		
 		/* Check for special case, where entire struct is initialized with absolute placeholder */
 		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
@@ -63,7 +64,7 @@ public class AsNStructureInit extends AsNExpression {
 			}
 		}
 		
-		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st, false);
+		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st);
 		
 		init.registerMetric();
 		return init;
@@ -78,9 +79,12 @@ public class AsNStructureInit extends AsNExpression {
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
-	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, boolean coveredParam, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
+	public static void structureInit(AsNNode node, List<Expression> elements, STRUCT struct, boolean isTopLevel, boolean coveredParam, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
+		
+		boolean isVFP = elements.get(elements.size() - 1).getType().isFloat();
+		
 		for (int i = elements.size() - 1; i >= 0; i--) {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
 			if (elements.get(i) instanceof Atom) {
@@ -91,7 +95,7 @@ public class AsNStructureInit extends AsNExpression {
 				regs++;
 				
 				/* If group size is 3, push them on the stack */
-				if (regs == 3) {
+				if (regs == 3 || elements.get(i).getType().isFloat() != isVFP) {
 					flush(regs, node, isVFP);
 					regs = 0;
 				}
@@ -101,7 +105,7 @@ public class AsNStructureInit extends AsNExpression {
 			else if (elements.get(i) instanceof TempAtom) {
 				TempAtom atom = (TempAtom) elements.get(i);
 				
-				if (atom.getType().wordsize() > 1) {
+				if (atom.getType().wordsize() > 1 || atom.getType().isFloat() != isVFP) {
 					flush(regs, node, isVFP);
 					regs = 0;
 				}
@@ -124,6 +128,8 @@ public class AsNStructureInit extends AsNExpression {
 					st.pushDummy();
 				}
 			}
+			
+			isVFP = elements.get(i).getType().isFloat();
 		}
 		
 		/* 
@@ -150,6 +156,8 @@ public class AsNStructureInit extends AsNExpression {
 			/* Push dummy for SID header */
 			st.pushDummy();
 			regs++;
+			
+			isVFP = false;
 		}
 		
 		/* Flush remaining atoms */

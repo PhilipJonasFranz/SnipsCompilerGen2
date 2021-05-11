@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.AST.Expression.ArrayInit;
-import Imm.TYPE.COMPOSIT.ARRAY;
 
 public class AsNArrayInit extends AsNExpression {
 
@@ -17,9 +16,7 @@ public class AsNArrayInit extends AsNExpression {
 		
 		r.free(0, 1, 2);
 		
-		ARRAY arr = (ARRAY) s.getType();
-		
-		AsNStructureInit.structureInit(init, s.elements, null, true, false, r, map, st, arr.elementType.isFloat());
+		AsNStructureInit.structureInit(init, s.elements, null, true, false, r, map, st);
 		
 		init.registerMetric();
 		return init;

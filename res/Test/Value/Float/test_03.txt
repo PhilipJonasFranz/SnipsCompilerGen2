@@ -46,7 +46,7 @@ main:                                        /* Function: main */
     vldr s1, .P1294068183_LIT_1065353216     /* Load value '1.0' from pool */
     vldr s2, .P1294068183_LIT_1075838976     /* Load value '2.5' from pool */
     vmov s0, #0                              /* Evaluate Expression */
-    stmfd sp!, {r0-r2}
+    vstmfd sp!, {s0-s2}
     ldr r0, .P1294068183_Vector3F
     push { r0 }
     sub r0, fp, #16                          /* Evaluate Expression */
