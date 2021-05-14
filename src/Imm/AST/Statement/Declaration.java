@@ -87,7 +87,7 @@ public class Declaration extends Statement {
 		}
 		
 		if (rec && this.value != null) 
-			this.value.print(d + this.printDepthStep, rec);
+			this.value.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -132,8 +132,7 @@ public class Declaration extends Statement {
 	 * Return the current context, or the actual type.
 	 */
 	public TYPE getType() {
-		if (this.type instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.type;
+		if (this.type instanceof PROVISO p) {
 			if (p.hasContext()) return p.getContext();
 			else return p;
 		}

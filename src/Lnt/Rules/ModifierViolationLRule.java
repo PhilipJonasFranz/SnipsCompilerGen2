@@ -15,9 +15,7 @@ public class ModifierViolationLRule extends LRule {
 	private List<SyntaxElement> result;
 	
 	public void getResults(Program AST) {
-		result = AST.visit(x -> {
-			return x.modifierViolated;
-		});
+		result = AST.visit(x -> x.modifierViolated);
 	}
 
 	public void reportResults() {

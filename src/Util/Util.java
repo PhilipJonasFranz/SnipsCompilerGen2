@@ -2,6 +2,7 @@ package Util;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -58,17 +59,16 @@ public class Util {
 	}
 	
 	public static void plot(List<Double> history) {
-		String f = "  ";
+		String f;
 		
 		int [] map = new int [100];
 		for (double d : history) {
 			if (d < 0) continue;
 			map [(int) d]++;
 		}
-		
-		int m = 0;
-		for (int i : map) if (i > m) m = i;
-		
+
+		/* Create empty string the with the length of the max value as spacing */
+		int m = Arrays.stream(map).max().getAsInt();
 		f = ("" + m).replaceAll(".", " ");
 		
 		for (int i = m; i >= 0; i--) {
@@ -144,10 +144,10 @@ public class Util {
 		CompilerDriver.outs.println();
 	}
 	
-	public static void printStats(CompilerDriver driver) {
+	public static void printStats() {
 		double [] rate = {0, 0};
-		CompilerDriver.compressions0.stream().forEach(x -> rate [0] += x / CompilerDriver.compressions0.size());
-		CompilerDriver.compressions1.stream().forEach(x -> rate [1] += x / CompilerDriver.compressions1.size());
+		CompilerDriver.compressions0.forEach(x -> rate [0] += x / CompilerDriver.compressions0.size());
+		CompilerDriver.compressions1.forEach(x -> rate [1] += x / CompilerDriver.compressions1.size());
 		
 		double r0 = rate [0];
 		r0 = Math.round(r0 * 100.0) / 100.0;
@@ -156,7 +156,7 @@ public class Util {
 		r1 = Math.round(r1 * 100.0) / 100.0;
 		
 		if (CompilerDriver.useASTOptimizer) {
-			new Message("SNIPS_OPT0 -> Compression Statistics: ", LogPoint.Type.INFO);
+			new Message("SNIPS_OPT0 -> Compression Statistics: ", Type.INFO);
 			
 			/* Plot compression statistics */		
 			CompilerDriver.outs.println();
@@ -166,39 +166,39 @@ public class Util {
 			double l = ((double) CompilerDriver.opt0_loops) / CompilerDriver.opt0_exc;
 			l = Math.round(l * 100.0) / 100.0;
 			
-			new Message("SNIPS_OPT0 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min0 + "%, max: " + CompilerDriver.c_max0 + "%", LogPoint.Type.INFO);
-			new Message("SNIPS_OPT0 -> Average optimization cycles: " + l, LogPoint.Type.INFO);
+			new Message("SNIPS_OPT0 -> Average compression rate: " + r0 + "%, min: " + CompilerDriver.c_min0 + "%, max: " + CompilerDriver.c_max0 + "%", Type.INFO);
+			new Message("SNIPS_OPT0 -> Average optimization cycles: " + l, Type.INFO);
 		}
 		
 		if (CompilerDriver.useASMOptimizer) {
-			new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO);
+			new Message("SNIPS_OPT1 -> Compression Statistics: ", Type.INFO);
 			
 			/* Plot compression statistics */		
 			CompilerDriver.outs.println();
 			
 			plot(CompilerDriver.compressions1);
 			
-			new Message("SNIPS_OPT1 -> Average compression rate: " + r1 + "%, min: " + CompilerDriver.c_min1 + "%, max: " + CompilerDriver.c_max1 + "%", LogPoint.Type.INFO);
+			new Message("SNIPS_OPT1 -> Average compression rate: " + r1 + "%, min: " + CompilerDriver.c_min1 + "%, max: " + CompilerDriver.c_max1 + "%", Type.INFO);
 		}
 		
-		new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", LogPoint.Type.INFO);
+		new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", Type.INFO);
 		
 		List<Pair<Integer, String>> rmap = new ArrayList();
 		for (Entry<String, Integer> e : CompilerDriver.ins_p.entrySet()) {
 			if (rmap.isEmpty()) {
-				rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
+				rmap.add(new Pair<>(e.getValue(), e.getKey()));
 			}
 			else {
 				boolean added = false;
 				for (int i = 0; i < rmap.size(); i++) {
 					if (e.getValue() > rmap.get(i).first) {
-						rmap.add(i, new Pair<Integer, String>(e.getValue(), e.getKey()));
+						rmap.add(i, new Pair<>(e.getValue(), e.getKey()));
 						added = true;
 						break;
 					}
 				}
 				
-				if (!added) rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
+				if (!added) rmap.add(new Pair<>(e.getValue(), e.getKey()));
 			}
 		}
 		
@@ -212,22 +212,22 @@ public class Util {
 			if (rmap.get(0).first > 75) {
 				stretch = 75.0 / rmap.get(0).first;
 			}
-			
-			for (int i = 0; i < rmap.size(); i++) {
+
+			for (Pair<Integer, String> integerStringPair : rmap) {
 				CompilerDriver.outs.print(f + "|");
-				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
+				for (int a = 0; a < (int) ((double) integerStringPair.first * stretch); a++) {
 					CompilerDriver.outs.print("\u2588");
 				}
-				
-				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
-				
-				CompilerDriver.outs.println(" : " + n + " (" + rmap.get(i).first + ")");
+
+				String n = integerStringPair.second.split("\\.")[integerStringPair.second.split("\\.").length - 1];
+
+				CompilerDriver.outs.println(" : " + n + " (" + integerStringPair.first + ")");
 			}
 			
 			CompilerDriver.outs.println();
 		}
 		
-		new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(CompilerDriver.instructionsGenerated), LogPoint.Type.INFO);
+		new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(CompilerDriver.instructionsGenerated), Type.INFO);
 	}
 	
 	public static void removeDuplicates(List<Program> ASTs) {
@@ -298,15 +298,14 @@ public class Util {
 				SyntaxElement s = CompilerDriver.stackTrace.pop();
 				
 				String loc = s.getSource().getSourceMarkerWithoutFile() + " ";
-				if (last == null || !s.getSource().sourceFile.equals(last)) {
+				if (!s.getSource().sourceFile.equals(last)) {
 					loc = s.getSource().getSourceMarker() + " ";
 					last = s.getSource().sourceFile;
 				}
 				
 				String trace = "  at " + Util.revCamelCase(s.getClass().getSimpleName()) + ", " + loc;
 				
-				if (s instanceof Expression) {
-					Expression e = (Expression) s;
+				if (s instanceof Expression e) {
 					trace += "[" + e.codePrint() + "]";
 				}
 				else {

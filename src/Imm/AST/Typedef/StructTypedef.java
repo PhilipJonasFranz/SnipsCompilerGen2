@@ -50,10 +50,8 @@ public class StructTypedef extends SyntaxElement {
 	/** List that contains functions from the functions list, that have been inherited */
 	public List<Function> inheritedFunctions = new ArrayList();
 	
-	public StructTypedef extension = null;
-	
-	public List<ASMDataLabel> interfaceRelayLabels = new ArrayList();
-	
+	public StructTypedef extension;
+
 	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
@@ -68,7 +66,7 @@ public class StructTypedef extends SyntaxElement {
 	
 	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
-	public class StructProvisoMapping {
+	public static class StructProvisoMapping {
 		
 		private List<TYPE> providedHeadProvisos;
 		
@@ -84,6 +82,7 @@ public class StructTypedef extends SyntaxElement {
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes, HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap) {
 			this.providedHeadProvisos = providedHeadProvisos;
 			this.effectiveFieldTypes = effectiveFieldTypes;
+			this.resolverLabelMap = resolverLabelMap;
 		}
 		
 		public List<TYPE> getProvidedProvisos() {
@@ -227,7 +226,7 @@ public class StructTypedef extends SyntaxElement {
 				
 				/* Apply new source file */
 				String file = this.getSource().sourceFile;
-				f0.visit(x -> true).stream().forEach(x -> x.getSource().sourceFile = file);
+				f0.visit(x -> true).forEach(x -> x.getSource().sourceFile = file);
 				
 				f0.translateProviso(this.extension.proviso, this.extProviso);
 				
@@ -311,8 +310,7 @@ public class StructTypedef extends SyntaxElement {
 		for (Declaration d : this.fields) newActive.add(d.getType().clone());
 		
 		/* Mapped cloned header proviso with mapped types to field types */
-		for (int i = 0; i < newActive.size(); i++) 
-			ProvisoUtil.mapNTo1(newActive.get(i), clone);
+		for (TYPE type : newActive) ProvisoUtil.mapNTo1(type, clone);
 		
 		List<TYPE> headMapped = ProvisoUtil.mapToHead(this.proviso, clone);
 		
@@ -384,10 +382,10 @@ public class StructTypedef extends SyntaxElement {
 		
 		if (rec) {
 			for (Declaration dec : this.fields) 
-				dec.print(d + this.printDepthStep, rec);
+				dec.print(d + this.printDepthStep, true);
 		
 			for (Function f : this.functions)
-				f.print(d + this.printDepthStep, rec);
+				f.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -416,10 +414,6 @@ public class StructTypedef extends SyntaxElement {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
-	
 	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
 		String postfix = LabelUtil.getProvisoPostfix(context);
 		

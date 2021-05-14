@@ -91,8 +91,8 @@ public class ProgramState {
 	 * Removes the VarState mapping associated with the given
 	 * declaration from the cState map.
 	 */
-	public VarState remove(Declaration origin) {
-		return this.cState.remove(origin);
+	public void remove(Declaration origin) {
+		this.cState.remove(origin);
 	}
 	
 	public HashMap<Declaration, VarState> getCState() {

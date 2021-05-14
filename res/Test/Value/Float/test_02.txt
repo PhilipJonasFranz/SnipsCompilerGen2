@@ -3,12 +3,11 @@ float addF(float a, float b) {
 	return a + b;
 }
 
-int main() {
-	return (int) addF(2.5f, 1.242f);
+float main() {
+	return addF(2.5f, 1.242f);
 }
-
 TESTCASES
-3
+3.742
 OUTPUT
 .version 0
 
@@ -26,12 +25,8 @@ addF:                                        /* Function: addF */
 
 .global main
 main:                                        /* Function: main */
-    push { lr }
     vldr s1, .P1265439032_LIT_1067383259
     vldr s0, .P1265439032_LIT_1075838976     /* Load value '2.5' from pool */
-    bl addF                                  /* Call addF */
-    vcvt.F32.S32 s0, s0
-    vmov.F32 r0, s0
-    pop { pc }
+    b addF                                   /* Call addF */
 .P1265439032_LIT_1075838976: .word 1075838976
 .P1265439032_LIT_1067383259: .word 1067383259

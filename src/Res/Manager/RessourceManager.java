@@ -18,9 +18,8 @@ public class RessourceManager {
 		filePath = this.resolve(filePath);
 		
 		File file = new File(filePath);
-		List<String> code = FileUtil.readFile(file);
-		
-		return code;
+
+		return FileUtil.readFile(file);
 	}
 	
 	public String toASMPath(String path) {
@@ -66,7 +65,7 @@ public class RessourceManager {
 	 */
 	public String resolve(String filePath) {
 		String resolved = this.resolvePath(filePath);
-		resolved.replace("\\", "/");
+		resolved = resolved.replace("\\", "/");
 		return resolved;
 	}
 	

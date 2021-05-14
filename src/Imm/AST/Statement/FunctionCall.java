@@ -100,7 +100,7 @@ public class FunctionCall extends Statement implements Callee {
 		CompilerDriver.outs.println();
 		
 		if (rec) for (Expression e : this.parameters) 
-			e.print(d + this.printDepthStep, rec);
+			e.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -129,9 +129,8 @@ public class FunctionCall extends Statement implements Callee {
 	}
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		if (this.anonTarget == null) 
-			for (int i = 0; i < this.proviso.size(); i++) 
-				ProvisoUtil.mapNTo1(this.proviso.get(i), context);
+		if (this.anonTarget == null)
+			for (TYPE type : this.proviso) ProvisoUtil.mapNTo1(type, context);
 		
 		for (Expression e : this.parameters) 
 			e.setContext(context);
@@ -203,9 +202,7 @@ public class FunctionCall extends Statement implements Callee {
 		this.proviso = proviso;
 	}
 
-	public void setType(TYPE t) {
-		return;
-	}
+	public void setType(TYPE t) {}
 
 	public void setCalledFunction(Function f) {
 		this.calledFunction = f;

@@ -74,7 +74,7 @@ public class UnrollStatementUtil {
 		List<Statement> result = new ArrayList();
 		
 		/* Extract Iterator Declaration, replace with IDRef */
-		Declaration dec = null;
+		Declaration dec;
 		if (f.iterator instanceof Declaration) {
 			dec = (Declaration) f.iterator;
 			result.add(dec);

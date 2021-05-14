@@ -24,13 +24,7 @@ public class ProgressMessage {
 			}
 		}
 	}
-	
-	public ProgressMessage(String message, Type type, boolean buffered) {
-		this.message = message;
-		this.messageType = type;
-		if (!CompilerDriver.silenced && !buffered) CompilerDriver.outs.print(this.getMessage());
-	}
-	
+
 	/**
 	 * Set to true when a progress value has been seen
 	 * with the value 1.
@@ -72,17 +66,7 @@ public class ProgressMessage {
 	public void finish() {
 		this.incProgress(1);
 	}
-	
-	/**
-	 * Prints out a single dot.
-	 */
-	public void incProgressSingle() {
-		if (!CompilerDriver.silenced) {
-			CompilerDriver.outs.print(".");
-			printed++;
-		}
-	}
-	
+
 	/**
 	 * Prints out all remaining dots and a 'ERROR!' message at the end.
 	 */

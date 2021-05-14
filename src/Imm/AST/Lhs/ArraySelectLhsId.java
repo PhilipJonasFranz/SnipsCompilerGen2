@@ -35,7 +35,7 @@ public class ArraySelectLhsId extends LhsId {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "ElementSelectLhsId");
-		if (rec) this.selection.print(d + this.printDepthStep, rec);
+		if (rec) this.selection.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -72,7 +72,7 @@ public class ArraySelectLhsId extends LhsId {
 	}
 
 	public ArraySelectLhsId clone() {
-		ArraySelectLhsId lhs = new ArraySelectLhsId((ArraySelect) this.selection.clone(), this.getSource().clone());
+		ArraySelectLhsId lhs = new ArraySelectLhsId(this.selection.clone(), this.getSource().clone());
 		lhs.origin = this.origin;
 		
 		if (this.expressionType != null)

@@ -61,9 +61,9 @@ public class ASTDirective {
 		 * Properties:
 		 * 		- [Symbol]			: The Symbol this operator is overriding. 
 		 */
-		OPERATOR;
-		
-	}
+		OPERATOR
+
+			}
 	
 	
 			/* ---< FIELDS >--- */

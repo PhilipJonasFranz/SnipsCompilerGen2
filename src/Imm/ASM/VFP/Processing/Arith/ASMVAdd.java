@@ -11,7 +11,7 @@ public class ASMVAdd extends ASMAdd {
 	
 	public ASMVAdd(VRegOp target, VRegOp op0, Operand op1) {
 		super(target, op0, op1);
-		this.solver = (x, y) -> x + y;
+		this.solver = Integer::sum;
 	}
 	
 	public String build() {

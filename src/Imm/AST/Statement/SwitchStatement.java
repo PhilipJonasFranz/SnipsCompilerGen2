@@ -33,7 +33,7 @@ public class SwitchStatement extends Statement {
 		super(source);
 		this.condition = condition;
 		this.cases = cases;
-		this.cases.stream().forEach(x -> x.superStatement = this);
+		this.cases.forEach(x -> x.superStatement = this);
 		this.defaultStatement = defaultStatement;
 	}
 	
@@ -43,12 +43,12 @@ public class SwitchStatement extends Statement {
 		CompilerDriver.outs.println(Util.pad(d) + "Switch");
 		
 		if (rec) {
-			this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, true);
 			
 			for (CaseStatement c : this.cases) 
-				c.print(d + this.printDepthStep, rec);
+				c.print(d + this.printDepthStep, true);
 			
-			this.defaultStatement.print(d + this.printDepthStep, rec);
+			this.defaultStatement.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -89,7 +89,7 @@ public class SwitchStatement extends Statement {
 		List<CaseStatement> casesC = new ArrayList();
 		for (CaseStatement w : this.cases) casesC.add((CaseStatement) w.clone());
 		
-		SwitchStatement s = new SwitchStatement((Expression) this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
+		SwitchStatement s = new SwitchStatement(this.condition.clone(), casesC, (DefaultStatement) this.defaultStatement.clone(), this.getSource().clone());
 		s.copyDirectivesFrom(this);
 		return s;
 	}

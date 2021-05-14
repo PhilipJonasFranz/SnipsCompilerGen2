@@ -85,14 +85,10 @@ public class Util {
 		}
 		
 		int [] [] program = Assembler.assemble(asmIn, silent, false);
-		if (program != null) {
-			Device d = deviceList.get(0);
-			for (int i = 0; i < program.length; i++) 
-				d.internalMemory [i] = program [i];
-		}
-		
-		ProcessorUnit pcu = new ProcessorUnit(deviceList.stream().toArray(Device []::new));
-		return pcu;
+		Device d = deviceList.get(0);
+		System.arraycopy(program, 0, d.internalMemory, 0, program.length);
+
+		return new ProcessorUnit(deviceList.toArray(Device[]::new));
 	}
 	
     public static void sleep() {

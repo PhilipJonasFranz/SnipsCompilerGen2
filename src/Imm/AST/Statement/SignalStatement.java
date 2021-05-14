@@ -40,7 +40,7 @@ public class SignalStatement extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Signal");
-		if (rec) this.exceptionBuilder.print(d + this.printDepthStep, rec);
+		if (rec) this.exceptionBuilder.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

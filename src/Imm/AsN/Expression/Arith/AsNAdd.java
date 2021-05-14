@@ -21,7 +21,7 @@ public class AsNAdd extends AsNNFoldExpression {
 		add.pushOnCreatorStack(a);
 		a.castedNode = add;
 		
-		add.evalExpression(add, a, r, map, st, (x, y) -> x + y);
+		add.evalExpression(add, a, r, map, st);
 		
 		add.registerMetric();
 		return add;

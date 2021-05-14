@@ -77,12 +77,12 @@ public class INTERFACE extends COMPOSIT {
 	}
 
 	public INTERFACE clone() {
-		List<TYPE> prov0 = this.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
+		List<TYPE> prov0 = this.proviso.stream().map(TYPE::clone).collect(Collectors.toList());
 		return new INTERFACE(this.typedef, prov0);
 	}
 
 	public TYPE provisoFree() {
-		INTERFACE s = (INTERFACE) this.clone();
+		INTERFACE s = this.clone();
 		
 		for (int i = 0; i < s.proviso.size(); i++) 
 			s.proviso.set(i, s.proviso.get(i).provisoFree());
@@ -115,7 +115,7 @@ public class INTERFACE extends COMPOSIT {
 	}
 
 	public boolean hasProviso() {
-		return this.proviso.stream().filter(x -> x.hasProviso()).count() > 0;
+		return this.proviso.stream().anyMatch(TYPE::hasProviso);
 	}
 	
 	public String codeString() {

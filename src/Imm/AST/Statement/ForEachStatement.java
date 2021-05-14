@@ -66,7 +66,7 @@ public class ForEachStatement extends CompoundStatement {
 	 * If set to true, the value of the iterator is written back into
 	 * the data source after the loop body.
 	 */
-	public boolean writeBackIterator = false;
+	public boolean writeBackIterator;
 	
 	/**
 	 * This assignment is set to a statement that represents
@@ -103,11 +103,11 @@ public class ForEachStatement extends CompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "ForEach");
 		
 		if (rec) {
-			this.iterator.print(d + this.printDepthStep, rec);
-			this.shadowRef.print(d + this.printDepthStep, rec);
+			this.iterator.print(d + this.printDepthStep, true);
+			this.shadowRef.print(d + this.printDepthStep, true);
 			
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class ForEachStatement extends CompoundStatement {
 	public Statement clone() {
 		ForEachStatement f = new ForEachStatement(this.iterator.clone(), this.writeBackIterator, this.shadowRef.clone(), this.range.clone(), this.cloneBody(), this.getSource().clone());
 		if (this.select != null)
-			f.select = (ArraySelect) this.select.clone();
+			f.select = this.select.clone();
 		
 		f.copyDirectivesFrom(this);
 		return f;

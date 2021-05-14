@@ -36,9 +36,7 @@ public class NamespaceProcessor {
 		
 		/* Remove duplicates */
 		for (int i = 0; i < p.programElements.size(); i++) {
-			if (p.programElements.get(i) instanceof Namespace) {
-				Namespace n = (Namespace) p.programElements.get(i);
-				
+			if (p.programElements.get(i) instanceof Namespace n) {
 				/* Check if namespace is still in list, or already added */
 				if (!names.contains(n.path.build()) || containedNames.contains(n.path.build())) 
 					p.programElements.remove(i--);
@@ -48,8 +46,7 @@ public class NamespaceProcessor {
 		
 		/* Flatten namespaces */
 		for (int i = 0; i < p.programElements.size(); i++) {
-			if (p.programElements.get(i) instanceof Namespace) {
-				Namespace n = (Namespace) p.programElements.get(i);
+			if (p.programElements.get(i) instanceof Namespace n) {
 				p.programElements.remove(i);
 				
 				List<SyntaxElement> target = new ArrayList();
@@ -62,18 +59,14 @@ public class NamespaceProcessor {
 	
 	private void flatten(List<SyntaxElement> target, Namespace name) {
 		for (SyntaxElement s : name.programElements) {
-			if (s instanceof Namespace) {
-				Namespace n = (Namespace) s;
-				
+			if (s instanceof Namespace n) {
 				/* Append current namespace path to namespace, and flatten into target */
 				n.path.path.addAll(0, name.path.path);
 				flatten(target, n);
 			}
 			else {
 				/* Global declaration */
-				if (s instanceof Declaration) {
-					Declaration dec = (Declaration) s;
-					
+				if (s instanceof Declaration dec) {
 					/* Append current namespace path */
 					dec.path.path.addAll(0, name.path.path);
 				}

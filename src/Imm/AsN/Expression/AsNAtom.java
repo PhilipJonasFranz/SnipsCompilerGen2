@@ -3,7 +3,6 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -16,7 +15,7 @@ import Snips.CompilerDriver;
 public class AsNAtom extends AsNExpression {
 
 			/* ---< METHODS >--- */
-	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st, int target) {
 		AsNAtom atom = new AsNAtom();
 		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;

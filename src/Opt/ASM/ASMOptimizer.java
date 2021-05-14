@@ -97,8 +97,8 @@ public class ASMOptimizer {
 			iterations++;
 			
 			OPT_DONE = false;
-			
-			/**
+
+			/*
 			 * add rx, ry, #2
 			 * add r0, rx, #4
 			 * Replace with:
@@ -106,7 +106,7 @@ public class ASMOptimizer {
 			 */
 			this.defragmentAdditions(ins);
 			
-			/**
+			/*
 			 * push { r0 }
 			 * push { r1 }
 			 * Replace with:
@@ -114,7 +114,7 @@ public class ASMOptimizer {
 			 */
 			this.defragmentPush(ins);
 			
-			/**
+			/*
 			 * sub r0, fp, #8
 			 * add r0, r0, #4
 			 * Replace with:
@@ -122,7 +122,7 @@ public class ASMOptimizer {
 			 */
 			this.defragmentDeltas(ins);
 			
-			/**
+			/*
 			 * mov r0, #10
 			 * add r0, r0, r2
 			 * Replace with:
@@ -130,7 +130,7 @@ public class ASMOptimizer {
 			 */
 			this.additionCommutative(ins);
 			
-			/**
+			/*
 			 * mov r0, #10
 			 * sub r0, r0, r2
 			 * Replace with:
@@ -138,7 +138,7 @@ public class ASMOptimizer {
 			 */
 			this.subtractionSemiCommutative(ins);
 			
-			/**
+			/*
 			 * add r0, r1, r2
 			 * mov r4, r0
 			 * Replace with:
@@ -146,7 +146,7 @@ public class ASMOptimizer {
 			 */
 			this.removeExpressionIndirectTargeting(ins);
 			
-			/**
+			/*
 			 * ldr r0, [r1]
 			 * mov r4, r0
 			 * Replace with:
@@ -154,7 +154,7 @@ public class ASMOptimizer {
 			 */
 			this.removeLdrIndirectTargeting(ins);
 			
-			/**
+			/*
 			 * mov r0, rx
 			 * cmp rx, r1
 			 * Replace with:
@@ -162,30 +162,30 @@ public class ASMOptimizer {
 			 */
 			this.removeOperandIndirectTargeting(ins);
 			
-			/**
+			/*
 			 * Substitute immediate values after assignment
 			 * to register into other instructions.
 			 */
 			this.constantOperandPropagation(ins);
 			
-			/**
+			/*
 			 * b .L1
 			 * ... <- Remove these Lines until Label or newline
 			 */
 			this.clearInstructionsAfterBranch(ins);
 			
-			/**
+			/*
 			 * Removes non-referenced Labels
 			 */
 			this.clearUnusedLabels(ins);
 			
-			/**
+			/*
 			 * mov r1, r0
 			 * mov r0, r1 <-- Delete this line
 			 */
 			this.removeDoubleCrossing(ins);
 			
-			/**
+			/*
 			 * .L0:
 			 * .L1:
 			 * Replace with:
@@ -193,20 +193,20 @@ public class ASMOptimizer {
 			 */
 			this.removeDoubleLabels(ins);
 			
-			/**
+			/*
 			 * b .Lx <-- Remove this line
 			 * .Lx: 
 			 */
 			this.removeBranchesBeforeLabelToLabel(ins);
 			
-			/**
+			/*
 			 * push { r0 }
 			 * ... <- Does not reassign r0
 			 * pop { r0 }
 			 */
 			this.removeUnnessesaryPushPop(ins);
 			
-			/**
+			/*
 			 * mov r0, rx
 			 * push { r0 }
 			 * Replace with:
@@ -214,7 +214,7 @@ public class ASMOptimizer {
 			 */
 			this.removeImplicitPushPopTargeting(ins);
 			
-			/**
+			/*
 			 * push { r0 }
 			 * ... <- Does not reassign r1
 			 * pop { r1 }
@@ -226,12 +226,12 @@ public class ASMOptimizer {
 			 */
 			this.removeIndirectPushPopAssign(ins);
 			
-			/**
+			/*
 			 * add r0, r0, #0 <- Remove this line
 			 */
 			this.removeZeroInstruction(ins);
 			
-			/**
+			/*
 			 * instruction a <- Assigns to rx
 			 * ... <- Do not reassign or read rx
 			 * instruction b <- Assigns to rx
@@ -240,13 +240,13 @@ public class ASMOptimizer {
 			 */
 			this.removeUnusedAssignment(ins);
 			
-			/**
+			/*
 			 * Removes mov rx, ... instructions, where rx = r3 - r9,
 			 * and rx is not being used until a bx lr
 			 */
 			this.removeUnusedRegistersStrict(ins);
 			
-			/**
+			/*
 			 * Attempt to collect immediate operands before a mult,
 			 * and try to precalculate the mult based on the operands.
 			 */
@@ -254,7 +254,7 @@ public class ASMOptimizer {
 			
 			this.removeMovId(ins);
 			
-			/**
+			/*
 			 * lsl r0, r1, #0
 			 * Replace with:
 			 * mov r0, r1
@@ -262,7 +262,7 @@ public class ASMOptimizer {
 			this.shiftBy0IsMov(ins);
 			
 			if (!OPT_DONE) {
-				/**
+				/*
 				 * add r0, fp, #4
 				 * ldr r0, [r0]
 				 * Replace with:
@@ -271,13 +271,13 @@ public class ASMOptimizer {
 				this.removeIndirectMemOpAddressing(ins);
 			}
 			
-			/**
+			/*
 			 * Execute these routines when no other optimization can be made.
 			 * Executing this routine to early can block data-paths that could
 			 * under other circumstances be simplified.
 			 */
 			if (!OPT_DONE) {
-				/**
+				/*
 				 * Attempts to move pop operations further up to allow 
 				 * for more data-path analysis. This will result in push and pop
 				 * operation positions to be closer together, which makes it easier
@@ -291,7 +291,7 @@ public class ASMOptimizer {
 			}
 			
 			if (!OPT_DONE) {
-				/**
+				/*
 				 * Checks through all function bodies and removes the pushed/popped regs 
 				 * at the function start/end, which are strictly not used in the function
 				 * body.
@@ -300,7 +300,7 @@ public class ASMOptimizer {
 			}
 			
 			if (!OPT_DONE) {
-				/**
+				/*
 				 * Checks if function body only contains one bl-Branch and if the branch is
 				 * directley before the pop func clean. If yes, remove the lr push/pop and
 				 * set the branch type to b. This means the branched function will return to
@@ -310,7 +310,7 @@ public class ASMOptimizer {
 			}
 			
 			if (!OPT_DONE) {
-				/**
+				/*
 				 * This operation is potentially dangerous and is still WIP. For the current
 				 * tests the operation works, but when using ASM Injection etc. the operation
 				 * could fail spectaculary.
@@ -354,7 +354,7 @@ public class ASMOptimizer {
 			
 			if (!OPT_DONE) {
 				
-				/**
+				/*
 				 * bne L3
 				 * b L2	    -> beq L2
 				 * L3:
@@ -371,13 +371,13 @@ public class ASMOptimizer {
 			
 		}
 		
-		/**
+		/*
 		 * Check if a bx lr statement is directley after the func clean pop. If the last
 		 * pop operand is a lr, substitute pc in the operand and remove the bx lr.
 		 */
 		this.popReturnDirect(ins);
 		
-		/**
+		/*
 		 * Attempt to push down the Function Frame Push. If this frame Push is pushed below
 		 * the base-cases of recursive functions, the Frame-Push for these Base-Cases can
 		 * be left out, saving an increased amount of instructions based on the size of
@@ -412,28 +412,23 @@ public class ASMOptimizer {
 		}
 		
 		if (isMainFile) aopt_progress.finish();
-		return Math.round(1 / (before / 100) * (before - ins.size()) * 100) / 100;
+		return Math.round(1.0 / (before / 100.0) * (before - ins.size()) * 100.0) / 100.0;
 	}
 	
 	public void replaceR0R1R2LdrWithLdm(List<ASMInstruction> ins0) {
 		for (int i = 2; i < ins0.size(); i++) {
-			if (ins0.get(i - 2) instanceof ASMLdr) {
-				ASMLdr ldr0 = (ASMLdr) ins0.get(i - 2);
-				
-				if (ldr0.op0 instanceof RegOp && ldr0.op1 != null && ldr0.op1 instanceof ImmOp && ldr0.cond == null) { 
-				
+			if (ins0.get(i - 2) instanceof ASMLdr ldr0) {
+				if (ldr0.op0 instanceof RegOp && ldr0.op1 instanceof ImmOp && ldr0.cond == null) {
 					REG base = ((RegOp) ldr0.op0).reg;
 					
 					if (base == REG.SP || base == REG.FP) {
 						List<ASMLdr> ldrs = new ArrayList();
 						ldrs.add(ldr0);
-						
+
 						for (int a = i - 1; a <= i; a++) {
 							if (ins0.get(a).cond != null) break;
-							if (ins0.get(a) instanceof ASMLdr) {
-								ASMLdr ldr = (ASMLdr) ins0.get(a);
-								
-								if (ldr.op0 instanceof RegOp && ((RegOp) ldr.op0).reg == base && ldr.op1 != null && ldr.op1 instanceof ImmOp) {
+							if (ins0.get(a) instanceof ASMLdr ldr) {
+								if (ldr.op0 instanceof RegOp && ((RegOp) ldr.op0).reg == base && ldr.op1 instanceof ImmOp) {
 									ldrs.add(ldr);
 								}
 								else break;
@@ -453,9 +448,8 @@ public class ASMOptimizer {
 							if (clear && Math.abs(start) < 256 && start != 0) {
 								
 								List<RegOp> regs = new ArrayList();
-								
-								for (int a = 0; a < ldrs.size(); a++) 
-									regs.add(ldrs.get(a).target);
+
+								for (ASMLdr ldr : ldrs) regs.add(ldr.target);
 								
 								for (int a = 0; a < ldrs.size(); a++) 
 									ins0.remove(i - 2);
@@ -477,19 +471,15 @@ public class ASMOptimizer {
 	}
 	
 	public void removeZeroOperands(List<ASMInstruction> ins0) {
-		for (int i = 0; i < ins0.size(); i++) {
-			ASMInstruction ins = ins0.get(i);
-			if (ins instanceof ASMMemOp) {
-				ASMMemOp op = (ASMMemOp) ins;
-				if (op.op1 != null && op.op1 instanceof ImmOp) {
+		for (ASMInstruction ins : ins0) {
+			if (ins instanceof ASMMemOp op) {
+				if (op.op1 instanceof ImmOp) {
 					if (((ImmOp) op.op1).value == 0) {
 						op.op1 = null;
 					}
 				}
-			}
-			else if (ins instanceof ASMStackOp) {
-				ASMStackOp op = (ASMStackOp) ins;
-				if (op.op1 != null && op.op1 instanceof ImmOp) {
+			} else if (ins instanceof ASMStackOp op) {
+				if (op.op1 instanceof ImmOp) {
 					if (((ImmOp) op.op1).value == 0) {
 						op.op1 = null;
 					}
@@ -500,13 +490,12 @@ public class ASMOptimizer {
 	
 	public void replacePushPopWithBlockMemory(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push) {
+
 				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 					ins0.set(i, new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(push.operands.size() * 4)));
 					
-					ASMMemBlock block = null;
+					ASMMemBlock block;
 					
 					if (push instanceof ASMVPushStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
 					else block = new ASMMemBlock(MEM_BLOCK_MODE.STMEA, false, new RegOp(REG.SP), push.operands, push.cond);
@@ -519,7 +508,7 @@ public class ASMOptimizer {
 					for (RegOp r : push.operands) ops.add(0, r);
 					
 					if (ASMMemBlock.checkInOrder(ops) && push.operands.size() > 1) {
-						ASMMemBlock block = null;
+						ASMMemBlock block;
 						
 						if (push instanceof ASMVPushStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
 						else block = new ASMMemBlock(MEM_BLOCK_MODE.STMFD, true, new RegOp(REG.SP), ops, push.cond);
@@ -528,11 +517,9 @@ public class ASMOptimizer {
 					}
 				}
 			}
-			else if (ins0.get(i) instanceof ASMPopStack) {
-				ASMPopStack pop = (ASMPopStack) ins0.get(i);
-				
+			else if (ins0.get(i) instanceof ASMPopStack pop) {
 				if (ASMMemBlock.checkInOrder(pop.operands) && pop.operands.size() > 1) {
-					ASMMemBlock block = null;
+					ASMMemBlock block;
 					
 					if (pop instanceof ASMVPopStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
 					else block = new ASMMemBlock(MEM_BLOCK_MODE.LDMFD, true, new RegOp(REG.SP), pop.operands, pop.cond);
@@ -547,7 +534,7 @@ public class ASMOptimizer {
 					if (ASMMemBlock.checkInOrder(ops) && pop.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {
 						ins0.set(i, new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(ops.size() * 4)));
 						
-						ASMMemBlock block = null;
+						ASMMemBlock block;
 						
 						if (pop instanceof ASMVPopStack) block = new ASMVMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
 						else block = new ASMMemBlock(MEM_BLOCK_MODE.LDMEA, false, new RegOp(REG.SP), ops, pop.cond);
@@ -563,33 +550,26 @@ public class ASMOptimizer {
 	 * Check if given register is overwritten by given instruction.
 	 */
 	public static boolean overwritesReg(ASMInstruction ins, REG reg) {
-		if (ins instanceof ASMBinaryData) {
-			ASMBinaryData data = (ASMBinaryData) ins;
+		if (ins instanceof ASMBinaryData data) {
 			return data.target.reg == reg;
 		}
-		else if (ins instanceof ASMMult) {
-			ASMMult mul = (ASMMult) ins;
+		else if (ins instanceof ASMMult mul) {
 			return mul.target.reg == reg;
 		}
-		else if (ins instanceof ASMMla) {
-			ASMMla mla = (ASMMla) ins;
+		else if (ins instanceof ASMMla mla) {
 			return mla.target.reg == reg;
 		}
-		else if (ins instanceof ASMMemOp) {
-			ASMMemOp memOp = (ASMMemOp) ins;
+		else if (ins instanceof ASMMemOp memOp) {
 			return memOp.target.reg == reg && memOp instanceof ASMLdr;
 		}
-		else if (ins instanceof ASMLdrStack) {
-			ASMLdrStack load = (ASMLdrStack) ins;
+		else if (ins instanceof ASMLdrStack load) {
 			return load.target.reg == reg;
 		}
-		else if (ins instanceof ASMStrStack) {
-			ASMStrStack load = (ASMStrStack) ins;
+		else if (ins instanceof ASMStrStack load) {
 			return (load.memOp == MEM_OP.POST_WRITEBACK || load.memOp == MEM_OP.PRE_WRITEBACK) && (load.op1 instanceof RegOp && ((RegOp) load.op1).reg == reg);
 		}
-		else if (ins instanceof ASMPopStack) {
-			ASMPopStack pop = (ASMPopStack) ins;
-			return pop.operands.stream().filter(x -> x.reg == reg).count() > 0;
+		else if (ins instanceof ASMPopStack pop) {
+			return pop.operands.stream().anyMatch(x -> x.reg == reg);
 		}
 		else if (ins instanceof ASMPushStack || ins instanceof ASMLabel || ins instanceof ASMComment || 
 				 ins instanceof ASMSeperator || ins instanceof ASMBranch || ins instanceof ASMCmp) {
@@ -602,8 +582,7 @@ public class ASMOptimizer {
 		else if (ins instanceof ASMDirective) {
 			return false;
 		}
-		else if (ins instanceof ASMVNeg) {
-			ASMVNeg neg = (ASMVNeg) ins;
+		else if (ins instanceof ASMVNeg neg) {
 			return neg.target.reg == reg;
 		}
 		else throw new SNIPS_EXC("Cannot check if instruction overwrites register: " + ins.getClass().getName());
@@ -613,40 +592,31 @@ public class ASMOptimizer {
 	 * Check if given register is read by given instruction.
 	 */
 	public static boolean readsReg(ASMInstruction ins, REG reg) {
-		if (ins instanceof ASMBinaryData) {
-			ASMBinaryData data = (ASMBinaryData) ins;
+		if (ins instanceof ASMBinaryData data) {
 			return (data.op0 != null && data.op0.reg == reg) || (data.op1 instanceof RegOp && ((RegOp) data.op1).reg == reg);
 		}
-		else if (ins instanceof ASMCmp) {
-			ASMCmp cmp = (ASMCmp) ins;
+		else if (ins instanceof ASMCmp cmp) {
 			return cmp.op0.reg == reg || (cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == reg);
 		}
-		else if (ins instanceof ASMStr) {
-			ASMStr str = (ASMStr) ins;
+		else if (ins instanceof ASMStr str) {
 			return str.target.reg == reg || (str.op0 instanceof RegOp && ((RegOp) str.op0).reg == reg) || (str.op1 instanceof RegOp && ((RegOp) str.op1).reg == reg);
 		}
-		else if (ins instanceof ASMMemOp) {
-			ASMMemOp op = (ASMMemOp) ins;
+		else if (ins instanceof ASMMemOp op) {
 			return (op.op0 instanceof RegOp && ((RegOp) op.op0).reg == reg) || (op.op1 instanceof RegOp && ((RegOp) op.op1).reg == reg);
 		}
-		else if (ins instanceof ASMLdrStack) {
-			ASMLdrStack ldr = (ASMLdrStack) ins;
-			return (ldr.op0 instanceof RegOp && ((RegOp) ldr.op0).reg == reg) || (ldr.op1 instanceof RegOp && ((RegOp) ldr.op1).reg == reg);
+		else if (ins instanceof ASMLdrStack ldr) {
+			return ldr.op0.reg == reg || (ldr.op1 instanceof RegOp && ((RegOp) ldr.op1).reg == reg);
 		}
-		else if (ins instanceof ASMMult) {
-			ASMMult mul = (ASMMult) ins;
+		else if (ins instanceof ASMMult mul) {
 			return mul.op0.reg == reg || mul.op1.reg == reg;
 		}
-		else if (ins instanceof ASMMla) {
-			ASMMla mla = (ASMMla) ins;
+		else if (ins instanceof ASMMla mla) {
 			return mla.op0.reg == reg || mla.op1.reg == reg || mla.op2.reg == reg;
 		}
-		else if (ins instanceof ASMStrStack) {
-			ASMStrStack str = (ASMStrStack) ins;
-			return str.target.reg == reg || str.op0.reg == reg || (str.op1 != null && str.op1 instanceof RegOp && ((RegOp) str.op1).reg == reg);
+		else if (ins instanceof ASMStrStack str) {
+			return str.target.reg == reg || str.op0.reg == reg || (str.op1 instanceof RegOp && ((RegOp) str.op1).reg == reg);
 		}
-		else if (ins instanceof ASMPushStack) {
-			ASMPushStack push = (ASMPushStack) ins;
+		else if (ins instanceof ASMPushStack push) {
 			for (RegOp r : push.operands) if (r.reg == reg) return true;
 			return false;
 		}
@@ -662,8 +632,7 @@ public class ASMOptimizer {
 		else if (ins instanceof ASMDirective) {
 			return false;
 		}
-		else if (ins instanceof ASMVNeg) {
-			ASMVNeg neg = (ASMVNeg) ins;
+		else if (ins instanceof ASMVNeg neg) {
 			return ((RegOp) neg.op0).reg == reg;
 		}
 		else throw new SNIPS_EXC("Cannot check if instruction reads register: " + ins.getClass().getName());
@@ -675,23 +644,19 @@ public class ASMOptimizer {
 			if (ins.optFlags.contains(OPT_FLAG.LOOP_BREAK_RESET)) continue;
 			
 			if (ins.equals(end)) break;
-			if (ins instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins;
+			if (ins instanceof ASMPushStack push) {
 				pushed += push.operands.size();
 			}
-			else if (ins instanceof ASMPopStack) {
-				ASMPopStack pop = (ASMPopStack) ins;
+			else if (ins instanceof ASMPopStack pop) {
 				pushed -= pop.operands.size();
 			}
-			else if (ins instanceof ASMAdd) {
-				ASMAdd add = (ASMAdd) ins;
-				if (add.target.reg == REG.SP && add.target.reg == REG.SP && add.op1 instanceof ImmOp) {
+			else if (ins instanceof ASMAdd add) {
+				if (add.target.reg == REG.SP && add.op1 instanceof ImmOp) {
 					pushed -= ((ImmOp) add.op1).value >> 2;
 				}
 			}
-			else if (ins instanceof ASMSub) {
-				ASMSub sub = (ASMSub) ins;
-				if (sub.target.reg == REG.SP && sub.target.reg == REG.SP && sub.op1 instanceof ImmOp) {
+			else if (ins instanceof ASMSub sub) {
+				if (sub.target.reg == REG.SP && sub.op1 instanceof ImmOp) {
 					pushed += ((ImmOp) sub.op1).value >> 2;
 				}
 			}
@@ -713,114 +678,88 @@ public class ASMOptimizer {
 	
 	public void patchFPtoSP(List<ASMInstruction> patch) {
 		for (ASMInstruction ins : patch) {
-			if (ins instanceof ASMBinaryData) {
-				ASMBinaryData d = (ASMBinaryData) ins;
+			if (ins instanceof ASMBinaryData d) {
 				if (d.target.reg == REG.FP) d.target.reg = REG.SP;
 				if (d.op0.reg == REG.FP) d.op0.reg = REG.SP;
-				if (d.op1 instanceof RegOp) {
-					RegOp op = (RegOp) d.op1;
+				if (d.op1 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMCmp) {
-				ASMCmp d = (ASMCmp) ins;
+			else if (ins instanceof ASMCmp d) {
 				if (d.op0.reg == REG.FP) d.op0.reg = REG.SP;
-				if (d.op1 instanceof RegOp) {
-					RegOp op = (RegOp) d.op1;
+				if (d.op1 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMBranch) {
-				ASMBranch d = (ASMBranch) ins;
-				if (d.target instanceof RegOp) {
-					RegOp op = (RegOp) d.target;
+			else if (ins instanceof ASMBranch d) {
+				if (d.target instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMMemOp) {
-				ASMMemOp memOp = (ASMMemOp) ins;
+			else if (ins instanceof ASMMemOp memOp) {
 				if (memOp.target.reg == REG.FP) memOp.target.reg = REG.SP;
 				
-				if (memOp.op1 instanceof PatchableImmOp) {
-					PatchableImmOp op = (PatchableImmOp) memOp.op1;
+				if (memOp.op1 instanceof PatchableImmOp op) {
 					int words = this.countPushedWords(patch, memOp);
 					memOp.op1 = new ImmOp(op.patchedValue + (words * 4));
 				}
-				else if (memOp.op1 instanceof ImmOp && memOp.op0 instanceof RegOp && ((RegOp) memOp.op0).reg == REG.FP) {
-					ImmOp op = (ImmOp) memOp.op1;
+				else if (memOp.op1 instanceof ImmOp op && memOp.op0 instanceof RegOp && ((RegOp) memOp.op0).reg == REG.FP) {
 					int words = this.countPushedWords(patch, memOp);
 					memOp.op1 = new ImmOp(op.value + (words * 4));
 				}
 				
-				if (memOp.op0 instanceof RegOp) {
-					RegOp op = (RegOp) memOp.op0;
+				if (memOp.op0 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
-				if (memOp.op1 instanceof RegOp) {
-					RegOp op = (RegOp) memOp.op1;
+				if (memOp.op1 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMLdrStack) {
-				ASMLdrStack ldr = (ASMLdrStack) ins;
+			else if (ins instanceof ASMLdrStack ldr) {
 				if (ldr.target.reg == REG.FP) ldr.target.reg = REG.SP;
 				
-				if (ldr.op1 instanceof PatchableImmOp) {
-					PatchableImmOp op = (PatchableImmOp) ldr.op1;
+				if (ldr.op1 instanceof PatchableImmOp op) {
 					int words = this.countPushedWords(patch, ldr);
 					ldr.op1 = new ImmOp(op.patchedValue + (words * 4));
 				}
-				else if (ldr.op1 instanceof ImmOp && ldr.op0 instanceof RegOp && ((RegOp) ldr.op0).reg == REG.FP) {
-					ImmOp op = (ImmOp) ldr.op1;
+				else if (ldr.op1 instanceof ImmOp op && ldr.op0.reg == REG.FP) {
 					int words = this.countPushedWords(patch, ldr);
 					ldr.op1 = new ImmOp(op.value + (words * 4));
 				}
 				
-				if (ldr.op0 instanceof RegOp) {
-					RegOp op = (RegOp) ldr.op0;
-					if (op.reg == REG.FP) op.reg = REG.SP;
-				}
-				if (ldr.op1 instanceof RegOp) {
-					RegOp op = (RegOp) ldr.op1;
+				if (ldr.op0.reg == REG.FP) ldr.op0.reg = REG.SP;
+
+				if (ldr.op1 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMMult) {
-				ASMMult mul = (ASMMult) ins;
+			else if (ins instanceof ASMMult mul) {
 				if (mul.target.reg == REG.FP) mul.target.reg = REG.SP;
 				if (mul.op0.reg == REG.FP) mul.op0.reg = REG.SP;
 				if (mul.op1.reg == REG.FP) mul.op1.reg = REG.SP;
 			}
-			else if (ins instanceof ASMStrStack) {
-				ASMStrStack str = (ASMStrStack) ins;
+			else if (ins instanceof ASMStrStack str) {
 				if (str.target.reg == REG.FP) str.target.reg = REG.SP;
 				
-				if (str.op1 instanceof PatchableImmOp) {
-					PatchableImmOp op = (PatchableImmOp) str.op1;
+				if (str.op1 instanceof PatchableImmOp op) {
 					int words = this.countPushedWords(patch, str);
 					str.op1 = new ImmOp(op.patchedValue + (words * 4));
 				}
-				else if (str.op1 instanceof ImmOp && str.op0 instanceof RegOp && ((RegOp) str.op0).reg == REG.FP) {
-					ImmOp op = (ImmOp) str.op1;
+				else if (str.op1 instanceof ImmOp op && str.op0.reg == REG.FP) {
 					int words = this.countPushedWords(patch, str);
 					str.op1 = new ImmOp(op.value + (words * 4));
 				}
 				
-				if (str.op0 instanceof RegOp) {
-					RegOp op = (RegOp) str.op0;
-					if (op.reg == REG.FP) op.reg = REG.SP;
-				}
-				if (str.op1 instanceof RegOp) {
-					RegOp op = (RegOp) str.op1;
+				if (str.op0.reg == REG.FP) str.op0.reg = REG.SP;
+
+				if (str.op1 instanceof RegOp op) {
 					if (op.reg == REG.FP) op.reg = REG.SP;
 				}
 			}
-			else if (ins instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins;
+			else if (ins instanceof ASMPushStack push) {
 				for (RegOp r : push.operands) if (r.reg == REG.FP) r.reg = REG.SP;
 			}
-			else if (ins instanceof ASMPopStack) {
-				ASMPopStack pop = (ASMPopStack) ins;
+			else if (ins instanceof ASMPopStack pop) {
 				for (RegOp r : pop.operands) if (r.reg == REG.FP) r.reg = REG.SP;
 			}
 			else if (ins instanceof ASMLabel || ins instanceof ASMComment || ins instanceof ASMSeperator) {
@@ -865,9 +804,9 @@ public class ASMOptimizer {
 						/* Cannot pushdown, essential for program flow */
 						if (ASMOptimizer.overwritesReg(ins1, REG.PC) || ASMOptimizer.readsReg(ins1, REG.PC)) break;
 						
-						boolean overwritesCondition = false;
-						overwritesCondition |= ins1 instanceof ASMUnaryData && ((ASMUnaryData) ins1).updateConditionField;
-						overwritesCondition |= ins1 instanceof ASMBinaryData && ((ASMBinaryData) ins1).updateConditionField;
+						boolean overwritesCondition =
+								ins1 instanceof ASMUnaryData && ((ASMUnaryData) ins1).updateConditionField ||
+								ins1 instanceof ASMBinaryData && ((ASMBinaryData) ins1).updateConditionField;
 						
 						if (ins1 instanceof ASMLabel || ins1 instanceof ASMBranch || 
 							ins1 instanceof ASMPushStack || ins1 instanceof ASMPopStack || 
@@ -887,9 +826,8 @@ public class ASMOptimizer {
 	
 	public void deepRegPropagation(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMov mov) {
+
 				if (mov.optFlags.contains(OPT_FLAG.WRITEBACK) || mov.target.reg == REG.PC) continue;
 				
 				if (mov.op1 instanceof RegOp) {
@@ -907,62 +845,50 @@ public class ASMOptimizer {
 							break;
 						}
 						
-						if (ins instanceof ASMBinaryData) {
-							ASMBinaryData d = (ASMBinaryData) ins;
-							
+						if (ins instanceof ASMBinaryData d) {
 							if (d.op0 != null && d.op0.reg == mov.target.reg && d.op0.reg != reg) {
 								d.op0.reg = reg;
 								OPT_DONE();
 							}
-							if (d.op1 instanceof RegOp) {
-								RegOp op1 = (RegOp) d.op1;
+							if (d.op1 instanceof RegOp op1) {
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
 									OPT_DONE();
 								}
 							}
 						}
-						else if (ins instanceof ASMCmp) {
-							ASMCmp d = (ASMCmp) ins;
-							
+						else if (ins instanceof ASMCmp d) {
 							if (d.op0.reg == mov.target.reg) {
 								d.op0.reg = reg;
 								OPT_DONE();
 							}
-							if (d.op1 instanceof RegOp) {
-								RegOp op1 = (RegOp) d.op1;
+							if (d.op1 instanceof RegOp op1) {
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
 									OPT_DONE();
 								}
 							}
 						}
-						else if (ins instanceof ASMStr) {
-							ASMStr d = (ASMStr) ins;
-							
+						else if (ins instanceof ASMStr d) {
 							if (d.target.reg == mov.target.reg) {
 								d.target.reg = reg;
 								OPT_DONE();
 							}
-							if (d.op0 instanceof RegOp) {
-								RegOp op = (RegOp) d.op0;
+							if (d.op0 instanceof RegOp op) {
 								if (op.reg == mov.target.reg && op.reg != reg) {
 									op.reg = reg;
 									OPT_DONE();
 								}
 							}
-							if (d.op1 instanceof RegOp) {
-								RegOp op1 = (RegOp) d.op1;
+							if (d.op1 instanceof RegOp op1) {
 								if (op1.reg == mov.target.reg && op1.reg != reg) {
 									op1.reg = reg;
 									OPT_DONE();
 								}
 							}
 						}
-						else {
-							remove = false;
-						}
-						
+						else remove = false;
+
 						if (overwritesReg(ins, mov.target.reg) || overwritesReg(ins, reg)) {
 							remove = false;
 							break;
@@ -981,11 +907,10 @@ public class ASMOptimizer {
 	
 	public void clearEmptyBreakStatements(List<ASMInstruction> ins0) {
 		for (int i = 2; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMLabel && ins0.get(i - 1) instanceof ASMBranch && ins0.get(i - 2) instanceof ASMBranch) {
-				ASMBranch branch0 = (ASMBranch) ins0.get(i - 2);
-				ASMBranch branch1 = (ASMBranch) ins0.get(i - 1);
-				ASMLabel label = (ASMLabel) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMLabel label &&
+					ins0.get(i - 1) instanceof ASMBranch branch1 &&
+					ins0.get(i - 2) instanceof ASMBranch branch0) {
+
 				if (branch0.cond != null && branch1.cond == null) {
 					COND cond = branch0.cond;
 					
@@ -1052,9 +977,8 @@ public class ASMOptimizer {
 	public void pushDownFunctionFrame(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
 			/* Found function push */
-			if (ins0.get(i) instanceof ASMPushStack && ins0.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push && ins0.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+
 				boolean DID_OPT = false;
 				
 				/* Get list of all regs that are pushed in the function frame */
@@ -1066,11 +990,11 @@ public class ASMOptimizer {
 				if (clearedRegs.contains(REG.FP)) continue;
 				
 				int wroteR0 = 0;
-				List<ASMInstruction> ins1 = ins0.stream().collect(Collectors.toList());
+				List<ASMInstruction> ins1 = new ArrayList<>(ins0);
 				
 				List<ASMLabel> visited = new ArrayList();
 				List<REG> regsReadByInitial = new ArrayList();
-				List<REG> clearedRegOccurrence = clearedRegs.stream().collect(Collectors.toList());
+				List<REG> clearedRegOccurrence = new ArrayList<>(clearedRegs);
 				
 				int currentPosition = i + 1;
 				int insertPosition = i;
@@ -1097,9 +1021,8 @@ public class ASMOptimizer {
 						
 					if (!overwritesPushedReg) {
 						/* If it does not overwrite one of the regs it is not part of the initial push */
-						if (ins instanceof ASMPopStack) {
-							ASMPopStack pop = (ASMPopStack) ins;
-							
+						if (ins instanceof ASMPopStack pop) {
+
 							/* Is function frame pop, replace with bx lr */
 							if (pop.operands.get(pop.operands.size() - 1).reg == REG.PC) {
 								ins0.set(currentPosition, new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
@@ -1111,17 +1034,12 @@ public class ASMOptimizer {
 							break;
 						}
 						else {
-							if (ins instanceof ASMLabel) {
-								ASMLabel label = (ASMLabel) ins;
+							if (ins instanceof ASMLabel label) {
 								if (label.optFlags.contains(OPT_FLAG.LOOP_HEAD)) break;
-								else {
-									if (visited.contains(label)) 
-										visited.remove(label);
-								}
+								else visited.remove(label);
 							}
-							else if (ins instanceof ASMBranch) {
+							else if (ins instanceof ASMBranch branch) {
 								/* Stop at function call */
-								ASMBranch branch = (ASMBranch) ins;
 								if (branch.type == BRANCH_TYPE.BL) break;
 								
 								if (ins.optFlags.contains(OPT_FLAG.BRANCH_TO_EXIT)) {
@@ -1130,9 +1048,8 @@ public class ASMOptimizer {
 									DID_OPT = true;
 								}
 								else {
-									if (branch.target instanceof LabelOp) {
-										LabelOp op = (LabelOp) branch.target;
-										if (!visited.contains(op.label)) 
+									if (branch.target instanceof LabelOp op) {
+										if (!visited.contains(op.label))
 											visited.add(op.label);
 									}
 									else break;
@@ -1189,9 +1106,8 @@ public class ASMOptimizer {
 	
 	public void removeFPExchange(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMov mov) {
+
 				ASMPushStack push = null;
 				if (ins0.get(i - 1) instanceof ASMPushStack) push = (ASMPushStack) ins0.get(i - 1);
 				
@@ -1219,9 +1135,7 @@ public class ASMOptimizer {
 							clear = false;
 							break;
 						}
-						else if (ins0.get(a) instanceof ASMSub) {
-							ASMSub sub = (ASMSub) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMSub sub) {
 							if (sub.target.reg == REG.SP && sub.op0.reg == REG.SP) {
 								clear = false;
 								break;
@@ -1236,7 +1150,7 @@ public class ASMOptimizer {
 							 * Check if the patch contains direct asm. If yes, the operation may be unsafe since the
 							 * direct ASM could interfere with the FP/SP.
 							 */
-							boolean containsDirectASM = patch.stream().filter(x -> x instanceof ASMHardcode).count() > 0;
+							boolean containsDirectASM = patch.stream().anyMatch(x -> x instanceof ASMHardcode);
 							if (!containsDirectASM) {
 								if (push != null) {
 									ins0.remove(push);
@@ -1263,9 +1177,8 @@ public class ASMOptimizer {
 	
 	public void implicitReturn(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push) {
+
 				RegOp lr = null;
 				for (RegOp r : push.operands) if (r.reg == REG.LR) {
 					lr = r;
@@ -1332,11 +1245,8 @@ public class ASMOptimizer {
 	
 	public void popReturnDirect(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMBranch) {
-				ASMBranch branch = (ASMBranch) ins0.get(i);
-				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.BX_SEMI_EXIT) && ins0.get(i - 1) instanceof ASMPopStack) {
-					ASMPopStack pop = (ASMPopStack) ins0.get(i - 1);
-					
+			if (ins0.get(i) instanceof ASMBranch branch) {
+				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.BX_SEMI_EXIT) && ins0.get(i - 1) instanceof ASMPopStack pop) {
 					if (pop.operands.size() > 0 && pop.operands.get(pop.operands.size() - 1).reg == REG.LR) {
 						pop.operands.set(pop.operands.size() - 1, new RegOp(REG.PC));
 						ins0.remove(i);
@@ -1350,9 +1260,7 @@ public class ASMOptimizer {
 	
 	public void patchFramePointerAddressing(List<ASMInstruction> body, int sub) {
 		for (ASMInstruction ins : body) {
-			if (ins instanceof ASMStackOp) {
-				ASMStackOp stackOp = (ASMStackOp) ins;
-				
+			if (ins instanceof ASMStackOp stackOp) {
 				if (stackOp.op0 != null && stackOp.op0.reg == REG.FP) {
 					if (stackOp.op1 instanceof ImmOp && ((ImmOp) stackOp.op1).patchable != null) {
 						PatchableImmOp op = ((ImmOp) stackOp.op1).patchable;
@@ -1366,9 +1274,7 @@ public class ASMOptimizer {
 					}
 				}
 			}
-			else if (ins instanceof ASMBinaryData) {
-				ASMBinaryData binary = (ASMBinaryData) ins;
-				
+			else if (ins instanceof ASMBinaryData binary) {
 				if (binary.op0 != null && binary.op0.reg == REG.FP) {
 					if (binary.op1 instanceof ImmOp && ((ImmOp) binary.op1).patchable != null) {
 						PatchableImmOp op = ((ImmOp) binary.op1).patchable;
@@ -1380,10 +1286,8 @@ public class ASMOptimizer {
 					else ((ImmOp) binary.op1).value -= sub;
 				}
 			}
-			else if (ins instanceof ASMMemOp) {
-				ASMMemOp mem = (ASMMemOp) ins;
-				
-				if (mem.op0 != null && mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
+			else if (ins instanceof ASMMemOp mem) {
+				if (mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
 					if (mem.op1 instanceof ImmOp && ((ImmOp) mem.op1).patchable != null) {
 						PatchableImmOp op = ((ImmOp) mem.op1).patchable;
 						
@@ -1398,9 +1302,8 @@ public class ASMOptimizer {
 	
 	private void removeFuncCleanStrict(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack && ins0.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push && ins0.get(i).optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
+
 				boolean done = false;
 				List<ASMInstruction> ins = new ArrayList();
 				
@@ -1452,18 +1355,15 @@ public class ASMOptimizer {
 	
 	private void bxSubstitution(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMBranch) {
-				ASMBranch branch = (ASMBranch) ins0.get(i);
-				
-				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp) {
-					LabelOp label = (LabelOp) branch.target;
-				
+			if (ins0.get(i) instanceof ASMBranch branch) {
+
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp label) {
+
 					int x = -1;
 					
 					/* Search for targeted label, indexOf is buggy in this situation :( */
 					for (int a = 0; a < ins0.size(); a++) {
-						if (ins0.get(a) instanceof ASMLabel) {
-							ASMLabel l = (ASMLabel) ins0.get(a);
+						if (ins0.get(a) instanceof ASMLabel l) {
 							if (label.label != null && l.name.equals(label.label.name)) {
 								x = a;
 								break;
@@ -1471,9 +1371,7 @@ public class ASMOptimizer {
 						}
 					}
 					
-					if (x != -1 && ins0.get(x + 1) instanceof ASMBranch) {
-						ASMBranch b0 = (ASMBranch) ins0.get(x + 1);
-					
+					if (x != -1 && ins0.get(x + 1) instanceof ASMBranch b0) {
 						if (b0.type == BRANCH_TYPE.BX) {
 							for (int a = i; a < x + 1; a++) {
 								if (ins0.get(a) instanceof ASMBranch) {
@@ -1496,18 +1394,15 @@ public class ASMOptimizer {
 	
 	private void popPcSubstitution(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMBranch) {
-				ASMBranch branch = (ASMBranch) ins0.get(i);
-				
-				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp) {
-					LabelOp label = (LabelOp) branch.target;
-				
+			if (ins0.get(i) instanceof ASMBranch branch) {
+
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp label) {
+
 					int x = -1;
 					
 					/* Search for targeted label, indexOf is buggy in this situation :( */
 					for (int a = 0; a < ins0.size(); a++) {
-						if (ins0.get(a) instanceof ASMLabel) {
-							ASMLabel l = (ASMLabel) ins0.get(a);
+						if (ins0.get(a) instanceof ASMLabel l) {
 							if (label.label != null && l.name.equals(label.label.name)) {
 								x = a;
 								break;
@@ -1515,9 +1410,7 @@ public class ASMOptimizer {
 						}
 					}
 					
-					if (x != -1 && ins0.get(x + 1) instanceof ASMPopStack) {
-						ASMPopStack pop = (ASMPopStack) ins0.get(x + 1);
-					
+					if (x != -1 && ins0.get(x + 1) instanceof ASMPopStack pop) {
 						if (ASMMemBlock.checkInOrder(pop.operands) || !CompilerDriver.optimizeFileSize) {
 							if (pop.operands.get(pop.operands.size() - 1).reg == REG.PC) {
 								for (int a = i; a < x + 1; a++) {
@@ -1540,9 +1433,8 @@ public class ASMOptimizer {
 	
 	private void multPrecalc(List<ASMInstruction> ins0) {
 		for (int i = 2; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMult) {
-				ASMMult mul = (ASMMult) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMult mul) {
+
 				REG mReg0 = mul.op0.reg;
 				REG mReg1 = mul.op1.reg;
 				
@@ -1551,16 +1443,14 @@ public class ASMOptimizer {
 				
 				boolean last = false;
 				
-				if (ins0.get(i - 2) instanceof ASMMov) {
-					ASMMov mov = (ASMMov) ins0.get(i - 2);
+				if (ins0.get(i - 2) instanceof ASMMov mov) {
 					if (mov.target.reg.isOperandReg() && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) op1 = (ImmOp) mov.op1;
 					}
 				}
 				
-				if (ins0.get(i - 1) instanceof ASMMov) {
-					ASMMov mov = (ASMMov) ins0.get(i - 1);
+				if (ins0.get(i - 1) instanceof ASMMov mov) {
 					if (mov.target.reg.isOperandReg() && mov.op1 instanceof ImmOp) {
 						if (mov.target.reg == mReg0) op0 = (ImmOp) mov.op1;
 						if (mov.target.reg == mReg1) {
@@ -1600,12 +1490,10 @@ public class ASMOptimizer {
 	
 	private void mulToMlaMerge(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMult && ins0.get(i).cond == null) {
-				ASMMult mul = (ASMMult) ins0.get(i - 1);
-				
-				if (ins0.get(i) instanceof ASMAdd && ins0.get(i).cond == null) {
-					ASMAdd add = (ASMAdd) ins0.get(i);
-					
+			if (ins0.get(i - 1) instanceof ASMMult mul && ins0.get(i).cond == null) {
+
+				if (ins0.get(i) instanceof ASMAdd add && ins0.get(i).cond == null) {
+
 					if (mul.target.reg == add.op0.reg && add.op1 instanceof RegOp) {
 						ASMMla mla = new ASMMla(add.target, mul.op0, mul.op1, (RegOp) add.op1);
 						ins0.set(i - 1, mla);
@@ -1620,9 +1508,8 @@ public class ASMOptimizer {
 	
 	private void removeIndirectMemOpAddressing(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMemOp) {
-				ASMMemOp ldr = (ASMMemOp) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMemOp ldr) {
+
 				if (ldr.op1 != null || !(ldr.op0 instanceof RegOp)) continue;
 				
 				REG dataTarget = null;
@@ -1633,18 +1520,14 @@ public class ASMOptimizer {
 				
 				boolean negate = false;
 				
-				if (ins0.get(i - 1) instanceof ASMAdd) {
-					ASMAdd add = (ASMAdd) ins0.get(i - 1);
-					
+				if (ins0.get(i - 1) instanceof ASMAdd add) {
 					dataTarget = add.target.reg;
 					op0 = add.op0.clone();
 					op1 = add.op1.clone();
 					
 					shift = add.shift;
 				}
-				else if (ins0.get(i - 1) instanceof ASMSub) {
-					ASMSub sub = (ASMSub) ins0.get(i - 1);
-					
+				else if (ins0.get(i - 1) instanceof ASMSub sub) {
 					dataTarget = sub.target.reg;
 					op0 = sub.op0.clone();
 					
@@ -1652,21 +1535,19 @@ public class ASMOptimizer {
 						op1 = sub.op1.clone();
 						negate = true;
 					}
-					else if (sub.op1 instanceof ImmOp) {
-						ImmOp imm = (ImmOp) sub.op1;
+					else if (sub.op1 instanceof ImmOp imm) {
 						op1 = new ImmOp(-imm.value);
 					}
 					else continue;
 				}
-				else if (ins0.get(i - 1) instanceof ASMLsl) {
+				else if (ins0.get(i - 1) instanceof ASMLsl lsl) {
 					/* 
 					 * Will mostly target dereferencing operations. 
 					 * Assumes that R10 is set to 0 at any given time. In most of the cases, this is given.
 					 * In some special cases, like when calling the stack copy routine or the lambda head of a function,
 					 * R10 is set temporary to the pc + 8. R10 is reset to 0 afterwards.
 					 */
-					ASMLsl lsl = (ASMLsl) ins0.get(i - 1);
-					
+
 					dataTarget = lsl.target.reg;
 					op0 = new RegOp(REG.R10);
 					
@@ -1738,8 +1619,7 @@ public class ASMOptimizer {
 				List<REG> probed = new ArrayList();
 				
 				for (int k = i; k < ins0.size(); k++) {
-					if (ins0.get(k) instanceof ASMMov) {
-						ASMMov mov = (ASMMov) ins0.get(k);
+					if (ins0.get(k) instanceof ASMMov mov) {
 						REG reg = mov.target.reg;
 						
 						/*
@@ -1765,10 +1645,8 @@ public class ASMOptimizer {
 									 * back to the start of the loop makes this optimization
 									 * impossible.
 									 */
-									if (ins0.get(a) instanceof ASMBranch) {
-										ASMBranch branch = (ASMBranch) ins0.get(a);
-										
-										/* 
+									if (ins0.get(a) instanceof ASMBranch branch) {
+										/*
 										 * Either by a loop branch or a call branch with an operand register we have
 										 * to assume that the register is used.
 										 */
@@ -1798,18 +1676,15 @@ public class ASMOptimizer {
 			
 			REG reg = null;
 			
-			if (ins0.get(i) instanceof ASMBinaryData) {
-				ASMBinaryData d = (ASMBinaryData) ins0.get(i);
+			if (ins0.get(i) instanceof ASMBinaryData d) {
 				if (d.isUpdatingCondField() || d.cond != null) continue;
 				reg = d.target.reg;
 			}
-			else if (ins0.get(i) instanceof ASMLdr) {
-				ASMLdr d = (ASMLdr) ins0.get(i);
+			else if (ins0.get(i) instanceof ASMLdr d) {
 				if (d.cond != null) continue;
 				reg = d.target.reg;
 			}
-			else if (ins0.get(i) instanceof ASMLdrStack) {
-				ASMLdrStack d = (ASMLdrStack) ins0.get(i);
+			else if (ins0.get(i) instanceof ASMLdrStack d) {
 				if (d.cond != null) continue;
 				reg = d.target.reg;
 			}
@@ -1851,9 +1726,8 @@ public class ASMOptimizer {
 	
 	private void pushPopRelocation(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push) {
+
 				REG reg = push.operands.get(0).reg;
 				if (reg.isSpecialReg()) continue;
 				
@@ -1868,14 +1742,12 @@ public class ASMOptimizer {
 								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
 								ins0.get(line) instanceof ASMStackOp || ins0.get(line) instanceof ASMPushStack ||
 								ins0.get(line) instanceof ASMLdr || ins0.get(line) instanceof ASMPopStack ||
-								ins0.get(line) instanceof ASMPushStack ||
 								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
 							break;
 						}
 						else if (readsReg(ins0.get(line), REG.SP)) break;
 						else {
-							if (ins0.get(line) instanceof ASMMov) {
-								ASMMov mov = (ASMMov) ins0.get(line);
+							if (ins0.get(line) instanceof ASMMov mov) {
 								if (mov.target.reg == REG.SP && mov.op1 instanceof RegOp && ((RegOp) mov.op1).reg == REG.FP) {
 									afterFPExchange = true;
 								}
@@ -1891,9 +1763,8 @@ public class ASMOptimizer {
 		}
 		
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPopStack) {
-				ASMPopStack pop = (ASMPopStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPopStack pop) {
+
 				REG reg = pop.operands.get(0).reg;
 				if (reg.isSpecialReg()) continue;
 				
@@ -1901,16 +1772,13 @@ public class ASMOptimizer {
 					ins0.remove(i);
 					
 					int line = i - 1;
-					while (true) {
-						if (readsReg(ins0.get(line), reg) || overwritesReg(ins0.get(line), reg) ||
-								ins0.get(line) instanceof ASMBranch || ins0.get(line) instanceof ASMLabel || 
-								ins0.get(line) instanceof ASMStackOp || 
-								ins0.get(line) instanceof ASMStr || ins0.get(line) instanceof ASMPushStack ||
-								ins0.get(line) instanceof ASMPopStack ||
-								ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
-							break;
-						}
-						
+					while (!readsReg(ins0.get(line), reg) && !overwritesReg(ins0.get(line), reg) &&
+							!(ins0.get(line) instanceof ASMBranch) && !(ins0.get(line) instanceof ASMLabel) &&
+							!(ins0.get(line) instanceof ASMStackOp) &&
+							!(ins0.get(line) instanceof ASMStr) && !(ins0.get(line) instanceof ASMPushStack) &&
+							!(ins0.get(line) instanceof ASMPopStack) &&
+							!ASMOptimizer.overwritesReg(ins0.get(line), REG.PC)) {
+
 						line--;
 					}
 					
@@ -1927,14 +1795,11 @@ public class ASMOptimizer {
 		for (int i = 1; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMAdd) {
-				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
-				ASMAdd add1 = (ASMAdd) ins0.get(i);
-				if (add0.target.reg == add1.target.reg && add0.target.reg == add1.op0.reg && 
-						add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp) {
-					ImmOp op0 = (ImmOp) add0.op1;
-					ImmOp op1 = (ImmOp) add1.op1;
-					
+			if (ins0.get(i) instanceof ASMAdd add1 && ins0.get(i - 1) instanceof ASMAdd add0) {
+				if (add0.target.reg == add1.target.reg && add0.target.reg == add1.op0.reg &&
+						add0.op1 instanceof ImmOp op0 &&
+						add1.op1 instanceof ImmOp op1) {
+
 					op0.value += op1.value;
 					ins0.remove(i);
 					i--;
@@ -1946,14 +1811,11 @@ public class ASMOptimizer {
 		for (int i = 1; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMAdd) {
-				ASMAdd add0 = (ASMAdd) ins0.get(i - 1);
-				ASMAdd add1 = (ASMAdd) ins0.get(i);
-				
-				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp && add1.op1 instanceof ImmOp && add0.target.reg.isOperandReg()) {
-					ImmOp op0 = (ImmOp) add0.op1;
-					ImmOp op1 = (ImmOp) add1.op1;
-					
+			if (ins0.get(i) instanceof ASMAdd add1 && ins0.get(i - 1) instanceof ASMAdd add0) {
+
+				if (add0.target.reg == add1.op0.reg && add0.op1 instanceof ImmOp op0 &&
+						add1.op1 instanceof ImmOp op1 && add0.target.reg.isOperandReg()) {
+
 					op1.value = op0.value + op1.value;
 					add1.op0.reg = add0.op0.reg;
 					
@@ -1968,31 +1830,32 @@ public class ASMOptimizer {
 	
 	private void defragmentPush(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack && ins0.get(i - 1) instanceof ASMPushStack) {
-				ASMPushStack push0 = (ASMPushStack) ins0.get(i - 1);
-				ASMPushStack push1 = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push1 &&
+					ins0.get(i - 1) instanceof ASMPushStack push0) {
+
 				/* Prevent merges of vfp and non-vfp pushes */
 				if (push0 instanceof ASMVPushStack && !(push1 instanceof ASMVPushStack) ||
 						!(push0 instanceof ASMVPushStack) && push1 instanceof ASMVPushStack) continue;
 				
 				/* Prevent merges of pushes with special registers */
-				if (push0.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
-				if (push1.operands.stream().filter(x -> x.reg.isSpecialReg()).count() > 0) continue;
+				if (push0.operands.stream().anyMatch(x -> x.reg.isSpecialReg())) continue;
+				if (push1.operands.stream().anyMatch(x -> x.reg.isSpecialReg())) continue;
 				
 				List<REG> op0 = push0.operands.stream().map(x -> x.reg).collect(Collectors.toList());
 				List<REG> op1 = push1.operands.stream().map(x -> x.reg).collect(Collectors.toList());
 				
 				/* Make sure no REGs of the push1 are contained in the REGs of push0 */
 				boolean contains = false;
-				for (REG reg : op1) 
-					if (op0.contains(reg)) 
+				for (REG reg : op1)
+					if (op0.contains(reg)) {
 						contains = true;
+						break;
+					}
 				if (contains) continue;
 				
 				for (int a = 0; a < push1.operands.size(); a++) {
 					RegOp reg = push1.operands.get(a);
-					if (push0.operands.stream().filter(x -> x.reg == reg.reg).count() == 0) {
+					if (push0.operands.stream().noneMatch(x -> x.reg == reg.reg)) {
 						push0.operands.add(0, reg);
 						push1.operands.remove(a--);
 						OPT_DONE();
@@ -2010,20 +1873,16 @@ public class ASMOptimizer {
 	private void shiftBy0IsMov(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
 			ASMInstruction ins = ins0.get(i);
-			if (ins instanceof ASMLsl) {
-				ASMLsl lsl = (ASMLsl) ins;
-				if (lsl.op1 != null && lsl.op1 instanceof ImmOp) {
-					ImmOp imm = (ImmOp) lsl.op1;
+			if (ins instanceof ASMLsl lsl) {
+				if (lsl.op1 instanceof ImmOp imm) {
 					if (imm.value == 0) {
 						ins0.set(i, new ASMMov(lsl.target, lsl.op0, lsl.cond));
 						OPT_DONE();
 					}
 				}
 			}
-			else if (ins instanceof ASMLsr) {
-				ASMLsr lsr = (ASMLsr) ins;
-				if (lsr.op1 != null && lsr.op1 instanceof ImmOp) {
-					ImmOp imm = (ImmOp) lsr.op1;
+			else if (ins instanceof ASMLsr lsr) {
+				if (lsr.op1 instanceof ImmOp imm) {
 					if (imm.value == 0) {
 						ins0.set(i, new ASMMov(lsr.target, lsr.op0, lsr.cond));
 						OPT_DONE();
@@ -2035,15 +1894,13 @@ public class ASMOptimizer {
 	
 	private void defragmentDeltas(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMSub) {
-				ASMSub sub = (ASMSub) ins0.get(i - 1);
-				ASMAdd add = (ASMAdd) ins0.get(i);
-				
-				if (sub.target.reg == add.target.reg && add.target.reg == add.op0.reg && 
-						sub.op1 instanceof ImmOp && add.op1 instanceof ImmOp) {
-					ImmOp subOp = (ImmOp) sub.op1;
-					ImmOp addOp = (ImmOp) add.op1;
-					
+			if (ins0.get(i) instanceof ASMAdd add &&
+					ins0.get(i - 1) instanceof ASMSub sub) {
+
+				if (sub.target.reg == add.target.reg && add.target.reg == add.op0.reg &&
+						sub.op1 instanceof ImmOp subOp &&
+						add.op1 instanceof ImmOp addOp) {
+
 					if (subOp.value >= addOp.value) {
 						subOp.value -= addOp.value;
 						ins0.remove(i);
@@ -2059,12 +1916,10 @@ public class ASMOptimizer {
 		for (int i = 1; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
-				ASMAdd add = (ASMAdd) ins0.get(i);
-				
-				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
-					RegOp op1 = (RegOp) add.op1;
+			if (ins0.get(i) instanceof ASMAdd add &&
+					ins0.get(i - 1) instanceof ASMMov mov) {
+
+				if (mov.target.reg == add.op0.reg && mov.op1 instanceof ImmOp && add.op1 instanceof RegOp op1 && add.shift == null) {
 					add.op1 = mov.op1;
 					add.op0 = op1;
 					
@@ -2078,16 +1933,14 @@ public class ASMOptimizer {
 		for (int i = 1; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMAdd && ins0.get(i - 1) instanceof ASMLsl) {
-				ASMLsl lsl = (ASMLsl) ins0.get(i - 1);
-				ASMAdd add = (ASMAdd) ins0.get(i);
-				
-				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp && add.op1 instanceof RegOp && add.shift == null) {
-					RegOp op1 = (RegOp) add.op1;
+			if (ins0.get(i) instanceof ASMAdd add &&
+					ins0.get(i - 1) instanceof ASMLsl lsl) {
+
+				if (lsl.target.reg == add.op0.reg && lsl.op1 instanceof ImmOp &&
+						add.op1 instanceof RegOp op1 && add.shift == null) {
+
 					add.op1 = lsl.op0;
-					
 					add.shift = new Shift(SHIFT.LSL, lsl.op1);
-					
 					add.op0 = op1;
 					
 					ins0.remove(i - 1);
@@ -2100,16 +1953,15 @@ public class ASMOptimizer {
 
 	private void subtractionSemiCommutative(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMSub && ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
-				ASMSub sub = (ASMSub) ins0.get(i);
-				
-				if (mov.target.reg == sub.op0.reg && mov.op1 instanceof ImmOp && sub.op1 instanceof RegOp) {
-					RegOp op1 = (RegOp) sub.op1;
-					
+			if (ins0.get(i) instanceof ASMSub sub &&
+					ins0.get(i - 1) instanceof ASMMov mov) {
+
+				if (mov.target.reg == sub.op0.reg &&
+						mov.op1 instanceof ImmOp && sub.op1 instanceof RegOp op1) {
+
 					ins0.set(i, new ASMRsb(sub.target, op1, mov.op1));
-					
 					ins0.remove(i - 1);
+
 					i--;
 					OPT_DONE();
 				}
@@ -2121,10 +1973,10 @@ public class ASMOptimizer {
 		for (int i = 0; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMAdd) {
-				ASMAdd add = (ASMAdd) ins0.get(i);
-				if (add.target.reg == add.op0.reg && add.op1 instanceof ImmOp && !add.isUpdatingCondField()) {
-					ImmOp imm = (ImmOp) add.op1;
+			if (ins0.get(i) instanceof ASMAdd add) {
+				if (add.target.reg == add.op0.reg &&
+						add.op1 instanceof ImmOp imm && !add.isUpdatingCondField()) {
+
 					if (imm.value == 0) {
 						ins0.remove(i);
 						i--;
@@ -2132,10 +1984,10 @@ public class ASMOptimizer {
 					}
 				}
 			}
-			else if (ins0.get(i) instanceof ASMSub) {
-				ASMSub sub = (ASMSub) ins0.get(i);
-				if (sub.target.reg == sub.op0.reg && sub.op1 instanceof ImmOp && !sub.isUpdatingCondField()) {
-					ImmOp imm = (ImmOp) sub.op1;
+			else if (ins0.get(i) instanceof ASMSub sub) {
+				if (sub.target.reg == sub.op0.reg &&
+						sub.op1 instanceof ImmOp imm && !sub.isUpdatingCondField()) {
+
 					if (imm.value == 0) {
 						ins0.remove(i);
 						i--;
@@ -2148,21 +2000,18 @@ public class ASMOptimizer {
 	
 	private void removeUnnessesaryPushPop(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push) {
+
 				boolean remove = false;
 				
 				if (push.operands.size() == 1) {
-					REG reg = ((RegOp) push.operands.get(0)).reg;
+					REG reg = push.operands.get(0).reg;
 					for (int a = i; a < ins0.size(); a++) {
 						ASMInstruction ins = ins0.get(a);
 						
-						if (ins instanceof ASMPopStack) {
-							ASMPopStack pop = (ASMPopStack) ins;
-							
+						if (ins instanceof ASMPopStack pop) {
 							if (pop.operands.size() == 1 && !pop.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
-								RegOp op0 = (RegOp) pop.operands.get(0);
+								RegOp op0 = pop.operands.get(0);
 								if (op0.reg == reg) {
 									ins0.remove(a);
 									remove = true;
@@ -2187,9 +2036,8 @@ public class ASMOptimizer {
 	
 	private void removeIndirectPushPopAssign(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMPushStack) {
-				ASMPushStack push = (ASMPushStack) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMPushStack push) {
+
 				if (push.operands.size() == 1) {
 					REG pushReg = push.operands.get(0).reg;
 					
@@ -2203,8 +2051,7 @@ public class ASMOptimizer {
 						if (ins instanceof ASMBranch || ins instanceof ASMLabel || ins instanceof ASMPushStack) {
 							break;
 						}
-						else if (ins instanceof ASMPopStack) {
-							ASMPopStack pop0 = (ASMPopStack) ins;
+						else if (ins instanceof ASMPopStack pop0) {
 							if (pop0.operands.size() == 1 && !pop0.optFlags.contains(OPT_FLAG.FUNC_CLEAN)) {
 								found = true;
 								pop = pop0;
@@ -2248,37 +2095,30 @@ public class ASMOptimizer {
 		for (int i = 1; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMov mov) {
+
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
 					if (reg.isOperandReg()) {
 						
 						boolean replace = true;
 						
-						if (ins0.get(i + 1) instanceof ASMCmp) {
-							ASMCmp cmp = (ASMCmp) ins0.get(i + 1);
+						if (ins0.get(i + 1) instanceof ASMCmp cmp) {
 							if (cmp.op0.reg == reg) replace = false;
 						}
 						
 						boolean patchUp = false;
-						if (ins0.get(i - 1) instanceof ASMBinaryData && !(ins0.get(i - 1) instanceof ASMMov)) {
-							ASMBinaryData data = (ASMBinaryData) ins0.get(i - 1);
-							
-							if (data instanceof ASMVCvt && mov.target.reg.toInt() < 16) {
-								patchUp = false;
-								break;
-							}
-							
+						if (ins0.get(i - 1) instanceof ASMBinaryData data && !(ins0.get(i - 1) instanceof ASMMov)) {
+
+							if (data instanceof ASMVCvt && mov.target.reg.toInt() < 16) break;
+
 							if (data.target.reg == reg && replace) {
 								data.target = mov.target;
 								OPT_DONE();
 								patchUp = true;
 							}
 						}
-						else if (ins0.get(i - 1) instanceof ASMMult) {
-							ASMMult mul = (ASMMult) ins0.get(i - 1);
+						else if (ins0.get(i - 1) instanceof ASMMult mul) {
 							if (mul.target.reg == reg && replace) {
 								mul.target = mov.target;
 								OPT_DONE();
@@ -2295,18 +2135,15 @@ public class ASMOptimizer {
 	
 	private void removeLdrIndirectTargeting(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMov mov) {
+
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
 					
 					/* Only perform action if target is a operand register. */
 					if (!reg.isOperandReg()) continue;
 					
-					if (ins0.get(i - 1) instanceof ASMLdrStack) {
-						ASMLdrStack ldr = (ASMLdrStack) ins0.get(i - 1);
-						
+					if (ins0.get(i - 1) instanceof ASMLdrStack ldr) {
 						if (ldr.target.reg == reg) {
 							ldr.target.reg = mov.target.reg;
 							OPT_DONE();
@@ -2314,9 +2151,7 @@ public class ASMOptimizer {
 							i--;
 						}
 					}
-					else if (ins0.get(i - 1) instanceof ASMLdrLabel) {
-						ASMLdrLabel ldr = (ASMLdrLabel) ins0.get(i - 1);
-						
+					else if (ins0.get(i - 1) instanceof ASMLdrLabel ldr) {
 						if (ldr.target.reg == reg) {
 							if (mov instanceof ASMVMov) {
 								ASMVLdrLabel ldrLabel = new ASMVLdrLabel(ldr.target, (LabelOp) ldr.op0, ldr.dec);
@@ -2331,9 +2166,7 @@ public class ASMOptimizer {
 							i--;
 						}
 					}
-					else if (ins0.get(i - 1) instanceof ASMLdr) {
-						ASMLdr ldr = (ASMLdr) ins0.get(i - 1);
-						
+					else if (ins0.get(i - 1) instanceof ASMLdr ldr) {
 						if (ldr.target.reg == reg) {
 							if (mov instanceof ASMVMov) 
 								ins0.set(i - 1, new ASMVLdr(ldr.target, ldr.op0, ldr.op1));
@@ -2351,15 +2184,11 @@ public class ASMOptimizer {
 	
 	private void removeStrOperandIndirectTargeting(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
-				
+			if (ins0.get(i - 1) instanceof ASMMov mov) {
 				if (mov.op1 instanceof RegOp) {
 					REG reg = ((RegOp) mov.op1).reg;
 					
-					if (ins0.get(i) instanceof ASMStrStack) {
-						ASMStrStack str = (ASMStrStack) ins0.get(i);
-						
+					if (ins0.get(i) instanceof ASMStrStack str) {
 						if (str.target.reg == mov.target.reg) {
 							str.target.reg = reg;
 							OPT_DONE();
@@ -2367,9 +2196,7 @@ public class ASMOptimizer {
 							i--;
 						}
 					}
-					else if (ins0.get(i) instanceof ASMStr) {
-						ASMStr str = (ASMStr) ins0.get(i);
-						
+					else if (ins0.get(i) instanceof ASMStr str) {
 						if (str.target.reg == mov.target.reg) {
 							str.target.reg = reg;
 							OPT_DONE();
@@ -2384,14 +2211,12 @@ public class ASMOptimizer {
 	
 	private void removeOperandIndirectTargeting(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
+			if (ins0.get(i - 1) instanceof ASMMov mov) {
 				/* For all operand regs */
 				for (REG a : REG.values()) {
 					if (!a.isOperandReg()) continue;
 					if (mov.target.reg == a && mov.op1 instanceof RegOp) {
-						if (ins0.get(i) instanceof ASMCmp) {
-							ASMCmp cmp = (ASMCmp) ins0.get(i);
+						if (ins0.get(i) instanceof ASMCmp cmp) {
 							if (cmp.op0 != null && cmp.op0.reg == a) {
 								/* Replace */
 								cmp.op0 = (RegOp) mov.op1;
@@ -2400,9 +2225,9 @@ public class ASMOptimizer {
 								ins0.remove(i - 1);
 								i--;
 							}
-							else if (cmp.op1 != null && cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == a) {
+							else if (cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == a) {
 								/* Replace */
-								cmp.op1 = (RegOp) mov.op1;
+								cmp.op1 = mov.op1;
 								OPT_DONE();
 								
 								ins0.remove(i - 1);
@@ -2414,17 +2239,14 @@ public class ASMOptimizer {
 			}
 		}
 		
-		/**
+		/*
 		 * mov r0, r3
 		 * str r0, [rx]
 		 * ->
 		 * str r3, [rx]
 		 */
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMStr && ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
-				ASMStr str = (ASMStr) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMStr str && ins0.get(i - 1) instanceof ASMMov mov) {
 				if (str.target.reg == mov.target.reg && mov.op1 instanceof RegOp) {
 					boolean clear = true;
 					for (int a = i + 1; a < ins0.size(); a++) {
@@ -2448,20 +2270,17 @@ public class ASMOptimizer {
 		}
 		
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
+			if (ins0.get(i - 1) instanceof ASMMov mov) {
 				for (int a = 0; a < 10; a++) {
-					if (mov.target.reg == REG.toReg(a) && mov.op1 instanceof RegOp) {
-						RegOp target = (RegOp) mov.op1;
-						
+					if (mov.target.reg == REG.toReg(a) && mov.op1 instanceof RegOp target) {
+
 						/* Writeback flag is set, cannot substitute, since mov copies operand */
 						if (ins0.get(i).optFlags.contains(OPT_FLAG.WRITEBACK)) {
 							break;
 						}
 						
-						if (ins0.get(i) instanceof ASMBinaryData && !(ins0.get(i) instanceof ASMMov)) {
-							ASMBinaryData data = (ASMBinaryData) ins0.get(i);
-							
+						if (ins0.get(i) instanceof ASMBinaryData data && !(ins0.get(i) instanceof ASMMov)) {
+
 							boolean remove = false;
 							if (data.op0 != null && data.op0.reg == REG.toReg(a)) {
 								/* Replace */
@@ -2470,7 +2289,7 @@ public class ASMOptimizer {
 								remove = true;
 							}
 							
-							if (data.op1 != null && data.op1 instanceof RegOp && ((RegOp) data.op1).reg == REG.toReg(a)) {
+							if (data.op1 instanceof RegOp && ((RegOp) data.op1).reg == REG.toReg(a)) {
 								/* Replace */
 								data.op1 = target;
 								OPT_DONE();
@@ -2482,8 +2301,8 @@ public class ASMOptimizer {
 								i--;
 							}
 						}
-						else if (ins0.get(i) instanceof ASMMult) {
-							ASMMult mul = (ASMMult) ins0.get(i);
+						else if (ins0.get(i) instanceof ASMMult mul) {
+
 							boolean remove = false;
 							if (mul.op0 != null && mul.op0.reg == REG.toReg(a)) {
 								/* Replace */
@@ -2492,7 +2311,7 @@ public class ASMOptimizer {
 								remove = true;
 							}
 							
-							if (mul.op1 != null && mul.op1 instanceof RegOp && ((RegOp) mul.op1).reg == REG.toReg(a)) {
+							if (mul.op1.reg == REG.toReg(a)) {
 								/* Replace */
 								mul.op1 = target;
 								OPT_DONE();
@@ -2523,7 +2342,7 @@ public class ASMOptimizer {
 									remove = true;
 								}
 								
-								if (mul.op1 != null && mul.op1 instanceof RegOp && mul.op1.reg == REG.toReg(a)) {
+								if (mul.op1.reg == REG.toReg(a)) {
 									/* Replace */
 									mul.op1 = target;
 									OPT_DONE();
@@ -2544,13 +2363,10 @@ public class ASMOptimizer {
 	
 	private void removeImplicitPushPopTargeting(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMov) {
-				ASMMov mov = (ASMMov) ins0.get(i - 1);
-				
+			if (ins0.get(i - 1) instanceof ASMMov mov) {
 				if (mov.target.reg == REG.R0 && mov.op1 instanceof RegOp) {
-					if (ins0.get(i) instanceof ASMPushStack) {
-						ASMPushStack push = (ASMPushStack) ins0.get(i);
-						
+					if (ins0.get(i) instanceof ASMPushStack push) {
+
 						if (push.operands.size() == 1 && push.operands.get(0).reg == mov.target.reg) {
 							push.operands.get(0).reg = ((RegOp) mov.op1).reg;
 							ins0.remove(i - 1);
@@ -2565,13 +2381,8 @@ public class ASMOptimizer {
 	
 	private void removeBranchesBeforeLabelToLabel(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMBranch && ins0.get(i) instanceof ASMLabel) {
-				ASMBranch branch = (ASMBranch) ins0.get(i - 1);
-				ASMLabel label = (ASMLabel) ins0.get(i);
-				
-				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp) {
-					LabelOp op = (LabelOp) branch.target;
-					
+			if (ins0.get(i - 1) instanceof ASMBranch branch && ins0.get(i) instanceof ASMLabel label) {
+				if (branch.type == BRANCH_TYPE.B && branch.target instanceof LabelOp op) {
 					if (op.label.name.equals(label.name)) {
 						ins0.remove(i - 1);
 						i--;
@@ -2584,12 +2395,8 @@ public class ASMOptimizer {
 	
 	private void removeDoubleCrossing(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i - 1) instanceof ASMMov && ins0.get(i) instanceof ASMMov) {
-				ASMMov move0 = (ASMMov) ins0.get(i - 1);
-				ASMMov move1 = (ASMMov) ins0.get(i);
-				if (move0.op1 instanceof RegOp && move1.op1 instanceof RegOp) {
-					RegOp op0 = (RegOp) move0.op1;
-					RegOp op1 = (RegOp) move1.op1;
+			if (ins0.get(i - 1) instanceof ASMMov move0 && ins0.get(i) instanceof ASMMov move1) {
+				if (move0.op1 instanceof RegOp op0 && move1.op1 instanceof RegOp op1) {
 					if (op0.reg == REG.FP || op1.reg == REG.FP) continue;
 					
 					if (op0.reg == move1.target.reg && move0.target.reg == op1.reg) {
@@ -2604,9 +2411,8 @@ public class ASMOptimizer {
 	
 	private void removeMovId(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMMov) {
+			if (ins0.get(i) instanceof ASMMov mov) {
 				/* Remove identity mov */
-				ASMMov mov = (ASMMov) ins0.get(i);
 				if (mov.op1 instanceof RegOp && ((RegOp) mov.op1).reg == mov.target.reg) {
 					ins0.remove(i);
 					i--;
@@ -2620,9 +2426,8 @@ public class ASMOptimizer {
 		for (int i = 0; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMMov) {
-				ASMMov move = (ASMMov) ins0.get(i);
-				
+			if (ins0.get(i) instanceof ASMMov move) {
+
 				if (move.cond != null) continue;
 				
 				if (move.op1 instanceof ImmOp) {
@@ -2637,8 +2442,7 @@ public class ASMOptimizer {
 					/* Break is reg is overwritten */
 					
 					for (int a = i + 1; a < ins0.size(); a++) {
-						if (ins0.get(a) instanceof ASMBranch) {
-							ASMBranch branch = (ASMBranch) ins0.get(a);
+						if (ins0.get(a) instanceof ASMBranch branch) {
 							if (branch.cond != null || branch.type != BRANCH_TYPE.B) {
 								clear = false;
 								break;
@@ -2657,9 +2461,7 @@ public class ASMOptimizer {
 							continue;
 						}
 						/* Substitute immediate value into move */
-						else if (ins0.get(a) instanceof ASMMov) {
-							ASMMov move0 = (ASMMov) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMMov move0) {
 							if (move0.target.reg == target) {
 								if (move0.cond != null) clear = false;
 								break;
@@ -2670,9 +2472,7 @@ public class ASMOptimizer {
 								OPT_DONE();
 							}
 						}
-						else if (ins0.get(a) instanceof ASMMvn) {
-							ASMMvn move0 = (ASMMvn) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMMvn move0) {
 							if (move0.target.reg == target) {
 								if (move0.cond != null) clear = false;
 								break;
@@ -2683,9 +2483,7 @@ public class ASMOptimizer {
 								OPT_DONE();
 							}
 						}
-						else if (ins0.get(a) instanceof ASMBinaryData) {
-							ASMBinaryData dataP = (ASMBinaryData) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMBinaryData dataP) {
 							if (dataP.optFlags.contains(OPT_FLAG.WRITEBACK)) {
 								clear = false;
 								break;
@@ -2698,7 +2496,7 @@ public class ASMOptimizer {
 								if (!move.optFlags.contains(OPT_FLAG.WRITEBACK)) hardClear = true;
 							}
 							
-							if (dataP.op0 instanceof RegOp && ((RegOp) dataP.op0).reg == target) {
+							if (dataP.op0.reg == target) {
 								/* mov r1, #10; add r0, r1, #5 -> mov r0, #15 */
 								if (dataP.op1 instanceof ImmOp) {
 									int value = ((ImmOp) dataP.op1).value;
@@ -2724,9 +2522,7 @@ public class ASMOptimizer {
 								break;
 							}
 						}
-						else if (ins0.get(a) instanceof ASMMult) {
-							ASMMult mult = (ASMMult) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMMult mult) {
 							if (mult.op0.reg == target || mult.op1.reg == target) {
 								clear = false;
 							}
@@ -2735,9 +2531,7 @@ public class ASMOptimizer {
 								break;
 							}
 						}
-						else if (ins0.get(a) instanceof ASMMla) {
-							ASMMla mla = (ASMMla) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMMla mla) {
 							if (mla.op0.reg == target || mla.op1.reg == target || mla.op2.reg == target) {
 								clear = false;
 							}
@@ -2746,9 +2540,7 @@ public class ASMOptimizer {
 								break;
 							}
 						}
-						else if (ins0.get(a) instanceof ASMCmp) {
-							ASMCmp cmp = (ASMCmp) ins0.get(a);
-							
+						else if (ins0.get(a) instanceof ASMCmp cmp) {
 							if (cmp.op1 instanceof RegOp && ((RegOp) cmp.op1).reg == target) {
 								cmp.op1 = new ImmOp(val);
 								OPT_DONE();
@@ -2758,8 +2550,7 @@ public class ASMOptimizer {
 								clear = false;
 							}
 						}
-						else if (ins0.get(a) instanceof ASMPushStack) {
-							ASMPushStack p = (ASMPushStack) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMPushStack p) {
 							for (RegOp r : p.operands) {
 								if (r.reg == target) {
 									clear = false;
@@ -2767,8 +2558,7 @@ public class ASMOptimizer {
 								}
 							}
 						}
-						else if (ins0.get(a) instanceof ASMPopStack) {
-							ASMPopStack p = (ASMPopStack) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMPopStack p) {
 							boolean end = false;
 							for (RegOp r : p.operands) {
 								if (r.reg == target) {
@@ -2779,8 +2569,7 @@ public class ASMOptimizer {
 							
 							if (end) break;
 						}
-						else if (ins0.get(a) instanceof ASMLdrStack) {
-							ASMLdrStack p = (ASMLdrStack) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMLdrStack p) {
 							if (p.target.reg == target) {
 								break;
 							}
@@ -2789,16 +2578,14 @@ public class ASMOptimizer {
 								clear = false;
 							}
 							
-							if (p.op1 instanceof RegOp) {
-								RegOp r = (RegOp) p.op1;
+							if (p.op1 instanceof RegOp r) {
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
 									OPT_DONE();
 								}
 							}
 						}
-						else if (ins0.get(a) instanceof ASMLdr) {
-							ASMLdr p = (ASMLdr) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMLdr p) {
 							if (p.target.reg == target) {
 								break;
 							}
@@ -2807,16 +2594,14 @@ public class ASMOptimizer {
 								clear = false;
 							}
 							
-							if (p.op1 instanceof RegOp) {
-								RegOp r = (RegOp) p.op1;
+							if (p.op1 instanceof RegOp r) {
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
 									OPT_DONE();
 								}
 							}
 						}
-						else if (ins0.get(a) instanceof ASMStr) {
-							ASMStr p = (ASMStr) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMStr p) {
 							if (p.target.reg == target) {
 								clear = false;
 								break;
@@ -2826,16 +2611,14 @@ public class ASMOptimizer {
 								clear = false;
 							}
 							
-							if (p.op1 instanceof RegOp) {
-								RegOp r = (RegOp) p.op1;
+							if (p.op1 instanceof RegOp r) {
 								if (r.reg == target) {
 									p.op1 = new ImmOp(val);
 									OPT_DONE();
 								}
 							}
 						}
-						else if (ins0.get(a) instanceof ASMStrStack) {
-							ASMStrStack p = (ASMStrStack) ins0.get(a);
+						else if (ins0.get(a) instanceof ASMStrStack p) {
 							if (p.target.reg == target) {
 								clear = false;
 								break;
@@ -2845,7 +2628,7 @@ public class ASMOptimizer {
 								clear = false;
 							}
 						}
-						else if (ins0.get(a) instanceof ASMHardcode) {
+						else if (ins0.get(a) instanceof ASMHardcode || ins0.get(a) instanceof ASMBranch) {
 							clear = false;
 							break;
 						}
@@ -2874,8 +2657,7 @@ public class ASMOptimizer {
 		
 		for (int i = 1; i < ins0.size(); i++) {
 			ASMInstruction ins = ins0.get(i);
-			if (ins instanceof ASMLabel) {
-				ASMLabel label = (ASMLabel) ins;
+			if (ins instanceof ASMLabel label) {
 				/* Label is used by default if its a function header or a data label */
 				if (label.isFunctionLabel || label instanceof ASMDataLabel || 
 						label.name.equals("main_init") || label.name.equals("name") ||
@@ -2884,9 +2666,8 @@ public class ASMOptimizer {
 					usedLabels.add((ASMLabel) ins);
 				}
 			}
-			if (ins instanceof ASMBranch) {
-				ASMBranch b = (ASMBranch) ins;
-				if (b.target instanceof LabelOp && ((LabelOp) b.target).label != null) 
+			if (ins instanceof ASMBranch b) {
+				if (b.target instanceof LabelOp && ((LabelOp) b.target).label != null)
 					usedLabels.add(((LabelOp) b.target).label);
 			}
 		}
@@ -2902,9 +2683,6 @@ public class ASMOptimizer {
 				if (!contained) {
 					ins0.remove(i);
 					OPT_DONE();
-					while (i < ins0.size() && !(ins instanceof ASMLabel)) {
-						ins0.remove(i);
-					}
 					i--;
 				}
 			}
@@ -2915,8 +2693,7 @@ public class ASMOptimizer {
 		for (int i = 0; i < ins0.size(); i++) {
 			if (ins0.get(i).optFlags.contains(OPT_FLAG.IS_PADDING)) continue;
 			
-			if (ins0.get(i) instanceof ASMBranch) {
-				ASMBranch b = (ASMBranch) ins0.get(i);
+			if (ins0.get(i) instanceof ASMBranch b) {
 				if (b.cond == null && b.type != BRANCH_TYPE.BL && !b.optFlags.contains(OPT_FLAG.SYS_JMP)) {
 					while (i < ins0.size() - 1 && !(ins0.get(i + 1) instanceof ASMSeperator)) {
 						if (ins0.get(i + 1) instanceof ASMLabel && !(ins0.get(i + 1) instanceof ASMDataLabel)) break;
@@ -2934,12 +2711,8 @@ public class ASMOptimizer {
 	
 	private void removeDoubleLabels(List<ASMInstruction> ins0) {
 		for (int i = 1; i < ins0.size(); i++) {
-			if (ins0.get(i) instanceof ASMLabel && !(ins0.get(i) instanceof ASMDataLabel)) {
-				ASMLabel l1 = (ASMLabel) ins0.get(i);
-				
-				if (ins0.get(i - 1) instanceof ASMLabel && !(ins0.get(i - 1) instanceof ASMDataLabel)) {
-					ASMLabel l0 = (ASMLabel) ins0.get(i - 1);
-					
+			if (ins0.get(i) instanceof ASMLabel l1 && !(ins0.get(i) instanceof ASMDataLabel)) {
+				if (ins0.get(i - 1) instanceof ASMLabel l0 && !(ins0.get(i - 1) instanceof ASMDataLabel)) {
 					l1.name = l0.name;
 					ins0.remove(i);
 					i--;

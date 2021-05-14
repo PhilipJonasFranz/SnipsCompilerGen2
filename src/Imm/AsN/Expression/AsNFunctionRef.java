@@ -3,7 +3,6 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.REG;
@@ -15,7 +14,7 @@ import Imm.AST.Expression.FunctionRef;
 public class AsNFunctionRef extends AsNExpression {
 
 			/* ---< METHODS >--- */
-	public static AsNFunctionRef cast(FunctionRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+	public static AsNFunctionRef cast(FunctionRef i, RegSet r, MemoryMap map, StackSet st, int target) {
 		AsNFunctionRef ref = new AsNFunctionRef();
 		ref.pushOnCreatorStack(i);
 		i.castedNode = ref;

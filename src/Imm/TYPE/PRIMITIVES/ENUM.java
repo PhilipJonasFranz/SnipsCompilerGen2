@@ -29,15 +29,13 @@ public class ENUM extends PRIMITIVE<String> {
 		}
 		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
-			if (p.getCoreType() instanceof ENUM) {
-				ENUM e0 = (ENUM) p.getCoreType();
+			if (p.getCoreType() instanceof ENUM e0) {
 				return e0.def.equals(this.def);
 			}
 			else return false;
 		}
 		
-		if (type instanceof ENUM) {
-			ENUM e0 = (ENUM) type;
+		if (type instanceof ENUM e0) {
 			return e0.def.equals(this.def);
 		}
 		else return false;

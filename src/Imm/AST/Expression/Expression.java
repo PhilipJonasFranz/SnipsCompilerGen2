@@ -33,8 +33,7 @@ public abstract class Expression extends SyntaxElement {
 	 * Return the current context, or the actual type.
 	 */
 	public TYPE getType() {
-		if (this.type instanceof PROVISO) {
-			PROVISO p = (PROVISO) this.type;
+		if (this.type instanceof PROVISO p) {
 			if (p.hasContext()) return p.getContext();
 			else return p;
 		}
@@ -54,9 +53,5 @@ public abstract class Expression extends SyntaxElement {
 	public List<String> codePrint(int d) {
 		return null;
 	}
-	
-	public boolean isEqualTo(Expression e) {
-		return this.codePrint().equals(e.codePrint());
-	}
-	
-} 
+
+}

@@ -15,7 +15,6 @@ public class ASMHardcode extends ASMInstruction {
 			/* ---< METHODS >--- */
 	/**
 	 * Create the ASM memonic representation of this instruction.
-	 * @return
 	 */
 	public String build() {
 		return CompilerDriver.printDepth + this.hardCode;

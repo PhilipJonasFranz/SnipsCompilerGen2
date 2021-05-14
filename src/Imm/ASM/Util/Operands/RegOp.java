@@ -34,11 +34,11 @@ public class RegOp extends Operand {
 				String r0 = reg.substring(1);
 				try {
 					int regNum = Integer.parseInt(r0);
-					
+
 					if (regNum < 0 || regNum > 15) {
 						return null;
 					}
-					
+
 					return REG.toReg(regNum);
 				} catch (NumberFormatException e) {
 					return null;
@@ -54,16 +54,14 @@ public class RegOp extends Operand {
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof RegOp)) return false;
+		if (!(operand instanceof RegOp op)) return false;
 		else {
-			RegOp op = (RegOp) operand;
 			if (this.shift != null) {
 				if (op.shift == null) return false;
 				else {
 					if (op.shift.distance != this.shift.distance || op.shift.shift != this.shift.shift) return false;
 				}
 			}
-			else if (this.shift != null) return false;
 			
 			return this.reg == op.reg;
 		}

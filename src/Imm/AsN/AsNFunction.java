@@ -1,9 +1,5 @@
 package Imm.AsN;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -27,30 +23,30 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Imm.TYPE.TYPE;
 import Opt.ASM.ASMOptimizer;
 import Opt.AST.Util.Matcher;
 import Res.Const;
 import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
-import Util.Pair;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import Util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AsNFunction extends AsNCompoundStatement {
 
@@ -73,10 +69,9 @@ public class AsNFunction extends AsNCompoundStatement {
 
 			/* ---< METHODS >--- */
 	/**
-	 * Casts given syntax element based on the given reg set to a asm function node. 
-	 * @throws CTEX_EXC 
+	 * Casts given syntax element based on the given reg set to a asm function node.
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTEX_EXC {
+	public static AsNFunction cast(Function f, MemoryMap map) throws CGEN_EXC, CTEX_EXC {
 		AsNFunction func = new AsNFunction();
 		func.pushOnCreatorStack(f);
 		f.castedNode = func;
@@ -101,10 +96,8 @@ public class AsNFunction extends AsNCompoundStatement {
 		List<ASMInstruction> all = new ArrayList();
 		
 		for (Declaration d : f.parameters) {
-			if (d.getType() instanceof FUNC) {
-				FUNC f0 = (FUNC) d.getType();
-				
-				/* 
+			if (d.getType() instanceof FUNC f0) {
+				/*
 				 * Predicate function heads are not casted, set a casted node here to prevent confusion later.
 				 * The isLambdaHead flag will indicate that this function is a predicate.
 				 */
@@ -183,8 +176,8 @@ public class AsNFunction extends AsNCompoundStatement {
 			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
 			
 			/* Reset regs and stack */
-			r = new RegSet();
-			st = new StackSet();
+			RegSet r = new RegSet();
+			StackSet st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
 			if (func.translated.contains(f.provisosCalls.get(k).getProvisoPostfix())) continue;
@@ -230,7 +223,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			
 			/* Generate comment with function name and potential proviso types */
-			String com = "";
+			String com;
 			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
 				com = "Function: " + f.path;
 			}
@@ -276,7 +269,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Save Stackpointer from caller perspective */
 			ASMMov fpMov = new ASMMov(new RegOp(REG.FP), new RegOp(REG.SP));
-			ASMMov fpMovBack = null;
+			ASMMov fpMovBack;
 			func.instructions.add(fpMov);
 			
 			int paramsWithRef = 0;
@@ -285,7 +278,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			for (int i = 0; i < 3; i++) {
 				if (r.getReg(i).declaration != null) {
 					Declaration d = r.getReg(i).declaration;
-					
+
 					boolean hasRef = false;
 					for (Statement s : f.body) 
 						hasRef |= Matcher.hasAddressReference(s, d);
@@ -294,7 +287,7 @@ public class AsNFunction extends AsNCompoundStatement {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
 						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
 						init.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
-						
+
 						/* Only do it if variable was used */
 						if (d.last == null || !d.last.equals(d)) {
 							func.instructions.add(init);
@@ -334,7 +327,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					else func.clearReg(r, st, true, i);
 				}
 			}
-			
+
 			/* Cast all statements and add all instructions */
 			for (int i = 0; i < f.body.size(); i++) 
 				func.loadStatement(f, f.body.get(i), r, map, st);
@@ -353,10 +346,8 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 				
 			/* Check if other function is called within this function */
-			boolean hasCall = func.instructions.stream().filter(x -> {
-				return x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
-					   x instanceof ASMAdd && ((ASMAdd) x).target.reg == REG.LR;
-			}).count() > 0;
+			boolean hasCall = func.instructions.stream().anyMatch(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
+					x instanceof ASMAdd && ((ASMAdd) x).target.reg == REG.LR);
 			
 			/* Jumplabel to centralized function return */
 			ASMLabel funcReturn = new ASMLabel(LabelUtil.getLabel());
@@ -383,7 +374,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					ipush.operands.clear();
 					vpush.operands.clear();
 					
-					used.stream().forEach(x -> {
+					used.forEach(x -> {
 						if (x.toInt() < 16) ipush.operands.add(new RegOp(x));
 						else vpush.operands.add(new VRegOp(x));
 					});
@@ -396,7 +387,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				ipush.operands.clear();
 				vpush.operands.clear();
 				
-				used.stream().forEach(x -> {
+				used.forEach(x -> {
 					if (x.toInt() < 16) ipush.operands.add(new RegOp(x));
 					else vpush.operands.add(new VRegOp(x));
 				});
@@ -570,9 +561,8 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Replace bx lr with branch to function end for centralized stack reset and bx
 	 */
 	public void patchBxToB(ASMLabel funcReturn) {
-		for (int i = 0; i < this.instructions.size(); i++) {
-			if (this.instructions.get(i) instanceof ASMBranch) {
-				ASMBranch branch = (ASMBranch) this.instructions.get(i);
+		for (ASMInstruction instruction : this.instructions) {
+			if (instruction instanceof ASMBranch branch) {
 				/* Only patch bx and instructions that are not part of exceptional exit */
 				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
@@ -585,12 +575,10 @@ public class AsNFunction extends AsNCompoundStatement {
 	
 	public void patchFramePointerAddressing(int offset) throws CGEN_EXC {
 		for (ASMInstruction ins : this.instructions) {
-			if (ins instanceof ASMStackOp) {
-				ASMStackOp stackOp = (ASMStackOp) ins;
+			if (ins instanceof ASMStackOp stackOp) {
 				if (stackOp.op0 != null && stackOp.op0.reg == REG.FP) {
-					if (stackOp.op1 instanceof PatchableImmOp) {
-						PatchableImmOp op = (PatchableImmOp) stackOp.op1;
-						
+					if (stackOp.op1 instanceof PatchableImmOp op) {
+
 						/* Patch the offset for parameters because they are located under the pushed regs,
 						 * dont patch local data since its located above the pushed regs.
 						 */
@@ -602,13 +590,10 @@ public class AsNFunction extends AsNCompoundStatement {
 					else throw new CGEN_EXC(this.source.getSource(), Const.CANNOT_PATCH_NON_PATCHABLE_IMM_OP);
 				}
 			}
-			else if (ins instanceof ASMBinaryData) {
-				ASMBinaryData binary = (ASMBinaryData) ins;
-				
+			else if (ins instanceof ASMBinaryData binary) {
+
 				if (binary.op0 != null && binary.op0.reg == REG.FP) {
-					if (binary.op1 instanceof PatchableImmOp) {
-						PatchableImmOp op = (PatchableImmOp) binary.op1;
-						
+					if (binary.op1 instanceof PatchableImmOp op) {
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);
 							binary.op1 = new ImmOp(op.patchedValue, op);
@@ -616,13 +601,9 @@ public class AsNFunction extends AsNCompoundStatement {
 					}
 				}
 			}
-			else if (ins instanceof ASMMemOp) {
-				ASMMemOp mem = (ASMMemOp) ins;
-				
-				if (mem.op0 != null && mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
-					if (mem.op1 instanceof PatchableImmOp) {
-						PatchableImmOp op = (PatchableImmOp) mem.op1;
-						
+			else if (ins instanceof ASMMemOp mem) {
+				if (mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
+					if (mem.op1 instanceof PatchableImmOp op) {
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);
 							mem.op1 = new ImmOp(op.patchedValue, op);
@@ -637,7 +618,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * Check if parameters are passed in the stack.
 	 */
 	public boolean hasParamsInStack() {
-		return this.parameterMapping.stream().map(x -> x.getSecond()).filter(x -> x == -1).count() > 0;
+		return this.parameterMapping.stream().map(Pair::getSecond).anyMatch(x -> x == -1);
 	}
 	
 	/**
@@ -646,7 +627,7 @@ public class AsNFunction extends AsNCompoundStatement {
 	public List<REG> getUsed() {
 		List<REG> used = new ArrayList();
 		
-		this.instructions.stream().forEach(x -> {
+		this.instructions.forEach(x -> {
 			if (x instanceof ASMMov) {
 				REG reg = ((ASMMov) x).target.reg;
 				

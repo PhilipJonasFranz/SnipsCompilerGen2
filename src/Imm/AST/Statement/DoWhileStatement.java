@@ -32,9 +32,9 @@ public class DoWhileStatement extends ConditionalCompoundStatement {
 		
 		if (rec) {
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 		
-			this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, true);
 		}
 	}
 

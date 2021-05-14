@@ -98,27 +98,27 @@ public abstract class TYPE<T> {
 	
 	public abstract TYPE mappable(TYPE mapType, String searchedProviso);
 	
-	public boolean isPointer() { return this instanceof POINTER; };
+	public boolean isPointer() { return this instanceof POINTER; }
+
+	public boolean isArray() { return this instanceof ARRAY; }
 	
-	public boolean isArray() { return this instanceof ARRAY; };
+	public boolean isStruct() { return this instanceof STRUCT; }
 	
-	public boolean isStruct() { return this instanceof STRUCT; };
+	public boolean isInterface() { return this instanceof INTERFACE; }
 	
-	public boolean isInterface() { return this instanceof INTERFACE; };
+	public boolean isPrimitive() { return this instanceof PRIMITIVE; }
 	
-	public boolean isPrimitive() { return this instanceof PRIMITIVE; };
+	public boolean isFloat() { return this instanceof FLOAT; }
 	
-	public boolean isFloat() { return this instanceof FLOAT; };
+	public boolean isComposit() { return this instanceof COMPOSIT; }
 	
-	public boolean isComposit() { return this instanceof COMPOSIT; };
+	public boolean isVoid() { return this instanceof VOID; }
 	
-	public boolean isVoid() { return this instanceof VOID; };
+	public boolean isNull() { return this instanceof NULL; }
 	
-	public boolean isNull() { return this instanceof NULL; };
+	public boolean isProviso() { return this instanceof PROVISO; }
 	
-	public boolean isProviso() { return this instanceof PROVISO; };
-	
-	public PRIMITIVE toPrimitive() { return (PRIMITIVE) this; };
+	public PRIMITIVE toPrimitive() { return (PRIMITIVE) this; }
 	
 	/**
 	 * Attempts to convert the type to a numeric representation.
@@ -140,12 +140,12 @@ public abstract class TYPE<T> {
 	/**
 	 * Returns true if this type is either a PRIMITIVE, POINTER or INTERFACE type.
 	 */
-	public boolean isRegType() { return this.isPrimitive() || this.isPointer() || this.isInterface(); };
+	public boolean isRegType() { return this.isPrimitive() || this.isPointer() || this.isInterface(); }
 	
 	/**
 	 * Returns true if this type is either an ARRAY or STRUCT.
 	 */
-	public boolean isStackType() { return this.isArray() || this.isStruct(); };
+	public boolean isStackType() { return this.isArray() || this.isStruct(); }
 	
 	/**
 	 * Relays to {@link #typeString()}.

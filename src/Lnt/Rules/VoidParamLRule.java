@@ -1,6 +1,6 @@
 package Lnt.Rules;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import Imm.AST.Function;
@@ -16,27 +16,23 @@ public class VoidParamLRule extends LRule {
 	private List<SyntaxElement> result;
 	
 	public void getResults(Program AST) {
-		List<SyntaxElement> result = AST.visit(x -> {
-			if (x instanceof Function) {
-				Function f = (Function) x;
-				
+		this.result = AST.visit(x -> {
+			if (x instanceof Function f) {
 				for (Declaration d : f.parameters) {
-					if (d.getType().getCoreType().isVoid() && !d.path.build().equals("self")) 
+					if (d.getType().getCoreType().isVoid() && !d.path.build().equals("self"))
 						return true;
 				}
 			}
-			
+
 			return false;
 		});
-		
-		this.result = result;
 	}
 
 	public void reportResults() {
 		for (SyntaxElement s : this.result) {
 			new Message("Unchecked type VOID as parameter, " + s.getSource().getSourceMarker(), Type.WARN);
 			String code = "    " + ((Function) s).signatureToString();
-			this.printResultSourceCode(Arrays.asList(code));
+			this.printResultSourceCode(Collections.singletonList(code));
 		}
 	}
 

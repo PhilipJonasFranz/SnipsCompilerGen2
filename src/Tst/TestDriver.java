@@ -17,6 +17,8 @@ import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
 import Res.Manager.FileUtil;
 import Snips.CompilerDriver;
+import Util.FBin;
+import Util.FBin.InvalidInputException;
 import Util.Pair;
 import Util.Util;
 import Util.Logging.LogPoint;
@@ -30,7 +32,7 @@ public class TestDriver {
 
 			/* ---< NESTED >--- */
 	/** Result summary of a test */
-	public class Result {
+	public static class Result {
 		
 				/* ---< FIELDS >--- */
 		/** The return type status of the test */
@@ -81,6 +83,8 @@ public class TestDriver {
 	
 	public static boolean excludeASMErrors = false;
 	
+	public static final float FLOAT_MAX_ERROR = 0.00001f;
+	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
 	
@@ -108,12 +112,16 @@ public class TestDriver {
 		List<String> paths = new ArrayList();
 		
 		/* Add add files to the paths list */
-		if (args.length == 0) paths.addAll(FileUtil.fileWalk("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+		if (args.length == 0) paths.addAll(FileUtil.fileWalk("res\\Test\\")
+				.stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt"))
+				.collect(Collectors.toList()));
 		else {
 			for (String s : args) {
 				if (s.endsWith(".sn")) paths.add(s);
 				else {
-					paths.addAll(FileUtil.fileWalk(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+					paths.addAll(FileUtil.fileWalk(s)
+							.stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt"))
+							.collect(Collectors.toList()));
 				}
 			}
 		}
@@ -146,7 +154,7 @@ public class TestDriver {
 		testPackage(head);
 		
 		/* Print out ASM-OPT stats */
-		Util.printStats(CompilerDriver.driver);
+		Util.printStats();
 		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
@@ -214,7 +222,7 @@ public class TestDriver {
 				}
 				
 				CompilerDriver.silenced = false;
-				test.getSecond().stream().forEach(x -> x.flush());
+				test.getSecond().forEach(Message::flush);
 			}
 			
 			/* Add result to package results */
@@ -278,8 +286,8 @@ public class TestDriver {
 			if (errorTest) {
 				thrown = new ArrayList();
 				
-				List<String> copy = code.stream().collect(Collectors.toList());
-				thrown.add(new Pair<String, List<String>>(content.get(i), copy));
+				List<String> copy = new ArrayList<>(code);
+				thrown.add(new Pair<>(content.get(i), copy));
 				i++;
 				
 				code.clear();
@@ -288,8 +296,8 @@ public class TestDriver {
 				
 				while (i < content.size() && !content.get(i).equals("OUTPUT")) {
 					if (content.get(i).equals("SOURCE") && !code.isEmpty() && exc != null) {
-						List<String> cp = code.stream().collect(Collectors.toList());
-						thrown.add(new Pair<String, List<String>>(exc, cp));
+						List<String> cp = new ArrayList<>(code);
+						thrown.add(new Pair<>(exc, cp));
 						code.clear();
 						exc = null;
 					}
@@ -309,7 +317,7 @@ public class TestDriver {
 				}
 				
 				if (!code.isEmpty() && exc != null) {
-					thrown.add(new Pair<String, List<String>>(exc, code));
+					thrown.add(new Pair<>(exc, code));
 				}
 			}
 			else {
@@ -318,12 +326,11 @@ public class TestDriver {
 					i++;
 				}
 			}
-			
-			for (int a = 0; a < content.size(); a++) {
-				if (content.get(a).equals("OUTPUT")) {
+
+			for (String s : content) {
+				if (s.equals("OUTPUT")) {
 					break;
-				}
-				else writeback.add(content.get(a));
+				} else writeback.add(s);
 			}
 		
 			buffer.add(new Message("Testing file " + file, LogPoint.Type.INFO, buffered));
@@ -350,7 +357,7 @@ public class TestDriver {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public Result test(String path, List<String> code, List<String> cases, List<Pair<String, List<String>>> thrown, List<Message> buffer, List<String> content) throws InterruptedException {
+	public Result test(String path, List<String> code, List<String> cases, List<Pair<String, List<String>>> thrown, List<Message> buffer, List<String> content) {
 		CompilerDriver.reset();
 		CompilerDriver cd = new CompilerDriver();
 		CompilerDriver.driver = cd;
@@ -385,7 +392,7 @@ public class TestDriver {
 						msg = ((SNIPS_EXC) e).getExcFieldName();
 					else if (e instanceof CTEX_EXC) 
 						msg = ((CTEX_EXC) e).getExcFieldName();
-					else if (e instanceof PARS_EXC) 
+					else if (e instanceof PARS_EXC)
 						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
@@ -428,7 +435,7 @@ public class TestDriver {
 					cd.setBurstMode(false, false);
 					buffer.add(new Message("Error when linking output! " + e.getMessage(), LogPoint.Type.FAIL, true));
 					
-					if (printResultOnError) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					if (printResultOnError) compile.forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					
 					return new Result(RET_TYPE.CRASH, 0, 0);
 				}
@@ -460,7 +467,7 @@ public class TestDriver {
 			boolean printedOutput = this.printResult;
 			
 			if (this.printResult) {
-				compile.stream().forEach(x -> CompilerDriver.outs.println(x));
+				compile.forEach(x -> CompilerDriver.outs.println(x));
 				printedOutput = true;
 			}
 			
@@ -498,7 +505,7 @@ public class TestDriver {
 						
 						if (printResultOnError) {
 							buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
-							compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+							compile.forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						}
 					}
 					
@@ -527,11 +534,7 @@ public class TestDriver {
 				pcu.debug = 0;
 				pcu.step = 1;
 				
-				Thread runThread = new Thread(new Runnable() {
-					public void run() {
-						pcu.execute();
-					}
-				});
+				Thread runThread = new Thread(pcu::execute);
 				
 				runThread.start();
 				long start = System.currentTimeMillis();
@@ -539,51 +542,90 @@ public class TestDriver {
 					if (System.currentTimeMillis() - start > ttl) {
 						runThread.interrupt();
 						runThread.stop();
-						runThread = null;
+
 						buffer.add(new Message("The compiled program timed out!", LogPoint.Type.FAIL, true));
 						fail++;
-						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+
+						if (!printedOutput) compile.forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
+
 						break;
 					}
 				}
 				
-				int pcu_return = REv.Modules.Tools.Util.toDecimal2K(pcu.regs [0]);
 				this.totalCPUCycles += pcu.cycles;
-				
-				if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
-					/* Output does match expected value */
-					succ++;
+
+				if (sp [sp.length - 1].contains(".")) {
+					float expected = (float) Double.parseDouble(sp [sp.length - 1]);
+					
+					int [] ret = new int [32];
+					for (int a = 0; a < 32; a++)
+						ret [a] = pcu.vfp.regs [0] [31 - a];
+					
+					float pcu_return = 0; 
+					boolean invalid = false;
+					
+					try {
+						pcu_return = FBin.fromFBin(ret);
+					}
+					catch (InvalidInputException e) {
+						/* Wrong output */
+						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+						buffer.add(new Message("-> Expected <" + expected + ">, but output was invalid IEEE formatted number!", LogPoint.Type.FAIL, true));
+						
+						invalid = true;
+					}
+					
+					if (!invalid) {
+						if (Math.abs(expected - pcu_return) <= FLOAT_MAX_ERROR) {
+							/* Output does match expected value */
+							succ++;
+							continue;
+						}
+						else {	
+							/* Wrong output */
+							if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+							buffer.add(new Message("-> Expected <" + sp [sp.length - 1] + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
+						}
+					}
 				}
 				else {
-					/* Wrong output */
-					if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
-					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
-					
-					/* Print inputted parameters */
-					if (sp.length > 1) {
-						String params = "-> Params: ";
-						for (int a = 0; a < sp.length - 1; a++) {
-							params += sp [a];
-							if (a < sp.length - 2) {
-								params += ", ";
-							}
-						}
-						buffer.add(new Message(params, LogPoint.Type.FAIL, true));
+					int pcu_return = FBin.toDecimal(pcu.regs [0]);
+					if (pcu_return == Integer.parseInt(sp [sp.length - 1])) {
+						/* Output does match expected value */
+						succ++;
+						continue;
 					}
-					
-					if (printResultOnError && !printedOutput) {
-						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
-						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					else {
+						/* Wrong output */
+						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
+						buffer.add(new Message("-> Expected <" + sp [sp.length - 1] + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
 					}
-					printedOutput = true;
-					
-					fail++;
 				}
+
+				/* Print inputted parameters */
+				if (sp.length > 1) {
+					String params = "-> Params: ";
+					for (int a = 0; a < sp.length - 1; a++) {
+						params += sp [a];
+						if (a < sp.length - 2) {
+							params += ", ";
+						}
+					}
+					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
+				}
+
+				if (printResultOnError && !printedOutput) {
+					buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+					compile.forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+				}
+				printedOutput = true;
+
+				fail++;
 			}
 		}
 		
-		return new Result((fail > 0)? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
+		return new Result((fail > 0) ? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
 	}
 	
 	private boolean timeout = false;
@@ -593,11 +635,7 @@ public class TestDriver {
 		
 		timeout = false;
 		
-		Thread compileThread = new Thread(new Runnable() {
-			public void run() {
-				out [0] = cd.compile(new File(path), code);
-			}
-		});
+		Thread compileThread = new Thread(() -> out [0] = cd.compile(new File(path), code));
 		
 		compileThread.start();
 		

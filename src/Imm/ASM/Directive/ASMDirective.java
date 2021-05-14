@@ -15,7 +15,6 @@ public class ASMDirective extends ASMInstruction {
 			/* ---< METHODS >--- */
 	/**
 	 * Create the ASM memonic representation of this instruction.
-	 * @return
 	 */
 	public String build() {
 		return this.hardCode;

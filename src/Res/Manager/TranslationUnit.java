@@ -2,7 +2,7 @@ package Res.Manager;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import Imm.ASM.ASMInstruction;
@@ -39,14 +39,14 @@ public class TranslationUnit extends AsNNode {
 	}
 	
 	public boolean hasVersionChanged() {
-		return existingUnit == null || (existingUnit != null && existingUnit.versionID != this.versionID);
+		return existingUnit == null || existingUnit.versionID != this.versionID;
 	}
 	
 	/**
 	 * Appends the given instruction to the given section.
 	 */
 	public void append(ASMInstruction instruction, SECTION section) {
-		List<ASMInstruction> instructions = Arrays.asList(instruction);
+		List<ASMInstruction> instructions = Collections.singletonList(instruction);
 		this.append(instructions, section);
 	}
 	

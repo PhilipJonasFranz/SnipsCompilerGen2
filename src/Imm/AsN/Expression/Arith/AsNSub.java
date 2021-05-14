@@ -20,7 +20,7 @@ public class AsNSub extends AsNNFoldExpression {
 		sub.pushOnCreatorStack(s);
 		s.castedNode = sub;
 		
-		sub.evalExpression(sub, s, r, map, st, (x, y) -> x - y);
+		sub.evalExpression(sub, s, r, map, st);
 		
 		sub.registerMetric();
 		return sub;

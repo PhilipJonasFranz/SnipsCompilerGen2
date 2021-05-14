@@ -298,9 +298,7 @@ public class Parser {
 			}
 			else push = false;
 			
-			if (element instanceof Function) {
-				Function f = (Function) element;
-				
+			if (element instanceof Function f) {
 				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
 					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 					
@@ -429,7 +427,7 @@ public class Parser {
 			
 			Token identifier = accept(TokenType.IDENTIFIER);
 			
-			SyntaxElement element = null;
+			SyntaxElement element;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
 				element = this.parseFunction(type, identifier, mod, false, false);
 			}
@@ -470,10 +468,10 @@ public class Parser {
 			while (current.type != TokenType.LBRACE) {
 				NamespacePath ext0 = this.parseNamespacePath();
 				
-				if (this.getStructTypedef(ext0, source) != null) {
+				if (this.getStructTypedef(ext0) != null) {
 					/* Attempt to find struct extension */
 					
-					ext = this.getStructTypedef(ext0, source);
+					ext = this.getStructTypedef(ext0);
 					
 					if (current.type == TokenType.CMPLT) 
 						extProviso.addAll(this.parseProviso());
@@ -486,8 +484,7 @@ public class Parser {
 						if (ext.proviso.size() == extProviso.size()) 
 							/* Remap type of declaration to provided provisos */
 							for (int i = 0; i < ext.proviso.size(); i++) {
-								if (!(ext.proviso.get(i) instanceof PROVISO)) continue;
-								PROVISO prov = (PROVISO) ext.proviso.get(i);
+								if (!(ext.proviso.get(i) instanceof PROVISO prov)) continue;
 								c.setType(c.getType().remapProvisoName(prov.placeholderName, extProviso.get(i)));
 							}
 						
@@ -530,10 +527,10 @@ public class Parser {
 		 * references from here on out are correct. So, we check if there is already a typedef
 		 * that has the same namespace path. If there is no such typedef, we use the current one.
 		 */
-		StructTypedef head = this.getStructTypedef(def.path, def.getSource());
+		StructTypedef head = this.getStructTypedef(def.path);
 		if (head == null) head = def;
 		
-		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
+		this.structIds.add(new Pair<>(path, def));
 		
 		/* Add the extended fields */
 		def.getFields().addAll(extendDecs);
@@ -624,7 +621,7 @@ public class Parser {
 		}
 		
 		InterfaceTypedef def = new InterfaceTypedef(path, proviso, implemented, functions, mod, source);
-		this.interfaceIds.add(new Pair<NamespacePath, InterfaceTypedef>(path, def));
+		this.interfaceIds.add(new Pair<>(path, def));
 		
 		accept(TokenType.LBRACE);
 		
@@ -678,35 +675,35 @@ public class Parser {
 				break;
 			}
 		}
-		
-		for (int i = 0; i < tokenStream.size(); i++) {
-			if (enums.contains(tokenStream.get(i).spelling)) {
-				tokenStream.get(i).type = TokenType.ENUMLIT;
+
+		for (Token token : tokenStream) {
+			if (enums.contains(token.spelling)) {
+				token.type = TokenType.ENUMLIT;
 			}
 		}
 		
 		accept(TokenType.RBRACE);
 		
 		EnumTypedef def = new EnumTypedef(path, enums, source);
-		enumIds.add(new Pair<NamespacePath, EnumTypedef>(path, def));
+		enumIds.add(new Pair<>(path, def));
 		
 		return def;
 	}
 	
 	private NamespacePath buildPath(String id) {
 		NamespacePath path = new NamespacePath(new ArrayList());
-		for (int i = 0; i < this.namespaces.size(); i++) {
-			path.path.addAll(this.namespaces.get(i).path);
-		}
+		for (NamespacePath namespace : this.namespaces)
+			path.path.addAll(namespace.path);
+
 		path.path.add(id);
 		return path;
 	}
 	
 	private NamespacePath buildPath() {
 		NamespacePath path = new NamespacePath(new ArrayList());
-		for (int i = 0; i < this.namespaces.size(); i++) {
-			path.path.addAll(this.namespaces.get(i).path);
-		}
+		for (NamespacePath namespace : this.namespaces)
+			path.path.addAll(namespace.path);
+
 		return path;
 	}
 	
@@ -745,11 +742,9 @@ public class Parser {
 		}
 		
 		accept(TokenType.RPAREN);
-		
-		boolean signals = false;
+
 		List<TYPE> signalsTypes = new ArrayList();
 		if (current.type == TokenType.SIGNALS) {
-			signals = true;
 			accept();
 			while (current.type != TokenType.LBRACE) {
 				signalsTypes.add(this.parseType());
@@ -764,7 +759,7 @@ public class Parser {
 		else if (!parseHeadOnly) body = this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
-		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
+		Function f = new Function(returnType, path, proviso, parameters, signalsTypes, body, mod, identifier.source);
 		
 		/* 
 		 * Perform merge only for functions that are not nested here,
@@ -784,7 +779,7 @@ public class Parser {
 			}
 		}
 		
-		this.functions.add(new Pair<NamespacePath, Function>(path, f));
+		this.functions.add(new Pair<>(path, f));
 		this.scopes.pop();
 		return f;
 	}
@@ -985,7 +980,7 @@ public class Parser {
 				
 				REG reg = RegOp.convertStringToReg(accept(TokenType.IDENTIFIER).spelling);
 				
-				dataIn.add(new Pair<Expression, REG>(in, reg));
+				dataIn.add(new Pair<>(in, reg));
 				
 				if (current.type == TokenType.COMMA) accept();
 				else break;
@@ -1044,7 +1039,7 @@ public class Parser {
 				
 				Expression out = this.parseExpression();
 				
-				dataOut.add(new Pair<Expression, REG>(out, reg));
+				dataOut.add(new Pair<>(out, reg));
 				
 				if (current.type == TokenType.COMMA) accept();
 				else break;
@@ -1157,7 +1152,7 @@ public class Parser {
 		if (current.type == TokenType.ELSE) {
 			Source elseSource = accept().source();
 			if (current.type == TokenType.IF) {
-				if0.elseStatement = (IfStatement) this.parseIf();
+				if0.elseStatement = this.parseIf();
 			}
 			else {
 				List<Statement> elseBody = this.parseCompoundStatement(false);
@@ -1357,9 +1352,7 @@ public class Parser {
 			if (expr instanceof OperatorStatement) {
 				return (OperatorStatement) expr;
 			}
-			else if (expr instanceof InlineCall) {
-				InlineCall ic = (InlineCall) expr;
-				
+			else if (expr instanceof InlineCall ic) {
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
 				fc.isNestedCall = true;
 				
@@ -1512,7 +1505,7 @@ public class Parser {
 		}
 		else {
 			Token curr1 = this.current;
-			List<Token> tokenStreamCopy = this.tokenStream.stream().collect(Collectors.toList());
+			List<Token> tokenStreamCopy = new ArrayList<>(this.tokenStream);
 			
 			Expression target = this.parseStructSelect();
 			
@@ -1598,7 +1591,6 @@ public class Parser {
 		 */
 		boolean inlineCheck = current.type == TokenType.LPAREN;
 		int bbalance = 1;
-		boolean allowLparen = false;
 		if (inlineCheck) for (int i = 0; i < this.tokenStream.size(); i++) {
 			if (bbalance == 0) {
 				inlineCheck &= tokenStream.get(i).type == TokenType.COLON;
@@ -1606,17 +1598,9 @@ public class Parser {
 				break;
 			}
 			
-			if (current.type == TokenType.FUNC)
-				allowLparen = true;
-			else if (tokenStream.get(i).type == TokenType.LPAREN) {
-				if (allowLparen)
-					bbalance++;
-				else {
-					inlineCheck = false;
-					break;
-				}
-				
-				allowLparen = false;
+			if (tokenStream.get(i).type == TokenType.LPAREN) {
+				inlineCheck = false;
+				break;
 			}
 			else if (tokenStream.get(i).type == TokenType.RPAREN) 
 				bbalance--;
@@ -1642,7 +1626,7 @@ public class Parser {
 			
 			List<Statement> body = this.parseCompoundStatement(true);
 			
-			Function function = new Function(ret, this.buildPath(LabelUtil.getAnonLabel()), new ArrayList(), params, false, new ArrayList(), body, MODIFIER.SHARED, current.source);
+			Function function = new Function(ret, this.buildPath(LabelUtil.getAnonLabel()), new ArrayList(), params, new ArrayList(), body, MODIFIER.SHARED, current.source);
 		
 			return new InlineFunction(function, current.source);
 		}
@@ -2063,7 +2047,7 @@ public class Parser {
 	 */
 	private Expression parseSizeOf() throws PARS_EXC {
 		if (current.type == TokenType.SIZEOF) {
-			Expression sof = null;
+			Expression sof;
 			
 			Source source = accept().source();
 			accept(TokenType.LPAREN);
@@ -2191,7 +2175,7 @@ public class Parser {
 				return false;
 			}
 			else {
-				castCheck &= tokenStream.get(i - 2).type == TokenType.NAMESPACE_IDENTIFIER || tokenStream.get(i - 2).type == TokenType.IDENTIFIER; 
+				castCheck &= tokenStream.get(i - 2).type == TokenType.NAMESPACE_IDENTIFIER || tokenStream.get(i - 2).type == TokenType.IDENTIFIER;
 				castCheck &= tokenStream.get(i - 1).type == TokenType.COLON;
 				castCheck &= tokenStream.get(i).type == TokenType.COLON;
 				
@@ -2267,7 +2251,7 @@ public class Parser {
 			Source source = current.source();
 			if (current.type == TokenType.INCR) {
 				Token incrT = accept();
-				Expression e = null;
+				Expression e;
 				
 				if (ref instanceof IDRef)
 					e = new IDRefWriteback(WRITEBACK.INCR, ref, source);
@@ -2282,7 +2266,7 @@ public class Parser {
 			}
 			else {
 				Token decrT = accept();
-				Expression e = null;
+				Expression e;
 				
 				if (ref instanceof IDRef)
 					e = new IDRefWriteback(WRITEBACK.DECR, ref, source);
@@ -2319,10 +2303,8 @@ public class Parser {
 			ref = new StructSelect(ref, this.parseStructSelect(), true, ref.getSource());
 		}
 		
-		if (ref instanceof StructSelect) {
-			StructSelect select = (StructSelect) ref;
-			
-			/* 
+		if (ref instanceof StructSelect select) {
+			/*
 			 * Nested call, transform AST by nesting the chained calls within each other.
 			 * Only do the transformation if the head of the select is not an inline call,
 			 * because if this is the case, this means we are currently recursiveley in the
@@ -2331,9 +2313,8 @@ public class Parser {
 			 * the AST eventually.
 			 */
 			if (!(select.selector instanceof InlineCall)) {
-				if (select.selection instanceof InlineCall) {
+				if (select.selection instanceof InlineCall call) {
 					/* Single call */
-					InlineCall call = (InlineCall) select.selection;
 					call.isNestedCall = true;
 					call.nestedDeref = !dot;
 					
@@ -2342,15 +2323,13 @@ public class Parser {
 					
 					ref = call;
 				}
-				else if (select.selection instanceof FunctionRef && select.selector instanceof IDRef) {
-					FunctionRef base = (FunctionRef) select.selection;
+				else if (select.selection instanceof FunctionRef base && select.selector instanceof IDRef) {
 					base.base = (IDRef) select.selector;
 					ref = base;
 				}
-				else if (select.selection instanceof StructSelect && ((StructSelect) select.selection).selector instanceof InlineCall) {
+				else if (select.selection instanceof StructSelect nested && ((StructSelect) select.selection).selector instanceof InlineCall) {
 					/* Chained nested call */
-					StructSelect nested = (StructSelect) select.selection;
-					
+
 					InlineCall call = (InlineCall) nested.selector;
 					call.isNestedCall = true;
 					call.nestedDeref = !dot;
@@ -2504,10 +2483,12 @@ public class Parser {
 				 */
 				for (int i = this.scopes.size() - 1; i >= 0; i--) {
 					List<Declaration> scope = this.scopes.get(i);
-					for (int a = 0; a < scope.size(); a++) 
-						if (scope.get(a).path.equals(path)) 
-							/* Path referres to a variable, set lambda to null */
+					for (Declaration declaration : scope)
+						if (declaration.path.equals(path))
+							/* Path referres to a variable, set lambda to null */ {
 							lambda = null;
+							break;
+						}
 				}
 				
 				if (lambda != null) 
@@ -2527,7 +2508,7 @@ public class Parser {
 			accept(TokenType.COLON);
 			accept(TokenType.COLON);
 			
-			StructTypedef def = this.getStructTypedef(new NamespacePath(sid.spelling), source);
+			StructTypedef def = this.getStructTypedef(new NamespacePath(sid.spelling));
 			
 			NamespacePath path = def.path.clone();
 			
@@ -2575,7 +2556,7 @@ public class Parser {
 				return this.wrapPlaceholder(new Atom(new FLOAT(token.spelling + "." + token0.spelling), token.source));
 			}
 			/* INT[F] = FLOAT */
-			else if (current.type == TokenType.IDENTIFIER && current.spelling.toLowerCase().equals("f")) {
+			else if (current.type == TokenType.IDENTIFIER && current.spelling.equalsIgnoreCase("f")) {
 				accept();
 				return this.wrapPlaceholder(new Atom(new FLOAT(token.spelling), token.source));
 			}
@@ -2592,8 +2573,7 @@ public class Parser {
 			String [] sp = token.spelling.split("");
 			
 			/* Create a list of expressions of char atoms */
-			for (int i = 0; i < sp.length; i++) 
-				charAtoms.add(new Atom(new CHAR(sp [i]), token.source));
+			for (String s : sp) charAtoms.add(new Atom(new CHAR(s), token.source));
 			
 			/* Insert null-termination character */
 			charAtoms.add(new Atom(new CHAR(null), token.source));
@@ -2649,22 +2629,18 @@ public class Parser {
 	 * 		listed names. Should not be null.
 	 */
 	private void checkAutoInclude(String name) {
-		if (name.equals("resv")) {
-			CompilerDriver.heap_referenced = true;
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
-		}
-		else if (name.equals("init")) {
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/init.sn");
-		}
-		else if (name.equals("isa") || name.equals("isar")) {
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/isa.sn");
-		}
-		else if (name.equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
-		}
-		else if (name.equals("hsize")) {
-			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/hsize.sn");
+		switch (name) {
+			case "resv" -> {
+				CompilerDriver.heap_referenced = true;
+				CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
+			}
+			case "init" -> {
+				CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/mem/init.sn");
+			}
+			case "isa", "isar" -> CompilerDriver.driver.referencedLibaries.add("release/lib/mem/isa.sn");
+			case "free" -> CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
+			case "hsize" -> CompilerDriver.driver.referencedLibaries.add("release/lib/mem/hsize.sn");
 		}
 	}
 
@@ -2700,25 +2676,21 @@ public class Parser {
 	}
 	
 	private Function findFunction(NamespacePath path) {
-		Function lambda = null;
-		
-		for (Pair<NamespacePath, Function> p : this.functions) 
+	for (Pair<NamespacePath, Function> p : this.functions)
 			if (p.first.equals(path)) 
 				return p.second;
 
-		if (lambda == null) {
-			if (path.path.size() == 1) {
-				List<Function> f0 = new ArrayList();
-				
-				for (Pair<NamespacePath, Function> p : this.functions) 
-					if (p.first.getLast().equals(path.getLast())) 
-						f0.add(p.second);
+		if (path.path.size() == 1) {
+			List<Function> f0 = new ArrayList();
 
-				/* Return if there is only one result */
-				if (f0.size() == 1) return f0.get(0);
-			}
+			for (Pair<NamespacePath, Function> p : this.functions)
+				if (p.first.getLast().equals(path.getLast()))
+					f0.add(p.second);
+
+			/* Return if there is only one result */
+			if (f0.size() == 1) return f0.get(0);
 		}
-		
+
 		return null;
 	}
 	
@@ -2760,13 +2732,11 @@ public class Parser {
 	 * Attempts to find a struct typedef based on the given namespace path.
 	 * 
 	 * @param path The path that is equal or similar to the path of the searched typedef.
-	 * @param source The source of the syntax element from where this method was called.
-	 * 
 	 * @return The StructTypedef that matches the give path.
 	 * 
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
-	private StructTypedef getStructTypedef(NamespacePath path, Source source) {
+	private StructTypedef getStructTypedef(NamespacePath path) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
 			if (p.getFirst().equals(path)) 
 				return p.getSecond();
@@ -2851,8 +2821,8 @@ public class Parser {
 	}
 
 	private TYPE parseType() throws PARS_EXC {
-		TYPE type = null;
-		Token token = null;
+		TYPE type;
+		Token token;
 		
 		if (current.type == TokenType.FUNC) token = accept();
 		else if (current.type == TokenType.IDENTIFIER) token = accept();
@@ -2866,7 +2836,7 @@ public class Parser {
 		InterfaceTypedef intf = null;
 		StructTypedef stru = null;
 		EnumTypedef enu = null;
-		NamespacePath path = null;
+		NamespacePath path;
 		
 		if (this.containsInterfaceTypedef(token.spelling) || this.containsStructTypedef(token.spelling) || this.containsEnumTypedef(token.spelling) || 
 				(current.type == TokenType.COLON && 
@@ -2885,12 +2855,12 @@ public class Parser {
 			}
 			
 			/* Search with relative path */
-			stru = this.getStructTypedef(path, token.source());
+			stru = this.getStructTypedef(path);
 			
 			/* Nothing found, attempt to convert to current absolut path and try again */
 			if (stru == null) {
 				path.path.addAll(0, this.buildPath().path);
-				stru = this.getStructTypedef(path, token.source());
+				stru = this.getStructTypedef(path);
 			}
 			
 			/* Search with relative path */
@@ -2998,7 +2968,7 @@ public class Parser {
 				}
 				
 				/* Wrap parsed function head in function object, wrap created head in declaration */
-				Function lambda = new Function(ret, new NamespacePath(path0, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, false, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
+				Function lambda = new Function(ret, new NamespacePath(path0, PATH_TERMINATION.UNKNOWN), new ArrayList(), params, new ArrayList(), new ArrayList(), MODIFIER.SHARED, source);
 				lambda.isLambdaHead = true;
 				
 				type = new FUNC(lambda, proviso);
@@ -3052,14 +3022,11 @@ public class Parser {
 		
 		if (current.type == TokenType.CMPLT) {
 			/* Set type of all identifiers to proviso until a CMPGT */
-			for (int i = 0; i < this.tokenStream.size(); i++) {
-				if (this.tokenStream.get(i).type == TokenType.CMPGT || 
-						(this.tokenStream.get(i).type != TokenType.COMMA &&
-						this.tokenStream.get(i).type != TokenType.IDENTIFIER &&
-						this.tokenStream.get(i).type != TokenType.CMPGT)) break;
-				
-				if (this.tokenStream.get(i).type == TokenType.IDENTIFIER) 
-					this.tokenStream.get(i).type = TokenType.PROVISO;
+			for (Token token : this.tokenStream) {
+				if (token.type == TokenType.CMPGT || token.type != TokenType.COMMA && token.type != TokenType.IDENTIFIER) break;
+
+				if (token.type == TokenType.IDENTIFIER)
+					token.type = TokenType.PROVISO;
 			}
 			
 			accept();
@@ -3072,10 +3039,9 @@ public class Parser {
 					
 					TYPE def = this.parseType();
 					
-					if (!(type instanceof PROVISO)) 
+					if (!(type instanceof PROVISO prov))
 						throw new SNIPS_EXC("Cannot parse a default proviso at this location, " + current.source().getSourceMarker() + " (" + CompilerDriver.inputFile.getPath() + ")");
-				
-					PROVISO prov = (PROVISO) type;
+
 					prov.defaultContext = def;
 				}
 				
@@ -3191,7 +3157,7 @@ public class Parser {
 			while (true) {
 				if (push) this.bufferedAnnotations.push(new ArrayList());
 				push = true;
-				
+
 				Statement s = this.parseStatement();
 				
 				if (s != null) {

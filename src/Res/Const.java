@@ -119,9 +119,7 @@ public class Const {
 	public static final String CANNOT_CAST_TO = "Cannot cast %s to %s";
 	
 	public static final String CANNOT_DEREF_TYPE = "Cannot deref type %s";
-	
-	public static final String POINTER_ARITH_ONLY_SUPPORTED_FOR_TYPE = "Pointer arithmetic is only supported for %s, actual %s";
-	
+
 	public static final String CLASS_CANNOT_BE_SELECTOR = "%s cannot be a selector";
 	
 	public static final String CONDITION_TYPE_MUST_BE_32_BIT = "Condition types have to be 32 bit large";

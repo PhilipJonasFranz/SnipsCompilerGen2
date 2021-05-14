@@ -43,7 +43,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
 				this.op0.toString() + "]";
 			if (this.op1 != null) {
-				s += " " + this.op1.toString();
+				s += " " + this.op1;
 			}
 			return s;
 		}
@@ -51,7 +51,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
 				this.op0.toString();
 			if (this.op1 != null) {
-				s += ", " + this.op1.toString() + "]!";
+				s += ", " + this.op1 + "]!";
 			}
 			else s += "]";
 			return s;
@@ -60,7 +60,7 @@ public abstract class ASMStackOp extends ASMInstruction {
 			String s = CompilerDriver.printDepth + operation + this.target.toString() + ", [" +
 					this.op0.toString();
 			if (this.op1 != null) {
-				s += ", " + this.op1.toString();
+				s += ", " + this.op1;
 			}
 			s += "]";
 			return s;

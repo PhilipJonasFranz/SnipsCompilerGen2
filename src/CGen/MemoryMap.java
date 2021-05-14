@@ -19,7 +19,7 @@ public class MemoryMap {
 	 * Memory cell to describe an entry in the memory cell. The cells can have
 	 * different word sizes based on the declaration they capsule.
 	 */
-	public class MemoryCell {
+	public static class MemoryCell {
 		
 				/* ---< FIELDS >--- */
 		/** The declaration that this cell houses */
@@ -58,7 +58,7 @@ public class MemoryMap {
 	 * Check wether given declaration is loaded in the memory map.
 	 */
 	public boolean declarationLoaded(Declaration dec) {
-		return this.map.stream().filter(x -> x.declaration.equals(dec)).count() > 0;
+		return this.map.stream().anyMatch(x -> x.declaration.equals(dec));
 	}
 	
 	/**
@@ -81,10 +81,8 @@ public class MemoryMap {
 	/** Prints out the memory layout. */
 	public void print() {
 		CompilerDriver.outs.println("\n----< MEMORY START ----");
-		for (int i = 0; i < this.map.size(); i++) {
-			MemoryCell x = this.map.get(i);
+		for (MemoryCell x : this.map)
 			x.declaration.print(4, true);
-		}
 		CompilerDriver.outs.println("----< MEMORY END >----\n");
 	}
 	

@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.ASM.Util.REG;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -62,7 +61,7 @@ public class RegisterAtom extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optRegisterAtom(this);
 	}
 	
@@ -75,9 +74,7 @@ public class RegisterAtom extends Expression {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
+	public void setContext(List<TYPE> context) {}
 
 	public Expression clone() {
 		RegisterAtom ra = new RegisterAtom(this.spelling, this.reg, this.getSource().clone());

@@ -25,7 +25,7 @@ public abstract class AsNStatement extends AsNNode {
 
 	public static AsNStatement cast(Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
-		AsNStatement node = null;
+		AsNStatement node;
 		
 		/* Free operand registers */
 		r.free(0, 1, 2);
@@ -76,7 +76,7 @@ public abstract class AsNStatement extends AsNNode {
 	}
 	
 	public void freeDecs(RegSet r, Statement s) {
-		return;
+
 	}
 	
 } 

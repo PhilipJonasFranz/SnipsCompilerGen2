@@ -9,15 +9,13 @@ public class ASMSectionAnnotation extends ASMInstruction {
 	}
 	
 	public SECTION section;
-	
-	public String postfix;
-	
+
 	public ASMSectionAnnotation(SECTION section) {
 		this.section = section;
 	}
 	
 	public String build() {
-		return "." + this.section.toString().toLowerCase() + ((this.postfix != null)? " " + this.postfix : "");
+		return "." + this.section.toString().toLowerCase();
 	}
 	
 	public int getRequiredCPUCycles() {

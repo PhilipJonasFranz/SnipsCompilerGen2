@@ -49,9 +49,8 @@ public class AsNStructSelect extends AsNExpression {
 		
 		boolean isVFP = s.getType().isFloat();
 		
-		if (s.selection instanceof InlineCall) {
+		if (s.selection instanceof InlineCall ic) {
 			/* Struct Select is nested struct call, simply extract called function and call it */
-			InlineCall ic = (InlineCall) s.selection;
 			AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, ic.proviso, ic.parameters, ic, sel, r, map, st);
 		}
 		else {
@@ -69,7 +68,7 @@ public class AsNStructSelect extends AsNExpression {
 				}
 				else {
 					/* Load in register */
-					ASMLdr load = null; 
+					ASMLdr load;
 					
 					if (isVFP) load = new ASMVLdr(new VRegOp(REG.S0), new RegOp(REG.R1));
 					else load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
@@ -85,7 +84,7 @@ public class AsNStructSelect extends AsNExpression {
 	}
 	
 	/**
-	 * Loads the address of the target of the selection into R1.
+	 * Loads the absolute address of the target of the selection into R1.
 	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st, boolean addressLoader) throws CGEN_EXC {
 		
@@ -95,10 +94,8 @@ public class AsNStructSelect extends AsNExpression {
 		}
 		
 		/* Load base address */
-		if (base instanceof IDRef) {
-			IDRef ref = (IDRef) base;
-			
-			/**
+		if (base instanceof IDRef ref) {
+			/*
 			 * When a pointer is the base, and the pointer is in the stack, we have a 'remote'
 			 * address. This means that our current address points to somewhere in the stack
 			 * where the pointer is located. The value of this pointer is pointing to the structure
@@ -166,9 +163,7 @@ public class AsNStructSelect extends AsNExpression {
 			if ((addressLoader || isInStack || isInGlobalMemory) && ref.getType() instanceof POINTER) 
 				node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
 		}
-		else if (base instanceof ArraySelect) {
-			ArraySelect arr = (ArraySelect) base;
-			
+		else if (base instanceof ArraySelect arr) {
 			/*
 			 * This case can only happen if the object that is selected from is a heaped array.
 			 * In this case we can just load the pointer from a register.
@@ -209,20 +204,8 @@ public class AsNStructSelect extends AsNExpression {
 				lsl.comment = new ASMComment("Convert to bytes");
 				node.instructions.add(lsl);
 			}
-			
-			/* Push current */
-			node.instructions.add(new ASMPushStack(new RegOp(REG.R1)));
-			
-			/* Load the struture offset in R2 */
-			if (arr.getType().wordsize() > 1)
-				AsNArraySelect.loadSumR2(node, arr, r, map, st, true);
-			else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
-			
-			/* Pop Current */
-			node.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
-			
-			/* Add sum to current */
-			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
+
+			injectArraySelect(node, arr, r, map, st);
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		
@@ -252,18 +235,10 @@ public class AsNStructSelect extends AsNExpression {
 			Expression selection = sel0.selection;
 			
 			/* Unwrap pointer */
-			if (type instanceof POINTER && sel0.deref) {
-				POINTER p0 = (POINTER) type;
-				type = p0.targetType;
-			}
-			
-			if (type instanceof STRUCT) {
-				/* Cast to struct type */
-				STRUCT struct = (STRUCT) type;
-				
-				if (selection instanceof StructSelect) {
-					StructSelect sel1 = (StructSelect) selection;
-					
+			if (type instanceof POINTER p0 && sel0.deref) type = p0.targetType;
+
+			if (type instanceof STRUCT struct) {
+				if (selection instanceof StructSelect sel1) {
 					if (sel1.selector instanceof IDRef) {
 						injectIDRef(node, struct, (IDRef) sel1.selector);
 					}
@@ -278,13 +253,10 @@ public class AsNStructSelect extends AsNExpression {
 					else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				}
 				/* Base Case */
-				else if (selection instanceof IDRef) {
-					IDRef ref = (IDRef) selection;
-					injectIDRef(node, struct, (IDRef) ref);
+				else if (selection instanceof IDRef ref) {
+					injectIDRef(node, struct, ref);
 				}
-				else if (selection instanceof ArraySelect) {
-					ArraySelect arrSel = (ArraySelect) selection;
-					
+				else if (selection instanceof ArraySelect arrSel) {
 					int offset = struct.getFieldByteOffset(arrSel.idRef.path);
 					node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(offset)));
 					
@@ -294,8 +266,7 @@ public class AsNStructSelect extends AsNExpression {
 			}
 			
 			/* If current selection derefs and its not the last selection in the chain */
-			if (sel0.selection instanceof StructSelect) {
-				StructSelect sel1 = (StructSelect) sel0.selection;
+			if (sel0.selection instanceof StructSelect sel1) {
 				if (sel1.deref) {
 					/* Deref, just load current address */
 					node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
@@ -319,9 +290,7 @@ public class AsNStructSelect extends AsNExpression {
 		node.instructions.add(new ASMPushStack(new RegOp(REG.R1)));
 		
 		/* Load the struture offset in R2 */
-		if (arr.getType().wordsize() > 1)
-			AsNArraySelect.loadSumR2(node, arr, r, map, st, true);
-		else AsNArraySelect.loadSumR2(node, arr, r, map, st, false);
+		AsNArraySelect.loadSumR2(node, arr, r, map, st, arr.getType().wordsize() > 1);
 		
 		node.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		

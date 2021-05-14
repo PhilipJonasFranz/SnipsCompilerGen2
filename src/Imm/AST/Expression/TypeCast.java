@@ -42,7 +42,7 @@ public class TypeCast extends Expression {
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "TypeCast");
 		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.castType);
-		if (rec) this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -70,7 +70,7 @@ public class TypeCast extends Expression {
 	}
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		/** Apply context to cast type */
+		/* Apply context to cast type */
 		ProvisoUtil.mapNTo1(this.castType, context);
 		
 		this.expression.setContext(context);

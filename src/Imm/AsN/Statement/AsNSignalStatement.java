@@ -54,12 +54,10 @@ public class AsNSignalStatement extends AsNStatement {
 	}
 	
 	public static void injectWatchpointBranch(AsNNode node, SyntaxElement watchpoint, COND cond) {
-		ASMLabel escape = null;
+		ASMLabel escape;
 		
 		/* Branch to escape target */
-		if (watchpoint instanceof Function) {
-			Function f = (Function) watchpoint;
-			
+		if (watchpoint instanceof Function f) {
 			/* Function does not signal, meaning all exceptions must be caught */
 			if (!f.signals()) return;
 			else {
@@ -69,7 +67,7 @@ public class AsNSignalStatement extends AsNStatement {
 		}
 		else if (watchpoint instanceof TryStatement) {
 			/* Branch to try statement watchpoint */
-			escape = ((AsNTryStatement) ((TryStatement) watchpoint).castedNode).watchpointLabel;
+			escape = ((AsNTryStatement) watchpoint.castedNode).watchpointLabel;
 		}
 		else throw new SNIPS_EXC(Const.UNKNOWN_WATCHPOINT_TYPE, watchpoint.getClass().getName(), watchpoint.getSource().getSourceMarker());
 	

@@ -40,7 +40,7 @@ public class SizeOfExpression extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "SizeOf");
-		if (rec) this.expression.print(d + this.printDepthStep, rec);
+		if (rec) this.expression.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

@@ -39,9 +39,9 @@ public class Ternary extends Expression {
 		CompilerDriver.outs.println(Util.pad(d) + "Ternary");
 		
 		if (rec) {
-			this.condition.print(d + this.printDepthStep, rec);
-			this.left.print(d + this.printDepthStep, rec);
-			this.right.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, true);
+			this.left.print(d + this.printDepthStep, true);
+			this.right.print(d + this.printDepthStep, true);
 		}
 	}
 

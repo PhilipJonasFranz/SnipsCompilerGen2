@@ -60,9 +60,9 @@ public class PreProcessor {
 		if (CompilerDriver.printAllImports)
 			while (!imports.isEmpty())
 				new Message("PRE0 -> Imported library " + imports.remove(0), LogPoint.Type.INFO);
-		
-		for (int i = 0; i < this.process.size(); i++) 
-			this.process.get(i).line = this.process.get(i).line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);
+
+		for (LineObject lineObject : this.process)
+			lineObject.line = lineObject.line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);
 		
 		return this.process;
 	}
@@ -131,9 +131,8 @@ public class PreProcessor {
 				
 				if (s.startsWith("<") && s.endsWith(">")) {
 					String path = s.substring(1, s.length() - 1);
-					
-					List<Pair<String, String>> passedFlags0 = new ArrayList();
-					passedFlags0.addAll(passedFlags);
+
+					List<Pair<String, String>> passedFlags0 = new ArrayList(passedFlags);
 					
 					/* Contains flag args */
 					if (path.contains("<")) {
@@ -145,7 +144,7 @@ public class PreProcessor {
 						for (String s0 : sp) {
 							s0 = s0.trim();
 							String [] sp1 = s0.split("=");
-							passedFlags0.add(new Pair<String, String>(sp1 [0].trim(), sp1 [1].trim()));
+							passedFlags0.add(new Pair<>(sp1[0].trim(), sp1[1].trim()));
 						}
 					}
 					
@@ -169,8 +168,10 @@ public class PreProcessor {
 					 * and if yes, load it. This is nessesary since the header may
 					 * include struct typedefs etc.
 					 */
+					String pathWithoutFileType = path.substring(0, path.length() - 2);
+
 					if (path.endsWith(".sn")) {
-						String modPath = path.substring(0, path.length() - 2) + "hn";
+						String modPath = pathWithoutFileType + "hn";
 						if (RessourceManager.instance.ressourceExists(modPath)) 
 							i = this.includeLines(modPath, i, passedFlags0);
 					}
@@ -183,7 +184,7 @@ public class PreProcessor {
 					 * to load in the .sn counterpart.
 					 */
 					if (CompilerDriver.buildModulesRecurse && path.endsWith(".hn")) {
-						String modPath = path.substring(0, path.length() - 2) + "sn";
+						String modPath = pathWithoutFileType + "sn";
 						if (RessourceManager.instance.ressourceExists(modPath)) 
 							i = this.includeLines(modPath, i, passedFlags0);
 					}
@@ -226,9 +227,10 @@ public class PreProcessor {
 				
 				if (CompilerDriver.buildModulesRecurse) {
 					boolean print = true;
-					
-					if (incPath.endsWith(".hn") && imports.contains(incPath.substring(0, incPath.length() - 2) + "sn")) print = false;
-					if (incPath.endsWith(".sn") && imports.contains(incPath.substring(0, incPath.length() - 2) + "hn")) print = false;
+
+					String filePathWithoutFileType = incPath.substring(0, incPath.length() - 2);
+					if (incPath.endsWith(".hn") && imports.contains(filePathWithoutFileType + "sn")) print = false;
+					if (incPath.endsWith(".sn") && imports.contains(filePathWithoutFileType + "hn")) print = false;
 					
 					if (print) new Message("Recompiling module '" + path.substring(0, path.length() - 3) + "'", Type.INFO);
 				}

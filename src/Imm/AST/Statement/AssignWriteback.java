@@ -22,7 +22,7 @@ public class AssignWriteback extends Statement {
 
 			/* ---< NESTED >--- */
 	public enum WRITEBACK {
-		INCR, DECR;
+		INCR, DECR
 	}
 
 	
@@ -40,7 +40,7 @@ public class AssignWriteback extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Assign Writeback");
-		if (rec) this.reference.print(d + this.printDepthStep, rec);
+		if (rec) this.reference.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Tools.ASTNodeVisitor;
@@ -55,7 +54,7 @@ public class Program extends SyntaxElement {
 		return t;
 	}
 
-	public Program opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Program opt(ASTOptimizer opt) {
 		return this;
 	}
 	
@@ -70,10 +69,6 @@ public class Program extends SyntaxElement {
 		}
 		
 		return result;
-	}
-	
-	public void setContext(List<TYPE> setContext) {
-		return;
 	}
 
 	public List<String> codePrint(int d) {

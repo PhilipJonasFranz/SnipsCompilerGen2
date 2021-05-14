@@ -19,8 +19,7 @@ public class DanglingPointerLRule extends LRule {
 	
 	private boolean danglingPointer(Expression e) {
 		return !e.visit(x -> {
-			if (x instanceof InlineCall) {
-				InlineCall ic = (InlineCall) x;
+			if (x instanceof InlineCall ic) {
 				return ic.getType().isPointer();
 			}
 			return false;
@@ -30,13 +29,10 @@ public class DanglingPointerLRule extends LRule {
 	public void getResults(Program AST) {
 		List<SyntaxElement> result = new ArrayList();
 		
-		List<SyntaxElement> calls = AST.visit(x -> {
-			return x instanceof FunctionCall || x instanceof InlineCall;
-		});
+		List<SyntaxElement> calls = AST.visit(x -> x instanceof FunctionCall || x instanceof InlineCall);
 		
-		calls.stream().forEach(x -> {
-			if (x instanceof FunctionCall) {
-				FunctionCall c = (FunctionCall) x;
+		calls.forEach(x -> {
+			if (x instanceof FunctionCall c) {
 				if (c.getType().isPointer())
 					result.add(x);
 			}
@@ -55,8 +51,7 @@ public class DanglingPointerLRule extends LRule {
 
 	public void reportResults() {
 		for (SyntaxElement s : this.result) {
-			if (s instanceof FunctionCall) {
-				FunctionCall fc = (FunctionCall) s;
+			if (s instanceof FunctionCall fc) {
 				new Message("Potential dangling pointer, " + fc.getSource().getSourceMarker(), Type.WARN);
 			}
 			else new Message("Potential dangling pointer in call, " + s.getSource().getSourceMarker(), Type.WARN);

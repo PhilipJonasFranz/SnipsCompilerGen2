@@ -36,7 +36,7 @@ public abstract class CompoundStatement extends Statement {
 	
 	public List<Statement> cloneBody() {
 		List<Statement> clone = new ArrayList();
-		for (Statement s : this.body) clone.add((Statement) s.clone());
+		for (Statement s : this.body) clone.add(s.clone());
 		return clone;
 	}
 

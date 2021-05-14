@@ -1,5 +1,7 @@
 package Exc;
 
+import java.io.Serial;
+
 import Imm.AsN.AsNBody;
 import Snips.CompilerDriver;
 import Util.Source;
@@ -13,6 +15,7 @@ import Util.Logging.Message;
  */
 public class CGEN_EXC extends Exception {
 
+	@Serial
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private String message;

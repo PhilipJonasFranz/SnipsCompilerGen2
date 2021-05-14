@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -66,7 +65,7 @@ public class FunctionRef extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optFunctionRef(this);
 	}
 	
@@ -79,9 +78,7 @@ public class FunctionRef extends Expression {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
+	public void setContext(List<TYPE> context) {}
 
 	public Expression clone() {
 		List<TYPE> provClone = new ArrayList();

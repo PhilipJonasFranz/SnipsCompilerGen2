@@ -2,7 +2,6 @@ package Util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class NamespacePath {
 
@@ -21,7 +20,7 @@ public class NamespacePath {
 	 * termination is set to unknown.
 	 */
 	public enum PATH_TERMINATION {
-		UNKNOWN, INTERFACE, STRUCT, ENUM;
+		UNKNOWN, INTERFACE, STRUCT, ENUM
 	}
 	
 	
@@ -76,7 +75,7 @@ public class NamespacePath {
 	 * <code>Name1.Name2.Target</code>
 	 */
 	public String build() {
-		return this.path.stream().collect(Collectors.joining("."));
+		return String.join(".", this.path);
 	}
 	
 	/**
@@ -84,7 +83,7 @@ public class NamespacePath {
 	 * the last path part.
 	 */
 	public String buildPathOnly() {
-		String s = this.path.stream().collect(Collectors.joining("."));
+		String s = String.join(".", this.path);
 		
 		if (!this.path.isEmpty()) {
 			s = s.substring(0, s.length() - this.path.get(this.path.size() - 1).length());
@@ -102,7 +101,7 @@ public class NamespacePath {
 	public NamespacePath clone() {
 		NamespacePath clone = new NamespacePath();
 		clone.termination = this.termination;
-		for (String s : this.path) clone.path.add(s);
+		clone.path.addAll(this.path);
 		return clone;
 	}
 	

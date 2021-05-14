@@ -22,6 +22,6 @@ public enum OPT_METRIC {
 	 * to cast the current AST. This metric is heuristic, and
 	 * thus not always perfect.
 	 */
-	EXPECTED_CPU_CYCLES;
-	
+	EXPECTED_CPU_CYCLES
+
 }

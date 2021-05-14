@@ -1,7 +1,6 @@
 package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.COND;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
@@ -22,15 +21,9 @@ public abstract class ASMUnaryData extends ASMInstruction {
 		this.target = target;
 		this.op0 = op0;
 	}
-	
-	public ASMUnaryData(RegOp target, Operand op0, COND cond) {
-		super(cond);
-		this.target = target;
-		this.op0 = op0;
-	}
-	
-	
-			/* ---< METHODS >--- */
+
+
+	/* ---< METHODS >--- */
 	public abstract String build();
 	
 	public int getRequiredCPUCycles() {

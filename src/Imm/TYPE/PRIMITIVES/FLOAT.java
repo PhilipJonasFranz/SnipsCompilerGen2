@@ -3,7 +3,7 @@ package Imm.TYPE.PRIMITIVES;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.POINTER;
-import Util.FBinConverter;
+import Util.FBin;
 
 public class FLOAT extends PRIMITIVE<Float> {
 
@@ -35,7 +35,7 @@ public class FLOAT extends PRIMITIVE<Float> {
 
 	public String sourceCodeRepresentation() {
 		/* Use packed int to represent float in asm */
-		return "" + FBinConverter.toDecimal(FBinConverter.toFBin(this.value));
+		return "" + FBin.toDecimal(FBin.toFBin(this.value));
 	}
 	
 	public Integer toInt() {

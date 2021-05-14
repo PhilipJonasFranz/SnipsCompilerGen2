@@ -40,10 +40,10 @@ public class IfStatement extends ConditionalCompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "If");
 		
 		if (rec) {
-			this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, true);
 			
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 		}
 		
 		IfStatement if0 = this.elseStatement;
@@ -52,10 +52,10 @@ public class IfStatement extends ConditionalCompoundStatement {
 				CompilerDriver.outs.println(Util.pad(d) + "Else If");
 				
 				if (rec) {
-					if0.condition.print(d + this.printDepthStep, rec);
+					if0.condition.print(d + this.printDepthStep, true);
 					
 					for (Statement s : if0.body) 
-						s.print(d + this.printDepthStep, rec);
+						s.print(d + this.printDepthStep, true);
 				}
 				
 				if0 = if0.elseStatement;
@@ -64,7 +64,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 				CompilerDriver.outs.println(Util.pad(d) + "Else");
 				
 				if (rec) for (Statement s : if0.body) 
-					s.print(d + this.printDepthStep, rec);
+					s.print(d + this.printDepthStep, true);
 				
 				return;
 			}
@@ -123,7 +123,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 		IfStatement if0 = this;
 		
 		while (if0 != null) {
-			String s = "";
+			String s;
 			
 			if (if0.condition != null) {
 				if (if0.equals(this)) {

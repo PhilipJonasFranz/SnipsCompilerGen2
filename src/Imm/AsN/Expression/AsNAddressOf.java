@@ -35,30 +35,34 @@ public class AsNAddressOf extends AsNExpression {
 		AsNAddressOf aof = new AsNAddressOf();
 		aof.pushOnCreatorStack(a);
 		a.castedNode = aof;
-		
+
 		aof.clearReg(r, st, false, 0, 1);
-		
+
 		if (a.expression instanceof IDRef || a.expression instanceof IDRefWriteback) {
-			IDRef ref = null;
-			
-			if (a.expression instanceof IDRef) {
-				ref = (IDRef) a.expression;
-			}
+			/*
+			 * We have to extract the IDRef to determine where it's origin is loaded.
+			 */
+			IDRef ref;
+
+			if (a.expression instanceof IDRef ref0) ref = ref0;
 			else {
+				IDRefWriteback idwb = (IDRefWriteback) a.expression;
+
 				/* Cast the writeback operation */
-				aof.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
-				
+				aof.instructions.addAll(AsNIDRefWriteback.cast(idwb, r, map, st).getInstructions());
+
 				/* Re-wire reference from sub-expression */
-				ref = ((IDRefWriteback) a.expression).idRef;
+				ref = idwb.idRef;
 			}
-			
-			/* Declaration cannot be loaded in regset since the AST was scanned for addressof-nodes,
-			 * and was pushed on the stack. */
-			
+
+			/*
+			 * Declaration cannot be loaded in register since the AST was
+			 * scanned for addressof-nodes, and was pushed on the stack.
+			 */
 			if (map.declarationLoaded(ref.origin)) {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(ref.origin);
-				
+
 				ASMLdrLabel load = new ASMLdrLabel(new RegOp(target), new LabelOp(label), ref.origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
@@ -66,7 +70,7 @@ public class AsNAddressOf extends AsNExpression {
 			else if (st.getParameterByteOffset(ref.origin) != -1) {
 				/* Get address from parameter stack */
 				int offset = st.getParameterByteOffset(ref.origin);
-				
+
 				/* Get offset of parameter relative to fp */
 				aof.instructions.add(new ASMAdd(new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
@@ -74,25 +78,24 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(ref.origin);
 				offset += (ref.origin.getType().wordsize() - 1) * 4;
-				
+
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 		}
-		else if (a.expression instanceof ArraySelect) {
-			ArraySelect select = (ArraySelect) a.expression;
-			
-			if (select.getType().isArray())
-				AsNArraySelect.loadSumR2(aof, select, r, map, st, true);
-			else 
-				AsNArraySelect.loadSumR2(aof, select, r, map, st, false);
-			
+		else if (a.expression instanceof ArraySelect select) {
+
+			/* Load offset in structure into R2 */
+			AsNArraySelect.loadSumR2(aof, select, r, map, st, select.getType().isArray());
+
 			Declaration origin = select.idRef.origin;
+
+			/* Determine base offset and load it into R0 */
 			if (map.declarationLoaded(origin)) {
 				/* Get address from global memory */
 				ASMDataLabel label = map.resolve(origin);
-				
+
 				ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R0), new LabelOp(label), origin);
 				load.comment = new ASMComment("Load data section address");
 				aof.instructions.add(load);
@@ -100,7 +103,7 @@ public class AsNAddressOf extends AsNExpression {
 			else if (st.getParameterByteOffset(origin) != -1) {
 				/* Get address from parameter stack */
 				int offset = st.getParameterByteOffset(origin);
-				
+
 				/* Get offset of parameter relative to fp */
 				aof.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset)));
 			}
@@ -108,55 +111,50 @@ public class AsNAddressOf extends AsNExpression {
 				/* Get address from local stack */
 				int offset = st.getDeclarationInStackByteOffset(origin);
 				offset += (origin.getType().wordsize() - 1) * 4;
-				
+
 				/* Load offset of array in memory */
 				aof.instructions.add(new ASMSub(new RegOp(REG.R0), new RegOp(REG.FP), new ImmOp(offset)));
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
-			
+
+			/* Address = Base + Offset */
 			ASMAdd add = new ASMAdd(new RegOp(target), new RegOp(REG.R0), new RegOp(REG.R2));
 			add.comment = new ASMComment("Add structure offset");
 			aof.instructions.add(add);
 		}
-		else if (a.expression instanceof StructSelect) {
-			StructSelect select = (StructSelect) a.expression;
-			
+		else if (a.expression instanceof StructSelect select) {
 			AsNStructSelect.injectAddressLoader(aof, select, r, map, st, true);
-			
 			aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		else if (a.expression instanceof StructureInit) {
 			/* Cast the structure init */
 			aof.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
-			
+
 			if (a.expression.getType().wordsize() > 1 || a.expression.getType().isStruct()) {
 				/* Swap R0 dummys with unbound data regs. */
 				st.popXWords(a.expression.getType().wordsize());
-				for (int i = 0; i < a.expression.getType().wordsize(); i++) st.push(REG.RX);
-				
-				/* Move SP in R0, since it is head of structure */
-				aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
+				st.push(REG.RX, a.expression.getType().wordsize());
 			}
 			else {
 				/* In Reg Set, push value on stack */
 				aof.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-				
+
 				/* Push RX to mark unbound data on stack */
 				st.push(REG.RX);
-				
-				/* Move SP in R0, since it is head of structure */
-				aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
 			}
+
+			/* Move SP in R0, since it is head of structure */
+			aof.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.SP)));
 		}
 		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
-		
+
 		/* Convert to words for pointer arithmetic */
 		aof.instructions.add(new ASMLsr(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
-		
+
 		r.free(0);
-		
+
 		aof.registerMetric();
 		return aof;
 	}
-	
+
 } 

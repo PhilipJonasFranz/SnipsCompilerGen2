@@ -21,8 +21,7 @@ public class OperandNotPointerLRule extends LRule {
 	public void getResults(Program AST) {
 		result = AST.visit(x -> {
 			/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
-			if (x instanceof Deref) {
-				Deref deref = (Deref) x;
+			if (x instanceof Deref deref) {
 				if (deref.expression.getType() != null)
 					return deref.expression.getType().isPrimitive();
 			}

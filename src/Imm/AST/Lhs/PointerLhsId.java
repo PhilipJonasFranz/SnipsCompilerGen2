@@ -38,7 +38,7 @@ public class PointerLhsId extends LhsId {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "PointerLhsId");
-		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, rec);
+		if (this.deref != null && rec) this.deref.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -82,10 +82,6 @@ public class PointerLhsId extends LhsId {
 	
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		this.expression.setContext(context);
-	}
-
-	public Expression getShadowDeref() {
-		return this.expression;
 	}
 
 	public PointerLhsId clone() {

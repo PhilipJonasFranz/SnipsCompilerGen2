@@ -1,8 +1,5 @@
 package Imm.AsN.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -11,18 +8,18 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.AST.Statement.CompoundStatement;
-import Imm.AST.Statement.ConditionalCompoundStatement;
-import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.ForEachStatement;
-import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.TryStatement;
+import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
+import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
+import Imm.AST.Statement.*;
 import Imm.AsN.AsNNode;
 import Opt.AST.Util.Matcher;
 import Res.Const;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AsNCompoundStatement extends AsNStatement {
 
@@ -112,13 +109,13 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * a declaration, the standard AsNStatement.cast() method is used for the injection cast.
 	 */
 	public void loadStatement(CompoundStatement a, Statement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		if (s instanceof Declaration) {
-			Declaration dec = (Declaration) s;
+		if (s instanceof Declaration dec) {
 			this.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
-			
-			if (r.declarationLoaded(dec)) {
-				boolean hasAddress = Matcher.hasAddressReference(a, dec); 
-				if (hasAddress) {
+
+			boolean hasAddress = Matcher.hasAddressReference(a, dec);
+
+			if (hasAddress) {
+				if (r.declarationLoaded(dec)) {
 					int location = r.declarationRegLocation(dec);
 					
 					ASMPushStack push = new ASMPushStack(new RegOp(location));
@@ -127,6 +124,16 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 					
 					st.push(dec);
 					r.free(location);
+				}
+				else if (r.getVRegSet().declarationLoaded(dec))  {
+					int location = r.getVRegSet().declarationRegLocation(dec);
+
+					ASMVPushStack push = new ASMVPushStack(new VRegOp(location));
+					push.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+					this.instructions.add(push);
+
+					st.push(dec);
+					r.getVRegSet().free(location);
 				}
 			}
 		}

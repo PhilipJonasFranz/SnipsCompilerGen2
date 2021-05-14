@@ -34,6 +34,7 @@ public class AsNDeclaration extends AsNStatement {
 		
 		if (d.getType().isFloat()) {
 			int free = r.getVRegSet().findFree();
+
 			if (free != -1) {
 				/* Free Register exists and declaration fits into a register */
 				ASMVMov mov = new ASMVMov(new VRegOp(free), new VRegOp(0));

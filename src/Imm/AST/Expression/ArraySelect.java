@@ -44,10 +44,10 @@ public class ArraySelect extends Expression {
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "ArraySelect");
 		if (rec) {
-			this.shadowRef.print(d + this.printDepthStep, rec);
+			this.shadowRef.print(d + this.printDepthStep, true);
 			
 			for (Expression e : this.selection) 
-				e.print(d + this.printDepthStep, rec);
+				e.print(d + this.printDepthStep, true);
 		}
 	}
 

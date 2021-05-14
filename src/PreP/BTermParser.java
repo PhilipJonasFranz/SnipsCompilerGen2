@@ -1,6 +1,7 @@
 package PreP;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,19 +42,18 @@ public class BTermParser {
 			
 			if (sp.get(0).trim().startsWith("#")) sp.remove(0);
 			if (sp.get(0).trim().equals("ifdef")) sp.remove(0);
-			
-			String line = sp.stream().collect(Collectors.joining(" ")).trim();
-			this.expression.line = line;
+
+			this.expression.line = String.join(" ", sp).trim();
 		}
 		
 	
 				/* ---< METHODS >--- */
 		public boolean evaluate() {
 			
-			this.dequeue = new Scanner(Arrays.asList(this.expression), null).scan();
+			this.dequeue = new Scanner(Collections.singletonList(this.expression), null).scan();
 			this.current = this.dequeue.get(0);
 			
-			Expression expr = null;
+			Expression expr;
 			
 			try {
 				expr = this.parseExpression();
@@ -95,9 +95,10 @@ public class BTermParser {
 		}
 		
 				/* ---< PARSER >--- */
-		private Token accept(TokenType tokenType) throws PARS_EXC {
-			if (current.type() == tokenType) return accept();
-			else throw new PARS_EXC(current.source(), current.type(), tokenType);
+		private void accept(TokenType tokenType) throws PARS_EXC {
+			if (current.type() == tokenType) {
+				accept();
+			} else throw new PARS_EXC(current.source(), current.type(), tokenType);
 		}
 		
 		private Token accept() {

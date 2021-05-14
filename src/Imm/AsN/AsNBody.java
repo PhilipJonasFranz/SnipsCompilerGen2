@@ -1,9 +1,6 @@
 package Imm.AsN;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import CGen.MemoryMap;
@@ -78,9 +75,7 @@ public class AsNBody extends AsNNode {
 	public static HashMap<String, TranslationUnit> translationUnits = new HashMap();
 	
 	public TranslationUnit originUnit;
-	
-	private static List<ASMInstruction> globalVarReferences;
-	
+
 	private static MemoryMap map;
 	
 	private static String originPath;
@@ -104,10 +99,7 @@ public class AsNBody extends AsNNode {
 		AsNBody.translationUnits.put(body.originUnit.sourceFile, body.originUnit);
 		
 		map = new MemoryMap();
-		
-		/* Count global variables */
-		globalVarReferences = new ArrayList();
-		
+
 		int done = 0;
 		
 		/* Create new stack set and reg set that can be used during global variable init. */
@@ -133,19 +125,16 @@ public class AsNBody extends AsNNode {
 		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
-			if (s instanceof Declaration) {
-				Declaration dec = (Declaration) s;
-				
+			if (s instanceof Declaration dec) {
 				/* Inject instruction for .data Section */
 				ASMDataLabel entry = new ASMDataLabel(dec.path.build(), new MemoryWordOp(dec.value));
 				
-				List<ASMInstruction> dataEntry = Arrays.asList(entry);
+				List<ASMInstruction> dataEntry = Collections.singletonList(entry);
 				AsNBody.addToTranslationUnit(dataEntry, s.getSource(), SECTION.DATA);
 				
 				/* Create address reference instruction for .text section */
 				ASMDataLabel reference = new ASMDataLabel(dec.path.build(), new MemoryWordRefOp(entry));
-				globalVarReferences.add(reference);
-				
+
 				/* Add declaration to global memory */
 				map.add(dec, reference);
 				
@@ -162,13 +151,11 @@ public class AsNBody extends AsNNode {
 		
 		/* Cast program elements */
 		for (SyntaxElement s : p.programElements) {
-			if (s instanceof Function) {
+			if (s instanceof Function f) {
 				/* Cast a single function */
-				
-				Function f = (Function) s;
-				
+
 				st = new StackSet();
-				AsNFunction func = AsNFunction.cast(f, new RegSet(), map, st);
+				AsNFunction func = AsNFunction.cast(f, map);
 				
 				/* Ensure that stack was emptied, so no stack shift at compile time occurred */
 				assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
@@ -183,9 +170,8 @@ public class AsNBody extends AsNNode {
 				
 				AsNBody.addToTranslationUnit(func.getInstructions(), s.getSource(), SECTION.TEXT);
 			}
-			else if (s instanceof StructTypedef) {
+			else if (s instanceof StructTypedef def) {
 				/* Cast all functions defined in the struct typedef */
-				StructTypedef def = (StructTypedef) s;
 
 				List<String> added = new ArrayList();
 				
@@ -233,7 +219,7 @@ public class AsNBody extends AsNNode {
 				
 				for (Function f : def.functions) {
 					st = new StackSet();
-					AsNFunction func = AsNFunction.cast(f, new RegSet(), map, st);
+					AsNFunction func = AsNFunction.cast(f, map);
 					
 					/* Ensure that stack was emptied, so no stack shift at compile time occurred */
 					assert st.getStack().isEmpty() : "Stack was not empty after casting function!";
@@ -274,9 +260,7 @@ public class AsNBody extends AsNNode {
 					}
 				}
 			}
-			else if (s instanceof InterfaceTypedef) {
-				InterfaceTypedef idef = (InterfaceTypedef) s;
-			
+			else if (s instanceof InterfaceTypedef idef) {
 				for (InterfaceProvisoMapping mapping : idef.registeredMappings) {
 					String postfix = LabelUtil.getProvisoPostfix(mapping.providedHeadProvisos);
 					
@@ -303,15 +287,13 @@ public class AsNBody extends AsNNode {
 		
 		for (int i = 0; i < p.programElements.size(); i++) {
 			SyntaxElement s = p.programElements.get(i);
-			if (s instanceof Declaration) {
-				Declaration dec = (Declaration) s;
-				
+			if (s instanceof Declaration dec) {
+
 				boolean directInitialization = dec.value instanceof Atom;
 				
 				/* .asciz initialization */
-				if (dec.value instanceof ArrayInit && ((ARRAY) dec.value.getType()).elementType instanceof CHAR) {
-					ArrayInit init = (ArrayInit) dec.value;
-					if (init.elements.stream().filter(x -> !(x instanceof Atom)).count() == 0) {
+				if (dec.value instanceof ArrayInit init && ((ARRAY) dec.value.getType()).elementType instanceof CHAR) {
+					if (init.elements.stream().allMatch(x -> x instanceof Atom)) {
 						directInitialization = true;
 					}
 				}
@@ -348,11 +330,10 @@ public class AsNBody extends AsNNode {
 		/* Add global initialization instruction */
 		if (addGlobalInit) {
 			boolean hasCall = false;
-			for (int i = 0; i < globalsInit.size(); i++) {
-				if (globalsInit.get(i) instanceof ASMBranch && ((ASMBranch) globalsInit.get(i)).type == BRANCH_TYPE.BL) {
+			for (ASMInstruction asmInstruction : globalsInit) {
+				if (asmInstruction instanceof ASMBranch && ((ASMBranch) asmInstruction).type == BRANCH_TYPE.BL) {
 					hasCall = true;
-				}
-				else if (globalsInit.get(i) instanceof ASMMov && ((ASMMov) globalsInit.get(i)).target.reg == REG.PC) {
+				} else if (asmInstruction instanceof ASMMov && ((ASMMov) asmInstruction).target.reg == REG.PC) {
 					hasCall = true;
 				}
 			}
@@ -454,8 +435,7 @@ public class AsNBody extends AsNNode {
 		for (int i = 0; i < text.size(); i++) {
 			
 			/* Collect ASMLdrLabel instructions in buffer, insert them after next bx instruction */
-			if (text.get(i) instanceof ASMLdrLabel) {
-				ASMLdrLabel load = (ASMLdrLabel) text.get(i);
+			if (text.get(i) instanceof ASMLdrLabel load) {
 				buffer.add(load);
 			}
 			else {
@@ -479,7 +459,7 @@ public class AsNBody extends AsNNode {
 							/* Apply prefix to load label */
 							label.prefix = prefix;
 							
-							ASMDataLabel l0 = null;
+							ASMDataLabel l0;
 							if (label.dec == null) {
 								/* Label is dynamic label, generated by literal manager */
 								ASMDataLabel dlabel = AsNBody.literalManager.getValue((LabelOp) label.op0);
@@ -524,21 +504,21 @@ public class AsNBody extends AsNNode {
 	 */
 	public static void addToTranslationUnit(List<ASMInstruction> ins, Source source, SECTION section) {
 		String path = RessourceManager.instance.toASMPath(source.sourceFile);
-			
+
+		TranslationUnit unit;
+
 		if (!AsNBody.translationUnits.containsKey(path)) {
-			TranslationUnit unit = new TranslationUnit(path);
+			unit = new TranslationUnit(path);
 			unit.versionID = FileUtil.computeHashSum(source.sourceFile);
 			AsNBody.translationUnits.put(unit.sourceFile, unit);
-			unit.append(ins, section);
 		}
-		else {
-			TranslationUnit unit = AsNBody.translationUnits.get(path);
-			unit.append(ins, section);
-		}
+		else unit = AsNBody.translationUnits.get(path);
+
+		unit.append(ins, section);
 	}
 	
 	public static void addToTranslationUnit(ASMInstruction ins, Source source, SECTION section) {
-		List<ASMInstruction> list = Arrays.asList(ins);
+		List<ASMInstruction> list = Collections.singletonList(ins);
 		AsNBody.addToTranslationUnit(list, source, section);
 	}
 	
@@ -549,13 +529,12 @@ public class AsNBody extends AsNNode {
 		
 		/* Create address reference instruction for .text section */
 		ASMDataLabel heapReference = new ASMDataLabel(dec.path.build(), new MemoryWordRefOp(dataEntryHeap));
-		globalVarReferences.add(heapReference);
-		
+
 		/* Add declaration to global memory */
 		map.add(dec, heapReference);
 	}
 	
-	public static void branchToCopyRoutine(AsNNode node) throws CGEN_EXC {
+	public static void branchToCopyRoutine(AsNNode node) {
 		/* Mark routine as used */
 		AsNBody.usedStackCopyRoutine = true;
 		

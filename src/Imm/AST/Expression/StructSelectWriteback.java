@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
 import Imm.TYPE.TYPE;
@@ -43,7 +42,7 @@ public class StructSelectWriteback extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Increment");
-		if (rec) this.shadowSelect.print(d + this.printDepthStep, rec);
+		if (rec) this.shadowSelect.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -55,7 +54,7 @@ public class StructSelectWriteback extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optStructSelectWriteback(this);
 	}
 	

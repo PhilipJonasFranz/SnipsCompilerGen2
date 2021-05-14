@@ -202,12 +202,12 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public STRUCT clone() {
-		List<TYPE> prov0 = this.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
+		List<TYPE> prov0 = this.proviso.stream().map(TYPE::clone).collect(Collectors.toList());
 		return new STRUCT(this.typedef, prov0);
 	}
 
 	public TYPE provisoFree() {
-		STRUCT s = (STRUCT) this.clone();
+		STRUCT s = this.clone();
 		
 		for (int i = 0; i < s.proviso.size(); i++) 
 			s.proviso.set(i, s.proviso.get(i).provisoFree());
@@ -244,7 +244,7 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public boolean hasProviso() {
-		return this.proviso.stream().filter(x -> x.hasProviso()).count() > 0;
+		return this.proviso.stream().anyMatch(TYPE::hasProviso);
 	}
 	
 	public String codeString() {

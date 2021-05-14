@@ -60,7 +60,7 @@ public class Compare extends NFoldExpression {
 		
 		if (rec) {
 			for (Expression e : this.operands)
-				e.print(d + this.printDepthStep, rec);
+				e.print(d + this.printDepthStep, true);
 		}
 	}
 

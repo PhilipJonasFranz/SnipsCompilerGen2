@@ -3,7 +3,7 @@ package Imm.ASM.Util.Operands;
 public class PatchableImmOp extends Operand {
 
 	public enum PATCH_DIR {
-		UP, DOWN;
+		UP, DOWN
 	}
 	
 	public PATCH_DIR dir;
@@ -36,11 +36,8 @@ public class PatchableImmOp extends Operand {
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof PatchableImmOp)) return false;
-		else {
-			PatchableImmOp op = (PatchableImmOp) operand;
-			return op.dir == this.dir && op.value == this.value;
-		}
+		if (!(operand instanceof PatchableImmOp op)) return false;
+		else return op.dir == this.dir && op.value == this.value;
 	}
 	
 } 

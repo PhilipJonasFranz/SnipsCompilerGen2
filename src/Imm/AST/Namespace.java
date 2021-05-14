@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.VOID;
 import Opt.AST.ASTOptimizer;
@@ -56,16 +54,16 @@ public class Namespace extends SyntaxElement {
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Namespace: " + this.path);
 		if (rec) for (SyntaxElement e : this.programElements) {
-			e.print(d + this.printDepthStep, rec);
+			e.print(d + this.printDepthStep, true);
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+	public TYPE check(ContextChecker ctx) {
 		/* This function should not be called since namespaces are flattened */
 		return new VOID();
 	}
 	
-	public Namespace opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Namespace opt(ASTOptimizer opt) {
 		return this;
 	}
 	
@@ -83,10 +81,6 @@ public class Namespace extends SyntaxElement {
 		return result;
 	}
 
-	public void setContext(List<TYPE> setContext) {
-		return;
-	}
-	
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
 		

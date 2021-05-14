@@ -8,17 +8,12 @@ import Imm.AST.Statement.Statement;
 
 public class CompoundStatementRules {
 
-	public static boolean removeDanglingAssignments(List<Statement> body, ProgramState state) {
-		boolean opt = false;
+	public static void removeDanglingAssignments(List<Statement> body, ProgramState state) {
 		for (int i = 0; i < body.size(); i++) {
 			Statement s = body.get(i);
 			
-			if (s instanceof Assignment) {
-				Assignment as = (Assignment) s;
-				
-				if (as.lhsId instanceof SimpleLhsId) {
-					SimpleLhsId lhs = (SimpleLhsId) as.lhsId;
-					
+			if (s instanceof Assignment as) {
+				if (as.lhsId instanceof SimpleLhsId lhs) {
 					if (lhs.origin != null) {
 						
 						/*
@@ -38,7 +33,7 @@ public class CompoundStatementRules {
 							 * Make sure removing the expression of the assignment has no side-effects,
 							 * for example removing a function call or removing a writeback operation.
 							 */
-							delete &= !Matcher.containsStateDependentSubExpression(as.value, state);
+							delete &= Matcher.noStateDependentSubExpression(as.value, state);
 
 							/*
 							 * No var references have been made, assignment is safe to delete.
@@ -46,15 +41,12 @@ public class CompoundStatementRules {
 							if (delete) {
 								body.remove(i);
 								i--;
-								opt = true;
 							}
 						}
 					}
 				}
 			}
 		}
-		
-		return opt;
 	}
 	
 }

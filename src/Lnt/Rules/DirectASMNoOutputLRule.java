@@ -15,8 +15,7 @@ public class DirectASMNoOutputLRule extends LRule {
 	
 	public void getResults(Program AST) {
 		result = AST.visit(x -> {
-			if (x instanceof DirectASMStatement) {
-				DirectASMStatement asm = (DirectASMStatement) x;
+			if (x instanceof DirectASMStatement asm) {
 				return asm.dataOut.isEmpty();
 			}
 			

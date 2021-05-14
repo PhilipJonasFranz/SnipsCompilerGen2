@@ -46,7 +46,7 @@ public class StructureInit extends Expression {
 		CompilerDriver.outs.println(Util.pad(d) + "StructureInit <" + ((this.getType() != null)? this.getType() : "?") + ">");
 		
 		if (rec) for (Expression e : this.elements) 
-			e.print(d + this.printDepthStep, rec);
+			e.print(d + this.printDepthStep, true);
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

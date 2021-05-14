@@ -39,7 +39,7 @@ public class Function extends CompoundStatement {
 	 * postfix, return type and the provided proviso types. All types are
 	 * stored as copies and proviso free.
 	 */
-	public class ProvisoMapping {
+	public static class ProvisoMapping {
 		
 				/* ---< FIELDS >--- */
 		/**
@@ -102,7 +102,7 @@ public class Function extends CompoundStatement {
 	/**
 	 * The visibility modifier specified in the function declaration.
 	 */
-	public MODIFIER modifier = MODIFIER.SHARED;
+	public MODIFIER modifier;
 	
 	/**
 	 * The return type of this function. May contain provisos.
@@ -170,7 +170,7 @@ public class Function extends CompoundStatement {
 	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, boolean signals, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
+	public Function(TYPE returnType, NamespacePath path, List<TYPE> proviso, List<Declaration> parameters, List<TYPE> signalsTypes, List<Statement> statements, MODIFIER modifier, Source source) {
 		super(statements, source);
 		this.returnType = returnType;
 		this.path = path;
@@ -220,12 +220,12 @@ public class Function extends CompoundStatement {
 		}
 		
 		if (!this.activeAnnotations.isEmpty()) 
-			CompilerDriver.outs.print(" " + this.activeAnnotations.toString());
+			CompilerDriver.outs.print(" " + this.activeAnnotations);
 		
 		CompilerDriver.outs.println();
 		
 		if (rec && body != null) for (Statement s : body) 
-			s.print(d + this.printDepthStep, rec);
+			s.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -332,12 +332,12 @@ public class Function extends CompoundStatement {
 	 * @return True if an equal mapping is already registered, false if not.
 	 */
 	public boolean containsMapping(List<TYPE> map) {
-		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
-			
-			if (map0.size() != map.size()) 
+		for (ProvisoMapping provisosCall : this.provisosCalls) {
+			List<TYPE> map0 = provisosCall.provisoMapping;
+
+			if (map0.size() != map.size())
 				throw new SNIPS_EXC(Const.RECIEVED_MAPPING_LENGTH_NOT_EQUAL, map0.size(), map.size());
-			
+
 			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) return true;
 		}
 		
@@ -352,11 +352,11 @@ public class Function extends CompoundStatement {
 	 */
 	public String getProvisoPostfix(List<TYPE> map) {
 		/* Search for postfix, if match is found return postfix */
-		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
-			
+		for (ProvisoMapping provisosCall : this.provisosCalls) {
+			List<TYPE> map0 = provisosCall.provisoMapping;
+
 			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) {
-				return LabelUtil.getProvisoPostfix(this.provisosCalls.get(i).provisoMapping);
+				return LabelUtil.getProvisoPostfix(provisosCall.provisoMapping);
 			}
 		}
 		
@@ -370,12 +370,9 @@ public class Function extends CompoundStatement {
 	 * @param context The proviso types of the new mapping.
 	 */
 	public void addProvisoMapping(TYPE returnType, List<TYPE> context) {
-		/* Proviso mapping already exists, just return */
-		if (this.containsMapping(context)) return;
-		else {
+		if (!this.containsMapping(context)) {
 			TYPE retTypeClone = null;
-			if (returnType != null) 
-				returnType.clone().provisoFree();
+			if (returnType != null) retTypeClone = returnType.clone().provisoFree();
 			
 			List<TYPE> contextClone = new ArrayList();
 			for (TYPE t : context)
@@ -419,11 +416,11 @@ public class Function extends CompoundStatement {
 	 * @throws SNIPS_EXC If no registered mapping is equal to the given mapping.
 	 */
 	public TYPE getMappingReturnType(List<TYPE> map) {
-		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
-			
+		for (ProvisoMapping provisosCall : this.provisosCalls) {
+			List<TYPE> map0 = provisosCall.provisoMapping;
+
 			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
-				return this.provisosCalls.get(i).returnType;
+				return provisosCall.returnType;
 		}
 		
 		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
@@ -457,7 +454,7 @@ public class Function extends CompoundStatement {
 			signalsTypes.add(t.clone());
 		
 		/* Clone the function signature */
-		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 
 		f.UID = this.UID;
 		return f;
@@ -479,7 +476,7 @@ public class Function extends CompoundStatement {
 		boolean match = true;
 		
 		/* Match function name, not namespace path */
-		match &= f0.path.getLast().equals(f1.path.getLast());
+		match = f0.path.getLast().equals(f1.path.getLast());
 		
 		if (matchFullNames) match &= f0.path.equals(f1.path);
 		
@@ -592,6 +589,6 @@ public class Function extends CompoundStatement {
 		return this.modifier == MODIFIER.STATIC && 
 				this.path.build().endsWith("create") && 
 				this.getReturnType().isStruct();
-	};
-	
+	}
+
 } 

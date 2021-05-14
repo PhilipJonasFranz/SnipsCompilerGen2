@@ -26,7 +26,7 @@ public class StackSet {
 	 * Used to identify the contents of a stack cell. 
 	 */
 	private enum CONTENT_TYPE {
-		REGISTER, DECLARATION;
+		REGISTER, DECLARATION
 	}
 	
 	/**
@@ -34,7 +34,7 @@ public class StackSet {
 	 * is 1 if the content type is a register, and the word size of the type of the declaration if the content
 	 * type is a declaration.
 	 */
-	public class StackCell {
+	public static class StackCell {
 		
 		/** 
 		 * The content type of the cell. 
@@ -128,6 +128,14 @@ public class StackSet {
 				this.newDecsOnStack = true;
 		}
 	}
+
+	/**
+	 * Pushes the given REG n times on the stack.
+	 */
+	public void push(REG reg, int n) {
+		for (int i = 0; i < n; i++)
+			push(reg);
+	}
 	
 	/** 
 	 * Pop a stack cell from the stack top. 
@@ -196,17 +204,15 @@ public class StackSet {
 	public int getParameterByteOffset(Declaration dec) {
 		int off = 0;
 		boolean foundHook = false;
-		for (int x = 0; x < stack.size(); x++) {
-			if (stack.get(x).type == CONTENT_TYPE.REGISTER && stack.get(x).reg == REG.LR) {
+		for (StackCell stackCell : stack) {
+			if (stackCell.type == CONTENT_TYPE.REGISTER && stackCell.reg == REG.LR) {
 				if (!foundHook) return -1;
 				else return off;
-			}
-			else if (stack.get(x).type == CONTENT_TYPE.DECLARATION && stack.get(x).declaration.equals(dec)) {
+			} else if (stackCell.type == CONTENT_TYPE.DECLARATION && stackCell.declaration.equals(dec)) {
 				off = 0;
 				foundHook = true;
-			}
-			else {
-				if (stack.get(x).type == CONTENT_TYPE.DECLARATION) off += stack.get(x).declaration.getType().wordsize() * 4;
+			} else {
+				if (stackCell.type == CONTENT_TYPE.DECLARATION) off += stackCell.declaration.getType().wordsize() * 4;
 				else off += 4;
 			}
 		}
@@ -222,25 +228,26 @@ public class StackSet {
 		boolean regs = false;
 		
 		/* Check if LR or FP regs were pushed */
-		for (int i = 0; i < stack.size(); i++) 
-			if (stack.get(i).type == CONTENT_TYPE.REGISTER && stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) 
+		for (StackCell stackCell : stack)
+			if (stackCell.type == CONTENT_TYPE.REGISTER && stackCell.reg == REG.FP || stackCell.reg == REG.LR) {
 				regs = true;
+				break;
+			}
 		
 		boolean hook = false;
-		for (int i = 0; i < stack.size(); i++) {
-			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
-				if (stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) {
+		for (StackCell stackCell : stack) {
+			if (stackCell.type == CONTENT_TYPE.REGISTER)
+				if (stackCell.reg == REG.FP || stackCell.reg == REG.LR) {
 					hook = true;
 					off = 4;
-				}
-				else off += 4;
-			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) {
-				if (stack.get(i).declaration.equals(dec)) {
+				} else off += 4;
+			else if (stackCell.type == CONTENT_TYPE.DECLARATION) {
+				if (stackCell.declaration.equals(dec)) {
 					/* Hook was not found and there is a reg section */
 					if (!hook && regs) return -1;
 					else return off;
 				}
-				off += (stack.get(i).declaration.getType().wordsize() * 4);
+				off += (stackCell.declaration.getType().wordsize() * 4);
 			}
 		}
 		
@@ -253,7 +260,7 @@ public class StackSet {
 	 * sp can be determined.
 	 */
 	public void openScope(CompoundStatement cs) {
-		this.scopes.push(new Pair<Integer, CompoundStatement>(this.stack.size(), cs));
+		this.scopes.push(new Pair<>(this.stack.size(), cs));
 	}
 	
 	/**
@@ -324,14 +331,14 @@ public class StackSet {
 	public int getHighestSPBackupOffset() {
 		int off = 4;
 		List<Integer> occurences = new ArrayList();
-		
-		for (int i = 0; i < stack.size(); i++) {
-			if (stack.get(i).type == CONTENT_TYPE.REGISTER) 
-				if (stack.get(i).reg == REG.FP || stack.get(i).reg == REG.LR) off = 4;
-				else if (stack.get(i).reg == REG.SP) occurences.add(off);
+
+		for (StackCell stackCell : stack) {
+			if (stackCell.type == CONTENT_TYPE.REGISTER)
+				if (stackCell.reg == REG.FP || stackCell.reg == REG.LR) off = 4;
+				else if (stackCell.reg == REG.SP) occurences.add(off);
 				else off += 4;
-			else if (stack.get(i).type == CONTENT_TYPE.DECLARATION) 
-				off += (stack.get(i).declaration.getType().wordsize() * 4);
+			else if (stackCell.type == CONTENT_TYPE.DECLARATION)
+				off += (stackCell.declaration.getType().wordsize() * 4);
 		}
 		
 		if (occurences.isEmpty()) return -1;

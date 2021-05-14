@@ -19,8 +19,8 @@ public abstract class UnaryExpression extends Expression {
 
 			/* ---< NESTED >--- */
 	public enum UnaryOperator {
-		NOT, NEG;
-	}
+		NOT, NEG
+			}
 	
 	
 			/* ---< FIELDS >--- */
@@ -46,7 +46,7 @@ public abstract class UnaryExpression extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + this.operator.toString());
-		if (rec) this.operand.print(d + this.printDepthStep, rec);
+		if (rec) this.operand.print(d + this.printDepthStep, true);
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

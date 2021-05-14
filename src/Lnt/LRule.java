@@ -12,7 +12,7 @@ public abstract class LRule {
 	public abstract void reportResults();
 	
 	public void printResultSourceCode(List<String> code) {
-		code.stream().forEach(CompilerDriver.outs::println);
+		code.forEach(CompilerDriver.outs::println);
 		
 		CompilerDriver.outs.print("    ^");
 		for (int i = 0; i < code.get(code.size() - 1).length() - 5; i++)

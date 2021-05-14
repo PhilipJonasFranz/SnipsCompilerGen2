@@ -8,6 +8,8 @@ import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
+import java.io.Serial;
+
 /**
  * Thrown when the user input led to an illegal combination of components.
  */
@@ -15,6 +17,7 @@ public class CTEX_EXC extends Exception {
 
 	public static boolean isProbe = false;
 	
+	@Serial
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private String message;

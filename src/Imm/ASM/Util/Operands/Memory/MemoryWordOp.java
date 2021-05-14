@@ -24,8 +24,7 @@ public class MemoryWordOp extends MemoryOperand {
 	public String toString() {
 		if (this.value != null) {
 			/* Use the type to string conversion to display type as number */
-			String s = this.toString(value);
-			return s; //((this.value instanceof Atom)? s : "\n" + s.substring(0, s.length() - 1));
+			return this.toString(value);
 		}
 		else {
 			/* Simple integer value */
@@ -34,15 +33,11 @@ public class MemoryWordOp extends MemoryOperand {
 	}
 	
 	private String toString(Expression val) {
-		if (val instanceof Atom) {
-			Atom atom = (Atom) val;
+		if (val instanceof Atom atom)
 			return ".word " + atom.getType().toPrimitive().sourceCodeRepresentation();
-		}
-		
-		if (val instanceof ArrayInit && ((ARRAY) val.getType()).elementType instanceof CHAR) {
-			ArrayInit init = (ArrayInit) val;
-			
-			if (init.elements.stream().filter(x -> !(x instanceof Atom)).count() == 0) {
+
+		if (val instanceof ArrayInit init && ((ARRAY) val.getType()).elementType instanceof CHAR) {
+			if (init.elements.stream().allMatch(x -> x instanceof Atom)) {
 				String s = ".asciz \"";
 				
 				for (int i = 0; i < init.elements.size() - 1; i++) {

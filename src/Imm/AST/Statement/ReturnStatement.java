@@ -40,7 +40,7 @@ public class ReturnStatement extends Statement {
 		CompilerDriver.outs.println(Util.pad(d) + "Return");
 		
 		if (rec && this.value != null) 
-			this.value.print(d + this.printDepthStep, rec);
+			this.value.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

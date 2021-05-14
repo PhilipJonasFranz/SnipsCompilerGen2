@@ -37,8 +37,7 @@ public class FUNC extends PRIMITIVE<Function> {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof FUNC;
 		}
-		else if (type instanceof FUNC) {
-			FUNC f0 = (FUNC) type;
+		else if (type instanceof FUNC f0) {
 			boolean equal = true;
 			
 			if (f0.funcHead != null && this.funcHead != null) {

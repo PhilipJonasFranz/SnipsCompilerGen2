@@ -79,12 +79,7 @@ public class Linker {
 			
 			output.add(".version " + this.versionID);
 			output.add("");
-			
-			for (String imp : this.imports) 
-				output.add(imp);
-			if (!this.imports.isEmpty())
-				output.add("");
-			
+
 			if (!this.dataSection.isEmpty()) {
 				output.add(".data");
 				for (String s : this.dataSection)
@@ -122,7 +117,7 @@ public class Linker {
 		 */
 		public void print() {
 			CompilerDriver.outs.println("LinkerUnit | Source File: " + ((this.sourceFile != null)? this.sourceFile : "Unknown"));
-			this.build().stream().forEach(x -> CompilerDriver.outs.println(x));
+			this.build().forEach(x -> CompilerDriver.outs.println(x));
 			CompilerDriver.outs.println();
 		}
 		
@@ -151,8 +146,7 @@ public class Linker {
 			else {
 				if (section == SECTION.DATA)
 					unit.dataSection.add(line);
-				else if (section == SECTION.TEXT)
-					unit.textSection.add(line);
+				else unit.textSection.add(line);
 			}
 		}
 		
@@ -238,18 +232,16 @@ public class Linker {
 				
 				/* Search import */
 				for (int a = 0; a < lines.size(); a++) {
-					if (label == null || lines.get(a).trim().startsWith(".global " + label)) {
+					if (lines.get(a).trim().startsWith(".global " + label)) {
 						/* Found position in module */
 						found = true;
 						
 						int cnt = 3;
-						
-						while (true) {
+
+						while (a < lines.size() && (cnt <= 3 || !lines.get(a).contains(".global")))
 							/* Copy contents until EOF is reached, or until a new .global directive is seen */
-							if (a >= lines.size() || (cnt > 3 && lines.get(a).contains(".global"))) break;
 							unit.textSection.add(cnt++, lines.get(a++));
-						}
-						
+
 						buffer.add(new Message("LINK -> Resolved '" + incPath + "' to " + (cnt - 3) + " lines from '" + mappedPath + "'", Type.INFO, true));
 						break;
 					}

@@ -22,11 +22,8 @@ public class MemoryWordRefOp extends MemoryOperand {
 	}
 
 	public boolean equals(Operand operand) {
-		if (!(operand instanceof MemoryWordRefOp)) return false;
-		else {
-			MemoryWordRefOp op = (MemoryWordRefOp) operand;
-			return op.prefix.equals(this.prefix) && op.dataLabel.equals(this.dataLabel);
-		}
+		if (!(operand instanceof MemoryWordRefOp op)) return false;
+		else return op.prefix.equals(this.prefix) && op.dataLabel.equals(this.dataLabel);
 	}
 	
 } 

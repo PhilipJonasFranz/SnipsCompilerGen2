@@ -1,12 +1,12 @@
 SOURCE
 #include <fmath.sn>
 
-int main() {
-	return (int) sin(0.5f) * 100;
+float main() {
+	return sin(0.5f) * 100f;
 }
 
 TESTCASES
-47
+0.47942553
 OUTPUT
 .version 0
 

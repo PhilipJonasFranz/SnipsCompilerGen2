@@ -38,7 +38,7 @@ public class AsNCompare extends AsNNFoldExpression {
 		cmp.pushOnCreatorStack(c);
 		c.castedNode = cmp;
 
-		boolean isVFP = c.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
+		boolean isVFP = c.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
 		if (c.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
@@ -46,10 +46,10 @@ public class AsNCompare extends AsNNFoldExpression {
 		if (isVFP) r.getVRegSet().free(0, 1);
 		else r.free(0, 1);
 		
-		if (c.operands.get(1) instanceof Atom && !(((Atom) c.operands.get(1)).getType() instanceof NULL)) {
+		if (c.operands.get(1) instanceof Atom && !(c.operands.get(1).getType() instanceof NULL)) {
 			cmp.instructions.addAll(AsNExpression.cast(c.operands.get(0), r, map, st).getInstructions());
 			
-			TYPE t = ((Atom) c.operands.get(1)).getType();
+			TYPE t = c.operands.get(1).getType();
 			int value = Integer.parseInt(t.toPrimitive().sourceCodeRepresentation());
 			
 			if (value < 255) {
@@ -69,7 +69,7 @@ public class AsNCompare extends AsNNFoldExpression {
 		}
 		else {
 			/* Generate Loader code that places the operands in R0 and R1 */
-			cmp.generatePrimitiveLoaderCode(cmp, c, c.operands.get(0), c.operands.get(1), r, map, st, 0, 1, isVFP);
+			cmp.generatePrimitiveLoaderCode(cmp, c.operands.get(0), c.operands.get(1), r, map, st, 0, 1, isVFP);
 			
 			if (isVFP) cmp.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new VRegOp(REG.S1)));
 			else cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));

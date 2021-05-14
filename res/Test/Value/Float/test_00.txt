@@ -1,12 +1,12 @@
 SOURCE
 float a = 2.482;
 
-int main() {
-	return (int) (10F + a);
+float main() {
+	return 10F + a;
 }
 
 TESTCASES
-12
+12.482
 OUTPUT
 .version 0
 
@@ -23,8 +23,6 @@ main:                                        /* Function: main */
     vldr s2, .P1208180730_LIT_1075763479
     vldr s1, .P1208180730_LIT_1092616192     /* Load value '10.0' from pool */
     vadd.F32 s0, s1, s2
-    vcvt.F32.S32 s0, s0
-    vmov.F32 r0, s0
     bx lr
 .P1208180730_LIT_1092616192: .word 1092616192
 .P1208180730_LIT_1075763479: .word 1075763479

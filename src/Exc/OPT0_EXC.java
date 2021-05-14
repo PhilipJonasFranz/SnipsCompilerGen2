@@ -6,8 +6,11 @@ import Util.Source;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
+import java.io.Serial;
+
 public class OPT0_EXC extends Exception {
 
+	@Serial
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private String message;

@@ -1,7 +1,7 @@
 package Lnt.Rules;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,12 +19,10 @@ public class NotThrownInTryLRule extends LRule {
 	private List<Pair<SyntaxElement, List<TYPE>>> result = new ArrayList();
 	
 	public void getResults(Program AST) {
-		List<Function> result = AST.visit(x -> {
-			return x instanceof Function;
-		});
+		List<Function> result = AST.visit(x -> x instanceof Function);
 		
 		for (Function f : result) {
-			List<TYPE> sCopy = f.signalsTypes.stream().collect(Collectors.toList());
+			List<TYPE> sCopy = new ArrayList<>(f.signalsTypes);
 			for (TYPE t : f.actualSignals) {
 				for (int i = 0; i < sCopy.size(); i++) {
 					if (sCopy.get(i).isEqual(t)) {
@@ -41,15 +39,13 @@ public class NotThrownInTryLRule extends LRule {
 
 	public void reportResults() {
 		for (Pair<SyntaxElement, List<TYPE>> p : this.result) {
-			if (p.first instanceof Function) {
-				Function f = (Function) p.first;
-				
-				String types = p.second.stream().map(x -> x.toString()).collect(Collectors.joining(", "));
+			if (p.first instanceof Function f) {
+				String types = p.second.stream().map(TYPE::toString).collect(Collectors.joining(", "));
 				new Message("Function '" + f.path.build() + "' signals not thrown types: " + types + ", " + p.first.getSource().getSourceMarker(), Type.WARN);
 				
 				String code = "    " + ((Function) p.first).signatureToString();
 				
-				this.printResultSourceCode(Arrays.asList(code));
+				this.printResultSourceCode(Collections.singletonList(code));
 			}
 		}
 	}

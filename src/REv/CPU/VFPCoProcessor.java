@@ -1,11 +1,11 @@
 package REv.CPU;
 
-import Util.FBinConverter;
+import Util.FBin;
 
 public class VFPCoProcessor {
 
 	/* 32 * F32 Registers */
-	int [] [] regs = new int [32] [32];
+	public int [] [] regs = new int [32] [32];
 	
 	
 	public void doInstruction(ProcessorUnit pcu, int [] instr) {
@@ -22,9 +22,9 @@ public class VFPCoProcessor {
 			int M = instr [5];
 			
 			/* Operand register numbers */
-			int Fd = FBinConverter.toDecimal(new int [] {Fd0 [0], Fd0 [1], Fd0 [2], Fd0 [3], D});
-			int Fn = FBinConverter.toDecimal(new int [] {Fn0 [0], Fn0 [1], Fn0 [2], Fn0 [3], N});
-			int Fm = FBinConverter.toDecimal(new int [] {Fm0 [0], Fm0 [1], Fm0 [2], Fm0 [3], M});
+			int Fd = FBin.toDecimal(new int [] {Fd0 [0], Fd0 [1], Fd0 [2], Fd0 [3], D});
+			int Fn = FBin.toDecimal(new int [] {Fn0 [0], Fn0 [1], Fn0 [2], Fn0 [3], N});
+			int Fm = FBin.toDecimal(new int [] {Fm0 [0], Fm0 [1], Fm0 [2], Fm0 [3], M});
 			
 			/* Opcode */
 			int p = instr [23];
@@ -33,9 +33,9 @@ public class VFPCoProcessor {
 			int s = instr [6];
 			
 			/* Float values decoded from regs */
-			float vFd = FBinConverter.fromFBin(regs [Fd].clone());
-			float vFn = FBinConverter.fromFBin(regs [Fn].clone());
-			float vFm = FBinConverter.fromFBin(regs [Fm].clone());
+			float vFd = FBin.fromFBin(regs [Fd].clone());
+			float vFn = FBin.fromFBin(regs [Fn].clone());
+			float vFm = FBin.fromFBin(regs [Fm].clone());
 			
 			/* Output, will be written to Fd */
 			float out = 0;
@@ -112,16 +112,16 @@ public class VFPCoProcessor {
 				}
 				/* FSITOS Signed integer -> floating-point conversions */
 				else if (Fn0 [0] == 1 && Fn0 [1] == 0 && Fn0 [2] == 0 && Fn0 [3] == 0 && N == 1) {
-					out = FBinConverter.toDecimal(regs [Fm].clone());
+					out = FBin.toDecimal(regs [Fm].clone());
 				}
 			}
 			
 			/* FTOSIS Floating-point -> signed integer conversions */
 			if (Fn0 [0] == 1 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0) {
 				/* Special case, output format not encoded in IEEE 754 */
-				regs [Fd] = FBinConverter.toBinI((int) vFm);
+				regs [Fd] = FBin.toBinI((int) vFm);
 			}
-			else regs [Fd] = FBinConverter.toFBin(out);
+			else regs [Fd] = FBin.toFBin(out);
 		}
 	}
 	

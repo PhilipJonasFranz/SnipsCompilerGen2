@@ -5,7 +5,6 @@ import java.util.List;
 
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -48,7 +47,7 @@ public class BreakStatement extends Statement {
 		return t;
 	}
 	
-	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Statement opt(ASTOptimizer opt) {
 		return opt.optBreakStatement(this);
 	}
 	
@@ -61,9 +60,7 @@ public class BreakStatement extends Statement {
 		return result;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
+	public void setContext(List<TYPE> context) {}
 
 	public Statement clone() {
 		BreakStatement b = new BreakStatement(this.getSource().clone());

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -35,15 +33,13 @@ public class Comment extends Statement {
 	
 	
 			/* ---< METHODS >--- */
-	public void print(int d, boolean rec) {
-		return;
-	}
+	public void print(int d, boolean rec) {}
 
-	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+	public TYPE check(ContextChecker ctx) {
 		return null;
 	}
 	
-	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Statement opt(ASTOptimizer opt) {
 		return this;
 	}
 	
@@ -56,9 +52,7 @@ public class Comment extends Statement {
 		return result;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
+	public void setContext(List<TYPE> context) {}
 
 	public Statement clone() {
 		Comment com = new Comment(this.comment, this.getSource().clone());

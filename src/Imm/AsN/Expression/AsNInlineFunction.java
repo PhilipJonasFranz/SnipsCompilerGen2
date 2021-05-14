@@ -31,7 +31,7 @@ public class AsNInlineFunction extends AsNExpression {
 		int currentUID = LabelUtil.funcUID;
 		
 		try {
-			funcCast = AsNFunction.cast(i.inlineFunction, new RegSet(), map, new StackSet());
+			funcCast = AsNFunction.cast(i.inlineFunction, map);
 		} catch (CTEX_EXC e) {
 			throw new CGEN_EXC(i.getSource(), "Failed to cast inline function: " + e.getMessage());
 		}

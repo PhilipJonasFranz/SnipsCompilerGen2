@@ -9,7 +9,6 @@ import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
@@ -51,7 +50,7 @@ public class InterfaceTypedef extends SyntaxElement {
 
 	public HashMap<String, ASMDataLabel> IIDLabelMap = new HashMap();
 	
-	public class InterfaceProvisoMapping {
+	public static class InterfaceProvisoMapping {
 		
 		public String provisoPostfix;
 		
@@ -126,14 +125,14 @@ public class InterfaceTypedef extends SyntaxElement {
 		}
 	}
 	
-	public InterfaceProvisoMapping registerMapping(List<TYPE> newMapping) {
+	public void registerMapping(List<TYPE> newMapping) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
 		assert this.proviso.size() == newMapping.size() : "Expected " + this.proviso.size() + " proviso types, but got " + newMapping.size();
 		
 		for (InterfaceProvisoMapping m : this.registeredMappings) 
 			if (ProvisoUtil.mappingIsEqual(newMapping, m.providedHeadProvisos))
-				return m;
+				return;
 		
 		/* Copy own provisos */
 		List<TYPE> clone = new ArrayList();
@@ -143,8 +142,6 @@ public class InterfaceTypedef extends SyntaxElement {
 		/* Create the new mapping and store it */
 		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(newMapping), clone);
 		this.registeredMappings.add(mapping);
-		
-		return mapping;
 	}
 
 	/**
@@ -196,7 +193,7 @@ public class InterfaceTypedef extends SyntaxElement {
 		CompilerDriver.outs.println(Util.pad(d) + "Interface Typedef:<" + this.path + ">");
 		
 		if (rec) for (Function f : this.functions)
-			f.print(d + this.printDepthStep, rec);
+			f.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -208,7 +205,7 @@ public class InterfaceTypedef extends SyntaxElement {
 		return t;
 	}
 	
-	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+	public SyntaxElement opt(ASTOptimizer opt) {
 		return opt.optInterfaceTypedef(this);
 	}
 	
@@ -224,10 +221,6 @@ public class InterfaceTypedef extends SyntaxElement {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
-		return;
-	}
-	
 	public void loadIIDInReg(AsNNode node, REG reg, List<TYPE> context) {
 		node.instructions.addAll(this.loadIIDInReg(reg, context));
 	}
@@ -261,7 +254,7 @@ public class InterfaceTypedef extends SyntaxElement {
 		
 		if (!this.implemented.isEmpty()) {
 			s += " : ";
-			s += this.implemented.stream().map(x -> x.codeString()).collect(Collectors.joining(", "));
+			s += this.implemented.stream().map(INTERFACE::codeString).collect(Collectors.joining(", "));
 		}
 		
 		s += " {";

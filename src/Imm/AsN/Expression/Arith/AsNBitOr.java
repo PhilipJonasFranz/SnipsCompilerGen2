@@ -18,7 +18,7 @@ public class AsNBitOr extends AsNNFoldExpression {
 		or.pushOnCreatorStack(b);
 		b.castedNode = or;
 		
-		or.evalExpression(or, b, r, map, st, (x, y) -> x | y);
+		or.evalExpression(or, b, r, map, st);
 			
 		or.registerMetric();
 		return or;

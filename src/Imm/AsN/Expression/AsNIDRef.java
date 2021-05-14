@@ -4,7 +4,6 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
-import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
@@ -20,6 +19,7 @@ import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.VFP.Memory.Stack.ASMVLdrStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.IDRef;
 import Res.Const;
@@ -27,10 +27,12 @@ import Res.Const;
 public class AsNIDRef extends AsNExpression {
 
 			/* ---< METHODS >--- */
-	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) {
 		AsNIDRef ref = new AsNIDRef();
 		ref.pushOnCreatorStack(i);
 		i.castedNode = ref;
+		
+		boolean isVFP = i.origin.getType().isFloat();
 		
 		/* Declaration is already loaded in Reg Stack */
 		if (r.declarationLoaded(i.origin)) {
@@ -52,7 +54,7 @@ public class AsNIDRef extends AsNExpression {
 					st.push(i.origin);
 				}
 			}
-			else if (location != target) {
+			else {
 				/* Copy value in target reg */
 				ref.instructions.add(new ASMMov(new RegOp(target), new RegOp(location)));
 				r.copy(location, target);
@@ -78,7 +80,7 @@ public class AsNIDRef extends AsNExpression {
 					st.push(i.origin);
 				}
 			}
-			else if (location != target) {
+			else {
 				/* Copy value in target reg */
 				ref.instructions.add(new ASMVMov(new VRegOp(target), new VRegOp(location)));
 				r.getVRegSet().copy(location, target);
@@ -119,13 +121,18 @@ public class AsNIDRef extends AsNExpression {
 					/* Variable is parameter in stack, get offset relative to Frame Pointer in Stack, 
 					 * 		Load from Stack */
 					int off = st.getParameterByteOffset(i.origin);
-					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, off)));
+					
+					if (isVFP) ref.instructions.add(new ASMVLdrStack(MEM_OP.PRE_NO_WRITEBACK, new VRegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, off)));
+					else ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, off)));
 				}
 				else if (st.getDeclarationInStackByteOffset(i.origin) != -1) {
 					/* Load Declaration Location from Stack */
 					int off = st.getDeclarationInStackByteOffset(i.origin);
-					ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), 
+					
+					if (isVFP) ref.instructions.add(new ASMVLdrStack(MEM_OP.PRE_NO_WRITEBACK, new VRegOp(target), new RegOp(REG.FP), 
 						new PatchableImmOp(PATCH_DIR.DOWN, -off)));
+					else ref.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), 
+							new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 				}
 				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				

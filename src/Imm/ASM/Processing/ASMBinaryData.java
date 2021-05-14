@@ -15,7 +15,9 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	 * Implementations are defined by classes extending from this class.
 	 */
 	public interface BinarySolver {
-		public int solve(int x, int y);
+
+		int solve(int x, int y);
+
 	}
 	
 	

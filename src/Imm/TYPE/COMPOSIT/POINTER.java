@@ -76,7 +76,7 @@ public class POINTER extends COMPOSIT {
 			this.coreType = targetType;
 		}
 		else if (targetType.isComposit()) {
-			this.coreType = ((COMPOSIT) targetType).getCoreType();
+			this.coreType = targetType.getCoreType();
 		}
 		else if (this.targetType.isProviso()) {
 			this.coreType = this.targetType.getCoreType();

@@ -33,7 +33,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	
 	public static AsNConditionalCompoundStatement cast(ConditionalCompoundStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
-		AsNConditionalCompoundStatement node = null;
+		AsNConditionalCompoundStatement node;
 		
 		if (s instanceof IfStatement) {
 			node = AsNIfStatement.cast((IfStatement) s, r, map, st);
@@ -68,18 +68,14 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 	public static COND injectConditionEvaluation(AsNNode node, AsNExpression expr, Expression expr0) {
 		COND cond = COND.EQ;
 		
-		if (expr0 instanceof Atom) {
-			Atom at = (Atom) expr0;
-			
+		if (expr0 instanceof Atom at) {
 			if (at.getType() instanceof BOOL) {
 				boolean value = (boolean) at.getType().value;
 				if (value) return COND.NO;
 			}
 		}
 		
-		if (expr instanceof AsNCompare) {
-			AsNCompare com = (AsNCompare) expr;
-			
+		if (expr instanceof AsNCompare com) {
 			cond = com.neg;
 
 			/* Remove two conditional mov instrutions */

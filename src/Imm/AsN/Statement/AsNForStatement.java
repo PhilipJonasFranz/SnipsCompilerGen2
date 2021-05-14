@@ -80,10 +80,9 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
-		if (expr instanceof AsNCompare) {
+		if (expr instanceof AsNCompare com) {
 			/* Top Comparison */
-			AsNCompare com = (AsNCompare) expr;
-			
+
 			COND neg = com.neg;
 			
 			/* Remove two conditional mov instrutions */
@@ -116,10 +115,8 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.instructions.add(continueJump);
 		
 		/* Add increment */
-		if (a.increment instanceof AssignWriteback) {
-			AssignWriteback awb = (AssignWriteback) a.increment;
+		if (a.increment instanceof AssignWriteback awb)
 			f.instructions.addAll(AsNAssignWriteback.cast(awb, r, map, st, false).getInstructions());
-		}
 		else f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */

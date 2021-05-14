@@ -79,7 +79,7 @@ public abstract class NFoldExpression extends Expression {
 		CompilerDriver.outs.println(Util.pad(d) + this.operator.toString());
 		if (rec) {
 			for (Expression e : this.operands)
-				e.print(d + this.printDepthStep, rec);
+				e.print(d + this.printDepthStep, true);
 		}
 	}
 	

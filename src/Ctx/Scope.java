@@ -75,13 +75,13 @@ public class Scope {
 	 */
 	public void addDeclaration(Declaration dec, boolean checkDups) throws CTEX_EXC {
 		if (checkDups) this.checkDuplicate(dec);
-		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
+		this.declarations.put(dec.path.build(), new Pair<>(dec, dec.path));
 	}
 	
 	/** Add a new declaration to this scope. Checks for duplicates. */
 	public Message addDeclaration(Declaration dec) throws CTEX_EXC {
 		Message m = this.checkDuplicate(dec);
-		this.declarations.put(dec.path.build(), new Pair<Declaration, NamespacePath>(dec, dec.path));
+		this.declarations.put(dec.path.build(), new Pair<>(dec, dec.path));
 		return m;
 	}
 	
@@ -95,7 +95,7 @@ public class Scope {
 		}
 		else {
 			if (this.parentScope != null) {
-				Declaration dec0 = null;
+				Declaration dec0;
 				if ((dec0 = this.parentScope.checkDuplicateRec(dec)) != null) {
 					if (!CompilerDriver.disableWarnings) {
 						return new Message(String.format(Const.VARIABLE_SHADOWED_BY, dec0.path, dec0.getSource().getSourceMarker(), dec.path.build(), dec.getSource().getSourceMarker()), LogPoint.Type.WARN, true);
@@ -111,7 +111,7 @@ public class Scope {
 	 * Internal recursive function to check for duplicate declaration names. 
 	 * Checks through the parent scopes.
 	 */
-	private Declaration checkDuplicateRec(Declaration dec) throws CTEX_EXC {
+	private Declaration checkDuplicateRec(Declaration dec) {
 		if (this.declarations.containsKey(dec.path.build())) {
 			return this.declarations.get(dec.path.build()).first;
 		}
@@ -126,7 +126,6 @@ public class Scope {
 	/** 
 	 * Returns the declaration with given field name from this scope or any of the parent scopes. 
 	 * Returns null if the field is not found.
-	 * @throws CTEX_EXC 
 	 */
 	public Declaration getField(NamespacePath path, Source source) throws CTEX_EXC {
 		if (path != null && this.declarations.containsKey(path.build())) {
@@ -170,13 +169,13 @@ public class Scope {
 	 * Same as {@link #getField(NamespacePath, Source)}, but returns null instead of
 	 * throwing exception.
 	 */
-	public Declaration getFieldNull(NamespacePath path, Source source) {
+	public Declaration getFieldNull(NamespacePath path) {
 		if (path != null && this.declarations.containsKey(path.build())) {
 			return this.declarations.get(path.build()).first;
 		}
 		else {
 			if (this.parentScope != null) {
-				return this.parentScope.getFieldNull(path, source);
+				return this.parentScope.getFieldNull(path);
 			}
 			else {
 				/* 

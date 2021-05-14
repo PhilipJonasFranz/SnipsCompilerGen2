@@ -25,7 +25,7 @@ public class AsNAnd extends AsNNFoldExpression {
 		and.pushOnCreatorStack(a);
 		a.castedNode = and;
 		
-		boolean isVFP = a.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
+		boolean isVFP = a.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
 		if (a.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
 		
@@ -70,7 +70,7 @@ public class AsNAnd extends AsNNFoldExpression {
 		}
 		else {
 			/* Load Operands */
-			and.generatePrimitiveLoaderCode(and, a, a.operands.get(0), a.operands.get(1), r, map, st, 0, 1, isVFP);
+			and.generatePrimitiveLoaderCode(and, a.operands.get(0), a.operands.get(1), r, map, st, 0, 1, isVFP);
 			
 			/* Perform and */
 			ASMAdd and0 = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(0));

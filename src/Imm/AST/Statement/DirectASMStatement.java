@@ -49,14 +49,14 @@ public class DirectASMStatement extends Statement {
 			
 			for (Pair<Expression, REG> p : this.dataIn) {
 				CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + p.second + " :");
-				p.first.print(d + this.printDepthStep, rec);
+				p.first.print(d + this.printDepthStep, true);
 			}
 			
 			CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + "Data Out:");
 			
 			for (Pair<Expression, REG> p : this.dataOut) {
 				CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + p.second + " :");
-				p.first.print(d + this.printDepthStep, rec);
+				p.first.print(d + this.printDepthStep, true);
 			}
 		}
 	}
@@ -92,14 +92,13 @@ public class DirectASMStatement extends Statement {
 	}
 
 	public Statement clone() {
-		List<String> ac = new ArrayList();
-		for (String s : this.assembly) ac.add(s);
+		List<String> ac = new ArrayList<>(this.assembly);
 		
 		List<Pair<Expression, REG>> dataInC = new ArrayList();
-		for (Pair<Expression, REG> p : this.dataIn) dataInC.add(new Pair<Expression, REG>(p.first.clone(), p.second));
+		for (Pair<Expression, REG> p : this.dataIn) dataInC.add(new Pair<>(p.first.clone(), p.second));
 		
 		List<Pair<Expression, REG>> dataOutC = new ArrayList();
-		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<Expression, REG>(p.first.clone(), p.second));
+		for (Pair<Expression, REG> p : this.dataOut) dataOutC.add(new Pair<>(p.first.clone(), p.second));
 		
 		DirectASMStatement dasm = new DirectASMStatement(ac, dataInC, dataOutC, this.getSource().clone());
 		dasm.copyDirectivesFrom(this);

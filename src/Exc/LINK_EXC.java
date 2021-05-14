@@ -5,11 +5,14 @@ import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
+import java.io.Serial;
+
 /**
  * Thrown when the user input led to an illegal combination of components.
  */
 public class LINK_EXC extends Exception {
 
+	@Serial
 	private static final long serialVersionUID = 5791314197219757362L;
 
 	private String message;
@@ -23,11 +26,7 @@ public class LINK_EXC extends Exception {
 		ContextChecker.progress.abort();
 		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
-	
-	public String getExcFieldName() {
-		return Util.Util.getExceptionFieldName(this.message);
-	}
-	
+
 	public String getMessage() {
 		return String.format(message, format);
 	}

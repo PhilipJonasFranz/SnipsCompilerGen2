@@ -3,7 +3,6 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -12,7 +11,7 @@ import Imm.AST.Statement.ContinueStatement;
 
 public class AsNContinueStatement extends AsNStatement {
 
-	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) {
 		AsNContinueStatement con = new AsNContinueStatement();
 		con.pushOnCreatorStack(c);
 		c.castedNode = con;

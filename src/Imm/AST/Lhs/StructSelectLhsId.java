@@ -37,19 +37,17 @@ public class StructSelectLhsId extends LhsId {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "StructSelectLhsId");
-		if (rec) this.select.print(d + this.printDepthStep, rec);
+		if (rec) this.select.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkStructSelect(this.select);
-		if (this.select.selector instanceof IDRef) {
-			IDRef ref = (IDRef) this.select.selector;
+		if (this.select.selector instanceof IDRef ref) {
 			this.origin = ref.origin;
 		}
-		else if (this.select.selector instanceof ArraySelect) {
-			ArraySelect sel = (ArraySelect) this.select.selector;
+		else if (this.select.selector instanceof ArraySelect sel) {
 			this.origin = sel.idRef.origin;
 		}
 		
@@ -73,12 +71,10 @@ public class StructSelectLhsId extends LhsId {
 	}
 
 	public NamespacePath getFieldName() {
-		if (this.select.selector instanceof IDRef) {
-			IDRef ref = (IDRef) this.select.selector;
+		if (this.select.selector instanceof IDRef ref) {
 			return ref.path;
 		}
-		else if (this.select.selector instanceof ArraySelect) {
-			ArraySelect sel = (ArraySelect) this.select.selector;
+		else if (this.select.selector instanceof ArraySelect sel) {
 			return sel.idRef.path;
 		}
 		else return null;

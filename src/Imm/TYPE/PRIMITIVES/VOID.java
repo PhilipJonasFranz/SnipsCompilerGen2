@@ -7,10 +7,8 @@ public class VOID extends PRIMITIVE<Void> {
 	public VOID() {
 	
 	}
-	
-	public void setValue(String value) {
-		this.value = null;
-	}
+
+	public void setValue(String value) {}
 
 	public boolean isEqual(TYPE type) {
 		/* Acts as dont care */
@@ -22,9 +20,7 @@ public class VOID extends PRIMITIVE<Void> {
 	}
 	
 	public TYPE clone() {
-		VOID b = new VOID();
-		if (this.value != null) b.setValue(this.value + "");
-		return b;
+		return new VOID();
 	}
 	
 	public String codeString() {

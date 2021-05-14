@@ -18,7 +18,7 @@ public class AsNBitAnd extends AsNNFoldExpression {
 		and.pushOnCreatorStack(b);
 		b.castedNode = and;
 		
-		and.evalExpression(and, b, r, map, st, (x, y) -> x & y);
+		and.evalExpression(and, b, r, map, st);
 			
 		and.registerMetric();
 		return and;

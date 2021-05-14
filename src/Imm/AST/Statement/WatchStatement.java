@@ -40,7 +40,7 @@ public class WatchStatement extends CompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "Watch<" + this.watched.getType() + " " + this.watched.path + ">");
 		
 		if (rec) for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+			s.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

@@ -1,40 +1,13 @@
 package CGen;
 
+import CGen.RegSet.Reg;
 import CGen.RegSet.STATUS;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 
 public class VRegSet {
 
-	public class Reg {
-		
-		STATUS status = STATUS.FREE;
-		
-		public Declaration declaration;
-		
-		public void free() {
-			this.declaration = null;
-			this.status = STATUS.FREE;
-		}
-		
-		public void setDeclaration(Declaration value) {
-			this.declaration = value;
-			this.status = STATUS.USED;
-		}
-		
-		public void print() {
-			CompilerDriver.outs.println("    Status: " + this.status.toString());
-			if (this.status == STATUS.USED) 
-				this.declaration.print(4, true);
-		}
-		
-		public boolean isFree() {
-			return this.status == STATUS.FREE;
-		}
-		
-	}
-	
-	Reg [] regs = new Reg [32]; 
+	Reg [] regs = new Reg [32];
 	
 	public VRegSet() {
 		for (int i = 0; i < regs.length; i++) regs [i] = new Reg();

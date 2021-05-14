@@ -1,17 +1,17 @@
 SOURCE
 #include <cmplx.sn>
 
-int main() {
+float main() {
 	cmplx c0 = cmplx::create(1f, 0f);
 	cmplx c1 = cmplx::create(5.5f, 3f);
 	
 	cmplx r = c0 + c1;
 	
-	return (int) r.real;
+	return r.real;
 }
 
 TESTCASES
-6
+6.5
 OUTPUT
 .version 0
 
@@ -42,8 +42,6 @@ main:                                        /* Function: main */
     stmfd sp!, {r0-r2}
     bl Cmplx.op_add_1222274617               /* Call Cmplx.op_add */
     vldr s0, [fp, #-32]                      /* Load field from struct */
-    vcvt.F32.S32 s0, s0
-    vmov.F32 r0, s0
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P1351326485_LIT_1085276160: .word 1085276160

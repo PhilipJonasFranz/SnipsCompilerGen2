@@ -54,7 +54,7 @@ public class ProcessorUnit {
 	public int [] aluControl   	= new int [1 << 2];
 	
 	/* Co-Processors */
-	VFPCoProcessor vfp = new VFPCoProcessor();
+	public VFPCoProcessor vfp = new VFPCoProcessor();
 	
 	
 	/* Main Processor */
@@ -88,8 +88,8 @@ public class ProcessorUnit {
 			if (pcD >> 2 >= memSize || pcD < 0) {
 				cpuExit = 1;
 				break;
-			};
-			
+			}
+
 			// Fetch Instruction
 			instr = readMem(regs [15]);
 			
@@ -264,7 +264,7 @@ public class ProcessorUnit {
 			quantityBit = instr [22];
 		}
 		// mul, mla
-		else if (instr [27] == 0 && instr [26] == 0 && instr [25] == 0 && instr [24] == 0 && instr [27] == 0 && instr [26] == 0 && instr [7] == 1 && instr [6] == 0 && instr [5] == 0 && instr [4] == 1) {
+		else if (instr [27] == 0 && instr [26] == 0 && instr [25] == 0 && instr [24] == 0 && instr [7] == 1 && instr [6] == 0 && instr [5] == 0 && instr [4] == 1) {
 			srcOvr = 1;
 			rD = new int [] {instr [19], instr [18], instr [17], instr [16]};
 			rN = new int [] {instr [15], instr [14], instr [13], instr [12]};
@@ -354,22 +354,22 @@ public class ProcessorUnit {
     	int address = toDecimal(addr), acc = 0;
     	int off = (address % 4) << 3;
     	address = address >> 2;
-    	for (int i = 0; i < memoryBlocks.length; i++) {
-    		if (acc + memoryBlocks [i].length > address) {
-    			if (quantityBit == 0)return memoryBlocks [i] [address - acc].clone();
-    			else {
-    				int [] readData = memoryBlocks [i] [address - acc].clone();
-    				if (off > 0) {
-    					for (int a = BIT - 1; a >= 0; a--) {
-    						if (a - off >= 0)readData [a] = readData [a - off];
-    						else readData [a] = 0;
-    					}
-    				}
-    				return and(readData, map0);
-    			}
-    		}
-    		acc += memoryBlocks [i].length;
-    	}
+		for (int[][] memoryBlock : memoryBlocks) {
+			if (acc + memoryBlock.length > address) {
+				if (quantityBit == 0) return memoryBlock[address - acc].clone();
+				else {
+					int[] readData = memoryBlock[address - acc].clone();
+					if (off > 0) {
+						for (int a = BIT - 1; a >= 0; a--) {
+							if (a - off >= 0) readData[a] = readData[a - off];
+							else readData[a] = 0;
+						}
+					}
+					return and(readData, map0);
+				}
+			}
+			acc += memoryBlock.length;
+		}
     	return add0;
     }
     

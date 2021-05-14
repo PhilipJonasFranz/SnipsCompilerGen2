@@ -1,12 +1,7 @@
 package Imm.AST.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
@@ -15,6 +10,10 @@ import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -34,7 +33,7 @@ public class InlineFunction extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Inline Function");
-		if (rec) this.inlineFunction.print(d + this.printDepthStep, rec);
+		if (rec) this.inlineFunction.print(d + this.printDepthStep, true);
 	}
 	
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -46,7 +45,7 @@ public class InlineFunction extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optInlineFunction(this);
 	}
 	
@@ -92,8 +91,7 @@ public class InlineFunction extends Expression {
 		
 		s += this.inlineFunction.body.stream()
 			.map(x -> x.codePrint(0))
-				.map(x -> x.stream()
-				.collect(Collectors.joining(" ")))
+				.map(x -> String.join(" ", x))
 			.collect(Collectors.joining(" "));
 		
 		s += " }";

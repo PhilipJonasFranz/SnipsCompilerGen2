@@ -115,14 +115,14 @@ public class AsNFunctionCall extends AsNStatement {
 		List<Integer> sMap = new ArrayList();
 		
 		/* Extract mapping locations from different mappings */
-		if (f == null || (f != null && (f.isLambdaHead || f.definedInInterface != null))) {
+		if (f == null || f.isLambdaHead || f.definedInInterface != null) {
 			/* Load default mapping */
 			List<Pair<Expression, Integer>> mapping = getDefaultMapping(parameters);
-			mapping.stream().forEach(x -> sMap.add(x.second));
+			mapping.forEach(x -> sMap.add(x.second));
 		}
 		else {
 			List<Pair<Declaration, Integer>> mapping = ((AsNFunction) f.castedNode).getParameterMapping();
-			mapping.stream().forEach(x -> sMap.add(x.second));
+			mapping.forEach(x -> sMap.add(x.second));
 		}
 		
 		/* Load Parameters in the Stack */
@@ -138,8 +138,7 @@ public class AsNFunctionCall extends AsNStatement {
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
 				boolean placeholder = false;
-				if (parameters.get(i) instanceof TempAtom) {
-					TempAtom a = (TempAtom) parameters.get(i);
+				if (parameters.get(i) instanceof TempAtom a) {
 					if (a.getType().wordsize() > 1) placeholder = true;
 				}
 				
@@ -165,7 +164,7 @@ public class AsNFunctionCall extends AsNStatement {
 			if (sMap.get(i) != -1) {
 				call.instructions.addAll(AsNExpression.cast(parameters.get(i), r, map, st).getInstructions());
 				
-				ASMPushStack push = null;
+				ASMPushStack push;
 				
 				if (parameters.get(i).getType().isFloat()) push = new ASMVPushStack(new VRegOp(REG.S0));
 				else push = new ASMPushStack(new RegOp(REG.R0));
@@ -296,10 +295,8 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		else {
-			if (callee instanceof InlineCall) {
-				InlineCall ic = (InlineCall) callee;
-				
-				/* 
+			if (callee instanceof InlineCall ic) {
+				/*
 				 * Anonymous inline call uses implicit type, push dummy values for this type.
 				 */
 				if (ic.getType().wordsize() > 1) {

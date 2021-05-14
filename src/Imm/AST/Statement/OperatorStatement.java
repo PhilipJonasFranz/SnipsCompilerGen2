@@ -1,7 +1,7 @@
 package Imm.AST.Statement;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import Ctx.ContextChecker;
@@ -69,7 +69,7 @@ public class OperatorStatement extends Statement {
 	}
 
 	public List<String> codePrint(int d) {
-		return Arrays.asList(this.expression.codePrint());
+		return Collections.singletonList(this.expression.codePrint());
 	}
 
 	public Statement clone() {

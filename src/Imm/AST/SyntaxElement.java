@@ -66,7 +66,7 @@ public abstract class SyntaxElement {
 	 * Also applies context recursiveley to the entire subtree.
 	 * @param context The provided Context.
 	 */
-	public abstract void setContext(List<TYPE> context) throws CTEX_EXC;
+	public void setContext(List<TYPE> context) throws CTEX_EXC {}
 	
 	/**
 	 * Visitor relay for context checking
@@ -182,7 +182,7 @@ public abstract class SyntaxElement {
 	}
 	
 	public boolean hasDirective(DIRECTIVE annotation) {
-		return this.activeAnnotations.stream().filter(x -> x.type() == annotation).count() > 0;
+		return this.activeAnnotations.stream().anyMatch(x -> x.type() == annotation);
 	}
 	
 	public ASTDirective getDirective(DIRECTIVE annotation) {

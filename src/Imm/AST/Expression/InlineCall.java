@@ -76,7 +76,7 @@ public class InlineCall extends Expression implements Callee {
 		}
 		
 		if (rec) for (Expression e : this.parameters) 
-			e.print(d + this.printDepthStep, rec);
+			e.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -90,8 +90,7 @@ public class InlineCall extends Expression implements Callee {
 			if (called.hasDirective(DIRECTIVE.INLINE)) {
 				ASTDirective directive = called.getDirective(DIRECTIVE.INLINE);
 				if (directive.hasProperty("depth")) {
-					int depth = Integer.parseInt(directive.getProperty("depth"));
-					this.INLINE_DEPTH = depth;
+					this.INLINE_DEPTH = Integer.parseInt(directive.getProperty("depth"));
 				}
 			}
 		}
@@ -118,9 +117,8 @@ public class InlineCall extends Expression implements Callee {
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		/* If func head exists */
-		if (this.anonTarget == null) 
-			for (int i = 0; i < this.proviso.size(); i++) 
-				ProvisoUtil.mapNTo1(this.proviso.get(i), context);
+		if (this.anonTarget == null)
+			for (TYPE type : this.proviso) ProvisoUtil.mapNTo1(type, context);
 		
 		for (Expression e : this.parameters) 
 			e.setContext(context);
@@ -209,6 +207,11 @@ public class InlineCall extends Expression implements Callee {
 
 	public String codePrint() {
 		String s = this.path.build();
+		
+		if (s.equals("__op_div")) 
+			return this.parameters.get(0).codePrint() + " / " + this.parameters.get(1).codePrint();
+		else if (s.equals("__op_mod")) 
+			return this.parameters.get(0).codePrint() + " % " + this.parameters.get(1).codePrint();
 		
 		if (!this.proviso.isEmpty()) 
 			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));

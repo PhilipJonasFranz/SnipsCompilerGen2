@@ -36,7 +36,7 @@ public class CaseStatement extends ConditionalCompoundStatement {
 		this.condition.print(d + this.printDepthStep, rec);
 		
 		if (rec) for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+			s.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

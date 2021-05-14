@@ -40,8 +40,8 @@ public class StructSelect extends Expression {
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Struct" + ((this.deref)? "Pointer" : "") + "Select");
 		if (rec) {
-			this.selector.print(d + this.printDepthStep, rec);
-			this.selection.print(d + this.printDepthStep, rec);
+			this.selector.print(d + this.printDepthStep, true);
+			this.selection.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -90,7 +90,7 @@ public class StructSelect extends Expression {
 		
 		StructSelect c = this;
 		
-		while (c != null) {
+		while (true) {
 			s = c.selection.codePrint() + s;
 			
 			if (this.deref)

@@ -1,6 +1,5 @@
 package Imm.TYPE.COMPOSIT;
 
-import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
@@ -16,7 +15,7 @@ public class ARRAY extends COMPOSIT {
 	 */
 	public ARRAY(TYPE elementType, Expression length) {
 		this.elementType = elementType;
-		this.length = ((Atom) length).getType().toInt();
+		this.length = length.getType().toInt();
 	}
 	
 	/**

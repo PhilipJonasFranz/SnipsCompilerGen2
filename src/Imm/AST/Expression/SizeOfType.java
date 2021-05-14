@@ -6,7 +6,6 @@ import java.util.List;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -50,7 +49,7 @@ public class SizeOfType extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optSizeOfType(this);
 	}
 	
@@ -63,7 +62,7 @@ public class SizeOfType extends Expression {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
+	public void setContext(List<TYPE> context) {
 		ProvisoUtil.mapNTo1(this.sizeType, context);
 	}
 

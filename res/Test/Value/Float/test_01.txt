@@ -1,5 +1,5 @@
 SOURCE
-int main() {
+float main() {
 	float [3] vec = {2.5f, 1.25f, 0.542f};
 	float sum = 0f;
 	
@@ -7,13 +7,13 @@ int main() {
 		sum += f;
 	}
 	
-	if (sum == 2.5f) return 10;
+	if (sum == 2.5f) return 10f;
 	
-	return (int) -sum;
+	return -sum;
 }
 
 TESTCASES
-4
+4.292
 OUTPUT
 .version 0
 
@@ -53,16 +53,15 @@ main.L2:
     cmp r0, r1
     vcmp s3, s1
     bne main.L3
-    mov r0, #10                              /* Evaluate Expression */
+    vldr s0, .P1236809881_LIT_1092616192     /* Evaluate Expression */
     b main.L5
 main.L3: 
     vmov.F32 s0, s3                          /* Evaluate Expression */
     vneg.F32 s0, s0
-    vcvt.F32.S32 s0, s0
-    vmov.F32 r0, s0
 main.L5: 
     mov sp, fp
     bx lr
+.P1236809881_LIT_1092616192: .word 1092616192
 .P1236809881_LIT_1075838976: .word 1075838976
 .P1236809881_LIT_1067450368: .word 1067450368
 .P1236809881_LIT_1069899841: .word 1069899841

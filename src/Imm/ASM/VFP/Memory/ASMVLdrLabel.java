@@ -16,7 +16,7 @@ public class ASMVLdrLabel extends ASMLdrLabel {
 	
 			/* ---< METHODS >--- */
 	public String build() {
-		return CompilerDriver.printDepth + "v" + super.toString().trim();
+		return CompilerDriver.printDepth + "v" + super.build().trim();
 	}
 	
 	public ASMVLdrLabel clone() {

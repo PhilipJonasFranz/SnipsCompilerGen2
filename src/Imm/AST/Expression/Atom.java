@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTEX_EXC;
-import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.CHAR;
@@ -37,7 +35,7 @@ public class Atom extends Expression {
 		CompilerDriver.outs.println(Util.pad(d) + "Atom <" + this.getType() + ">" + ((value != null)? " " + value : ""));
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+	public TYPE check(ContextChecker ctx) {
 		ctx.pushTrace(this);
 		
 		TYPE t = ctx.checkAtom(this);
@@ -46,7 +44,7 @@ public class Atom extends Expression {
 		return t;
 	}
 	
-	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+	public Expression opt(ASTOptimizer opt) {
 		return opt.optAtom(this);
 	}
 	
@@ -58,7 +56,7 @@ public class Atom extends Expression {
 		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
+	public void setContext(List<TYPE> context) {
 		
 	}
 

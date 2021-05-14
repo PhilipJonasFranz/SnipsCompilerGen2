@@ -69,7 +69,7 @@ public abstract class ASMInstruction {
 		 * knows that this is not the final loop stack reset, and will not count it to the pushed
 		 * words when patching FP to SP.
 		 */
-		LOOP_BREAK_RESET;
+		LOOP_BREAK_RESET
 	}
 	
 	/** Flags applied to this asm instruction. See {@link #OPT_FLAG}. */
@@ -111,7 +111,6 @@ public abstract class ASMInstruction {
 			/* ---< METHODS >--- */
 	/**
 	 * Create the ASM memonic representation of this instruction.
-	 * @return
 	 */
 	public abstract String build();
 	

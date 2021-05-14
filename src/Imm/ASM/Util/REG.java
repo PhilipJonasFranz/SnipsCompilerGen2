@@ -30,8 +30,7 @@ public enum REG {
 	}
 	
 	public static REG toVReg(int reg0) {
-		REG reg = REG.valueOf("S" + reg0);
-		return reg;
+		return REG.valueOf("S" + reg0);
 	}
 	
 	public int toInt() {

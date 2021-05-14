@@ -138,7 +138,7 @@ public abstract class AsNNode {
 		String key = this.getClass().getSimpleName();
 		
 		if (!metricsMap.containsKey(key)) 
-			metricsMap.put(key, new Pair<>(0, new Pair<>(0.0, 0.0)));
+			metricsMap.put(key, new Pair<Integer, Pair<Double, Double>>(0, new Pair<>(0.0, 0.0)));
 		
 		Pair<Integer, Pair<Double, Double>> pair = metricsMap.get(key);
 		

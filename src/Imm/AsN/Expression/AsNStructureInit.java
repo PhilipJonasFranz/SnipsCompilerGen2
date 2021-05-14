@@ -35,10 +35,8 @@ public class AsNStructureInit extends AsNExpression {
 		r.getVRegSet().free(0, 1, 2);
 		
 		/* Check for special case, where entire struct is initialized with absolute placeholder */
-		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
-			TempAtom a = (TempAtom) s.elements.get(0);
+		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom a) {
 			if (a.base == null) {
-				
 				/* Size of the memory section that the placeholder covers in words */
 				int size = s.structType.wordsize();
 				
@@ -87,9 +85,7 @@ public class AsNStructureInit extends AsNExpression {
 		
 		for (int i = elements.size() - 1; i >= 0; i--) {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
-			if (elements.get(i) instanceof Atom) {
-				Atom atom = (Atom) elements.get(i);
-
+			if (elements.get(i) instanceof Atom atom) {
 				/* If group size is 3, push them on the stack */
 				if (regs == 3 || elements.get(i).getType().isFloat() != isVFP) {
 					flush(regs, node, isVFP);
@@ -102,9 +98,7 @@ public class AsNStructureInit extends AsNExpression {
 				
 				st.pushDummy();
 			}
-			else if (elements.get(i) instanceof TempAtom) {
-				TempAtom atom = (TempAtom) elements.get(i);
-				
+			else if (elements.get(i) instanceof TempAtom atom) {
 				if (atom.getType().wordsize() > 1 || atom.getType().isFloat() != isVFP) {
 					flush(regs, node, isVFP);
 					regs = 0;

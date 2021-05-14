@@ -29,9 +29,7 @@ public class ProvisoUtil {
 			/* No need to apply */
 			return true;
 		}
-		else if (target instanceof FUNC) {
-			FUNC f = (FUNC) target;
-
+		else if (target instanceof FUNC f) {
 			boolean map = true;
 			
 			/* Map to each predicate proviso */
@@ -47,24 +45,18 @@ public class ProvisoUtil {
 			
 			return map;
 		}
-		else if (target instanceof POINTER) {
-			POINTER p = (POINTER) target;
-			
+		else if (target instanceof POINTER p) {
 			/* Relay to targeted type */
 			return map1To1Maybe(p.targetType, source);
 		}
-		else if (target instanceof PROVISO) {
-			PROVISO p = (PROVISO) target;
-			
+		else if (target instanceof PROVISO p) {
 			if (p.isEqual(source)) {
 				/* Successfully mapped proviso */
 				p.setContext(source);
 				return true;
 			}
 		}
-		else if (target instanceof STRUCT) {
-			STRUCT s = (STRUCT) target;
-			
+		else if (target instanceof STRUCT s) {
 			boolean map = true;
 			
 			/* Map to each struct proviso */
@@ -72,9 +64,7 @@ public class ProvisoUtil {
 			
 			return map;
 		}
-		else if (target instanceof INTERFACE) {
-			INTERFACE i = (INTERFACE) target;
-			
+		else if (target instanceof INTERFACE i) {
 			boolean map = true;
 			
 			/* Map to each struct proviso */
@@ -82,9 +72,7 @@ public class ProvisoUtil {
 			
 			return map;
 		}
-		else if (target instanceof ARRAY) {
-			ARRAY a = (ARRAY) target;
-
+		else if (target instanceof ARRAY a) {
 			/* Relay to array target type */
 			return map1To1Maybe(a.elementType, source);
 		}
@@ -106,41 +94,28 @@ public class ProvisoUtil {
 	public static void map1To1(TYPE target, TYPE source) throws SNIPS_EXC {
 		if (target instanceof PRIMITIVE && !(target instanceof FUNC)) {
 			/* No need to apply */
-			return;
 		}
-		else if (target instanceof FUNC) {
-			FUNC f = (FUNC) target;
-
+		else if (target instanceof FUNC f) {
 			/* Map to each predicate proviso */
 			for (TYPE t : f.proviso) map1To1(t, source);
 		}
-		else if (target instanceof PROVISO) {
-			PROVISO p = (PROVISO) target;
-			
+		else if (target instanceof PROVISO p) {
 			/* Successfully mapped proviso */
 			p.setContext(source);	
 		}
-		else if (target instanceof POINTER) {
-			POINTER p = (POINTER) target;
-			
+		else if (target instanceof POINTER p) {
 			/* Relay to targeted type */
 			map1To1(p.targetType, source);
 		}
-		else if (target instanceof STRUCT) {
-			STRUCT s = (STRUCT) target;
-			
+		else if (target instanceof STRUCT s) {
 			/* Map to each struct proviso */
 			for (TYPE t : s.proviso) map1To1(t, source);
 		}
-		else if (target instanceof INTERFACE) {
-			INTERFACE i = (INTERFACE) target;
-			
+		else if (target instanceof INTERFACE i) {
 			/* Map to each struct proviso */
 			for (TYPE t : i.proviso) map1To1(t, source);
 		}
-		else if (target instanceof ARRAY) {
-			ARRAY a = (ARRAY) target;
-
+		else if (target instanceof ARRAY a) {
 			/* Relay to array target type */
 			map1To1(a.elementType, source);
 		}
@@ -215,7 +190,7 @@ public class ProvisoUtil {
 	 * a capsuled proviso type.
 	 */
 	public static boolean isProvisoFreeMapping(List<TYPE> mapping) {
-		return mapping.stream().filter(TYPE::hasProviso).count() == 0;
+		return mapping.stream().noneMatch(TYPE::hasProviso);
 	}
 
 	/**

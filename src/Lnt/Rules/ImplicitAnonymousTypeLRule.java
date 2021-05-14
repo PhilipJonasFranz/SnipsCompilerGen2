@@ -1,6 +1,6 @@
 package Lnt.Rules;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import Imm.AST.Program;
@@ -17,10 +17,8 @@ public class ImplicitAnonymousTypeLRule extends LRule {
 	public void getResults(Program AST) {
 		result = AST.visit(x -> {
 			/* Dereferencing a primitive can be a valid statement, but it can be unsafe. A pointer would be safer. */
-			if (x instanceof TypeCast) {
-				TypeCast tc = (TypeCast) x;
-				if (tc.expression instanceof InlineCall) {
-					InlineCall ic = (InlineCall) tc.expression;
+			if (x instanceof TypeCast tc) {
+				if (tc.expression instanceof InlineCall ic) {
 					return ic.calledFunction == null;
 				}
 			}
@@ -33,7 +31,7 @@ public class ImplicitAnonymousTypeLRule extends LRule {
 		for (TypeCast s : this.result) {
 			new Message("Using implicit anonymous type '" + s.getType().codeString() + "', " + s.getSource().getSourceMarker(), Type.WARN);
 			String code = "    " + s.codePrint();
-			this.printResultSourceCode(Arrays.asList(code));
+			this.printResultSourceCode(Collections.singletonList(code));
 		}
 	}
 

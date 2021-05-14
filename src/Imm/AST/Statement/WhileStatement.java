@@ -35,10 +35,10 @@ public class WhileStatement extends ConditionalCompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "While");
 		
 		if (rec) {
-			this.condition.print(d + this.printDepthStep, rec);
+			this.condition.print(d + this.printDepthStep, true);
 		
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -69,7 +69,7 @@ public class WhileStatement extends ConditionalCompoundStatement {
 	}
 
 	public WhileStatement clone() {
-		WhileStatement w = new WhileStatement((Expression) this.condition.clone(), this.cloneBody(), this.getSource().clone());
+		WhileStatement w = new WhileStatement(this.condition.clone(), this.cloneBody(), this.getSource().clone());
 		w.copyDirectivesFrom(this);
 		return w;
 	}

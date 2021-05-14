@@ -11,13 +11,13 @@ float norm(Vector3F* vec) {
 	return vec->x + (float) vec->y + vec->z;
 }
 
-int main() {
+float main() {
 	Vector3F vec = Vector3F::(2.5f, 2, 0f);
-	return (int) norm(&vec);
+	return norm(&vec);
 }
 
 TESTCASES
-3
+4.5
 OUTPUT
 .version 0
 
@@ -57,8 +57,6 @@ main:                                        /* Function: main */
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r0, r0, #2
     bl norm                                  /* Call norm */
-    vcvt.F32.S32 s0, s0
-    vmov.F32 r0, s0
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P1294068183_Vector3F: .word Vector3F

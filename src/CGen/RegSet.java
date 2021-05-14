@@ -6,9 +6,11 @@ import Snips.CompilerDriver;
 public class RegSet {
 
 			/* ---< NESTED >--- */
-	/** Used to identify the state of a register */
-	public static enum STATUS {
-		USED, FREE, RESERVED;
+	/**
+	 * Used to identify the state of a register
+	 */
+	public enum STATUS {
+		USED, FREE, RESERVED
 	}
 	
 	/**
@@ -16,11 +18,11 @@ public class RegSet {
 	 * the declaration is set to null. If its used, the declaration will contain the variable
 	 * currently stored in the register. If the reg is reserved, it will never contain anything.
 	 */
-	public class Reg {
+	public static class Reg {
 		
 				/* ---< FIELDS >--- */
 		/** The status of the Register */
-		private STATUS status = STATUS.FREE;
+		STATUS status = STATUS.FREE;
 		
 		/** The declaration that is currently in the register. */
 		public Declaration declaration;
@@ -55,9 +57,9 @@ public class RegSet {
 	
 			/* ---< FIELDS >--- */
 	/** The register array. */
-	private Reg [] regs = new Reg [16]; 
+	private final Reg [] regs = new Reg [16];
 	
-	private VRegSet vRegSet;
+	private final VRegSet vRegSet;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -112,14 +114,18 @@ public class RegSet {
 	 * Prints out the reg set and all of its registers via Reg.print().
 	 */
 	public void print() {
+		int i = 0;
+
 		CompilerDriver.outs.println("RegSet State:");
-		for (int i = 0; i < regs.length; i++) {
-			CompilerDriver.outs.println("R" + i);
-			this.regs [i].print();
+		for (Reg reg : regs) {
+			CompilerDriver.outs.println("R" + i++);
+			reg.print();
 		}
 	}
 	
-	/** Check wether given declaration is loaded in any register. */
+	/**
+	 * Check wether given declaration is loaded in any register.
+	 */
 	public boolean declarationLoaded(Declaration dec) {
 		for (int i = 3; i < regs.length; i++) 
 			if (regs [i].declaration != null && regs [i].declaration.equals(dec)) return true;
@@ -137,9 +143,13 @@ public class RegSet {
 		return -1;
 	}
 	
-	/** Free all given regs */
+	/**
+	 * Free all given regs in this, and
+	 * the VRegSet.
+	 */
 	public void free(int...regs) {
 		for (int r : regs) this.regs [r].free();
+		this.getVRegSet().free(regs);
 	}
 	
 } 

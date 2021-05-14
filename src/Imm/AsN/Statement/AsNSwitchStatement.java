@@ -24,7 +24,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		s.castedNode = sw;
 		
 		/* Capsule expressions in compare statements */
-		s.cases.stream().forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
+		s.cases.forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
 	
 		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
 		

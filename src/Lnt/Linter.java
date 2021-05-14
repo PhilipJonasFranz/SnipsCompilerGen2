@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.AST.Program;
-import Lnt.Rules.*;
+import Lnt.Rules.AddressOfStructureInitLRule;
+import Lnt.Rules.DanglingPointerLRule;
+import Lnt.Rules.DirectASMNoOutputLRule;
+import Lnt.Rules.ImplicitAnonymousTypeLRule;
+import Lnt.Rules.ModifierViolationLRule;
+import Lnt.Rules.NotThrownInTryLRule;
+import Lnt.Rules.OperandNotPointerLRule;
+import Lnt.Rules.VoidParamLRule;
 
 /**
  * The Linter is used to statically analyze the AST and check
@@ -30,15 +37,16 @@ public class Linter {
 		rules.add(new ImplicitAnonymousTypeLRule());
 		rules.add(new ModifierViolationLRule());
 		rules.add(new DirectASMNoOutputLRule());
+		rules.add(new AddressOfStructureInitLRule());
 		
 	}
 	
 	public void lint() {
-		this.rules.stream().forEach(x -> x.getResults(this.AST));
+		this.rules.forEach(x -> x.getResults(this.AST));
 	}
 	
 	public void report() {
-		this.rules.stream().forEach(LRule::reportResults);
+		this.rules.forEach(LRule::reportResults);
 	}
 	
 }

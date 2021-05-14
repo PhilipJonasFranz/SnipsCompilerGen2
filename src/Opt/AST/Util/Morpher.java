@@ -20,9 +20,7 @@ public class Morpher {
 		if (source instanceof Atom) return source;
 		else if (source instanceof IDRef) return source;
 		else if (source instanceof IDRefWriteback) return source;
-		else if (source instanceof NFoldExpression) {
-			NFoldExpression nfold = (NFoldExpression) source;
-			
+		else if (source instanceof NFoldExpression nfold) {
 			for (int i = 0; i < nfold.operands.size(); i++) {
 				Expression e0 = nfold.operands.get(i);
 				if (visitor.visit(e0)) 
@@ -31,9 +29,7 @@ public class Morpher {
 					nfold.operands.set(i, morphExpression(nfold.operands.get(i), visitor, replacement));
 			}
 		}
-		else if (source instanceof ArrayInit) {
-			ArrayInit init = (ArrayInit) source;
-			
+		else if (source instanceof ArrayInit init) {
 			for (int i = 0; i < init.elements.size(); i++) {
 				Expression e0 = init.elements.get(i);
 				if (visitor.visit(e0)) 
@@ -42,9 +38,7 @@ public class Morpher {
 					init.elements.set(i, morphExpression(init.elements.get(i), visitor, replacement));
 			}
 		}
-		else if (source instanceof StructureInit) {
-			StructureInit init = (StructureInit) source;
-			
+		else if (source instanceof StructureInit init) {
 			for (int i = 0; i < init.elements.size(); i++) {
 				Expression e0 = init.elements.get(i);
 				if (visitor.visit(e0)) 
@@ -53,16 +47,12 @@ public class Morpher {
 					init.elements.set(i, morphExpression(init.elements.get(i), visitor, replacement));
 			}
 		}
-		else if (source instanceof TempAtom) {
-			TempAtom atom = (TempAtom) source;
-			
+		else if (source instanceof TempAtom atom) {
 			if (atom.base != null && visitor.visit(atom.base)) {
 				atom.base = replacement.clone();
 			}
 		}
-		else if (source instanceof Ternary) {
-			Ternary tern = (Ternary) source;
-			
+		else if (source instanceof Ternary tern) {
 			if (visitor.visit(tern.condition)) tern.condition = replacement.clone();
 			else tern.condition = morphExpression(tern.condition, visitor, replacement);
 			
@@ -72,9 +62,7 @@ public class Morpher {
 			if (visitor.visit(tern.right)) tern.right = replacement.clone();
 			else tern.right = morphExpression(tern.right, visitor, replacement);
 		}
-		else if (source instanceof InlineCall) {
-			InlineCall in = (InlineCall) source;
-			
+		else if (source instanceof InlineCall in) {
 			for (int i = 0; i < in.parameters.size(); i++) {
 				Expression e0 = in.parameters.get(i);
 				if (visitor.visit(e0)) 
@@ -83,9 +71,7 @@ public class Morpher {
 					in.parameters.set(i, morphExpression(e0, visitor, replacement));
 			}
 		}
-		else if (source instanceof ArraySelect) {
-			ArraySelect s = (ArraySelect) source;
-			
+		else if (source instanceof ArraySelect s) {
 			if (visitor.visit(s.idRef)) s.idRef = (IDRef) replacement.clone();
 			else s.idRef = (IDRef) morphExpression(s.idRef, visitor, replacement);
 			

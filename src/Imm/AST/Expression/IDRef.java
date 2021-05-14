@@ -67,7 +67,7 @@ public class IDRef extends Expression {
 		return result;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTEX_EXC {
+	public void setContext(List<TYPE> context) {
 		if (this.origin != null) 
 			this.setType(this.origin.getType().clone());
 		

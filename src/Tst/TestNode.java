@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import Snips.CompilerDriver;
 import Util.Pair;
@@ -23,13 +22,8 @@ public class TestNode {
 	public List<Pair<String, List<Message>>> tests = new ArrayList();
 	
 	public TestNode(List<String> files) {
-		this.testPackage = "";
-		
-		List<String> cut = files.stream().map(x -> x.substring(testPackage.length())).collect(Collectors.toList());
-		
-		for (String file : cut) {
-			this.addTest(file);
-		}
+		List<String> cut = new ArrayList<>(files);
+		for (String file : cut) this.addTest(file);
 	}
 	
 	public TestNode(TestNode parent, String testPackage) {

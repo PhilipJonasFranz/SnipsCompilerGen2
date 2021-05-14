@@ -43,7 +43,7 @@ public class ArrayInit extends Expression {
 		CompilerDriver.outs.println(Util.pad(d) + "ArrayInit " + ((this.getType() != null)? this.getType() : "?"));
 		
 		if (rec) for (Expression e : this.elements) 
-			e.print(d + this.printDepthStep, rec);
+			e.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
@@ -88,7 +88,7 @@ public class ArrayInit extends Expression {
 	}
 	
 	public String codePrint() {
-		String s = "";
+		String s;
 		if (this.dontCareTypes) s = "[";
 		else s = "{";
 		

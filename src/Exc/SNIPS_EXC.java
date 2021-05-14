@@ -5,12 +5,15 @@ import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
+import java.io.Serial;
+
 /**
  * Thrown when a Snips intern component fails unexpectedly, or if a component fails and it is
  * not related to the user input.
  */
 public class SNIPS_EXC extends RuntimeException {
 
+	@Serial
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private String message;

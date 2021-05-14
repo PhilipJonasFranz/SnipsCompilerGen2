@@ -43,9 +43,8 @@ public class FileUtil {
 	
 	public static List<String> fileWalk(String path) {
 		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-			List<String> result = walk.filter(Files::isRegularFile)
-				.map(x -> x.toString()).collect(Collectors.toList());
-			return result;
+			return walk.filter(Files::isRegularFile)
+				.map(Path::toString).collect(Collectors.toList());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

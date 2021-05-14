@@ -35,7 +35,7 @@ public class AsNArraySelect extends AsNExpression {
 		REG_SINGLE, REG_SUB,
 		LOCAL_SINGLE, LOCAL_SUB,
 		PARAM_SINGLE, PARAM_SUB,
-		GLOBAL_SINGLE, GLOBAL_SUB;
+		GLOBAL_SINGLE, GLOBAL_SUB
 	}
 	
 	
@@ -100,7 +100,7 @@ public class AsNArraySelect extends AsNExpression {
 			sum.comment = new ASMComment("Calculate offset of sub structure");
 			node.instructions.add(sum);
 			
-			ARRAY superType = null;
+			ARRAY superType;
 			if (s.idRef.getType().isPointer()) {
 				superType = (ARRAY) ((POINTER) s.idRef.getType()).targetType;
 			}
@@ -162,7 +162,7 @@ public class AsNArraySelect extends AsNExpression {
 	 */
 	public static void injectAddressLoader(SELECT_TYPE selectType, AsNNode node, ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		
-		int offset = 0;
+		int offset;
 		if (selectType == SELECT_TYPE.LOCAL_SINGLE || selectType == SELECT_TYPE.LOCAL_SUB) {
 			offset = st.getDeclarationInStackByteOffset(s.idRef.origin);
 			offset += (s.idRef.origin.getType().wordsize() - 1) * 4;

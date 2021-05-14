@@ -3,7 +3,6 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
@@ -13,7 +12,7 @@ import Imm.AST.Expression.RegisterAtom;
 public class AsNRegisterAtom extends AsNExpression {
 
 			/* ---< METHODS >--- */
-	public static AsNRegisterAtom cast(RegisterAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+	public static AsNRegisterAtom cast(RegisterAtom a, RegSet r, MemoryMap map, StackSet st, int target) {
 		AsNRegisterAtom atom = new AsNRegisterAtom();
 		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;

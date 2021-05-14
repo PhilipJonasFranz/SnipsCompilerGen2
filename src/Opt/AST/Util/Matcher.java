@@ -1,24 +1,15 @@
 package Opt.AST.Util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import Exc.CGEN_EXC;
-import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.StructSelectWriteback;
-import Imm.AST.Expression.StructureInit;
+import Imm.AST.Expression.*;
 import Imm.AST.Statement.BreakStatement;
 import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
+import Imm.AST.SyntaxElement;
 import Tools.ASTNodeVisitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains pre-built AST-Visitor matcher statements.
@@ -29,11 +20,10 @@ public class Matcher {
 	 * Checks if in the given subtree defined by the given statement, has an address reference via address of
 	 * is made to a variable with given origin declaration. If so, return true.
 	 */
-	public static boolean hasAddressReference(SyntaxElement s, Declaration dec) throws CGEN_EXC {
+	public static boolean hasAddressReference(SyntaxElement s, Declaration dec) {
 		return !s.visit(x -> {
-			if (x instanceof AddressOf) {
-				AddressOf aof = (AddressOf) x;
-				if (aof.expression instanceof IDRef) 
+			if (x instanceof AddressOf aof) {
+				if (aof.expression instanceof IDRef)
 					return (((IDRef) aof.expression).origin.equals(dec));
 				else if (aof.expression instanceof IDRefWriteback) 
 					return (((IDRefWriteback) aof.expression).idRef.origin.equals(dec));
@@ -53,42 +43,33 @@ public class Matcher {
 	
 	public static boolean hasRefTo(SyntaxElement s, Declaration dec) {
 		return !(s.visit(x -> {
-			if (x instanceof IDRef) {
-				IDRef ref = (IDRef) x;
-				if (ref.origin.equals(dec)) return true;
+			if (x instanceof IDRef ref) {
+				return ref.origin.equals(dec);
 			}
 			return false;
 		}).isEmpty());
 	}
 	
-	public static boolean containsStateDependentSubExpression(Expression e, ProgramState state) {
+	public static boolean noStateDependentSubExpression(Expression e, ProgramState state) {
 		List<Expression> list = e.visit(x -> {
-			if (x instanceof IDRef) {
-				IDRef ref = (IDRef) x;
+			if (x instanceof IDRef ref) {
 				return state.getWrite(ref.origin);
 			}
-			else if (x instanceof IDRefWriteback) {
-				IDRefWriteback wb = (IDRefWriteback) x;
+			else if (x instanceof IDRefWriteback wb) {
 				return state.getAll(wb.idRef.origin);
 			}
-			else if (x instanceof InlineCall) return true;
-			
-			return false;
+			else return x instanceof InlineCall;
 		});
 		
-		return !list.isEmpty();
+		return list.isEmpty();
 	}
 	
 	/**
 	 * Returns true if the given expression contains either an 
 	 * IDRefWriteback, StructSelectWriteback or InlienCall node.
 	 */
-	public static boolean containsStateChangingSubExpression(Expression e, ProgramState state) {
-		List<Expression> list = e.visit(x -> {
-			return x instanceof IDRefWriteback || x instanceof StructSelectWriteback || x instanceof InlineCall;
-		});
-		
-		return !list.isEmpty();
+	public static boolean containsStateChangingSubExpression(Expression e) {
+		return e.visit(x -> x instanceof IDRefWriteback || x instanceof StructSelectWriteback || x instanceof InlineCall).isEmpty();
 	}
 	
 	/**
@@ -101,18 +82,15 @@ public class Matcher {
 	 * @param e The expression that should be checked if it is morphable.
 	 * @param origin The declaration that is the origin of IDRefs that are the morphing target, 
 	 * 		or the sub-expressions that will be replaced.
-	 * @param state The current program state.
 	 * @return True if the given expression is morphable.
 	 */
-	public static boolean isMorphable(Expression e, Declaration origin, ProgramState state) {
+	public static boolean isMorphable(Expression e, Declaration origin) {
 		List<Expression> list = e.visit(x -> {
 			if (x instanceof StructSelectWriteback) return true;
-			else if (x instanceof IDRefWriteback) {
-				IDRefWriteback wb = (IDRefWriteback) x;
+			else if (x instanceof IDRefWriteback wb) {
 				return wb.idRef.origin.equals(origin);
 			}
-			else if (x instanceof ArraySelect) {
-				ArraySelect s = (ArraySelect) x;
+			else if (x instanceof ArraySelect s) {
 				return s.idRef.origin.equals(origin);
 			}
 			
@@ -123,9 +101,7 @@ public class Matcher {
 	}
 	
 	public static boolean hasLoopUnrollBlockerStatements(List<Statement> body) {
-		List<Statement> blockers = Matcher.visitBody(body, x -> {
-			return x instanceof Declaration || x instanceof ContinueStatement || x instanceof BreakStatement;
-		});
+		List<Statement> blockers = Matcher.visitBody(body, x -> x instanceof Declaration || x instanceof ContinueStatement || x instanceof BreakStatement);
 		return !blockers.isEmpty();
 	}
 	
@@ -135,8 +111,7 @@ public class Matcher {
 	 */
 	public static boolean hasOverwrittenVariables(Expression e, ProgramState state) {
 		List<Expression> list = e.visit(x -> {
-			if (e instanceof IDRef) {
-				IDRef ref = (IDRef) e;
+			if (e instanceof IDRef ref) {
 				return state.getWrite(ref.origin);
 			}
 			return false;

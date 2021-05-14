@@ -34,35 +34,34 @@ public class Assembler {
 		
 		/* ----< Pre-Processor >---- */
 		int c = 0;
-		for (int i = 0; i < input.size(); i++) {
-			String s = input.get(i).toLowerCase();
-			String [] sp = s.split("\n");
+		for (String value : input) {
+			String s = value.toLowerCase();
+			String[] sp = s.split("\n");
 			for (String s0 : sp) {
 				if (s0.contains(".asciz")) {
 					String buffer = "";
-					
+
 					/* Transfer first half with " */
 					while (s0.charAt(0) != '"') {
 						buffer += ("" + s0.charAt(0)).toLowerCase();
 						s0 = s0.substring(1);
 					}
-					
+
 					buffer += "\"";
 					s0 = s0.substring(1);
-					
+
 					/* Transfer String */
 					while (s0.charAt(0) != '"') {
 						buffer += s0.charAt(0);
 						s0 = s0.substring(1);
 					}
-					
+
 					/* Transfer rest */
 					buffer += s0.toLowerCase();
-					
+
 					s0 = buffer;
-				}
-				else s0 = s0.toLowerCase();
-				
+				} else s0 = s0.toLowerCase();
+
 				in.add(new Instruction(s0, c++));
 			}
 		}
@@ -340,16 +339,16 @@ public class Assembler {
 		
 		// Replace Addresses
 		if (!in.isEmpty())try {
-			for (int i = 0; i < in.size(); i++) {
-				if (in.get(i).getInstruction().startsWith("bl") || (in.get(i).instruction.startsWith("b") && !in.get(i).getInstruction().startsWith("bx"))) {
+			for (Instruction instruction : in) {
+				if (instruction.getInstruction().startsWith("bl") || (instruction.instruction.startsWith("b") && !instruction.getInstruction().startsWith("bx"))) {
 					// bl there -> bl [x], x = address there
-					String [] sp = in.get(i).getInstruction().split(" ");
-					
-					if (!locations.containsKey(sp [1]) || locations.get(sp [1]) == null)
-						 log.add(new Message("Unknown label: " + sp [1] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL));
-					
-					sp [1] = "" + locations.get(sp [1]);
-					in.get(i).setInstruction(sp [0] + " " + sp [1]);
+					String[] sp = instruction.getInstruction().split(" ");
+
+					if (!locations.containsKey(sp[1]) || locations.get(sp[1]) == null)
+						log.add(new Message("Unknown label: " + sp[1] + " in line " + instruction.getLine() + ".", Type.FAIL));
+
+					sp[1] = "" + locations.get(sp[1]);
+					instruction.setInstruction(sp[0] + " " + sp[1]);
 				}
 			}
 		} catch (Exception e) {
@@ -549,7 +548,7 @@ public class Assembler {
 					String cond = null;
 					
 					if (op.length() > 2) {
-						cond = getCond(op.substring(op.length() - 2, op.length()));
+						cond = getCond(op.substring(op.length() - 2));
 						op = op.substring(0, op.length() - 2);
 					}
 					
@@ -818,9 +817,6 @@ public class Assembler {
 							
 							int [] num = Util.toBinary(label);
 							for (int a : num)app = a + app;
-							
-							//new Message("Error when parsing label in line " + in.get(i).getLine() + ": Expected numeric value for .word, got label name: " + sp [1], LogPoint.Type.FAIL);
-							//new Message("Possible causes: Multiple/misplaced .data labels.", LogPoint.Type.WARN);
 						}
 					}
 				}
@@ -837,7 +833,7 @@ public class Assembler {
 				boolean silenced = CompilerDriver.silenced;
 				if (!TestDriver.excludeASMErrors) CompilerDriver.silenced = false;
 				log.add(new Message("Internal Error when creating machine code in line " + in.get(i).getLine(), LogPoint.Type.FAIL));
-				log.stream().forEach(x -> x.flush());
+				log.forEach(Message::flush);
 				new Message("Error in line: " + in.get(i).instruction + " line: " + in.get(i).getLine(), Type.FAIL);
 				error = e;
 				CompilerDriver.silenced = silenced;

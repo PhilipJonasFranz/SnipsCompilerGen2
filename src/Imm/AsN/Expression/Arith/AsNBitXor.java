@@ -18,7 +18,7 @@ public class AsNBitXor extends AsNNFoldExpression {
 		xor.pushOnCreatorStack(b);
 		b.castedNode = xor;
 		
-		xor.evalExpression(xor, b, r, map, st, (x, y) -> x ^ y);
+		xor.evalExpression(xor, b, r, map, st);
 			
 		xor.registerMetric();
 		return xor;

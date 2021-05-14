@@ -6,12 +6,15 @@ import Util.Source;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
+import java.io.Serial;
+
 /**
  * Thrown when the parser encounters a token that is not expected by the Snips Language Grammar.
  * This error can only occur in combination with a bad user input.
  */
 public class PARS_EXC extends Exception {
 
+	@Serial
 	private static final long serialVersionUID = 765217464625890214L;
 
 	private TokenType actual;

@@ -15,38 +15,38 @@ import Util.NamespacePath;
  */
 public interface Callee {
 	
-	public boolean isNestedCall();
+	boolean isNestedCall();
 	
-	public boolean isNestedDeref();
+	boolean isNestedDeref();
 	
-	public boolean hasAutoProviso();
+	boolean hasAutoProviso();
 	
-	public TYPE getType();
+	TYPE getType();
 	
-	public List<Expression> getParams();
+	List<Expression> getParams();
 	
-	public NamespacePath getPath();
+	NamespacePath getPath();
 	
-	public SyntaxElement getCallee();
+	SyntaxElement getCallee();
 	
-	public Expression getBaseRef();
+	Expression getBaseRef();
 	
-	public List<TYPE> getProviso();
+	List<TYPE> getProviso();
 	
-	public void setNestedCall(boolean b);
+	void setNestedCall(boolean b);
 	
-	public void setAutoProviso(boolean b);
+	void setAutoProviso(boolean b);
 	
-	public void setProviso(List<TYPE> proviso);
+	void setProviso(List<TYPE> proviso);
 	
-	public void setAnonTarget(Declaration d);
+	void setAnonTarget(Declaration d);
 	
-	public void setType(TYPE t);
+	void setType(TYPE t);
 	
-	public void setPath(NamespacePath path);
+	void setPath(NamespacePath path);
 	
-	public void setCalledFunction(Function f);
+	void setCalledFunction(Function f);
 	
-	public void setWatchpoint(SyntaxElement w);
+	void setWatchpoint(SyntaxElement w);
 	
 }

@@ -43,7 +43,7 @@ public class IDRefWriteback extends Expression {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		CompilerDriver.outs.println(Util.pad(d) + "Increment");
-		if (rec) this.shadowRef.print(d + this.printDepthStep, rec);
+		if (rec) this.shadowRef.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

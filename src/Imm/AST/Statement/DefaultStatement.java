@@ -30,7 +30,7 @@ public class DefaultStatement extends CompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "Default");
 		
 		if (rec) for (Statement s : this.body) 
-			s.print(d + this.printDepthStep, rec);
+			s.print(d + this.printDepthStep, true);
 	}
 
 	public TYPE check(ContextChecker ctx) throws CTEX_EXC {

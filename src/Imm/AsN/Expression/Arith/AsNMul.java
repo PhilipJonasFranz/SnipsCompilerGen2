@@ -20,7 +20,7 @@ public class AsNMul extends AsNNFoldExpression {
 		mul.pushOnCreatorStack(m);
 		m.castedNode = mul;
 		
-		mul.evalExpression(mul, m, r, map, st, (x, y) -> x * y);
+		mul.evalExpression(mul, m, r, map, st);
 		
 		mul.registerMetric();
 		return mul;

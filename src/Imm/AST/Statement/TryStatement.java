@@ -46,10 +46,10 @@ public class TryStatement extends CompoundStatement {
 		
 		if (rec) {
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 			
 			for (WatchStatement w : this.watchpoints) 
-				w.print(d + this.printDepthStep, rec);
+				w.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -93,12 +93,9 @@ public class TryStatement extends CompoundStatement {
 		List<WatchStatement> watchClone = null;
 		if (this.watchpoints != null) {
 			watchClone = new ArrayList();
-			for (WatchStatement w : this.watchpoints) watchClone.add((WatchStatement) w.clone());
+			for (WatchStatement w : this.watchpoints) watchClone.add(w.clone());
 		}
-	
-		List<TYPE> unw = new ArrayList();
-		for (TYPE t : this.unwatched) unw.add(t.clone());
-		
+
 		TryStatement tr = new TryStatement(this.cloneBody(), watchClone, this.getSource().clone());
 		if (this.watchpoint != null) tr.watchpoint = this.watchpoint;
 		tr.copyDirectivesFrom(this);

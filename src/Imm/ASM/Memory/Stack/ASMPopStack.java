@@ -42,7 +42,7 @@ public class ASMPopStack extends ASMInstruction {
 	}
 	
 	public int getRequiredCPUCycles() {
-		if (this.operands.stream().filter(x -> x.reg == REG.PC).count() > 0) {
+		if (this.operands.stream().anyMatch(x -> x.reg == REG.PC)) {
 			return this.operands.size() + 4; // +N +(n-1)S +I +N +2S
 		}
 		else return this.operands.size() + 2; // +N +(n-1)S +I +S

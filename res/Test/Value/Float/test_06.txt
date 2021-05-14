@@ -1,0 +1,45 @@
+SOURCE
+void addToFloat(float* p) {
+    *p = *p + 5f;
+}
+
+float main() {
+	float val = 2.5f;
+	addToFloat(&val);
+	return val;
+}
+
+TESTCASES
+7.5
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global addToFloat
+addToFloat:                                  /* Function: addToFloat */
+    vldr s1, [r10, r0, lsl #2]
+    vldr s2, .P1379955636_LIT_1084227584     /* Load value '5.0' from pool */
+    vadd.F32 s0, s1, s2
+    vstr s0, [r10, r0, lsl #2]
+    bx lr
+.P1379955636_LIT_1084227584: .word 1084227584
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    vldr s3, .P1379955637_LIT_1075838976
+    sub r0, fp, #4                           /* Load parameters */
+    lsr r0, r0, #2
+    vpush { s3 }                             /* Push declaration on stack, referenced by addressof. */
+    bl addToFloat                            /* Call addToFloat */
+    vldr s0, [fp, #-4]                       /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P1379955637_LIT_1075838976: .word 1075838976

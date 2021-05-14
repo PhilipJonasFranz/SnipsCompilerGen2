@@ -6,7 +6,7 @@ public class Shift {
 
 			/* ---< NESTED >--- */
 	public enum SHIFT {
-		LSL, LSR, ASR, ROR;
+		LSL, LSR, ASR, ROR
 	}
 	
 	

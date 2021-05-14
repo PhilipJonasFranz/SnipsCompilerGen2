@@ -25,6 +25,6 @@ public enum MODIFIER {
 	/**
 	 * The ressourcee is only accessible from the same namespace.
 	 */
-	EXCLUSIVE;
-	
+	EXCLUSIVE
+
 }

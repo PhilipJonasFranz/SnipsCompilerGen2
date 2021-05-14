@@ -1,7 +1,7 @@
 package Imm.AST.Expression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,7 +57,7 @@ public class OperatorExpression extends Expression {
 		CompilerDriver.outs.println();
 		
 		if (rec) {
-			this.actualExpression.print(d + this.printDepthStep, rec);
+			this.actualExpression.print(d + this.printDepthStep, true);
 		}
 	}
 	
@@ -98,7 +98,7 @@ public class OperatorExpression extends Expression {
 		op.calledFunction = this.calledFunction;
 		
 		if (this.provisoTypes != null) {
-			op.provisoTypes = this.provisoTypes.stream().map(x -> x.clone()).collect(Collectors.toList());
+			op.provisoTypes = this.provisoTypes.stream().map(TYPE::clone).collect(Collectors.toList());
 		}
 		
 		return op;
@@ -111,17 +111,14 @@ public class OperatorExpression extends Expression {
 	public List<Expression> extractOperands() {
 		List<Expression> operands = null;
 		
-		if (this.actualExpression instanceof NFoldExpression) {
-			NFoldExpression nfold = (NFoldExpression) this.actualExpression;
+		if (this.actualExpression instanceof NFoldExpression nfold) {
 			operands = nfold.operands;
 		}
-		else if (this.actualExpression instanceof UnaryExpression) {
-			UnaryExpression unary = (UnaryExpression) this.actualExpression;
-			operands = Arrays.asList(unary.operand);
+		else if (this.actualExpression instanceof UnaryExpression unary) {
+			operands = Collections.singletonList(unary.operand);
 		}
-		else if (this.actualExpression instanceof IDRefWriteback) {
-			IDRefWriteback idwb = (IDRefWriteback) this.actualExpression;
-			operands = Arrays.asList(idwb.getShadowRef());
+		else if (this.actualExpression instanceof IDRefWriteback idwb) {
+			operands = Collections.singletonList(idwb.getShadowRef());
 		}
 		
 		return operands;

@@ -18,7 +18,7 @@ public class AsNLsl extends AsNNFoldExpression {
 		lsl.pushOnCreatorStack(l);
 		l.castedNode = lsl;
 		
-		lsl.evalExpression(lsl, l, r, map, st, (x, y) -> x << y);
+		lsl.evalExpression(lsl, l, r, map, st);
 			
 		lsl.registerMetric();
 		return lsl;

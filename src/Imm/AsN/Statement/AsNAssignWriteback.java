@@ -51,8 +51,7 @@ public class AsNAssignWriteback extends AsNStatement {
 	}
 	
 	public static void injectWriteback(AsNNode node, Expression reference, RegSet r, MemoryMap map, StackSet st, boolean partOfExpression) throws CGEN_EXC {
-		if (reference instanceof IDRefWriteback) {
-			IDRefWriteback wb = (IDRefWriteback) reference;
+		if (reference instanceof IDRefWriteback wb) {
 			IDRef ref = wb.idRef;
 			
 			if (wb.idRef.getType().isFloat()) r.getVRegSet().free(0, 1, 2);
@@ -109,9 +108,7 @@ public class AsNAssignWriteback extends AsNStatement {
 				}
 			}
 		}
-		else if (reference instanceof StructSelectWriteback) {
-			StructSelectWriteback sel = (StructSelectWriteback) reference;
-			
+		else if (reference instanceof StructSelectWriteback sel) {
 			/* Load the address of the target in R1 */
 			AsNStructSelect.injectAddressLoader(node, sel.select, r, map, st, false);
 			

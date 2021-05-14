@@ -3,7 +3,6 @@ package Imm.AsN.Expression;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Exc.CGEN_EXC;
 import Imm.ASM.Util.REG;
 import Imm.AST.Expression.IDOfExpression;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -11,7 +10,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 public class AsNIDOfExpression extends AsNExpression {
 
 			/* ---< METHODS >--- */
-	public static AsNIDOfExpression cast(IDOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
+	public static AsNIDOfExpression cast(IDOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) {
 		AsNIDOfExpression s = new AsNIDOfExpression();
 		s.pushOnCreatorStack(soe);
 		soe.castedNode = s;

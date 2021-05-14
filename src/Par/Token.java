@@ -168,19 +168,19 @@ public class Token {
 			LITERAL,
 			COMPARE,
 			MODIFIER,
-			MISC;
+			MISC
 		}
 		
 		private final String spelling;
 		
 		private TokenGroup group;
 		
-		private TokenType(String spelling, TokenGroup tokenGroup) {
+		TokenType(String spelling, TokenGroup tokenGroup) {
 			this.spelling = spelling;
 			this.group = tokenGroup;
 		}
 		
-		private TokenType(String spelling) {
+		TokenType(String spelling) {
 			this.spelling = spelling;
 			this.group = TokenGroup.MISC;
 		}

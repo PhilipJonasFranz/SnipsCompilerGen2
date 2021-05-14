@@ -223,11 +223,11 @@ public class ASTOptimizer {
 		}
 	}
 	
-	public Program optProgram(Program AST, Program AST0) throws OPT0_EXC {
+	public Program optProgram(Program AST, Program AST0) {
 		try {
 			complexity.clear();
 			
-			if (PRINT_RESULT) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
+			if (PRINT_RESULT) AST.codePrint(0).forEach(CompilerDriver.outs::println);
 
 			/*
 			 * Create 1-to-1 links between the functions in the original and duplicate
@@ -236,11 +236,8 @@ public class ASTOptimizer {
 			for (int i = 0; i < AST.programElements.size(); i++) {
 				SyntaxElement s = AST.programElements.get(i);
 				
-				if (s instanceof Function) {
-					Function f = (Function) s;
-					Function f0 = (Function) AST0.programElements.get(i);
-					f.ASTOptCounterpart = f0;
-				}
+				if (s instanceof Function f)
+					f.ASTOptCounterpart = (Function) AST0.programElements.get(i);
 			}
 			
 			/*
@@ -271,7 +268,7 @@ public class ASTOptimizer {
 				 */
 				phase = 1;
 				AST0 = this.optProgramStep(AST0);
-				if (PRINT_INTERMEDIATE_STEPS) AST0.codePrint(0).stream().forEach(System.out::println);
+				if (PRINT_INTERMEDIATE_STEPS) AST0.codePrint(0).forEach(System.out::println);
 				
 				if (!OPT_DONE && CYCLES >= MIN_CYCLES) {
 					if (LAST_ROUND) break;
@@ -310,7 +307,7 @@ public class ASTOptimizer {
 			new Message("Assuming AST is in consistent state, aborting OPT0, keeping changes.", Type.WARN);
 		}
 
-		if (PRINT_RESULT) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
+		if (PRINT_RESULT) AST.codePrint(0).forEach(CompilerDriver.outs::println);
 		
 		return AST;
 	}
@@ -383,7 +380,7 @@ public class ASTOptimizer {
 			else if (dir.hasProperty(OPT_STRATEGY.ON_IMPROVEMENT.toString())) STRATEGY = OPT_STRATEGY.ON_IMPROVEMENT;
 		}
 		
-		/**
+		/*
 		 * If there is a counterpart available and we have selected the 
 		 * 'ON_IMPROVEMENT'-Strategy, the function can decide here to accept
 		 * the current optimizations or refuse them and wait for further optimizations.
@@ -396,7 +393,7 @@ public class ASTOptimizer {
 			/* Node # of original body */
 			int nodes_f = this.getCurrentHeuristic(f);
 			
-			/**
+			/*
 			 * At this point, the AST-Counterpart-Function could not make an optimization that
 			 * reduced its complexity below the current complexity of the original. So the
 			 * original function skips this optimization round to prevent a rise in
@@ -460,15 +457,13 @@ public class ASTOptimizer {
 			/* Statement was removed */
 			if (s0 == null) body.remove(i--);
 			else {
-				if (s0 instanceof DefaultStatement) {
-					DefaultStatement d = (DefaultStatement) s0;
+				if (s0 instanceof DefaultStatement d) {
 					body.remove(i);
 					body.addAll(i, d.body);
 					i--;
 					OPT_DONE();
 				}
-				else if (s0 instanceof IfStatement) {
-					IfStatement if0 = (IfStatement) s0;
+				else if (s0 instanceof IfStatement if0) {
 					if (Makro.isAlwaysTrue(if0.condition)) {
 						body.remove(i);
 						body.addAll(i, if0.body);
@@ -494,31 +489,25 @@ public class ASTOptimizer {
 		 */
 		if (LAST_ROUND) {
 			List<Statement> done = new ArrayList();
-			for (int i = 0; i < body.size(); i++) {
-				Statement s = body.get(i);
-				
-				/* 
-				 * Last round optimizations add and remove statements from 
+
+			for (Statement s : body) {
+				/*
+				 * Last round optimizations add and remove statements from
 				 * the body, so it can happen that a statement is caught multiple
 				 * times in this loop. But we only want each one to be done once,
 				 * so we check if the statement was already done.
 				 */
 				if (done.contains(s)) continue;
 				else done.add(s);
-				
-				if (s instanceof ForStatement) {
-					ForStatement f = (ForStatement) s;
-					
-					/* Attempt loop unrolling */
+
+				/* Attempt loop unrolling */
+				if (s instanceof ForStatement f) {
 					if (UnrollStatementUtil.unrollForStatement(f, body)) {
 						OPT_DONE();
 						break;
 					}
 				}
-				else if (s instanceof WhileStatement) {
-					WhileStatement w = (WhileStatement) s;
-					
-					/* Attempt loop unrolling */
+				else if (s instanceof WhileStatement w) {
 					if (UnrollStatementUtil.unrollWhileStatement(w, body)) {
 						OPT_DONE();
 						break;
@@ -535,24 +524,20 @@ public class ASTOptimizer {
 			Declaration dec = entry.getKey();
 			
 			if (!this.state.getAll(dec)) {
-				
-				List<Expression> added = new ArrayList();
-				
+
 				/* Inline Calls are considered state-changing, so we have to keep the declaration. */
 				List<InlineCall> ics = new ArrayList();
 				if (dec.value != null) ics = dec.value.visit(x -> {
-					if (x instanceof InlineCall) {
-						InlineCall ic = (InlineCall) x;
-						if (ic.calledFunction != null && ic.calledFunction.hasDirective(DIRECTIVE.PREDICATE)) return false;
-						else return true;
+					if (x instanceof InlineCall ic) {
+						return ic.calledFunction == null || !ic.calledFunction.hasDirective(DIRECTIVE.PREDICATE);
 					}
 					return false;
 				});
 				
 				List<IDRefWriteback> idwb = new ArrayList();
 				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);
-				
-				added.addAll(idwb);
+
+				List<Expression> added = new ArrayList(idwb);
 				
 				for (InlineCall ic : ics) {
 					for (int i = 0; i < added.size(); i++) {
@@ -613,9 +598,7 @@ public class ASTOptimizer {
 			}
 		}
 		
-		removed.stream().forEach(x -> {
-			this.state.remove(x);
-		});
+		removed.forEach(x -> this.state.remove(x));
 	
 		if (pushContext) this.popContext();
 		return body;
@@ -635,28 +618,22 @@ public class ASTOptimizer {
 		
 		Expression e0 = aof.expression.opt(this);
 		
-		if (e0 != null && (e0 instanceof IDRef || e0 instanceof IDRefWriteback || 
+		if ((e0 instanceof IDRef || e0 instanceof IDRefWriteback ||
 				e0 instanceof ArraySelect || e0 instanceof StructSelect || e0 instanceof StructureInit)) {
 			
-			if (e0 instanceof IDRef) {
-				IDRef ref = (IDRef) e0;
+			if (e0 instanceof IDRef ref)
 				this.state.setReferenced(ref.origin);
-			}
-			
-			if (e0 instanceof IDRefWriteback) {
-				IDRefWriteback ref = (IDRefWriteback) e0;
+
+			if (e0 instanceof IDRefWriteback ref)
 				this.state.setReferenced(ref.idRef.origin);
-			}
-			
+
 			aof.expression = e0;
 		}
 		
 		this.state.popSetting(Setting.SUBSTITUTION);
 		
 		List<IDRef> refs = aof.expression.visit(x -> x instanceof IDRef);
-		refs.stream().forEach(x -> {
-			this.state.setReferenced(x.origin);
-		});
+		refs.forEach(x -> this.state.setReferenced(x.origin));
 		
 		return aof;
 	}
@@ -681,7 +658,7 @@ public class ASTOptimizer {
 		return arraySelect;
 	}
 
-	public Expression optAtom(Atom atom) throws OPT0_EXC {
+	public Expression optAtom(Atom atom) {
 		return atom;
 	}
 
@@ -691,11 +668,11 @@ public class ASTOptimizer {
 		return deref;
 	}
 
-	public Expression optFunctionRef(FunctionRef functionRef) throws OPT0_EXC {
+	public Expression optFunctionRef(FunctionRef functionRef) {
 		return functionRef;
 	}
 
-	public Expression optIDOfExpression(IDOfExpression idOfExpression) throws OPT0_EXC {
+	public Expression optIDOfExpression(IDOfExpression idOfExpression) {
 		return idOfExpression;
 	}
 
@@ -733,7 +710,7 @@ public class ASTOptimizer {
 			Expression cValue = this.state.get(idRef.origin).getCurrentValue();
 			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
 			for (IDRef ref : varsInExpression) {
-				if ((!ref.origin.equals(idRef.origin) && this.state.getWrite(ref.origin)) || ref.origin.equals(idRef.origin)) {
+				if (ref.origin.equals(idRef.origin) || this.state.getWrite(ref.origin)) {
 					operationApplicable = false;
 					break;
 				}
@@ -831,15 +808,14 @@ public class ASTOptimizer {
 			 * call's inline depth is greater or equal to 0.
 			 */
 			if (f.hasDirective(DIRECTIVE.INLINE) && inlineCall.INLINE_DEPTH >= 0) {
-				if (f.body != null && f.body.size() == 1 && f.body.get(0) instanceof ReturnStatement) {
-					ReturnStatement ret = (ReturnStatement) f.body.get(0);
-					
+				if (f.body != null && f.body.size() == 1 && f.body.get(0) instanceof ReturnStatement ret) {
+
 					Expression value = ret.value.clone();
 					
 					boolean morphable = true;
 					List<Declaration> parameters = f.parameters;
 					for (Declaration param : parameters) 
-						morphable &= Matcher.isMorphable(value, param, this.state);
+						morphable &= Matcher.isMorphable(value, param);
 					
 					if (!value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(currentFunction)).isEmpty())
 						morphable = false;
@@ -849,9 +825,7 @@ public class ASTOptimizer {
 						
 						for (int i = 0; i < parameters.size(); i++) {
 							final Declaration param0 = f.parameters.get(i);
-							Morpher.morphExpression(value, x -> {
-								return x instanceof IDRef && ((IDRef) x).origin.equals(param0);
-							}, inlineCall.parameters.get(i).clone());
+							Morpher.morphExpression(value, x -> x instanceof IDRef && ((IDRef) x).origin.equals(param0), inlineCall.parameters.get(i).clone());
 						}
 						
 						/* 
@@ -859,7 +833,7 @@ public class ASTOptimizer {
 						 * INLINE_DEPTH for these calls to prevent infinite inlining.
 						 */
 						List<InlineCall> calls = value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(f));
-						calls.stream().forEach(x -> x.INLINE_DEPTH = inlineCall.INLINE_DEPTH);
+						calls.forEach(x -> x.INLINE_DEPTH = inlineCall.INLINE_DEPTH);
 						
 						OPT_DONE();
 						return value;
@@ -871,11 +845,11 @@ public class ASTOptimizer {
 		return inlineCall;
 	}
 
-	public Expression optInlineFunction(InlineFunction inlineFunction) throws OPT0_EXC {
+	public Expression optInlineFunction(InlineFunction inlineFunction) {
 		return inlineFunction;
 	}
 
-	public Expression optRegisterAtom(RegisterAtom registerAtom) throws OPT0_EXC {
+	public Expression optRegisterAtom(RegisterAtom registerAtom) {
 		return registerAtom;
 	}
 
@@ -892,7 +866,7 @@ public class ASTOptimizer {
 		return sizeOfExpression;
 	}
 
-	public Expression optSizeOfType(SizeOfType sizeOfType) throws OPT0_EXC {
+	public Expression optSizeOfType(SizeOfType sizeOfType) {
 		
 		/* If there are no proviso types in the type, size is static */
 		if (!sizeOfType.sizeType.hasProviso()) {
@@ -905,8 +879,7 @@ public class ASTOptimizer {
 	}
 
 	public Expression optStructSelect(StructSelect structSelect) throws OPT0_EXC {
-		if (structSelect.selector instanceof IDRef) {
-			IDRef ref = (IDRef) structSelect.selector;
+		if (structSelect.selector instanceof IDRef ref) {
 			this.state.setRead(ref.origin);
 		}
 		else structSelect.selector.opt(this);
@@ -914,7 +887,7 @@ public class ASTOptimizer {
 		return structSelect;
 	}
 
-	public Expression optStructSelectWriteback(StructSelectWriteback structSelectWriteback) throws OPT0_EXC {
+	public Expression optStructSelectWriteback(StructSelectWriteback structSelectWriteback) {
 		return structSelectWriteback;
 	}
 
@@ -962,7 +935,7 @@ public class ASTOptimizer {
 		for (int i = 0; i < add.operands.size(); i++) {
 			Expression e0 = add.operands.get(i);
 			
-			/**
+			/*
 			 * We cannot fold sub-expressions that modify variables or the program state.
 			 */
 			boolean block = !e0.visit(x -> x instanceof InlineCall || x instanceof IDRefWriteback).isEmpty();
@@ -1195,10 +1168,7 @@ public class ASTOptimizer {
 		
 		if (s.operands.size() == 2) {
 			/* -4 - -5 = 5 - 4 = 1 */
-			if (s.operands.get(0) instanceof UnaryMinus && s.operands.get(1) instanceof UnaryMinus) {
-				UnaryMinus left = (UnaryMinus) s.operands.get(0);
-				UnaryMinus right = (UnaryMinus) s.operands.get(1);
-				
+			if (s.operands.get(0) instanceof UnaryMinus left && s.operands.get(1) instanceof UnaryMinus right) {
 				s.operands.set(0, right.getOperand());
 				s.operands.set(1, left.getOperand());
 				
@@ -1206,11 +1176,11 @@ public class ASTOptimizer {
 			}
 			
 			/* 4 - -5 = 4 + 5 = 9 */
-			if (s.operands.get(1) instanceof UnaryMinus) {
-				UnaryMinus right = (UnaryMinus) s.operands.get(1);
-				OPT_DONE();
+			if (s.operands.get(1) instanceof UnaryMinus right) {
 				Add add = new Add(s.operands.get(0), right.getOperand(), s.getSource());
 				add.setType(s.operands.get(0).getType().clone());
+
+				OPT_DONE();
 				return add;
 			}
 		}
@@ -1237,8 +1207,7 @@ public class ASTOptimizer {
 		m.operand = m.operand.opt(this);
 		
 		/* --5 = 5 */
-		if (m.getOperand() instanceof UnaryMinus) {
-			UnaryMinus m0 = (UnaryMinus) m.getOperand();
+		if (m.getOperand() instanceof UnaryMinus m0) {
 			OPT_DONE();
 			return m0.getOperand();
 		}
@@ -1283,12 +1252,10 @@ public class ASTOptimizer {
 		 * a == 20 -> if true, a is 20 currently
 		 */
 		if (c.comparator == COMPARATOR.EQUAL) {
-			if (c.operands.get(0) instanceof IDRef) {
-				IDRef ref = (IDRef) c.operands.get(0);
+			if (c.operands.get(0) instanceof IDRef ref) {
 				this.state.get(ref.origin).setCurrentValue(c.operands.get(1).clone());
 			}
-			else if (c.operands.get(1) instanceof IDRef) {
-				IDRef ref = (IDRef) c.operands.get(1);
+			else if (c.operands.get(1) instanceof IDRef ref) {
 				this.state.get(ref.origin).setCurrentValue(c.operands.get(0).clone());
 			}
 		}
@@ -1321,18 +1288,15 @@ public class ASTOptimizer {
 		not.operand = not.operand.opt(this);
 		
 		/* !!value = value */
-		if (not.getOperand() instanceof Not) {
-			Not m0 = (Not) not.getOperand();
+		if (not.getOperand() instanceof Not m0) {
 			OPT_DONE();
 			return m0.getOperand();
 		}
 		
 		/* !true = false */
-		if (not.getOperand() instanceof Atom && not.getOperand().getType().hasInt()) {
-			int value = not.getOperand().getType().toInt();
-			
-			Atom atom = (Atom) not.getOperand();
-			
+		if (not.getOperand() instanceof Atom atom && not.getOperand().getType().hasInt()) {
+			int value = atom.getType().toInt();
+
 			if (value == 0) atom.getType().value = true;
 			else atom.getType().value = false;
 			
@@ -1414,9 +1378,7 @@ public class ASTOptimizer {
 		 * potential candidates. For each found reference, mark the variable as written to.
 		 */
 		List<IDRef> refs = pointerLhsId.deref.visit(x -> x instanceof IDRef);
-		refs.stream().forEach(x -> {
-			this.state.setWrite(x.origin, true);
-		});
+		refs.forEach(x -> this.state.setWrite(x.origin, true));
 		
 		if (refs.isEmpty()) {
 			
@@ -1428,7 +1390,7 @@ public class ASTOptimizer {
 		return pointerLhsId;
 	}
 
-	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) throws OPT0_EXC {
+	public LhsId optSimpleLhsId(SimpleLhsId simpleLhsId) {
 		
 		if (simpleLhsId.ref.origin != null)
 			this.state.setWrite(simpleLhsId.ref.origin, true);
@@ -1449,9 +1411,7 @@ public class ASTOptimizer {
 		/*
 		 * Extract data origin if it is a SimpleLhsId.
 		 */
-		if (assignment.lhsId instanceof SimpleLhsId) {
-			SimpleLhsId lhs = (SimpleLhsId) assignment.lhsId;
-			
+		if (assignment.lhsId instanceof SimpleLhsId lhs) {
 			if (lhs.ref.origin != null) {
 				origin = lhs.ref.origin;
 			}
@@ -1464,7 +1424,7 @@ public class ASTOptimizer {
 			
 			Expression currentValue = this.state.get(origin).getCurrentValue();
 			
-			/**
+			/*
 			 * Make sure upward propagation of this assignment is side-effect free.
 			 * We need to make sure that in this expression, no inline functions are called, 
 			 * since they may modify the state. Also, no writeback operations may take place.
@@ -1473,20 +1433,19 @@ public class ASTOptimizer {
 			 * Finally, the assigned value has to be morphable in order to propagate the value
 			 * back up.
 			 */
-			if (!Matcher.containsStateDependentSubExpression(assignment.value, this.state) &&
+			if (Matcher.noStateDependentSubExpression(assignment.value, this.state) &&
 				this.state.isDeclarationScope(origin) && currentValue != null &&
-				Matcher.isMorphable(assignment.value, origin, this.state)) {
+				Matcher.isMorphable(assignment.value, origin)) {
 				
 				Expression toMorph = assignment.value.clone();
 					
-				/**
+				/*
 				 * Morph the assigned value into the exisiting, current value
 				 * of the variable.
 				 */
 				final Declaration origin0 = origin;
 				Morpher.morphExpression(toMorph, x -> {
-					if (x instanceof IDRef) {
-						IDRef ref = (IDRef) x;
+					if (x instanceof IDRef ref) {
 						return ref.origin.equals(origin0);
 					}
 					
@@ -1527,8 +1486,7 @@ public class ASTOptimizer {
 		 * Signal in the current program context that the target of the writeback
 		 * operations has been modified.
 		 */
-		if (wb.reference instanceof IDRefWriteback) {
-			IDRefWriteback idwb = (IDRefWriteback) wb.reference;
+		if (wb.reference instanceof IDRefWriteback idwb) {
 			Declaration origin = idwb.idRef.origin;
 			
 			this.state.setWrite(origin, true);
@@ -1537,9 +1495,8 @@ public class ASTOptimizer {
 			this.state.get(origin).clearCurrentValue();
 			
 			/* Attempt to writeback new value into current value */
-			if (cValue instanceof Atom && cValue.getType().hasInt() && this.state.isDeclarationScope(origin)) {
-				Atom atom = (Atom) cValue;
-				
+			if (cValue instanceof Atom atom && cValue.getType().hasInt() && this.state.isDeclarationScope(origin)) {
+
 				int val = atom.getType().toInt();
 				if (idwb.writeback == WRITEBACK.INCR) val++;
 				else val--;
@@ -1551,7 +1508,7 @@ public class ASTOptimizer {
 			}
 			
 			/* Transform assign writeback into simple assignment: a++ -> a = a + 1 */
-			Expression value = null;
+			Expression value;
 			
 			if (idwb.writeback == WRITEBACK.INCR) value = new Add(idwb.idRef.clone(), new Atom(new INT("1"), idwb.getSource()), idwb.getSource());
 			else value = new Sub(idwb.idRef.clone(), new Atom(new INT("1"), idwb.getSource()), idwb.getSource());
@@ -1566,8 +1523,7 @@ public class ASTOptimizer {
 		}
 		else {
 			StructSelectWriteback sswb = (StructSelectWriteback) wb.reference;
-			if (sswb.select.selector instanceof IDRef) {
-				IDRef ref = (IDRef) sswb.select.selector;
+			if (sswb.select.selector instanceof IDRef ref) {
 				this.state.setWrite(ref.origin, true);
 				this.state.get(ref.origin).clearCurrentValue();
 			}
@@ -1576,7 +1532,7 @@ public class ASTOptimizer {
 		return wb;
 	}
 
-	public Statement optBreakStatement(BreakStatement breakStatement) throws OPT0_EXC {
+	public Statement optBreakStatement(BreakStatement breakStatement) {
 		return breakStatement;
 	}
 
@@ -1590,7 +1546,7 @@ public class ASTOptimizer {
 		return c;
 	}
 
-	public Statement optContinueStatement(ContinueStatement continueStatement) throws OPT0_EXC {
+	public Statement optContinueStatement(ContinueStatement continueStatement) {
 		return continueStatement;
 	}
 
@@ -1661,8 +1617,7 @@ public class ASTOptimizer {
 		this.pushContext(true);
 		f.iterator.opt(this);
 		
-		if (f.iterator instanceof Declaration) {
-			Declaration dec = (Declaration) f.iterator;
+		if (f.iterator instanceof Declaration dec) {
 			this.state.setWrite(dec, true);
 		}
 		else {
@@ -1713,7 +1668,7 @@ public class ASTOptimizer {
 		/*
 		 * Condition is always true, prune else statement.
 		 */
-		if (i.condition != null && Makro.isAlwaysTrue(i.condition) && i.elseStatement != null) {
+		if (Makro.isAlwaysTrue(i.condition) && i.elseStatement != null) {
 			i.elseStatement = null;
 			OPT_DONE();
 		}
@@ -1729,7 +1684,7 @@ public class ASTOptimizer {
 		/*
 		 * Condition is always false, remove from chain.
 		 */
-		if (i.condition != null && Makro.isAlwaysFalse(i.condition)) {
+		if (Makro.isAlwaysFalse(i.condition)) {
 			OPT_DONE();
 			return i.elseStatement;
 		}
@@ -1744,7 +1699,7 @@ public class ASTOptimizer {
 				return null;
 			}
 			else {
-				if (!Matcher.containsStateChangingSubExpression(i.condition, this.state)) {
+				if (!Matcher.containsStateChangingSubExpression(i.condition)) {
 					OPT_DONE();
 					if (i.elseStatement != null) return i.elseStatement;
 					else return null;
@@ -1835,11 +1790,11 @@ public class ASTOptimizer {
 		return whileStatement;
 	}
 
-	public SyntaxElement optEnumTypedef(EnumTypedef enumTypedef) throws OPT0_EXC {
+	public SyntaxElement optEnumTypedef(EnumTypedef enumTypedef) {
 		return enumTypedef;
 	}
 
-	public SyntaxElement optInterfaceTypedef(InterfaceTypedef interfaceTypedef) throws OPT0_EXC {
+	public SyntaxElement optInterfaceTypedef(InterfaceTypedef interfaceTypedef) {
 		return interfaceTypedef;
 	}
 

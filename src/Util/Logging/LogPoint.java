@@ -2,7 +2,7 @@ package Util.Logging;
 
 public class LogPoint {
 
-	public class ColorCodes {
+	public static class ColorCodes {
 		
 		public static final String ANSI_RESET  = "\u001B[0m";
 		public static final String ANSI_BLACK  = "\u001B[30m";
@@ -16,8 +16,8 @@ public class LogPoint {
 		
 	}
 	
-	public static enum Type {
-		INFO, WARN, FAIL;
+	public enum Type {
+		INFO, WARN, FAIL
 	}
 	
 	public static String getEscapeCodeFor(Type type) {

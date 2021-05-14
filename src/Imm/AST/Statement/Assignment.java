@@ -59,7 +59,7 @@ public class Assignment extends Statement {
 	
 	
 			/* ---< FIELDS >--- */
-	public ASSIGN_ARITH assignArith = ASSIGN_ARITH.NONE;
+	public ASSIGN_ARITH assignArith;
 	
 	/** The LHS that defines the assigning method, f.E direct, assign by dereference... */
 	public LhsId lhsId;
@@ -83,8 +83,8 @@ public class Assignment extends Statement {
 		CompilerDriver.outs.println(Util.pad(d) + "Assign, arith = " + this.assignArith.toString());
 		
 		if (rec) {
-			this.lhsId.print(d + this.printDepthStep, rec);
-			this.value.print(d + this.printDepthStep, rec);
+			this.lhsId.print(d + this.printDepthStep, true);
+			this.value.print(d + this.printDepthStep, true);
 		}
 	}
 

@@ -48,12 +48,12 @@ public class ForStatement extends ConditionalCompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "For");
 		
 		if (rec) {
-			this.iterator.print(d + this.printDepthStep, rec);
-			this.condition.print(d + this.printDepthStep, rec);
-			this.increment.print(d + this.printDepthStep, rec);
+			this.iterator.print(d + this.printDepthStep, true);
+			this.condition.print(d + this.printDepthStep, true);
+			this.increment.print(d + this.printDepthStep, true);
 			
 			for (Statement s : this.body) 
-				s.print(d + this.printDepthStep, rec);
+				s.print(d + this.printDepthStep, true);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class ForStatement extends ConditionalCompoundStatement {
 		if (inc.endsWith(";"))
 			inc = inc.substring(0, inc.length() - 1);
 		
-		String it = "";
+		String it;
 		/* Switch between Declaration and IDRef iterator codePrint implementations */
 		if (this.iterator instanceof Declaration) it = this.iterator.codePrint(0).get(0);
 		else it = ((Expression) this.iterator).codePrint() + ";";

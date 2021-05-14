@@ -11,6 +11,6 @@ public enum OPT_STRATEGY {
 	/**
 	 * Always accept optimizations.
 	 */
-	ALWAYS;
+	ALWAYS
 	
 }

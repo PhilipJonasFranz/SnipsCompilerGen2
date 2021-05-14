@@ -18,16 +18,13 @@ import Util.NamespacePath;
 public class CallUtil {
 
 	public static void transformNestedSuperCall(Callee c, Function currentFunction) throws CTEX_EXC {
-		if (!c.getParams().isEmpty() && c.getParams().get(0) instanceof IDRef) {
+		if (!c.getParams().isEmpty() && c.getParams().get(0) instanceof IDRef ref) {
 			/* Nested call to super function */
-			IDRef ref = (IDRef) c.getParams().get(0);
 			if (ref.path.build().equals("super")) {
-				Function f0 = currentFunction;
-				
-				if (!f0.parameters.get(0).path.build().equals("self")) 
+				if (!currentFunction.parameters.get(0).path.build().equals("self"))
 					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_OUTSIDE_STRUCT);
 				
-				STRUCT struct = (STRUCT) f0.parameters.get(0).getType().getCoreType();
+				STRUCT struct = (STRUCT) currentFunction.parameters.get(0).getType().getCoreType();
 				StructTypedef def = struct.getTypedef().extension;
 				
 				if (def == null)
@@ -56,7 +53,7 @@ public class CallUtil {
 				STRUCT.useProvisoFreeInCheck = check;
 				PROVISO.COMPARE_NAMES = comp;
 				
-				if (!found) throw new CTEX_EXC(Const.UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER, f0.path, struct);
+				if (!found) throw new CTEX_EXC(Const.UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER, currentFunction.path, struct);
 				
 				/* Switch to self-reference */
 				ref.path = new NamespacePath("self");
@@ -69,12 +66,10 @@ public class CallUtil {
 		
 		/* Calls to super constructor, switch out with call to constructor */
 		if (c.getPath().build().equals("super")) {
-			
-			Function f0 = currentFunction;
-			
+
 			/* We are in a constructor */
-			if (f0.isConstructor()) {
-				STRUCT struct = (STRUCT) f0.getReturnType();
+			if (currentFunction.isConstructor()) {
+				STRUCT struct = (STRUCT) currentFunction.getReturnType();
 				StructTypedef def = struct.getTypedef();
 				
 				if (def.extension == null) 
@@ -97,18 +92,18 @@ public class CallUtil {
 			}
 			else {
 				/* Call to super function, written as 'super(...)'. */
-				if (!f0.parameters.get(0).path.build().equals("self")) 
+				if (!currentFunction.parameters.get(0).path.build().equals("self"))
 					throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_OUTSIDE_STRUCT);
 				
-				STRUCT struct = (STRUCT) f0.parameters.get(0).getType().getCoreType();
+				STRUCT struct = (STRUCT) currentFunction.parameters.get(0).getType().getCoreType();
 				StructTypedef def = struct.getTypedef();
 				
 				if (def.extension == null) throw new CTEX_EXC(Const.CANNOT_INVOKE_SUPER_NO_EXTENSION, struct);
-				if (f0.inheritLink == null) throw new CTEX_EXC(Const.UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER, f0.path.getLast(), def.extension.self);
+				if (currentFunction.inheritLink == null) throw new CTEX_EXC(Const.UNDEFINED_FUNCTION_OR_PREDICATE_IN_SUPER, currentFunction.path.getLast(), def.extension.self);
 				
 				/* Set new path, add self-reference, set nested call */
-				c.setPath(f0.inheritLink.path.clone());
-				c.getParams().add(0, new IDRef(f0.parameters.get(0).path.clone(), c.getCallee().getSource()));
+				c.setPath(currentFunction.inheritLink.path.clone());
+				c.getParams().add(0, new IDRef(currentFunction.parameters.get(0).path.clone(), c.getCallee().getSource()));
 				c.setNestedCall(true);
 			}
 		}

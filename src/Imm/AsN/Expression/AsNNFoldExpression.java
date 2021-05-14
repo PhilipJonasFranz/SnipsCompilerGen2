@@ -49,19 +49,10 @@ import Res.Const;
 
 public abstract class AsNNFoldExpression extends AsNExpression {
 
-			/* ---< NESTED >--- */
-	/**
-	 * Solve the binary expression for two given operands.
-	 */
-	public interface BinarySolver {
-		public int solve(int a, int b);
-	}
-	
-
-			/* ---< METHODS >--- */
-	public static AsNNFoldExpression cast(Expression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
+	/* ---< METHODS >--- */
+	public static AsNNFoldExpression cast(NFoldExpression e, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to Expression type */
-		AsNNFoldExpression node = null;
+		AsNNFoldExpression node;
 		
 		if (e instanceof Add) {
 			node = AsNAdd.cast((Add) e, r, map, st);
@@ -112,16 +103,11 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 
 	
 		/* --- OPERAND LOADING --- */
-	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1, boolean isVFP) throws CGEN_EXC {
+	protected void generatePrimitiveLoaderCode(AsNNFoldExpression m, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, int target0, int target1, boolean isVFP) throws CGEN_EXC {
 		
 		/* Some assertions for debug purposes */
-		if (e0 instanceof TypeCast) {
-			assert(e0.getType().getCoreType() instanceof PRIMITIVE);
-		}
-		
-		if (e1 instanceof TypeCast) {
-			assert(e1.getType().getCoreType() instanceof PRIMITIVE);
-		}
+		assert !(e0 instanceof TypeCast) || (e0.getType().getCoreType() instanceof PRIMITIVE);
+		assert !(e1 instanceof TypeCast) || (e1.getType().getCoreType() instanceof PRIMITIVE);
 		
 		/* If operands are TypeCasts and the TypeCast is trivial, unrwrap expression from type cast */
 		Expression left = (e0 instanceof TypeCast && ((TypeCast) e0).isTrivialCast())? ((TypeCast) e0).expression : e0;
@@ -134,27 +120,11 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		}
 		/* Load the right operand, then the left directley */
 		else if (left instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
-			if (target1 != 0) {
-				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
-				else m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
-				
-				r.copy(0, target1);
-			}
-			
-			m.instructions.addAll(AsNIDRef.cast((IDRef) left, r, map, st, target0).getInstructions());
+			loadWithOneIDRef(m, r, map, st, target0, target1, isVFP, (IDRef) left, right);
 		}
 		/* Load the left operand, then the right directley */
 		else if (right instanceof IDRef) {
-			m.instructions.addAll(AsNExpression.cast(left, r, map, st).getInstructions());
-			if (target0 != 0) {
-				if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target0), new VRegOp(0)));
-				else m.instructions.add(new ASMMov(new RegOp(target0), new RegOp(0)));
-				
-				r.copy(0, target0);
-			}
-			
-			m.instructions.addAll(AsNIDRef.cast((IDRef) right, r, map, st, target1).getInstructions());
+			loadWithOneIDRef(m, r, map, st, target1, target0, isVFP, (IDRef) right, left);
 		}
 		else {
 			r.free(0, 1, 2);
@@ -172,28 +142,9 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 				if (isVFP) free = r.getVRegSet().findFree();
 				else free = r.findFree();
 			}
-			
-			if (isVFP) {
-				if (free != -1) {
-					m.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(REG.S0)));
-					r.getVRegSet().getReg(free).setDeclaration(null);
-				}
-				else {
-					m.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
-					st.pushDummy();
-				}
-			}
-			else {
-				if (free != -1) {
-					m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
-					r.getReg(free).setDeclaration(null);
-				}
-				else {
-					m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-					st.pushDummy();
-				}
-			}
-			
+
+			makeSpaceForSecondParameter(m, r, st, isVFP, free);
+
 			if (isVFP) r.getVRegSet().free(0);
 			else r.free(0);
 			
@@ -233,14 +184,49 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			}
 		}
 	}
-	
-	protected void evalExpression(AsNNFoldExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st, BinarySolver solver) throws CGEN_EXC {
+
+	private void loadWithOneIDRef(AsNNFoldExpression m, RegSet r, MemoryMap map, StackSet st, int target0, int target1, boolean isVFP, IDRef left, Expression right) throws CGEN_EXC {
+		m.instructions.addAll(AsNExpression.cast(right, r, map, st).getInstructions());
+		if (target1 != 0) {
+			if (isVFP) m.instructions.add(new ASMVMov(new VRegOp(target1), new VRegOp(0)));
+			else m.instructions.add(new ASMMov(new RegOp(target1), new RegOp(0)));
+
+			r.copy(0, target1);
+		}
+
+		m.instructions.addAll(AsNIDRef.cast(left, r, map, st, target0).getInstructions());
+	}
+
+	private void makeSpaceForSecondParameter(AsNNFoldExpression m, RegSet r, StackSet st, boolean isVFP, int free) {
+		if (isVFP) {
+			if (free != -1) {
+				m.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(REG.S0)));
+				r.getVRegSet().getReg(free).setDeclaration(null);
+			}
+			else {
+				m.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
+				st.pushDummy();
+			}
+		}
+		else {
+			if (free != -1) {
+				m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
+				r.getReg(free).setDeclaration(null);
+			}
+			else {
+				m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+				st.pushDummy();
+			}
+		}
+	}
+
+	protected void evalExpression(AsNNFoldExpression m, NFoldExpression b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		
-		boolean isVFP = b.operands.stream().filter(x -> x.getType().isFloat()).count() > 0;
+		boolean isVFP = b.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
 		this.clearReg(r, st, isVFP, 0, 1, 2);
 
-		generateLoaderCode(m, b, b.operands.get(0), b.operands.get(1), r, map, st, solver, isVFP);
+		generateLoaderCode(m, b.operands.get(0), b.operands.get(1), r, map, st, isVFP);
 		
 		/* Inject calculation into loader code */
 		if (!isVFP) m.instructions.add(m.buildInjector());
@@ -263,26 +249,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 				}
 				
 				if (requireClear) {
-					if (isVFP) {
-						if (free != -1) {
-							m.instructions.add(new ASMVMov(new VRegOp(free), new VRegOp(REG.S0)));
-							r.getVRegSet().getReg(free).setDeclaration(null);
-						}
-						else {
-							m.instructions.add(new ASMVPushStack(new VRegOp(REG.S0)));
-							st.pushDummy();
-						}
-					}
-					else {
-						if (free != -1) {
-							m.instructions.add(new ASMMov(new RegOp(free), new RegOp(REG.R0)));
-							r.getReg(free).setDeclaration(null);
-						}
-						else {
-							m.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-							st.pushDummy();
-						}
-					}
+					makeSpaceForSecondParameter(m, r, st, isVFP, free);
 				}
 				else {
 					if (isVFP) this.instructions.add(new ASMVMov(new VRegOp(REG.S1), new VRegOp(REG.S0)));
@@ -319,7 +286,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		else r.free(0, 1, 2);
 	}
 	
-	protected void generateLoaderCode(AsNNFoldExpression m, NFoldExpression b, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, BinarySolver solver, boolean isVFP) throws CGEN_EXC {
+	protected void generateLoaderCode(AsNNFoldExpression m, Expression e0, Expression e1, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
 		/* Partial Atomic Loading Left */
 		if (e0 instanceof Atom) {
 			this.loadOperand(e1, 2, r, map, st, isVFP);
@@ -330,7 +297,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			this.loadOperand(e0, 1, r, map, st, isVFP);
 			AsNBody.literalManager.loadValue(this, Integer.parseInt(e1.getType().toPrimitive().sourceCodeRepresentation()), 2, isVFP, e1.getType().value.toString());
 		}
-		else m.generatePrimitiveLoaderCode(m, b, e0, e1, r, map, st, 1, 2, isVFP);
+		else m.generatePrimitiveLoaderCode(m, e0, e1, r, map, st, 1, 2, isVFP);
 	}
 	
 	protected void loadOperand(Expression e, int target, RegSet r, MemoryMap map, StackSet st, boolean isVFP) throws CGEN_EXC {
