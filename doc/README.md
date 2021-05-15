@@ -51,6 +51,7 @@ Types are seperated in three classes: Primitives, Composit and Special Types. Pr
  | `INT` (Integer)      | A number ranging from `2^-32 to (2^32)-1`     |
  | `BOOL` (Boolean)     | A logic type with two states, `true or false` |
  | `CHAR` (Character)   | A single character encoded in UTF-8           |
+ | `FLOAT`(Float)       | A 32-Bit precision floating-point number      |
  | `FUNC` (Function)    | Holds the address of a function, is callable  |
  | `ENUM` (Enumeration) | Holds a value from an enumeration             |
  | `VOID` (Void)        | Universal type that matches any other type    |
