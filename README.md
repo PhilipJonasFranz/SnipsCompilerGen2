@@ -26,7 +26,7 @@
 
 Currently supported data types are:
 
-- Primitive types : `int`, `bool`, `char`
+- Primitive types : `int`, `bool`, `char`, `float`
 - Custom types    : `interface`, `struct`, `enum`
 - Special types   : `func`, `proviso`, `void`, `auto`
 
