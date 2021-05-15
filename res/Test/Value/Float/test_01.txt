@@ -31,9 +31,8 @@ main:                                        /* Function: main */
     vldr s1, .P1236809881_LIT_1067450368     /* Load value '1.25' from pool */
     vldr s2, .P1236809881_LIT_1075838976     /* Load value '2.5' from pool */
     vstmfd sp!, {s0-s2}
-    vmov.F32 s4, #0
-    vmov.F32 s3, #0
-    vmov.F32 s0, #0                          /* Evaluate Expression */
+    vldr s3, .P1236809881_LIT_0
+    vmov.F32 s4, s0
     mov r3, #0
     mov r0, #0                               /* Evaluate Expression */
 main.L1: 
@@ -62,6 +61,7 @@ main.L5:
     mov sp, fp
     bx lr
 .P1236809881_LIT_1092616192: .word 1092616192
+.P1236809881_LIT_0: .word 0
 .P1236809881_LIT_1075838976: .word 1075838976
 .P1236809881_LIT_1067450368: .word 1067450368
 .P1236809881_LIT_1069899841: .word 1069899841

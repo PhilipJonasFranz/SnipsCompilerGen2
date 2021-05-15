@@ -28,7 +28,7 @@ HEAP_START: .word 0
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    vmov.F32 s1, #0
+    vldr s1, .P1351326485_LIT_0
     vldr s0, .P1351326485_LIT_1065353216     /* Load value '1.0' from pool */
     bl Cmplx.cmplx.create                    /* Call Cmplx.cmplx.create */
     vldr s1, .P1351326485_LIT_1077936128
@@ -47,6 +47,7 @@ main:                                        /* Function: main */
 .P1351326485_LIT_1085276160: .word 1085276160
 .P1351326485_LIT_1077936128: .word 1077936128
 .P1351326485_LIT_1065353216: .word 1065353216
+.P1351326485_LIT_0: .word 0
 
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 

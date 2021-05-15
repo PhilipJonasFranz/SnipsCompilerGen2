@@ -1,9 +1,5 @@
 package Opt.ASM;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMHardcode;
 import Imm.ASM.ASMInstruction;
@@ -11,45 +7,24 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Directive.ASMDirective;
-import Imm.ASM.Memory.ASMLdr;
-import Imm.ASM.Memory.ASMLdrLabel;
-import Imm.ASM.Memory.ASMMemBlock;
+import Imm.ASM.Memory.*;
 import Imm.ASM.Memory.ASMMemBlock.MEM_BLOCK_MODE;
-import Imm.ASM.Memory.ASMMemOp;
-import Imm.ASM.Memory.ASMStr;
-import Imm.ASM.Memory.Stack.ASMLdrStack;
-import Imm.ASM.Memory.Stack.ASMPopStack;
-import Imm.ASM.Memory.Stack.ASMPushStack;
-import Imm.ASM.Memory.Stack.ASMStackOp;
+import Imm.ASM.Memory.Stack.*;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
-import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.ASMUnaryData;
-import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Processing.Arith.ASMLsr;
-import Imm.ASM.Processing.Arith.ASMMla;
-import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMMult;
-import Imm.ASM.Processing.Arith.ASMMvn;
-import Imm.ASM.Processing.Arith.ASMRsb;
-import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Processing.Arith.*;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
+import Imm.ASM.Util.Operands.*;
+import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Shift.SHIFT;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.PatchableImmOp;
-import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.ASM.VFP.Memory.ASMVLdrLabel;
 import Imm.ASM.VFP.Memory.ASMVMemBlock;
@@ -62,6 +37,10 @@ import Snips.CompilerDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This optimizer can simplify a sequence of asm instructions. By doing so
@@ -1540,7 +1519,7 @@ public class ASMOptimizer {
 					}
 					else continue;
 				}
-				else if (ins0.get(i - 1) instanceof ASMLsl lsl) {
+				else if (!ldr.isVectorOperation() && ins0.get(i - 1) instanceof ASMLsl lsl) {
 					/* 
 					 * Will mostly target dereferencing operations. 
 					 * Assumes that R10 is set to 0 at any given time. In most of the cases, this is given.

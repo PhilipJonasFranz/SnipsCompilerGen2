@@ -8,19 +8,19 @@ import Exc.SNIPS_EXC;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
-import Imm.ASM.VFP.Processing.Arith.ASMVMov;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Processing.Logic.ASMVCmp;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AsN.AsNBody;
 import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNNFoldExpression;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.PRIMITIVES.NULL;
+import Imm.TYPE.TYPE;
+import Util.FBin;
 
 public class AsNCompare extends AsNNFoldExpression {
 
@@ -54,7 +54,7 @@ public class AsNCompare extends AsNNFoldExpression {
 			
 			if (value < 255) {
 				if (isVFP) {
-					cmp.instructions.add(new ASMVMov(new VRegOp(REG.S1), new ImmOp(value)));
+					AsNBody.literalManager.loadValue(cmp, FBin.toDecimal(FBin.toFBin(value)), 1, true, "" + (float) value);
 					cmp.instructions.add(new ASMVCmp(new VRegOp(REG.S0), new VRegOp(REG.S1)));
 				}
 				else cmp.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(value)));

@@ -23,10 +23,15 @@ HEAP_START: .word 0
 
 .global addToFloat
 addToFloat:                                  /* Function: addToFloat */
-    vldr s1, [r10, r0, lsl #2]
+    push { r3 }
+    mov r3, r0
+    lsl r0, r0, #2                           /* Convert to bytes */
+    vldr s1, [r0]
     vldr s2, .P1379955636_LIT_1084227584     /* Load value '5.0' from pool */
     vadd.F32 s0, s1, s2
-    vstr s0, [r10, r0, lsl #2]
+    lsl r1, r3, #2
+    vstr s0, [r1]
+    pop { r3 }
     bx lr
 .P1379955636_LIT_1084227584: .word 1084227584
 

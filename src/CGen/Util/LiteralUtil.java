@@ -1,9 +1,5 @@
 package CGen.Util;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMMvn;
@@ -11,12 +7,14 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
-import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
 import Imm.ASM.VFP.Memory.ASMVLdrLabel;
-import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AsN.AsNNode;
+
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * The literal manager is responsible for managing large literals.
@@ -57,11 +55,11 @@ public class LiteralUtil {
 	 * from an external literal pool.
 	 */
 	public void loadValue(AsNNode node, int value, int target, boolean isVFP, String actualValue) {
-		if (value > 255) {
+		if (value > 255 || isVFP) {
 			ASMDataLabel label = requestLabel(value);
 			
 			ASMComment comment = new ASMComment("Load value '" + actualValue + "' from pool");
-			
+
 			if (isVFP) {
 				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
 				ASMVLdrLabel ldr = new ASMVLdrLabel(new VRegOp(target), new LabelOp(label), null);
@@ -80,14 +78,12 @@ public class LiteralUtil {
 		else {
 			if (value >= 0) {
 				/* Load the value directley, fits in value range */
-				if (isVFP) node.instructions.add(new ASMVMov(new VRegOp(target), new ImmOp(value)));
-				else node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
+				node.instructions.add(new ASMMov(new RegOp(target), new ImmOp(value)));
 			}
 			else {
 				/* Load the value directley, fits in value range, but use mvn */
 				int inverse = -(value + 1);
-				if (isVFP) throw new SNIPS_EXC("MVN not available for VFP!");
-				else node.instructions.add(new ASMMvn(new RegOp(target), new ImmOp(inverse)));
+				node.instructions.add(new ASMMvn(new RegOp(target), new ImmOp(inverse)));
 			}
 		}
 	}

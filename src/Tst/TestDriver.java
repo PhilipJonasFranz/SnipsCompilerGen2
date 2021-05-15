@@ -1,17 +1,6 @@
 package Tst;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
-import Exc.CGEN_EXC;
-import Exc.CTEX_EXC;
-import Exc.LINK_EXC;
-import Exc.OPT0_EXC;
-import Exc.PARS_EXC;
-import Exc.SNIPS_EXC;
+import Exc.*;
 import Lnk.Linker;
 import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
@@ -19,14 +8,20 @@ import Res.Manager.FileUtil;
 import Snips.CompilerDriver;
 import Util.FBin;
 import Util.FBin.InvalidInputException;
-import Util.Pair;
-import Util.Util;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
+import Util.Pair;
+import Util.Util;
 import XMLParser.MalformedXMLException;
 import XMLParser.XMLParser;
 import XMLParser.XMLParser.XMLNode;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class TestDriver {
 
@@ -558,11 +553,8 @@ public class TestDriver {
 				if (sp [sp.length - 1].contains(".")) {
 					float expected = (float) Double.parseDouble(sp [sp.length - 1]);
 					
-					int [] ret = new int [32];
-					for (int a = 0; a < 32; a++)
-						ret [a] = pcu.vfp.regs [0] [31 - a];
-					
-					float pcu_return = 0; 
+					int [] ret = pcu.vfp.regs [0].clone();
+					float pcu_return = 0;
 					boolean invalid = false;
 					
 					try {
@@ -571,7 +563,7 @@ public class TestDriver {
 					catch (InvalidInputException e) {
 						/* Wrong output */
 						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
-						buffer.add(new Message("-> Expected <" + expected + ">, but output was invalid IEEE formatted number!", LogPoint.Type.FAIL, true));
+						buffer.add(new Message("-> Expected <" + expected + ">, but output was invalid IEEE formatted number: " + FBin.toDecimal(ret), LogPoint.Type.FAIL, true));
 						
 						invalid = true;
 					}

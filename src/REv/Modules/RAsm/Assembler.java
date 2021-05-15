@@ -1,16 +1,16 @@
 package REv.Modules.RAsm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import REv.Modules.Tools.Util;
 import Snips.CompilerDriver;
 import Tst.TestDriver;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class Assembler {
 
@@ -25,7 +25,7 @@ public class Assembler {
 	public static int [] [] assemble(List<String> input, boolean silent, boolean printBinary) throws Exception {
 		boolean silent0 = CompilerDriver.silenced;
 		CompilerDriver.silenced = silent;
-		
+
 		if (input == null || input.isEmpty())new Message("Input is empty!", LogPoint.Type.WARN);
 		
 		new Message("Starting compilation", LogPoint.Type.INFO);
@@ -125,7 +125,7 @@ public class Assembler {
 		boolean labelText = false, labelData = false;
 		
 		int l = in.size();
-		
+
 		/* Move .data block to the end of the file */
 		if (!in.isEmpty())try {
 			for (int i = 0; i < in.size(); i++) {
@@ -154,7 +154,7 @@ public class Assembler {
 		} catch (Exception e) {
 			log.add(new Message("Internal Error while relocating sections.", LogPoint.Type.FAIL));
 		}
-		
+
 		if (!in.isEmpty()) {
 			if (!labelData && !labelText)new Message("No section labels found. Assuming a global .text section.", LogPoint.Type.WARN);
 			if (mode.equals(MODE.DATA))new Message("No .text section found.", LogPoint.Type.WARN);
@@ -177,12 +177,16 @@ public class Assembler {
 					i--;
 					continue;
 				}
-				
-				if (in.get(i).getInstruction().startsWith("push")) {
+
+				if (in.get(i).getInstruction().startsWith("push") || in.get(i).getInstruction().startsWith("vpush")) {
 					String [] sp = in.get(i).getInstruction().split(" ");
 					in.remove(i);
-					
-					sp [0] = sp [0].substring(4);
+
+					boolean isVFP = sp [0].equals("vpush");
+
+					/* Extract condition */
+					if (isVFP) sp [0] = sp [0].substring(5);
+					else sp [0] = sp [0].substring(4);
 					
 					for (int a = 1; a < sp.length; a++) {
 						String r = sp [a].trim();
@@ -190,25 +194,35 @@ public class Assembler {
 						if (r.startsWith("{"))r = r.substring(1);
 						if (r.endsWith("}"))r = r.substring(0, r.length() - 1);
 						if (r.endsWith(","))r = r.substring(0, r.length() - 1);
-						
-						in.add(i, new Instruction("str" + sp [0] + " " + r + ", [sp, #-4]!", i));
+
+						String op = "str";
+						if (isVFP) op = "v" + op;
+
+						in.add(i, new Instruction(op + sp [0] + " " + r + ", [sp, #-4]!", i));
 					}
 				}
 				
-				if (in.get(i).getInstruction().startsWith("pop")) {
+				if (in.get(i).getInstruction().startsWith("pop") || in.get(i).getInstruction().startsWith("vpop")) {
 					String [] sp = in.get(i).getInstruction().split(" ");
 					in.remove(i);
-					
-					sp [0] = sp [0].substring(3);
-					
+
+					boolean isVFP = sp [0].equals("vpop");
+
+					/* Extract condition */
+					if (isVFP) sp [0] = sp [0].substring(4);
+					else sp [0] = sp [0].substring(3);
+
 					for (int a = sp.length - 1; a >= 1; a--) {
 						String r = sp [a].trim();
 						if (r.equals("") || r.equals("{") || r.equals("}"))continue;
 						if (r.startsWith("{"))r = r.substring(1);
 						if (r.endsWith("}"))r = r.substring(0, r.length() - 1);
 						if (r.endsWith(","))r = r.substring(0, r.length() - 1);
-						
-						in.add(i, new Instruction("ldr" + sp [0] + " " + r + ", [sp], #4", i));
+
+						String op = "ldr";
+						if (isVFP) op = "v" + op;
+
+						in.add(i, new Instruction(op + sp [0] + " " + r + ", [sp], #4", i));
 					}
 				}
 				
@@ -366,7 +380,7 @@ public class Assembler {
 		if (!in.isEmpty())for (int i = 0; i < in.size(); i++) {
 			try {
 				boolean addLine = true;
-				
+
 				String [] sp = in.get(i).getInstruction().replace("  ", " ").split(" ");
 				for (int a = 0; a < sp.length; a++)sp [a] = sp [a].replace(",", "").trim();
 				String app = "";
@@ -388,30 +402,30 @@ public class Assembler {
 					if (sp [0].startsWith("bx")) {
 						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected register: bx [Reg] in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						sp [0] = sp [0].substring(2);
-						
+
 						String cond = getCond(sp [0]);
 						if (cond != null)sp [0] = sp [0].substring(2);
 						else cond = "1110";
-						
+
 						app += cond;
 						app += "000100101111111111110001";
 						app += getReg(sp [1]);
 					}
 					else {
-						if (sp.length == 1 || sp [1].equals("null"))new Message("Expected destination: " + sp [0] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
+						if (sp.length == 1 || sp [1].equals("null")) new Message("Expected destination: " + sp [0] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
 						String link = "0";
-						
+
 						sp [0] = sp [0].substring(1);
-						
+
 						if (sp [0].equals("l") || sp [0].length() == 3) {
 							sp [0] = sp [0].substring(1);
 							link = "1";
 						}
-						
+
 						String cond = getCond(sp [0]);
 						if (cond != null)sp [0] = sp [0].substring(2);
 						else cond = "1110";
-						
+
 						app += cond;
 						app += "101";
 						app += link;
@@ -420,11 +434,11 @@ public class Assembler {
 				}
 				else if (sp [0].startsWith("mrs")) {
 					sp [0] = sp [0].substring(3);
-					
+
 					String cond = getCond(sp [0]);
 					if (cond != null)sp [0] = sp [0].substring(2);
 					else cond = "1110";
-					
+
 					app += cond; // Cond
 					app += "00010";
 					app += "0"; // TODO: CPSR or SPSR
@@ -435,14 +449,122 @@ public class Assembler {
 				else if (sp [0].startsWith("msr")) {
 					// TODO
 				}
-				else if (sp [0].startsWith("lsl") || sp [0].startsWith("lsr") || sp [0].startsWith("asr") || sp [0].startsWith("ror")) {
-					String shift = getShift(sp [0].substring(0, 3));
-					sp [0] = sp [0].substring(3);
-					
+				else if (sp [0].startsWith("vmla") || sp [0].startsWith("vmls") || sp [0].startsWith("vnmls") ||
+						 sp [0].startsWith("vnmla") || sp [0].startsWith("vmul") || sp [0].startsWith("vnmul") ||
+						 sp [0].startsWith("vadd") || sp [0].startsWith("vsub") || sp [0].startsWith("vdiv") ||
+
+						/* Extension Instruction */
+						// VMOV with two S-Registers
+						(sp [0].startsWith("vmov") && sp [1].startsWith("s") && sp [2].startsWith("s")) ||
+						sp [0].startsWith("vabs") || sp [0].startsWith("vneg") ||
+						sp [0].startsWith("vsqrt") || sp [0].startsWith("vcmp") ||
+						sp [0].startsWith("vcvt.F32.S32") || sp [0].startsWith("vcvt.S32.F32")) {
+
+					/* Op is 1111 for extension instructions */
+					String op = "1111";
+
+					String Fn = getRegVFP(sp [2]);
+					char N = Fn.charAt(4);
+					Fn = Fn.substring(0, 4);
+
+					String Fm = getRegVFP(sp [2]);
+					char M = Fm.charAt(4);
+					Fm = Fm.substring(0, 4);
+
+					if (getOpCodeExtendedVFP(sp [0]) != null) {
+						/* Fn is extension of op-code */
+						Fn = getOpCodeExtendedVFP(sp [0]);
+						N = Fn.charAt(4);
+						Fn = Fn.substring(0, 4);
+					}
+					else {
+						Fm = getRegVFP(sp [3]);
+						M = Fm.charAt(4);
+						Fm = Fm.substring(0, 4);
+
+						op = getOpCodeVFP(sp[0]);
+					}
+
+					sp [0] = sp [0].substring(getOpCodeLengthVFP(sp[0]));
+
 					String cond = getCond(sp [0]);
 					if (cond != null)sp [0] = sp [0].substring(2);
 					else cond = "1110";
-					
+
+					String Fd = getRegVFP(sp [1]);
+					char D = Fd.charAt(4);
+					Fd = Fd.substring(0, 4);
+
+					String cpu_num = "1010";
+
+					char p = op.charAt(0);
+					char q = op.charAt(1);
+					char r = op.charAt(2);
+					char s = op.charAt(3);
+
+					app += cond;
+					app += "1110";
+
+					app += p;
+					app += D;
+					app += q;
+					app += r;
+
+					app += Fn;
+					app += Fd;
+
+					app += cpu_num;
+
+					app += N;
+					app += s;
+					app += M;
+					app += "0";
+
+					app += Fm;
+				}
+				else if (sp [0].startsWith("vmov")) {
+					// VMOV with one S and one R register
+					String L = (sp [1].startsWith("r"))? "1" : "0";
+					sp [0] = sp [0].substring(4);
+
+					String cond = getCond(sp [0]);
+					if (cond == null) cond = "1110";
+
+					String op = "000";
+
+					String Rd = getReg(sp [(L.equals("1"))? 1 : 2]);
+
+					String Fn = getRegVFP(sp [(!L.equals("1"))? 1 : 2]);
+					char N = Fn.charAt(4);
+					Fn = Fn.substring(0, 4);
+
+					String cpu_num = "1010";
+
+					app += cond;
+					app += "1110";
+
+					app += op;
+					app += L;
+
+					app += Fn;
+					app += Rd;
+
+					app += cpu_num;
+
+					app += N;
+
+					app += "00"; // SBZ
+					app += "1";
+					app += "0000"; // SBZ
+				}
+				else if (sp [0].startsWith("lsl") || sp [0].startsWith("lsr") || sp [0].startsWith("asr") || sp [0].startsWith("ror")) {
+					String shift = getShift(sp [0].substring(0, 3));
+					sp [0] = sp [0].substring(3);
+
+					String cond = getCond(sp [0]);
+					if (cond != null)sp [0] = sp [0].substring(2);
+					else cond = "1110";
+
 					app += cond; // Cond
 					app += "00"; // Data Processing
 					app += "0"; // I TODO: Shift by reg?
@@ -461,17 +583,17 @@ public class Assembler {
 						app += shift;
 						app += "1";
 					}
-					
+
 					app += (sp.length > 3)? getReg(sp [2]) : getReg(sp [1]); // Source reg: Rd
 				}
 				else if (sp [0].startsWith("mov") || sp [0].startsWith("mvn") || sp [0].startsWith("cmp") || sp [0].startsWith("cmn")) {
 					String op = getOpCode(sp [0]);
 					sp [0] = sp [0].substring(3);
-					
+
 					String cond = getCond(sp [0]);
 					if (cond != null)sp [0] = sp [0].substring(2);
 					else cond = "1110";
-					
+
 					app += cond; // Cond
 					app += "00";
 					app += (sp [2].contains("#"))? "1" : "0";
@@ -481,7 +603,7 @@ public class Assembler {
 					app += getReg(sp [1]); // Rd
 					if (sp [2].contains("#")) { // Immediate value
 						app += "0000"; // TODO: ror
-						app += toBinaryStringLength(sp [2].substring(1), 8, in.get(i).getLine());	
+						app += toBinaryStringLength(sp [2].substring(1), 8, in.get(i).getLine());
 					}
 					else { // Register Source
 						if (sp.length > 3) {
@@ -540,6 +662,9 @@ public class Assembler {
 					app += getReg(sp [3]); // Rs
 					app += "1001";
 					app += getReg(sp [2]); // Rm
+				}
+				else if (sp [0].startsWith("vldm") || sp [0].startsWith("vstm")) {
+					throw new Exception("Cannot encode " + sp [0]);
 				}
 				else if (sp [0].startsWith("ldm") || sp [0].startsWith("stm")) {
 					/* Block Memory Op Code */
@@ -617,6 +742,108 @@ public class Assembler {
 					app += l0;
 					app += getReg(rn);
 					app += regListCode;
+				}
+				else if (sp [0].startsWith("vldr") || sp [0].startsWith("vstr")) {
+					String L = (sp [0].startsWith("vstr"))? "0" : "1";
+					sp [0] = sp [0].substring(4);
+
+					String cond = getCond(sp [0]);
+					if (cond != null)sp [0] = sp [0].substring(2);
+					else cond = "1110";
+
+					String Fd = getRegVFP(sp [1]);
+					char D = Fd.charAt(4);
+					Fd = Fd.substring(0, 4);
+
+					String immV = "00000000";
+
+					String Rn = "0000";
+
+					String P = "1"; // Indexing, P = 1 and W = 1 -> Pre-Indexed
+					String U = "1"; // Offset Direction, 1 = Positive
+					String W = "0"; // Writeback to base, 1 = Writeback
+
+					if (!in.get(i).getInstruction().contains("[")) {
+						// Address Label
+						if (sp.length < 3) new Message("Expected Address Label or Operands: " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
+						String [] labelSplit = sp [2].split("\\+");
+						if (locations.containsKey(labelSplit [0])) {
+							int base = locations.get(labelSplit [0]);
+							if (labelSplit.length == 2) base += Integer.parseInt(labelSplit [1]);
+							immV = Assembler.toBinaryStringLength("" + ((base - (i << 2) + ((labelData)? 4 : 0)) / 4), 8, in.get(i).getLine());
+							Rn = "1111";
+						}
+						else new Message("Unknown Label: " + sp [2] + " in line " + in.get(i).getLine() + ".", LogPoint.Type.FAIL);
+						U = "1";
+					}
+					else if (in.get(i).getInstruction().contains("!")) {
+						// vldr r0, [r1, #-4]!
+						W = "1";
+
+						sp [2] = sp [2].substring(1);
+						sp [sp.length - 1] = sp [sp.length - 1].substring(0, sp [sp.length - 1].length() - 2);
+
+						Rn = getReg(sp [2]);
+
+						int val = Integer.parseInt(sp [3].substring(1));
+						if (val < 0) {
+							U = "0";
+							val = -val;
+						}
+						immV = toBinaryStringLength("" + val / 4, 8, in.get(i).getLine());
+					}
+					else if (sp.length > 3 && sp [sp.length - 1].contains("]")) {
+						// vldr r0, [r1, r0]
+						sp [2] = sp [2].substring(1);
+						if (sp [3].endsWith("]"))sp [3] = sp [3].substring(0, sp [3].length() - 1);
+
+						Rn = getReg(sp [2]);
+
+						if (sp.length > 3) {
+							int val = Integer.parseInt(sp[3].substring(1));
+							if (val < 0) {
+								U = "0";
+								val = -val;
+							}
+							immV = toBinaryStringLength("" + val / 4, 8, in.get(i).getLine());
+						}
+					}
+					else {
+						// vldr r0, [r0], r1
+						W = "1";
+						P = "0"; // Post Indexed
+
+						sp [2] = sp [2].substring(1, sp [2].length() - 1);
+
+						Rn = getReg(sp [2]);
+
+						if (sp.length > 3) {
+							int val = Integer.parseInt(sp[3].substring(1));
+							if (val < 0) {
+								U = "0";
+								val = -val;
+							}
+							immV = toBinaryStringLength("" + val / 4, 8, in.get(i).getLine());
+						}
+					}
+
+					String cpu_num = "1010";
+
+					app += cond;
+					app += "110";
+
+					app += P;
+					app += U;
+					app += D;
+					app += W;
+					app += L;
+
+					app += Rn;
+					app += Fd;
+
+					app += cpu_num;
+
+					app += immV;
 				}
 				else if (sp [0].startsWith("ldr") || sp [0].startsWith("str")) {
 					String ls = (sp [0].startsWith("str"))? "0" : "1";
@@ -758,7 +985,7 @@ public class Assembler {
 					app += "0"; // Quantity
 					app += wb; // Writeback
 					app += ls;
-					
+
 					app += rn; // Rn
 					app += getReg(sp [1]); // Rd
 					
@@ -823,10 +1050,13 @@ public class Assembler {
 				else {
 					new Message("Unknown Command in line " + in.get(i).getLine() + ": " + in.get(i).getInstruction(), LogPoint.Type.FAIL);
 				}
-			
+
 				if (addLine) {
 					app = app.trim();
-					if (!app.equals("") && printBinary) CompilerDriver.outs.println(app + ": " + in.get(i).getInstruction());
+
+					if (!app.equals("") && printBinary)
+						CompilerDriver.outs.println(i * 4 + " " + app + " : " + in.get(i).getInstruction());
+
 					instr.add(app);
 				}
 			} catch (Exception e) {
@@ -954,6 +1184,58 @@ public class Assembler {
 		if (in.startsWith("mvn"))return "1111";
 		return null;
 	}
+
+	public static int getOpCodeLengthVFP(String in) {
+		if (in.startsWith("vmla"))return 4;
+		if (in.startsWith("vmls"))return 4;
+		if (in.startsWith("vnmls"))return 5;
+		if (in.startsWith("vnmla"))return 5;
+		if (in.startsWith("vmul"))return 4;
+		if (in.startsWith("vnmul"))return 5;
+		if (in.startsWith("vadd"))return 4;
+		if (in.startsWith("vsub"))return 4;
+		if (in.startsWith("vdiv"))return 4;
+
+		// Extension Instructions
+		if (in.startsWith("vmov"))return 4;
+		if (in.startsWith("vabs"))return 4;
+		if (in.startsWith("vneg"))return 4;
+		if (in.startsWith("vsqrt"))return 5;
+
+		if (in.startsWith("vcmp"))return 4;
+
+		if (in.startsWith("vcvt.F32.S32"))return 12; // SI -> F
+		if (in.startsWith("vcvt.S32.F32"))return 12; // SI -> F
+
+		return 0;
+	}
+
+	public static String getOpCodeVFP(String in) {
+		if (in.startsWith("vmla"))return "0000";
+		if (in.startsWith("vmls"))return "0001";
+		if (in.startsWith("vnmls"))return "0010";
+		if (in.startsWith("vnmla"))return "0011";
+		if (in.startsWith("vmul"))return "0100";
+		if (in.startsWith("vnmul"))return "0101";
+		if (in.startsWith("vadd"))return "0110";
+		if (in.startsWith("vsub"))return "0111";
+		if (in.startsWith("vdiv"))return "1000";
+		return null;
+	}
+
+	public static String getOpCodeExtendedVFP(String in) {
+		if (in.startsWith("vmov"))return "00000";
+		if (in.startsWith("vabs"))return "00001";
+		if (in.startsWith("vneg"))return "00010";
+		if (in.startsWith("vsqrt"))return "00011";
+
+		if (in.startsWith("vcmp"))return "01000";
+
+		if (in.startsWith("vcvt.F32.S32"))return "10001"; // SI -> F
+		if (in.startsWith("vcvt.S32.F32"))return "11010"; // SI -> F
+
+		return null;
+	}
 	
 	public static String getReg(String r) throws Exception {
 		r = r.trim();
@@ -978,7 +1260,46 @@ public class Assembler {
 		if (r.equals("pc"))return "1111";
 		if (r.equals("fp"))return "1011";
 		log.add(new Message("Not a register: " + r, LogPoint.Type.FAIL));
-		throw new Exception();
+		new Exception().printStackTrace();
+		throw new Exception("Not a register: " + r);
+	}
+
+	public static String getRegVFP(String r) throws Exception {
+		r = r.trim().toLowerCase();
+		if (r.equals("s0")) return "00000";
+		if (r.equals("s1")) return "00001";
+		if (r.equals("s2")) return "00010";
+		if (r.equals("s3")) return "00011";
+		if (r.equals("s4")) return "00100";
+		if (r.equals("s5")) return "00101";
+		if (r.equals("s6")) return "00110";
+		if (r.equals("s7")) return "00111";
+		if (r.equals("s8")) return "01000";
+		if (r.equals("s9")) return "01001";
+		if (r.equals("s10")) return "01010";
+		if (r.equals("s11")) return "01011";
+		if (r.equals("s12")) return "01100";
+		if (r.equals("s13")) return "01101";
+		if (r.equals("s14")) return "01110";
+		if (r.equals("s15")) return "01111";
+		if (r.equals("s16")) return "10000";
+		if (r.equals("s17")) return "10001";
+		if (r.equals("s18")) return "10010";
+		if (r.equals("s19")) return "10011";
+		if (r.equals("s20")) return "10100";
+		if (r.equals("s21")) return "10101";
+		if (r.equals("s22")) return "10110";
+		if (r.equals("s23")) return "10111";
+		if (r.equals("s24")) return "11000";
+		if (r.equals("s25")) return "11001";
+		if (r.equals("s26")) return "11010";
+		if (r.equals("s27")) return "11011";
+		if (r.equals("s28")) return "11100";
+		if (r.equals("s29")) return "11101";
+		if (r.equals("s30")) return "11110";
+		if (r.equals("s31")) return "11111";
+		log.add(new Message("Not a register: " + r, LogPoint.Type.FAIL));
+		throw new Exception("Not a register: " + r);
 	}
 	
 	public static int toIntR(String r) {

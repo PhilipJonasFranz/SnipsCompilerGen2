@@ -15,15 +15,10 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Processing.Arith.ASMVAdd;
-import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.ASM.VFP.Processing.Arith.ASMVSub;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -31,10 +26,12 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.StructSelectWriteback;
 import Imm.AST.Statement.AssignWriteback;
 import Imm.AST.Statement.AssignWriteback.WRITEBACK;
+import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 import Res.Const;
+import Util.FBin;
 
 public class AsNAssignWriteback extends AsNStatement {
 
@@ -130,8 +127,8 @@ public class AsNAssignWriteback extends AsNStatement {
 				node.instructions.add(new ASMSub(new RegOp(target), new RegOp(REG.R0), new ImmOp(1)));
 		}
 		else {
-			node.instructions.add(new ASMVMov(new VRegOp(REG.S1), new ImmOp(1)));
-			
+			AsNBody.literalManager.loadValue(node, FBin.toDecimal(FBin.toFBin(1f)), 1, true, "1.0f");
+
 			if (wb == WRITEBACK.INCR) 
 				node.instructions.add(new ASMVAdd(new VRegOp(target), new VRegOp(REG.S0), new VRegOp(REG.S1)));
 			else 
