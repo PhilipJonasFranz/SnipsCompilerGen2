@@ -140,7 +140,8 @@ public class VFPCoProcessor {
 					out = FBin.toDecimal(regs [Fm].clone());
 					if (DEBUG) System.out.print(Fds + " = " + "(float) " + Fms + ", ");
 				}
-				else throw new RuntimeException("Not implemented!");
+				else if (!(Fn0 [0] == 1 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0))
+					throw new RuntimeException("Not implemented!");
 			}
 			else throw new RuntimeException("Not implemented!");
 			
@@ -149,6 +150,7 @@ public class VFPCoProcessor {
 				/* Special case, output format not encoded in IEEE 754 */
 				regs [Fd] = FBin.toBinI((int) vFm);
 				if (DEBUG) System.out.print(Fds + " = " + "(int) " + Fms + ", ");
+				out = (int) vFm;
 			}
 			else regs [Fd] = FBin.toFBin(out);
 

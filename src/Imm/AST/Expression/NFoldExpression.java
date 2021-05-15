@@ -1,18 +1,18 @@
 package Imm.AST.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
-import Util.Source;
-import Util.Util;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import Util.Source;
+import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Describes an operation that is applied to two or more operands.
@@ -23,7 +23,7 @@ public abstract class NFoldExpression extends Expression {
 	public enum Operator {
 		MUL, ADD, SUB, ORR,
 		LSL, LSR, CMP, AND,
-		BOR, BAN, BXR;
+		BOR, BAN, BXR, DIV, MOD;
 		
 		public String codeRepresentation() {
 			if (this == MUL) return "*";

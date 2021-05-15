@@ -149,7 +149,6 @@ public class RegSet {
 	 */
 	public void free(int...regs) {
 		for (int r : regs) this.regs [r].free();
-		this.getVRegSet().free(regs);
 	}
 	
 } 

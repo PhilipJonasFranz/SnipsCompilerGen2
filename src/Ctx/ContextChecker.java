@@ -1384,7 +1384,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkNFoldExpression(NFoldExpression b) throws CTEX_EXC {
-		
 		for (Expression e : b.operands) e.check(this);
 		
 		for (Expression e : b.operands)
@@ -1404,7 +1403,12 @@ public class ContextChecker {
 			String s = b.operands.stream().filter(x -> !x.getType().isFloat()).map(x -> x.getType().toString()).collect(Collectors.joining(", "));
 			throw new CTEX_EXC(b, Const.INCOMPATIBLE_TYPES_FOR_FLOP, s);
 		}
-		
+
+		if (fOps == 0 && b instanceof Div div) {
+			div.placeholderCall = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), div.operands, div.getSource());
+			div.placeholderCall.check(this);
+		}
+
 		b.setType(b.operands.get(0).getType().clone());
 		return b.getType();
 	}

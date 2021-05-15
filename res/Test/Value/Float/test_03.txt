@@ -35,7 +35,7 @@ norm:                                        /* Function: norm */
     vldr s0, [r1, #4]                        /* Load field from struct */
     vpush { s0 }
     vldr s0, [r1, #8]
-    vcvt.S32.F32 s2, s0
+    vcvt.F32.S32 s2, s0
     vpop { s0 }
     vadd.F32 s0, s0, s2
     vldr s2, [r1, #12]

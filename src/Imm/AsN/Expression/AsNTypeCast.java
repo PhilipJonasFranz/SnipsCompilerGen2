@@ -28,14 +28,14 @@ public class AsNTypeCast extends AsNExpression {
 		
 		/* Cast from FLOAT to non-float */
 		if (tc.expression.getType().isFloat() && !tc.castType.isFloat()) {
-			t.instructions.add(new ASMVCvt(new VRegOp(REG.S0), new VRegOp(REG.S0), PRECISION.F32, PRECISION.S32));
+			t.instructions.add(new ASMVCvt(new VRegOp(REG.S0), new VRegOp(REG.S0), PRECISION.S32, PRECISION.F32));
 			t.instructions.add(new ASMVMov(new RegOp(REG.R0), new VRegOp(REG.S0)));
 		}
 		
 		/* Cast from non-float to FLOAT */
 		if (!tc.expression.getType().isFloat() && tc.castType.isFloat()) {
 			t.instructions.add(new ASMVMov(new VRegOp(REG.S0), new RegOp(REG.R0)));
-			t.instructions.add(new ASMVCvt(new VRegOp(REG.S0), new VRegOp(REG.S0), PRECISION.S32, PRECISION.F32));
+			t.instructions.add(new ASMVCvt(new VRegOp(REG.S0), new VRegOp(REG.S0), PRECISION.F32, PRECISION.S32));
 		}
 		
 		t.registerMetric();

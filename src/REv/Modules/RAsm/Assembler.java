@@ -458,7 +458,7 @@ public class Assembler {
 						(sp [0].startsWith("vmov") && sp [1].startsWith("s") && sp [2].startsWith("s")) ||
 						sp [0].startsWith("vabs") || sp [0].startsWith("vneg") ||
 						sp [0].startsWith("vsqrt") || sp [0].startsWith("vcmp") ||
-						sp [0].startsWith("vcvt.F32.S32") || sp [0].startsWith("vcvt.S32.F32")) {
+						sp [0].startsWith("vcvt.f32.s32") || sp [0].startsWith("vcvt.s32.f32")) {
 
 					/* Op is 1111 for extension instructions */
 					String op = "1111";
@@ -1204,8 +1204,8 @@ public class Assembler {
 
 		if (in.startsWith("vcmp"))return 4;
 
-		if (in.startsWith("vcvt.F32.S32"))return 12; // SI -> F
-		if (in.startsWith("vcvt.S32.F32"))return 12; // SI -> F
+		if (in.startsWith("vcvt.f32.s32"))return 12; // SI -> F
+		if (in.startsWith("vcvt.s32.f32"))return 12; // SI -> F
 
 		return 0;
 	}
@@ -1231,8 +1231,8 @@ public class Assembler {
 
 		if (in.startsWith("vcmp"))return "01000";
 
-		if (in.startsWith("vcvt.F32.S32"))return "10001"; // SI -> F
-		if (in.startsWith("vcvt.S32.F32"))return "11010"; // SI -> F
+		if (in.startsWith("vcvt.f32.s32"))return "10001"; // SI -> F
+		if (in.startsWith("vcvt.s32.f32"))return "11010"; // SI -> F
 
 		return null;
 	}

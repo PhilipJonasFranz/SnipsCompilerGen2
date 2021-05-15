@@ -2,14 +2,15 @@ SOURCE
 #include <fmath.sn>
 
 float main() {
-	return sin(0.5f) * 100f;
+	return sin(0.5f);
 }
 
 TESTCASES
-0.47942553
+0.37758255
 OUTPUT
 .version 0
 
+.include maybe __op_div.s
 .include fmath.s
 
 .data
@@ -21,11 +22,6 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
-    push { lr }
-    vldr s0, .P1322697334_LIT_1069547520     /* Evaluate Expression */
-    bl FMath.sin                             /* Call FMath.sin */
-    vcvt.F32.S32 s0, s0
-    mov r2, #100
-    mul r0, s0, r2
-    pop { pc }
-.P1322697334_LIT_1069547520: .word 1069547520
+    vldr s0, .P1322697334_LIT_1056964608     /* Evaluate Expression */
+    b FMath.sin                              /* Call FMath.sin */
+.P1322697334_LIT_1056964608: .word 1056964608

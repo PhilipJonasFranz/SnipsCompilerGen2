@@ -9,38 +9,19 @@ import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
-import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.NFoldExpression;
-import Imm.AST.Expression.TypeCast;
-import Imm.AST.Expression.Arith.Add;
-import Imm.AST.Expression.Arith.BitAnd;
-import Imm.AST.Expression.Arith.BitOr;
-import Imm.AST.Expression.Arith.BitXor;
-import Imm.AST.Expression.Arith.Lsl;
-import Imm.AST.Expression.Arith.Lsr;
-import Imm.AST.Expression.Arith.Mul;
-import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Arith.*;
+import Imm.AST.Expression.*;
 import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Or;
 import Imm.AsN.AsNBody;
-import Imm.AsN.Expression.Arith.AsNAdd;
-import Imm.AsN.Expression.Arith.AsNBitAnd;
-import Imm.AsN.Expression.Arith.AsNBitOr;
-import Imm.AsN.Expression.Arith.AsNBitXor;
-import Imm.AsN.Expression.Arith.AsNLsl;
-import Imm.AsN.Expression.Arith.AsNLsr;
-import Imm.AsN.Expression.Arith.AsNMul;
-import Imm.AsN.Expression.Arith.AsNSub;
+import Imm.AsN.Expression.Arith.*;
 import Imm.AsN.Expression.Boolean.AsNAnd;
 import Imm.AsN.Expression.Boolean.AsNCompare;
 import Imm.AsN.Expression.Boolean.AsNOr;
@@ -62,6 +43,9 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 		}
 		else if (e instanceof Mul) {
 			node = AsNMul.cast((Mul) e, r, map, st);
+		}
+		else if (e instanceof Div) {
+			node = AsNDiv.cast((Div) e, r, map, st);
 		}
 		else if (e instanceof Compare) {
 			node = AsNCompare.cast((Compare) e, r, map, st);
