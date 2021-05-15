@@ -24,6 +24,18 @@ namespace FMath {
 		return r;
 	}
 
+    shared float abs(float x) {
+    	asm {
+    	    vabs s0, s0
+    	};
+    }
+
+	shared float sqrt(float x) {
+    	asm {
+    	    vsqrt s0, s0
+    	};
+    }
+
 	#strategy always
 	shared float sin(float x) {
 		float s = x;

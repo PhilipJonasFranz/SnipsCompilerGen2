@@ -440,7 +440,7 @@ public class TestDriver {
 			
 			if (compile == null) {
 				if (timeout) {
-					buffer.add(new Message("-> The compilation process timed out.", LogPoint.Type.FAIL, true));
+					buffer.add(new Message("-> The compilation process timed out, pipeline stage: " + CompilerDriver.currentStage, LogPoint.Type.FAIL, true));
 					return new Result(RET_TYPE.TIMEOUT, 0, 0);
 				}
 				else {

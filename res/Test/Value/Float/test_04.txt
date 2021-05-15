@@ -2,11 +2,11 @@ SOURCE
 #include <fmath.sn>
 
 float main() {
-	return sin(0.5f);
+	return sin(0.5f) + sqrt(abs(-25f));
 }
 
 TESTCASES
-0.37758255
+5.37758255
 OUTPUT
 .version 0
 
@@ -22,6 +22,17 @@ HEAP_START: .word 0
 
 .global main
 main:                                        /* Function: main */
+    push { lr }
     vldr s0, .P1322697334_LIT_1056964608     /* Evaluate Expression */
-    b FMath.sin                              /* Call FMath.sin */
+    bl FMath.sin                             /* Call FMath.sin */
+    vmov.F32 s3, s0
+    vldr s0, .P1322697334_LIT_1103626240     /* Load parameters */
+    vneg.F32 s0, s0
+    bl FMath.abs                             /* Call FMath.abs */
+    bl FMath.sqrt                            /* Call FMath.sqrt */
+    vmov.F32 s2, s0
+    vmov.F32 s1, s3
+    vadd.F32 s0, s3, s0
+    pop { pc }
+.P1322697334_LIT_1103626240: .word 1103626240
 .P1322697334_LIT_1056964608: .word 1056964608
