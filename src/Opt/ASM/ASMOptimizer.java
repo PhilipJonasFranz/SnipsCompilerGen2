@@ -1610,7 +1610,7 @@ public class ASMOptimizer {
 						if (probed.contains(reg)) continue;
 						else probed.add(reg);
 						
-						if (reg.toInt() > 2 && !reg.isSpecialReg()) {
+						if (!reg.isOperandReg() && !reg.isSpecialReg()) {
 							boolean used = false;
 							for (int a = k + 1; a < ins0.size(); a++) {
 								if (ins0.get(a) instanceof ASMLabel && ((ASMLabel) ins0.get(a)).isFunctionLabel) {

@@ -20,7 +20,9 @@ HEAP_START: .word 0
 
 .global addF
 addF:                                        /* Function: addF */
-    vadd.F32 s0, s0, s1
+    vmov.F32 s2, s1
+    vmov.F32 s1, s0                          /* Evaluate Expression */
+    vadd.F32 s0, s0, s2
     bx lr
 
 .global main

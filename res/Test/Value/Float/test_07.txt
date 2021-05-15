@@ -1,0 +1,41 @@
+SOURCE
+float main() {
+	float val = 0.0f;
+
+	for (int i = 0; i < 100; i++) {
+	    val += 0.5f;
+	}
+
+	return val;
+}
+
+TESTCASES
+50.0
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    vldr s3, .P1408584787_LIT_0
+    mov r3, #0
+    mov r0, #0                               /* Evaluate Expression */
+main.L1: 
+    cmp r3, #100
+    bge main.L2
+    vldr s2, .P1408584787_LIT_1056964608     /* Load value '0.5' from pool */
+    vmov.F32 s1, s3                          /* Evaluate Expression */
+    vadd.F32 s3, s3, s2
+    add r3, r3, #1
+    b main.L1
+main.L2: 
+    vmov.F32 s0, s3                          /* Evaluate Expression */
+    bx lr
+.P1408584787_LIT_1056964608: .word 1056964608
+.P1408584787_LIT_0: .word 0

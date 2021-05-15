@@ -39,6 +39,7 @@ norm:                                        /* Function: norm */
     vpop { s0 }
     vadd.F32 s0, s0, s2
     vldr s2, [r1, #12]
+    vmov.F32 s1, s0
     vadd.F32 s0, s0, s2
     bx lr
 

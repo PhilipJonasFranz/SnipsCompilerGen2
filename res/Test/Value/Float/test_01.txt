@@ -27,7 +27,7 @@ HEAP_START: .word 0
 .global main
 main:                                        /* Function: main */
     mov fp, sp
-    vldr s0, .P1236809881_LIT_1069899841     /* Evaluate Expression */
+    vldr s0, .P1236809881_LIT_1057669251     /* Evaluate Expression */
     vldr s1, .P1236809881_LIT_1067450368     /* Load value '1.25' from pool */
     vldr s2, .P1236809881_LIT_1075838976     /* Load value '2.5' from pool */
     vstmfd sp!, {s0-s2}
@@ -64,4 +64,4 @@ main.L5:
 .P1236809881_LIT_0: .word 0
 .P1236809881_LIT_1075838976: .word 1075838976
 .P1236809881_LIT_1067450368: .word 1067450368
-.P1236809881_LIT_1069899841: .word 1069899841
+.P1236809881_LIT_1057669251: .word 1057669251
