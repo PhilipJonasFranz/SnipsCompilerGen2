@@ -115,7 +115,11 @@ public class Parser {
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		
+
+		/* EOF reached */
+		if (current.type == TokenType.EOF && !Arrays.stream(types).anyMatch(x -> x == TokenType.EOF))
+			throw new PARS_EXC("Got unexpected EOF!");
+
 		for (TokenType type : types) {
 			if (current.type() == type) return accept();
 		}
@@ -134,7 +138,7 @@ public class Parser {
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		
+
 		if (current.type() == tokenType) return accept();
 		else {
 			this.progress.abort();
@@ -165,10 +169,7 @@ public class Parser {
 	 * @return The accepted token.
 	 */
 	private Token accept() {
-		
-		/* Store the current source, is used to give aproximation when crash occurs */
-		//CompilerDriver.lastSource = current.source;
-		
+
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;

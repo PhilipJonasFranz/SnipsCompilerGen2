@@ -30,16 +30,26 @@ public class PARS_EXC extends Exception {
 		CompilerDriver.log.add(new Message(this.getMessage(), LogPoint.Type.FAIL));
 	}
 
+	public PARS_EXC(String message) {
+		super(message);
+		CompilerDriver.log.add(new Message(message, LogPoint.Type.FAIL));
+	}
+
 	public String getExcFieldName() {
 		return "UNKNOWN_FIELD";
 	}
 	
 	public String getMessage() {
-		String message = "Got " + this.actual + ", expected ";
-		for (TokenType t : this.expected) {
-			message += t + ", ";
+		if (this.expected == null) {
+			return super.getMessage();
 		}
-		return message + this.location.getSourceMarker();
+		else {
+			String message = "Got " + this.actual + ", expected ";
+			for (TokenType t : this.expected) {
+				message += t + ", ";
+			}
+			return message + this.location.getSourceMarker();
+		}
 	}
 	
 } 

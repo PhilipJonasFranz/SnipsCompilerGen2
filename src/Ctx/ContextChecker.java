@@ -1617,11 +1617,15 @@ public class ContextChecker {
 		
 		/* Call is call to super constructor, replace with explicit call, returns called constructor */
 		Function func = CallUtil.transformSuperConstructorCall(c, this.getCurrentFunction());
-		
+
+		/* Switch out path if one of the operands is a float type */
+		if (c.getPath().build().equals("__op_mod") && types.stream().anyMatch(x -> x.isFloat()))
+			c.setPath(new NamespacePath("__op_mod_f"));
+
 		/* Super constructor was not used, search for function */
 		if (func == null) func = this.searchFunction(c, types);
 		Function f = func;
-		
+
 		if (c.isNestedCall()) {
 			/* Call to struct nested function */
 			if (c.getParams().get(0).check(this).getCoreType().isStruct()) {

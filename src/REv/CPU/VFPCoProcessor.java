@@ -48,6 +48,9 @@ public class VFPCoProcessor {
 			/* Output, will be written to Fd */
 			float out = 0;
 
+			/* True if this instruction is a vcvt.S32.F32 instruction */
+			boolean instIsToIntConversion = Fn0[0] == 1 && Fn0[1] == 1 && Fn0[2] == 0 && Fn0[3] == 1 && N == 0;
+
 			/* FMACS Fd = Fd + (Fn * Fm) */
 			if (p == 0 && q == 0 && r == 0 && s == 0) {
 				out = vFd + (vFn * vFm);
@@ -117,18 +120,62 @@ public class VFPCoProcessor {
 				}
 				/* FCMPS Compare Fd with Fm */
 				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 0 && N == 0) {
-					// TODO
-					throw new RuntimeException("Not implemented!");
+					if (vFd == vFm) {
+						pcu.cpsr [31] = 0; // Negative
+						pcu.cpsr [30] = 1; // Zero
+						pcu.cpsr [29] = 1; // Carry
+						pcu.cpsr [28] = 0; // Overflow
+					}
+					else if (vFd < vFm) {
+						pcu.cpsr [31] = 1;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 0;
+						pcu.cpsr [28] = 0;
+					}
+					else if (vFd > vFm) {
+						pcu.cpsr [31] = 0;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 1;
+						pcu.cpsr [28] = 0;
+					}
+					else {
+						pcu.cpsr [31] = 0;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 1;
+						pcu.cpsr [28] = 1;
+					}
 				}
 				/* FCMPES Compare Fd with Fm */
 				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 0 && N == 1) {
 					// TODO
 					throw new RuntimeException("Not implemented!");
 				}
-				/* FCMPZS Compare Fd with Fm */
+				/* FCMPZS Compare Fd with 0 */
 				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0) {
-					// TODO
-					throw new RuntimeException("Not implemented!");
+					if (vFd == 0) {
+						pcu.cpsr [31] = 0; // Negative
+						pcu.cpsr [30] = 1; // Zero
+						pcu.cpsr [29] = 1; // Carry
+						pcu.cpsr [28] = 0; // Overflow
+					}
+					else if (vFd < 0) {
+						pcu.cpsr [31] = 1;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 0;
+						pcu.cpsr [28] = 0;
+					}
+					else if (vFd > 0) {
+						pcu.cpsr [31] = 0;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 1;
+						pcu.cpsr [28] = 0;
+					}
+					else {
+						pcu.cpsr [31] = 0;
+						pcu.cpsr [30] = 0;
+						pcu.cpsr [29] = 1;
+						pcu.cpsr [28] = 1;
+					}
 				}
 				/* FCMPEZS Compare Fd with Fm */
 				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 1) {
@@ -140,13 +187,13 @@ public class VFPCoProcessor {
 					out = FBin.toDecimal(regs [Fm].clone());
 					if (DEBUG) System.out.print(Fds + " = " + "(float) " + Fms + ", ");
 				}
-				else if (!(Fn0 [0] == 1 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0))
+				else if (!instIsToIntConversion)
 					throw new RuntimeException("Not implemented!");
 			}
 			else throw new RuntimeException("Not implemented!");
 			
 			/* FTOSIS Floating-point -> signed integer conversions */
-			if (Fn0 [0] == 1 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0) {
+			if (instIsToIntConversion) {
 				/* Special case, output format not encoded in IEEE 754 */
 				regs [Fd] = FBin.toBinI((int) vFm);
 				if (DEBUG) System.out.print(Fds + " = " + "(int) " + Fms + ", ");
