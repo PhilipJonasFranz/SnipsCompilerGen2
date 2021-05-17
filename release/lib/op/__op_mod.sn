@@ -1,50 +1,9 @@
 shared int __op_mod(int a, int b) {
-	if (a == 0) return 0;
-
-	bool neg = false;
-	if (a < 0) {
-		neg = true;
-		a = -a;
-	}
-
-	int s = b;
-	while (s <= a) {
-		s = s << 1;
-	}
-	int r = a;
-	while (r >= b) {
-	    s = s >> 1;
-		if (s <= r) {    
-			r = r - s;
-		}
-	}
-	
-	if (r != 0 && neg) r = b - r;
-	return r;
+	if (a < b) return a;
+	return a - (b * (a / b));
 }
 
 shared float __op_mod_f(float a, float b) {
-	if (a == 0f) return 0f;
-
-	bool neg = false;
-	if (a < 0f) {
-		neg = true;
-		a = -a;
-	}
-
-	float s = b;
-	while (s <= a) {
-		s *= 2f;
-	}
-
-	float r = a;
-	while (r >= b) {
-	    s = s / 2f;
-		if (s <= r) {
-			r = r - s;
-		}
-	}
-
-	if (r != 0f && neg) r = b - r;
-	return r;
+	if (a < b) return a;
+    return a - (b * (a / b));
 }

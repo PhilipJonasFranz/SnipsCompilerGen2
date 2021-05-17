@@ -45,7 +45,10 @@ public class Div extends NFoldExpression {
 		
 		if (this.getType() != null)
 			e.setType(this.getType().clone());
-		
+
+		if (this.placeholderCall != null)
+			e.placeholderCall = (InlineCall) this.placeholderCall.clone();
+
 		e.copyDirectivesFrom(this);
 		return e;
 	}

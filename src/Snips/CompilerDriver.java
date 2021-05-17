@@ -307,7 +307,12 @@ public class CompilerDriver {
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
-				if (useASTOptimizer) STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
+				if (useASTOptimizer) {
+					List<String> ref = new ArrayList(driver.referencedLibaries);
+					driver.referencedLibaries.clear();
+					STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
+					driver.referencedLibaries = ref;
+				}
 				
 				if (imm) AST.print(4, true);
 				

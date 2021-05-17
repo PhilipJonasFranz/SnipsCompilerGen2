@@ -1252,7 +1252,7 @@ public class ContextChecker {
 				a.value.check(this);
 			}
 			else if (a.assignArith == ASSIGN_ARITH.DIV_ASSIGN) {
-				a.value = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), Arrays.asList(a.lhsId.expression, a.value), a.getSource());
+				a.value = new Div(a.lhsId.expression, a.value, a.getSource());
 				a.value.check(this);
 			}
 			else if (a.assignArith == ASSIGN_ARITH.LSL_ASSIGN) {

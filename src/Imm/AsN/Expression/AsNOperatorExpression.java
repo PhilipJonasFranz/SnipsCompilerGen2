@@ -1,15 +1,13 @@
 package Imm.AsN.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.OperatorExpression;
+
+import java.util.ArrayList;
 
 public class AsNOperatorExpression extends AsNExpression {
 
@@ -19,12 +17,12 @@ public class AsNOperatorExpression extends AsNExpression {
 		op0.pushOnCreatorStack(op);
 		op.castedNode = op0;
 		
-		if (op.calledFunction == null) 
+		if (op.calledFunction == null)
+			/* Not an operator expression, cast the original interpretation of the expression */
 			op0.instructions.addAll(AsNExpression.cast(op.actualExpression, r, map, st).getInstructions());
 		else {
-			List<Expression> operands = op.extractOperands();
-			
-			InlineCall ic = new InlineCall(op.calledFunction.path.clone(), new ArrayList(), operands, op.getSource());
+			/* Is operator, cast inline call to operator function */
+			InlineCall ic = new InlineCall(op.calledFunction.path.clone(), new ArrayList(), op.extractOperands(), op.getSource());
 			ic.calledFunction = op.calledFunction;
 			ic.proviso = op.provisoTypes;
 			

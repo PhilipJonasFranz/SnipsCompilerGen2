@@ -20,14 +20,12 @@ public class AsNDiv extends AsNNFoldExpression {
 		div.pushOnCreatorStack(d);
 		d.castedNode = div;
 
-		if (d.placeholderCall != null) {
+		if (d.placeholderCall != null)
 			/* Not a float division, inline call calls the __op_div function */
 			div.instructions.addAll(AsNInlineCall.cast(d.placeholderCall, r, map, st).getInstructions());
-		}
-		else {
+		else
 			/* Float division using the vdiv instruction */
 			div.evalExpression(div, d, r, map, st);
-		}
 
 		div.registerMetric();
 		return div;
