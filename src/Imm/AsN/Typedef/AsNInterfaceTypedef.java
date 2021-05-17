@@ -1,8 +1,5 @@
 package Imm.AsN.Typedef;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.Util.LabelUtil;
 import Ctx.Util.ProvisoUtil;
 import Imm.ASM.ASMInstruction;
@@ -16,19 +13,22 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Function;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AST.Typedef.StructTypedef.StructProvisoMapping;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.INTERFACE;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AsNInterfaceTypedef extends AsNNode {
 
@@ -126,11 +126,15 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 * it will be referenced by the resolver table.
 			 */
 			table.clear();
-			
+
+			/*
+			 * Add label head, so other casting methods can reference it. It wont
+			 * be used, but we have to ensure the existence of the label anyway.
+			 */
 			relayTableHead.comment.comment += " (Unused)";
 			table.add(relayTableHead);
 		}
-		
+
 		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}
@@ -161,7 +165,11 @@ public class AsNInterfaceTypedef extends AsNNode {
 		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
 		relayTableHead.comment = new ASMComment("Relay: " + sdef.path + " -> INTF");
 		table.add(relayTableHead);
-		
+
+		int c = 0;
+		List<ASMInstruction> tableBody = new ArrayList();
+		ASMBranch lastBranch = null;
+
 		for (int i = 0; i < sdef.implemented.size(); i++) {
 			INTERFACE intf = sdef.implemented.get(i);
 		
@@ -191,14 +199,25 @@ public class AsNInterfaceTypedef extends AsNNode {
 				
 				if (!added.contains(postfix) && isValidMapping) {
 					added.add(postfix);
-					
-					table.addAll(intf.getTypedef().loadIIDInReg(REG.R12, intfTypes));
-					table.add(new ASMCmp(new RegOp(REG.R10), new RegOp(REG.R12)));
-					table.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(mapping.resolverLabelMap.get(intf.getTypedef()))));
+
+					tableBody.addAll(intf.getTypedef().loadIIDInReg(REG.R12, intfTypes));
+					tableBody.add(new ASMCmp(new RegOp(REG.R10), new RegOp(REG.R12)));
+
+					lastBranch = new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(mapping.resolverLabelMap.get(intf.getTypedef())));
+					tableBody.add(lastBranch);
+
+					c++;
 				}
 			}
 		}
-		
+
+		if (c == 1) {
+			lastBranch.cond = null;
+			table.add(lastBranch);
+		}
+		else
+			table.addAll(tableBody);
+
 		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}

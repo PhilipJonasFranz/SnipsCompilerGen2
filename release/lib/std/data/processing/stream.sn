@@ -31,6 +31,32 @@ namespace Streamable {
 			
 			return self;
 		}
+
+		shared boolean allMatch(func T -> bool pred) {
+            int c = 0;
+            int size = (self->collection).size();
+
+            for (int i = 0; i < size; i++) {
+                if (pred((self->collection).get(i))) {
+                    c++;
+                }
+            }
+
+            return c == size;
+        }
+
+        shared boolean anyMatch(func T -> bool pred) {
+            int c = 0;
+            int size = (self->collection).size();
+
+            for (int i = 0; i < size; i++) {
+                if (pred((self->collection).get(i))) {
+                    c++;
+                }
+            }
+
+            return c > 0;
+        }
 		
 		shared Stream<V>* map<V, T>(Collection<V> target, func T -> V pred) {
 			int size = (self->collection).size();
