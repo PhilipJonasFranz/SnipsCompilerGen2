@@ -12,15 +12,20 @@ struct X<T> {
 	void set(T nVal) {
 		self->val = nVal;
 	}
-	
+
+    shared void destroy() {
+        free(self);
+    }
+
 	static X<T> create<T>(T val) {
 		return X<T>::(val);
 	}
+
 }
 
 int main() {
-	X<int>* x = init<>(X::create<int>(10));
-	LinkedList<X<int>*>* list = LinkedList::create<X<int>*>(null);
+	volatile X<int>* x = init<>(X::create<int>(10));
+	volatile LinkedList<X<int>*>* list = LinkedList::create<X<int>*>(null);
 	
 	list->add(x);
 	
@@ -61,6 +66,10 @@ X.set_P_1:                                   /* Function: X.set, Provisos: INT *
     pop { r4 }
     bx lr
 
+.global X.destroy_P_1
+X.destroy_P_1:                               /* Function: X.destroy, Provisos: INT */
+    b free                                   /* Call free */
+
 .global X.create_P_1
 X.create_P_1:                                /* Function: X.create, Provisos: INT */
     push { fp }
@@ -94,6 +103,10 @@ main:                                        /* Function: main */
     mov r1, #12
     mov r0, r3
     bl X.set_P_1                             /* Call X.set */
+    mov r0, r3                               /* Evaluate Expression */
+    bl X.destroy_P_1                         /* Call X.destroy */
+    mov r0, r4                               /* Load parameters */
+    bl List.LinkedList.destroy_P_1           /* Call List.LinkedList.destroy */
     mov r1, #0
     mov r0, r4
     bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */

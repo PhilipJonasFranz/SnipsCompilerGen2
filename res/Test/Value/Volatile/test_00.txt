@@ -1,0 +1,51 @@
+SOURCE
+int main(int a) {
+	volatile int* p = resv(sizeof(int));
+
+    *p = 10;
+
+    if (*p == 6) {
+        return 0;
+    }
+
+	*p = 5;
+
+	return *p;
+}
+TESTCASES
+5
+OUTPUT
+.version 0
+
+.include maybe resv.s
+.include maybe free.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r0, #1                               /* Evaluate Expression */
+    bl resv                                  /* Call resv */
+    mov r4, r0
+    mov r0, #10                              /* Evaluate Expression */
+    str r0, [r10, r4, lsl #2]
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    cmp r0, #6
+    bne main.L0
+    mov r0, r4                               /* Evaluate Expression */
+    bl free                                  /* Call free */
+    mov r0, #0
+    pop { pc }
+main.L0: 
+    mov r0, #5                               /* Evaluate Expression */
+    str r0, [r10, r4, lsl #2]
+    mov r0, r4                               /* Evaluate Expression */
+    bl free                                  /* Call free */
+    ldr r0, [r10, r4, lsl #2]                /* Load from address */
+    pop { pc }

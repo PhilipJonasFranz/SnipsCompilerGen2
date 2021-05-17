@@ -153,7 +153,10 @@ public class Token {
 		STRUCTID("", 				TokenGroup.TYPE),
 		ENUMID("", 					TokenGroup.TYPE),
 		TYPE("type", 				TokenGroup.TYPE),
-		
+
+		/* Type descriptiors */
+		VOLATILE("volatile", 		TokenGroup.TYPE),
+
 		/* Primitive Literals */
 		INTLIT("intlit",			TokenGroup.LITERAL),
 		CHARLIT("charlit",			TokenGroup.LITERAL),

@@ -1,13 +1,16 @@
 package Par;
 
-import java.util.*;
-
 import Exc.SNIPS_EXC;
 import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Res.Const;
-import Util.Source;
 import Util.Logging.ProgressMessage;
+import Util.Source;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Scanner {
 
@@ -106,6 +109,7 @@ public class Scanner {
 			new ScannableToken("float", TokenType.FLOAT, ACC_STATE.NONE, " ", "*", "[", ">", ")", ","),
 			new ScannableToken("char", TokenType.CHAR, ACC_STATE.NONE, " ", "*", "[", ">", ")", ","),
 			new ScannableToken("bool", TokenType.BOOL, ACC_STATE.NONE, " ", "*", "[", ">", ")", ","),
+			new ScannableToken("volatile", TokenType.VOLATILE, ACC_STATE.NONE, " ", "*", "[", ">", ")", ","),
 			new ScannableToken("return", TokenType.RETURN, ACC_STATE.NONE, " ", ";"),
 			new ScannableToken("asm", TokenType.ASM, ACC_STATE.NONE, " ", "(", "{"),
 			new ScannableToken("break", TokenType.BREAK, ACC_STATE.NONE, " ", ";"),

@@ -1,20 +1,20 @@
 package Ctx;
 
+import Exc.CTEX_EXC;
+import Imm.AST.Statement.Declaration;
+import Res.Const;
+import Snips.CompilerDriver;
+import Util.Logging.LogPoint;
+import Util.Logging.Message;
+import Util.NamespacePath;
+import Util.Pair;
+import Util.Source;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import Exc.CTEX_EXC;
-import Imm.AST.Statement.Declaration;
-import Res.Const;
-import Snips.CompilerDriver;
-import Util.NamespacePath;
-import Util.Pair;
-import Util.Source;
-import Util.Logging.LogPoint;
-import Util.Logging.Message;
 
 /**
  * A scope capsules a reference to its parent scope and a 
@@ -198,6 +198,40 @@ public class Scope {
 		}
 		
 		return null;
+	}
+
+	/**
+	 * Returns all currently active declarations in this scope.
+	 */
+	public List<Declaration> getDeclarationsInScope() {
+		List<Declaration> immutableListDecs = this.declarations.values().stream().map(x -> x.first).toList();
+		List<Declaration> mutableListDecs = new ArrayList<>(immutableListDecs);
+		return mutableListDecs;
+	}
+
+	/**
+	 * Returns all currently active declarations, in this and all parent scopes.
+	 */
+	public List<Declaration> getAllDeclarations() {
+		if (this.parentScope == null) return this.getDeclarationsInScope();
+		else {
+			List<Declaration> fromParent = this.parentScope.getAllDeclarations();
+			fromParent.addAll(this.getDeclarationsInScope());
+			return fromParent;
+		}
+	}
+
+	/**
+	 * Returns all currently active declarations, in this and all parent scopes.
+	 * Excludes declarations in the root-scope, or global variables.
+	 */
+	public List<Declaration> getAllDeclarationsExceptGlobal() {
+		if (this.parentScope == null) return new ArrayList();
+		else {
+			List<Declaration> fromParent = this.parentScope.getAllDeclarations();
+			fromParent.addAll(this.getDeclarationsInScope());
+			return fromParent;
+		}
 	}
 	
 } 

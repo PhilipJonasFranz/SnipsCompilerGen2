@@ -49,18 +49,24 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 	 * @param r The current RegSet
 	 * @param close If set to true, the declarations are removed, if not, only the offsets are calculated and added to the stack.
 	 */
-	public static void popDeclarationScope(AsNNode node, CompoundStatement s, RegSet r, StackSet st, boolean close) {
+	public static void popDeclarationScope(AsNNode node, CompoundStatement s, RegSet r, StackSet st, MemoryMap map, boolean close) throws CGEN_EXC {
 		if (close) {
 			List<Declaration> declarations = new ArrayList(); 
 			
 			/* Collect declarations from statements, ignore sub-compounds, they will do the same */
 			for (Statement s0 : s.body) {
-				if (s0 instanceof Declaration) 
+				if (s0.equals(s)) break;
+				if (s0 instanceof Declaration) {
 					declarations.add((Declaration) s0);
+				}
 			}
 			
 			/* Delete declarations out of the registers */
 			for (Declaration d : declarations) {
+				/* Cast the destruction operation */
+				if (d.isVolatile && d.volatileDestruct != null)
+					node.instructions.addAll(AsNStatement.cast(d.volatileDestruct, r, map, st).getInstructions());
+				
 				if (r.declarationLoaded(d)) {
 					int loc = r.declarationRegLocation(d);
 					r.getReg(loc).free();
@@ -97,7 +103,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		}
 		
 		/* Free all declarations in scope */
-		popDeclarationScope(this, a, r, st, true);
+		popDeclarationScope(this, a, r, st, map, true);
 	}
 	
 	/**

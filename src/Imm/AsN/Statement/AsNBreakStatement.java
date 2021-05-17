@@ -3,6 +3,7 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -11,7 +12,7 @@ import Imm.AST.Statement.BreakStatement;
 
 public class AsNBreakStatement extends AsNStatement {
 
-	public static AsNBreakStatement cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) {
+	public static AsNBreakStatement cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNBreakStatement br = new AsNBreakStatement();
 		br.pushOnCreatorStack(b);
 		b.castedNode = br;
@@ -23,7 +24,7 @@ public class AsNBreakStatement extends AsNStatement {
 		 * the normal loop exit is not taken, and thus the stack resetting is skipped.
 		 * By passing the parameter false the stack set and reg set is not changed, but the
 		 * correct offsets are determined, and the stack reset operation is inserted */
-		AsNCompoundStatement.popDeclarationScope(br, b.superLoop, r, st, false);
+		AsNCompoundStatement.popDeclarationScope(br, b.superLoop, r, st, map, false);
 		
 		/* Jump to the loop escape label */
 		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));

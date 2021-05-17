@@ -3,6 +3,7 @@ package Imm.AsN.Statement;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
+import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
@@ -11,7 +12,7 @@ import Imm.AST.Statement.ContinueStatement;
 
 public class AsNContinueStatement extends AsNStatement {
 
-	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) {
+	public static AsNContinueStatement cast(ContinueStatement c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNContinueStatement con = new AsNContinueStatement();
 		con.pushOnCreatorStack(c);
 		c.castedNode = con;
@@ -23,7 +24,7 @@ public class AsNContinueStatement extends AsNStatement {
 		 * the normal loop reset is skipped, which will cause declarations to pile on the stack.
 		 * By passing the parameter false the stack set and reg set is not changed, but the
 		 * correct offsets are determined. */
-		AsNCompoundStatement.popDeclarationScope(con, c.superLoop, r, st, false);
+		AsNCompoundStatement.popDeclarationScope(con, c.superLoop, r, st, map, false);
 		
 		/* Jump to the label */
 		con.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));

@@ -1,14 +1,11 @@
 package Imm.AST.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -18,6 +15,9 @@ import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -55,6 +55,20 @@ public class Declaration extends Statement {
 	public Statement last = null;
 	
 	public boolean hadAutoType = false;
+
+	/**
+	 * If set to true, after the scope is closed this declaration is in, it is
+	 * attempted to free or destroy this declaration automatically. Can be set
+	 * to true by using the 'volatile' keyword.
+	 */
+	public boolean isVolatile = false;
+
+	/**
+	 * This statement is set during context checking. For declarations that
+	 * require special handling like a free() call, a statement is created
+	 * and set here that can be called to destroy this declaration.
+	 */
+	public Statement volatileDestruct;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -81,7 +95,7 @@ public class Declaration extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
-			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type + "> " + this.path);
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type + "> " + this.path + ((this.isVolatile)? " <VOLATILE>" : ""));
 		} catch (Exception e) {
 			CompilerDriver.outs.println(Util.pad(d) + "Declaration <?> " + this.path);
 		}
@@ -151,7 +165,11 @@ public class Declaration extends Statement {
 		Declaration clone = new Declaration(this.path, this.type.clone(), this.modifier, this.getSource());
 		
 		if (this.value != null) clone.value = this.value.clone();
-		
+
+		clone.isVolatile = this.isVolatile;
+		if (clone.volatileDestruct != null)
+			clone.volatileDestruct = this.volatileDestruct.clone();
+
 		clone.SERIAL = this.SERIAL;
 		clone.copyDirectivesFrom(this);
 		return clone;
@@ -159,7 +177,11 @@ public class Declaration extends Statement {
 
 	public List<String> codePrint(int d) {
 		List<String> code = new ArrayList();
-		String s = this.type.codeString() + " " + this.path;
+		String s = "";
+
+		if (this.isVolatile) s = "volatile ";
+
+		s += this.type.codeString() + " " + this.path;
 		if (this.value != null)
 			s += " = " + this.value.codePrint() + ";";
 		code.add(Util.pad(d) + s);

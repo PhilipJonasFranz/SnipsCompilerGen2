@@ -1098,7 +1098,12 @@ public class ContextChecker {
 		}
 		
 		this.checkBody(i.body, true, false);
-		
+
+		/*
+		 * The Break statement uses popDeclarationScope of super loop to destroy declarations,
+		 * so we do not have to collect the declarations here.
+		 */
+
 		if (i.elseStatement != null) 
 			i.elseStatement.check(this);
 		
@@ -1186,6 +1191,39 @@ public class ContextChecker {
 			
 			/* Check for modifier restrictions */
 			d.modifierViolated = this.checkModifier(i.getTypedef().modifier, i.getTypedef().path, d.getSource());
+		}
+
+		if (d.isVolatile && d.getType().isPointer()) {
+			/*
+			 * We assume that it is a heaped pointer here. For non-heaped pointers, the
+			 * volatile keyword should not be used.
+			 */
+			IDRef refToDec = new IDRef(d.path.clone(), d.getSource());
+			FunctionCall callToFree = new FunctionCall(new NamespacePath("free"), new ArrayList(), Arrays.asList(refToDec), d.getSource());
+
+			/*
+			 * If the declaration is a struct pointer, we can search for a
+			 * destroy function and call this function instead. If the
+			 * declaration is a struct, and not a struct pointer, the struct
+			 * is on the stack and deleted automatically.
+			 */
+			if (d.getType().getContainedType().isStruct()) {
+				STRUCT struct = (STRUCT) d.getType().getContainedType();
+
+				/* Search for destructor function */
+				for (Function f : struct.getTypedef().functions) {
+					if (f.path.getLast().equals("destroy")) {
+						/* Found function, create new call to this function instead */
+						callToFree = new FunctionCall(f.path.clone(), new ArrayList(), Arrays.asList(refToDec), d.getSource());
+						callToFree.isNestedCall = true;
+						break;
+					}
+				}
+			}
+
+			/* Initialize references and link functions */
+			callToFree.check(this);
+			d.volatileDestruct = callToFree;
 		}
 
 		/* No need to set type here, is done while parsing */
@@ -1288,14 +1326,26 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkBreak(BreakStatement b) throws CTEX_EXC {
-		if (this.compoundStack.isEmpty()) 
+
+		/*
+		 * The Break statement uses popDeclarationScope of super loop to destroy declarations,
+		 * so we do not have to collect the declarations here.
+		 */
+
+		if (this.compoundStack.isEmpty())
 			throw new CTEX_EXC(Const.CAN_ONLY_BREAK_OUT_OF_LOOP);
 		else b.superLoop = this.compoundStack.peek();
 		return null;
 	}
 	
 	public TYPE checkContinue(ContinueStatement c) throws CTEX_EXC {
-		if (this.compoundStack.isEmpty()) 
+
+		/*
+		 * The Continue statement uses popDeclarationScope of super loop to destroy declarations,
+		 * so we do not have to collect the declarations here.
+		 */
+
+		if (this.compoundStack.isEmpty())
 			throw new CTEX_EXC(Const.CAN_ONLY_CONTINUE_IN_LOOP);
 		else c.superLoop = this.compoundStack.peek();
 		return null;
@@ -1333,6 +1383,12 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkReturn(ReturnStatement r) throws CTEX_EXC {
+
+		for (Declaration d : this.scopes.peek().getAllDeclarationsExceptGlobal()) {
+			if (d.isVolatile && d.volatileDestruct != null)
+				r.volatileDecsToDestroy.add(d);
+		}
+
 		if (r.value != null) {
 			TYPE t = r.value.check(this);
 
@@ -2561,13 +2617,15 @@ public class ContextChecker {
 		}
 	}
 	
-	public void checkBody(List<Statement> body, boolean pushScope, boolean loopedScope) throws CTEX_EXC {
+	public Scope checkBody(List<Statement> body, boolean pushScope, boolean loopedScope) throws CTEX_EXC {
 		if (pushScope) this.scopes.push(new Scope(this.scopes.peek(), loopedScope));
 		for (Statement s : body) {
 			currentStatement = s;
 			s.check(this);
 		}
-		if (pushScope) this.scopes.pop();
+
+		if (pushScope) return this.scopes.pop();
+		return null;
 	}
 	
 	/**

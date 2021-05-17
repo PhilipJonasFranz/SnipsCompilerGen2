@@ -1,19 +1,19 @@
 package Imm.AST.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -22,6 +22,12 @@ public class ReturnStatement extends Statement {
 
 			/* ---< FIELDS >--- */
 	public Expression value;
+
+	/**
+	 * A list of declarations that need to be destroyed when this statement is
+	 * executed.
+	 */
+	public List<Declaration> volatileDecsToDestroy = new ArrayList();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -76,6 +82,7 @@ public class ReturnStatement extends Statement {
 	public Statement clone() {
 		ReturnStatement r = new ReturnStatement((this.value != null)? this.value.clone() : null, this.getSource().clone());
 		r.copyDirectivesFrom(this);
+		r.volatileDecsToDestroy.addAll(this.volatileDecsToDestroy);
 		return r;
 	}
 	

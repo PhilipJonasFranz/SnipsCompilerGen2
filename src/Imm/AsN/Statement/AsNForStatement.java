@@ -120,7 +120,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		else f.instructions.addAll(AsNAssignment.cast(a.increment, r, map, st).getInstructions());
 		
 		/* Free all declarations in scope */
-		popDeclarationScope(f, a, r, st, true);
+		popDeclarationScope(f, a, r, st, map, true);
 		
 		
 		/* Branch to loop start */

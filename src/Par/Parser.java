@@ -714,6 +714,16 @@ public class Parser {
 	}
 	
 	private Declaration parseDeclaration(MODIFIER mod, boolean parseValue, boolean acceptSemicolon) throws PARS_EXC {
+		boolean isVolatile = false;
+
+		if (current.type == TokenType.VOLATILE) {
+			accept();
+			isVolatile = true;
+
+			/* Need to include library since it may be called in the auto destructor */
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
+		}
+
 		TYPE type = this.parseType();
 		Token id = accept(TokenType.IDENTIFIER);
 
@@ -728,6 +738,8 @@ public class Parser {
 			accept(TokenType.SEMICOLON);
 		
 		Declaration d = new Declaration(new NamespacePath(id.spelling), type, value, mod, id.source());
+		d.isVolatile = isVolatile;
+
 		this.scopes.peek().add(d);
 		return d;
 	}
@@ -771,8 +783,8 @@ public class Parser {
 			}
 		}
 		
-		boolean decCheck = current.type.group() == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
-		for (int i = 0; i < this.tokenStream.size(); i += 3) {
+		boolean decCheck = current.type == TokenType.VOLATILE || current.type.group() == TokenGroup.TYPE || current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.ENUMID;
+		for (int i = current.type == TokenType.VOLATILE? 1 : 0; i < this.tokenStream.size(); i += 3) {
 			if (tokenStream.get(i).type == TokenType.IDENTIFIER || 
 				tokenStream.get(i).type == TokenType.ENUMID || 
 				tokenStream.get(i).type == TokenType.LBRACKET || 

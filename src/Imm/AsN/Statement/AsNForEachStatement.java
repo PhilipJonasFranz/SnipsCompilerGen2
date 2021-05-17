@@ -181,7 +181,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		
 		/* Free all declarations in scope */
-		popDeclarationScope(f, a, r, st, true);
+		popDeclarationScope(f, a, r, st, map, true);
 		
 		
 		/* Operand will hold the value to increment the counter with */

@@ -7,8 +7,9 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
+import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AsN.Expression.AsNExpression;
 
@@ -18,7 +19,11 @@ public class AsNReturnStatement extends AsNStatement {
 		AsNReturnStatement ret = new AsNReturnStatement();
 		ret.pushOnCreatorStack(s);
 		s.castedNode = ret;
-		
+
+		/* Cast all declaration destroy operations */
+		for (Declaration d : s.volatileDecsToDestroy)
+			ret.instructions.addAll(AsNStatement.cast(d.volatileDestruct, r, map, st).getInstructions());
+
 		if (s.value != null) {
 			ret.instructions.addAll(AsNExpression.cast(s.value, r, map, st).getInstructions());
 			if (!ret.instructions.isEmpty()) ret.instructions.get(0).comment = new ASMComment("Evaluate Expression");
