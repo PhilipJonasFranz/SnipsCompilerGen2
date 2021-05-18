@@ -1,19 +1,19 @@
 package Imm.AST.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -40,7 +40,7 @@ public class IfStatement extends ConditionalCompoundStatement {
 		CompilerDriver.outs.println(Util.pad(d) + "If");
 		
 		if (rec) {
-			this.condition.print(d + this.printDepthStep, true);
+			if (this.condition != null) this.condition.print(d + this.printDepthStep, true);
 			
 			for (Statement s : this.body) 
 				s.print(d + this.printDepthStep, true);

@@ -1,10 +1,5 @@
 package Imm.AST;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
@@ -26,6 +21,11 @@ import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -149,10 +149,27 @@ public class Function extends CompoundStatement {
 	 * Unique ID of this function.
 	 */
 	public int UID = LabelUtil.getUID();
-	
+
+	/**
+	 * Set during AST_OPT phase, contains reference to the function in
+	 * the duplicate AST that is used to probe optimizations, before they
+	 * are passed to this function.
+	 */
 	public Function ASTOptCounterpart;
 	
 	public int LAST_UPDATE = 0;
+
+	/**
+	 * A list that is set during context checking that lists all statements
+	 * in the function body that are not providing a return statement. This
+	 * is computed using the noReturnStatement() function from Matcher.
+	 * The algorithm chooses the highest-scoped statement that is missing
+	 * a return statement, for example if an if-statement in an if-statement
+	 * is missing a return statement, but the outer if provides one, the inner
+	 * one is discarded. Otherwise, if the outer does not provide a return,
+	 * the outer one is chosen since it is in a higher scope.
+	 */
+	public List<Statement> statementsWithoutReturn = new ArrayList();
 	
 	/**
 	 * If this function is not null, and the body of this function is null,
@@ -589,6 +606,12 @@ public class Function extends CompoundStatement {
 		return this.modifier == MODIFIER.STATIC && 
 				this.path.build().endsWith("create") && 
 				this.getReturnType().isStruct();
+	}
+
+	public boolean isDestructor() {
+		return this.modifier == MODIFIER.SHARED &&
+				this.path.build().endsWith("destroy") &&
+				this.getReturnType().isVoid();
 	}
 
 } 

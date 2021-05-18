@@ -29,6 +29,7 @@ import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.*;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Opt.AST.Util.Matcher;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.*;
@@ -371,7 +372,10 @@ public class ContextChecker {
 		 */
 		if (f.hasDirective(DIRECTIVE.OPERATOR))
 			f.requireUIDInLabel = true;
-		
+
+		if (f.body != null)
+			f.statementsWithoutReturn = Matcher.noReturnStatement(f.body);
+
 		return f.getReturnType().clone();
 	}
 	
@@ -1212,7 +1216,7 @@ public class ContextChecker {
 
 				/* Search for destructor function */
 				for (Function f : struct.getTypedef().functions) {
-					if (f.path.getLast().equals("destroy")) {
+					if (f.isDestructor()) {
 						/* Found function, create new call to this function instead */
 						callToFree = new FunctionCall(f.path.clone(), new ArrayList(), Arrays.asList(refToDec), d.getSource());
 						callToFree.isNestedCall = true;

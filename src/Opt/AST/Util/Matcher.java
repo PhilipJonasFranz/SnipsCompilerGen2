@@ -1,14 +1,13 @@
 package Opt.AST.Util;
 
 import Imm.AST.Expression.*;
-import Imm.AST.Statement.BreakStatement;
-import Imm.AST.Statement.ContinueStatement;
-import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.Statement;
+import Imm.AST.Function;
+import Imm.AST.Statement.*;
 import Imm.AST.SyntaxElement;
 import Tools.ASTNodeVisitor;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -125,7 +124,68 @@ public class Matcher {
 		for (Statement s : body) result.addAll(s.visit(visitor));
 		return result;
 	}
-	
+
+	/**
+	 * Returns a list of statements that are missing a return statement
+	 * at a branch/control flow.
+	 */
+	public static List<Statement> noReturnStatement(List<Statement> body) {
+		List<Statement> noReturn = new ArrayList();
+		for (Statement s : body) {
+			List<Statement> noReturnInStatement = noReturnStatement(s);
+			if (!noReturnInStatement.isEmpty()) noReturn.addAll(noReturnInStatement);
+			else noReturn.clear();
+		}
+
+		/* Filter duplicates */
+		return new ArrayList<>(new LinkedHashSet<>(noReturn));
+	}
+
+	/**
+	 * Returns a list of statements that are missing a return statement
+	 * at a branch/control flow.
+	 */
+	public static List<Statement> noReturnStatement(Statement s) {
+		if (s instanceof ReturnStatement) return new ArrayList<>();
+		else if (s instanceof IfStatement if0) {
+			List<Statement> noReturnInStatement = new ArrayList<>();
+
+			while (if0 != null) {
+				List<Statement> noReturnInIf = noReturnStatement(if0.body);
+				if (!if0.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(if0);
+				else noReturnInStatement.addAll(noReturnInIf);
+
+				if0 = if0.elseStatement;
+			}
+
+			return noReturnInStatement;
+		}
+		else if (s instanceof SwitchStatement sw) {
+			List<Statement> noReturnInStatement = new ArrayList<>();
+
+			for (CaseStatement case0 : sw.cases) {
+				List<Statement> noReturnInCase = noReturnStatement(case0.body);
+				if (!case0.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(case0);
+				else noReturnInStatement.addAll(noReturnInCase);
+			}
+
+			List<Statement> noReturnInDefault = noReturnStatement(sw.defaultStatement.body);
+			if (!sw.defaultStatement.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(sw.defaultStatement);
+			else noReturnInStatement.addAll(noReturnInDefault);
+
+			return noReturnInStatement;
+		}
+		else if (s instanceof Function f) {
+			List<Statement> noReturnInStatement = noReturnStatement(f.body);
+
+			if (!f.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(f);
+			else noReturnInStatement.addAll(noReturnInStatement);
+
+			return noReturnInStatement;
+		}
+		else return new ArrayList<>();
+	}
+
 	public static boolean isSubExpression(Expression base, Expression sub) {
 		return base.visit(x -> true).contains(sub);
 	}
