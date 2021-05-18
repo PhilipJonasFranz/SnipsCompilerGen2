@@ -26,7 +26,7 @@
 
 Currently supported data types are:
 
-- Primitive types : `int`, `bool`, `char`
+- Primitive types : `int`, `bool`, `char`, `float`
 - Custom types    : `interface`, `struct`, `enum`
 - Special types   : `func`, `proviso`, `void`, `auto`
 
@@ -66,11 +66,11 @@ int main() {
  - Parsing the token stream, creating an AST
  - Processing dynamic imports
  - Context checking and creating the DAST
- - Linter, spot potential problems with rule-based static code analysis
- - AST Optimizer, rule-based AST transformations
+ - Linter, spot potential problems with rule-based static code analysis (Optional)
+ - AST Optimizer, rule-based AST transformations (Optional)
  - Code Generation, create list of Assembly instructions
- - Assembly Optimizer, rule-based optimizations
- - Linker, resolves assembly imports of output
+ - Assembly Optimizer, rule-based optimizations (Optional)
+ - Linker, resolves assembly imports of output (Optional)
 
  The compiler uses a built-in [System Library](release/lib "release/lib"), located at `release/lib`. 
  
@@ -116,12 +116,15 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  
 ### SWARM32Pc
  Under `src/REv/CPU/` you can find a [Virtual Machine](src/REv/CPU/), which implements a subset of the ARM Instruction Set. Again, this is used to test the output of the Compiler. Since the processor does not support all instructions i would not recommend to use it somewhere else. Supported instructions are: 
+ 
  - `b`, `bl`, `bx`
  - All data processing operations
  - `mrs`, `msr`
  - `mul`, `mla`
  - `ldr`, `str`
  - `ldm`, `stm`
+
+Additionally, a VFP-Coprocessor can handle floating point arithmetic.
  
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 
