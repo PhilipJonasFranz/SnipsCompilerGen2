@@ -4,6 +4,18 @@ namespace FMath {
 	
 	static float PI = 3.14159265359f;
 
+    shared float abs(float x) {
+    	asm {
+    	    vabs s0, s0
+    	};
+    }
+
+	shared float sqrt(float x) {
+    	asm {
+    	    vsqrt s0, s0
+    	};
+    }
+
 	shared float fac(int n) {
 		float r = 1f;
 		while (n > 0) {
@@ -24,17 +36,17 @@ namespace FMath {
 		return r;
 	}
 
-    shared float abs(float x) {
-    	asm {
-    	    vabs s0, s0
-    	};
-    }
+	shared float exp(float x) {
+	    if (x == 0f) return 1f;
+	    if (x == 1f) return FMath::E;
 
-	shared float sqrt(float x) {
-    	asm {
-    	    vsqrt s0, s0
-    	};
-    }
+        /* Use continued fraction to approximate, depth = 20 */
+	    float x_0 = 1f;
+	    for (float d = 20f; d >= 2f; d -= 1f)
+            x_0 = 1f + x / d - (x / (d + 1f)) / x_0;
+
+        return 1f + (x / (1f - (x / 2f) / x_0));
+	}
 
 	#strategy always
 	shared float sin(float x) {
