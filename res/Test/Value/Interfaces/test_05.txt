@@ -86,8 +86,10 @@ OUTPUT
 
 .data
 List.LinkedList_P_1: .word 0
+List.LinkedList_vrelay_P_1: .word List.LinkedList_vtable_P_1
 List.LinkedList_P_1_resolver_relay: .word List.LinkedList_P_1_resolver
 List.ListNode_P_1: .word 0
+List.ListNode_vrelay_P_1: .word 0
 List.Iterable_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
@@ -95,8 +97,16 @@ HEAP_START: .word 0
 .text
     b main
 
+List.LinkedList_vtable_P_1:                  /* VTable for List.LinkedList proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b List.LinkedList.add_P_1
+    b List.LinkedList.get_P_1
+    b List.LinkedList.size_P_1
+
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r4, r1
@@ -233,7 +243,7 @@ main:                                        /* Function: main */
     mov r0, r3                               /* Evaluate Expression */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P481193736_List.Iterable_P_1
     add lr, pc, #8
     mov pc, r12
@@ -248,7 +258,7 @@ main.L1:
     mov r0, r3
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P481193736_List.Iterable_P_1
     add lr, pc, #8
     mov pc, r12

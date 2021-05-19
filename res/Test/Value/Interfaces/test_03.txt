@@ -27,6 +27,7 @@ OUTPUT
 
 .data
 X_P_1: .word 0
+X_vrelay_P_1: .word X_vtable_P_1
 X_P_1_resolver_relay: .word X_P_1_resolver
 Inter_P_1: .word 0
 NULL: .word 0
@@ -34,6 +35,11 @@ HEAP_START: .word 0
 
 .text
     b main
+
+X_vtable_P_1:                                /* VTable for X proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b X.get_P_1
 
 .global X.get_P_1
 X.get_P_1:                                   /* Function: X.get, Provisos: INT */
@@ -69,7 +75,7 @@ main:                                        /* Function: main */
     mov r0, r3                               /* Evaluate Expression */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P423935431_Inter_P_1
     add lr, pc, #8
     mov pc, r12

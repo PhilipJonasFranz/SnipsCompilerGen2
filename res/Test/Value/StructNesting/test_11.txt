@@ -67,15 +67,23 @@ OUTPUT
 
 .data
 C.A_P_1: .word C.B_P_1
+C.A_vrelay_P_1: .word C.A_vtable_P_1
 C.B_P_1: .word 0
+C.B_vrelay_P_1: .word C.B_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+C.B_vtable_P_1:                              /* VTable for C.B proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b C.B.incr_P_1
+
 .global C.B.incr_P_1
 C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: INT */
+    mov r10, #0
     push { r3 }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -86,12 +94,20 @@ C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: IN
     pop { r3 }
     bx lr
 
+C.A_vtable_P_1:                              /* VTable for C.A proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b C.B.incr_P_1
+    add r10, r10, r10                        /* Function 'C.A.set' not called */
+    b C.A.pipe_P_1
+
 .global C.A.incr_P_1
 C.A.incr_P_1: 
     b C.B.incr_P_1                           /* Relay to inherited C.B.incr_P_1 */
 
 .global C.A.pipe_P_1
 C.A.pipe_P_1:                                /* Function: C.A.pipe, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r4, r1

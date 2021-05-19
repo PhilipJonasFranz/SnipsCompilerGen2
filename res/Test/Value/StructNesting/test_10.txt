@@ -30,15 +30,23 @@ OUTPUT
 
 .data
 X: .word 0
+X_vrelay: .word X_vtable
 Y: .word 0
+Y_vrelay: .word Y_vtable
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+Y_vtable:                                    /* VTable for Y */
+    mov r12, #0
+    add pc, pc, r10
+    b Y.incr
+
 .global Y.incr
 Y.incr:                                      /* Function: Y.incr */
+    mov r10, #0
     push { r3 }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -49,8 +57,14 @@ Y.incr:                                      /* Function: Y.incr */
     pop { r3 }
     bx lr
 
+X_vtable:                                    /* VTable for X */
+    mov r12, #0
+    add pc, pc, r10
+    b X.relay
+
 .global X.relay
 X.relay:                                     /* Function: X.relay */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     b Y.incr                                 /* Call Y.incr */

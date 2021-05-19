@@ -41,8 +41,10 @@ import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
+import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.TYPE;
 import Res.Const;
+import Util.MODIFIER;
 import Util.Pair;
 
 public class AsNFunctionCall extends AsNStatement {
@@ -267,14 +269,46 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		else {
-			/* Branch to function */
-			String target = f.buildCallLabel(provisos);
-			
-			ASMLabel functionLabel = new ASMLabel(target);
-			
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
-			branch.comment = new ASMComment("Call " + f.path);
-			call.instructions.add(branch);
+			boolean isSuper = true;
+			if (f.definedInStruct != null && !callee.getParams().isEmpty() && callee.getParams().get(0).getType().getContainedType().isStruct())
+				isSuper = !f.definedInStruct.equals(((STRUCT) callee.getParams().get(0).getType().getContainedType()).getTypedef());
+
+			/* Dynamic Dispatch function call */
+			if (f.definedInStruct != null && !f.definedInStruct.extenders.isEmpty() && f.modifier != MODIFIER.STATIC && !isSuper) {
+				StructTypedef def = f.definedInStruct;
+
+				int offset = AsNFunctionCall.findOffset(def.functions, f);
+
+				/* Make sure the function was found */
+				assert offset == -1 : "Failed to locate function '" + f.path + "'!";
+
+				/* Load address of struct interface resolver */
+				ASMLsl lsl = new ASMLsl(new RegOp(REG.R12), new RegOp(REG.R0), new ImmOp(2));
+				lsl.optFlags.add(OPT_FLAG.WRITEBACK);
+				call.instructions.add(lsl);
+				call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12)));
+
+				/* Load and push the function offset for later use */
+				ASMMov offsetMov = new ASMMov(new RegOp(REG.R10), new ImmOp(offset + 4));
+				offsetMov.comment = new ASMComment("Offset to " + f.path);
+				call.instructions.add(offsetMov);
+
+				/* Load the address of the table into the PC to branch to it. */
+				ASMLdr ddispatch = new ASMLdr(new RegOp(REG.PC), new RegOp(REG.R12), new ImmOp(4));
+				ddispatch.optFlags.add(OPT_FLAG.SYS_JMP);
+				ddispatch.comment = new ASMComment("Dynamic dispatch to VTable");
+				call.instructions.add(ddispatch);
+			}
+			else {
+				/* Branch to function */
+				String target = f.buildCallLabel(provisos);
+
+				ASMLabel functionLabel = new ASMLabel(target);
+
+				ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
+				branch.comment = new ASMComment("Call " + f.path);
+				call.instructions.add(branch);
+			}
 		}
 		
 		if (f != null) {

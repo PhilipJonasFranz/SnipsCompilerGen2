@@ -25,11 +25,17 @@ OUTPUT
 
 .data
 Data.X: .word 0
+Data.X_vrelay: .word Data.X_vtable
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+Data.X_vtable:                               /* VTable for Data.X */
+    mov r12, #0
+    add pc, pc, r10
+    b Data.X.create
 
 .global Data.X.create
 Data.X.create:                               /* Function: Data.X.create */

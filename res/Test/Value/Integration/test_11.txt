@@ -45,20 +45,31 @@ OUTPUT
 
 .data
 X_P_1: .word 0
+X_vrelay_P_1: .word X_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+X_vtable_P_1:                                /* VTable for X proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b X.get_P_1
+    b X.set_P_1
+    b X.destroy_P_1
+    b X.create_P_1
+
 .global X.get_P_1
 X.get_P_1:                                   /* Function: X.get, Provisos: INT */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
 
 .global X.set_P_1
 X.set_P_1:                                   /* Function: X.set, Provisos: INT */
+    mov r10, #0
     push { r4 }
     mov r4, r1
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -68,6 +79,7 @@ X.set_P_1:                                   /* Function: X.set, Provisos: INT *
 
 .global X.destroy_P_1
 X.destroy_P_1:                               /* Function: X.destroy, Provisos: INT */
+    mov r10, #0
     b free                                   /* Call free */
 
 .global X.create_P_1

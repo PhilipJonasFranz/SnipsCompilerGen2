@@ -206,7 +206,48 @@ public class AsNBody extends AsNNode {
 						ASMDataLabel entry = new ASMDataLabel(def.path + postfix, parent);
 						dataBlock.add(entry);
 						def.SIDLabelMap.put(postfix, entry);
-						
+
+						/* Add label for VTable relay */
+						MemoryOperand tableTarget = new MemoryWordRefOp(new ASMDataLabel(def.path + "_vtable" + postfix, new MemoryWordOp(0)));
+						if (def.functions.isEmpty()) tableTarget = new MemoryWordOp(0);
+						ASMDataLabel vTableEntry = new ASMDataLabel(def.path + "_vrelay" + postfix, tableTarget);
+						dataBlock.add(vTableEntry);
+
+						/* Build v-table */
+						if (!def.functions.isEmpty()) {
+							List<ASMInstruction> vTable = new ArrayList<>();
+
+							ASMLabel vTableHead = new ASMLabel(def.path + "_vtable" + postfix);
+							vTableHead.comment = new ASMComment("VTable for " + def.path + ((!mapping.getProvidedProvisos().isEmpty()) ? " proviso " + postfix : ""));
+							vTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+							vTable.add(vTableHead);
+
+							vTable.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+							vTable.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+
+							for (Function f : def.functions) {
+								if (f.containsMapping(mapping.getProvidedProvisos())) {
+									ASMBranch fBranch;
+
+									/* Inherited Function */
+									if (f.body == null)
+										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildInheritedCallLabel(mapping.getProvidedProvisos()))));
+									else
+										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildCallLabel(mapping.getProvidedProvisos()))));
+
+									fBranch.optFlags.add(OPT_FLAG.SYS_JMP);
+									vTable.add(fBranch);
+								}
+								else {
+									ASMAdd placeholder = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+									placeholder.comment = new ASMComment("Function '" + f.path + "' not called");
+									vTable.add(placeholder);
+								}
+							}
+
+							AsNBody.addToTranslationUnit(vTable, s.getSource(), SECTION.TEXT);
+						}
+
 						if (!def.implemented.isEmpty()) {
 							String name = def.path + postfix + "_resolver";
 							

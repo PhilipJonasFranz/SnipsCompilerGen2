@@ -59,17 +59,29 @@ OUTPUT
 
 .data
 AY: .word 0
+AY_vrelay: .word 0
 J: .word G
+J_vrelay: .word 0
 I: .word G
+I_vrelay: .word 0
 H: .word G
+H_vrelay: .word 0
 G: .word A
+G_vrelay: .word 0
 F: .word E
+F_vrelay: .word 0
 E: .word A
+E_vrelay: .word 0
 D: .word B
+D_vrelay: .word 0
 C: .word B
+C_vrelay: .word 0
 B: .word A
+B_vrelay: .word 0
 A: .word 0
+A_vrelay: .word 0
 AX: .word 0
+AX_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

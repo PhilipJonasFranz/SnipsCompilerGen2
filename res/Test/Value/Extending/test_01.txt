@@ -41,11 +41,17 @@ OUTPUT
 
 .data
 Root2: .word 0
+Root2_vrelay: .word 0
 C: .word A
+C_vrelay: .word 0
 D: .word B
+D_vrelay: .word 0
 B: .word Root
+B_vrelay: .word 0
 A: .word Root
+A_vrelay: .word 0
 Root: .word 0
+Root_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

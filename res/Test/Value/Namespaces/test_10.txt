@@ -29,8 +29,11 @@ OUTPUT
 
 .data
 Name1.B: .word 0
+Name1.B_vrelay: .word 0
 Name0.C: .word 0
+Name0.C_vrelay: .word 0
 Name0.A: .word 0
+Name0.A_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

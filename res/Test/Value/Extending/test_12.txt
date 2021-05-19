@@ -23,15 +23,23 @@ OUTPUT
 
 .data
 B_P_1: .word A_P_1
+B_vrelay_P_1: .word B_vtable_P_1
 A_P_1: .word 0
+A_vrelay_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+B_vtable_P_1:                                /* VTable for B proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b B.incr_P_1
+
 .global B.incr_P_1
 B.incr_P_1:                                  /* Function: B.incr, Provisos: INT */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]

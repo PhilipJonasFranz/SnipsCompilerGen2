@@ -38,14 +38,23 @@ OUTPUT
 
 .data
 Storage.X_P_1: .word 0
+Storage.X_vrelay_P_1: .word Storage.X_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+Storage.X_vtable_P_1:                        /* VTable for Storage.X proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b Storage.X.set_P_1
+    b Storage.X.get_P_1
+    b Storage.X.id_P_1
+
 .global Storage.X.set_P_1
 Storage.X.set_P_1:                           /* Function: Storage.X.set, Provisos: INT */
+    mov r10, #0
     push { r4 }
     mov r4, r1
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -55,12 +64,14 @@ Storage.X.set_P_1:                           /* Function: Storage.X.set, Proviso
 
 .global Storage.X.get_P_1
 Storage.X.get_P_1:                           /* Function: Storage.X.get, Provisos: INT */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
 
 .global Storage.X.id_P_1
 Storage.X.id_P_1:                            /* Function: Storage.X.id, Provisos: INT */
+    mov r10, #0
     bx lr
 
 .global main

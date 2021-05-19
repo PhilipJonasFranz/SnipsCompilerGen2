@@ -24,8 +24,11 @@ OUTPUT
 
 .data
 Cap_P_1: .word 0
+Cap_vrelay_P_1: .word 0
 Cap_P_2: .word 0
+Cap_vrelay_P_2: .word 0
 Data_P_3: .word 0
+Data_vrelay_P_3: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

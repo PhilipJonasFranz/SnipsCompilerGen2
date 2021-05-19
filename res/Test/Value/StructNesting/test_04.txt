@@ -60,15 +60,24 @@ OUTPUT
 
 .data
 List.LinkedList_P_1: .word 0
+List.LinkedList_vrelay_P_1: .word List.LinkedList_vtable_P_1
 List.ListNode_P_1: .word 0
+List.ListNode_vrelay_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
 
+List.LinkedList_vtable_P_1:                  /* VTable for List.LinkedList proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b List.LinkedList.add_P_1
+    b List.LinkedList.get_P_1
+
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r4, r1
@@ -102,6 +111,7 @@ List.LinkedList.add_P_1.L1:
 
 .global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
+    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r4, r1

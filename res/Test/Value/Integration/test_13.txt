@@ -96,8 +96,11 @@ OUTPUT
 
 .data
 ZBase.Z: .word ObjectBase.Object
+ZBase.Z_vrelay: .word ZBase.Z_vtable
 Y: .word X
+Y_vrelay: .word 0
 X: .word 0
+X_vrelay: .word 0
 globalVar: .word 25
 NULL: .word 0
 HEAP_START: .word 0
@@ -110,14 +113,28 @@ foo:                                         /* Function: foo */
     mov r0, #50                              /* Evaluate Expression */
     bx lr
 
+ZBase.Z_vtable:                              /* VTable for ZBase.Z */
+    mov r12, #0
+    add pc, pc, r10
+    add r10, r10, r10                        /* Function 'ZBase.Z.toString' not called */
+    b ZBase.Z.getMember
+    b ZBase.Z.equals
+    b ZBase.Z.create
+
+.global ZBase.Z.toString
+ZBase.Z.toString: 
+    b ObjectBase.Object.toString             /* Relay to inherited ObjectBase.Object.toString */
+
 .global ZBase.Z.getMember
 ZBase.Z.getMember:                           /* Function: ZBase.Z.getMember */
+    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     bx lr
 
 .global ZBase.Z.equals
 ZBase.Z.equals:                              /* Function: ZBase.Z.equals */
+    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3, r4, r6, lr}
     mov r4, r1
@@ -146,6 +163,7 @@ ZBase.Z.equals.L1:
 
 .global ZBase.Z.create
 ZBase.Z.create:                              /* Function: ZBase.Z.create */
+    mov r10, #0
     push { lr }
     push { r0 }
     bl ObjectBase.Object.create              /* Call ObjectBase.Object.create */
@@ -169,7 +187,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -178,7 +196,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -189,7 +207,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -205,7 +223,7 @@ main:                                        /* Function: main */
     mov r0, r6
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_2
     add lr, pc, #8
     mov pc, r12
@@ -218,7 +236,7 @@ main:                                        /* Function: main */
     mov r0, r4                               /* Evaluate Expression */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -278,7 +296,7 @@ main.L4:
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12

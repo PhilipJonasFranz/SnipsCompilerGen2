@@ -42,6 +42,7 @@ import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import Util.MODIFIER;
 import Util.Pair;
 
 import java.util.ArrayList;
@@ -86,7 +87,15 @@ public class AsNFunction extends AsNCompoundStatement {
 				f.addProvisoMapping(new INT(), new ArrayList());
 			}
 		}
-		
+
+		/*
+		 * The function is nested inside a struct and has no provisos, or no explicit calls. But,
+		 * due to dynamic dispatch, we have to cast the function since it may be called explicitly.
+		 * So, we add the default mapping here.
+		 */
+		if (f.definedInStruct != null && f.definedInStruct.proviso.isEmpty() && !f.containsMapping(new ArrayList()) && f.modifier != MODIFIER.STATIC)
+				f.addProvisoMapping(f.getReturnType().clone(), new ArrayList());
+
 		LabelUtil.reset();
 		LabelUtil.funcPrefix = f.path.build();
 		LabelUtil.funcUID = (f.requireUIDInLabel)? f.UID : -1;

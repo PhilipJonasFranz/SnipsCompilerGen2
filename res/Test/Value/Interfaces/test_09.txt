@@ -104,7 +104,7 @@ main:                                        /* Function: main */
     mov r1, r3
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P595710337_Collection_P_1
     add lr, pc, #8
     mov pc, r12

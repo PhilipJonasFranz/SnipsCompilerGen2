@@ -30,6 +30,7 @@ OUTPUT
 
 .data
 X: .word 0
+X_vrelay: .word X_vtable
 X_resolver_relay: .word X_resolver
 Inter: .word 0
 NULL: .word 0
@@ -37,6 +38,11 @@ HEAP_START: .word 0
 
 .text
     b main
+
+X_vtable:                                    /* VTable for X */
+    mov r12, #0
+    add pc, pc, r10
+    b X.get
 
 .global X.get
 X.get:                                       /* Function: X.get */
@@ -75,7 +81,7 @@ main:                                        /* Function: main */
     mov r12, #0                              /* Offset to Inter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P509822884_Inter
     add lr, pc, #8
     mov pc, r12

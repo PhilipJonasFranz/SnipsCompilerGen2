@@ -29,7 +29,9 @@ OUTPUT
 
 .data
 Data_P_2: .word 0
+Data_vrelay_P_2: .word 0
 Capsule_P_2: .word 0
+Capsule_vrelay_P_2: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

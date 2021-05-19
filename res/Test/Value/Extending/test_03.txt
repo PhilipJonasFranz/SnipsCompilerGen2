@@ -25,8 +25,11 @@ OUTPUT
 
 .data
 A_P_1_1_1: .word Root_P_1
+A_vrelay_P_1_1_1: .word 0
 Root_P_1: .word Base_P_1
+Root_vrelay_P_1: .word 0
 Base_P_1: .word 0
+Base_vrelay_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 
