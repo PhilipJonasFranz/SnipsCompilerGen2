@@ -30,6 +30,7 @@ TESTCASES
 OUTPUT
 .version 0
 
+.include maybe __op_div.s
 .include maybe __op_mod.s
 .include maybe resv.s
 .include maybe init.s

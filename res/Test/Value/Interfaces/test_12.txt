@@ -58,15 +58,15 @@ A.get_P_1:                                   /* Function: A.get, Provisos: INT *
 A_P_1_Getter:                                /* Relay: Getter -> A */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b A.get_P_1
 
 A_P_1_resolver:                              /* Relay: A -> INTF */
-    ldr r12, .P1282809961_Getter_P_1
-    cmp r10, r12
-    beq A_P_1_Getter
-.P1282809961_Getter_P_1: .word Getter_P_1
+    b A_P_1_Getter
 
 .global B.get_P_1
 B.get_P_1:                                   /* Function: B.get, Provisos: INT */
@@ -78,15 +78,15 @@ B.get_P_1:                                   /* Function: B.get, Provisos: INT *
 B_P_1_Getter:                                /* Relay: Getter -> B */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b B.get_P_1
 
 B_P_1_resolver:                              /* Relay: B -> INTF */
-    ldr r12, .P1282809962_Getter_P_1
-    cmp r10, r12
-    beq B_P_1_Getter
-.P1282809962_Getter_P_1: .word Getter_P_1
+    b B_P_1_Getter
 
 .global main
 main:                                        /* Function: main */
@@ -94,16 +94,16 @@ main:                                        /* Function: main */
     mov r1, #10
     mov r0, #16                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    ldr r0, .P1282809963_B_P_1
+    ldr r0, .P1282809961_B_P_1
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r12, #0                              /* Offset to Getter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1282809963_Getter_P_1
+    ldr r10, .P1282809961_Getter_P_1
     add lr, pc, #8
     mov pc, r12
     pop { pc }
-.P1282809963_Getter_P_1: .word Getter_P_1
-.P1282809963_B_P_1: .word B_P_1
+.P1282809961_Getter_P_1: .word Getter_P_1
+.P1282809961_B_P_1: .word B_P_1

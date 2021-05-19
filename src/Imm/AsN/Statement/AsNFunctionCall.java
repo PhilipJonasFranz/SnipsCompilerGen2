@@ -1,8 +1,5 @@
 package Imm.AsN.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -23,20 +20,20 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVPopStack;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
-import Imm.AST.Function;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
+import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
@@ -44,6 +41,9 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.TYPE.TYPE;
 import Res.Const;
 import Util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AsNFunctionCall extends AsNStatement {
 
@@ -254,7 +254,7 @@ public class AsNFunctionCall extends AsNStatement {
 				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			}
 			else {
-				if (r.declarationLoaded(f.lambdaDeclaration)) {
+				if (r.declarationLoaded(f.lambdaDeclaration)) { 
 					int loc = r.declarationRegLocation(f.lambdaDeclaration);
 					
 					/* Manual linking */

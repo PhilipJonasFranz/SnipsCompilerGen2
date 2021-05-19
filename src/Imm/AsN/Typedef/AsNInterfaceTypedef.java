@@ -7,6 +7,7 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Memory.Stack.ASMPopStack;
+import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
@@ -59,9 +60,12 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		/* Pop function offset */
 		table.add(new ASMPopStack(new RegOp(REG.R12)));
-		
-		table.add(new ASMAdd(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(4)));
-		table.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R12)));
+
+		table.add(new ASMAdd(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(16)));
+		table.add(new ASMAdd(new RegOp(REG.R12), new RegOp(REG.R12), new RegOp(REG.PC)));
+		table.add(new ASMPushStack(new RegOp(REG.R12)));
+		table.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+		table.add(new ASMPopStack(new RegOp(REG.PC)));
 		
 		boolean hasCalls = false;
 		

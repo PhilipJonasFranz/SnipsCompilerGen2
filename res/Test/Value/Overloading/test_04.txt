@@ -66,16 +66,16 @@ X.get_P_1_586492511.L3:
 X_P_1_Getter:                                /* Relay: Getter -> X */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b X.get_30282381_P_1
     b X.get_586492511_P_1
 
 X_P_1_resolver:                              /* Relay: X -> INTF */
-    ldr r12, .P1144089514_Getter_P_1
-    cmp r10, r12
-    beq X_P_1_Getter
-.P1144089514_Getter_P_1: .word Getter_P_1
+    b X_P_1_Getter
 
 .global main
 main:                                        /* Function: main */
@@ -84,7 +84,7 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1144089515_X_P_1
+    ldr r0, .P1144089514_X_P_1
     push { r0 }
     mov r12, #0                              /* Offset to Getter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
@@ -93,7 +93,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1144089515_Getter_P_1
+    ldr r10, .P1144089514_Getter_P_1
     add lr, pc, #8
     mov pc, r12
     mov r12, #4                              /* Offset to Getter.get */
@@ -103,11 +103,11 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1144089515_Getter_P_1
+    ldr r10, .P1144089514_Getter_P_1
     add lr, pc, #8
     mov pc, r12
     add r0, r5, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P1144089515_Getter_P_1: .word Getter_P_1
-.P1144089515_X_P_1: .word X_P_1
+.P1144089514_Getter_P_1: .word Getter_P_1
+.P1144089514_X_P_1: .word X_P_1

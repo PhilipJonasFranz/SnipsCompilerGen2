@@ -54,15 +54,15 @@ A.get:                                       /* Function: A.get */
 A_Getter:                                    /* Relay: Getter -> A */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b A.get
 
 A_resolver:                                  /* Relay: A -> INTF */
-    ldr r12, .P1225551659_Getter
-    cmp r10, r12
-    beq A_Getter
-.P1225551659_Getter: .word Getter
+    b A_Getter
 
 .global B.get
 B.get: 
@@ -71,15 +71,15 @@ B.get:
 B_Getter:                                    /* Relay: Getter -> B */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b B.get
 
 B_resolver:                                  /* Relay: B -> INTF */
-    ldr r12, .P1225551660_Getter
-    cmp r10, r12
-    beq B_Getter
-.P1225551660_Getter: .word Getter
+    b B_Getter
 
 .global main
 main:                                        /* Function: main */
@@ -87,16 +87,16 @@ main:                                        /* Function: main */
     mov r1, #10
     mov r0, #16                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    ldr r0, .P1225551661_B
+    ldr r0, .P1225551659_B
     push { r0 }
     bl init_P_3                              /* Call init */
     mov r12, #0                              /* Offset to Getter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1225551661_Getter
+    ldr r10, .P1225551659_Getter
     add lr, pc, #8
     mov pc, r12
     pop { pc }
-.P1225551661_Getter: .word Getter
-.P1225551661_B: .word B
+.P1225551659_Getter: .word Getter
+.P1225551659_B: .word B
