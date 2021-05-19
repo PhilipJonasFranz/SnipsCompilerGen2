@@ -45,15 +45,15 @@ X.get:                                       /* Function: X.get */
 X_Inter:                                     /* Relay: Inter -> X */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b X.get
 
 X_resolver:                                  /* Relay: X -> INTF */
-    ldr r12, .P338047978_Inter
-    cmp r10, r12
-    beq X_Inter
-.P338047978_Inter: .word Inter
+    b X_Inter
 
 .global main
 main:                                        /* Function: main */
@@ -61,7 +61,7 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P338047979_X
+    ldr r0, .P338047978_X
     push { r0 }
     mov r12, #0                              /* Offset to Inter.get */
     sub r0, fp, #8                           /* Evaluate Expression */
@@ -70,10 +70,10 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P338047979_Inter
+    ldr r10, .P338047978_Inter
     add lr, pc, #8
     mov pc, r12
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P338047979_Inter: .word Inter
-.P338047979_X: .word X
+.P338047978_Inter: .word Inter
+.P338047978_X: .word X

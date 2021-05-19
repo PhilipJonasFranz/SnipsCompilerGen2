@@ -67,15 +67,15 @@ X.get:                                       /* Function: X.get */
 X_Inter:                                     /* Relay: Inter -> X */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b X.get
 
 X_resolver:                                  /* Relay: X -> INTF */
-    ldr r12, .P538452035_Inter
-    cmp r10, r12
-    beq X_Inter
-.P538452035_Inter: .word Inter
+    b X_Inter
 
 .global Y.get
 Y.get:                                       /* Function: Y.get */
@@ -88,15 +88,15 @@ Y.get:                                       /* Function: Y.get */
 Y_Inter:                                     /* Relay: Inter -> Y */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b Y.get
 
 Y_resolver:                                  /* Relay: Y -> INTF */
-    ldr r12, .P538452036_Inter
-    cmp r10, r12
-    beq Y_Inter
-.P538452036_Inter: .word Inter
+    b Y_Inter
 
 .global process
 process:                                     /* Function: process */
@@ -105,11 +105,11 @@ process:                                     /* Function: process */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P538452037_Inter
+    ldr r10, .P538452035_Inter
     add lr, pc, #8
     mov pc, r12
     pop { pc }
-.P538452037_Inter: .word Inter
+.P538452035_Inter: .word Inter
 
 .global main
 main:                                        /* Function: main */
@@ -118,13 +118,13 @@ main:                                        /* Function: main */
     mov r3, r0
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P538452038_X
+    ldr r0, .P538452036_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P538452038_Y
+    ldr r0, .P538452036_Y
     push { r0 }
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r5, r0, #2
@@ -138,5 +138,5 @@ main.L1:
     bl process                               /* Call process */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P538452038_Y: .word Y
-.P538452038_X: .word X
+.P538452036_Y: .word Y
+.P538452036_X: .word X

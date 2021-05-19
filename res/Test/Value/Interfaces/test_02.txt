@@ -86,16 +86,16 @@ X.set:                                       /* Function: X.set */
 X_Inter:                                     /* Relay: Inter -> X */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b X.get
     b X.set
 
 X_resolver:                                  /* Relay: X -> INTF */
-    ldr r12, .P395306280_Inter
-    cmp r10, r12
-    beq X_Inter
-.P395306280_Inter: .word Inter
+    b X_Inter
 
 .global Y.get
 Y.get:                                       /* Function: Y.get */
@@ -119,16 +119,16 @@ Y.set:                                       /* Function: Y.set */
 Y_Inter:                                     /* Relay: Inter -> Y */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b Y.get
     b Y.set
 
 Y_resolver:                                  /* Relay: Y -> INTF */
-    ldr r12, .P395306281_Inter
-    cmp r10, r12
-    beq Y_Inter
-.P395306281_Inter: .word Inter
+    b Y_Inter
 
 .global main
 main:                                        /* Function: main */
@@ -136,13 +136,13 @@ main:                                        /* Function: main */
     mov fp, sp
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P395306282_X
+    ldr r0, .P395306280_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r3, r0, #2
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P395306282_Y
+    ldr r0, .P395306280_Y
     push { r0 }
 /* 25 + 10 = 35 */
     mov r12, #0                              /* Offset to Inter.get */
@@ -152,7 +152,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
     mov r12, #0                              /* Offset to Inter.get */
@@ -161,7 +161,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
     mov r12, #4                              /* Offset to Inter.set */
@@ -171,7 +171,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
     mov r12, #4                              /* Offset to Inter.set */
@@ -180,7 +180,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
 /* 35 + 12 + 16 = 63 */
@@ -189,7 +189,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
     mov r12, #0                              /* Offset to Inter.get */
@@ -198,12 +198,12 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P395306282_Inter
+    ldr r10, .P395306280_Inter
     add lr, pc, #8
     mov pc, r12
     add r0, r6, r0
     mov sp, fp
     ldmfd sp!, {fp, pc}
-.P395306282_Inter: .word Inter
-.P395306282_Y: .word Y
-.P395306282_X: .word X
+.P395306280_Inter: .word Inter
+.P395306280_Y: .word Y
+.P395306280_X: .word X

@@ -1,10 +1,5 @@
 package Imm.AsN;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
-
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.VRegSet;
@@ -14,14 +9,20 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
+import Imm.ASM.VFP.Memory.Stack.ASMVStrStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.SyntaxElement;
 import Util.Pair;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Stack;
 
 public abstract class AsNNode {
 
@@ -71,7 +72,7 @@ public abstract class AsNNode {
 					int free = v.findFree();
 					
 					if (free == -1) {
-						this.instructions.add(new ASMStrStack(MEM_OP.PRE_WRITEBACK, new VRegOp(reg), new RegOp(REG.SP), 
+						this.instructions.add(new ASMVStrStack(MEM_OP.PRE_WRITEBACK, new VRegOp(reg), new RegOp(REG.SP),
 							new PatchableImmOp(PATCH_DIR.DOWN, -4)));
 						st.push(v.getReg(reg).declaration);
 					}

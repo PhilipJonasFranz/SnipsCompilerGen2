@@ -47,33 +47,33 @@ HEAP_START: .word 0
 .text
     b main
 
-.global ANON78
-ANON78:                                      /* Function: ANON78 */
+.global ANON86
+ANON86:                                      /* Function: ANON86 */
     add r0, r0, #5
     bx lr
 
-.global ANON80
-ANON80:                                      /* Function: ANON80 */
+.global ANON88
+ANON88:                                      /* Function: ANON88 */
     cmp r0, #10
-    blt ANON80.L0
+    blt ANON88.L0
     mov r0, #1
     bx lr
-ANON80.L0: 
+ANON88.L0: 
     mov r0, #0
     bx lr
 
-.global ANON82
-ANON82:                                      /* Function: ANON82 */
+.global ANON90
+ANON90:                                      /* Function: ANON90 */
     cmp r0, #0
-    beq ANON82.L0
+    beq ANON90.L0
     mov r0, #10
     bx lr
-ANON82.L0: 
+ANON90.L0: 
     mov r0, #5
     bx lr
 
-.global ANON84
-ANON84:                                      /* Function: ANON84 */
+.global ANON92
+ANON92:                                      /* Function: ANON92 */
     add r0, r1, r0, lsl #1
     bx lr
 
@@ -134,14 +134,14 @@ main:                                        /* Function: main */
     bl init_P_2                              /* Call init */
 /* 17, 14, 9, 8, 13 */
     mov r4, r0
-    ldr r1, .P1368697414_ANON78              /* Load parameters */
+    ldr r1, .P1368697414_ANON86              /* Load parameters */
     mov r0, r4
     bl Streamable.Stream.forEach_P_1         /* Call Streamable.Stream.forEach */
 /* true, true, false, false, true */
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r5, r0
-    ldr r2, .P1368697414_ANON80              /* Evaluate Expression */
+    ldr r2, .P1368697414_ANON88              /* Evaluate Expression */
     mov r1, r5
     mov r0, r4
     bl Streamable.Stream.map_P_1_1           /* Call Streamable.Stream.map */
@@ -150,20 +150,20 @@ main:                                        /* Function: main */
     mov r0, #0                               /* Evaluate Expression */
     bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
     mov r7, r0
-    ldr r2, .P1368697414_ANON82              /* Evaluate Expression */
+    ldr r2, .P1368697414_ANON90              /* Evaluate Expression */
     mov r1, r7
     mov r0, r6
     bl Streamable.Stream.map_P_1_1           /* Call Streamable.Stream.map */
     mov r8, r0
-    ldr r2, .P1368697414_ANON84              /* Evaluate Expression */
+    ldr r2, .P1368697414_ANON92              /* Evaluate Expression */
     mov r1, #0
     mov r0, r8
     bl Streamable.Stream.fold_P_1_1          /* Call Streamable.Stream.fold */
     pop { pc }
-.P1368697414_ANON84: .word ANON84
-.P1368697414_ANON82: .word ANON82
-.P1368697414_ANON80: .word ANON80
-.P1368697414_ANON78: .word ANON78
+.P1368697414_ANON92: .word ANON92
+.P1368697414_ANON90: .word ANON90
+.P1368697414_ANON88: .word ANON88
+.P1368697414_ANON86: .word ANON86
 .P1368697414_Collection_P_1: .word Collection_P_1
 
 /* System Routine, used to copy memory on the stack */

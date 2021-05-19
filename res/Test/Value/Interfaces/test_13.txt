@@ -69,23 +69,23 @@ A.set_P_1:                                   /* Function: A.set, Provisos: INT *
 A_P_1_GetSet:                                /* Relay: GetSet -> A */
     mov r10, #0
     pop { r12 }
-    add r12, r12, #4
-    add pc, pc, r12
+    add r12, r12, #16
+    add r12, r12, pc
+    push { r12 }
+    mov r12, #0
+    pop { pc }
     b A.get_P_1
     b A.set_P_1
 
 A_P_1_resolver:                              /* Relay: A -> INTF */
-    ldr r12, .P1311439112_GetSet_P_1
-    cmp r10, r12
-    beq A_P_1_GetSet
-.P1311439112_GetSet_P_1: .word GetSet_P_1
+    b A_P_1_GetSet
 
 .global main
 main:                                        /* Function: main */
     push { lr }
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    ldr r0, .P1311439113_A_P_1
+    ldr r0, .P1311439112_A_P_1
     push { r0 }
     bl init_P_2                              /* Call init */
     mov r12, #0                              /* Offset to GetSet.get */
@@ -93,7 +93,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1311439113_GetSet_P_1
+    ldr r10, .P1311439112_GetSet_P_1
     add lr, pc, #8
     mov pc, r12
     mov r12, #4                              /* Offset to GetSet.set */
@@ -103,7 +103,7 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1311439113_GetSet_P_1
+    ldr r10, .P1311439112_GetSet_P_1
     add lr, pc, #8
     mov pc, r12
     mov r12, #0                              /* Offset to GetSet.get */
@@ -111,10 +111,10 @@ main:                                        /* Function: main */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
     ldr r12, [r12, #4]
-    ldr r10, .P1311439113_GetSet_P_1
+    ldr r10, .P1311439112_GetSet_P_1
     add lr, pc, #8
     mov pc, r12
     add r0, r4, r0
     pop { pc }
-.P1311439113_GetSet_P_1: .word GetSet_P_1
-.P1311439113_A_P_1: .word A_P_1
+.P1311439112_GetSet_P_1: .word GetSet_P_1
+.P1311439112_A_P_1: .word A_P_1
