@@ -40,7 +40,6 @@ B_vtable_P_1:                                /* VTable for B proviso _P_1 */
 
 .global B.incr_P_1
 B.incr_P_1:                                  /* Function: B.incr, Provisos: INT */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     add r1, r1, #4
     ldr r0, [r1]

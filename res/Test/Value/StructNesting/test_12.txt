@@ -50,7 +50,6 @@ C.B_vtable:                                  /* VTable for C.B */
 
 .global C.B.get
 C.B.get:                                     /* Function: C.B.get */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
@@ -62,7 +61,6 @@ C.A_vtable:                                  /* VTable for C.A */
 
 .global C.A.get
 C.A.get:                                     /* Function: C.A.get */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1

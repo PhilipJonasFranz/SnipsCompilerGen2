@@ -46,7 +46,6 @@ Y_vtable:                                    /* VTable for Y */
 
 .global Y.incr
 Y.incr:                                      /* Function: Y.incr */
-    mov r10, #0
     push { r3 }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -64,7 +63,6 @@ X_vtable:                                    /* VTable for X */
 
 .global X.relay
 X.relay:                                     /* Function: X.relay */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     b Y.incr                                 /* Call Y.incr */

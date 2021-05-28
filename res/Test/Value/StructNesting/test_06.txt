@@ -39,7 +39,6 @@ Storage.X_vtable_P_1:                        /* VTable for Storage.X proviso _P_
 
 .global Storage.X.get_P_1
 Storage.X.get_P_1:                           /* Function: Storage.X.get, Provisos: INT */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr

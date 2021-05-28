@@ -77,7 +77,6 @@ List.LinkedList_vtable_P_1:                  /* VTable for List.LinkedList provi
 
 .global List.LinkedList.add_P_1
 List.LinkedList.add_P_1:                     /* Function: List.LinkedList.add, Provisos: INT */
-    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3-r5, lr}
     mov r4, r1
@@ -111,7 +110,6 @@ List.LinkedList.add_P_1.L1:
 
 .global List.LinkedList.get_P_1
 List.LinkedList.get_P_1:                     /* Function: List.LinkedList.get, Provisos: INT */
-    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3-r5}
     mov r4, r1

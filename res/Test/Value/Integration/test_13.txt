@@ -119,7 +119,6 @@ ZBase.Z_vtable:                              /* VTable for ZBase.Z */
     add r10, r10, r10                        /* Function 'ZBase.Z.toString' not called */
     b ZBase.Z.getMember
     b ZBase.Z.equals
-    b ZBase.Z.create
 
 .global ZBase.Z.toString
 ZBase.Z.toString: 
@@ -127,14 +126,12 @@ ZBase.Z.toString:
 
 .global ZBase.Z.getMember
 ZBase.Z.getMember:                           /* Function: ZBase.Z.getMember */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #12]                        /* Load field from struct */
     bx lr
 
 .global ZBase.Z.equals
 ZBase.Z.equals:                              /* Function: ZBase.Z.equals */
-    mov r10, #0
     sub sp, sp, #16
     stmea sp, {r3, r4, r6, lr}
     mov r4, r1
@@ -163,7 +160,6 @@ ZBase.Z.equals.L1:
 
 .global ZBase.Z.create
 ZBase.Z.create:                              /* Function: ZBase.Z.create */
-    mov r10, #0
     push { lr }
     push { r0 }
     bl ObjectBase.Object.create              /* Call ObjectBase.Object.create */

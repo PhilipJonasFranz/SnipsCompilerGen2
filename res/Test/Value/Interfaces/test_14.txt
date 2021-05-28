@@ -89,7 +89,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -98,7 +98,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -107,7 +107,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -116,7 +116,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -125,7 +125,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -160,7 +160,7 @@ main:                                        /* Function: main */
     mov r0, r8
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1340068263_Collection_P_1
     add lr, pc, #8
     mov pc, r12

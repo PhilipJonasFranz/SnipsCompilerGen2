@@ -49,7 +49,6 @@ A_vtable_P_1:                                /* VTable for A proviso _P_1 */
 
 .global A.get_P_1
 A.get_P_1:                                   /* Function: A.get, Provisos: INT */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
@@ -63,12 +62,10 @@ B_vtable_P_1:                                /* VTable for B proviso _P_1 */
 
 .global B.get_P_1
 B.get_P_1:                                   /* Function: B.get, Provisos: INT */
-    mov r10, #0
     b A.get_P_1                              /* Call A.get */
 
 .global B.get0_P_1
 B.get0_P_1:                                  /* Function: B.get0, Provisos: INT */
-    mov r10, #0
     b A.get_P_1                              /* Call A.get */
 
 .global main

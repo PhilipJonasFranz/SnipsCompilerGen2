@@ -36,7 +36,6 @@ B_vtable_P_1:                                /* VTable for B proviso _P_1 */
 
 .global B.get_P_1
 B.get_P_1:                                   /* Function: B.get, Provisos: INT */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr

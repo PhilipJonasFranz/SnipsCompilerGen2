@@ -41,7 +41,6 @@ X_vtable_P_1:                                /* VTable for X proviso _P_1 */
 
 .global X.pipe_P_1
 X.pipe_P_1:                                  /* Function: X.pipe, Provisos: INT */
-    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r4, r1

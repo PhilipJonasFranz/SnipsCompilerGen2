@@ -41,7 +41,6 @@ A_vtable:                                    /* VTable for A */
 
 .global A.get
 A.get:                                       /* Function: A.get */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
@@ -49,11 +48,10 @@ A.get:                                       /* Function: A.get */
 B_vtable:                                    /* VTable for B */
     mov r12, #0
     add pc, pc, r10
-    add r10, r10, r10                        /* Function 'B.get' not called */
+    b B.get
 
 .global B.get
 B.get:                                       /* Function: B.get */
-    mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1

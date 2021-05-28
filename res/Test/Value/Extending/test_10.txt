@@ -70,7 +70,6 @@ C.B_vtable_P_1:                              /* VTable for C.B proviso _P_1 */
 
 .global C.B.incr_P_1
 C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: INT */
-    mov r10, #0
     push { r3 }
     mov r3, r0
     lsl r1, r0, #2                           /* Convert to bytes */
@@ -110,7 +109,6 @@ C.A.incr_P_1:
 
 .global C.A.initPointer
 C.A.initPointer:                             /* Function: C.A.initPointer */
-    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r3, r4, lr}
     mov r4, r1
@@ -125,7 +123,6 @@ C.A.initPointer:                             /* Function: C.A.initPointer */
 
 .global C.A.create_P_1
 C.A.create_P_1:                              /* Function: C.A.create, Provisos: INT */
-    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r4, fp, lr}
     mov fp, sp

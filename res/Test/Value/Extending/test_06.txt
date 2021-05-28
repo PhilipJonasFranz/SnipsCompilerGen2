@@ -39,7 +39,6 @@ HEAP_START: .word 0
 X_vtable:                                    /* VTable for X */
     mov r12, #0
     add pc, pc, r10
-    b X.create
 
 .global X.create
 X.create:                                    /* Function: X.create */
@@ -65,11 +64,9 @@ X.create:                                    /* Function: X.create */
 Y_vtable:                                    /* VTable for Y */
     mov r12, #0
     add pc, pc, r10
-    b Y.create
 
 .global Y.create
 Y.create:                                    /* Function: Y.create */
-    mov r10, #0
     sub sp, sp, #12
     stmea sp, {r5, fp, lr}
     mov fp, sp
