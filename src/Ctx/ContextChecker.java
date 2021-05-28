@@ -1934,7 +1934,61 @@ public class ContextChecker {
 		if (c.isNestedCall() && c.getParams().get(0).getType().getCoreType().isInterface() && c.getParams().get(0) instanceof AddressOf aof)
 			c.getParams().set(0, aof.expression);
 
+		/* Register call mapping to inherited function heads of all extenders in subtree. */
+		if (f != null && f.definedInStruct != null) this.registerCallToExtenderTransitive(f, c);
+
 		return (c.getCallee() instanceof FunctionCall)? new VOID() : c.getType();
+	}
+
+	/**
+	 * When a function is called, we have to create and register proviso mappings in the
+	 * corresponding function heads of all extenders in the subtree. This is needed so that<br>
+	 *<br>
+	 * a) The function is casted, since it may be called implicitly via dynamic dispatch<br>
+	 * b) The function is added to the v-table and the call label can be built.<br>
+	 */
+	public void registerCallToExtenderTransitive(Function f, Callee c) throws CTEX_EXC {
+		if (f.modifier != MODIFIER.STATIC) {
+			List<StructTypedef> extenders = f.definedInStruct.extenders;
+
+			for (StructTypedef ex : extenders) {
+				/* Search extended function */
+				Function f0 = null;
+
+				for (Function f1 : ex.functions) {
+
+					/*
+					 * Not matching number of proviso is direct indicator that this cannot be the function
+					 * that we are looking for.
+					 */
+					if (f1.provisoTypes.size() != c.getProviso().size()) continue;
+
+					if (f1.inheritLink != null && f1.inheritLink.equals(f)) {
+						f0 = f1;
+
+						// TODO: Proviso need to be translated here to extender proviso heads. We do know that no additional proviso types can be added since it is the inherited function.
+						if (!f1.containsMapping(c.getProviso())) {
+							f1.setContext(c.getProviso());
+							f1.check(this);
+						}
+						else f1.setContext(c.getProviso());
+
+						break;
+					}
+				}
+
+				if (f0 == null) {
+					ex.print(0, true);
+					throw new SNIPS_EXC("Failed to locate inherited function '" + f.path + "' in '" + ex.path + "'");
+				}
+
+				/* Register Proviso Mapping / Call at inherited function */
+				f0.addProvisoMapping(f.getReturnTypeDirect(), c.getProviso());
+
+				// TODO: Probably issues with proviso translation chain.
+				for (StructTypedef ex0 : ex.extenders) registerCallToExtenderTransitive(f0, c);
+			}
+		}
 	}
 	
 	/**

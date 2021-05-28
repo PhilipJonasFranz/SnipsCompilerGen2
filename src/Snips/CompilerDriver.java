@@ -37,11 +37,8 @@ import XMLParser.XMLParser;
 import XMLParser.XMLParser.XMLNode;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class CompilerDriver {
