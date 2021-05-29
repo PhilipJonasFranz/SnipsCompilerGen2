@@ -356,7 +356,7 @@ public class AsNFunctionCall extends AsNStatement {
 		int offset = 0;
 
 		for (int i = 0; i < functions.size(); i++) {
-			if (Function.signatureMatch(functions.get(i), f, false, true, false)) {
+			if (Function.signatureMatch(functions.get(i), f, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS)) {
 				return offset;
 			}
 			else if (functions.get(i).modifier != MODIFIER.STATIC)

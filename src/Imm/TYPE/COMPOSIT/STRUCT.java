@@ -1,8 +1,5 @@
 package Imm.TYPE.COMPOSIT;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.StructTypedef;
@@ -12,6 +9,9 @@ import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
 import Util.Source;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class STRUCT extends COMPOSIT {
 
@@ -64,28 +64,13 @@ public class STRUCT extends COMPOSIT {
 		if (type.getCoreType().isVoid()) return true;
 		if (type.isStruct()) {
 			STRUCT struct = (STRUCT) type;
-			
+
+			/* Only check if it is part of the inherit chain */
 			StructTypedef sDef = this.typedef;
-			while (!sDef.equals(struct.typedef)) {
-				if (sDef.extension == null) 
-					return false;
+			while (sDef != null) {
+				if (sDef.equals(struct.typedef)) return true;
 				else sDef = sDef.extension;
 			}
-			
-			if (sDef.getFields().size() == struct.typedef.getFields().size() && struct.proviso.size() == this.proviso.size()) {
-				boolean isEqual = true;
-				
-				/* Compare Provisos, rest of subtree must be equal */
-				for (int i = 0; i < this.proviso.size(); i++) {
-					if (useProvisoFreeInCheck) 
-						isEqual &= this.proviso.get(i).provisoFree().isEqual(struct.proviso.get(i).provisoFree());
-					else 
-						isEqual &= this.proviso.get(i).isEqual(struct.proviso.get(i));
-				}
-				
-				return isEqual;
-			}
-			
 		}
 		
 		return false;

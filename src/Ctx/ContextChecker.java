@@ -224,7 +224,7 @@ public class ContextChecker {
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				for (Function f0 : this.functions) 
-					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false)) {
+					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS)) {
 						/* 
 						 * Already seen function has no body, this function has body,
 						 * so already seen function is from a header file, this function
@@ -398,7 +398,7 @@ public class ContextChecker {
 					if (f.body == null) {
 						for (int a = 0; a < e.functions.size(); a++) {
 							Function f0 = e.functions.get(a);
-							if (Function.signatureMatch(f0, f, false, false, false)) {
+							if (Function.signatureMatch(f0, f)) {
 								f.body = f0.body;
 								break;
 							}
@@ -419,12 +419,12 @@ public class ContextChecker {
 			for (Function f : e.functions) {
 				
 				if (f.modifier != MODIFIER.STATIC) {
-					
+
 					/* Dynamically add-in the struct head provisos, if not present already */
 					if (!e.inheritedFunctions.contains(f)) {
 						for (TYPE t : e.proviso) {
 							boolean found = f.provisoTypes.stream().anyMatch(x -> x.isEqual(t));
-							
+
 							/* Add the proviso to the function signature */
 							if (!found) f.provisoTypes.add(t.clone());
 						}
@@ -435,7 +435,7 @@ public class ContextChecker {
 				 
 					/* Check for duplicate function name */
 					for (Function f0 : this.functions) {
-						if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
+						if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS))
 							throw new CTEX_EXC(f, Const.DUPLICATE_FUNCTION_NAME, f.path);
 					}
 				}
@@ -477,7 +477,7 @@ public class ContextChecker {
 					for (int i = 0; i < e.functions.size(); i++) {
 						Function structFunction = e.functions.get(i);
 						
-						if (Function.signatureMatch(structFunction, ftranslated, false, true, false)) {
+						if (Function.signatureMatch(structFunction, ftranslated, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS)) {
 							/* Add default context to make sure it is casted */
 							if (structFunction.provisoTypes.isEmpty())
 								structFunction.addProvisoMapping(f.getReturnType(), new ArrayList());
@@ -539,7 +539,7 @@ public class ContextChecker {
 			 
 				/* Check for duplicate function name */
 				for (Function f0 : this.functions) {
-					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, false, true, false))
+					if (f0.path.equals(f.path) && Function.signatureMatch(f0, f, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS))
 						throw new CTEX_EXC(f, Const.DUPLICATE_FUNCTION_NAME, f.path);
 				}
 			}
@@ -1966,24 +1966,26 @@ public class ContextChecker {
 					if (f1.inheritLink != null && f1.inheritLink.equals(f)) {
 						f0 = f1;
 
-						// TODO: Proviso need to be translated here to extender proviso heads. We do know that no additional proviso types can be added since it is the inherited function.
-						if (!f1.containsMapping(c.getProviso())) {
-							f1.setContext(c.getProviso());
+						List<TYPE> provisoHeads = ex.extProviso.stream().map(x -> x.clone()).collect(Collectors.toList());
+						List<TYPE> provCopy = ex.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
+
+						/* Attempt to figure out the proviso of the function in the extension based on the proviso of f */
+						List<TYPE> mappedToExtender = this.autoProviso(provisoHeads, provisoHeads, c.getProviso(), c.getCallee().getSource(), true);
+
+						if (!f1.containsMapping(mappedToExtender)) {
+							f1.setContext(mappedToExtender);
 							f1.check(this);
 						}
-						else f1.setContext(c.getProviso());
+						else f1.setContext(mappedToExtender);
 
 						break;
 					}
 				}
 
 				if (f0 == null) {
-					ex.print(0, true);
-					throw new SNIPS_EXC("Failed to locate inherited function '" + f.path + "' in '" + ex.path + "'");
+					if (f.definedInStruct.proviso.size() != ex.proviso.size()) throw new SNIPS_EXC("Failed to locate inherited function '" + f.path + "' in '" + ex.path + "'. Make sure overloaded functions are actually overloaded");
+					else throw new SNIPS_EXC("Failed to locate inherited function '" + f.path + "' in '" + ex.path + "'");
 				}
-
-				/* Register Proviso Mapping / Call at inherited function */
-				f0.addProvisoMapping(f.getReturnTypeDirect(), c.getProviso());
 
 				// TODO: Probably issues with proviso translation chain.
 				for (StructTypedef ex0 : ex.extenders) registerCallToExtenderTransitive(f0, c);

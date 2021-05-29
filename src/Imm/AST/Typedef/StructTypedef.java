@@ -143,6 +143,8 @@ public class StructTypedef extends SyntaxElement {
 	public void postInitialize() {
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
+
+			/* Notify parent that this struct is extending from it */
 			this.extension.extenders.add(this);
 
 			/* Register this struct typedef at all implemented interfaces from the extension */
@@ -235,7 +237,7 @@ public class StructTypedef extends SyntaxElement {
 
 				boolean override = false;
 				for (Function fs : this.functions) {
-					if (Function.signatureMatch(fs, f0, false, true, false)) {
+					if (Function.signatureMatch(fs, f0, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS) && this.proviso.size() == this.extension.proviso.size()) {
 						override = true;
 
 						/* Set link to actual inherited function */

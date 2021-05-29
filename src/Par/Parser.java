@@ -698,7 +698,7 @@ public class Parser {
 			for (Pair<NamespacePath, Function> pair : this.functions) {
 				boolean useProvisoFreeInCheck = STRUCT.useProvisoFreeInCheck;
 				STRUCT.useProvisoFreeInCheck = false;
-				if (Function.signatureMatch(f, pair.second, false, false, true)) {
+				if (Function.signatureMatch(f, pair.second, Function.SIG_M_CRIT.FULL_NAMES)) {
 					STRUCT.useProvisoFreeInCheck = useProvisoFreeInCheck;
 					pair.second.body = f.body;
 					this.scopes.pop();

@@ -24,6 +24,7 @@ import Util.Source;
 import Util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +35,26 @@ import java.util.stream.Collectors;
 public class Function extends CompoundStatement {
 
 			/* ---< NESTED >--- */
+	/**
+	 * Used to pass compare-criteria when comparing two function
+	 * signatures.
+	 */
+	public static enum SIG_M_CRIT {
+
+		/** Match parameter names */
+		PARAM_NAMES,
+
+		/** Call proviso free when comparing parameter types */
+		PROVISO_FREE_IN_PARAMS,
+
+		/** Match the full namespace paths of the functions */
+		FULL_NAMES,
+
+		/** Check if the amount of proviso heads is equal */
+		PROVISO_AMOUNT;
+
+	}
+
 	/**
 	 * A proviso mapping is used to store a unique mapping that was
 	 * applied to this function or ressource. The mapping stores a unique
@@ -59,9 +80,7 @@ public class Function extends CompoundStatement {
 			this.returnType = returnType;
 			this.provisoMapping = provisoMapping;
 
-			for (TYPE t : provisoMapping) {
-				assert !t.typeString().contains("PROVISO") : "Found proviso type in proviso mapping!";
-			}
+			assert provisoMapping.stream().noneMatch(x -> x.hasProviso()) : "Found proviso type in proviso mapping!";
 		}
 
 		public String getProvisoPostfix() {
@@ -242,6 +261,9 @@ public class Function extends CompoundStatement {
 				if (i < this.signalsTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
 		}
+
+		if (this.inheritLink != null)
+			CompilerDriver.outs.print(" overrides <" + this.inheritLink.signatureToString() + ">");
 
 		if (!this.activeAnnotations.isEmpty())
 			CompilerDriver.outs.print(" " + this.activeAnnotations);
@@ -482,51 +504,58 @@ public class Function extends CompoundStatement {
 		/* Clone the function signature */
 		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 
+		f.definedInStruct = this.definedInStruct;
+		f.definedInInterface = this.definedInInterface;
+
 		f.UID = this.UID;
 		return f;
 	}
-	
+
 	/**
 	 * Compares the signatures of the two given functions. This includes name, parameters
 	 * and return type. Returns true if the signatures match.
 	 * @param f0 The first function.
 	 * @param f1 The second function to match against the first.
-	 * @param matchParamNames If set to true, the name of the parameter names will be matched as well.
-	 * @param useProvisoFreeParams If set to true, when comparing the parameter types, the types will be compared proviso free.
-	 * 		This might cause a crash when using this functionality in early stages, for example before its possible to set
-	 * 		a context.
-	 * @param matchFullNames If set to true, the full namespace paths of the function will be matched, instead of only the last part.
+	 * @param criteria A list of criteria that should be taken into account.
 	 * @return True iff the signatures match with the specified flags.
 	 */
-	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams, boolean matchFullNames) {
+	public static boolean signatureMatch(Function f0, Function f1, SIG_M_CRIT...criteria) {
 		boolean match = true;
-		
+
 		/* Match function name, not namespace path */
 		match = f0.path.getLast().equals(f1.path.getLast());
-		
-		if (matchFullNames) match &= f0.path.equals(f1.path);
-		
+
+		if (Arrays.stream(criteria).anyMatch(x -> x == SIG_M_CRIT.FULL_NAMES)) match &= f0.path.equals(f1.path);
+
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;
-		
+
 		/* Compare parameters */
 		if (f0.parameters.size() == f1.parameters.size()) {
 			for (int i = 0; i < f0.parameters.size(); i++) {
 				Declaration d0 = f0.parameters.get(i);
 				Declaration d1 = f1.parameters.get(i);
-				
+
 				/* Also match names if flag is set */
-				if (matchParamNames) match &= d0.path.getLast().equals(d1.path.getLast());
-				
-				if (useProvisoFreeParams) match &= d0.getType().isEqual(d1.getType());
+				if (Arrays.stream(criteria).anyMatch(x -> x == SIG_M_CRIT.PARAM_NAMES)) match &= d0.path.getLast().equals(d1.path.getLast());
+
+				if (Arrays.stream(criteria).anyMatch(x -> x == SIG_M_CRIT.PROVISO_FREE_IN_PARAMS)) match &= d0.getType().isEqual(d1.getType());
 				else match &= d0.getRawType().isEqual(d1.getRawType());
 			}
 		}
 		else match = false;
-		
+
 		/* Compare the return type */
 		match &= f0.getReturnTypeDirect().isEqual(f1.getReturnTypeDirect());
-		
+
+		/*
+		 * Check if the same amount of possible proviso are present. We do not care about the
+		 * context or proviso names. When a struct is extending another struct, the proviso
+		 * names are overwritten. The function is thus inherited, but matches the parent's
+		 * signature.
+		 */
+		if (Arrays.stream(criteria).anyMatch(x -> x == SIG_M_CRIT.PROVISO_AMOUNT)) match &= f0.provisoTypes.size() == f1.provisoTypes.size();
+
 		return match;
 	}
 	
