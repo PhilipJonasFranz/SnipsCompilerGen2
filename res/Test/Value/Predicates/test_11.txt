@@ -28,14 +28,14 @@ process_P_1:                                 /* Function: process, Provisos: INT
     mov pc, r4
     ldmfd sp!, {r4, pc}
 
-.global ANON2
-ANON2:                                       /* Function: ANON2 */
+.global ANON0
+ANON0:                                       /* Function: ANON0 */
     add r0, r0, #12
     bx lr
 
 .global main
 main:                                        /* Function: main */
-    ldr r1, .P966250440_ANON2                /* Evaluate Expression */
+    ldr r1, .P966250440_ANON0                /* Evaluate Expression */
     mov r0, #5
     b process_P_1                            /* Call process */
-.P966250440_ANON2: .word ANON2
+.P966250440_ANON0: .word ANON0

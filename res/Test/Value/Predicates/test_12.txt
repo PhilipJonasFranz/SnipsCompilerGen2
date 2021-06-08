@@ -15,17 +15,17 @@ HEAP_START: .word 0
 .text
     b main
 
-.global ANON1
-ANON1:                                       /* Function: ANON1 */
+.global ANON0
+ANON0:                                       /* Function: ANON0 */
     add r0, r0, #10
     bx lr
 
 .global main
 main:                                        /* Function: main */
     push { lr }
-    ldr r3, .P994879591_ANON1                /* Evaluate Expression */
+    ldr r3, .P994879591_ANON0                /* Evaluate Expression */
     mov r0, #3                               /* Evaluate Expression */
     add lr, pc, #8
     mov pc, r3
     pop { pc }
-.P994879591_ANON1: .word ANON1
+.P994879591_ANON0: .word ANON0

@@ -30,7 +30,7 @@ main:                                        /* Function: main */
     vldr s0, .P1236809881_LIT_1057669251     /* Evaluate Expression */
     vldr s1, .P1236809881_LIT_1067450368     /* Load value '1.25' from pool */
     vldr s2, .P1236809881_LIT_1075838976     /* Load value '2.5' from pool */
-    vstmfd sp!, {s0-s2}
+    vpush { s2, s1, s0 }
     vldr s3, .P1236809881_LIT_0
     vmov.F32 s4, s0
     mov r3, #0
