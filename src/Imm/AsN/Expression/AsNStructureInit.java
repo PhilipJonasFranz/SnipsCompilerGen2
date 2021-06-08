@@ -1,7 +1,5 @@
 package Imm.AsN.Expression;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -10,10 +8,10 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -22,6 +20,8 @@ import Imm.AST.Expression.TempAtom;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
+
+import java.util.List;
 
 public class AsNStructureInit extends AsNExpression {
 

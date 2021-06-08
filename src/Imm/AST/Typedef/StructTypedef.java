@@ -421,7 +421,7 @@ public class StructTypedef extends SyntaxElement {
 
 	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
 		String postfix = LabelUtil.getProvisoPostfix(context);
-		
+
 		assert this.SIDLabelMap.get(postfix) != null : 
 			"Attempted to load SID for a not registered mapping!";
 		
