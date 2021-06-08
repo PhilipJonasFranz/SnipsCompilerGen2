@@ -1,13 +1,10 @@
 package Imm.AST.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
@@ -15,15 +12,14 @@ import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a superclass for all AST-Nodes.
  */
 public class WhileStatement extends ConditionalCompoundStatement {
 
-			/* ---< FIELDS >--- */
-	public int CURR_UNROLL_DEPTH = 0;
-	
-	
 			/* ---< CONSTRUCTORS >--- */
 	public WhileStatement(Expression condition, List<Statement> body, Source source) {
 		super(condition, body, source);

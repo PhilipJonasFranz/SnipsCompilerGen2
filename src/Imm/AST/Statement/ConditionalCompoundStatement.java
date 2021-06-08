@@ -1,18 +1,21 @@
 package Imm.AST.Statement;
 
-import java.util.List;
-
 import Exc.CTEX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.TYPE;
+import Opt.AST.Util.UnrollStatementUtil;
 import Util.Source;
+
+import java.util.List;
 
 public abstract class ConditionalCompoundStatement extends CompoundStatement {
 
 			/* ---< FIELDS >--- */
 	/** The condition that has to be true so that the body is executed, f.E if-statement */
 	public Expression condition;
-	
+
+	public int CURR_UNROLL_DEPTH = UnrollStatementUtil.MAX_UNROLL_DEPTH;
+
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
