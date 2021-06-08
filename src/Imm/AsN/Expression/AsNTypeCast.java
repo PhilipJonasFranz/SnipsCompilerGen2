@@ -16,10 +16,8 @@ public class AsNTypeCast extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNTypeCast cast(TypeCast tc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNTypeCast t = new AsNTypeCast();
-		t.pushOnCreatorStack(tc);
-		tc.castedNode = t;
-		
+		AsNTypeCast t = new AsNTypeCast().pushCreatorStack(tc);
+
 		/* 
 		 * Relay to capsuled expression for now, currently no datatype requires some kind of transformation,
 		 * FLOAT -> INT, INT -> FLOAT in the future maybe.
@@ -37,9 +35,8 @@ public class AsNTypeCast extends AsNExpression {
 			t.instructions.add(new ASMVMov(new VRegOp(REG.S0), new RegOp(REG.R0)));
 			t.instructions.add(new ASMVCvt(new VRegOp(REG.S0), new VRegOp(REG.S0), PRECISION.F32, PRECISION.S32));
 		}
-		
-		t.registerMetric();
-		return t;
+
+		return t.popCreatorStack();
 	}
 	
 } 

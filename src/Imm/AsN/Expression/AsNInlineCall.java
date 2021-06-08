@@ -19,19 +19,16 @@ public class AsNInlineCall extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNInlineCall cast(InlineCall ic, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNInlineCall call = new AsNInlineCall();
-		call.pushOnCreatorStack(ic);
-		ic.castedNode = call;
-		
+		AsNInlineCall call = new AsNInlineCall().pushCreatorStack(ic);
+
 		/* Function may be null when its an anonymous call */
 		if (ic.anonTarget == null) {
 			/* 
 			 * When a function has provisos, the order cannot be checked.
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
-			if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead && ic.calledFunction.definedInInterface == null) {
+			if (ic.calledFunction.castedNode == null && !ic.calledFunction.isLambdaHead && ic.calledFunction.definedInInterface == null)
 				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, ic.calledFunction.path, ic.getSource().getSourceMarker());
-			}
 		}
 		
 		AsNFunctionCall.call(ic.calledFunction, ic.anonTarget, ic.proviso, ic.parameters, ic, call, r, map, st);
@@ -41,9 +38,8 @@ public class AsNInlineCall extends AsNExpression {
 			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
 			AsNSignalStatement.injectWatchpointBranch(call, ic.watchpoint, COND.NE);
 		}
-		
-		call.registerMetric();
-		return call;
+
+		return call.popCreatorStack();
 	}
 	
 } 

@@ -48,8 +48,7 @@ public abstract class AsNConditionalCompoundStatement extends AsNCompoundStateme
 			node = AsNForStatement.cast((ForStatement) s, r, map, st);
 		}
 		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());	
-	
-		s.castedNode = node;
+
 		return node;
 	}
 	

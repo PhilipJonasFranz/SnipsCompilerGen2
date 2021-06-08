@@ -15,10 +15,8 @@ public class AsNFunctionRef extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNFunctionRef cast(FunctionRef i, RegSet r, MemoryMap map, StackSet st, int target) {
-		AsNFunctionRef ref = new AsNFunctionRef();
-		ref.pushOnCreatorStack(i);
-		i.castedNode = ref;
-		
+		AsNFunctionRef ref = new AsNFunctionRef().pushCreatorStack(i);
+
 		/* Construct label name for function lambda target with provided provisos */
 		String label = i.origin.path + ((i.origin.requireUIDInLabel)? "_" + i.origin.UID : "") + i.origin.getProvisoPostfix(i.proviso);
 		
@@ -26,9 +24,8 @@ public class AsNFunctionRef extends AsNExpression {
 		
 		LabelOp operand = new LabelOp(entry);
 		ref.instructions.add(new ASMLdrLabel(new RegOp(REG.R0), operand, null));
-		
-		ref.registerMetric();
-		return ref;
+
+		return ref.popCreatorStack();
 	}
 	
 } 

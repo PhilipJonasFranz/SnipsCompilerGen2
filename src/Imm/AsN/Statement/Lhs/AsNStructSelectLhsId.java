@@ -18,10 +18,8 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 
 	public static AsNStructSelectLhsId cast(StructSelectLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
-		AsNStructSelectLhsId id = new AsNStructSelectLhsId();
-		id.pushOnCreatorStack(lhs);
-		lhs.castedNode = id;
-		
+		AsNStructSelectLhsId id = new AsNStructSelectLhsId().pushCreatorStack(lhs);
+
 		if (lhs.select.getType().wordsize() == 1) 
 			id.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 		
@@ -44,9 +42,8 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 			store.comment = new ASMComment("Store value to struct field");
 			id.instructions.add(store);
 		}
-		
-		id.registerMetric();
-		return id;
+
+		return id.popCreatorStack();
 	}
 	
 } 

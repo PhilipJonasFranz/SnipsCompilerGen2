@@ -35,8 +35,7 @@ public class AsNLhsId extends AsNStatement {
 			id = AsNStructSelectLhsId.cast((StructSelectLhsId) lhs, r, map, st);
 		}
 		else throw new CGEN_EXC(lhs.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, lhs.getClass().getName());
-	
-		lhs.castedNode = id;
+
 		return id;
 	}
 	

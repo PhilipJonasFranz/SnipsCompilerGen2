@@ -17,9 +17,7 @@ import Imm.AsN.Expression.AsNExpression;
 public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNDoWhileStatement w = new AsNDoWhileStatement();
-		w.pushOnCreatorStack(a);
-		a.castedNode = w;
+		AsNDoWhileStatement w = new AsNDoWhileStatement().pushCreatorStack(a);
 
 		/* End of while loop */
 		w.breakJump = new ASMLabel(LabelUtil.getLabel());
@@ -51,8 +49,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		w.instructions.add(branch);
 		
 		w.instructions.add(w.breakJump);
-		w.registerMetric();
-		return w;
+		return w.popCreatorStack();
 	}
 	
 } 

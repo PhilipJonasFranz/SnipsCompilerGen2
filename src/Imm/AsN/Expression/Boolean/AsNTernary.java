@@ -18,10 +18,7 @@ public class AsNTernary extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNTernary cast(Ternary t, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNTernary tern = new AsNTernary();
-		tern.pushOnCreatorStack(t);
-		t.castedNode = tern;
-		
+		AsNTernary tern = new AsNTernary().pushCreatorStack(t);
 		r.free(0, 1, 2);
 		
 		/* The Target that is branched to if the condition is false */
@@ -57,9 +54,7 @@ public class AsNTernary extends AsNExpression {
 		tern.instructions.add(end);
 		
 		r.free(0, 1, 2);
-		
-		tern.registerMetric();
-		return tern;
+		return tern.popCreatorStack();
 	}
 	
 } 

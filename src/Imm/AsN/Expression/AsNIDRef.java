@@ -28,10 +28,8 @@ public class AsNIDRef extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) {
-		AsNIDRef ref = new AsNIDRef();
-		ref.pushOnCreatorStack(i);
-		i.castedNode = ref;
-		
+		AsNIDRef ref = new AsNIDRef().pushCreatorStack(i);
+
 		boolean isVFP = i.origin.getType().isFloat();
 		
 		/* Declaration is already loaded in Reg Stack */
@@ -139,9 +137,8 @@ public class AsNIDRef extends AsNExpression {
 				r.getReg(target).setDeclaration(i.origin);
 			}
 		}
-		
-		ref.registerMetric();
-		return ref;
+
+		return ref.popCreatorStack();
 	}
 	
 } 

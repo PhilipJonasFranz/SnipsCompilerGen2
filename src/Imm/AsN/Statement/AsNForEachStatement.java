@@ -50,10 +50,8 @@ import Res.Const;
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForEachStatement cast(ForEachStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNForEachStatement f = new AsNForEachStatement();
-		f.pushOnCreatorStack(a);
-		a.castedNode = f;
-		
+		AsNForEachStatement f = new AsNForEachStatement().pushCreatorStack(a);
+
 		/* Create jump as target for continue statements */
 		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		f.continueJump = continueJump;
@@ -243,8 +241,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		f.freeDecs(r, a);
-		f.registerMetric();
-		return f;
+		return f.popCreatorStack();
 	}
 
 	private static void loadIteratorValueRegSet(ForEachStatement a, RegSet r, MemoryMap map, StackSet st, AsNForEachStatement f) throws CGEN_EXC {

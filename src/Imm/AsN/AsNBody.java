@@ -91,7 +91,7 @@ public class AsNBody extends AsNNode {
 		AsNBody.literalManager = new LiteralUtil();
 		
 		AsNBody body = new AsNBody();
-		body.pushOnCreatorStack(p);
+		body.pushCreatorStack(p);
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		
@@ -473,7 +473,7 @@ public class AsNBody extends AsNNode {
 			body.buildLiteralPools(entry.getValue().textSection, map, entry.getValue().sourceFile);
 		
 		progress.incProgress(1);
-		body.registerMetric();
+		body.popCreatorStack();
 		return body;
 	}
 	

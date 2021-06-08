@@ -14,14 +14,11 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 public class AsNBitXor extends AsNNFoldExpression {
 
 	public static AsNBitXor cast(BitXor b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNBitXor xor = new AsNBitXor();
-		xor.pushOnCreatorStack(b);
-		b.castedNode = xor;
-		
+		AsNBitXor xor = new AsNBitXor().pushCreatorStack(b);
+
 		xor.evalExpression(xor, b, r, map, st);
-			
-		xor.registerMetric();
-		return xor;
+
+		return xor.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

@@ -10,17 +10,13 @@ public class AsNSizeOfExpression extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNSizeOfExpression cast(SizeOfExpression soe, RegSet r, MemoryMap map, StackSet st, int target) {
-		AsNSizeOfExpression s = new AsNSizeOfExpression();
-		s.pushOnCreatorStack(soe);
-		soe.castedNode = s;
-		
+		AsNSizeOfExpression s = new AsNSizeOfExpression().pushCreatorStack(soe);
 		r.free(0);
 		
 		/* Move word size in target register via literal manager, makes sure values > 255 are handeled correctly */
 		AsNBody.literalManager.loadValue(s, soe.sizeType.wordsize(), target, false, soe.sizeType.wordsize() + "");
-		
-		s.registerMetric();
-		return s;
+
+		return s.popCreatorStack();
 	}
 	
 } 

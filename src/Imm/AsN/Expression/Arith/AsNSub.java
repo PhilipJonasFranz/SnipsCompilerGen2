@@ -16,14 +16,11 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 public class AsNSub extends AsNNFoldExpression {
 	
 	public static AsNSub cast(Sub s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNSub sub = new AsNSub();
-		sub.pushOnCreatorStack(s);
-		s.castedNode = sub;
-		
+		AsNSub sub = new AsNSub().pushCreatorStack(s);
+
 		sub.evalExpression(sub, s, r, map, st);
-		
-		sub.registerMetric();
-		return sub;
+
+		return sub.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

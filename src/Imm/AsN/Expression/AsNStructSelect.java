@@ -43,10 +43,8 @@ public class AsNStructSelect extends AsNExpression {
 	
 			/* ---< METHODS >--- */
 	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNStructSelect sel = new AsNStructSelect();
-		sel.pushOnCreatorStack(s);
-		s.castedNode = sel;
-		
+		AsNStructSelect sel = new AsNStructSelect().pushCreatorStack(s);
+
 		boolean isVFP = s.getType().isFloat();
 		
 		if (s.selection instanceof InlineCall ic) {
@@ -78,9 +76,8 @@ public class AsNStructSelect extends AsNExpression {
 				}
 			}
 		}
-		
-		sel.registerMetric();
-		return sel;
+
+		return sel.popCreatorStack();
 	}
 	
 	/**

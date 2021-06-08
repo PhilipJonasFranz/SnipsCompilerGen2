@@ -29,8 +29,7 @@ public abstract class AsNUnaryExpression extends AsNExpression {
 			node = AsNBitNot.cast((BitNot) u, r, map, st);
 		}
 		else throw new CGEN_EXC(u.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, u.getClass().getName());
-		
-		u.castedNode = node;
+
 		return node;
 	}
 	

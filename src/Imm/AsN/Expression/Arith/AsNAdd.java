@@ -17,14 +17,11 @@ public class AsNAdd extends AsNNFoldExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNAdd cast(Add a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNAdd add = new AsNAdd();
-		add.pushOnCreatorStack(a);
-		a.castedNode = add;
-		
+		AsNAdd add = new AsNAdd().pushCreatorStack(a);
+
 		add.evalExpression(add, a, r, map, st);
-		
-		add.registerMetric();
-		return add;
+
+		return add.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

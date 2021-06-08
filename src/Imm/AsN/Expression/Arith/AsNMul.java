@@ -16,14 +16,11 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 public class AsNMul extends AsNNFoldExpression {
 
 	public static AsNMul cast(Mul m, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNMul mul = new AsNMul();
-		mul.pushOnCreatorStack(m);
-		m.castedNode = mul;
-		
+		AsNMul mul = new AsNMul().pushCreatorStack(m);
+
 		mul.evalExpression(mul, m, r, map, st);
-		
-		mul.registerMetric();
-		return mul;
+
+		return mul.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

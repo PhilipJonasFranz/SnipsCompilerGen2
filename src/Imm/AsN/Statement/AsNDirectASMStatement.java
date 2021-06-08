@@ -28,10 +28,8 @@ import Util.Pair;
 public class AsNDirectASMStatement extends AsNStatement {
 
 	public static AsNDirectASMStatement cast(DirectASMStatement d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNDirectASMStatement asm = new AsNDirectASMStatement();
-		asm.pushOnCreatorStack(d);
-		d.castedNode = asm;
-		
+		AsNDirectASMStatement asm = new AsNDirectASMStatement().pushCreatorStack(d);
+
 		/* Load data in */
 		for (Pair<Expression, REG> p : d.dataIn) {
 			asm.instructions.addAll(AsNExpression.cast(p.first, r, map, st).getInstructions());
@@ -77,9 +75,8 @@ public class AsNDirectASMStatement extends AsNStatement {
 				asm.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
 		}
-		
-		asm.registerMetric();
-		return asm;
+
+		return asm.popCreatorStack();
 	}
 	
 } 
