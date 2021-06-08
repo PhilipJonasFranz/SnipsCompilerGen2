@@ -125,6 +125,12 @@ If you want to run the code, you can run either the CompilerDriver.java with the
  
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 
+Additionally, the Processor is equipped with a VFP-Coprocessor. The VFP is limited to 32bit single-precission arithmetic. Supported instructions are:
+ - `vmla`, `vmls`, `vnmls`, `vnmla`, `vmul`, `vnmul`, `vadd`, `vsub`, `vdiv`
+ - `vmov`, `vabs`, `vneg`, `vsqrt`, `vcmp`, `vcvt`
+ - `vldr`, `vstr`, `vldm`, `vstm`
+
+
 ### XML-Parser
  Uses my XML-Parser implementation wich can be found here: [XML-Parser](https://github.com/PhilipJonasFranz/XMLParser)
  
