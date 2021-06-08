@@ -51,6 +51,12 @@ public class VFPCoProcessor {
 			/* True if this instruction is a vcvt.S32.F32 instruction */
 			boolean instIsToIntConversion = Fn0[0] == 1 && Fn0[1] == 1 && Fn0[2] == 0 && Fn0[3] == 1 && N == 0;
 
+			/* True if this instruction is a vcmp instruction */
+			boolean isCMPInstruction = Fn0[0] == 0 && Fn0[1] == 1 && Fn0[2] == 0 && Fn0[3] == 0 && N == 0;
+
+			/* True if this instruction is a vcmp with zero instruction */
+			boolean isCMPZInstruction = Fn0[0] == 0 && Fn0[1] == 1 && Fn0[2] == 0 && Fn0[3] == 1 && N == 0;
+
 			/* FMACS Fd = Fd + (Fn * Fm) */
 			if (p == 0 && q == 0 && r == 0 && s == 0) {
 				out = vFd + (vFn * vFm);
@@ -119,7 +125,8 @@ public class VFPCoProcessor {
 					if (DEBUG) System.out.print(Fds + " = " + "sqrt(" + Fms + ")" + ", ");
 				}
 				/* FCMPS Compare Fd with Fm */
-				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 0 && N == 0) {
+				else if (isCMPInstruction) {
+					if (DEBUG) System.out.println("CMP");
 					if (vFd == vFm) {
 						pcu.cpsr [31] = 0; // Negative
 						pcu.cpsr [30] = 1; // Zero
@@ -151,7 +158,8 @@ public class VFPCoProcessor {
 					throw new RuntimeException("Not implemented!");
 				}
 				/* FCMPZS Compare Fd with 0 */
-				else if (Fn0 [0] == 0 && Fn0 [1] == 1 && Fn0 [2] == 0 && Fn0 [3] == 1 && N == 0) {
+				else if (isCMPZInstruction) {
+					if (DEBUG) System.out.println("CMPZ");
 					if (vFd == 0) {
 						pcu.cpsr [31] = 0; // Negative
 						pcu.cpsr [30] = 1; // Zero
@@ -199,9 +207,10 @@ public class VFPCoProcessor {
 				if (DEBUG) System.out.print(Fds + " = " + "(int) " + Fms + ", ");
 				out = (int) vFm;
 			}
-			else regs [Fd] = FBin.toFBin(out);
+			else if (!isCMPInstruction && !isCMPZInstruction)
+				regs [Fd] = FBin.toFBin(out);
 
-			if (DEBUG) System.out.println("Result: " + Fds + " = " + out);
+			if (DEBUG && !isCMPInstruction && !isCMPZInstruction) System.out.println("Result: " + Fds + " = " + out);
 		}
 		/* Single-Register-Transfer Instruction */
 		else if (instr [27] == 1 && instr [26] == 1 && instr [25] == 1 && instr [24] == 0 && instr [4] == 1) {
@@ -271,7 +280,7 @@ public class VFPCoProcessor {
 				/* Load Value */
 				int [] value = pcu.readMem(addrBin.clone());
 				this.regs [Fd] = value.clone();
-				if (DEBUG) System.out.print("Loading " + Fds + " from " + addr + " = " + FBin.toDecimal(value));
+				if (DEBUG) System.out.print("Loading " + Fds + " from " + addr + " = " + FBin.toDecimal(value) + " " + offset);
 			}
 			else {
 				/* Store Value */
