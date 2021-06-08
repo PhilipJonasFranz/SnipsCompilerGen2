@@ -652,8 +652,6 @@ public class ContextChecker {
 	}
 	
 	public TYPE checkStructureInit(StructureInit e) throws CTEX_EXC {
-		e.setType(e.structType);
-		
 		StructTypedef extension = e.structType.getTypedef().extension;
 		
 		boolean covered = false;
@@ -702,7 +700,7 @@ public class ContextChecker {
 			List<TYPE> provided = new ArrayList();
 			for (Expression x : e.elements) 
 				provided.add(x.check(this));
-			
+
 			e.structType.proviso = this.autoProviso(e.structType.getTypedef().proviso, expected, provided, e.getSource(), true);
 		}
 		
@@ -719,7 +717,7 @@ public class ContextChecker {
 		
 		/* Check that type that is covering is a struct type */
 		if (extension != null && covered && !(e.elements.get(0).getType().isStruct())) 
-				throw new CTEX_EXC(Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType());
+			throw new CTEX_EXC(Const.CAN_ONLY_COVER_WITH_STRUCT, e.elements.get(0).getType());
 		
 		/* Absolute placeholder case */
 		if (e.elements.size() == 1 && e.elements.get(0) instanceof TempAtom a) {
@@ -799,7 +797,8 @@ public class ContextChecker {
 		
 		/* Check if all required provisos are present */
 		e.structType.checkProvisoPresent(e.getSource());
-		
+
+		e.setType(e.structType);
 		return e.getType();
 	}
 	
@@ -834,21 +833,16 @@ public class ContextChecker {
 		
 		/* First selections does deref, this means that the base must be a pointer */
 		if (e.deref) {
-			if (type.isPointer()) {
-				POINTER p0 = (POINTER) type;
-				type = p0.targetType;
-			}
+			if (type instanceof POINTER p0) type = p0.targetType;
 			else throw new CTEX_EXC(e.selector, Const.CANNOT_DEREF_NON_POINTER, type.provisoFree());
 		}
 		
 		Expression selection = e.selection;
 		
 		while (true) {
-			selection.setType(type.clone());
+			selection.setType(type);
 			
-			if (type.isStruct()) {
-				STRUCT struct = (STRUCT) type;
-					
+			if (type instanceof STRUCT struct) {
 				if (selection instanceof StructSelect sel0) {
 					if (sel0.selector instanceof IDRef ref) {
 						type = findAndLinkField(struct, ref);
@@ -861,7 +855,7 @@ public class ContextChecker {
 								type = type.getContainedType();
 						}
 						
-						ref.setType(type.clone());
+						ref.setType(type);
 					}
 					else if (sel0.selector instanceof ArraySelect arr0) {
 						/* Push new scope to house the struct fields */
@@ -879,8 +873,7 @@ public class ContextChecker {
 
 						type = arr0.check(this);
 						
-						arr0.setType(type.clone());
-						
+						arr0.setType(type);
 						this.scopes.pop();
 					}
 					else throw new CTEX_EXC(selection, Const.CLASS_CANNOT_BE_SELECTOR, sel0.selector.getClass().getSimpleName());
@@ -898,13 +891,8 @@ public class ContextChecker {
 						else 
 							throw ex;
 					}
-					
-					TYPE type0 = type;
-					if (type0.isPointer())
-						type0 = type0.getContainedType();
-					
-					ref.setType(type.clone());
-					
+
+					ref.setType(type);
 					break;
 				}
 				else if (selection instanceof ArraySelect arr0) {
@@ -925,7 +913,7 @@ public class ContextChecker {
 					
 					this.scopes.pop();
 					
-					arr0.setType(type.clone());
+					arr0.setType(type);
 					
 					break;
 				}
@@ -935,7 +923,7 @@ public class ContextChecker {
 			
 		}
 		
-		e.setType(type.clone());
+		e.setType(type);
 		return e.getType();
 	}
 	
@@ -1024,9 +1012,7 @@ public class ContextChecker {
 		
 		LhsId iteratorWritebackLhs = null;
 		
-		if (refType.isPointer()) {
-			POINTER p = (POINTER) refType;
-			
+		if (refType instanceof POINTER p) {
 			if (!p.targetType.isEqual(itType) && !p.targetType.getCoreType().isEqual(itType))
 				throw new CTEX_EXC(Const.POINTER_TYPE_DOES_NOT_MATCH_ITERATOR_TYPE, p.targetType.provisoFree(), itType.provisoFree());
 			
@@ -1047,9 +1033,7 @@ public class ContextChecker {
 				/* Construct the lhs that uses a pointer deref to store the iterator */
 				iteratorWritebackLhs = new PointerLhsId(f.shadowRef.clone(), f.iterator.getSource());
 		}
-		else if (refType.isArray()) {
-			ARRAY a = (ARRAY) refType;
-			
+		else if (refType instanceof ARRAY a) {
 			if (!a.elementType.isEqual(itType))
 				throw new CTEX_EXC(Const.ARRAY_TYPE_DOES_NOT_MATCH_ITERATOR_TYPE, a.elementType.provisoFree(), itType.provisoFree());
 			
@@ -1130,7 +1114,7 @@ public class ContextChecker {
 			TYPE t = d.value.check(this);
 			if (d.getType() instanceof AUTO || d.hadAutoType) {
 				d.hadAutoType = true;
-				d.setType(d.value.getType().clone());
+				d.setType(d.value.getType());
 			}
 			
 			if (t instanceof FUNC t0) {
@@ -1184,18 +1168,13 @@ public class ContextChecker {
 		this.declarations.add(d);
 		
 		/* If the type is a struct, make sure all required provisos are present */
-		if (d.getType().getCoreType().isStruct()) {
-			STRUCT s = (STRUCT) d.getType().getCoreType();
+		if (d.getType().getCoreType() instanceof STRUCT s)
 			s.checkProvisoPresent(d.getSource());
-		}
 
 		/* If the type is an interface, make sure the modifier is not violated */
-		if (d.getType().getCoreType().isInterface()) { 
-			INTERFACE i = (INTERFACE) d.getType().getCoreType();
-			
+		if (d.getType().getCoreType() instanceof INTERFACE i)
 			/* Check for modifier restrictions */
 			d.modifierViolated = this.checkModifier(i.getTypedef().modifier, i.getTypedef().path, d.getSource());
-		}
 
 		if (d.isVolatile && d.getType().isPointer()) {
 			/*
@@ -1211,9 +1190,7 @@ public class ContextChecker {
 			 * declaration is a struct, and not a struct pointer, the struct
 			 * is on the stack and deleted automatically.
 			 */
-			if (d.getType().getContainedType().isStruct()) {
-				STRUCT struct = (STRUCT) d.getType().getContainedType();
-
+			if (d.getType().getContainedType() instanceof STRUCT struct) {
 				/* Search for destructor function */
 				for (Function f : struct.getTypedef().functions) {
 					if (f.isDestructor()) {
@@ -1469,7 +1446,7 @@ public class ContextChecker {
 			div.placeholderCall.check(this);
 		}
 
-		b.setType(b.operands.get(0).getType().clone());
+		b.setType(b.operands.get(0).getType());
 		return b.getType();
 	}
 	
@@ -1544,7 +1521,7 @@ public class ContextChecker {
 				
 				/* Found function, wire data */
 				op.calledFunction = f;
-				op.setType(f.getReturnType().clone());
+				op.setType(f.getReturnType());
 				op.provisoTypes = mapping;
 			}
 		}
@@ -1552,7 +1529,7 @@ public class ContextChecker {
 		if (op.calledFunction == null) {
 			/* No function was found, check actual expression */
 			op.actualExpression.check(this);
-			op.setType(op.actualExpression.getType().clone());
+			op.setType(op.actualExpression.getType());
 		}
 		else {
 			Function f = op.calledFunction;
@@ -1562,7 +1539,7 @@ public class ContextChecker {
 				 * Add default proviso mapping. If function has proviso, 
 				 * it will be checked above automatically. 
 				 */
-				f.addProvisoMapping(f.getReturnType().clone(), new ArrayList());
+				f.addProvisoMapping(f.getReturnType(), new ArrayList());
 				f.check(this);
 			}
 		}
@@ -1586,7 +1563,7 @@ public class ContextChecker {
 				throw new CTEX_EXC(e, Const.CONDITION_TYPE_MUST_BE_32_BIT);
 		}
 
-		b.setType(b.operands.get(0).getType().clone());
+		b.setType(b.operands.get(0).getType());
 		return b.getType();
 	}
 	
@@ -1679,7 +1656,7 @@ public class ContextChecker {
 		Function func = CallUtil.transformSuperConstructorCall(c, this.getCurrentFunction());
 
 		/* Switch out path if one of the operands is a float type */
-		if (c.getPath().build().equals("__op_mod") && types.stream().anyMatch(x -> x.isFloat()))
+		if (c.getPath().build().equals("__op_mod") && types.stream().anyMatch(TYPE::isFloat))
 			c.setPath(new NamespacePath("__op_mod_f"));
 
 		/* Super constructor was not used, search for function */
@@ -1688,8 +1665,7 @@ public class ContextChecker {
 
 		if (c.isNestedCall()) {
 			/* Call to struct nested function */
-			if (c.getParams().get(0).check(this).getCoreType().isStruct()) {
-				STRUCT s = (STRUCT) c.getParams().get(0).check(this).getCoreType();
+			if (c.getParams().get(0).check(this).getCoreType() instanceof STRUCT s) {
 				StructTypedef def = s.getTypedef();
 				
 				boolean found = false;
@@ -1723,10 +1699,9 @@ public class ContextChecker {
 					
 					for (int a = 0; a < c.getParams().size(); a++) {
 						/* Apply parameter type if atom is placeholder */
-						if (c.getParams().get(a) instanceof TempAtom atom) {
+						if (c.getParams().get(a) instanceof TempAtom atom)
 							atom.inheritType = f.parameters.get(a).getType();
-						}
-						
+
 						iParamTypes.add(c.getParams().get(a).check(this));
 					}	
 					
@@ -1814,20 +1789,14 @@ public class ContextChecker {
 							atom.inheritType = f.parameters.get(a).getType();
 
 						iParamTypes.add(c.getParams().get(a).check(this));
-					}	
-					
-					List<TYPE> functionTypes = new ArrayList();
-					
-					for (Declaration d : f.parameters) 
-						functionTypes.add(d.getRawType());
-					
-					if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
-						INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
-						
-						/* Replace void* type of implicit self parameter with interface pointer type for auto-proviso */
-						functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
 					}
-					
+
+					List<TYPE> functionTypes = f.parameters.stream().map(Declaration::getRawType).collect(Collectors.toList());
+
+					/* Replace void* type of implicit self parameter with interface pointer type for auto-proviso */
+					if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType() instanceof INTERFACE s)
+						functionTypes.set(0, new POINTER(s.getTypedef().self.clone()));
+
 					if (iParamTypes.get(0).isInterface()) {
 						/* Must be pointer to interface */
 						iParamTypes.set(0, new POINTER(iParamTypes.get(0)));
@@ -1835,10 +1804,8 @@ public class ContextChecker {
 					
 					c.setProviso(this.autoProviso(f.provisoTypes, functionTypes, iParamTypes, c.getCallee().getSource(), true));
 				}
-				
-				if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType().isInterface()) {
-					INTERFACE s = (INTERFACE) c.getParams().get(0).check(this).getCoreType();
-					
+
+				if (c.isNestedCall() && c.getParams().get(0).check(this).getCoreType() instanceof INTERFACE s) {
 					/* Add proviso mapping to all implementations in the StructTypedefs that extend from this function. */
 					for (StructTypedef def : s.getTypedef().implementers) {
 						for (Function f0 : def.functions) {
@@ -1889,10 +1856,8 @@ public class ContextChecker {
 					if (paramType.isPointer() || functionParamType.isPointer()) 
 						CompilerDriver.printProvisoTypes = true;
 					
-					if (paramType.getCoreType().isStruct()) {
-						STRUCT s = (STRUCT) paramType.getCoreType();
+					if (paramType.getCoreType() instanceof STRUCT s)
 						s.checkProvisoPresent(c.getParams().get(a).getSource());
-					}
 					
 					int paramNumber = a + 1;
 					if (c.isNestedCall() && a > 0)
@@ -1907,8 +1872,8 @@ public class ContextChecker {
 			
 			if (c.getCallee() instanceof InlineCall) {
 				if (f.provisoTypes.isEmpty() || !f.containsMapping(c.getProviso())) 
-					c.setType(f.getReturnType().clone());
-				
+					c.setType(f.getReturnType());
+
 				if (c.getType().isVoid() && !f.hasReturn) 
 					throw new CTEX_EXC(Const.EXPECTED_RETURN_VALUE);
 			}
@@ -1966,8 +1931,8 @@ public class ContextChecker {
 					if (f1.inheritLink != null && f1.inheritLink.equals(f)) {
 						f0 = f1;
 
-						List<TYPE> provisoHeads = ex.extProviso.stream().map(x -> x.clone()).collect(Collectors.toList());
-						List<TYPE> provCopy = ex.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
+						List<TYPE> provisoHeads = ex.extProviso.stream().map(TYPE::clone).collect(Collectors.toList());
+						List<TYPE> provCopy = ex.proviso.stream().map(TYPE::clone).collect(Collectors.toList());
 
 						/* Attempt to figure out the proviso of the function in the extension based on the proviso of f */
 						List<TYPE> mappedToExtender = this.autoProviso(provisoHeads, provisoHeads, c.getProviso(), c.getCallee().getSource(), true);
@@ -2052,14 +2017,8 @@ public class ContextChecker {
 				TYPE t = r.base.check(this);
 				
 				/* Extract prefix from ressource */
-				if (t.getCoreType().isStruct()) {
-					STRUCT s = (STRUCT) t.getCoreType();
-					prefix = s.getTypedef().path.getLast();
-				}
-				else if (t.getCoreType().isInterface()) {
-					INTERFACE i = (INTERFACE) t.getCoreType();
-					prefix = i.getTypedef().path.getLast();
-				}
+				if (t.getCoreType() instanceof STRUCT s) prefix = s.getTypedef().path.getLast();
+				else if (t.getCoreType() instanceof INTERFACE i) prefix = i.getTypedef().path.getLast();
 			}
 			
 			lambda = this.findFunction(r.path, r.getSource(), true, prefix, null);
@@ -2175,13 +2134,10 @@ public class ContextChecker {
 		TYPE t = deref.expression.check(this);
 		
 		/* Dereference pointer or primitive type */
-		if (t.isPrimitive()) 
-			/* Set to core type */
-			deref.setType(t.getCoreType());
-		else if (t.isPointer()) {
-			deref.setType(t.getContainedType());
-		}
-		else throw new CTEX_EXC(deref.expression, Const.CANNOT_DEREF_TYPE, t.provisoFree());
+		if (t.isPrimitive()) deref.setType(t.getCoreType());
+		else if (t.isPointer()) deref.setType(t.getContainedType());
+		else
+			throw new CTEX_EXC(deref.expression, Const.CANNOT_DEREF_TYPE, t.provisoFree());
 		
 		return deref.getType();
 	}
@@ -2278,24 +2234,18 @@ public class ContextChecker {
 				/* Allow to select from array but only in the first selection, since pointer 'flattens' the array structure */
 				if (!(chain.isArray() || (i == 0 && (type0.isPointer() || chain.isVoid())))) 
 					throw new CTEX_EXC(select.selection.get(i), Const.CANNOT_SELECT_FROM_TYPE, type0.provisoFree());
-				else if (chain.isArray()) {
-					ARRAY arr = (ARRAY) chain;
-					
+				else if (chain instanceof ARRAY arr) {
 					if (select.selection.get(i) instanceof Atom a) {
 						int value = (int) a.getType().getValue();
-						if (value < 0 || value >= arr.getLength()) 
+						if (value < 0 || value >= arr.getLength())
 							throw new CTEX_EXC(select.selection.get(i), Const.ARRAY_OUT_OF_BOUNDS, value, chain.provisoFree());
 					}
 					
 					chain = arr.elementType;
 				}
 				else {
-					if (type0.isPointer()) {
-						chain = type0.getContainedType();
-					}
-					else {
-						/* When selecting from void, type will stay void */
-					}
+					if (type0.isPointer()) chain = type0.getContainedType();
+					else { /* When selecting from void, type will stay void */ }
 
 					if (select.selection.size() > 1) 
 						throw new CTEX_EXC(select.getShadowRef(), Const.CAN_ONLY_SELECT_ONCE_FROM_POINTER_OR_VOID);
@@ -2482,14 +2432,10 @@ public class ContextChecker {
 	 * @param target The Type that acts as the parent of the child.
 	 */
 	public boolean checkPolymorphViolation(TYPE child, TYPE target) {
-		if (!target.isStruct()) return false;
+		if (!target.isStruct() || !child.isStruct()) return false;
 		
-		if (!child.isStruct()) return false;
-		
-		if (child.getCoreType().isStruct()) {
-			return ((STRUCT) child.getCoreType()).isPolymorphTo(target) &&
-					!((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef());
-		}
+		if (child.getCoreType() instanceof STRUCT s)
+			return s.isPolymorphTo(target) && !((STRUCT) child).getTypedef().equals(((STRUCT) target).getTypedef());
 		
 		return false;
 	}
@@ -2667,10 +2613,8 @@ public class ContextChecker {
 	 * @return The extracted and built namespace path.
 	 */
 	public String getPath(Expression e) throws CTEX_EXC {
-		if (e.check(this).getCoreType().isStruct()) {
-			STRUCT s = (STRUCT) e.check(this).getCoreType();
+		if (e.check(this).getCoreType() instanceof STRUCT s)
 			return s.getTypedef().path.build();
-		}
 		else {
 			INTERFACE s = (INTERFACE) e.check(this).getCoreType();
 			return s.getTypedef().path.build();
