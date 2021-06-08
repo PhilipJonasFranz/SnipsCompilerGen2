@@ -39,7 +39,7 @@ public class Function extends CompoundStatement {
 	 * Used to pass compare-criteria when comparing two function
 	 * signatures.
 	 */
-	public static enum SIG_M_CRIT {
+	public enum SIG_M_CRIT {
 
 		/** Match parameter names */
 		PARAM_NAMES,
@@ -51,7 +51,7 @@ public class Function extends CompoundStatement {
 		FULL_NAMES,
 
 		/** Check if the amount of proviso heads is equal */
-		PROVISO_AMOUNT;
+		PROVISO_AMOUNT
 
 	}
 
@@ -80,7 +80,7 @@ public class Function extends CompoundStatement {
 			this.returnType = returnType;
 			this.provisoMapping = provisoMapping;
 
-			assert provisoMapping.stream().noneMatch(x -> x.hasProviso()) : "Found proviso type in proviso mapping!";
+			assert provisoMapping.stream().noneMatch(TYPE::hasProviso) : "Found proviso type in proviso mapping!";
 		}
 
 		public String getProvisoPostfix() {
@@ -174,7 +174,7 @@ public class Function extends CompoundStatement {
 	/**
 	 * Unique ID of this function.
 	 */
-	public int UID = LabelUtil.getUID();
+	public int UID;
 
 	/**
 	 * Set during AST_OPT phase, contains reference to the function in
@@ -458,23 +458,6 @@ public class Function extends CompoundStatement {
 	
 			/* ---< METHOD >--- */
 	/**
-	 * Returns the return type that corresponds to the given mapping.
-	 * @param map The proviso map which is matched to the registered proviso maps to get the return type from.
-	 * @return The return type.
-	 * @throws SNIPS_EXC If no registered mapping is equal to the given mapping.
-	 */
-	public TYPE getMappingReturnType(List<TYPE> map) {
-		for (ProvisoMapping provisosCall : this.provisosCalls) {
-			List<TYPE> map0 = provisosCall.provisoMapping;
-
-			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
-				return provisosCall.returnType;
-		}
-		
-		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
-	}
-	
-	/**
 	 * Clones the function's signature. This includes deep copies of:
 	 * 
 	 * - Return Type
@@ -520,7 +503,7 @@ public class Function extends CompoundStatement {
 	 * @return True iff the signatures match with the specified flags.
 	 */
 	public static boolean signatureMatch(Function f0, Function f1, SIG_M_CRIT...criteria) {
-		boolean match = true;
+		boolean match;
 
 		/* Match function name, not namespace path */
 		match = f0.path.getLast().equals(f1.path.getLast());
