@@ -29,10 +29,8 @@ import Res.Const;
 public class AsNSignalStatement extends AsNStatement {
 
 	public static AsNSignalStatement cast(SignalStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNSignalStatement sig = new AsNSignalStatement();
-		sig.pushOnCreatorStack(s);
-		s.castedNode = sig;
-		
+		AsNSignalStatement sig = new AsNSignalStatement().pushCreatorStack(s);
+
 		STRUCT excType = (STRUCT) s.exceptionBuilder.getType();
 		
 		/* Load Exception */
@@ -48,9 +46,8 @@ public class AsNSignalStatement extends AsNStatement {
 		
 		/* Add the branch to the watchpoint */
 		injectWatchpointBranch(sig, s.watchpoint, null);
-		
-		sig.registerMetric();
-		return sig;
+
+		return sig.popCreatorStack();
 	}
 	
 	public static void injectWatchpointBranch(AsNNode node, SyntaxElement watchpoint, COND cond) {

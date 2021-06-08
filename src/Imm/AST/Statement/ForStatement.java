@@ -1,20 +1,19 @@
 package Imm.AST.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
-import Opt.AST.Util.UnrollStatementUtil;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -31,8 +30,6 @@ public class ForStatement extends ConditionalCompoundStatement {
 	 * The iterator increment statement. 
 	 */
 	public Statement increment;
-	
-	public int CURR_UNROLL_DEPTH = UnrollStatementUtil.MAX_UNROLL_DEPTH;
 	
 	
 			/* ---< CONSTRUCTORS >--- */

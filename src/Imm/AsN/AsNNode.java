@@ -121,16 +121,18 @@ public abstract class AsNNode {
 	 * this node to the given syntax element.
 	 * @param s The AST-Node this AsNNode is casting.
 	 */
-	public void pushOnCreatorStack(SyntaxElement s) {
+	public <T extends AsNNode> T pushCreatorStack(SyntaxElement s) {
 		creatorStack.push(this);
 		this.castedNode = s;
+		s.castedNode = this;
+		return (T) this;
 	}
 	
 	/**
 	 * Pop this node from the creator-stack and register its metrics
 	 * in the {@link #metricsMap}.
 	 */
-	public void registerMetric() {
+	public <T extends AsNNode> T popCreatorStack() {
 		if (creatorStack.isEmpty()) throw new SNIPS_EXC("Attempted to pop from empty creator stack!");
 		else if (!creatorStack.peek().equals(this)) throw new SNIPS_EXC("Creator stack is not lined up!");
 		
@@ -156,6 +158,8 @@ public abstract class AsNNode {
 		
 		pair.second.first += sum;
 		pair.second.second += cycles;
+
+		return (T) this;
 	}
 	
 } 

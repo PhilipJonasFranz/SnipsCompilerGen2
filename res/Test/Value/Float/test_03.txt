@@ -23,6 +23,7 @@ OUTPUT
 
 .data
 Vector3F: .word 0
+Vector3F_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

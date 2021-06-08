@@ -72,8 +72,7 @@ public abstract class AsNNFoldExpression extends AsNExpression {
 			node = AsNBitXor.cast((BitXor) e, r, map, st);
 		}
 		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
-	
-		e.castedNode = node;
+
 		return node;
 	}
 	

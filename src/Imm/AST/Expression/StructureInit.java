@@ -1,21 +1,21 @@
 package Imm.AST.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StructureInit extends Expression {
 
@@ -76,7 +76,14 @@ public class StructureInit extends Expression {
 
 	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		ProvisoUtil.mapNTo1(this.structType, context);
-		
+
+		/*
+		 * Apply context to fabricated struct type, since
+		 * its proviso are used to load the correct SID when calling
+		 * 'structureInit' in AsNStructureInit.
+		 */
+		ProvisoUtil.mapNTo1(this.type, context);
+
 		for (Expression e : this.elements) 
 			e.setContext(context);
 	}

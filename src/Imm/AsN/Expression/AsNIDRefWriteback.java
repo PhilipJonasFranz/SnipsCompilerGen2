@@ -11,17 +11,14 @@ public class AsNIDRefWriteback extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNIDRefWriteback cast(IDRefWriteback wb, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNIDRefWriteback w = new AsNIDRefWriteback();
-		w.pushOnCreatorStack(wb);
-		wb.castedNode = w;
-		
+		AsNIDRefWriteback w = new AsNIDRefWriteback().pushCreatorStack(wb);
+
 		if (wb.idRef.getType().isFloat()) r.getVRegSet().free(0, 1, 2);
 		else r.free(0, 1, 2);
 		
 		AsNAssignWriteback.injectWriteback(w, wb, r, map, st, true);
-		
-		w.registerMetric();
-		return w;
+
+		return w.popCreatorStack();
 	}
 	
 } 

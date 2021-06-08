@@ -16,9 +16,7 @@ public class AsNDiv extends AsNNFoldExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNDiv cast(Div d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNDiv div = new AsNDiv();
-		div.pushOnCreatorStack(d);
-		d.castedNode = div;
+		AsNDiv div = new AsNDiv().pushCreatorStack(d);
 
 		if (d.placeholderCall != null)
 			/* Not a float division, inline call calls the __op_div function */
@@ -27,8 +25,7 @@ public class AsNDiv extends AsNNFoldExpression {
 			/* Float division using the vdiv instruction */
 			div.evalExpression(div, d, r, map, st);
 
-		div.registerMetric();
-		return div;
+		return div.popCreatorStack();
 	}
 
 	public ASMInstruction buildVInjector() {

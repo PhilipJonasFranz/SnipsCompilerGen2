@@ -25,11 +25,18 @@ OUTPUT
 
 .data
 X: .word 0
+X_vrelay: .word X_vtable
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+X_vtable:                                    /* VTable for X */
+    mov r12, #0
+    add pc, pc, r10
+    b X.get_1482960026
+    b X.get_622834266
 
 .global X.get_1482960026
 X.get_1482960026:                            /* Function: X.get */

@@ -14,14 +14,11 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 public class AsNLsl extends AsNNFoldExpression {
 
 	public static AsNLsl cast(Lsl l, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNLsl lsl = new AsNLsl();
-		lsl.pushOnCreatorStack(l);
-		l.castedNode = lsl;
-		
+		AsNLsl lsl = new AsNLsl().pushCreatorStack(l);
+
 		lsl.evalExpression(lsl, l, r, map, st);
-			
-		lsl.registerMetric();
-		return lsl;
+
+		return lsl.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

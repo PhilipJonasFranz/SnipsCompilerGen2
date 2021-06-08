@@ -34,10 +34,8 @@ public class AsNTryStatement extends AsNCompoundStatement {
 	ASMLabel watchpointLabel;
 	
 	public static AsNTryStatement cast(TryStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNTryStatement tr0 = new AsNTryStatement();
-		tr0.pushOnCreatorStack(s);
-		s.castedNode = tr0;
-		
+		AsNTryStatement tr0 = new AsNTryStatement().pushCreatorStack(s);
+
 		/* Create the watchpoint jump target label */
 		tr0.watchpointLabel = new ASMLabel(LabelUtil.getLabel());
 		
@@ -124,8 +122,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		tr0.instructions.add(endBranch);
 		
 		tr0.freeDecs(r, s);
-		tr0.registerMetric();
-		return tr0;
+		return tr0.popCreatorStack();
 	}
 	
 	public void loadSPBackup(AsNNode node, StackSet st) {

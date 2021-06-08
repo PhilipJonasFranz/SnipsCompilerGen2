@@ -13,10 +13,8 @@ import Imm.AST.Statement.BreakStatement;
 public class AsNBreakStatement extends AsNStatement {
 
 	public static AsNBreakStatement cast(BreakStatement b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNBreakStatement br = new AsNBreakStatement();
-		br.pushOnCreatorStack(b);
-		b.castedNode = br;
-		
+		AsNBreakStatement br = new AsNBreakStatement().pushCreatorStack(b);
+
 		/* Retrieve the jump label target from the super loop */
 		ASMLabel target = ((AsNConditionalCompoundStatement) b.superLoop.castedNode).breakJump;
 		
@@ -28,9 +26,8 @@ public class AsNBreakStatement extends AsNStatement {
 		
 		/* Jump to the loop escape label */
 		br.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(target)));
-		
-		br.registerMetric();
-		return br;
+
+		return br.popCreatorStack();
 	}
 	
 } 

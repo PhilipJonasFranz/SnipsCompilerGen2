@@ -1,7 +1,5 @@
 package Imm.AsN.Expression;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -10,10 +8,10 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVPushStack;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
@@ -23,14 +21,14 @@ import Imm.AsN.AsNNode;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 
+import java.util.List;
+
 public class AsNStructureInit extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNStructureInit init = new AsNStructureInit();
-		init.pushOnCreatorStack(s);
-		s.castedNode = init;
-		
+		AsNStructureInit init = new AsNStructureInit().pushCreatorStack(s);
+
 		r.free(0, 1, 2);
 		r.getVRegSet().free(0, 1, 2);
 		
@@ -56,16 +54,14 @@ public class AsNStructureInit extends AsNExpression {
 					/* Push dummy for SID header */
 					st.pushDummy();
 				}
-				
-				init.registerMetric();
-				return init;
+
+				return init.popCreatorStack();
 			}
 		}
 		
 		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st);
-		
-		init.registerMetric();
-		return init;
+
+		return init.popCreatorStack();
 	}
 	
 	public static ASMPushStack attatchFlag(ASMPushStack push) {

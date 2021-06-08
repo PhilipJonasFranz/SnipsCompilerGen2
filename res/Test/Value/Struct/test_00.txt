@@ -22,7 +22,9 @@ OUTPUT
 
 .data
 Line2D: .word 0
+Line2D_vrelay: .word 0
 Point2D: .word 0
+Point2D_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

@@ -51,7 +51,7 @@ getSum:                                      /* Function: getSum */
     mov r3, r0
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P567081186_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -66,7 +66,7 @@ getSum.L1:
     mov r0, r3
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P567081186_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -100,7 +100,7 @@ main:                                        /* Function: main */
     mov r0, r5
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P567081187_Collection_P_1
     add lr, pc, #8
     mov pc, r12

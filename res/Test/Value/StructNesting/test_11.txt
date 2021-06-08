@@ -67,12 +67,19 @@ OUTPUT
 
 .data
 C.A_P_1: .word C.B_P_1
+C.A_vrelay_P_1: .word C.A_vtable_P_1
 C.B_P_1: .word 0
+C.B_vrelay_P_1: .word C.B_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+C.B_vtable_P_1:                              /* VTable for C.B proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b C.B.incr_P_1
 
 .global C.B.incr_P_1
 C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: INT */
@@ -85,6 +92,13 @@ C.B.incr_P_1:                                /* Function: C.B.incr, Provisos: IN
     str r0, [r1, #4]                         /* Store value to struct field */
     pop { r3 }
     bx lr
+
+C.A_vtable_P_1:                              /* VTable for C.A proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b C.B.incr_P_1
+    add r10, r10, r10                        /* Function 'C.A.set' not called */
+    b C.A.pipe_P_1
 
 .global C.A.incr_P_1
 C.A.incr_P_1: 

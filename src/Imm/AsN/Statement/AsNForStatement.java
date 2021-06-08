@@ -28,10 +28,8 @@ import Opt.AST.Util.Matcher;
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNForStatement f = new AsNForStatement();
-		f.pushOnCreatorStack(a);
-		a.castedNode = f;
-		
+		AsNForStatement f = new AsNForStatement().pushCreatorStack(a);
+
 		/* Create jump as target for continue statements */
 		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
 		f.continueJump = continueJump;
@@ -149,8 +147,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		f.freeDecs(r, a);
-		f.registerMetric();
-		return f;
+		return f.popCreatorStack();
 	}
 	
 } 

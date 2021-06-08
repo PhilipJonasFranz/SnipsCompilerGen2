@@ -12,5 +12,5 @@ public interface ASTNodeVisitor<T extends SyntaxElement> {
 	 * @return True if the syntax element is relevant for this filter.
 	 */
 	boolean visit(SyntaxElement s);
-		
+	
 }

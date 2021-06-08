@@ -19,6 +19,7 @@ OUTPUT
 
 .data
 X_P_1: .word 0
+X_vrelay_P_1: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

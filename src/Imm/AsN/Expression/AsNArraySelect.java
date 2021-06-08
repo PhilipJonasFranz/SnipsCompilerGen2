@@ -41,10 +41,7 @@ public class AsNArraySelect extends AsNExpression {
 	
 			/* ---< METHODS >--- */
 	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNArraySelect select = new AsNArraySelect();
-		select.pushOnCreatorStack(s);
-		s.castedNode = select;
-		
+		AsNArraySelect select = new AsNArraySelect().pushCreatorStack(s);
 		r.free(0, 1, 2);
 		
 		if (r.declarationLoaded(s.idRef.origin)) {
@@ -85,9 +82,8 @@ public class AsNArraySelect extends AsNExpression {
 			/* Load single value into R0 */
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
-		
-		select.registerMetric();
-		return select;
+
+		return select.popCreatorStack();
 	}
 	
 	/**

@@ -449,6 +449,12 @@ public class ASTOptimizer {
 						break;
 					}
 				}
+				else if (s instanceof DoWhileStatement w) {
+					if (UnrollStatementUtil.unrollDoWhileStatement(w, body)) {
+						OPT_DONE();
+						break;
+					}
+				}
 			}
 		}
 		
@@ -1553,9 +1559,9 @@ public class ASTOptimizer {
 	}
 
 	public Statement optDoWhileStatement(DoWhileStatement doWhileStatement) throws OPT0_EXC {
-		doWhileStatement.condition = doWhileStatement.condition.opt(this);
 		doWhileStatement.body = this.optBody(doWhileStatement.body, true, true);
-		
+		doWhileStatement.condition = doWhileStatement.condition.opt(this);
+
 		return doWhileStatement;
 	}
 	

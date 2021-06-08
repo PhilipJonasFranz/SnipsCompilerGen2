@@ -14,10 +14,8 @@ import Imm.AsN.Statement.Lhs.AsNLhsId;
 public class AsNAssignment extends AsNStatement {
 
 	public static AsNAssignment cast(Assignment a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNAssignment assign = new AsNAssignment();
-		assign.pushOnCreatorStack(a);
-		a.castedNode = assign;
-		
+		AsNAssignment assign = new AsNAssignment().pushCreatorStack(a);
+
 		if (a.assignArith != ASSIGN_ARITH.NONE)
 			throw new SNIPS_EXC("Attempted to cast Assignment with assign arith, " + a.getSource().getSourceMarker());
 		
@@ -29,8 +27,7 @@ public class AsNAssignment extends AsNStatement {
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());
 		
 		assign.freeDecs(r, a);
-		assign.registerMetric();
-		return assign;
+		return assign.popCreatorStack();
 	}
 	
 } 

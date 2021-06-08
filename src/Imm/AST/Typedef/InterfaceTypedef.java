@@ -1,10 +1,5 @@
 package Imm.AST.Typedef;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
@@ -12,15 +7,15 @@ import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.INTERFACE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
@@ -28,6 +23,11 @@ import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -115,7 +115,7 @@ public class InterfaceTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false, true, false))
+					if (Function.signatureMatch(fs, f0, Function.SIG_M_CRIT.PROVISO_FREE_IN_PARAMS))
 						override = true;
 				
 				if (!override) {

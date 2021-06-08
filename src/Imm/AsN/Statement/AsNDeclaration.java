@@ -24,10 +24,8 @@ import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 public class AsNDeclaration extends AsNStatement {
 
 	public static AsNDeclaration cast(Declaration d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNDeclaration dec = new AsNDeclaration();
-		dec.pushOnCreatorStack(d);
-		d.castedNode = dec;
-		
+		AsNDeclaration dec = new AsNDeclaration().pushCreatorStack(d);
+
 		/* Load value, either in R0 or on the stack */
 		if (d.value != null) dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
 		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
@@ -91,8 +89,7 @@ public class AsNDeclaration extends AsNStatement {
 		}
 		
 		dec.freeDecs(r, d);
-		dec.registerMetric();
-		return dec;
+		return dec.popCreatorStack();
 	}
 	
 } 

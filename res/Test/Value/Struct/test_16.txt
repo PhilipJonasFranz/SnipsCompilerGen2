@@ -20,6 +20,7 @@ OUTPUT
 
 .data
 Data: .word 0
+Data_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

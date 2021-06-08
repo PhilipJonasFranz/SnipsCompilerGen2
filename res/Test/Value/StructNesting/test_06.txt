@@ -25,11 +25,17 @@ OUTPUT
 
 .data
 Storage.X_P_1: .word 0
+Storage.X_vrelay_P_1: .word Storage.X_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+Storage.X_vtable_P_1:                        /* VTable for Storage.X proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b Storage.X.get_P_1
 
 .global Storage.X.get_P_1
 Storage.X.get_P_1:                           /* Function: Storage.X.get, Provisos: INT */

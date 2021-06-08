@@ -1,20 +1,17 @@
 package Opt.AST.Util;
 
+import Imm.AST.Expression.IDRef;
+import Imm.AST.Statement.*;
+import Util.ASTDirective.DIRECTIVE;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Statement.Declaration;
-import Imm.AST.Statement.ForStatement;
-import Imm.AST.Statement.IfStatement;
-import Imm.AST.Statement.Statement;
-import Imm.AST.Statement.WhileStatement;
-import Util.ASTDirective.DIRECTIVE;
 
 /**
  * Contains methods that allow loop unrolling for 
  * 		- ForStatement
  * 		- WhileStatement
+ * 		- DoWhileStatement
  * 
  * --- General strategy when unrolling loops ---
  * 
@@ -53,23 +50,29 @@ import Util.ASTDirective.DIRECTIVE;
 public class UnrollStatementUtil {
 
 	public static int MAX_UNROLL_DEPTH = 10;
-	
-	public static boolean unrollForStatement(ForStatement f, List<Statement> body) {
-		
+
+	private static boolean isEligibleForUnroll(ConditionalCompoundStatement cc) {
 		/* Check if loop was marked to be unrolled */
-		if (!f.hasDirective(DIRECTIVE.UNROLL)) return false;
-		
+		if (!cc.hasDirective(DIRECTIVE.UNROLL)) return false;
+
 		/* Abort if maximum unroll depth is exceeded */
-		if (f.CURR_UNROLL_DEPTH < 0) return false;
-		f.CURR_UNROLL_DEPTH--;
-		
-		/* 
-		 * Make sure no declaration is created within the loop body. 
+		if (cc.CURR_UNROLL_DEPTH < 0) return false;
+		cc.CURR_UNROLL_DEPTH--;
+
+		/*
+		 * Make sure no declaration is created within the loop body.
 		 * Also check that no continue or break statement is in the
 		 * body, since these statements cannot be copied out of the
 		 * loop.
 		 */
-		if (Matcher.hasLoopUnrollBlockerStatements(f.body)) return false;
+		if (Matcher.hasLoopUnrollBlockerStatements(cc.body)) return false;
+
+		return true;
+	}
+
+	public static boolean unrollForStatement(ForStatement f, List<Statement> body) {
+		
+		if (!isEligibleForUnroll(f)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
@@ -99,21 +102,8 @@ public class UnrollStatementUtil {
 	}
 	
 	public static boolean unrollWhileStatement(WhileStatement w, List<Statement> body) {
-		
-		/* Check if loop was marked to be unrolled */
-		if (!w.hasDirective(DIRECTIVE.UNROLL)) return false;
-		
-		/* Abort if maximum unroll depth is exceeded */
-		if (w.CURR_UNROLL_DEPTH < 0) return false;
-		w.CURR_UNROLL_DEPTH--;
-		
-		/* 
-		 * Make sure no declaration is created within the loop body. 
-		 * Also check that no continue or break statement is in the
-		 * body, since these statements cannot be copied out of the
-		 * loop.
-		 */
-		if (Matcher.hasLoopUnrollBlockerStatements(w.body)) return false;
+
+		if (!isEligibleForUnroll(w)) return false;
 		
 		List<Statement> result = new ArrayList();
 		
@@ -131,6 +121,31 @@ public class UnrollStatementUtil {
 		body.remove(index);
 		body.addAll(index, result);
 		
+		return true;
+	}
+
+	public static boolean unrollDoWhileStatement(DoWhileStatement w, List<Statement> body) {
+
+		if (!isEligibleForUnroll(w)) return false;
+
+		List<Statement> result = new ArrayList();
+
+		/*
+		 * Create copy of body and increment operation and add it wrapped
+		 * in an if-statement guarded by the loop-condition.
+		 */
+		List<Statement> bodyCopy = new ArrayList<>();
+		bodyCopy.add(w);
+
+		result.addAll(Makro.copyBody(w.body));
+		IfStatement if0 = new IfStatement(w.condition.clone(), bodyCopy, w.getSource());
+		result.add(if0);
+
+		/* Replace the While-Statement in the body with the result */
+		int index = body.indexOf(w);
+		body.remove(index);
+		body.addAll(index, result);
+
 		return true;
 	}
 	

@@ -14,14 +14,11 @@ import Imm.AsN.Expression.AsNNFoldExpression;
 public class AsNBitAnd extends AsNNFoldExpression {
 
 	public static AsNBitAnd cast(BitAnd b, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNBitAnd and = new AsNBitAnd();
-		and.pushOnCreatorStack(b);
-		b.castedNode = and;
-		
+		AsNBitAnd and = new AsNBitAnd().pushCreatorStack(b);
+
 		and.evalExpression(and, b, r, map, st);
-			
-		and.registerMetric();
-		return and;
+
+		return and.popCreatorStack();
 	}
 	
 	public ASMInstruction buildInjector() {

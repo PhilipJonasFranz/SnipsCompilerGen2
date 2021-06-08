@@ -21,9 +21,7 @@ public class AsNOr extends AsNNFoldExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNOr cast(Or o, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNOr or = new AsNOr();
-		or.pushOnCreatorStack(o);
-		o.castedNode = or;
+		AsNOr or = new AsNOr().pushCreatorStack(o);
 
 		boolean isVFP = o.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
@@ -79,9 +77,8 @@ public class AsNOr extends AsNNFoldExpression {
 			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(1), COND.NE));
 			or.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.EQ));
 		}
-		
-		or.registerMetric();
-		return or;
+
+		return or.popCreatorStack();
 	}
 
 } 

@@ -70,8 +70,7 @@ public abstract class AsNStatement extends AsNNode {
 			node = AsNOperatorStatement.cast((OperatorStatement) s, r, map, st); 
 		}
 		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());
-	
-		s.castedNode = node;
+
 		return node;
 	}
 	

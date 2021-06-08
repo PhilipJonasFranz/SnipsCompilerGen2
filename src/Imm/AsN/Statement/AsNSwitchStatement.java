@@ -19,10 +19,8 @@ import Imm.AsN.Expression.AsNExpression;
 public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNSwitchStatement cast(SwitchStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNSwitchStatement sw = new AsNSwitchStatement();
-		sw.pushOnCreatorStack(s);
-		s.castedNode = sw;
-		
+		AsNSwitchStatement sw = new AsNSwitchStatement().pushCreatorStack(s);
+
 		/* Capsule expressions in compare statements */
 		s.cases.forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
 	
@@ -53,8 +51,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		sw.instructions.add(end);
 		
 		sw.freeDecs(r, s);
-		sw.registerMetric();
-		return sw;
+		return sw.popCreatorStack();
 	}
 	
 } 

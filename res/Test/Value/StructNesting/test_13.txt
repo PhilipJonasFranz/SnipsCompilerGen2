@@ -22,11 +22,17 @@ OUTPUT
 
 .data
 B_P_1: .word 0
+B_vrelay_P_1: .word B_vtable_P_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+B_vtable_P_1:                                /* VTable for B proviso _P_1 */
+    mov r12, #0
+    add pc, pc, r10
+    b B.get_P_1
 
 .global B.get_P_1
 B.get_P_1:                                   /* Function: B.get, Provisos: INT */

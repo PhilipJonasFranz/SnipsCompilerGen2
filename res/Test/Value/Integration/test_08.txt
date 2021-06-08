@@ -81,11 +81,17 @@ OUTPUT
 
 .data
 Util.Container_P_1: .word 0
+Util.Container_vrelay_P_1: .word 0
 Util.Tuple2_P_1_1: .word 0
+Util.Tuple2_vrelay_P_1_1: .word 0
 Util.Tuple2_P_3_1: .word 0
+Util.Tuple2_vrelay_P_3_1: .word 0
 Util.Tuple2_P_1_2: .word 0
+Util.Tuple2_vrelay_P_1_2: .word 0
 GameObject.Player: .word 0
+GameObject.Player_vrelay: .word 0
 GameObject.Items.Inventory: .word 0
+GameObject.Items.Inventory_vrelay: .word 0
 arr: .skip 8
 NULL: .word 0
 HEAP_START: .word 0

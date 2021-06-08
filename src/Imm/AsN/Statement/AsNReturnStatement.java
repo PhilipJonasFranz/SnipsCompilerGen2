@@ -16,9 +16,7 @@ import Imm.AsN.Expression.AsNExpression;
 public class AsNReturnStatement extends AsNStatement {
 
 	public static AsNReturnStatement cast(ReturnStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNReturnStatement ret = new AsNReturnStatement();
-		ret.pushOnCreatorStack(s);
-		s.castedNode = ret;
+		AsNReturnStatement ret = new AsNReturnStatement().pushCreatorStack(s);
 
 		/* Cast all declaration destroy operations */
 		for (Declaration d : s.volatileDecsToDestroy)
@@ -32,8 +30,7 @@ public class AsNReturnStatement extends AsNStatement {
 		ret.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
 		
 		ret.freeDecs(r, s);
-		ret.registerMetric();
-		return ret;
+		return ret.popCreatorStack();
 	}
 	
 } 

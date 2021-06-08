@@ -16,10 +16,8 @@ public class AsNAtom extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNAtom cast(Atom a, RegSet r, MemoryMap map, StackSet st, int target) {
-		AsNAtom atom = new AsNAtom();
-		atom.pushOnCreatorStack(a);
-		a.castedNode = atom;
-		
+		AsNAtom atom = new AsNAtom().pushCreatorStack(a);
+
 		if (a.getType().isFloat()) r.getVRegSet().free(0);
 		else r.free(0);
 		
@@ -41,9 +39,8 @@ public class AsNAtom extends AsNExpression {
 			int value = Integer.parseInt(a.getType().toPrimitive().sourceCodeRepresentation());	
 			AsNBody.literalManager.loadValue(atom, value, target, a.getType().isFloat(), a.getType().value.toString());
 		}
-		
-		atom.registerMetric();
-		return atom;
+
+		return atom.popCreatorStack();
 	}
 	
 } 

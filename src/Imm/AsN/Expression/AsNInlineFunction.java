@@ -21,10 +21,8 @@ public class AsNInlineFunction extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNInlineFunction cast(InlineFunction i, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNInlineFunction ifunc = new AsNInlineFunction();
-		ifunc.pushOnCreatorStack(i);
-		i.castedNode = ifunc;
-		
+		AsNInlineFunction ifunc = new AsNInlineFunction().pushCreatorStack(i);
+
 		AsNFunction funcCast;
 		
 		String currentPrefix = LabelUtil.funcPrefix;
@@ -47,9 +45,8 @@ public class AsNInlineFunction extends AsNExpression {
 		
 		LabelOp operand = new LabelOp(entry);
 		ifunc.instructions.add(new ASMLdrLabel(new RegOp(REG.R0), operand, null));
-		
-		ifunc.registerMetric();
-		return ifunc;
+
+		return ifunc.popCreatorStack();
 	}
 	
 } 

@@ -5,7 +5,13 @@ import Imm.ASM.ASMInstruction;
 public class ASMSectionAnnotation extends ASMInstruction {
 
 	public enum SECTION {
-		DATA, TEXT, GLOBAL
+
+		DATA, TEXT, GLOBAL;
+
+		public String toString() {
+			return "." + this.name().toLowerCase();
+		}
+
 	}
 	
 	public SECTION section;
@@ -13,11 +19,11 @@ public class ASMSectionAnnotation extends ASMInstruction {
 	public ASMSectionAnnotation(SECTION section) {
 		this.section = section;
 	}
-	
+
 	public String build() {
-		return "." + this.section.toString().toLowerCase();
+		return this.section.toString();
 	}
-	
+
 	public int getRequiredCPUCycles() {
 		return 0;
 	}

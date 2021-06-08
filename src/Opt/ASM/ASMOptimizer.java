@@ -469,6 +469,8 @@ public class ASMOptimizer {
 	
 	public void replacePushPopWithBlockMemory(List<ASMInstruction> ins0) {
 		for (int i = 0; i < ins0.size(); i++) {
+			if (ins0.get(i).isVectorOperation()) continue;
+
 			if (ins0.get(i) instanceof ASMPushStack push) {
 
 				if (ASMMemBlock.checkInOrder(push.operands) && push.operands.size() > 2 && !CompilerDriver.optimizeFileSize) {

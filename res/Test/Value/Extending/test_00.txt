@@ -20,7 +20,9 @@ OUTPUT
 
 .data
 Extend: .word Base
+Extend_vrelay: .word 0
 Base: .word 0
+Base_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

@@ -24,6 +24,7 @@ OUTPUT
 
 .data
 S: .word 0
+S_vrelay: .word 0
 s1: .skip 12
 s0: .skip 12
 sw: .word 1

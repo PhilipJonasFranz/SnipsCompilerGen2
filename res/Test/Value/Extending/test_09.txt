@@ -28,12 +28,18 @@ OUTPUT
 
 .data
 Y_P_1_1: .word X_P_1_1
+Y_vrelay_P_1_1: .word Y_vtable_P_1_1
 X_P_1_1: .word 0
+X_vrelay_P_1_1: .word X_vtable_P_1_1
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+X_vtable_P_1_1:                              /* VTable for X proviso _P_1_1 */
+    mov r12, #0
+    add pc, pc, r10
 
 .global X.create_P_1_1
 X.create_P_1_1:                              /* Function: X.create, Provisos: BOOL, CHAR */
@@ -57,6 +63,10 @@ X.create_P_1_1:                              /* Function: X.create, Provisos: BO
     mov r10, #0
     bx lr
 .P925677669_X_P_1_1: .word X_P_1_1
+
+Y_vtable_P_1_1:                              /* VTable for Y proviso _P_1_1 */
+    mov r12, #0
+    add pc, pc, r10
 
 .global Y.create_P_1_1
 Y.create_P_1_1:                              /* Function: Y.create, Provisos: BOOL, CHAR */

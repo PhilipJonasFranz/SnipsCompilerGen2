@@ -6,10 +6,19 @@ import Imm.TYPE.TYPE;
 
 public class ARRAY extends COMPOSIT {
 
+			/* ---< FIELDS >--- */
+	/**
+	 * The type of elements this array contains.
+	 */
 	public TYPE elementType;
-	
+
+	/**
+	 * Stores the static length of this array type.
+	 */
 	private int length;
-	
+
+
+			/* ---< CONSTRUCTORS >--- */
 	/**
 	 * Create ARRAY type with length determined by constant expression.
 	 */
@@ -25,7 +34,9 @@ public class ARRAY extends COMPOSIT {
 		this.elementType = elementType;
 		this.length = length;
 	}
-	
+
+
+			/* ---< METHODS >--- */
 	public int getLength() {
 		return this.length;
 	}

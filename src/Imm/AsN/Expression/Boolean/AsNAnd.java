@@ -21,10 +21,8 @@ public class AsNAnd extends AsNNFoldExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNAnd cast(And a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNAnd and = new AsNAnd();
-		and.pushOnCreatorStack(a);
-		a.castedNode = and;
-		
+		AsNAnd and = new AsNAnd().pushCreatorStack(a);
+
 		boolean isVFP = a.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
 		if (a.operands.size() > 2) throw new SNIPS_EXC("N-Operand Chains are not supported!");
@@ -84,9 +82,8 @@ public class AsNAnd extends AsNNFoldExpression {
 			and.instructions.add(new ASMMov(new RegOp(REG.R0), new RegOp(REG.R1), COND.NE));
 			and.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(0), COND.EQ));
 		}
-		
-		and.registerMetric();
-		return and;
+
+		return and.popCreatorStack();
 	}
 
 } 

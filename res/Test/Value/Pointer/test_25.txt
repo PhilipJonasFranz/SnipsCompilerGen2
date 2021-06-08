@@ -25,7 +25,9 @@ OUTPUT
 
 .data
 P: .word 0
+P_vrelay: .word 0
 K: .word 0
+K_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

@@ -32,10 +32,7 @@ public class AsNAddressOf extends AsNExpression {
 
 			/* ---< METHODS >--- */
 	public static AsNAddressOf cast(AddressOf a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
-		AsNAddressOf aof = new AsNAddressOf();
-		aof.pushOnCreatorStack(a);
-		a.castedNode = aof;
-
+		AsNAddressOf aof = new AsNAddressOf().pushCreatorStack(a);
 		aof.clearReg(r, st, false, 0, 1);
 
 		if (a.expression instanceof IDRef || a.expression instanceof IDRefWriteback) {
@@ -152,9 +149,7 @@ public class AsNAddressOf extends AsNExpression {
 		aof.instructions.add(new ASMLsr(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
 
 		r.free(0);
-
-		aof.registerMetric();
-		return aof;
+		return aof.popCreatorStack();
 	}
 
 } 

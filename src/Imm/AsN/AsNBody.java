@@ -1,8 +1,5 @@
 package Imm.AsN;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -27,20 +24,20 @@ import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.Memory.MemoryOperand;
 import Imm.ASM.Util.Operands.Memory.MemoryWordOp;
 import Imm.ASM.Util.Operands.Memory.MemoryWordRefOp;
-import Imm.AST.Function;
-import Imm.AST.Program;
-import Imm.AST.SyntaxElement;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Expression.ArrayInit;
 import Imm.AST.Expression.Atom;
+import Imm.AST.Function;
+import Imm.AST.Program;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
 import Imm.AST.Typedef.StructTypedef;
@@ -49,16 +46,23 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Statement.AsNComment;
 import Imm.AsN.Typedef.AsNInterfaceTypedef;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.PRIMITIVES.CHAR;
+import Imm.TYPE.TYPE;
 import PreP.PreProcessor;
 import Res.Manager.FileUtil;
 import Res.Manager.RessourceManager;
 import Res.Manager.TranslationUnit;
 import Snips.CompilerDriver;
-import Util.Source;
 import Util.Logging.ProgressMessage;
+import Util.MODIFIER;
+import Util.Source;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class AsNBody extends AsNNode {
 
@@ -87,7 +91,7 @@ public class AsNBody extends AsNNode {
 		AsNBody.literalManager = new LiteralUtil();
 		
 		AsNBody body = new AsNBody();
-		body.pushOnCreatorStack(p);
+		body.pushCreatorStack(p);
 		p.castedNode = body;
 		AsNBody.progress = progress;
 		
@@ -206,7 +210,52 @@ public class AsNBody extends AsNNode {
 						ASMDataLabel entry = new ASMDataLabel(def.path + postfix, parent);
 						dataBlock.add(entry);
 						def.SIDLabelMap.put(postfix, entry);
-						
+
+						/* Add label for VTable relay */
+						MemoryOperand tableTarget = new MemoryWordRefOp(new ASMDataLabel(def.path + "_vtable" + postfix, new MemoryWordOp(0)));
+						if (def.functions.isEmpty()) tableTarget = new MemoryWordOp(0);
+						ASMDataLabel vTableEntry = new ASMDataLabel(def.path + "_vrelay" + postfix, tableTarget);
+						dataBlock.add(vTableEntry);
+
+						/* Build v-table */
+						if (!def.functions.isEmpty()) {
+							List<ASMInstruction> vTable = new ArrayList<>();
+
+							ASMLabel vTableHead = new ASMLabel(def.path + "_vtable" + postfix);
+							vTableHead.comment = new ASMComment("VTable for " + def.path + ((!mapping.getProvidedProvisos().isEmpty()) ? " proviso " + postfix : ""));
+							vTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+							vTable.add(vTableHead);
+
+							vTable.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
+							vTable.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
+
+							for (Function f : def.functions) {
+
+								/* Skip static functions, not associated with struct instance */
+								if (f.modifier == MODIFIER.STATIC) continue;
+
+								if (f.provisoTypes.size() == mapping.getProvidedProvisos().size() && f.containsMapping(mapping.getProvidedProvisos())) {
+									ASMBranch fBranch;
+
+									/* Inherited Function */
+									if (f.body == null)
+										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildInheritedCallLabel(mapping.getProvidedProvisos()))));
+									else
+										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildCallLabel(mapping.getProvidedProvisos()))));
+
+									fBranch.optFlags.add(OPT_FLAG.SYS_JMP);
+									vTable.add(fBranch);
+								}
+								else {
+									ASMAdd placeholder = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
+									placeholder.comment = new ASMComment("Function '" + f.path + "' not called");
+									vTable.add(placeholder);
+								}
+							}
+
+							AsNBody.addToTranslationUnit(vTable, s.getSource(), SECTION.TEXT);
+						}
+
 						if (!def.implemented.isEmpty()) {
 							String name = def.path + postfix + "_resolver";
 							
@@ -424,7 +473,7 @@ public class AsNBody extends AsNNode {
 			body.buildLiteralPools(entry.getValue().textSection, map, entry.getValue().sourceFile);
 		
 		progress.incProgress(1);
-		body.registerMetric();
+		body.popCreatorStack();
 		return body;
 	}
 	

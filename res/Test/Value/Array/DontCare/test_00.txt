@@ -22,6 +22,7 @@ OUTPUT
 
 .data
 Point: .word 0
+Point_vrelay: .word 0
 NULL: .word 0
 HEAP_START: .word 0
 

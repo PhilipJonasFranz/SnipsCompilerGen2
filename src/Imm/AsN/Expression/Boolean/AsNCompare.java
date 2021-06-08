@@ -34,9 +34,7 @@ public class AsNCompare extends AsNNFoldExpression {
 	 * expression is true, #0 if not.
 	 */
 	public static AsNCompare cast(Compare c, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
-		AsNCompare cmp = new AsNCompare();
-		cmp.pushOnCreatorStack(c);
-		c.castedNode = cmp;
+		AsNCompare cmp = new AsNCompare().pushCreatorStack(c);
 
 		boolean isVFP = c.operands.stream().anyMatch(x -> x.getType().isFloat());
 		
@@ -86,9 +84,8 @@ public class AsNCompare extends AsNNFoldExpression {
 	
 		if (isVFP) r.getVRegSet().free(0, 1);
 		else r.free(0, 1);
-		
-		cmp.registerMetric();
-		return cmp;
+
+		return cmp.popCreatorStack();
 	}
 	
 } 

@@ -1,8 +1,5 @@
 package Imm.AST;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
@@ -15,6 +12,9 @@ import Util.ASTDirective;
 import Util.ASTDirective.DIRECTIVE;
 import Util.Pair;
 import Util.Source;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -37,9 +37,18 @@ public abstract class SyntaxElement {
 	 * The location of this syntax element in the source code, row and column representation. 
 	 */
 	Source source;
-	
+
+	/**
+	 * List of AST Annotations that were attatched to this Syntax Element.
+	 * Custom data is contained within the annotation instances.
+	 */
 	public List<ASTDirective> activeAnnotations = new ArrayList();
-	
+
+	/**
+	 * Set to true during context checking when this syntax element
+	 * violated a modifier. If the Linter is enabled, a warning will
+	 * be generated during the linter pipeline stage.
+	 */
 	public boolean modifierViolated = false;
 	
 	

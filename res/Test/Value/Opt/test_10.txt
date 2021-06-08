@@ -1,0 +1,27 @@
+SOURCE
+int main() {
+	int a = 10;
+
+	#unroll depth = 10
+	do {
+	    a = a + 1;
+	} while (a < 20);
+
+	return a;
+}
+TESTCASES
+20
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    mov r0, #20                              /* Evaluate Expression */
+    bx lr

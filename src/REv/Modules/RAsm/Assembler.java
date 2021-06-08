@@ -799,14 +799,16 @@ public class Assembler {
 
 						Rn = getReg(sp [2]);
 
-						if (sp.length > 3) {
+						if (sp.length > 3 && sp [3].startsWith("#")) {
 							int val = Integer.parseInt(sp[3].substring(1));
+
 							if (val < 0) {
 								U = "0";
 								val = -val;
 							}
 							immV = toBinaryStringLength("" + val / 4, 8, in.get(i).getLine());
 						}
+						else throw new Exception("Cannot encode " + in.get(i).getInstruction());
 					}
 					else {
 						// vldr r0, [r0], r1

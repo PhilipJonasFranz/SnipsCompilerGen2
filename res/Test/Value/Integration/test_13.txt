@@ -96,8 +96,11 @@ OUTPUT
 
 .data
 ZBase.Z: .word ObjectBase.Object
+ZBase.Z_vrelay: .word ZBase.Z_vtable
 Y: .word X
+Y_vrelay: .word 0
 X: .word 0
+X_vrelay: .word 0
 globalVar: .word 25
 NULL: .word 0
 HEAP_START: .word 0
@@ -109,6 +112,17 @@ HEAP_START: .word 0
 foo:                                         /* Function: foo */
     mov r0, #50                              /* Evaluate Expression */
     bx lr
+
+ZBase.Z_vtable:                              /* VTable for ZBase.Z */
+    mov r12, #0
+    add pc, pc, r10
+    add r10, r10, r10                        /* Function 'ZBase.Z.toString' not called */
+    b ZBase.Z.getMember
+    b ZBase.Z.equals
+
+.global ZBase.Z.toString
+ZBase.Z.toString: 
+    b ObjectBase.Object.toString             /* Relay to inherited ObjectBase.Object.toString */
 
 .global ZBase.Z.getMember
 ZBase.Z.getMember:                           /* Function: ZBase.Z.getMember */
@@ -169,7 +183,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -178,7 +192,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -189,7 +203,7 @@ main:                                        /* Function: main */
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -205,7 +219,7 @@ main:                                        /* Function: main */
     mov r0, r6
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_2
     add lr, pc, #8
     mov pc, r12
@@ -218,7 +232,7 @@ main:                                        /* Function: main */
     mov r0, r4                               /* Evaluate Expression */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12
@@ -278,7 +292,7 @@ main.L4:
     mov r0, r4
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P264378910_Collection_P_1
     add lr, pc, #8
     mov pc, r12

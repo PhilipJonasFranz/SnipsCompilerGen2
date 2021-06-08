@@ -152,7 +152,7 @@ public class Declaration extends Statement {
 		}
 		else return this.type;
 	}
-	
+
 	public TYPE getRawType() {
 		return this.type;
 	}

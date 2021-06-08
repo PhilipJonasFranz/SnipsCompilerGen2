@@ -109,8 +109,7 @@ public abstract class AsNExpression extends AsNNode {
 			node = AsNOperatorExpression.cast((OperatorExpression) e, r, map, st); 
 		}
 		else throw new CGEN_EXC(e.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, e.getClass().getName());
-	
-		e.castedNode = node;
+
 		return node;
 	}
 	

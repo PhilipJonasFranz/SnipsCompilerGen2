@@ -34,8 +34,10 @@ OUTPUT
 
 .data
 B: .word A
+B_vrelay: .word B_vtable
 B_resolver_relay: .word B_resolver
 A: .word 0
+A_vrelay: .word A_vtable
 A_resolver_relay: .word A_resolver
 Getter: .word 0
 NULL: .word 0
@@ -43,6 +45,11 @@ HEAP_START: .word 0
 
 .text
     b main
+
+A_vtable:                                    /* VTable for A */
+    mov r12, #0
+    add pc, pc, r10
+    b A.get
 
 .global A.get
 A.get:                                       /* Function: A.get */
@@ -63,6 +70,11 @@ A_Getter:                                    /* Relay: Getter -> A */
 
 A_resolver:                                  /* Relay: A -> INTF */
     b A_Getter
+
+B_vtable:                                    /* VTable for B */
+    mov r12, #0
+    add pc, pc, r10
+    b A.get
 
 .global B.get
 B.get: 
@@ -93,7 +105,7 @@ main:                                        /* Function: main */
     mov r12, #0                              /* Offset to Getter.get */
     push { r12 }
     ldr r12, [r10, r0, lsl #2]
-    ldr r12, [r12, #4]
+    ldr r12, [r12, #8]
     ldr r10, .P1225551659_Getter
     add lr, pc, #8
     mov pc, r12

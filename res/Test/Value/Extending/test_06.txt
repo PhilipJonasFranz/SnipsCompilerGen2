@@ -27,12 +27,18 @@ OUTPUT
 
 .data
 Y: .word X
+Y_vrelay: .word Y_vtable
 X: .word 0
+X_vrelay: .word X_vtable
 NULL: .word 0
 HEAP_START: .word 0
 
 .text
     b main
+
+X_vtable:                                    /* VTable for X */
+    mov r12, #0
+    add pc, pc, r10
 
 .global X.create
 X.create:                                    /* Function: X.create */
@@ -54,6 +60,10 @@ X.create:                                    /* Function: X.create */
     mov r10, #0
     bx lr
 .P839790216_X: .word X
+
+Y_vtable:                                    /* VTable for Y */
+    mov r12, #0
+    add pc, pc, r10
 
 .global Y.create
 Y.create:                                    /* Function: Y.create */

@@ -74,7 +74,7 @@ public class TestDriver {
 	public boolean printResultOnError = true;
 	
 	/** Store/Update asm results in the tested file */
-	public boolean writebackResults = false;
+	public boolean writebackResults = true;
 	
 	public static boolean excludeASMErrors = false;
 	

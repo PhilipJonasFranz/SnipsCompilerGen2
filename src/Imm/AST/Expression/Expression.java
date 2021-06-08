@@ -1,7 +1,5 @@
 package Imm.AST.Expression;
 
-import java.util.List;
-
 import Exc.OPT0_EXC;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PROVISO;
@@ -9,13 +7,15 @@ import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Util.Source;
 
+import java.util.List;
+
 /**
  * This class represents a superclass for all Expressions.
  */
 public abstract class Expression extends SyntaxElement {
 
 			/* ---< FIELDS >--- */
-	private TYPE type;
+	protected TYPE type;
 	
 	public String operatorSymbolOverride;
 	
@@ -43,7 +43,7 @@ public abstract class Expression extends SyntaxElement {
 	public abstract Expression opt(ASTOptimizer s) throws OPT0_EXC;
 	
 	public void setType(TYPE type) {
-		this.type = type;
+		this.type = type.clone();
 	}
 	
 	public abstract Expression clone();
