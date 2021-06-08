@@ -1,8 +1,5 @@
 package Lnk;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Exc.LINK_EXC;
 import Imm.ASM.Structural.ASMSectionAnnotation.SECTION;
 import Res.Manager.RessourceManager;
@@ -10,6 +7,9 @@ import Snips.CompilerDriver;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The linker is responsible for resolving '.include' directives
@@ -81,7 +81,7 @@ public class Linker {
 			output.add("");
 
 			if (!this.dataSection.isEmpty()) {
-				output.add(".data");
+				output.add(SECTION.DATA.toString());
 				for (String s : this.dataSection)
 					if (!s.trim().equals(""))
 						output.add(s);
@@ -94,7 +94,7 @@ public class Linker {
 			}
 			
 			if (!this.textSection.isEmpty() && !(this.textSection.size() == 1 && this.textSection.get(0).trim().equals(""))) {
-				output.add(".text");
+				output.add(SECTION.TEXT.toString());
 				
 				for (int i = 0; i < this.textSection.size(); i++) {
 					if (i == 0 && this.textSection.get(i).trim().equals("")) continue;
@@ -137,9 +137,9 @@ public class Linker {
 			if (line.startsWith(".version")) {
 				unit.versionID = Long.parseLong(line.split(" ") [1]);
 			}
-			else if (line.startsWith(".data"))
+			else if (line.startsWith(SECTION.DATA.toString()))
 				section = SECTION.DATA;
-			else if (line.startsWith(".text"))
+			else if (line.startsWith(SECTION.TEXT.toString()))
 				section = SECTION.TEXT;
 			else if (line.startsWith(".include"))
 				unit.imports.add(line);
