@@ -39,7 +39,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		AsNForEachStatement f = new AsNForEachStatement().pushCreatorStack(a);
 
 		/* Create jump as target for continue statements */
-		ASMLabel continueJump = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel continueJump = LabelUtil.getLabel();
 		f.continueJump = continueJump;
 		
 		/* Open new scope for counter and iterator */
@@ -71,12 +71,11 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		st.openScope(a);
 		
 		/* Marks the start of the loop */
-		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
-		forStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
-		f.instructions.add(forStart);
+		ASMLabel forStart = LabelUtil.getLabel();
+		f.instructions.add(forStart.flag(OPT_FLAG.LOOP_HEAD));
 		
 		/* End of the loop */
-		ASMLabel forEnd = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel forEnd = LabelUtil.getLabel();
 		
 		/* Set jump target for break statements */
 		f.breakJump = forEnd;
@@ -199,8 +198,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(forStart));
-		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
-		f.instructions.add(branch);
+		f.instructions.add(branch.flag(OPT_FLAG.LOOP_BRANCH));
 		
 		
 		/* Add loop end */

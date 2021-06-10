@@ -127,6 +127,30 @@ public abstract class ASMInstruction {
 		return (T) this;
 	}
 
+	/**
+	 * Adds the given OPT_FLAGs to this instruction and returns
+	 * this instruction. Ignores flag duplicates.
+	 *
+	 * @param flags The flags to be added.
+	 * @param <T> Type of the instruction, set dynamically.
+	 * @return This instruction.
+	 */
+	public <T extends ASMInstruction> T flag(OPT_FLAG...flags) {
+		for (OPT_FLAG flag : flags) {
+			if (!this.hasFlag(flag))
+				this.optFlags.add(flag);
+		}
+
+		return (T) this;
+	}
+
+	/**
+	 * Returns wether this instruction has the given flag set.
+	 */
+	public boolean hasFlag(OPT_FLAG flag) {
+		return this.optFlags.contains(flag);
+	}
+
 	public int getRequiredCPUCycles() {
 		return 1;
 	}

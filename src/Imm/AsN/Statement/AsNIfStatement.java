@@ -21,10 +21,10 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		/* Used to iterate over if-chain */
 		IfStatement currentIf = a;
 		
-		ASMLabel endTarget = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel endTarget = LabelUtil.getLabel();
 		
 		while (currentIf != null) {
-			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel elseTarget = LabelUtil.getLabel();
 		
 			COND cond = COND.NO;
 			

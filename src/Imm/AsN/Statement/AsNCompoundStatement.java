@@ -77,7 +77,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 		
 		if (add != 0) {
 			ASMAdd add0 = new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(add));
-			if (!close) add0.optFlags.add(OPT_FLAG.LOOP_BREAK_RESET);
+			if (!close) add0.flag(OPT_FLAG.LOOP_BREAK_RESET);
 			node.instructions.add(add0);
 		}
 	}

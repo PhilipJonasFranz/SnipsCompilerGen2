@@ -63,13 +63,16 @@ public class AsNStructureInit extends AsNExpression {
 
 		return init.popCreatorStack();
 	}
-	
-	public static ASMPushStack attatchFlag(ASMPushStack push) {
-		push.optFlags.add(OPT_FLAG.STRUCT_INIT);
-		return push;
+
+	/**
+	 * Flags the given push instruction with the STRUCT_INIT OPT_FLAG
+	 * and returns the instruction.
+	 */
+	public static ASMPushStack flagInit(ASMPushStack push) {
+		return push.flag(OPT_FLAG.STRUCT_INIT);
 	}
-	
-	/*
+
+	/**
 	 * Loads the element in reverse order on the stack, so the first element in the list will end up on the top 
 	 * of the stack.
 	 */
@@ -113,8 +116,8 @@ public class AsNStructureInit extends AsNExpression {
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
 				if (!elements.get(i).getType().isStackType()) {
-					if (isVFP) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S0))));
-					else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+					if (isVFP) node.instructions.add(flagInit(new ASMVPushStack(new VRegOp(REG.S0))));
+					else node.instructions.add(flagInit(new ASMPushStack(new RegOp(REG.R0))));
 					st.pushDummy();
 				}
 			}
@@ -164,16 +167,16 @@ public class AsNStructureInit extends AsNExpression {
 	public static void flush(int regs, AsNNode node, boolean isVFP) {
 		if (isVFP) {
 			if (regs > 0) {
-				if (regs == 3) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S2), new VRegOp(REG.S1), new VRegOp(REG.S0))));
-				else if (regs == 2) node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S1), new VRegOp(REG.S0))));
-				else node.instructions.add(attatchFlag(new ASMVPushStack(new VRegOp(REG.S0))));
+				if (regs == 3) node.instructions.add(flagInit(new ASMVPushStack(new VRegOp(REG.S2), new VRegOp(REG.S1), new VRegOp(REG.S0))));
+				else if (regs == 2) node.instructions.add(flagInit(new ASMVPushStack(new VRegOp(REG.S1), new VRegOp(REG.S0))));
+				else node.instructions.add(flagInit(new ASMVPushStack(new VRegOp(REG.S0))));
 			}
 		}
 		else {
 			if (regs > 0) {
-				if (regs == 3) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R1), new RegOp(REG.R0))));
-				else if (regs == 2) node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R1), new RegOp(REG.R0))));
-				else node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
+				if (regs == 3) node.instructions.add(flagInit(new ASMPushStack(new RegOp(REG.R2), new RegOp(REG.R1), new RegOp(REG.R0))));
+				else if (regs == 2) node.instructions.add(flagInit(new ASMPushStack(new RegOp(REG.R1), new RegOp(REG.R0))));
+				else node.instructions.add(flagInit(new ASMPushStack(new RegOp(REG.R0))));
 			}
 		}
 	}

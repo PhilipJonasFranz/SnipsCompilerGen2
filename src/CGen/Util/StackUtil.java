@@ -77,10 +77,10 @@ public class StackUtil {
 				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R1)));
 			}
 			
-			ASMLabel loopStart = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel loopStart = LabelUtil.getLabel();
 			node.instructions.add(loopStart.com("Copy memory section with loop"));
 			
-			ASMLabel loopEnd = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel loopEnd = LabelUtil.getLabel();
 			
 			/* Check if whole sub array was loaded */
 			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));
@@ -133,10 +133,10 @@ public class StackUtil {
 			/* Move counter in R2 */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(size * 4)));
 			
-			ASMLabel loopStart = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel loopStart = LabelUtil.getLabel();
 			node.instructions.add(loopStart.com("Copy memory section with loop"));
 			
-			ASMLabel loopEnd = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel loopEnd = LabelUtil.getLabel();
 			
 			/* Check if whole sub array was loaded */
 			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));

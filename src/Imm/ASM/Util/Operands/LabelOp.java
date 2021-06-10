@@ -47,7 +47,7 @@ public class LabelOp extends Operand {
 	}
 
 	public boolean equals(Operand operand) {
-		return operand instanceof LabelOp && ((LabelOp) operand).label.equals(this.label);
+		return operand instanceof LabelOp op && op.label.equals(this.label);
 	}
 	
 } 

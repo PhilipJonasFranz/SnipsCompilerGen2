@@ -152,7 +152,7 @@ public class Matcher {
 
 			while (if0 != null) {
 				List<Statement> noReturnInIf = noReturnStatement(if0.body);
-				if (!if0.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(if0);
+				if (!if0.body.stream().anyMatch(ReturnStatement.class::isInstance)) noReturnInStatement.add(if0);
 				else noReturnInStatement.addAll(noReturnInIf);
 
 				if0 = if0.elseStatement;
@@ -165,12 +165,12 @@ public class Matcher {
 
 			for (CaseStatement case0 : sw.cases) {
 				List<Statement> noReturnInCase = noReturnStatement(case0.body);
-				if (!case0.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(case0);
+				if (!case0.body.stream().anyMatch(ReturnStatement.class::isInstance)) noReturnInStatement.add(case0);
 				else noReturnInStatement.addAll(noReturnInCase);
 			}
 
 			List<Statement> noReturnInDefault = noReturnStatement(sw.defaultStatement.body);
-			if (!sw.defaultStatement.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(sw.defaultStatement);
+			if (!sw.defaultStatement.body.stream().anyMatch(ReturnStatement.class::isInstance)) noReturnInStatement.add(sw.defaultStatement);
 			else noReturnInStatement.addAll(noReturnInDefault);
 
 			return noReturnInStatement;
@@ -178,7 +178,7 @@ public class Matcher {
 		else if (s instanceof Function f) {
 			List<Statement> noReturnInStatement = noReturnStatement(f.body);
 
-			if (!f.body.stream().anyMatch(x -> x instanceof ReturnStatement)) noReturnInStatement.add(f);
+			if (!f.body.stream().anyMatch(ReturnStatement.class::isInstance)) noReturnInStatement.add(f);
 			else noReturnInStatement.addAll(noReturnInStatement);
 
 			return noReturnInStatement;

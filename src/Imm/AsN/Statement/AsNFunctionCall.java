@@ -171,7 +171,7 @@ public class AsNFunctionCall extends AsNStatement {
 				toPopRegs.add(0, REG.toReg(sMap.get(i)));
 
 				/* Add Opt flag so optimizer does not clear it */
-				push.optFlags.add(OPT_FLAG.STRUCT_INIT);
+				push.flag(OPT_FLAG.STRUCT_INIT);
 
 				call.instructions.add(push);
 
@@ -272,8 +272,7 @@ public class AsNFunctionCall extends AsNStatement {
 
 				/* Load address of struct interface resolver */
 				ASMLsl lsl = new ASMLsl(new RegOp(REG.R12), new RegOp(REG.R0), new ImmOp(2));
-				lsl.optFlags.add(OPT_FLAG.WRITEBACK);
-				call.instructions.add(lsl);
+				call.instructions.add(lsl.flag(OPT_FLAG.WRITEBACK));
 				call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12)));
 
 				/* Load and push the function offset for later use */
@@ -282,8 +281,7 @@ public class AsNFunctionCall extends AsNStatement {
 
 				/* Load the address of the table into the PC to branch to it. */
 				ASMLdr ddispatch = new ASMLdr(new RegOp(REG.PC), new RegOp(REG.R12), new ImmOp(4));
-				ddispatch.optFlags.add(OPT_FLAG.SYS_JMP);
-				call.instructions.add(ddispatch.com("Dynamic dispatch to VTable"));
+				call.instructions.add(ddispatch.flag(OPT_FLAG.SYS_JMP).com("Dynamic dispatch to VTable"));
 			}
 			else {
 				/* Branch to function */

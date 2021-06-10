@@ -20,15 +20,14 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		AsNDoWhileStatement w = new AsNDoWhileStatement().pushCreatorStack(a);
 
 		/* End of while loop */
-		w.breakJump = new ASMLabel(LabelUtil.getLabel());
+		w.breakJump = LabelUtil.getLabel();
 		
 		/* Create jump as target for continue statements */
-		w.continueJump = new ASMLabel(LabelUtil.getLabel());
+		w.continueJump = LabelUtil.getLabel();
 		
 		/* Loop Entrypoint */
-		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
-		whileStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
-		w.instructions.add(whileStart);
+		ASMLabel whileStart = LabelUtil.getLabel();
+		w.instructions.add(whileStart.flag(OPT_FLAG.LOOP_HEAD));
 		
 		/* Add Body */
 		w.addBody(a, r, map, st);
@@ -45,8 +44,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
-		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
-		w.instructions.add(branch);
+		w.instructions.add(branch.flag(OPT_FLAG.LOOP_BRANCH));
 		
 		w.instructions.add(w.breakJump);
 		return w.popCreatorStack();

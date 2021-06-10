@@ -80,8 +80,8 @@ public abstract class AsNNode {
 						ASMVMov mov = new ASMVMov(new VRegOp(free), new VRegOp(reg));
 						
 						/* Mark for optimizer to prevent double crossing optimization */
-						mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
-						
+						mov.flag(OPT_FLAG.FUNC_CLEAN);
+
 						this.instructions.add(mov);
 						v.copy(reg, free);
 					}
@@ -104,7 +104,7 @@ public abstract class AsNNode {
 						ASMMov mov = new ASMMov(new RegOp(free), new RegOp(reg));
 						
 						/* Mark for optimizer to prevent double crossing optimization */
-						mov.optFlags.add(OPT_FLAG.FUNC_CLEAN);
+						mov.flag(OPT_FLAG.FUNC_CLEAN);
 						
 						this.instructions.add(mov);
 						r.copy(reg, free);

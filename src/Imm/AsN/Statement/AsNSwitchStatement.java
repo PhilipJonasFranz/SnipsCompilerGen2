@@ -24,10 +24,10 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		/* Capsule expressions in compare statements */
 		s.cases.forEach(x -> x.condition = new Compare(x.condition, s.condition, COMPARATOR.EQUAL, x.getSource()));
 	
-		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel end = LabelUtil.getLabel();
 		
 		for (CaseStatement cs : s.cases) {
-			ASMLabel next = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel next = LabelUtil.getLabel();
 			
 			COND cond = injectConditionEvaluation(sw, AsNExpression.cast(cs.condition, r, map, st), cs.condition);
 			

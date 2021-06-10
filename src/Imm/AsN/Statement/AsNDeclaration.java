@@ -35,8 +35,7 @@ public class AsNDeclaration extends AsNStatement {
 			if (free != -1) {
 				/* Free Register exists and declaration fits into a register */
 				ASMVMov mov = new ASMVMov(new VRegOp(free), new VRegOp(0));
-				mov.optFlags.add(OPT_FLAG.WRITEBACK);
-				dec.instructions.add(mov);
+				dec.instructions.add(mov.flag(OPT_FLAG.WRITEBACK));
 				
 				r.getVRegSet().getReg(free).setDeclaration(d);
 			}
@@ -56,8 +55,7 @@ public class AsNDeclaration extends AsNStatement {
 			if (free != -1 && (d.getType() instanceof PRIMITIVE || d.getType() instanceof POINTER || d.getType() instanceof INTERFACE)) {
 				/* Free Register exists and declaration fits into a register */
 				ASMMov mov = new ASMMov(new RegOp(free), new RegOp(0));
-				mov.optFlags.add(OPT_FLAG.WRITEBACK);
-				dec.instructions.add(mov);
+				dec.instructions.add(mov.flag(OPT_FLAG.WRITEBACK));
 				
 				r.getReg(free).setDeclaration(d);
 			}

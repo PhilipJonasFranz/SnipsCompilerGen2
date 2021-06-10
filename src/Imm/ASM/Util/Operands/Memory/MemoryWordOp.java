@@ -37,7 +37,7 @@ public class MemoryWordOp extends MemoryOperand {
 			return ".word " + atom.getType().toPrimitive().sourceCodeRepresentation();
 
 		if (val instanceof ArrayInit init && ((ARRAY) val.getType()).elementType instanceof CHAR) {
-			if (init.elements.stream().allMatch(x -> x instanceof Atom)) {
+			if (init.elements.stream().allMatch(Atom.class::isInstance)) {
 				String s = ".asciz \"";
 				
 				for (int i = 0; i < init.elements.size() - 1; i++) {

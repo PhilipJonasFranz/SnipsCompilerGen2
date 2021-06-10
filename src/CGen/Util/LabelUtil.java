@@ -1,9 +1,10 @@
 package CGen.Util;
 
+import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.TYPE.TYPE;
+
 import java.util.HashMap;
 import java.util.List;
-
-import Imm.TYPE.TYPE;
 
 /**
  * Provides unique labels for branches.
@@ -28,7 +29,7 @@ public class LabelUtil {
 	/**
 	 * Returns a new unique label. 
 	 */
-	public static String getLabel() {
+	public static String getLabelString() {
 		String prov = "";
 		if (currentContext != null)
 			prov = currentContext;
@@ -43,7 +44,15 @@ public class LabelUtil {
 							  funcPrefix.equals("init") || funcPrefix.equals("hsize") || funcUID == -1)? "" : "_"  + funcUID)
 				+ ".L" + c0;
 	}
-	
+
+	/**
+	 * Creates a new, unique label using getLabelString().
+	 * @return The newly created label.
+	 */
+	public static ASMLabel getLabel() {
+		return new ASMLabel(LabelUtil.getLabelString());
+	}
+
 	/**
 	 * Builds a postfix for labels that reflects the characteristics for
 	 * this pattern. This pattern will contain the wordsizes of the given

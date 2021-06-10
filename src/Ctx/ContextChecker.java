@@ -494,7 +494,7 @@ public class ContextChecker {
 				}
 			}
 			
-			Optional<TYPE> opt = e.proviso.stream().filter(x -> !(x instanceof PROVISO)).findFirst();
+			Optional<TYPE> opt = e.proviso.stream().filter(x -> !x.isProviso()).findFirst();
 			
 			if (opt.isPresent())
 				throw new CTEX_EXC(Const.NON_PROVISO_TYPE_IN_HEADER, opt.get().provisoFree());

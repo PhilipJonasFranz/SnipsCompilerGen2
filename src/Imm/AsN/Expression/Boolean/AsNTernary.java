@@ -22,10 +22,10 @@ public class AsNTernary extends AsNExpression {
 		r.free(0, 1, 2);
 		
 		/* The Target that is branched to if the condition is false */
-		ASMLabel loadFalse = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel loadFalse = LabelUtil.getLabel();
 		
 		/* The End Label Target */
-		ASMLabel end = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel end = LabelUtil.getLabel();
 
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(t.condition, r, map, st);

@@ -2270,7 +2270,7 @@ public class Parser {
 					base.base = (IDRef) select.selector;
 					ref = base;
 				}
-				else if (select.selection instanceof StructSelect nested && ((StructSelect) select.selection).selector instanceof InlineCall) {
+				else if (select.selection instanceof StructSelect nested && nested.selector instanceof InlineCall) {
 					/* Chained nested call */
 
 					InlineCall call = (InlineCall) nested.selector;
@@ -2282,8 +2282,8 @@ public class Parser {
 					else call.parameters.add(0, select.selector);
 					
 					/* Multiple chains */
-					if (((StructSelect) select.selection).selection instanceof StructSelect) {
-						nested = (StructSelect) (((StructSelect) select.selection).selection);
+					if (nested.selection instanceof StructSelect) {
+						nested = (StructSelect) nested.selection;
 						
 						while (nested instanceof StructSelect) {
 							

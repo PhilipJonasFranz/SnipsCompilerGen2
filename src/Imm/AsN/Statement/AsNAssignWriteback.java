@@ -134,7 +134,8 @@ public class AsNAssignWriteback extends AsNStatement {
 		 * Add opt flag for optimizer, but only if this writeback is part of an expression, meaning that the result
 		 * needs to stay in R0. If this assignment is a statement like i++, the value does not have to stay in R0.
 		 */
-		if (partOfExpression) node.instructions.get(node.instructions.size() - 1).optFlags.add(OPT_FLAG.WRITEBACK);
+		if (partOfExpression)
+			node.instructions.get(node.instructions.size() - 1).flag(OPT_FLAG.WRITEBACK);
 	}
 	
 } 

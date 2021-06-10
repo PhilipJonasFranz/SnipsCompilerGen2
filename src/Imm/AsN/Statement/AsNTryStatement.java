@@ -37,7 +37,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		AsNTryStatement tr0 = new AsNTryStatement().pushCreatorStack(s);
 
 		/* Create the watchpoint jump target label */
-		tr0.watchpointLabel = new ASMLabel(LabelUtil.getLabel());
+		tr0.watchpointLabel = LabelUtil.getLabel();
 		
 		/* Save stack pointer for watchpoint */
 		tr0.instructions.add(new ASMPushStack(new RegOp(REG.SP)));
@@ -51,7 +51,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		tr0.loadSPBackup(tr0, st);
 		
 		/* Branch to end, no exception occured */
-		ASMLabel endBranch = new ASMLabel(LabelUtil.getLabel());
+		ASMLabel endBranch = LabelUtil.getLabel();
 		tr0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(endBranch)));
 		
 		/* --- INSERT WATCHPOINT --- */
@@ -66,7 +66,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 		
 		for (WatchStatement w : s.watchpoints) {
 			/* Skip to this position if thrown exception is not the one watched here */
-			ASMLabel skip = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel skip = LabelUtil.getLabel();
 			
 			/* Check if value in R12 matches watched SID */
 			STRUCT watched = (STRUCT) w.watched.getType();

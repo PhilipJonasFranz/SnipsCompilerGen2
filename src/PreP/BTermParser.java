@@ -1,16 +1,11 @@
 package PreP;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Atom;
-import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.Boolean.And;
 import Imm.AST.Expression.Boolean.Or;
+import Imm.AST.Expression.Expression;
 import Imm.TYPE.PRIMITIVES.BOOL;
 import Par.Scanner;
 import Par.Token;
@@ -18,6 +13,11 @@ import Par.Token.TokenType;
 import PreP.PreProcessor.LineObject;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Parses a micro-expression and evaluates it to a boolean
@@ -70,8 +70,8 @@ public class BTermParser {
 		
 				/* ---< EVALUATION >--- */
 		private boolean evaluateExpression(Expression expr) {
-			if (expr instanceof Or) return this.evaluateOr((Or) expr);
-			else if (expr instanceof And) return this.evaluateAnd((And) expr);
+			if (expr instanceof Or or) return this.evaluateOr(or);
+			else if (expr instanceof And and) return this.evaluateAnd(and);
 			else return this.evaluateAtom((Atom) expr);
 		}
 		

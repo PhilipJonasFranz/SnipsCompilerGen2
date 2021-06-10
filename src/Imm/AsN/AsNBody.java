@@ -223,8 +223,7 @@ public class AsNBody extends AsNNode {
 
 							ASMLabel vTableHead = new ASMLabel(def.path + "_vtable" + postfix);
 							vTableHead.com("VTable for " + def.path + ((!mapping.getProvidedProvisos().isEmpty()) ? " proviso " + postfix : ""));
-							vTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-							vTable.add(vTableHead);
+							vTable.add(vTableHead.flag(OPT_FLAG.LABEL_USED));
 
 							vTable.add(new ASMMov(new RegOp(REG.R12), new ImmOp(0)));
 							vTable.add(new ASMAdd(new RegOp(REG.PC), new RegOp(REG.PC), new RegOp(REG.R10)));
@@ -243,8 +242,7 @@ public class AsNBody extends AsNNode {
 									else
 										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildCallLabel(mapping.getProvidedProvisos()))));
 
-									fBranch.optFlags.add(OPT_FLAG.SYS_JMP);
-									vTable.add(fBranch);
+									vTable.add(fBranch.flag(OPT_FLAG.SYS_JMP));
 								}
 								else {
 									ASMAdd placeholder = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
@@ -341,7 +339,7 @@ public class AsNBody extends AsNNode {
 				
 				/* .asciz initialization */
 				if (dec.value instanceof ArrayInit init && ((ARRAY) dec.value.getType()).elementType instanceof CHAR) {
-					if (init.elements.stream().allMatch(x -> x instanceof Atom)) {
+					if (init.elements.stream().allMatch(Atom.class::isInstance)) {
 						directInitialization = true;
 					}
 				}
@@ -378,9 +376,9 @@ public class AsNBody extends AsNNode {
 		if (addGlobalInit) {
 			boolean hasCall = false;
 			for (ASMInstruction asmInstruction : globalsInit) {
-				if (asmInstruction instanceof ASMBranch && ((ASMBranch) asmInstruction).type == BRANCH_TYPE.BL) {
+				if (asmInstruction instanceof ASMBranch branch0 && branch0.type == BRANCH_TYPE.BL) {
 					hasCall = true;
-				} else if (asmInstruction instanceof ASMMov && ((ASMMov) asmInstruction).target.reg == REG.PC) {
+				} else if (asmInstruction instanceof ASMMov mov0 && mov0.target.reg == REG.PC) {
 					hasCall = true;
 				}
 			}
@@ -492,8 +490,8 @@ public class AsNBody extends AsNNode {
 				 * Flush buffer either at BX branch or at instruction with BX_SEMI_EXIT set,
 				 * marking the end of a relay table mapping, which has no explicit exit.
 				 */
-				if ((ins instanceof ASMBranch && ((ASMBranch) ins).type == BRANCH_TYPE.BX) || 
-						ins.optFlags.contains(OPT_FLAG.BX_SEMI_EXIT)) {
+				if ((ins instanceof ASMBranch branch && branch.type == BRANCH_TYPE.BX) ||
+						ins.hasFlag(OPT_FLAG.BX_SEMI_EXIT)) {
 					
 					/* Flush buffer here */
 					if (!buffer.isEmpty()) {
@@ -594,8 +592,7 @@ public class AsNBody extends AsNNode {
 		 * Signal the optimizer that this is a controlled jump, and that the program will return, 
 		 * but not with jump mechanics, but by manipulating the pc.
 		 */
-		branch.optFlags.add(OPT_FLAG.SYS_JMP);
-		node.instructions.add(branch);
+		node.instructions.add(branch.flag(OPT_FLAG.SYS_JMP));
 		
 		/* Move 0 into R10 */
 		ASMMov resetR10 = new ASMMov(new RegOp(REG.R10), new ImmOp(0));

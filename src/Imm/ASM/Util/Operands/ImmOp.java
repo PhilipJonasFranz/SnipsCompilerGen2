@@ -24,7 +24,7 @@ public class ImmOp extends Operand {
 	}
 
 	public boolean equals(Operand operand) {
-		return operand instanceof ImmOp && ((ImmOp) operand).value == this.value;
+		return operand instanceof ImmOp imm && imm.value == this.value;
 	}
 	
 } 

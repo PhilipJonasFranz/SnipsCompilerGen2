@@ -1,20 +1,20 @@
 package PreP;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Exc.SNIPS_EXC;
 import Imm.AST.Function;
 import Imm.AST.Namespace;
 import Imm.AST.Program;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Comment;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Res.Const;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The namespace processor is responsible to merge namespaces with the same name,
@@ -26,7 +26,7 @@ public class NamespaceProcessor {
 		List<Namespace> namespaces = new ArrayList();
 		
 		for (SyntaxElement s : p.programElements) 
-			if (s instanceof Namespace) namespaces.add((Namespace) s);
+			if (s instanceof Namespace namespace) namespaces.add(namespace);
 		
 		/* Merge and integrate namespaces */
 		merge(namespaces);
@@ -113,7 +113,7 @@ public class NamespaceProcessor {
 		List<Namespace> name = new ArrayList();
 		
 		for (SyntaxElement s : n.programElements) 
-			if (s instanceof Namespace) name.add((Namespace) s);
+			if (s instanceof Namespace namespace) name.add(namespace);
 		
 		return name;
 	}

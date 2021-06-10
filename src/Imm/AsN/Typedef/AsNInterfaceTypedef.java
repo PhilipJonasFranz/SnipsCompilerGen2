@@ -49,8 +49,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		String name = sdef.path + postfix + "_" + idef.path;
 		
 		ASMLabel relayTableHead = new ASMLabel(name);
-		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-		table.add(relayTableHead.com("Relay: " + idef.path + " -> " + sdef.path));
+		table.add(relayTableHead.flag(OPT_FLAG.LABEL_USED).com("Relay: " + idef.path + " -> " + sdef.path));
 		
 		mapping.resolverLabelMap.put(idef, relayTableHead);
 		
@@ -105,9 +104,8 @@ public class AsNInterfaceTypedef extends AsNNode {
 			if (post == null) {
 				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
 				add.com("Function was not called, use as placeholder");
-				add.optFlags.add(OPT_FLAG.IS_PADDING);
-				add.optFlags.add(OPT_FLAG.SYS_JMP);
-				table.add(add);
+				add.flag(OPT_FLAG.IS_PADDING, OPT_FLAG.SYS_JMP);
+				table.add(add.flag(OPT_FLAG.IS_PADDING, OPT_FLAG.SYS_JMP));
 			}
 			else {
 				/* Get function head label from function with given postfix */
@@ -115,8 +113,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 				
 				/* Create system jump to function */
 				ASMBranch b = new ASMBranch(BRANCH_TYPE.B, new LabelOp(functionLabel));
-				b.optFlags.add(OPT_FLAG.SYS_JMP);
-				table.add(b);
+				table.add(b.flag(OPT_FLAG.SYS_JMP));
 				
 				hasCalls = true;
 			}
@@ -137,7 +134,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			table.add(relayTableHead);
 		}
 
-		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
+		table.get(table.size() - 1).flag(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}
 	
@@ -164,7 +161,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		/* Create table head */
 		ASMLabel relayTableHead = new ASMLabel(name);
-		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
+		relayTableHead.flag(OPT_FLAG.LABEL_USED);
 		table.add(relayTableHead.com("Relay: " + sdef.path + " -> INTF"));
 
 		int c = 0;
@@ -219,7 +216,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		else
 			table.addAll(tableBody);
 
-		table.get(table.size() - 1).optFlags.add(OPT_FLAG.BX_SEMI_EXIT);
+		table.get(table.size() - 1).flag(OPT_FLAG.BX_SEMI_EXIT);
 		return table;
 	}
 	

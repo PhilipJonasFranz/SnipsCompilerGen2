@@ -1,25 +1,25 @@
 package Lnt.Rules;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Imm.AST.Function;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Lnt.LRule;
-import Util.Pair;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import Util.Pair;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class NotThrownInTryLRule extends LRule {
 
 	private List<Pair<SyntaxElement, List<TYPE>>> result = new ArrayList();
 	
 	public void getResults(Program AST) {
-		List<Function> result = AST.visit(x -> x instanceof Function);
+		List<Function> result = AST.visit(Function.class::isInstance);
 		
 		for (Function f : result) {
 			List<TYPE> sCopy = new ArrayList<>(f.signalsTypes);

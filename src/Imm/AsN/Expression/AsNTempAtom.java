@@ -99,9 +99,9 @@ public class AsNTempAtom extends AsNExpression {
 					/* Counter that keeps track of how many words still need to be copied */
 					atom.instructions.add(new ASMMov(new RegOp(REG.R1), new ImmOp(wordsToStore)));
 					
-					ASMLabel start = new ASMLabel(LabelUtil.getLabel());
+					ASMLabel start = LabelUtil.getLabel();
 					
-					ASMLabel end = new ASMLabel(LabelUtil.getLabel());
+					ASMLabel end = LabelUtil.getLabel();
 					
 					/* Start of loop */
 					atom.instructions.add(start);

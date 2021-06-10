@@ -20,20 +20,17 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		AsNWhileStatement w = new AsNWhileStatement().pushCreatorStack(a);
 
 		/* Generate labels for targets within this loop and set them to the casted node */
-		w.continueJump = new ASMLabel(LabelUtil.getLabel());
+		w.continueJump = LabelUtil.getLabel();
 		
-		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
-		whileStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
-		w.instructions.add(whileStart);
+		ASMLabel whileStart = LabelUtil.getLabel();
+		w.instructions.add(whileStart.flag(OPT_FLAG.LOOP_HEAD));
 
-		w.breakJump = new ASMLabel(LabelUtil.getLabel());
+		w.breakJump = LabelUtil.getLabel();
 		
 		COND cond =	injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st), a.condition);
-		
-		if (cond != COND.NO) {
-			/* Condition was false, no else, skip body */
-			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(w.breakJump)));
-		}
+
+		/* Skip body */
+		if (cond != COND.NO) w.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(w.breakJump)));
 		
 		/* Add Body */
 		w.addBody(a, r, map, st);
@@ -43,9 +40,8 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
-		branch.optFlags.add(OPT_FLAG.LOOP_BRANCH);
-		w.instructions.add(branch);
-		
+		w.instructions.add(branch.flag(OPT_FLAG.LOOP_BRANCH));
+
 		w.instructions.add(w.breakJump);
 		
 		if (!w.instructions.isEmpty()) 

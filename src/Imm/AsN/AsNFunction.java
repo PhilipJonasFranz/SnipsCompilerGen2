@@ -99,7 +99,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		LabelUtil.funcPrefix = f.path.build();
 		LabelUtil.funcUID = (f.requireUIDInLabel)? f.UID : -1;
 		
-		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelUtil.getLabel());
+		if (f.signals()) func.copyLoopEscape = LabelUtil.getLabel();
 		
 		List<ASMInstruction> all = new ArrayList();
 		
@@ -174,8 +174,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				String call = f.buildInheritedCallLabel(f.provisosCalls.get(k).provisoMapping);
 				
 				ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(call)));
-				branch.optFlags.add(OPT_FLAG.SYS_JMP);
-				func.instructions.add(branch.com("Relay to inherited " + call));
+				func.instructions.add(branch.flag(OPT_FLAG.SYS_JMP).com("Relay to inherited " + call));
 
 				continue;
 			}
@@ -267,13 +266,11 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			/* Save FP and lr by default */
 			ASMPushStack ipush = new ASMPushStack(new RegOp(REG.FP), new RegOp(REG.LR));
-			ipush.optFlags.add(OPT_FLAG.FUNC_CLEAN);
-			func.instructions.add(ipush);
+			func.instructions.add(ipush.flag(OPT_FLAG.FUNC_CLEAN));
 			st.push(REG.LR, REG.FP);
 			
 			ASMVPushStack vpush = new ASMVPushStack();
-			vpush.optFlags.add(OPT_FLAG.FUNC_CLEAN);
-			func.instructions.add(vpush);
+			func.instructions.add(vpush.flag(OPT_FLAG.FUNC_CLEAN));
 			
 			/* Save Stackpointer from caller perspective */
 			ASMMov fpMov = new ASMMov(new RegOp(REG.FP), new RegOp(REG.SP));
@@ -293,7 +290,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
-						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
+						init.flag(OPT_FLAG.STRUCT_INIT);
 						init.com("Push declaration on stack, referenced by addressof.");
 
 						/* Only do it if variable was used */
@@ -320,7 +317,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					if (hasRef) {
 						ASMVPushStack init = new ASMVPushStack(new VRegOp(i));
-						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
+						init.flag(OPT_FLAG.STRUCT_INIT);
 						init.com("Push declaration on stack, referenced by addressof.");
 						
 						/* Only do it if variable was used */
@@ -354,11 +351,11 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 				
 			/* Check if other function is called within this function */
-			boolean hasCall = func.instructions.stream().anyMatch(x -> x instanceof ASMBranch && ((ASMBranch) x).type == BRANCH_TYPE.BL ||
-					x instanceof ASMAdd && ((ASMAdd) x).target.reg == REG.LR);
+			boolean hasCall = func.instructions.stream().anyMatch(x -> x instanceof ASMBranch branch && branch.type == BRANCH_TYPE.BL ||
+					x instanceof ASMAdd add && add.target.reg == REG.LR);
 			
 			/* Jumplabel to centralized function return */
-			ASMLabel funcReturn = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel funcReturn = LabelUtil.getLabel();
 			
 			/* 
 			 * Get a list of all used registers. These registers have to be 
@@ -468,13 +465,11 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				/* Set relation for optimizer */
 				vpush.popCounterpart = vpop;
-				vpop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
-				func.instructions.add(vpop);
+				func.instructions.add(vpop.flag(OPT_FLAG.FUNC_CLEAN));
 				
 				/* Set relation for optimizer */
 				ipush.popCounterpart = ipop;
-				ipop.optFlags.add(OPT_FLAG.FUNC_CLEAN);
-				func.instructions.add(ipop);
+				func.instructions.add(ipop.flag(OPT_FLAG.FUNC_CLEAN));
 			}
 			
 			int size = 0;
@@ -489,7 +484,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				func.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 		
 			
-			ASMLabel singleWordSkip = new ASMLabel(LabelUtil.getLabel());
+			ASMLabel singleWordSkip = LabelUtil.getLabel();
 			if (f.getReturnType().wordsize() == 1 && f.signals()) 
 				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(singleWordSkip)));
 			
@@ -501,14 +496,12 @@ public class AsNFunction extends AsNCompoundStatement {
 					 * were thrown, the word size would already be in R0 
 					 */
 					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), COND.EQ);
-					mov.optFlags.add(OPT_FLAG.WRITEBACK);
-					func.instructions.add(mov);
+					func.instructions.add(mov.flag(OPT_FLAG.WRITEBACK));
 				}
 				else if (f.getReturnType().wordsize() > 1) {
 					/* Function does not signal, move word size of return type in R0 */
 					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4));
-					mov.optFlags.add(OPT_FLAG.WRITEBACK);
-					func.instructions.add(mov);
+					func.instructions.add(mov.flag(OPT_FLAG.WRITEBACK));
 				}
 				
 				/* End address of return in stack */
@@ -572,9 +565,9 @@ public class AsNFunction extends AsNCompoundStatement {
 		for (ASMInstruction instruction : this.instructions) {
 			if (instruction instanceof ASMBranch branch) {
 				/* Only patch bx and instructions that are not part of exceptional exit */
-				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
+				if (branch.type == BRANCH_TYPE.BX && !branch.hasFlag(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
-					branch.optFlags.add(OPT_FLAG.BRANCH_TO_EXIT);
+					branch.flag(OPT_FLAG.BRANCH_TO_EXIT);
 					branch.target = new LabelOp(funcReturn);
 				}
 			}
@@ -610,7 +603,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				}
 			}
 			else if (ins instanceof ASMMemOp mem) {
-				if (mem.op0 instanceof RegOp && ((RegOp) mem.op0).reg == REG.FP) {
+				if (mem.op0 instanceof RegOp regOp && regOp.reg == REG.FP) {
 					if (mem.op1 instanceof PatchableImmOp op) {
 						if (op.dir == PATCH_DIR.UP) {
 							op.patch(offset);

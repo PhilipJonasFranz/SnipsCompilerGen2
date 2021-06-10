@@ -40,8 +40,7 @@ public class AsNSignalStatement extends AsNStatement {
 		
 		/* Move word size of thrown exception into r0 to be used in the copy loop */
 		ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(s.exceptionBuilder.getType().wordsize() * 4));
-		mov.optFlags.add(OPT_FLAG.WRITEBACK);
-		sig.instructions.add(mov);
+		sig.instructions.add(mov.flag(OPT_FLAG.WRITEBACK));
 		
 		/* Add the branch to the watchpoint */
 		injectWatchpointBranch(sig, s.watchpoint, null);

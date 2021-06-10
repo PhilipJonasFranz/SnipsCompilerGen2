@@ -477,7 +477,7 @@ public class ASTOptimizer {
 				});
 				
 				List<IDRefWriteback> idwb = new ArrayList();
-				if (dec.value != null) idwb = dec.value.visit(x -> x instanceof IDRefWriteback);
+				if (dec.value != null) idwb = dec.value.visit(IDRefWriteback.class::isInstance);
 
 				List<Expression> added = new ArrayList(idwb);
 				
@@ -574,7 +574,7 @@ public class ASTOptimizer {
 		
 		this.state.popSetting(Setting.SUBSTITUTION);
 		
-		List<IDRef> refs = aof.expression.visit(x -> x instanceof IDRef);
+		List<IDRef> refs = aof.expression.visit(IDRef.class::isInstance);
 		refs.forEach(x -> this.state.setReferenced(x.origin));
 		
 		return aof;
@@ -650,7 +650,7 @@ public class ASTOptimizer {
 			 * different.
 			 */
 			Expression cValue = this.state.get(idRef.origin).getCurrentValue();
-			List<IDRef> varsInExpression = cValue.visit(x -> x instanceof IDRef);
+			List<IDRef> varsInExpression = cValue.visit(IDRef.class::isInstance);
 			for (IDRef ref : varsInExpression) {
 				if (ref.origin.equals(idRef.origin) || this.state.getWrite(ref.origin)) {
 					operationApplicable = false;
@@ -670,7 +670,7 @@ public class ASTOptimizer {
 			 * Make sure we do not forward substitute function calls.
 			 * The calls could change global state variables.
 			 */
-			operationApplicable &= cValue.visit(x -> x instanceof InlineCall).isEmpty();
+			operationApplicable &= cValue.visit(InlineCall.class::isInstance).isEmpty();
 			
 			/* 
 			 * Check if the current path is within a looped scope.
@@ -759,7 +759,7 @@ public class ASTOptimizer {
 					for (Declaration param : parameters) 
 						morphable &= Matcher.isMorphable(value, param);
 					
-					if (!value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(currentFunction)).isEmpty())
+					if (!value.visit(x -> x instanceof InlineCall call && call.calledFunction.equals(currentFunction)).isEmpty())
 						morphable = false;
 					
 					if (morphable) {
@@ -767,14 +767,14 @@ public class ASTOptimizer {
 						
 						for (int i = 0; i < parameters.size(); i++) {
 							final Declaration param0 = f.parameters.get(i);
-							Morpher.morphExpression(value, x -> x instanceof IDRef && ((IDRef) x).origin.equals(param0), inlineCall.parameters.get(i).clone());
+							Morpher.morphExpression(value, x -> x instanceof IDRef ref && ref.origin.equals(param0), inlineCall.parameters.get(i).clone());
 						}
 						
 						/* 
 						 * Get list of inline calls in the new value, decrement the 
 						 * INLINE_DEPTH for these calls to prevent infinite inlining.
 						 */
-						List<InlineCall> calls = value.visit(x -> x instanceof InlineCall && ((InlineCall) x).calledFunction.equals(f));
+						List<InlineCall> calls = value.visit(x -> x instanceof InlineCall call && call.calledFunction.equals(f));
 						calls.forEach(x -> x.INLINE_DEPTH = inlineCall.INLINE_DEPTH);
 						
 						OPT_DONE();
@@ -1352,7 +1352,7 @@ public class ASTOptimizer {
 		 * Cannot say for sure which variable is targeted, mark all occurring variables as
 		 * potential candidates. For each found reference, mark the variable as written to.
 		 */
-		List<IDRef> refs = pointerLhsId.deref.visit(x -> x instanceof IDRef);
+		List<IDRef> refs = pointerLhsId.deref.visit(IDRef.class::isInstance);
 		refs.forEach(x -> this.state.setWrite(x.origin, true));
 		
 		if (refs.isEmpty()) {
