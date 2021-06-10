@@ -20,6 +20,12 @@ public class ASMComment extends ASMInstruction {
 		for (int i = 0; i < CompilerDriver.commentDistance - x; i++) s+= " ";
 		return s + "/* " + this.comment + " */";
 	}
+
+	public static String build(String s0, int x) {
+		String s = "";
+		for (int i = 0; i < CompilerDriver.commentDistance - x; i++) s+= " ";
+		return s + "/* " + s0 + " */";
+	}
 	
 	public int getRequiredCPUCycles() {
 		return 0;

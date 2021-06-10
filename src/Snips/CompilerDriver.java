@@ -438,8 +438,10 @@ public class CompilerDriver {
 				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
 				else ins_p.put(x.getClass().getName(), 1);
 				
+				String ins_build = x.build();
+
 				/* Build instruction with or without comment */
-				return x.build() + ((x.comment != null && enableComments)? x.comment.build(x.build().length()) : "");
+				return ins_build + ((x.comment != null && enableComments)? ASMComment.build(x.comment, ins_build.length()) : "");
 			}).collect(Collectors.toList());
 		
 			/* Remove double empty lines */

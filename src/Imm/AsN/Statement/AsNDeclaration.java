@@ -8,11 +8,10 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
@@ -28,7 +27,7 @@ public class AsNDeclaration extends AsNStatement {
 
 		/* Load value, either in R0 or on the stack */
 		if (d.value != null) dec.instructions.addAll(AsNExpression.cast(d.value, r, map, st).getInstructions());
-		if (!dec.instructions.isEmpty()) dec.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+		if (!dec.instructions.isEmpty()) dec.instructions.get(0).com("Evaluate Expression");
 		
 		if (d.getType().isFloat()) {
 			int free = r.getVRegSet().findFree();
@@ -75,8 +74,8 @@ public class AsNDeclaration extends AsNStatement {
 					if (d.value != null) st.popXWords(d.getType().wordsize());
 					else {
 						/* Declaration has no value, just make space on the stack */
-						ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(d.getType().wordsize() * 4));
-						sub.comment = new ASMComment("Make space on stack for declaration " + d.path.getLast());
+						ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(d.getType().wordsize() * 4))
+								.com("Make space on stack for declaration " + d.path.getLast());
 						
 						dec.instructions.add(sub);
 					}

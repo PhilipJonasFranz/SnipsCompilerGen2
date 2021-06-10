@@ -222,7 +222,7 @@ public class AsNBody extends AsNNode {
 							List<ASMInstruction> vTable = new ArrayList<>();
 
 							ASMLabel vTableHead = new ASMLabel(def.path + "_vtable" + postfix);
-							vTableHead.comment = new ASMComment("VTable for " + def.path + ((!mapping.getProvidedProvisos().isEmpty()) ? " proviso " + postfix : ""));
+							vTableHead.com("VTable for " + def.path + ((!mapping.getProvidedProvisos().isEmpty()) ? " proviso " + postfix : ""));
 							vTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
 							vTable.add(vTableHead);
 
@@ -248,8 +248,7 @@ public class AsNBody extends AsNNode {
 								}
 								else {
 									ASMAdd placeholder = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
-									placeholder.comment = new ASMComment("Function '" + f.path + "' not called");
-									vTable.add(placeholder);
+									vTable.add(placeholder.com("Function '" + f.path + "' not called"));
 								}
 							}
 
@@ -360,8 +359,7 @@ public class AsNBody extends AsNNode {
 					
 					/* Load memory address */
 					ASMLdrLabel ins = new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), dec);
-					ins.comment = new ASMComment("Load from .data section");
-					globalsInit.add(ins);
+					globalsInit.add(ins.com("Load from .data section"));
 					
 					if (dec.value.getType().wordsize() == 1) {
 						globalsInit.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
@@ -588,8 +586,7 @@ public class AsNBody extends AsNNode {
 		AsNBody.usedStackCopyRoutine = true;
 		
 		ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.PC), new ImmOp(8));
-		add.comment = new ASMComment("Setup return address for routine");
-		node.instructions.add(add);
+		node.instructions.add(add.com("Setup return address for routine"));
 		
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(AsNBody.stackCopyRoutine));
 		

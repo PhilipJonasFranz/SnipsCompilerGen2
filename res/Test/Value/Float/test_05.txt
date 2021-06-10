@@ -41,7 +41,7 @@ main:                                        /* Function: main */
     ldmfa r0, {r0-r2}
     stmfd sp!, {r0-r2}
     bl Cmplx.op_add_1222274617               /* Call Cmplx.op_add */
-    vldr s0, [fp, #-32]                      /* Load field from struct */
+    vldr s0, [fp, #-32]
     mov sp, fp
     ldmfd sp!, {fp, pc}
 .P1351326485_LIT_1085276160: .word 1085276160

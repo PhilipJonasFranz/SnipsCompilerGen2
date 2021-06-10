@@ -14,28 +14,18 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.ASMVLdr;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.Expression;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.TypeCast;
+import Imm.AST.Expression.*;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Statement.AsNFunctionCall;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Imm.TYPE.TYPE;
 import Res.Const;
 import Snips.CompilerDriver;
 
@@ -69,9 +59,9 @@ public class AsNStructSelect extends AsNExpression {
 					ASMLdr load;
 					
 					if (isVFP) load = new ASMVLdr(new VRegOp(REG.S0), new RegOp(REG.R1));
-					else load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1));
-					
-					load.comment = new ASMComment("Load field from struct");
+					else load = new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R1))
+							.com("Load field from struct");
+
 					sel.instructions.add(load);
 				}
 			}
@@ -133,8 +123,7 @@ public class AsNStructSelect extends AsNExpression {
 				int offset = st.getParameterByteOffset(ref.origin);
 				
 				ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
-				start.comment = new ASMComment("Start of structure in stack");
-				node.instructions.add(start);
+				node.instructions.add(start.com("Start of structure in stack"));
 				
 				isInStack = true;
 			}
@@ -184,8 +173,7 @@ public class AsNStructSelect extends AsNExpression {
 				int offset = st.getParameterByteOffset(arr.idRef.origin);
 				
 				ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
-				start.comment = new ASMComment("Start of structure in stack");
-				node.instructions.add(start);
+				node.instructions.add(start.com("Start of structure in stack"));
 			}
 			/* In Global Memory */
 			else if (map.declarationLoaded(arr.idRef.origin)) {
@@ -198,8 +186,7 @@ public class AsNStructSelect extends AsNExpression {
 			/* Already convert to bytes here, since loadSumR2 loads the offset in bytes */
 			if (select.deref) {
 				ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2));
-				lsl.comment = new ASMComment("Convert to bytes");
-				node.instructions.add(lsl);
+				node.instructions.add(lsl.com("Convert to bytes"));
 			}
 
 			injectArraySelect(node, arr, r, map, st);
@@ -212,12 +199,11 @@ public class AsNStructSelect extends AsNExpression {
 		 */
 		if (select.deref && !(base instanceof ArraySelect)) {
 			ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(2));
-			lsl.comment = new ASMComment("Convert to bytes");
-			node.instructions.add(lsl);
+			node.instructions.add(lsl.com("Convert to bytes"));
 		}
 		
 		if (!node.instructions.isEmpty())
-			node.instructions.get(0).comment = new ASMComment("Load field location");
+			node.instructions.get(0).com("Load field location");
 		
 		/* Base address is now in R1 */
 		

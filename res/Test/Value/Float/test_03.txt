@@ -33,7 +33,7 @@ HEAP_START: .word 0
 .global norm
 norm:                                        /* Function: norm */
     lsl r1, r0, #2                           /* Convert to bytes */
-    vldr s0, [r1, #4]                        /* Load field from struct */
+    vldr s0, [r1, #4]
     vpush { s0 }
     vldr s0, [r1, #8]
     vcvt.F32.S32 s2, s0

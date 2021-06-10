@@ -1,11 +1,10 @@
 package Imm.ASM;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.COND;
 import Imm.AsN.AsNNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Acts as a base class for all assembly instructions.
@@ -83,7 +82,7 @@ public abstract class ASMInstruction {
 	/**
 	 * A comment attatched to this instruction. Will be added after the instruction when building.
 	 */
-	public ASMComment comment;
+	public String comment;
 	
 	/**
 	 * The AsNNode that was active when this instruction was created.
@@ -113,7 +112,21 @@ public abstract class ASMInstruction {
 	 * Create the ASM memonic representation of this instruction.
 	 */
 	public abstract String build();
-	
+
+	/**
+	 * Comments this instruction with the given string. The string
+	 * will be appended after the instruction when the instruction
+	 * is built out.
+	 *
+	 * @param comment The string to comment this instruction with.
+	 * @param <T> Type of the instruction, set dynamically.
+	 * @return This instruction.
+	 */
+	public <T extends ASMInstruction> T com(String comment) {
+		this.comment = comment;
+		return (T) this;
+	}
+
 	public int getRequiredCPUCycles() {
 		return 1;
 	}

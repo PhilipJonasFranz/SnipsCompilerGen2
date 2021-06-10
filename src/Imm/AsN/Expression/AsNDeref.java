@@ -7,11 +7,10 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.AST.Expression.Deref;
 import Imm.TYPE.COMPOSIT.STRUCT;
@@ -34,26 +33,22 @@ public class AsNDeref extends AsNExpression {
 		if (a.getType().wordsize() == 1) {
 			/* Convert to bytes */
 			ASMLsl lsl = new ASMLsl(new RegOp(target), new RegOp(REG.R0), new ImmOp(2));
-			lsl.comment = new ASMComment("Convert to bytes");
-			ref.instructions.add(lsl);
+			ref.instructions.add(lsl.com("Convert to bytes"));
 
 			if (isVFP) {
 				ASMVLdr load = new ASMVLdr(new VRegOp(target), new RegOp(target));
-				load.comment = new ASMComment("Load from address");
-				ref.instructions.add(load);
+				ref.instructions.add(load.com("Load from address"));
 			}
 			else {
 				ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(target));
-				load.comment = new ASMComment("Load from address");
-				ref.instructions.add(load);
+				ref.instructions.add(load.com("Load from address"));
 			}
 		}
 		/* Load on stack */
 		else {
 			/* Convert to bytes */
 			ASMLsl lsl = new ASMLsl(new RegOp(REG.R1), new RegOp(REG.R0), new ImmOp(2));
-			lsl.comment = new ASMComment("Convert to bytes");
-			ref.instructions.add(lsl);
+			ref.instructions.add(lsl.com("Convert to bytes"));
 
 			/* Sequentially push words on stack */
 			for (int i = 0; i < a.getType().wordsize(); i++) {

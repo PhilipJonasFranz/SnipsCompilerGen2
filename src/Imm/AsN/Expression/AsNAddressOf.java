@@ -11,20 +11,14 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMLsr;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
-import Imm.AST.Expression.AddressOf;
-import Imm.AST.Expression.ArraySelect;
-import Imm.AST.Expression.IDRef;
-import Imm.AST.Expression.IDRefWriteback;
-import Imm.AST.Expression.StructSelect;
-import Imm.AST.Expression.StructureInit;
+import Imm.ASM.Util.REG;
+import Imm.AST.Expression.*;
 import Imm.AST.Statement.Declaration;
 import Res.Const;
 
@@ -61,8 +55,7 @@ public class AsNAddressOf extends AsNExpression {
 				ASMDataLabel label = map.resolve(ref.origin);
 
 				ASMLdrLabel load = new ASMLdrLabel(new RegOp(target), new LabelOp(label), ref.origin);
-				load.comment = new ASMComment("Load data section address");
-				aof.instructions.add(load);
+				aof.instructions.add(load.com("Load data section address"));
 			}
 			else if (st.getParameterByteOffset(ref.origin) != -1) {
 				/* Get address from parameter stack */
@@ -94,8 +87,7 @@ public class AsNAddressOf extends AsNExpression {
 				ASMDataLabel label = map.resolve(origin);
 
 				ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R0), new LabelOp(label), origin);
-				load.comment = new ASMComment("Load data section address");
-				aof.instructions.add(load);
+				aof.instructions.add(load.com("Load data section address"));
 			}
 			else if (st.getParameterByteOffset(origin) != -1) {
 				/* Get address from parameter stack */
@@ -116,8 +108,7 @@ public class AsNAddressOf extends AsNExpression {
 
 			/* Address = Base + Offset */
 			ASMAdd add = new ASMAdd(new RegOp(target), new RegOp(REG.R0), new RegOp(REG.R2));
-			add.comment = new ASMComment("Add structure offset");
-			aof.instructions.add(add);
+			aof.instructions.add(add.com("Add structure offset"));
 		}
 		else if (a.expression instanceof StructSelect select) {
 			AsNStructSelect.injectAddressLoader(aof, select, r, map, st, true);

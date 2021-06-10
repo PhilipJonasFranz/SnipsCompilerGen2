@@ -9,17 +9,16 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Function;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.TryStatement;
+import Imm.AST.SyntaxElement;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
@@ -49,7 +48,13 @@ public class AsNSignalStatement extends AsNStatement {
 
 		return sig.popCreatorStack();
 	}
-	
+
+	/**
+	 *
+	 * @param node
+	 * @param watchpoint
+	 * @param cond
+	 */
 	public static void injectWatchpointBranch(AsNNode node, SyntaxElement watchpoint, COND cond) {
 		ASMLabel escape;
 		
@@ -68,8 +73,8 @@ public class AsNSignalStatement extends AsNStatement {
 		}
 		else throw new SNIPS_EXC(Const.UNKNOWN_WATCHPOINT_TYPE, watchpoint.getClass().getName(), watchpoint.getSource().getSourceMarker());
 	
-		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(escape));
-		branch.comment = new ASMComment("Exception thrown, branch to escape target");
+		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(escape))
+				.com("Exception thrown, branch to escape target");
 		
 		node.instructions.add(branch);
 	}

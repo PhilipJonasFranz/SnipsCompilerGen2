@@ -13,7 +13,6 @@ import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
@@ -78,8 +77,7 @@ public class AsNAssignWriteback extends AsNStatement {
 					
 					/* Load memory address */
 					ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(REG.R2), new LabelOp(label), ref.origin);
-					ldr.comment = new ASMComment("Load from .data section");
-					node.instructions.add(ldr);
+					node.instructions.add(ldr.com("Load from .data section"));
 					
 					node.instructions.add(new ASMStr(new RegOp(REG.R1), new RegOp(REG.R2)));
 				}

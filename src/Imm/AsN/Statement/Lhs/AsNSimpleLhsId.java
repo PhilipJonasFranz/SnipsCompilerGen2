@@ -13,15 +13,10 @@ import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
@@ -80,15 +75,13 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					int offset = st.getParameterByteOffset(ref.origin);
 					
 					ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
-					start.comment = new ASMComment("Start of structure in stack");
-					id.instructions.add(start);
+					id.instructions.add(start.com("Start of structure in stack"));
 				}
 				else if (map.resolve(ref.origin) != null) {
 					ASMDataLabel label = map.resolve(ref.origin);
 					
 					ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin);
-					load.comment = new ASMComment("Load data section address");
-					id.instructions.add(load);
+					id.instructions.add(load.com("Load data section address"));
 				}
 				/* Local */
 				else if (st.getDeclarationInStackByteOffset(ref.origin) != -1) {
@@ -97,8 +90,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					
 					/* Load the start of the structure into R1 */
 					ASMSub sub = new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset));
-					sub.comment = new ASMComment("Start of structure in stack");
-					id.instructions.add(sub);
+					id.instructions.add(sub.com("Start of structure in stack"));
 				}
 				else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 				

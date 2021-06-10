@@ -11,14 +11,13 @@ import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
 import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.Stack.ASMVLdrStack;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.IDRef;
@@ -95,8 +94,7 @@ public class AsNIDRef extends AsNExpression {
 				
 				/* Load memory address */
 				ASMLdrLabel ins = new ASMLdrLabel(new RegOp(target), new LabelOp(label), i.origin);
-				ins.comment = new ASMComment("Load from .data section");
-				ref.instructions.add(ins);
+				ref.instructions.add(ins.com("Load from .data section"));
 				
 				ref.instructions.add(new ASMLdr(new RegOp(target), new RegOp(target)));
 			}

@@ -6,7 +6,6 @@ import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.REG;
 import Imm.AST.Statement.Declaration;
@@ -24,9 +23,14 @@ public class AsNReturnStatement extends AsNStatement {
 
 		if (s.value != null) {
 			ret.instructions.addAll(AsNExpression.cast(s.value, r, map, st).getInstructions());
-			if (!ret.instructions.isEmpty()) ret.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+			if (!ret.instructions.isEmpty()) ret.instructions.get(0).com("Evaluate Expression");
 		}
-		
+
+		/*
+		 * Create symbolic bx branch. This branch will be replaced with a
+		 * simple b branch to the function exit, that will contain exception,
+		 * stack handling, as well as takes care of restoring the registers.
+		 */
 		ret.instructions.add(new ASMBranch(BRANCH_TYPE.BX, new RegOp(REG.LR)));
 		
 		ret.freeDecs(r, s);

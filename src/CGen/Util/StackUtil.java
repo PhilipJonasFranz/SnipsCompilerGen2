@@ -1,8 +1,5 @@
 package CGen.Util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
@@ -28,17 +25,20 @@ import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Expression.IDRef;
 import Imm.AsN.AsNBody;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNStructureInit;
 import Res.Const;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains utility functions related to stack operations, like copying a memory
@@ -78,8 +78,7 @@ public class StackUtil {
 			}
 			
 			ASMLabel loopStart = new ASMLabel(LabelUtil.getLabel());
-			loopStart.comment = new ASMComment("Copy memory section with loop");
-			node.instructions.add(loopStart);
+			node.instructions.add(loopStart.com("Copy memory section with loop"));
 			
 			ASMLabel loopEnd = new ASMLabel(LabelUtil.getLabel());
 			
@@ -135,8 +134,7 @@ public class StackUtil {
 			node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(size * 4)));
 			
 			ASMLabel loopStart = new ASMLabel(LabelUtil.getLabel());
-			loopStart.comment = new ASMComment("Copy memory section with loop");
-			node.instructions.add(loopStart);
+			node.instructions.add(loopStart.com("Copy memory section with loop"));
 			
 			ASMLabel loopEnd = new ASMLabel(LabelUtil.getLabel());
 			
@@ -199,8 +197,7 @@ public class StackUtil {
 			ASMDataLabel label = map.resolve(i.origin);
 			
 			ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R2), new LabelOp(label), i.origin);
-			load.comment = new ASMComment("Load data section address");
-			node.instructions.add(load);
+			node.instructions.add(load.com("Load data section address"));
 			
 			node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new ImmOp((wordSize - 1) * 4)));
 			

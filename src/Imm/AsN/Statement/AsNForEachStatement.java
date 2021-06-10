@@ -15,34 +15,20 @@ import Imm.ASM.Memory.Stack.ASMLdrStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
 import Imm.ASM.Memory.Stack.ASMStrStack;
-import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMMult;
-import Imm.ASM.Processing.Arith.ASMSub;
+import Imm.ASM.Processing.Arith.*;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
-import Imm.ASM.Util.Operands.ImmOp;
-import Imm.ASM.Util.Operands.LabelOp;
-import Imm.ASM.Util.Operands.Operand;
-import Imm.ASM.Util.Operands.PatchableImmOp;
+import Imm.ASM.Util.Operands.*;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
-import Imm.ASM.Util.Operands.RegOp;
-import Imm.ASM.Util.Operands.VRegOp;
+import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Processing.Arith.ASMVMov;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.AsNBody;
-import Imm.AsN.Expression.AsNArraySelect;
-import Imm.AsN.Expression.AsNDeref;
-import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.AsNIDRef;
-import Imm.AsN.Expression.AsNStructSelect;
+import Imm.AsN.Expression.*;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Opt.AST.Util.Matcher;
 import Res.Const;
@@ -236,8 +222,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		int add = st.closeScope(a, true);
 		if (add != 0) {
 			ASMAdd add0 = new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(add));
-			add0.comment = new ASMComment("Reset stack, remove iterator and counter");
-			f.instructions.add(add0);
+			f.instructions.add(add0.com("Reset stack, remove iterator and counter"));
 		}
 		
 		f.freeDecs(r, a);

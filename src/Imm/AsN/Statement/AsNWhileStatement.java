@@ -8,7 +8,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
@@ -50,7 +49,7 @@ public class AsNWhileStatement extends AsNConditionalCompoundStatement {
 		w.instructions.add(w.breakJump);
 		
 		if (!w.instructions.isEmpty()) 
-			w.instructions.get(0).comment = new ASMComment("Evaluate condition");
+			w.instructions.get(0).com("Evaluate condition");
 		
 		w.freeDecs(r, a);
 		return w.popCreatorStack();

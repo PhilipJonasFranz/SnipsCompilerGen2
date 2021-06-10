@@ -8,9 +8,8 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMStr;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
-import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Lhs.StructSelectLhsId;
 import Imm.AsN.Expression.AsNStructSelect;
 
@@ -39,8 +38,7 @@ public class AsNStructSelectLhsId extends AsNLhsId {
 			
 			/* Store value to location */
 			ASMStr store = new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1));
-			store.comment = new ASMComment("Store value to struct field");
-			id.instructions.add(store);
+			id.instructions.add(store.com("Store value to struct field"));
 		}
 
 		return id.popCreatorStack();

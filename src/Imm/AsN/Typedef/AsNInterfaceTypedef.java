@@ -11,7 +11,6 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -51,8 +50,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		
 		ASMLabel relayTableHead = new ASMLabel(name);
 		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-		relayTableHead.comment = new ASMComment("Relay: " + idef.path + " -> " + sdef.path);
-		table.add(relayTableHead);
+		table.add(relayTableHead.com("Relay: " + idef.path + " -> " + sdef.path));
 		
 		mapping.resolverLabelMap.put(idef, relayTableHead);
 		
@@ -106,7 +104,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 */
 			if (post == null) {
 				ASMAdd add = new ASMAdd(new RegOp(REG.R10), new RegOp(REG.R10), new RegOp(REG.R10));
-				add.comment = new ASMComment("Function was not called, use as placeholder");
+				add.com("Function was not called, use as placeholder");
 				add.optFlags.add(OPT_FLAG.IS_PADDING);
 				add.optFlags.add(OPT_FLAG.SYS_JMP);
 				table.add(add);
@@ -135,7 +133,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 			 * Add label head, so other casting methods can reference it. It wont
 			 * be used, but we have to ensure the existence of the label anyway.
 			 */
-			relayTableHead.comment.comment += " (Unused)";
+			relayTableHead.comment += " (Unused)";
 			table.add(relayTableHead);
 		}
 
@@ -167,8 +165,7 @@ public class AsNInterfaceTypedef extends AsNNode {
 		/* Create table head */
 		ASMLabel relayTableHead = new ASMLabel(name);
 		relayTableHead.optFlags.add(OPT_FLAG.LABEL_USED);
-		relayTableHead.comment = new ASMComment("Relay: " + sdef.path + " -> INTF");
-		table.add(relayTableHead);
+		table.add(relayTableHead.com("Relay: " + sdef.path + " -> INTF"));
 
 		int c = 0;
 		List<ASMInstruction> tableBody = new ArrayList();

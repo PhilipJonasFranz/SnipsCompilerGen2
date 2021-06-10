@@ -58,20 +58,16 @@ public class LiteralUtil {
 		if (value > 255 || isVFP) {
 			ASMDataLabel label = requestLabel(value);
 			
-			ASMComment comment = new ASMComment("Load value '" + actualValue + "' from pool");
+			String comment = "Load value '" + actualValue + "' from pool";
 
 			if (isVFP) {
 				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
-				ASMVLdrLabel ldr = new ASMVLdrLabel(new VRegOp(target), new LabelOp(label), null);
-				ldr.comment = comment;
-				
+				ASMVLdrLabel ldr = new ASMVLdrLabel(new VRegOp(target), new LabelOp(label), null).com(comment);
 				node.instructions.add(ldr);
 			}
 			else {
 				/* Create the new LDR statement, that loads the value stored at the label in the target reg */
-				ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null);
-				ldr.comment = comment;
-				
+				ASMLdrLabel ldr = new ASMLdrLabel(new RegOp(target), new LabelOp(label), null).com(comment);
 				node.instructions.add(ldr);
 			}
 		}

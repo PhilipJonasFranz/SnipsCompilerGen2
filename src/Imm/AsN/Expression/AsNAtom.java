@@ -4,7 +4,6 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Imm.ASM.Memory.ASMLdrLabel;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -31,8 +30,7 @@ public class AsNAtom extends AsNExpression {
 				
 			/* Load memory address */
 			ASMLdrLabel ins = new ASMLdrLabel(new RegOp(target), new LabelOp(nullPtr), CompilerDriver.NULL_PTR);
-			ins.comment = new ASMComment("Load null address");
-			atom.instructions.add(ins);
+			atom.instructions.add(ins.com("Load null address"));
 		}
 		else {
 			/* Load value via literal manager, directly or via label */

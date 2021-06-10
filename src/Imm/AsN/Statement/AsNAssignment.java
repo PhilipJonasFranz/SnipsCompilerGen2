@@ -5,7 +5,6 @@ import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.Structural.ASMComment;
 import Imm.AST.Statement.Assignment;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
 import Imm.AsN.Expression.AsNExpression;
@@ -21,7 +20,7 @@ public class AsNAssignment extends AsNStatement {
 		
 		/* Compute value */
 		assign.instructions.addAll(AsNExpression.cast(a.value, r, map, st).getInstructions());
-		if (!assign.instructions.isEmpty()) assign.instructions.get(0).comment = new ASMComment("Evaluate Expression");
+		if (!assign.instructions.isEmpty()) assign.instructions.get(0).com("Evaluate Expression");
 		
 		/* Store value at location specified by lhs */
 		assign.instructions.addAll(AsNLhsId.cast(a.lhsId, r, map, st).getInstructions());

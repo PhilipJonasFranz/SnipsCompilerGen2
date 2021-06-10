@@ -128,8 +128,7 @@ public class AsNTryStatement extends AsNCompoundStatement {
 	public void loadSPBackup(AsNNode node, StackSet st) {
 		int off = st.getHighestSPBackupOffset();
 		ASMLdrStack reset = new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.SP), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off));
-		reset.comment = new ASMComment("Load backed up sp from stack");
-		node.instructions.add(reset);
+		node.instructions.add(reset.com("Load backed up sp from stack"));
 		
 		/* Pop SP Backup */
 		node.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(4)));

@@ -7,7 +7,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.VRegOp;
@@ -124,8 +123,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 					int location = r.declarationRegLocation(dec);
 					
 					ASMPushStack push = new ASMPushStack(new RegOp(location));
-					push.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
-					this.instructions.add(push);
+					this.instructions.add(push.com("Push declaration on stack, referenced by addressof."));
 					
 					st.push(dec);
 					r.free(location);
@@ -134,8 +132,7 @@ public abstract class AsNCompoundStatement extends AsNStatement {
 					int location = r.getVRegSet().declarationRegLocation(dec);
 
 					ASMVPushStack push = new ASMVPushStack(new VRegOp(location));
-					push.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
-					this.instructions.add(push);
+					this.instructions.add(push.com("Push declaration on stack, referenced by addressof."));
 
 					st.push(dec);
 					r.getVRegSet().free(location);

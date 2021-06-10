@@ -18,7 +18,6 @@ import Imm.ASM.Processing.Arith.ASMLsl;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
@@ -34,7 +33,6 @@ import Imm.AST.Expression.TempAtom;
 import Imm.AST.Function;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.AsN.AsNFunction;
@@ -217,8 +215,7 @@ public class AsNFunctionCall extends AsNStatement {
 
 			/* Load and push the function offset for later use */
 			ASMMov offsetMov = new ASMMov(new RegOp(REG.R12), new ImmOp(offset));
-			offsetMov.comment = new ASMComment("Offset to " + f.path);
-			call.instructions.add(offsetMov);
+			call.instructions.add(offsetMov.com("Offset to " + f.path));
 			call.instructions.add(new ASMPushStack(new RegOp(REG.R12)));
 
 			/* Load address of struct interface resolver */
@@ -281,14 +278,12 @@ public class AsNFunctionCall extends AsNStatement {
 
 				/* Load and push the function offset for later use */
 				ASMMov offsetMov = new ASMMov(new RegOp(REG.R10), new ImmOp(offset + 4));
-				offsetMov.comment = new ASMComment("Offset to " + f.path);
-				call.instructions.add(offsetMov);
+				call.instructions.add(offsetMov.com("Offset to " + f.path));
 
 				/* Load the address of the table into the PC to branch to it. */
 				ASMLdr ddispatch = new ASMLdr(new RegOp(REG.PC), new RegOp(REG.R12), new ImmOp(4));
 				ddispatch.optFlags.add(OPT_FLAG.SYS_JMP);
-				ddispatch.comment = new ASMComment("Dynamic dispatch to VTable");
-				call.instructions.add(ddispatch);
+				call.instructions.add(ddispatch.com("Dynamic dispatch to VTable"));
 			}
 			else {
 				/* Branch to function */
@@ -297,8 +292,7 @@ public class AsNFunctionCall extends AsNStatement {
 				ASMLabel functionLabel = new ASMLabel(target);
 
 				ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
-				branch.comment = new ASMComment("Call " + f.path);
-				call.instructions.add(branch);
+				call.instructions.add(branch.com("Call " + f.path));
 			}
 		}
 
@@ -336,18 +330,17 @@ public class AsNFunctionCall extends AsNStatement {
 				/* Resets the stack by setting the SP to FP - (Frame Size * 4). */
 				if (off != 0) {
 					ASMSub sub = new ASMSub(new RegOp(REG.SP), new RegOp(REG.FP), new ImmOp(off));
-					sub.comment = new ASMComment("Reset the stack after anonymous call");
-					call.instructions.add(sub);
+					call.instructions.add(sub.com("Reset the stack after anonymous call"));
 				}
 				else {
 					ASMMov mov = new ASMMov(new RegOp(REG.SP), new RegOp(REG.FP));
-					mov.comment = new ASMComment("Reset the stack after anonymous call");
-					call.instructions.add(mov);
+					call.instructions.add(mov.com("Reset the stack after anonymous call"));
 				}
 			}
 		}
 
-		if (parameters.size() > 0) call.instructions.get(0).comment = new ASMComment("Load parameters");
+		if (parameters.size() > 0)
+			call.instructions.get(0).com("Load parameters");
 	}
 
 	private static int findOffset(List<Function> functions, Function f) {

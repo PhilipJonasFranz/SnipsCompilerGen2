@@ -8,24 +8,19 @@ import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
-import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Processing.Arith.ASMMov;
-import Imm.ASM.Processing.Arith.ASMMult;
-import Imm.ASM.Processing.Arith.ASMSub;
-import Imm.ASM.Structural.ASMComment;
+import Imm.ASM.Processing.Arith.*;
 import Imm.ASM.Structural.Label.ASMDataLabel;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AsN.AsNNode;
-import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
+import Imm.TYPE.TYPE;
 import Res.Const;
 
 public class AsNArraySelect extends AsNExpression {
@@ -93,8 +88,7 @@ public class AsNArraySelect extends AsNExpression {
 		/* Sum */
 		if (s.selection.size() > 1 || block) {
 			ASMMov sum = new ASMMov(new RegOp(REG.R2), new ImmOp(0));
-			sum.comment = new ASMComment("Calculate offset of sub structure");
-			node.instructions.add(sum);
+			node.instructions.add(sum.com("Calculate offset of sub structure"));
 			
 			ARRAY superType;
 			if (s.idRef.getType().isPointer()) {
@@ -185,8 +179,7 @@ public class AsNArraySelect extends AsNExpression {
 			
 			/* Sub the offset to the start of the sub structure from the start in R1 */
 			ASMAdd block = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2));
-			block.comment = new ASMComment("Start of sub structure in stack");
-			node.instructions.add(block);
+			node.instructions.add(block.com("Start of sub structure in stack"));
 		}
 		else if (selectType == SELECT_TYPE.LOCAL_SINGLE) {
 			/* Load offset of target in array */
@@ -204,13 +197,11 @@ public class AsNArraySelect extends AsNExpression {
 			
 			/* Load the start of the structure into R1 */
 			ASMSub sub = new ASMSub(new RegOp(REG.R1), new RegOp(REG.FP), new ImmOp(offset));
-			sub.comment = new ASMComment("Start of structure in stack");
-			node.instructions.add(sub);
+			node.instructions.add(sub.com("Start of structure in stack"));
 		
 			/* Sub the offset to the start of the sub structure from the start in R1 */
 			ASMAdd block = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2));
-			block.comment = new ASMComment("Start of sub structure in stack");
-			node.instructions.add(block);
+			node.instructions.add(block.com("Start of sub structure in stack"));
 		}
 		else if (selectType == SELECT_TYPE.PARAM_SINGLE) {
 			/* Load offset of target in array */
@@ -226,8 +217,7 @@ public class AsNArraySelect extends AsNExpression {
 			loadSumR2(node, s, r, map, st, true);
 			
 			ASMAdd start = new ASMAdd(new RegOp(REG.R1), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.UP, offset));
-			start.comment = new ASMComment("Start of structure in stack");
-			node.instructions.add(start);
+			node.instructions.add(start.com("Start of structure in stack"));
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));
@@ -238,8 +228,7 @@ public class AsNArraySelect extends AsNExpression {
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 			
 			ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R0), new LabelOp(label), s.idRef.origin);
-			load.comment = new ASMComment("Load data section address");
-			node.instructions.add(load);
+			node.instructions.add(load.com("Load data section address"));
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.R0), new RegOp(REG.R2)));
@@ -250,8 +239,7 @@ public class AsNArraySelect extends AsNExpression {
 			ASMDataLabel label = map.resolve(s.idRef.origin);
 		
 			ASMLdrLabel load = new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), s.idRef.origin);
-			load.comment = new ASMComment("Load data section address");
-			node.instructions.add(load);
+			node.instructions.add(load.com("Load data section address"));
 			
 			/* Add sum */
 			node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new RegOp(REG.R2)));

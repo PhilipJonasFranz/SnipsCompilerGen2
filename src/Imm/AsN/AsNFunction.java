@@ -19,7 +19,6 @@ import Imm.ASM.Processing.ASMBinaryData;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
@@ -176,9 +175,8 @@ public class AsNFunction extends AsNCompoundStatement {
 				
 				ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(call)));
 				branch.optFlags.add(OPT_FLAG.SYS_JMP);
-				branch.comment = new ASMComment("Relay to inherited " + call);
-				
-				func.instructions.add(branch);
+				func.instructions.add(branch.com("Relay to inherited " + call));
+
 				continue;
 			}
 			
@@ -232,27 +230,28 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			
 			/* Generate comment with function name and potential proviso types */
-			String com;
+			String comment;
 			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
-				com = "Function: " + f.path;
+				comment = "Function: " + f.path;
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
+				comment = ((k == 0)? "Function: " + f.path + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
 					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
-						com += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
+						comment += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
 						
-						if (z < f.provisosCalls.size() - 1) com += " | ";
+						if (z < f.provisosCalls.size() - 1) comment += " | ";
 					}
 				}
 				
-				if (com.endsWith(" | ")) com = com.substring(0, com.length() - 3);
+				if (comment.endsWith(" | ")) comment = comment.substring(0, comment.length() - 3);
 			}
-			label.comment = new ASMComment(com);
+
+			label.com(comment);
 			
 			/* Add function label */
 			func.instructions.add(label);
@@ -295,7 +294,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
 						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
-						init.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+						init.com("Push declaration on stack, referenced by addressof.");
 
 						/* Only do it if variable was used */
 						if (d.last == null || !d.last.equals(d)) {
@@ -322,7 +321,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					if (hasRef) {
 						ASMVPushStack init = new ASMVPushStack(new VRegOp(i));
 						init.optFlags.add(OPT_FLAG.STRUCT_INIT);
-						init.comment = new ASMComment("Push declaration on stack, referenced by addressof.");
+						init.com("Push declaration on stack, referenced by addressof.");
 						
 						/* Only do it if variable was used */
 						if (d.last == null || !d.last.equals(d)) {
