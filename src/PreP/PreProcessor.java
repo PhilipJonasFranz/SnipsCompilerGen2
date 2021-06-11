@@ -1,19 +1,19 @@
 package PreP;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Exc.SNIPS_EXC;
 import Res.Const;
 import Res.Manager.RessourceManager;
 import Snips.CompilerDriver;
-import Util.Pair;
-import Util.Source;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
+import Util.Pair;
+import Util.Source;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PreProcessor {
 
@@ -61,9 +61,6 @@ public class PreProcessor {
 			while (!imports.isEmpty())
 				new Message("PRE0 -> Imported library " + imports.remove(0), LogPoint.Type.INFO);
 
-		for (LineObject lineObject : this.process)
-			lineObject.line = lineObject.line.replaceAll("__EN_SID", "" + !CompilerDriver.disableStructSIDHeaders);
-		
 		return this.process;
 	}
 	

@@ -27,7 +27,6 @@ import Imm.TYPE.COMPOSIT.POINTER;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.TYPE;
 import Res.Const;
-import Snips.CompilerDriver;
 
 public class AsNStructSelect extends AsNExpression {
 	
@@ -226,11 +225,9 @@ public class AsNStructSelect extends AsNExpression {
 						injectIDRef(node, struct, (IDRef) sel1.selector);
 					}
 					else if (sel1.selector instanceof ArraySelect) {
-						if (!CompilerDriver.disableStructSIDHeaders) {
-							/* Add offset for header */
-							node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(4)));
-						}
-						
+						/* Add offset for header */
+						node.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(4)));
+
 						injectArraySelect(node, (ArraySelect) sel1.selector, r, map, st);
 					}
 					else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);

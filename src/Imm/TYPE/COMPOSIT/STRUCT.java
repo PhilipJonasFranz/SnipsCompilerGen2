@@ -133,7 +133,7 @@ public class STRUCT extends COMPOSIT {
 	 * @return The amount of bytes the field is offsetted or -1.
 	 */
 	public int getFieldByteOffset(NamespacePath path) {
-		int offset = (!CompilerDriver.disableStructSIDHeaders)? 1 : 0;
+		int offset = 1;
 		
 		for (int i = 0; i < this.typedef.getFields().size(); i++) {
 			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
@@ -174,7 +174,7 @@ public class STRUCT extends COMPOSIT {
 			sum += dec.getType().wordsize();
 		}
 		
-		return sum + ((!CompilerDriver.disableStructSIDHeaders)? 1 : 0);
+		return sum + 1;
 	}
 
 	public TYPE getCoreType() {

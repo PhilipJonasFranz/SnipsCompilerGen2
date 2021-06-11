@@ -221,7 +221,7 @@ namespace Map {
 			MapEntry<K, V>* def = resv(sizeof(MapEntry<K, V>));
 			
 			/* Place default value, skip key and padding */
-			*((void) def + sizeof(K) + (int) __EN_SID + 1) = defValue;
+			*((void) def + sizeof(K) + 2) = defValue;
 			
 			/* Create the hash map and initialize it */
 			return init<>(HashMap<K, V>::(storage, size, def));

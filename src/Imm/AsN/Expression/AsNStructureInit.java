@@ -39,21 +39,19 @@ public class AsNStructureInit extends AsNExpression {
 				int size = s.structType.wordsize();
 				
 				/* One word is covered by the SID */
-				if (!CompilerDriver.disableStructSIDHeaders) size--;
+				size--;
 				
 				/* Make space on stack */
 				init.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 				
 				st.pushDummies(size);
-				
-				if (!CompilerDriver.disableStructSIDHeaders) {
-					/* Load SID header */
-					s.structType.getTypedef().loadSIDInReg(init, REG.R0, s.structType.proviso);
-					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-					
-					/* Push dummy for SID header */
-					st.pushDummy();
-				}
+
+				/* Load SID header */
+				s.structType.getTypedef().loadSIDInReg(init, REG.R0, s.structType.proviso);
+				init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
+
+				/* Push dummy for SID header */
+				st.pushDummy();
 
 				return init.popCreatorStack();
 			}
@@ -137,12 +135,12 @@ public class AsNStructureInit extends AsNExpression {
 		}
 		
 		/* Delete pushed SID for first param if param is covered */
-		if (coveredParam && !CompilerDriver.disableStructSIDHeaders) {
+		if (coveredParam) {
 			node.instructions.add(new ASMAdd(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(4)));
 			st.pop();
 		}
 		
-		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
+		if (struct != null) {
 			/* Load SID header */
 			struct.getTypedef().loadSIDInReg(node, new RegOp(regs).reg, struct.proviso);
 			

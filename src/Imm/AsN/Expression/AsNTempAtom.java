@@ -16,14 +16,13 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.ASM.Util.COND;
-import Imm.ASM.Util.REG;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.REG;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.COMPOSIT.STRUCT;
-import Snips.CompilerDriver;
 
 public class AsNTempAtom extends AsNExpression {
 
@@ -39,7 +38,7 @@ public class AsNTempAtom extends AsNExpression {
 			def = ((STRUCT) a.inheritType).getTypedef();
 		}
 		
-		boolean pushSID = def != null && !CompilerDriver.disableStructSIDHeaders;
+		boolean pushSID = def != null;
 		
 		/* Free as many regs as needed */
 		if (a.base == null || a.base.getType().wordsize() == 1 && a.inheritType.wordsize() == 1)

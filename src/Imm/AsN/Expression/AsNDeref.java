@@ -14,7 +14,6 @@ import Imm.ASM.Util.REG;
 import Imm.ASM.VFP.Memory.ASMVLdr;
 import Imm.AST.Expression.Deref;
 import Imm.TYPE.COMPOSIT.STRUCT;
-import Snips.CompilerDriver;
 
 public class AsNDeref extends AsNExpression {
 
@@ -58,7 +57,7 @@ public class AsNDeref extends AsNExpression {
 				 * could be stored at this location. Since we load the struct, polymorphism is not available anymore, and thus we need to overwrite
 				 * the stored SID with the actual SID of the struct type.
 				 */
-				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct() && !CompilerDriver.disableStructSIDHeaders) {
+				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct()) {
 					STRUCT s = (STRUCT) a.getType().getCoreType();
 					s.getTypedef().loadSIDInReg(ref, new RegOp(target).reg, s.proviso);
 				}
