@@ -78,8 +78,8 @@ public class AsNStructureInit extends AsNExpression {
 		/* Compute all elements, push them push them with dummy value on the stack */
 		int regs = 0;
 		
-		boolean isVFP = elements.get(elements.size() - 1).getType().isFloat();
-		
+		boolean isVFP = !elements.isEmpty() && elements.get(elements.size() - 1).getType().isFloat();
+
 		for (int i = elements.size() - 1; i >= 0; i--) {
 			/* If elements are multiple atoms after another, the push can be grouped together in max three */
 			if (elements.get(i) instanceof Atom atom) {

@@ -95,9 +95,7 @@ public class Const {
 	public static final String ARGUMENT_DOES_NOT_MATCH_STRUCT_FIELD_TYPE = "Argument type does not match struct field (%d) type: %s vs %s";
 	
 	public static final String FUNCTION_IS_NOT_PART_OF_STRUCT_TYPE = "Function '%s' is not part of struct type %s";
-	
-	public static final String STRUCT_TYPEDEF_MUST_CONTAIN_FIELD = "Struct must contain at least one field";
-	
+
 	public static final String NESTED_FUNCTION_CANNOT_BE_ACCESSED = "Nested Function '%s' cannot be accessed";
 	
 	public static final String NESTED_CALL_BASE_IS_NOT_A_STRUCT = "Nested call base is not a STRUCT, actual %s";

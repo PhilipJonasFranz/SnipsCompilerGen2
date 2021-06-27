@@ -1,0 +1,55 @@
+SOURCE
+struct T {
+
+	int bar(int a, int b) {
+		return a * b;
+	}
+
+}
+
+int main() {
+	int temp = 0;
+
+	T t = T::();
+	temp = t.bar(10, 13);
+
+	return temp;
+}
+TESTCASES
+130
+OUTPUT
+.version 0
+
+.data
+T: .word 0
+T_vrelay: .word T_vtable
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+T_vtable:                                    /* VTable for T */
+    mov r12, #0
+    add pc, pc, r10
+    b T.bar
+
+.global T.bar
+T.bar:                                       /* Function: T.bar */
+    mul r0, r1, r2
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    ldr r0, .P1107546578_T                   /* Evaluate Expression */
+    push { r0 }
+    mov r2, #13
+    mov r1, #10
+    sub r0, fp, #4
+    lsr r0, r0, #2
+    bl T.bar                                 /* Call T.bar */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P1107546578_T: .word T

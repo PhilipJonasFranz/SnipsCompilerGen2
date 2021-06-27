@@ -70,7 +70,10 @@ public class AsNStructSelect extends AsNExpression {
 	}
 	
 	/**
-	 * Loads the absolute address of the target of the selection into R1.
+	 * Loads the absolute address of the target of the selection into R1. Does
+	 * not load any data, but uses the given struct select to compute the relative
+	 * address starting from the structure start, and adds the absolute memory
+	 * address that can be retrieved from the base of the selection.
 	 */
 	public static boolean injectAddressLoader(AsNNode node, StructSelect select, RegSet r, MemoryMap map, StackSet st, boolean addressLoader) throws CGEN_EXC {
 		
@@ -254,9 +257,9 @@ public class AsNStructSelect extends AsNExpression {
 				}
 			}
 			
-			if (selection instanceof StructSelect) 
+			if (selection instanceof StructSelect sel1)
 				/* Keep selecting */
-				sel0 = (StructSelect) sel0.selection;
+				sel0 = sel1;
 			else 
 				/* Base Case reached */
 				break;

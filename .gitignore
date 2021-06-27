@@ -45,3 +45,6 @@ doc/~$ips Documentation.docx
 *.s
 
 *.exe
+release/META-INF/
+
+out/

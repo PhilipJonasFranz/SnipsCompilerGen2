@@ -59,7 +59,7 @@ public class AsNDeref extends AsNExpression {
 				 */
 				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct()) {
 					STRUCT s = (STRUCT) a.getType().getCoreType();
-					s.getTypedef().loadSIDInReg(ref, new RegOp(target).reg, s.proviso);
+					s.getTypedef().loadSIDInReg(ref, REG.toReg(target), s.proviso);
 				}
 				else {
 					ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));

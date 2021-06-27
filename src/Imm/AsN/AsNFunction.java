@@ -485,10 +485,10 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 			
 			ASMLabel singleWordSkip = LabelUtil.getLabel();
-			if (f.getReturnType().wordsize() == 1 && f.signals()) 
+			if (f.getReturnType().wordsize() == 1 && f.signals())
 				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(singleWordSkip)));
-			
-			
+
+
 			if (f.getReturnType().wordsize() > 1 || f.signals()) {
 				if (f.signals() && f.getReturnType().wordsize() > 1) {
 					/* 
@@ -579,8 +579,8 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (ins instanceof ASMStackOp stackOp) {
 				if (stackOp.op0 != null && stackOp.op0.reg == REG.FP) {
 					if (stackOp.op1 instanceof PatchableImmOp op) {
-
-						/* Patch the offset for parameters because they are located under the pushed regs,
+						/*
+						 * Patch the offset for parameters because they are located under the pushed regs,
 						 * dont patch local data since its located above the pushed regs.
 						 */
 						if (op.dir == PATCH_DIR.UP) {
@@ -629,8 +629,8 @@ public class AsNFunction extends AsNCompoundStatement {
 		List<REG> used = new ArrayList();
 		
 		this.instructions.forEach(x -> {
-			if (x instanceof ASMMov) {
-				REG reg = ((ASMMov) x).target.reg;
+			if (x instanceof ASMMov mov) {
+				REG reg = mov.target.reg;
 				
 				boolean include = !reg.isOperandReg() && !reg.isSpecialReg();
 				if (include && !used.contains(reg)) used.add(reg);
@@ -645,8 +645,8 @@ public class AsNFunction extends AsNCompoundStatement {
 	 * as a location.
 	 */
 	public List<Pair<Declaration, Integer>> getParameterMapping() {
-		int r = 0;
-		int s = 0;
+		int r = 0; // Counts the amount of used registers
+		int s = 0; // Counts the amount of used VFP registers
 		
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		

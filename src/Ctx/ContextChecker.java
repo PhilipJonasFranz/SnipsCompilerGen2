@@ -504,10 +504,6 @@ public class ContextChecker {
 			
 			if (!this.structTypedefs.contains(e))
 				this.structTypedefs.add(e);
-			
-			/* Make sure at least one field is in the struct */
-			if (e.getFields().isEmpty())
-				throw new CTEX_EXC(Const.STRUCT_TYPEDEF_MUST_CONTAIN_FIELD);
 		}
 		
 		STRUCT.useProvisoFreeInCheck = useProvisoFree;
@@ -657,7 +653,7 @@ public class ContextChecker {
 			throw new CTEX_EXC(Const.MISSMATCHING_NUMBER_OF_PROVISOS, e.structType.getTypedef().proviso.size(), e.structType.proviso.size());
 		
 		/* Check if the first element of the call is the super constructor */
-		if (e.elements.get(0) instanceof InlineCall call) {
+		if (!e.elements.isEmpty() && e.elements.get(0) instanceof InlineCall call) {
 			/* Calls to super constructor */
 			if (call.path.build().equals("super")) {
 				
@@ -708,7 +704,7 @@ public class ContextChecker {
 		 * It it is not a temp atom, check the first element here so in the 
 		 * line after this line getType() can be called safely 
 		 */
-		if (!(e.elements.get(0) instanceof TempAtom))
+		if (!(e.elements.isEmpty() || e.elements.get(0) instanceof TempAtom))
 			e.elements.get(0).check(this);
 		
 		/* Check that type that is covering is a struct type */
