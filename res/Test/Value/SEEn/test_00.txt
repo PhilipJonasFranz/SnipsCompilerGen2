@@ -1,6 +1,8 @@
 SOURCE
 #@ requires x >= 0 && y >= 0
 #@
+#@ ensures \result >= 0
+#@
 #@ returns \old(y) < \old(x) : \old(x) - \old(y)
 #@ returns true : \old(y) - \old(x)
 int dist(int x, int y) {

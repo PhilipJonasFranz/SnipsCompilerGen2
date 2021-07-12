@@ -103,6 +103,8 @@ public class TestDriver {
 		CompilerDriver.pruneModules = true;
 		CompilerDriver.useExperimentalOptimizer = true;
 		CompilerDriver.useDefaultVersionID = false;
+
+		CompilerDriver.enableSEEn = true;
 		
 		List<String> paths = new ArrayList();
 		

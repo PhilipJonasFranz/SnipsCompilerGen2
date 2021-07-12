@@ -1,11 +1,13 @@
 package SEEn.AnnotationPar;
 
+
 import Exc.PARS_EXC;
-import Imm.AST.Expression.OperatorExpression;
+import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.SyntaxElement;
+import Imm.TYPE.PRIMITIVES.BOOL;
+import Imm.TYPE.PRIMITIVES.INT;
 import Par.Token;
-import SEEn.Imm.Formula.*;
-import SEEn.Imm.Term.DLTerm;
+import SEEn.Imm.DLTerm.*;
 import SEEn.SEState;
 import Util.ASTDirective;
 import Util.Source;
@@ -39,22 +41,22 @@ public class SEAnnotationParser {
             /* Extract tokens from AST Annotation from SyntaxElement */
             if (property.isPresent()) {
                 Map.Entry<String, Object> entry = property.get();
-                if (entry.getValue() instanceof ArrayList) {
+                if (entry.getValue() instanceof ArrayList)
                     this.tokens = (List<Token>) entry.getValue();
-
-                    System.out.println(tokens.toString());
-                }
             }
 
             if (!tokens.isEmpty()) current = tokens.remove(0);
 
             /* Start to parse and process the current annotation */
-            if (current != null) this.parse();
+            if (current != null) this.process();
         }
     }
 
-    public void parse() throws PARS_EXC {
+    public void process() throws PARS_EXC {
         accept(Token.TokenType.AT);
+
+        /* Was just a placeholder line */
+        if (tokens.isEmpty()) return;
 
         Token identifier = accept(Token.TokenType.IDENTIFIER);
 
@@ -63,21 +65,27 @@ public class SEAnnotationParser {
          * of the current state, since it is a precondition.
          */
         if (identifier.spelling().equals("requires")) {
-            FAbstr formula = parseFormula();
-            if (this.state.pathCondition instanceof FAnd and) and.operands.add(formula);
-            else this.state.pathCondition = new FAnd(this.state.pathCondition, formula);
+            DLTerm formula = parse();
+            this.state.addToPathCondition(formula);
         }
         /*
          * The returns condition adds the parsed formula
          */
         else if (identifier.spelling().equals("returns")) {
-            FAbstr formula = parseFormula();
-            DLTerm term = parseTerm();
+            DLTerm formula = parse();
+            accept(Token.TokenType.COLON);
+            DLTerm term = parse();
 
+            /* formula -> term : If condition of returns holds the term must be equal to the returned value */
+            this.state.addToPostCondition(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("return"), COMPARATOR.EQUAL)));
+        }
+        /*
+         * Ensures that the formula holds in the final state
+         */
+        else if (identifier.spelling().equals("ensures")) {
+            DLTerm formula = parse();
 
-
-            if (this.state.pathCondition instanceof FAnd and) and.operands.add(formula);
-            else this.state.pathCondition = new FAnd(this.state.pathCondition, formula);
+            this.state.addToPostCondition(formula);
         }
     }
 
@@ -96,42 +104,42 @@ public class SEAnnotationParser {
         return old;
     }
 
-    public FAbstr parseFormula() throws PARS_EXC {
-        return parseFOr();
+    public DLTerm parse() throws PARS_EXC {
+        return parseCmp();
     }
 
-    public FAbstr parseFCmp() throws PARS_EXC {
-        FAbstr left = this.parseFOr();
+    public DLTerm parseCmp() throws PARS_EXC {
+        DLTerm left = this.parseOr();
 
         if (current.type().group() == Token.TokenType.TokenGroup.COMPARE) {
             Token cmpT = current;
 
-            FCmp cmp = null;
+            DLCmp cmp = null;
 
             Source source = current.source();
             if (current.type() == Token.TokenType.CMPEQ) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.EQUAL, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.EQUAL);
             }
             else if (current.type() == Token.TokenType.CMPNE) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.NOT_EQUAL, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.NOT_EQUAL);
             }
             else if (current.type() == Token.TokenType.CMPGE) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.GREATER_SAME, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.GREATER_SAME);
             }
             else if (current.type() == Token.TokenType.CMPGT) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.GREATER_THAN, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.GREATER_THAN);
             }
             else if (current.type() == Token.TokenType.CMPLE) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.LESS_SAME, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.LESS_SAME);
             }
             else if (current.type() == Token.TokenType.CMPLT) {
                 accept();
-                cmp = new FCmp(left, this.parseFOr(), COMPARATOR.LESS_THAN, source);
+                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.LESS_THAN);
             }
 
             left = cmp;
@@ -140,43 +148,55 @@ public class SEAnnotationParser {
         return left;
     }
 
-    public FAbstr parseFOr() throws PARS_EXC {
-        FAbstr left = this.parseFAnd();
+    public DLTerm parseOr() throws PARS_EXC {
+        DLTerm left = this.parseAnd();
 
         while (current.type() == Token.TokenType.OR) {
             accept();
-            left = new FOr(left, this.parseFAnd());
+            left = new DLOr(left, this.parseAnd());
         }
 
         return left;
     }
 
-    public FAbstr parseFAnd() throws PARS_EXC {
-        FAbstr left = this.parseFAtom();
+    public DLTerm parseAnd() throws PARS_EXC {
+        DLTerm left = this.parseAtom();
 
         while (current.type() == Token.TokenType.AND) {
             accept();
-            left = new FAnd(left, this.parseFAnd());
+            left = new DLAnd(left, this.parseAnd());
         }
 
         return left;
     }
 
-    public FAbstr parseFAtom() throws PARS_EXC {
+    public DLTerm parseAtom() throws PARS_EXC {
         if (current.type() == Token.TokenType.BOOLLIT) {
-            return new FSingleton(Boolean.parseBoolean(accept().spelling()));
+            return new DLAtom(new BOOL(accept().spelling()));
+        }
+        else if (current.type() == Token.TokenType.INTLIT) {
+            return new DLAtom(new INT(accept().spelling()));
         }
         else if (current.type() == Token.TokenType.BACKSL) {
             accept();
 
-            Token identifier = accept(Token.TokenType.IDENTIFIER);
+            Token name = accept(Token.TokenType.IDENTIFIER);
 
-            return new FBind(identifier.spelling());
+            if (current.type() == Token.TokenType.LPAREN) {
+                accept();
+                Token identifier = accept(Token.TokenType.IDENTIFIER);
+                accept(Token.TokenType.RPAREN);
+
+                return new DLBind(name.spelling(), identifier.spelling());
+            }
+            else return new DLBind(name.spelling(), null);
         }
-    }
+        else if (current.type() == Token.TokenType.IDENTIFIER) {
+            Token identifier = accept();
+            return new DLVariable(identifier.spelling());
+        }
 
-    public DLTerm parseTerm() {
-
+        throw new PARS_EXC(current.source(), current.type(), Token.TokenType.BOOLLIT, Token.TokenType.IDENTIFIER);
     }
 
 }
