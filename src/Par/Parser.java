@@ -178,7 +178,7 @@ public class Parser {
 			done++;
 			this.progress.incProgress((double) done / this.toGo);
 		}
-		
+
 		Token old = current;
 		if (!tokenStream.isEmpty()) {
 			current = tokenStream.get(0);
@@ -198,7 +198,7 @@ public class Parser {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF, false);
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
@@ -209,7 +209,7 @@ public class Parser {
 		return program;
 	}
 	
-	private List<SyntaxElement> parseProgramElements(TokenType close) throws PARS_EXC {
+	private List<SyntaxElement> parseProgramElements(TokenType close, boolean singleOnly) throws PARS_EXC {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		boolean push = true;
@@ -231,7 +231,7 @@ public class Parser {
 				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
 					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 					
-					Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+					Optional<Entry<String, Object>> first = dir.properties().entrySet().stream().findFirst();
 					
 					if (first.isPresent()) {
 						/* 
@@ -265,6 +265,8 @@ public class Parser {
 					}
 				}
 			}
+
+			if (elements.size() == 1 && singleOnly) break;
 		}
 		
 		return elements;
@@ -279,7 +281,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE, false);
 		
 		this.namespaces.pop();
 		
@@ -290,7 +292,25 @@ public class Parser {
 	
 	private ASTDirective parseASTAnnotation() throws PARS_EXC {
 		accept(TokenType.DIRECTIVE);
-		
+
+		/*
+		 * Special handling for SE-Properties.
+		 */
+		if (current.type == TokenType.AT) {
+
+			List<Token> annotationTokens = new ArrayList<>();
+
+			int line = current.source.row;
+			while (current.type != TokenType.EOF && current.source.row == line)
+				annotationTokens.add(accept());
+
+			DIRECTIVE type = DIRECTIVE.SE_PROPERTY;
+			HashMap<String, Object> arguments = new HashMap();
+			arguments.put("tokens", annotationTokens);
+
+			return new ASTDirective(type, arguments);
+		}
+
 		Token type = accept(TokenType.IDENTIFIER);
 		DIRECTIVE type0 = null;
 		
@@ -300,7 +320,7 @@ public class Parser {
 			throw new SNIPS_EXC("Unknown directive: '" + type.spelling + "', " + type.source.getSourceMarker());
 		}
 		
-		HashMap<String, String> arguments = new HashMap();
+		HashMap<String, Object> arguments = new HashMap();
 		
 		while (current.source.row == type.source.row) {
 			String key = accept().spelling;
@@ -487,28 +507,28 @@ public class Parser {
 				/* Declaration */
 				def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
 			else {
-				/* Nested function */
-				MODIFIER m = this.parseModifier();
-				
-				TYPE type = this.parseType();
-				
-				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false, true);
-				
-				/* Insert Struct Name */
-				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
-				
-				if (f.modifier != MODIFIER.STATIC) {
-					/* 
-					 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
-					 * of a header, that we use the local variable 'head', that holds a reference to it.
-					 * This is important because later when context checking, the correct struct typedef 
-					 * reference is present and type comparisons work accordingly. 
-					 */
-					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
-					f.parameters.add(0, self);
+
+				List<SyntaxElement> elements = parseProgramElements(TokenType.RBRACE, true);
+
+				if (!elements.isEmpty()) {
+					Function f = (Function) elements.get(0);
+
+					/* Insert Struct Name */
+					f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+
+					if (f.modifier != MODIFIER.STATIC) {
+						/*
+						 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
+						 * of a header, that we use the local variable 'head', that holds a reference to it.
+						 * This is important because later when context checking, the correct struct typedef
+						 * reference is present and type comparisons work accordingly.
+						 */
+						Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
+						f.parameters.add(0, self);
+					}
+
+					def.functions.add(f);
 				}
-				
-				def.functions.add(f);
 			}
 		}
 		

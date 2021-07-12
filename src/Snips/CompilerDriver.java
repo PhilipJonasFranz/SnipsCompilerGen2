@@ -27,6 +27,7 @@ import PreP.PreProcessor.LineObject;
 import Res.Manager.FileUtil;
 import Res.Manager.RessourceManager;
 import Res.Manager.TranslationUnit;
+import SEEn.SEEngine;
 import Util.*;
 import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
@@ -68,6 +69,7 @@ public class CompilerDriver {
 		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
 		useExperimentalOptimizer =		false,	/* If true, new and potentially buggy opt features are used.	*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
+		enableSEEn = 					false,	/* Enables the SE-Verifiction System SEEn.			 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
 		useLinter = 					false,	/* The linter pipeline stage is run.							*/
 		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
@@ -101,6 +103,7 @@ public class CompilerDriver {
 		NAMM("Namespace Manager"),
 		CTEX("Context Checker"),
 		LINT("Linter"),
+		SEEN("SE-Verification"),
 		OPT0("AST Optimizer"),
 		CGEN("Code Generation"),
 		OPT1("ASM Optimizer");
@@ -299,7 +302,10 @@ public class CompilerDriver {
 
 				/* ---< LINTER >--- */
 				if (useLinter) STAGE_LINT(AST);
-				
+
+				/* ---< LINTER >--- */
+				if (enableSEEn) STAGE_SEEN((Program) AST);
+
 				if (imm) AST.print(4, true);
 				
 						/* ---< AST OPTIMIZER >--- */
@@ -662,6 +668,16 @@ public class CompilerDriver {
 		lnt.report();
 		return AST;
 	}
+
+	private static SyntaxElement STAGE_SEEN(Program AST) throws PARS_EXC {
+		currentStage = PIPE_STAGE.SEEN;
+		ProgressMessage seen_progress = new ProgressMessage("SEEN -> Starting", 30, LogPoint.Type.INFO);
+		SEEngine seEngine = new SEEngine(AST);
+		seEngine.interpret();
+
+		seen_progress.finish();
+		return AST;
+	}
 	
 	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) {
 		if (useASTOptimizer) {
@@ -810,6 +826,7 @@ public class CompilerDriver {
 					useASMOptimizer = false;
 				}
 				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
+				else if (args [i].equals("-v")) 	enableSEEn = true;
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-O")) 	buildObjectFileOnly = true;
@@ -863,6 +880,7 @@ public class CompilerDriver {
 				"-opt1     : Disable ASM Optimizer",
 				"-opt      : Disable code optimizers",
 				"-ofs      : Optimize for filesize, slight performance penalty",
+				"-v        : Enable Symbolic-Execution Verification Pass",
 				"-rov      : Disable visibility modifiers",
 				"-O        : Build object file only, required additional linking",
 				"-r        : Re-build all changed required modules and save them",

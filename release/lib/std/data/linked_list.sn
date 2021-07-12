@@ -32,6 +32,8 @@ namespace List {
 		}
 		
 		shared void set(int i, T value) {
+			if (i < 0 || i >= self->size) return;
+			
 			auto node = self->head;
 			while (i != 0) {
 				if (node->next == null) return;

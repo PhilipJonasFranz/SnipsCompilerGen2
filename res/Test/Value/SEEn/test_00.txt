@@ -1,0 +1,51 @@
+SOURCE
+#@ requires x >= 0 && y >= 0
+#@
+#@ returns \old(y) < \old(x) : \old(x) - \old(y)
+#@ returns true : \old(y) - \old(x)
+int dist(int x, int y) {
+	if (y < x) {
+	    int tmp = y;
+	    y = x;
+	    x = tmp;
+	}
+	return y - x;
+}
+
+#@ ensures \result >= 0
+int main() {
+	return dist(6, 8);
+}
+TESTCASES
+2
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global dist
+dist:                                        /* Function: dist */
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
+    mov r4, r1
+    mov r3, r0
+    cmp r1, r0
+    bge dist.L0
+    mov r5, r4
+    mov r4, r3
+    mov r3, r5
+dist.L0: 
+    sub r0, r4, r3
+    ldmfd sp!, {r3-r5}
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    mov r1, #8
+    mov r0, #6
+    b dist                                   /* Call dist */

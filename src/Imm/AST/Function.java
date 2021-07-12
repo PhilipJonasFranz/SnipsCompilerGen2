@@ -18,6 +18,8 @@ import Opt.AST.ASTOptimizer;
 import Res.Const;
 import Snips.CompilerDriver;
 import Tools.ASTNodeVisitor;
+import Util.Logging.LogPoint;
+import Util.Logging.Message;
 import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
@@ -559,6 +561,13 @@ public class Function extends CompoundStatement {
 	}
 	
 	public String buildInheritedCallLabel(List<TYPE> provisos) {
+		if (this.inheritLink == null) {
+			new Message("Failed to build call label for function '" + this.path.build() + "', " + this.getSource().getSourceMarker(), LogPoint.Type.FAIL);
+			new Message("Try to compile using the -R parameter.", LogPoint.Type.FAIL);
+			new Exception().printStackTrace();
+			throw new SNIPS_EXC("Cannot build call label for function '" + this.path.build() + "'");
+		}
+
 		NamespacePath path = this.inheritLink.path;
 		
 		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */

@@ -15,6 +15,7 @@ import Util.Source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -193,11 +194,22 @@ public abstract class SyntaxElement {
 	public boolean hasDirective(DIRECTIVE annotation) {
 		return this.activeAnnotations.stream().anyMatch(x -> x.type() == annotation);
 	}
-	
+
+	/**
+	 * Returns the first ASTAnnotation that matches the given directive,
+	 * or return null if none is found.
+	 */
 	public ASTDirective getDirective(DIRECTIVE annotation) {
 		for (ASTDirective x : this.activeAnnotations)
 			if (x.type() == annotation) return x;
 		return null;
+	}
+
+	/**
+	 * Returns all ASTAnnotations that match the given directive.
+	 */
+	public List<ASTDirective> getDirectives(DIRECTIVE annotation) {
+		return this.activeAnnotations.stream().filter(x -> x.type() == annotation).collect(Collectors.toList());
 	}
 	
 } 

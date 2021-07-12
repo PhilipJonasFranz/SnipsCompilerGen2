@@ -237,7 +237,7 @@ public class AsNBody extends AsNNode {
 									ASMBranch fBranch;
 
 									/* Inherited Function */
-									if (f.body == null)
+									if (f.body == null && f.inheritLink != null)
 										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildInheritedCallLabel(mapping.getProvidedProvisos()))));
 									else
 										fBranch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(f.buildCallLabel(mapping.getProvidedProvisos()))));
