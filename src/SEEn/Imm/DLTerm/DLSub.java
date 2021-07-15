@@ -1,6 +1,5 @@
 package SEEn.Imm.DLTerm;
 
-import Imm.TYPE.PRIMITIVES.BOOL;
 import SEEn.SEState;
 import Tools.DLTermModifier;
 import Tools.DLTermVisitor;
@@ -9,38 +8,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DLAnd extends DLTerm {
+public class DLSub extends DLTerm {
 
     public List<DLTerm> operands = new ArrayList<>();
 
-    public DLAnd(List<DLTerm> operands) {
-        for (DLTerm op : operands) {
-            if (op instanceof DLAtom atom)
-                if (atom.value instanceof BOOL b && b.value)
-                    continue;
-
-            this.operands.add(op);
-        }
+    public DLSub(List<DLTerm> operands) {
+        this.operands.addAll(operands);
     }
 
-    public DLAnd(DLTerm...operands) {
-        for (DLTerm op : operands) {
-            if (op instanceof DLAtom atom)
-                if (atom.value instanceof BOOL b && b.value)
-                    continue;
-
+    public DLSub(DLTerm...operands) {
+        for (DLTerm op : operands)
             this.operands.add(op);
-        }
     }
 
     public boolean isEqual(DLTerm term) {
-        if (term instanceof DLAnd and) {
-            if (this.operands.size() != and.operands.size()) return false;
+        if (term instanceof DLSub sub) {
+            if (this.operands.size() != sub.operands.size()) return false;
 
             boolean equal = true;
 
             for (int i = 0; i < this.operands.size(); i++)
-                equal &= this.operands.get(i).isEqual(and.operands.get(i));
+                equal &= this.operands.get(i).isEqual(sub.operands.get(i));
 
             return equal;
         }
@@ -48,17 +36,17 @@ public class DLAnd extends DLTerm {
     }
 
     public boolean eval(SEState state) {
-        for (DLTerm term : operands)
-            if (!term.eval(state)) return false;
-        return true;
+        for (DLTerm formula : operands)
+            if (formula.eval(state)) return true;
+        return false;
     }
 
     public DLTerm clone() {
-        return new DLAnd(this.operands.stream().map(DLTerm::clone).collect(Collectors.toList()));
+        return new DLSub(this.operands.stream().map(DLTerm::clone).collect(Collectors.toList()));
     }
 
     public String toString() {
-        return "(" + this.operands.stream().map(DLTerm::toString).collect(Collectors.joining(" && ")) + ")";
+        return "(" + this.operands.stream().map(DLTerm::toString).collect(Collectors.joining(" - ")) + ")";
     }
 
     public <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor) {

@@ -3,6 +3,7 @@ package Imm.AST;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -114,7 +115,24 @@ public abstract class SyntaxElement {
 	 * @param Current printing depth, initially 0.
 	 */
 	public abstract List<String> codePrint(int d);
-	
+
+	public String codePrintSingle() {
+		List<String> printList = this.codePrint(0);
+
+		if (printList == null && this instanceof Expression e) {
+			printList = List.of(e.codePrint());
+		}
+
+		if (printList != null && !printList.isEmpty()) {
+			String print = printList.get(0);
+			if (print.endsWith("{"))
+				print = print.substring(0, print.length() - 1);
+
+			return print.trim();
+		}
+		else return this.getClass().getSimpleName();
+	}
+
 	/**
 	 * Returns the source at which this syntax element was parsed. The Source holds the
 	 * approximated source file location from which this AST node was parsed.

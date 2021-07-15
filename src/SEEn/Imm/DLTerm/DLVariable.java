@@ -1,6 +1,11 @@
 package SEEn.Imm.DLTerm;
 
 import SEEn.SEState;
+import Tools.DLTermModifier;
+import Tools.DLTermVisitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DLVariable extends DLTerm {
 
@@ -8,10 +13,6 @@ public class DLVariable extends DLTerm {
 
     public DLVariable(String name) {
         this.name = name;
-    }
-
-    public boolean isEqual() {
-        return false;
     }
 
     public boolean isEqual(DLTerm term) {
@@ -28,6 +29,17 @@ public class DLVariable extends DLTerm {
 
     public String toString() {
         return this.name;
+    }
+
+    public <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor) {
+        List<T> result = new ArrayList<>();
+        if (visitor.visit(this)) result.add((T) this);
+
+        return result;
+    }
+
+    public <T extends DLTerm> void replace(DLTermModifier<T> visitor) {
+        return;
     }
 
 }

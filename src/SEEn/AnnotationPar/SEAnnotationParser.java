@@ -10,7 +10,6 @@ import Par.Token;
 import SEEn.Imm.DLTerm.*;
 import SEEn.SEState;
 import Util.ASTDirective;
-import Util.Source;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +66,7 @@ public class SEAnnotationParser {
         if (identifier.spelling().equals("requires")) {
             DLTerm formula = parse();
             this.state.addToPathCondition(formula);
+            this.state.getPrecondition().operands.add(formula);
         }
         /*
          * The returns condition adds the parsed formula
@@ -105,41 +105,61 @@ public class SEAnnotationParser {
     }
 
     public DLTerm parse() throws PARS_EXC {
-        return parseCmp();
+        return parseOr();
+    }
+
+    public DLTerm parseOr() throws PARS_EXC {
+        DLTerm left = this.parseAnd();
+
+        while (current.type() == Token.TokenType.OR) {
+            accept();
+            left = new DLOr(left, this.parseOr());
+        }
+
+        return left;
+    }
+
+    public DLTerm parseAnd() throws PARS_EXC {
+        DLTerm left = this.parseCmp();
+
+        while (current.type() == Token.TokenType.AND) {
+            accept();
+            left = new DLAnd(left, this.parseAnd());
+        }
+
+        return left;
     }
 
     public DLTerm parseCmp() throws PARS_EXC {
-        DLTerm left = this.parseOr();
+        DLTerm left = this.parseAddSub();
 
         if (current.type().group() == Token.TokenType.TokenGroup.COMPARE) {
-            Token cmpT = current;
 
             DLCmp cmp = null;
 
-            Source source = current.source();
             if (current.type() == Token.TokenType.CMPEQ) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.EQUAL);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.EQUAL);
             }
             else if (current.type() == Token.TokenType.CMPNE) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.NOT_EQUAL);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.NOT_EQUAL);
             }
             else if (current.type() == Token.TokenType.CMPGE) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.GREATER_SAME);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.GREATER_SAME);
             }
             else if (current.type() == Token.TokenType.CMPGT) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.GREATER_THAN);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.GREATER_THAN);
             }
             else if (current.type() == Token.TokenType.CMPLE) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.LESS_SAME);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.LESS_SAME);
             }
             else if (current.type() == Token.TokenType.CMPLT) {
                 accept();
-                cmp = new DLCmp(left, this.parseOr(), COMPARATOR.LESS_THAN);
+                cmp = new DLCmp(left, this.parseAddSub(), COMPARATOR.LESS_THAN);
             }
 
             left = cmp;
@@ -148,23 +168,18 @@ public class SEAnnotationParser {
         return left;
     }
 
-    public DLTerm parseOr() throws PARS_EXC {
-        DLTerm left = this.parseAnd();
-
-        while (current.type() == Token.TokenType.OR) {
-            accept();
-            left = new DLOr(left, this.parseAnd());
-        }
-
-        return left;
-    }
-
-    public DLTerm parseAnd() throws PARS_EXC {
+    public DLTerm parseAddSub() throws PARS_EXC {
         DLTerm left = this.parseAtom();
 
-        while (current.type() == Token.TokenType.AND) {
-            accept();
-            left = new DLAnd(left, this.parseAnd());
+        while (current.type() == Token.TokenType.ADD || current.type() == Token.TokenType.SUB) {
+            if (current.type() == Token.TokenType.ADD) {
+                accept();
+                left = new DLAdd(left, this.parseAddSub());
+            }
+            else {
+                accept();
+                left = new DLSub(left, this.parseAddSub());
+            }
         }
 
         return left;

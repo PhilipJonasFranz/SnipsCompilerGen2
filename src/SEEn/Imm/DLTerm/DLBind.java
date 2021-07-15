@@ -1,6 +1,11 @@
 package SEEn.Imm.DLTerm;
 
 import SEEn.SEState;
+import Tools.DLTermModifier;
+import Tools.DLTermVisitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DLBind extends DLTerm {
 
@@ -40,4 +45,16 @@ public class DLBind extends DLTerm {
             s += "(" + this.id + ")";
         return s;
     }
+
+    public <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor) {
+        List<T> result = new ArrayList<>();
+        if (visitor.visit(this)) result.add((T) this);
+
+        return result;
+    }
+
+    public <T extends DLTerm> void replace(DLTermModifier<T> visitor) {
+        return;
+    }
+
 }

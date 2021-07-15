@@ -15,13 +15,13 @@ public class SEState {
 
     public SyntaxElement programCounter;
 
-    public DLTerm pathCondition;
-
-    public DLTerm postcondition;
+    private DLTerm pathCondition, postcondition;
 
     public SEState parent;
 
-    public List<SEState> forked = new ArrayList<>();
+    private DLAnd precondition = new DLAnd();
+
+    private List<SEState> forked = new ArrayList<>();
 
     public int depth = 0;
 
@@ -48,6 +48,8 @@ public class SEState {
 
     public SEState fork() {
         SEState child = this.clone();
+        child.forked.clear();
+
         child.parent = this;
         child.depth = this.depth + 1;
         this.forked.add(child);
@@ -71,17 +73,42 @@ public class SEState {
         if (vars.endsWith(", ")) vars = vars.substring(0, vars.length() - 2);
         else vars = "-";
 
-        return "<" + this.programCounter.codePrint(0).get(0) + " : " + vars + " : [" + this.pathCondition.toString() + "] : [" + this.postcondition.toString() + "]>";
+        return "<" + ((this.programCounter == null)? "?" : this.programCounter.codePrintSingle()) + " : " + vars + " : [" + this.pathCondition.toString() + "] : [" + this.postcondition.toString() + "]>";
     }
 
     public void print() {
         for (int i = 0; i < this.depth; i++) System.out.print("    ");
-        System.out.println(this.toString());
+        System.out.println(this);
     }
 
-    public void printRec(int d) {
-        for (int i = 0; i < d; i++) System.out.print("    ");
-        System.out.println(this.toString());
+    public void printRec() {
+        for (int i = 0; i < this.depth; i++) System.out.print("    ");
+        System.out.println(this);
+        for (SEState state0 : this.forked)
+            state0.printRec();
     }
 
+    public DLTerm getPathCondition() {
+        return pathCondition;
+    }
+
+    public void setPathCondition(DLTerm pathCondition) {
+        this.pathCondition = pathCondition;
+    }
+
+    public DLTerm getPostCondition() {
+        return postcondition;
+    }
+
+    public void setPostCondition(DLTerm postcondition) {
+        this.postcondition = postcondition;
+    }
+
+    public DLAnd getPrecondition() {
+        return precondition;
+    }
+
+    public void setPrecondition(DLAnd precondition) {
+        this.precondition = precondition;
+    }
 }
