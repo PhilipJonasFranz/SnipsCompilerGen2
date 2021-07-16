@@ -18,6 +18,8 @@ import java.util.Optional;
 
 public class SEAnnotationParser {
 
+    private List<DLTerm> returns = new ArrayList<>();
+
     private SyntaxElement origin;
 
     private SEState state;
@@ -49,6 +51,12 @@ public class SEAnnotationParser {
             /* Start to parse and process the current annotation */
             if (current != null) this.process();
         }
+
+        /* One of the return statements is taken:
+         *
+         *      (cond1 -> result1) or (cond2 -> result2) or ...
+         */
+        if (!this.returns.isEmpty()) this.state.addToPostCondition(new DLOr(this.returns));
     }
 
     public void process() throws PARS_EXC {
@@ -77,7 +85,7 @@ public class SEAnnotationParser {
             DLTerm term = parse();
 
             /* formula -> term : If condition of returns holds the term must be equal to the returned value */
-            this.state.addToPostCondition(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("result"), COMPARATOR.EQUAL)));
+            this.returns.add(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("result"), COMPARATOR.EQUAL)));
         }
         /*
          * Ensures that the formula holds in the final state
