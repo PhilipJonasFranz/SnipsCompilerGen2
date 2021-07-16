@@ -3,6 +3,7 @@ package SEEn;
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.IDRef;
@@ -17,12 +18,15 @@ import SEEn.AnnotationPar.SEAnnotationParser;
 import SEEn.Imm.DLTerm.*;
 import SEEn.SMTSolver.DLTransform;
 import SEEn.SMTSolver.SMTSolver;
+import Util.Logging.Message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class SEEngine {
+
+    public final List<Message> report = new ArrayList<>();
 
     private final HashMap<Function, SEState> functionMap = new HashMap<>();
 
@@ -190,7 +194,8 @@ public class SEEngine {
         toProve = transform.inlineVariables(state, toProve);
 
         /* Make sure the postcondition holds in the current state */
-        SMTSolver.getInstance().prove(state, formula, toProve);
+        List<Message> report0 = SMTSolver.getInstance().solve(state, formula, toProve);
+        report.addAll(report0);
 
         /* No state returned here, marks leaf in execution tree */
         return new ArrayList();
@@ -201,6 +206,7 @@ public class SEEngine {
         else if (e instanceof Compare c) return interpretCompare(state, c);
         else if (e instanceof Sub s) return interpretSub(state, s);
         else if (e instanceof InlineCall i) return interpretInlineCall(state, i);
+        else if (e instanceof Atom a) return interpretAtom(state, a);
         throw new SNIPS_EXC("Cannot interpret expression '" + e.getClass().getSimpleName() + "'");
     }
 
@@ -215,23 +221,38 @@ public class SEEngine {
         return new DLSub(operands);
     }
 
-    public DLTerm interpretInlineCall(SEState state, InlineCall i) {
+    public DLTerm interpretInlineCall(SEState state, InlineCall ic) {
 
-        SEState fState = this.functionMap.get(i.calledFunction);
+        DLTransform transform = DLTransform.getInstance();
+
+        SEState fState = this.functionMap.get(ic.calledFunction);
 
         /* Make sure we fullfill the preconditions of the called function */
         DLTerm contractCondition = fState.getPrecondition();
-        SMTSolver.getInstance().prove(state, state.getPathCondition(), contractCondition);
+
+        /* Substitute the variables in the precondition with the values from the call */
+        for (int i = 0; i < ic.calledFunction.parameters.size(); i++) {
+            String varName = ic.calledFunction.parameters.get(i).path.build();
+            transform.substitute(contractCondition, new DLVariable(varName), interpretExpression(state, ic.parameters.get(i)));
+        }
+
+        /* Prove that this function call fullfills the required clauses in the method contract */
+        List<Message> report0 = SMTSolver.getInstance().solve(state, state.getPathCondition(), contractCondition);
+        report.addAll(report0);
 
         /* Add the postcondition of the function contract to the current path condition */
         state.addToPathCondition(fState.getPostCondition());
 
-        return new DLCall(i);
+        return new DLCall(ic);
     }
 
     public DLTerm interpretIDRef(SEState state, IDRef ref) {
         if (!state.variables.containsKey(ref.path.build())) throw new SNIPS_EXC("Unknown symbol: '" + ref.path.build() + "'");
         return state.variables.get(ref.path.build()).clone();
+    }
+
+    public DLTerm interpretAtom(SEState state, Atom a) {
+        return new DLAtom(a.getType().clone());
     }
 
 }

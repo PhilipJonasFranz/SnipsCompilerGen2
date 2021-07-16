@@ -49,6 +49,10 @@ public class DLAdd extends DLTerm {
         return "(" + this.operands.stream().map(DLTerm::toString).collect(Collectors.joining(" + ")) + ")";
     }
 
+    public DLTerm simplify() {
+        return this;
+    }
+
     public <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor) {
         List<T> result = new ArrayList<>();
         if (visitor.visit(this)) result.add((T) this);

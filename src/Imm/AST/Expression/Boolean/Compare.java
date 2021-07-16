@@ -1,9 +1,5 @@
 package Imm.AST.Expression.Boolean;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
@@ -14,6 +10,10 @@ import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Compare extends NFoldExpression {
 
@@ -34,6 +34,16 @@ public class Compare extends NFoldExpression {
 			if (this == COMPARATOR.NOT_EQUAL) comp = "!=";
 			
 			return comp;
+		}
+
+		public COMPARATOR negate() {
+			if (this == COMPARATOR.EQUAL) return COMPARATOR.NOT_EQUAL;
+			if (this == COMPARATOR.GREATER_SAME) return COMPARATOR.LESS_THAN;
+			if (this == COMPARATOR.GREATER_THAN) return COMPARATOR.LESS_SAME;
+			if (this == COMPARATOR.LESS_SAME) return COMPARATOR.GREATER_THAN;
+			if (this == COMPARATOR.LESS_THAN) return COMPARATOR.GREATER_SAME;
+			if (this == COMPARATOR.NOT_EQUAL) return COMPARATOR.EQUAL;
+			return null;
 		}
 	}
 	

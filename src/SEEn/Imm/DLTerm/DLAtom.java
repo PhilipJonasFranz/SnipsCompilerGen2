@@ -42,4 +42,8 @@ public class DLAtom extends DLTerm {
         return;
     }
 
+    public DLTerm simplify() {
+        return this;
+    }
+
 }

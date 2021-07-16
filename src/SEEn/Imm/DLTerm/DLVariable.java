@@ -42,4 +42,8 @@ public class DLVariable extends DLTerm {
         return;
     }
 
+    public DLTerm simplify() {
+        return this;
+    }
+
 }

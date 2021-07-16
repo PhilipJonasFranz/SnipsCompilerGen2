@@ -57,4 +57,8 @@ public class DLBind extends DLTerm {
         return;
     }
 
+    public DLTerm simplify() {
+        return this;
+    }
+
 }

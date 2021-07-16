@@ -3,8 +3,8 @@ SOURCE
 #@
 #@ ensures \result >= 0
 #@
-#@ returns \old(x) < \old(y) : \old(y) - \old(x)
-#@ returns true : \old(x) - \old(y)
+#@ returns \old(x) < \old(y) : y - x
+#@ returns \old(y) < \old(x) : x - y
 int dist(int x, int y) {
 	if (y < x) {
 	    int tmp = y;

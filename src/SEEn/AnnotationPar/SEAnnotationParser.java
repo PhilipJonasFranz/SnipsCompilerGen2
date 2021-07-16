@@ -77,7 +77,7 @@ public class SEAnnotationParser {
             DLTerm term = parse();
 
             /* formula -> term : If condition of returns holds the term must be equal to the returned value */
-            this.state.addToPostCondition(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("return"), COMPARATOR.EQUAL)));
+            this.state.addToPostCondition(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("result"), COMPARATOR.EQUAL)));
         }
         /*
          * Ensures that the formula holds in the final state

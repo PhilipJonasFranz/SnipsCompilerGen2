@@ -1,5 +1,6 @@
 package SEEn.Imm.DLTerm;
 
+import Imm.TYPE.PRIMITIVES.BOOL;
 import SEEn.SEState;
 import Tools.DLTermModifier;
 import Tools.DLTermVisitor;
@@ -46,6 +47,36 @@ public class DLNot extends DLTerm {
     public <T extends DLTerm> void replace(DLTermModifier<T> visitor) {
         this.operand.replace(visitor);
         this.operand = visitor.replace(this.operand);
+    }
+
+    public DLTerm simplify() {
+        this.operand = operand.simplify();
+
+        if (operand instanceof DLNot not) return not.operand;
+        else if (operand instanceof DLAnd and) {
+            DLOr or = new DLOr();
+            for (DLTerm term : and.operands) {
+                or.operands.add(new DLNot(term));
+            }
+            this.operand = or.simplify();
+        }
+        else if (operand instanceof DLOr or) {
+            DLAnd and = new DLAnd();
+            for (DLTerm term : or.operands) {
+                and.operands.add(new DLNot(term));
+            }
+            this.operand = and.simplify();
+        }
+        else if (this.operand instanceof DLAtom a && a.value instanceof BOOL b) {
+            if (b.value) return new DLAtom(new BOOL("false"));
+            else return new DLAtom(new BOOL("true"));
+        }
+        else if (this.operand instanceof DLCmp cmp) {
+            cmp.operator = cmp.operator.negate();
+            return cmp;
+        }
+
+        return this;
     }
 
 }

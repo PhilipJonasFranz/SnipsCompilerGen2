@@ -78,4 +78,28 @@ public class DLOr extends DLTerm {
         }
     }
 
+    public DLTerm simplify() {
+        for (int i = 0; i < this.operands.size(); i++) {
+            DLTerm op = this.operands.get(i);
+            op = op.simplify();
+
+            if (op instanceof DLAtom a && a.value instanceof BOOL b) {
+                if (!b.value) {
+                    this.operands.remove(i);
+                    i--;
+                    continue;
+                }
+                else {
+                    return new DLAtom(new BOOL("true"));
+                }
+            }
+
+            this.operands.set(i, op);
+        }
+
+        if (this.operands.isEmpty()) return new DLAtom(new BOOL("false"));
+
+        return this;
+    }
+
 }

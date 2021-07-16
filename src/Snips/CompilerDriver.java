@@ -676,6 +676,9 @@ public class CompilerDriver {
 		seEngine.interpret();
 
 		seen_progress.finish();
+
+		seEngine.report.forEach(x -> System.out.println(x.getMessage()));
+
 		return AST;
 	}
 	

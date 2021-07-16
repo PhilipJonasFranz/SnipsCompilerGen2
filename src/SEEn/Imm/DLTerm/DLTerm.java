@@ -16,6 +16,8 @@ public abstract class DLTerm {
 
     public abstract String toString();
 
+    public abstract DLTerm simplify();
+
     public abstract <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor);
 
     public abstract <T extends DLTerm> void replace(DLTermModifier<T> visitor);

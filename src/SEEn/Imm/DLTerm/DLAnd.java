@@ -78,4 +78,25 @@ public class DLAnd extends DLTerm {
         }
     }
 
+    public DLTerm simplify() {
+        for (int i = 0; i < this.operands.size(); i++) {
+            DLTerm op = this.operands.get(i);
+            op = op.simplify();
+
+            if (op instanceof DLAtom a && a.value instanceof BOOL b) {
+                if (b.value) {
+                    this.operands.remove(i);
+                    i--;
+                }
+                else {
+                    return new DLAtom(new BOOL("false"));
+                }
+            }
+        }
+
+        if (this.operands.isEmpty()) return new DLAtom(new BOOL("true"));
+
+        return this;
+    }
+
 }

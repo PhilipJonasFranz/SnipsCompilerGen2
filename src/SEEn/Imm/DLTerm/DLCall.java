@@ -43,4 +43,8 @@ public class DLCall extends DLTerm {
         return;
     }
 
+    public DLTerm simplify() {
+        return this;
+    }
+
 }

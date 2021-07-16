@@ -1,6 +1,7 @@
 package SEEn.Imm.DLTerm;
 
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
+import Imm.TYPE.PRIMITIVES.BOOL;
 import SEEn.SEState;
 import Tools.DLTermModifier;
 import Tools.DLTermVisitor;
@@ -62,6 +63,26 @@ public class DLCmp extends DLTerm {
 
         this.right.replace(visitor);
         this.right = visitor.replace(this.right);
+    }
+
+    public DLTerm simplify() {
+        if (this.operator == COMPARATOR.EQUAL && this.left.isEqual(this.right)) return new DLAtom(new BOOL("true"));
+        else if (this.left instanceof DLAtom a0 && this.right instanceof DLAtom a1) {
+            int l = a0.value.toInt(), r = a1.value.toInt();
+
+            boolean result = false;
+
+            if (this.operator == COMPARATOR.EQUAL) result = l == r;
+            else if (this.operator == COMPARATOR.NOT_EQUAL) result = l != r;
+            else if (this.operator == COMPARATOR.GREATER_SAME) result = l >= r;
+            else if (this.operator == COMPARATOR.LESS_SAME) result = l <= r;
+            else if (this.operator == COMPARATOR.GREATER_THAN) result = l > r;
+            else if (this.operator == COMPARATOR.LESS_THAN) result = l < r;
+
+            return new DLAtom(new BOOL(result + ""));
+        }
+
+        return this;
     }
 
 }
