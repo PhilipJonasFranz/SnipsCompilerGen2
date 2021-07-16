@@ -87,11 +87,14 @@ public class DLAnd extends DLTerm {
                 if (b.value) {
                     this.operands.remove(i);
                     i--;
+                    continue;
                 }
                 else {
                     return new DLAtom(new BOOL("false"));
                 }
             }
+
+            this.operands.set(i, op);
         }
 
         if (this.operands.isEmpty()) return new DLAtom(new BOOL("true"));

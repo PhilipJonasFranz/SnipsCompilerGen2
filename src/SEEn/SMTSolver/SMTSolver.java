@@ -11,6 +11,7 @@ import Util.Logging.Message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SMTSolver {
@@ -22,8 +23,13 @@ public class SMTSolver {
     }
 
     public List<Message> solve(SEState state, DLTerm formula, DLTerm toVerify) {
+        formula = formula.clone().simplify();
         toVerify = toVerify.clone();
+
         List<DLTerm> toProve = subs(state, formula, toVerify);
+
+        /* Simplify the formulas as much as possible */
+        toProve = toProve.stream().map(DLTerm::simplify).collect(Collectors.toList());
 
         List<DLTerm> duplicateFree = new ArrayList<>();
         for (DLTerm term : toProve) {
@@ -32,9 +38,6 @@ public class SMTSolver {
             }
         }
         toProve = duplicateFree;
-
-        /* Simplify the formulas as much as possible */
-        toProve = toProve.stream().map(DLTerm::simplify).collect(Collectors.toList());
 
         /* Generate report which formulas could not be proven */
         List<Message> report = new ArrayList<>();
@@ -45,8 +48,20 @@ public class SMTSolver {
             }
         });
 
-        if (!report.isEmpty())
-            report.add(0, new Message("In state '" + state.toString() + "', the formulas could not be proven: ", LogPoint.Type.FAIL, true));
+        if (!report.isEmpty()) {
+            report.add(0, new Message("In the state:", LogPoint.Type.FAIL, true));
+
+            report.add(1, new Message("    Condition " + formula.toString(), LogPoint.Type.FAIL, true));
+
+            String vars = "";
+            for (Map.Entry<String, DLTerm> var : state.variables.entrySet())
+                vars += var.getKey() + " = " + var.getValue().toString() + ", ";
+            if (vars.endsWith(", ")) vars = vars.substring(0, vars.length() - 2);
+            else vars = "-";
+
+            report.add(2, new Message("    Variables: " + vars, LogPoint.Type.FAIL, true));
+            report.add(3, new Message("The formula(s) could not be proven:", LogPoint.Type.FAIL, true));
+        }
 
         return report;
     }
