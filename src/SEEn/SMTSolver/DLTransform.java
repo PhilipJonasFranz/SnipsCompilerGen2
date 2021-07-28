@@ -20,8 +20,11 @@ public class DLTransform {
         return instance;
     }
 
-    public DLTerm substitute(DLTerm target, DLTerm replace, DLTerm with) {
-        DLTermModifier mod = x -> replace.weakerOrEqual(x)? with.clone() : x;
+    /**
+     * Substitute all occurrences of the replace term in the target term with the replacement term.
+     */
+    public DLTerm substitute(DLTerm target, DLTerm replace, DLTerm replacement) {
+        DLTermModifier mod = x -> replace.weakerOrEqual(x)? replacement.clone() : x;
 
         target.replace(mod);
         return mod.replace(target);
@@ -84,7 +87,7 @@ public class DLTransform {
                 if (var.name.startsWith("_")) {
                     return s;
                 }
-                else return state.variables.get(var.name).clone();
+                else if (state.variables.containsKey(var.name)) return state.variables.get(var.name).clone();
             }
             return s;
         };

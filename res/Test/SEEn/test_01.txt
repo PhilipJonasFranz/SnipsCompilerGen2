@@ -1,0 +1,58 @@
+SOURCE
+#@ requires n >= 0
+#@
+#@ ensures \result >= 0
+#@
+#@ returns true : \sum(i; i >= 0 && i < n; i)
+int sum(int n) {
+	int r = 0;
+
+	#@ invariant c >= 0 && c <= n && r == \sum(i; i >= 0 && i <= c; i)
+	#@ finally c == n
+	for (int c = 0; c <= n; c = c + 1) {
+	    r += c;
+	}
+
+	return r;
+}
+
+#@ ensures \result >= 0
+#@
+#@ returns true : 55
+int main() {
+	return sum(10);
+}
+TESTCASES
+55
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global sum
+sum:                                         /* Function: sum */
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
+    mov r5, #0
+    mov r4, #0
+    mov r3, r0
+sum.L1: 
+    cmp r5, r3
+    bgt sum.L2
+    add r4, r4, r5
+    add r5, r5, #1
+    b sum.L1
+sum.L2: 
+    mov r0, r4                               /* Evaluate Expression */
+    ldmfd sp!, {r3-r5}
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    mov r0, #10                              /* Evaluate Expression */
+    b sum                                    /* Call sum */

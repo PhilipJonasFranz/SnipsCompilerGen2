@@ -26,6 +26,8 @@ public class SEState {
      */
     public DLTerm pathCondition;
 
+    public DLTerm invariantCondition;
+
     /**
      * The precondtion of the current function, which is parsed from 'requires'-Annotations.
      */

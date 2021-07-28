@@ -2,6 +2,7 @@ package SEEn;
 
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
+import Imm.AST.Expression.Arith.Add;
 import Imm.AST.Expression.Arith.Sub;
 import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Atom;
@@ -86,7 +87,7 @@ public class SEEngine {
             report.add(new Message("SNIPS_SEEN -> Verified function '" + f.path.build() + "'", LogPoint.Type.INFO, true));
     }
 
-    public List<SEState> interpretBody(SEState state, List<Statement> body) {
+    public List<SEState> interpretBody(SEState state, List<Statement> body) throws PARS_EXC {
         List<SEState> result = List.of(state);
 
         for (Statement stmt : body) {
@@ -105,10 +106,11 @@ public class SEEngine {
         return result;
     }
 
-    public List<SEState> interpretStatement(SEState state, Statement s) {
+    public List<SEState> interpretStatement(SEState state, Statement s) throws PARS_EXC {
         if (s instanceof Declaration d) return interpretDeclaration(state, d);
         else if (s instanceof Assignment a) return interpretAssignment(state, a);
         else if (s instanceof IfStatement if0) return interpretIfStmt(state, if0);
+        else if (s instanceof ForStatement f) return interpretForStmt(state, f);
         else if (s instanceof ReturnStatement r) return interpretReturnStmt(state, r);
 
         throw new SNIPS_EXC("Cannot interpret statement '" + s.getClass().getSimpleName() + "'");
@@ -142,7 +144,31 @@ public class SEEngine {
         return List.of(state);
     }
 
-    public List<SEState> interpretIfStmt(SEState state, IfStatement if0) {
+    public List<SEState> interpretForStmt(SEState state, ForStatement f) throws PARS_EXC {
+        state = state.fork();
+        state.programCounter = f;
+
+        /* Parse the annotations that were made for this for statement */
+        new SEAnnotationParser(f, state).parseAnnotations();
+        SEState fState = state;
+
+        state = this.interpretStatement(state, (Statement) f.iterator).get(0);
+
+        DLTerm condition = this.interpretExpression(state, f.condition);
+
+        this.interpretBody(state, f.body);
+
+        this.interpretStatement(state, f.increment);
+
+        // TODO: Need to check invariant, amend to path condition finally clause
+
+        System.out.println(fState.postcondition.toString());
+        state.addToPathCondition(fState.postcondition.clone());
+
+        return List.of(state);
+    }
+
+    public List<SEState> interpretIfStmt(SEState state, IfStatement if0) throws PARS_EXC {
         List<SEState> result = new ArrayList<>();
 
         SEState copy;
@@ -205,6 +231,8 @@ public class SEEngine {
         String cString = condition.simplify().toString();
         String pString = toProve.simplify().toString();
 
+        System.out.println(toProve.toString());
+
         condition = this.prepareTermInState(state, condition, result);
         toProve = this.prepareTermInState(state, toProve, result);
 
@@ -237,6 +265,7 @@ public class SEEngine {
     public DLTerm interpretExpression(SEState state, Expression e) {
         if (e instanceof IDRef ref) return interpretIDRef(state, ref);
         else if (e instanceof Compare c) return interpretCompare(state, c);
+        else if (e instanceof Add a) return interpretAdd(state, a);
         else if (e instanceof Sub s) return interpretSub(state, s);
         else if (e instanceof InlineCall i) return interpretInlineCall(state, i);
         else if (e instanceof Atom a) return interpretAtom(state, a);
@@ -246,6 +275,13 @@ public class SEEngine {
 
     public DLTerm interpretCompare(SEState state, Compare c) {
         return new DLCmp(interpretExpression(state, c.operands.get(0)), interpretExpression(state, c.operands.get(1)), c.comparator);
+    }
+
+    public DLTerm interpretAdd(SEState state, Add a) {
+        List<DLTerm> operands = new ArrayList<>();
+        for (Expression e : a.operands)
+            operands.add(interpretExpression(state, e));
+        return new DLAdd(operands);
     }
 
     public DLTerm interpretSub(SEState state, Sub s) {

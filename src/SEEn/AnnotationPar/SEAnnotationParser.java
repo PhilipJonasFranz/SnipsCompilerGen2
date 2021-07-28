@@ -2,6 +2,7 @@ package SEEn.AnnotationPar;
 
 
 import Exc.PARS_EXC;
+import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
 import Imm.AST.SyntaxElement;
 import Imm.TYPE.PRIMITIVES.BOOL;
@@ -100,6 +101,17 @@ public class SEAnnotationParser {
 
             this.state.addToPostCondition(formula);
         }
+        else if (identifier.spelling().equals("finally")) {
+            DLTerm formula = parse();
+
+            this.state.addToPostCondition(formula);
+        }
+        else if (identifier.spelling().equals("invariant")) {
+            DLTerm formula = parse();
+
+            this.state.invariantCondition = formula;
+        }
+        else throw new SNIPS_EXC("Unknown annotation: '" + identifier.spelling() + "'");
     }
 
     private Token accept(Token.TokenType tokenType) throws PARS_EXC {
@@ -210,14 +222,28 @@ public class SEAnnotationParser {
 
             Token name = accept(Token.TokenType.IDENTIFIER);
 
-            if (current.type() == Token.TokenType.LPAREN) {
-                accept();
-                Token identifier = accept(Token.TokenType.IDENTIFIER);
+            if (name.spelling().equals("sum")) {
+                /* Sum Term */
+
+                accept(Token.TokenType.LPAREN);
+                DLTerm iterator = this.parse();
+                accept(Token.TokenType.SEMICOLON);
+                DLTerm condition = this.parse();
+                accept(Token.TokenType.SEMICOLON);
+                DLTerm operand = this.parse();
                 accept(Token.TokenType.RPAREN);
 
-                return new DLBind(name.spelling(), identifier.spelling());
+                return new DLSum(iterator, condition, operand);
             }
-            else return new DLBind(name.spelling(), null);
+            else {
+                if (current.type() == Token.TokenType.LPAREN) {
+                    accept();
+                    Token identifier = accept(Token.TokenType.IDENTIFIER);
+                    accept(Token.TokenType.RPAREN);
+
+                    return new DLBind(name.spelling(), identifier.spelling());
+                } else return new DLBind(name.spelling(), null);
+            }
         }
         else if (current.type() == Token.TokenType.IDENTIFIER) {
             Token identifier = accept();

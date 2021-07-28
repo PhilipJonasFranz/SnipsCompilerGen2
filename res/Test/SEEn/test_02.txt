@@ -1,0 +1,50 @@
+SOURCE
+#@ requires n >= 0
+#@
+#@ ensures \result >= 1
+#@
+#@ returns true : \mul(int i; i >= 1 && i <= n; i)
+int fac(int n) {
+	if (n <= 0) return 1;
+	else return fac(n - 1) * n;
+}
+
+#@ ensures \result >= 0
+#@
+#@ returns true : 24
+int main() {
+	return fac(4);
+}
+TESTCASES
+24
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global dist
+dist:                                        /* Function: dist */
+    sub sp, sp, #12
+    stmea sp, {r3-r5}
+    mov r4, r1
+    mov r3, r0
+    cmp r1, r0
+    bge dist.L0
+    mov r5, r4
+    mov r4, r3
+    mov r3, r5
+dist.L0: 
+    sub r0, r4, r3
+    ldmfd sp!, {r3-r5}
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    mov r1, #8
+    mov r0, #6
+    b dist                                   /* Call dist */
