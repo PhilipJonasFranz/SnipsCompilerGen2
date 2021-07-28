@@ -10,6 +10,7 @@ import Par.Token;
 import SEEn.Imm.DLTerm.*;
 import SEEn.SEState;
 import Util.ASTDirective;
+import Util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,9 @@ public class SEAnnotationParser {
          *
          *      (cond1 -> result1) or (cond2 -> result2) or ...
          */
-        if (!this.returns.isEmpty()) this.state.addToPostCondition(new DLOr(this.returns));
+        if (!this.returns.isEmpty()) {
+            this.state.addToPostCondition(new DLOr(this.returns));
+        }
     }
 
     public void process() throws PARS_EXC {
@@ -74,7 +77,7 @@ public class SEAnnotationParser {
         if (identifier.spelling().equals("requires")) {
             DLTerm formula = parse();
             this.state.addToPathCondition(formula);
-            this.state.getPrecondition().operands.add(formula);
+            this.state.precondition.operands.add(formula);
         }
         /*
          * The returns condition adds the parsed formula
@@ -83,6 +86,8 @@ public class SEAnnotationParser {
             DLTerm formula = parse();
             accept(Token.TokenType.COLON);
             DLTerm term = parse();
+
+            this.state.returnCondition.add(new Pair<>(formula.clone(), term.clone()));
 
             /* formula -> term : If condition of returns holds the term must be equal to the returned value */
             this.returns.add(new DLOr(new DLNot(formula), new DLCmp(term, new DLBind("result"), COMPARATOR.EQUAL)));

@@ -7,13 +7,19 @@ import Tools.DLTermVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DLCall extends DLTerm {
 
     public Callee callee;
 
-    public DLCall(Callee callee) {
+    public List<DLTerm> parameters;
+
+    public SEState calledState;
+
+    public DLCall(Callee callee, List<DLTerm> parameters) {
         this.callee = callee;
+        this.parameters = parameters;
     }
 
     public boolean isEqual(DLTerm term) {
@@ -25,7 +31,7 @@ public class DLCall extends DLTerm {
     }
 
     public DLTerm clone() {
-        return new DLCall(this.callee);
+        return new DLCall(this.callee, this.parameters.stream().map(DLTerm::clone).collect(Collectors.toList()));
     }
 
     public String toString() {

@@ -1,15 +1,8 @@
 package Util;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
+import Imm.AST.Expression.Expression;
 import Imm.AST.Program;
 import Imm.AST.SyntaxElement;
-import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode;
 import Res.Const;
 import Res.Manager.FileUtil;
@@ -18,6 +11,13 @@ import Util.Logging.LogPoint;
 import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import XMLParser.XMLParser.XMLNode;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class Util {
 
@@ -344,5 +344,5 @@ public class Util {
 		List<String> out = node.asString();
 		FileUtil.writeInFile(out, "release/metric-inf.xml");
 	}
-	
+
 } 

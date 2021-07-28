@@ -1,9 +1,12 @@
 package SEEn.SMTSolver;
 
 import Exc.SNIPS_EXC;
+import Imm.AST.Expression.InlineCall;
 import SEEn.Imm.DLTerm.DLBind;
+import SEEn.Imm.DLTerm.DLCall;
 import SEEn.Imm.DLTerm.DLTerm;
 import SEEn.Imm.DLTerm.DLVariable;
+import SEEn.SEEngine;
 import SEEn.SEState;
 import Tools.DLTermModifier;
 
@@ -75,8 +78,40 @@ public class DLTransform {
         return mod.replace(term);
     }
 
-    public DLTerm inlineVariables(SEState state,DLTerm term) {
-        DLTermModifier mod = s-> (s instanceof DLVariable var)? state.variables.get(var.name).clone() : s;
+    public DLTerm inlineVariables(SEState state, DLTerm term) {
+        DLTermModifier mod = s -> {
+            if (s instanceof DLVariable var) {
+                if (var.name.startsWith("_")) {
+                    return s;
+                }
+                else return state.variables.get(var.name).clone();
+            }
+            return s;
+        };
+
+        term.replace(mod);
+        return mod.replace(term);
+    }
+
+    public DLTerm inlineCalls(SEState state, SEEngine eng, DLTerm term) {
+        DLTermModifier mod = s-> {
+            if (s instanceof DLCall call) {
+                InlineCall ic = (InlineCall) call.callee.getCallee();
+                DLTerm returnCondition = eng.functionMap.get(ic.calledFunction).buildReturnConditionFromTerm();
+
+                /* Substitute the variables in the precondition with the values from the call */
+                for (int i = 0; i < ic.calledFunction.parameters.size(); i++) {
+                    String varName = ic.calledFunction.parameters.get(i).path.build();
+
+                    this.substitute(returnCondition, new DLVariable(varName), call.parameters.get(i).clone());
+                    this.substitute(returnCondition, new DLBind("old", varName), call.parameters.get(i).clone());
+                }
+
+                return returnCondition;
+            }
+            else return s;
+        };
+
         term.replace(mod);
         return mod.replace(term);
     }

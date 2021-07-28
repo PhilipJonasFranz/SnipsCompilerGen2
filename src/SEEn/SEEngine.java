@@ -3,6 +3,7 @@ package SEEn;
 import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Imm.AST.Expression.Arith.Sub;
+import Imm.AST.Expression.Arith.UnaryMinus;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Expression;
@@ -18,17 +19,19 @@ import SEEn.AnnotationPar.SEAnnotationParser;
 import SEEn.Imm.DLTerm.*;
 import SEEn.SMTSolver.DLTransform;
 import SEEn.SMTSolver.SMTSolver;
+import Util.Logging.LogPoint;
 import Util.Logging.Message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SEEngine {
 
     public final List<Message> report = new ArrayList<>();
 
-    private final HashMap<Function, SEState> functionMap = new HashMap<>();
+    public final HashMap<Function, SEState> functionMap = new HashMap<>();
 
     private final Program AST;
 
@@ -54,7 +57,7 @@ public class SEEngine {
 
         /* Register parameter variables */
         for (Declaration d : f.parameters)
-            state.variables.put(d.path.build(), new DLVariable(d.path.build()));
+            state.variables.put(d.path.build(), new DLVariable("_" + d.path.build()));
 
         state.programCounter = f;
 
@@ -177,25 +180,39 @@ public class SEEngine {
             state.programCounter = r;
         }
 
-        DLTerm formula = state.getPathCondition().clone();
-        DLTerm toProve = state.getPostCondition().clone();
+        DLTerm formula = state.pathCondition.clone();
+        DLTerm toProve = state.postcondition.clone();
 
         DLTransform transform = DLTransform.getInstance();
 
         DLTerm result = null;
         if (r.value != null) result = interpretExpression(state, r.value);
 
-        /* Resolve the bindings to get a provable formula */
-        formula = transform.resolveBindings(state, formula, result);
-        toProve = transform.resolveBindings(state, toProve, result);
+        String fString = formula.toString(), fString0 = fString;
+        String pString = toProve.toString(), pString0 = pString;
 
-        /* Apply the values in the current state */
-        formula = transform.inlineVariables(state, formula);
-        toProve = transform.inlineVariables(state, toProve);
+        while (true) {
+            /* Apply the values in the current state */
+            formula = transform.inlineVariables(state, formula);
+            toProve = transform.inlineVariables(state, toProve);
+
+            formula = transform.inlineCalls(state, this, formula);
+            toProve = transform.inlineCalls(state, this, toProve);
+
+            /* Resolve the bindings to get a provable formula */
+            formula = transform.resolveBindings(state, formula, result);
+            toProve = transform.resolveBindings(state, toProve, result);
+
+            if (formula.toString().equals(fString) && toProve.toString().equals(pString)) break;
+            else {
+                fString = formula.toString();
+                pString = toProve.toString();
+            }
+        }
 
         /* Make sure the postcondition holds in the current state */
-        List<Message> report0 = SMTSolver.getInstance().solve(state, formula, toProve);
-        report.addAll(report0);
+        boolean solved = SMTSolver.getInstance().solve(state, formula, toProve);
+        if (!solved) report.addAll(generateReport(state, "Returned value does not match contract", fString0, pString0));
 
         /* No state returned here, marks leaf in execution tree */
         return new ArrayList();
@@ -207,6 +224,7 @@ public class SEEngine {
         else if (e instanceof Sub s) return interpretSub(state, s);
         else if (e instanceof InlineCall i) return interpretInlineCall(state, i);
         else if (e instanceof Atom a) return interpretAtom(state, a);
+        else if (e instanceof UnaryMinus m) return interpretUnaryMinus(state, m);
         throw new SNIPS_EXC("Cannot interpret expression '" + e.getClass().getSimpleName() + "'");
     }
 
@@ -228,22 +246,31 @@ public class SEEngine {
         SEState fState = this.functionMap.get(ic.calledFunction);
 
         /* Make sure we fullfill the preconditions of the called function */
-        DLTerm contractCondition = fState.getPrecondition();
+        DLTerm contractCondition = fState.precondition.clone();
+
+        String fString = contractCondition.toString();
+
+        List<DLTerm> parameters = new ArrayList<>();
 
         /* Substitute the variables in the precondition with the values from the call */
         for (int i = 0; i < ic.calledFunction.parameters.size(); i++) {
             String varName = ic.calledFunction.parameters.get(i).path.build();
-            transform.substitute(contractCondition, new DLVariable(varName), interpretExpression(state, ic.parameters.get(i)));
+
+            DLTerm param = interpretExpression(state, ic.parameters.get(i));
+            transform.substitute(contractCondition, new DLVariable(varName), param);
+            parameters.add(param);
         }
 
         /* Prove that this function call fullfills the required clauses in the method contract */
-        List<Message> report0 = SMTSolver.getInstance().solve(state, state.getPathCondition(), contractCondition);
-        report.addAll(report0);
+        boolean solved = SMTSolver.getInstance().solve(state, state.pathCondition.clone(), contractCondition);
+        if (!solved) report.addAll(generateReport(state, "Parameters do not match precondition", state.pathCondition.toString(), fString));
 
         /* Add the postcondition of the function contract to the current path condition */
-        state.addToPathCondition(fState.getPostCondition());
+        state.addToPathCondition(fState.postcondition.clone());
 
-        return new DLCall(ic);
+        DLCall call = new DLCall(ic, parameters);
+        call.calledState = fState;
+        return call;
     }
 
     public DLTerm interpretIDRef(SEState state, IDRef ref) {
@@ -251,8 +278,37 @@ public class SEEngine {
         return state.variables.get(ref.path.build()).clone();
     }
 
+    public DLTerm interpretUnaryMinus(SEState state, UnaryMinus m) {
+        return new DLNot(this.interpretExpression(state, m.operand));
+    }
+
     public DLTerm interpretAtom(SEState state, Atom a) {
         return new DLAtom(a.getType().clone());
+    }
+
+    public List<Message> generateReport(SEState state, String reason, String precondition, String formula) {
+        /* Generate report which formulas could not be proven */
+        List<Message> report = new ArrayList<>();
+
+        report.add(new Message("Failed to verify formula", LogPoint.Type.FAIL, true));
+
+        report.add(new Message("        -> " + formula.toString(), LogPoint.Type.FAIL, true));
+
+        report.add(new Message("    at statement '" + state.programCounter.codePrintSingle() + "', " + state.programCounter.getSource().getSourceMarker(), LogPoint.Type.FAIL, true));
+
+        report.add(new Message("    with condition " + precondition.toString(), LogPoint.Type.FAIL, true));
+
+        String vars = "";
+        for (Map.Entry<String, DLTerm> var : state.variables.entrySet())
+            vars += var.getKey() + " = " + var.getValue().toString() + ", ";
+        if (vars.endsWith(", ")) vars = vars.substring(0, vars.length() - 2);
+        else vars = "-";
+
+        report.add(new Message("    and variables: " + vars, LogPoint.Type.FAIL, true));
+
+        report.add(new Message("    reason: " + reason, LogPoint.Type.FAIL, true));
+
+        return report;
     }
 
 }

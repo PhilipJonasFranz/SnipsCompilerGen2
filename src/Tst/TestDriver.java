@@ -644,6 +644,8 @@ public class TestDriver {
 		
 		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_COMPILE_TIME) {
 			timeout = true;
+			for (StackTraceElement e : compileThread.getStackTrace())
+				System.out.println(e);
 			return null;
 		}
 		

@@ -1,8 +1,5 @@
 package Imm.AST.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Imm.AST.SyntaxElement;
@@ -12,6 +9,9 @@ import Tools.ASTNodeVisitor;
 import Util.Source;
 import Util.Util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a superclass for all Expressions.
  */
@@ -20,7 +20,7 @@ public abstract class UnaryExpression extends Expression {
 			/* ---< NESTED >--- */
 	public enum UnaryOperator {
 		NOT, NEG
-			}
+	}
 	
 	
 			/* ---< FIELDS >--- */

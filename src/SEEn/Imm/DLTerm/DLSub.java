@@ -1,24 +1,18 @@
 package SEEn.Imm.DLTerm;
 
-import SEEn.SEState;
-import Tools.DLTermModifier;
-import Tools.DLTermVisitor;
+import Imm.TYPE.PRIMITIVES.INT;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DLSub extends DLTerm {
-
-    public List<DLTerm> operands = new ArrayList<>();
+public class DLSub extends DLNFold {
 
     public DLSub(List<DLTerm> operands) {
-        this.operands.addAll(operands);
+        super(operands);
     }
 
     public DLSub(DLTerm...operands) {
-        for (DLTerm op : operands)
-            this.operands.add(op);
+        super(operands);
     }
 
     public boolean isEqual(DLTerm term) {
@@ -35,12 +29,6 @@ public class DLSub extends DLTerm {
         return false;
     }
 
-    public boolean eval(SEState state) {
-        for (DLTerm formula : operands)
-            if (formula.eval(state)) return true;
-        return false;
-    }
-
     public DLTerm clone() {
         return new DLSub(this.operands.stream().map(DLTerm::clone).collect(Collectors.toList()));
     }
@@ -50,24 +38,34 @@ public class DLSub extends DLTerm {
     }
 
     public DLTerm simplify() {
-        return this;
-    }
+        int res = 0;
+        boolean hadAtom = false;
 
-    public <T extends DLTerm> List<T> visit(DLTermVisitor<T> visitor) {
-        List<T> result = new ArrayList<>();
-        if (visitor.visit(this)) result.add((T) this);
-
-        for (DLTerm op : this.operands)
-            result.addAll(op.visit(visitor));
-
-        return result;
-    }
-
-    public <T extends DLTerm> void replace(DLTermModifier<T> visitor) {
         for (int i = 0; i < this.operands.size(); i++) {
-            this.operands.get(i).replace(visitor);
-            this.operands.set(i, visitor.replace(this.operands.get(i)));
+            DLTerm op = this.operands.get(i);
+            op = op.simplify();
+
+            if (op instanceof DLAtom a && a.value instanceof INT int0) {
+                if (int0.hasInt()) {
+                    if (hadAtom) res -= int0.toInt();
+                    else {
+                        hadAtom = true;
+                        res = int0.toInt();
+                    }
+
+                    this.operands.remove(i);
+                    i--;
+                    continue;
+                }
+            }
+
+            this.operands.set(i, op);
         }
+
+        if (hadAtom) this.operands.add(0, new DLAtom(new INT("" + res)));
+
+        if (this.operands.size() == 1) return this.operands.get(0);
+        return this;
     }
 
 }

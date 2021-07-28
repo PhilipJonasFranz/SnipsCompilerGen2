@@ -21,7 +21,12 @@ public class DLBind extends DLTerm {
     }
 
     public boolean isEqual(DLTerm term) {
-        return term instanceof DLBind b && b.name.equals(this.name);
+        if (term instanceof DLBind b && b.name.equals(this.name)) {
+            if (this.id == null) return b.id == null;
+            else if (b.id == null) return false;
+            else return this.id.equals(b.id);
+        }
+        return false;
     }
 
     public boolean eval(SEState state) {

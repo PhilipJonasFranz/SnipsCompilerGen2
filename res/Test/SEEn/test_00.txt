@@ -3,7 +3,7 @@ SOURCE
 #@
 #@ ensures \result >= 0
 #@
-#@ returns \old(x) < \old(y) : y - x
+#@ returns \old(x) <= \old(y) : y - x
 #@ returns \old(y) < \old(x) : x - y
 int dist(int x, int y) {
 	if (y < x) {
@@ -41,7 +41,7 @@ dist:                                        /* Function: dist */
     mov r5, r4
     mov r4, r3
     mov r3, r5
-dist.L0: 
+dist.L0:
     sub r0, r4, r3
     ldmfd sp!, {r3-r5}
     bx lr

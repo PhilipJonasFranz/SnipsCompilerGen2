@@ -25,10 +25,11 @@ public class DLCmp extends DLTerm {
         if (term instanceof DLCmp cmp) {
             boolean equal = true;
 
-            equal &= cmp.operator == this.operator;
+            /* Normal case */
+            equal |= cmp.operator == this.operator && this.left.isEqual(cmp.left) && this.right.isEqual(cmp.right);
 
-            equal &= this.left.isEqual(cmp.left);
-            equal &= this.right.isEqual(cmp.right);
+            /* Flipped case */
+            equal |= cmp.operator == this.operator.negate() && this.left.isEqual(cmp.right) && this.right.isEqual(cmp.left);
 
             return equal;
         }
@@ -66,6 +67,9 @@ public class DLCmp extends DLTerm {
     }
 
     public DLTerm simplify() {
+        this.left = this.left.simplify();
+        this.right = this.right.simplify();
+
         if (this.operator == COMPARATOR.EQUAL && this.left.isEqual(this.right)) return new DLAtom(new BOOL("true"));
         else if (this.left instanceof DLAtom a0 && this.right instanceof DLAtom a1) {
             int l = a0.value.toInt(), r = a1.value.toInt();
