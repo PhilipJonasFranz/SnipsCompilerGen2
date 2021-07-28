@@ -10,6 +10,10 @@ public abstract class DLTerm {
 
     public abstract boolean isEqual(DLTerm term);
 
+    public boolean weakerOrEqual(DLTerm term) {
+        return this.isEqual(term);
+    }
+
     public abstract boolean eval(SEState state);
 
     public abstract DLTerm clone();

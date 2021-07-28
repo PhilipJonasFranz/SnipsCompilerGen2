@@ -29,6 +29,12 @@ import java.util.Map;
 
 public class SEEngine {
 
+    public Function currentFunction;
+
+    public boolean failedVerificationInFunction = false;
+
+    public boolean failedVerifications = false;
+
     public final List<Message> report = new ArrayList<>();
 
     public final HashMap<Function, SEState> functionMap = new HashMap<>();
@@ -41,6 +47,11 @@ public class SEEngine {
 
     public void interpret() throws PARS_EXC {
         this.interpretProgram(this.AST);
+
+        if (failedVerifications)
+            report.add(new Message("SNIPS_SEEN -> Verification failed!", LogPoint.Type.FAIL, true));
+        else
+            report.add(new Message("SNIPS_SEEN -> Verification successful, # of solves: " + SMTSolver.solves, LogPoint.Type.INFO, true));
     }
 
     public void interpretProgram(Program p) throws PARS_EXC {
@@ -61,6 +72,9 @@ public class SEEngine {
 
         state.programCounter = f;
 
+        failedVerificationInFunction = false;
+        this.currentFunction = f;
+
         /* Parse the annotations that were made for this function */
         new SEAnnotationParser(f, state).parseAnnotations();
 
@@ -68,8 +82,8 @@ public class SEEngine {
 
         interpretBody(state, f.body);
 
-        state.printRec();
-        System.out.println();
+        if (!failedVerificationInFunction)
+            report.add(new Message("SNIPS_SEEN -> Verified function '" + f.path.build() + "'", LogPoint.Type.INFO, true));
     }
 
     public List<SEState> interpretBody(SEState state, List<Statement> body) {
@@ -180,7 +194,7 @@ public class SEEngine {
             state.programCounter = r;
         }
 
-        DLTerm formula = state.pathCondition.clone();
+        DLTerm condition = state.pathCondition.clone();
         DLTerm toProve = state.postcondition.clone();
 
         DLTransform transform = DLTransform.getInstance();
@@ -188,31 +202,33 @@ public class SEEngine {
         DLTerm result = null;
         if (r.value != null) result = interpretExpression(state, r.value);
 
-        String fString = formula.toString(), fString0 = fString;
-        String pString = toProve.toString(), pString0 = pString;
+        String cString = condition.simplify().toString();
+        String pString = toProve.simplify().toString();
 
-        while (true) {
-            /* Apply the values in the current state */
-            formula = transform.inlineVariables(state, formula);
-            toProve = transform.inlineVariables(state, toProve);
+        condition = this.prepareTermInState(state, condition, result);
+        toProve = this.prepareTermInState(state, toProve, result);
 
-            formula = transform.inlineCalls(state, this, formula);
-            toProve = transform.inlineCalls(state, this, toProve);
+        /* Make sure the postcondition holds in the current state */
+        boolean solved = SMTSolver.getInstance().solve(state, condition.clone(), toProve);
+        if (!solved) report.addAll(generateReport(state, "Returned value does not fullfill postcondition", cString, pString));
 
-            /* Resolve the bindings to get a provable formula */
-            formula = transform.resolveBindings(state, formula, result);
-            toProve = transform.resolveBindings(state, toProve, result);
 
-            if (formula.toString().equals(fString) && toProve.toString().equals(pString)) break;
-            else {
-                fString = formula.toString();
-                pString = toProve.toString();
+        if (result != null) {
+            /* Make sure the returned value matches the return value of the function */
+            SEState fState = this.functionMap.get(this.currentFunction);
+            if (!fState.returnCondition.isEmpty()) {
+                DLTerm returnTerm = new DLCmp(fState.buildReturnConditionFromTerm(), result.clone(), Compare.COMPARATOR.EQUAL);
+
+                returnTerm = this.prepareTermInState(state, returnTerm, result);
+
+                cString = condition.simplify().toString();
+                pString = returnTerm.simplify().toString();
+
+                solved = SMTSolver.getInstance().solve(state, condition, returnTerm);
+                if (!solved) report.addAll(generateReport(state, "Returned value does not match contract return value", cString, pString));
             }
         }
 
-        /* Make sure the postcondition holds in the current state */
-        boolean solved = SMTSolver.getInstance().solve(state, formula, toProve);
-        if (!solved) report.addAll(generateReport(state, "Returned value does not match contract", fString0, pString0));
 
         /* No state returned here, marks leaf in execution tree */
         return new ArrayList();
@@ -290,13 +306,16 @@ public class SEEngine {
         /* Generate report which formulas could not be proven */
         List<Message> report = new ArrayList<>();
 
-        report.add(new Message("Failed to verify formula", LogPoint.Type.FAIL, true));
+        if (!failedVerificationInFunction)
+            report.add(new Message("Failed to verify function '" + this.currentFunction.path.build() + "'", LogPoint.Type.FAIL, true));
+
+        report.add(new Message("SNIPS_SEEN -> Failed to verify formula", LogPoint.Type.FAIL, true));
 
         report.add(new Message("        -> " + formula.toString(), LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    at statement '" + state.programCounter.codePrintSingle() + "', " + state.programCounter.getSource().getSourceMarker(), LogPoint.Type.FAIL, true));
+        report.add(new Message("    at statement:    '" + state.programCounter.codePrintSingle() + "', " + state.programCounter.getSource().getSourceMarker(), LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    with condition " + precondition.toString(), LogPoint.Type.FAIL, true));
+        report.add(new Message("    with condition:  " + precondition.toString(), LogPoint.Type.FAIL, true));
 
         String vars = "";
         for (Map.Entry<String, DLTerm> var : state.variables.entrySet())
@@ -304,11 +323,34 @@ public class SEEngine {
         if (vars.endsWith(", ")) vars = vars.substring(0, vars.length() - 2);
         else vars = "-";
 
-        report.add(new Message("    and variables: " + vars, LogPoint.Type.FAIL, true));
+        report.add(new Message("    and variables:   " + vars, LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    reason: " + reason, LogPoint.Type.FAIL, true));
+        report.add(new Message("    reason:          " + reason, LogPoint.Type.FAIL, true));
 
+        failedVerifications = true;
+        failedVerificationInFunction = true;
         return report;
+    }
+
+    public DLTerm prepareTermInState(SEState state, DLTerm term, DLTerm result) {
+        String s = term.    toString();
+
+        DLTransform transform = DLTransform.getInstance();
+
+        while (true) {
+            /* Apply the values in the current state */
+            term = transform.inlineVariables(state, term);
+
+            term = transform.inlineCalls(state, this, term);
+
+            /* Resolve the bindings to get a provable formula */
+            term = transform.resolveBindings(state, term, (result == null)? null : result.clone());
+
+            if (term.toString().equals(s)) break;
+            else s = term.toString();
+        }
+
+        return term;
     }
 
 }

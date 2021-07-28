@@ -21,7 +21,7 @@ public class DLTransform {
     }
 
     public DLTerm substitute(DLTerm target, DLTerm replace, DLTerm with) {
-        DLTermModifier mod = x -> x.isEqual(replace)? with.clone() : x;
+        DLTermModifier mod = x -> replace.weakerOrEqual(x)? with.clone() : x;
 
         target.replace(mod);
         return mod.replace(target);

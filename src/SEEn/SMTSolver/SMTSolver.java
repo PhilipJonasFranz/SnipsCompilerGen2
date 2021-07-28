@@ -11,19 +11,21 @@ import java.util.stream.Collectors;
 
 public class SMTSolver {
 
+    public static int solves = 0;
+
     private static final SMTSolver instance = new SMTSolver();
 
     public static SMTSolver getInstance() {
         return SMTSolver.instance;
     }
 
-    public boolean solve(SEState state, DLTerm formula, DLTerm toVerify) {
-        DLTerm formula0 = formula.clone(), toVerify0 = toVerify.clone();
+    public boolean solve(SEState state, DLTerm condition, DLTerm toVerify) {
+        DLTerm condition0 = condition.clone(), toVerify0 = toVerify.clone();
 
-        formula = formula.clone().simplify();
+        condition = condition.clone().simplify();
         toVerify = toVerify.clone();
 
-        List<DLTerm> toProve = getClauses(state, formula, toVerify);
+        List<DLTerm> toProve = getClauses(state, condition, toVerify);
 
         /* Simplify the formulas as much as possible */
         toProve = toProve.stream().map(DLTerm::simplify).collect(Collectors.toList());
@@ -37,12 +39,13 @@ public class SMTSolver {
         toProve = duplicateFree;
 
         for (int i = 0; i < toProve.size(); i++) {
-            if (proveClause(toProve.get(i).clone(), formula.clone())) {
+            if (proveClause(toProve.get(i).clone(), condition.clone())) {
                 toProve.remove(i);
                 i--;
             }
         }
 
+        solves++;
         return toProve.isEmpty();
     }
 
@@ -50,35 +53,35 @@ public class SMTSolver {
      * Returns a list of clauses that need to be proven under the given formula.
      * By descending down the left formula, at each DLOr, a split occurrs, which generates an additional clause.
      */
-    public List<DLTerm> getClauses(SEState state, DLTerm formula, DLTerm toVerify) {
-        if (formula instanceof DLAnd and) return getClausesAndLeft(state, and, toVerify);
-        else if (formula instanceof DLOr or) return getClausesOrLeft(state, or, toVerify);
+    public List<DLTerm> getClauses(SEState state, DLTerm condition, DLTerm toVerify) {
+        if (condition instanceof DLAnd and) return getClausesAndLeft(state, and, toVerify);
+        else if (condition instanceof DLOr or) return getClausesOrLeft(state, or, toVerify);
         else return List.of(toVerify.clone());
     }
 
-    public List<DLTerm> getClausesAndLeft(SEState state, DLAnd and, DLTerm toVerify) {
+    public List<DLTerm> getClausesAndLeft(SEState state, DLAnd condition, DLTerm toVerify) {
         toVerify = toVerify.clone();
         DLTransform transform = DLTransform.getInstance();
 
         List<DLTerm> result = new ArrayList<>();
 
-        for (DLTerm operand : and.operands)
+        for (DLTerm operand : condition.operands)
             transform.substitute(toVerify, operand, new DLAtom(new BOOL("true")));
 
-        for (DLTerm operand : and.operands)
+        for (DLTerm operand : condition.operands)
             result.addAll(getClauses(state, operand, toVerify));
 
         if (result.isEmpty()) result.add(toVerify.clone());
         return result;
     }
 
-    public List<DLTerm> getClausesOrLeft(SEState state, DLOr or, DLTerm toVerify) {
+    public List<DLTerm> getClausesOrLeft(SEState state, DLOr condition, DLTerm toVerify) {
         toVerify = toVerify.clone();
         DLTransform transform = DLTransform.getInstance();
 
         List<DLTerm> result = new ArrayList<>();
 
-        for (DLTerm operand : or.operands) {
+        for (DLTerm operand : condition.operands) {
             DLTerm toVerify0 = toVerify.clone();
             transform.substitute(toVerify0, operand, new DLAtom(new BOOL("true")));
             result.addAll(getClauses(state, operand, toVerify0));
@@ -117,8 +120,12 @@ public class SMTSolver {
         EQTransform transform = EQTransform.getInstance();
 
         for (String varName : varNames) {
-            DLTerm transformed = new DLCmp(new DLVariable(varName), transform.transformToVar(cmp.left.clone(), cmp.right.clone(), varName), cmp.operator).simplify();
-            if (!condition.visit(x -> x.isEqual(transformed)).isEmpty()) return true;
+            try {
+                DLTerm transformed = new DLCmp(new DLVariable(varName), transform.transformToVar(cmp.left.clone(), cmp.right.clone(), varName), cmp.operator).simplify();
+                if (!condition.visit(x -> x.weakerOrEqual(transformed)).isEmpty()) return true;
+            } catch (SNIPS_EXC e) {
+                // Cannot transform every term
+            }
         }
 
         return false;

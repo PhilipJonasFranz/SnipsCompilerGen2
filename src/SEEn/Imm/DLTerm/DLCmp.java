@@ -23,13 +23,28 @@ public class DLCmp extends DLTerm {
 
     public boolean isEqual(DLTerm term) {
         if (term instanceof DLCmp cmp) {
-            boolean equal = true;
+            boolean equal = false;
 
             /* Normal case */
             equal |= cmp.operator == this.operator && this.left.isEqual(cmp.left) && this.right.isEqual(cmp.right);
 
             /* Flipped case */
-            equal |= cmp.operator == this.operator.negate() && this.left.isEqual(cmp.right) && this.right.isEqual(cmp.left);
+            equal |= cmp.operator == this.operator.flip() && this.left.isEqual(cmp.right) && this.right.isEqual(cmp.left);
+
+            return equal;
+        }
+        return false;
+    }
+
+    public boolean weakerOrEqual(DLTerm term) {
+        if (term instanceof DLCmp cmp) {
+            boolean equal = false;
+
+            /* Normal case */
+            equal |= this.operator.weakerOrSame(cmp.operator) && this.left.isEqual(cmp.left) && this.right.isEqual(cmp.right);
+
+            /* Flipped case */
+            equal |= this.operator.weakerOrSame(cmp.operator.flip()) && this.left.isEqual(cmp.right) && this.right.isEqual(cmp.left);
 
             return equal;
         }

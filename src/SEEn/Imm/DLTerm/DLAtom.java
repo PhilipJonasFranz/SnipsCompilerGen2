@@ -17,7 +17,7 @@ public class DLAtom extends DLTerm {
     }
 
     public boolean isEqual(DLTerm term) {
-        return term instanceof DLAtom a && this.value.isEqual(a.value);
+        return term instanceof DLAtom a && this.value.isEqual(a.value) && this.value.value.equals(a.value.value);
     }
 
     public boolean eval(SEState state) {

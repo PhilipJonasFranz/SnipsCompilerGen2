@@ -45,6 +45,24 @@ public class Compare extends NFoldExpression {
 			if (this == COMPARATOR.NOT_EQUAL) return COMPARATOR.EQUAL;
 			return null;
 		}
+
+		public COMPARATOR flip() {
+			if (this == COMPARATOR.EQUAL) return COMPARATOR.EQUAL;
+			if (this == COMPARATOR.GREATER_SAME) return COMPARATOR.LESS_SAME;
+			if (this == COMPARATOR.GREATER_THAN) return COMPARATOR.LESS_THAN;
+			if (this == COMPARATOR.LESS_SAME) return COMPARATOR.GREATER_SAME;
+			if (this == COMPARATOR.LESS_THAN) return COMPARATOR.GREATER_THAN;
+			if (this == COMPARATOR.NOT_EQUAL) return COMPARATOR.NOT_EQUAL;
+			return null;
+		}
+
+		public boolean weakerOrSame(COMPARATOR c) {
+			if (this == COMPARATOR.EQUAL) return c == this || c == COMPARATOR.GREATER_SAME || c == LESS_SAME;
+			if (this == COMPARATOR.NOT_EQUAL) return c == this;
+			if (this == COMPARATOR.GREATER_THAN) return c == this || c == GREATER_SAME;
+			if (this == COMPARATOR.LESS_THAN) return c == this || c == LESS_SAME;
+			return c == this;
+		}
 	}
 	
 	
