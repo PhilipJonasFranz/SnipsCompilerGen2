@@ -198,7 +198,7 @@ public class Parser {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF, false);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF, false, true);
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
@@ -209,17 +209,15 @@ public class Parser {
 		return program;
 	}
 	
-	private List<SyntaxElement> parseProgramElements(TokenType close, boolean singleOnly) throws PARS_EXC {
+	private List<SyntaxElement> parseProgramElements(TokenType close, boolean singleOnly, boolean resetKnownProvisos) throws PARS_EXC {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		boolean push = true;
 		while (this.current.type != close) {
-			this.activeProvisos.clear();
-			
 			if (push) this.bufferedAnnotations.push(new ArrayList());
 			push = true;
 			
-			SyntaxElement element = this.parseProgramElement();
+			SyntaxElement element = this.parseProgramElement(resetKnownProvisos);
 			
 			if (element != null) {
 				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
@@ -281,7 +279,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE, false);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE, false, true);
 		
 		this.namespaces.pop();
 		
@@ -349,7 +347,9 @@ public class Parser {
 		return new ASTDirective(type0, arguments);
 	}
 	
-	private SyntaxElement parseProgramElement() throws PARS_EXC {
+	private SyntaxElement parseProgramElement(boolean resetKnownProvisos) throws PARS_EXC {
+		if (resetKnownProvisos) this.activeProvisos.clear();
+
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
@@ -396,13 +396,21 @@ public class Parser {
 	}
 	
 	private StructTypedef parseStructTypedef() throws PARS_EXC {
-		
+		this.activeProvisos.clear();
+
 		MODIFIER mod = this.parseModifier();
 		
 		Source source = accept(TokenType.STRUCT).source();
 		Token id = accept(TokenType.STRUCTID);
 		
 		List<TYPE> proviso = this.parseProviso();
+
+		/* Register new proviso placeholder names to be used inside the structs body. */
+		for (TYPE t : proviso) {
+			if (t instanceof PROVISO p && !this.activeProvisos.contains(p.placeholderName))
+				this.activeProvisos.add(p.placeholderName);
+		}
+
 		NamespacePath path = this.buildPath(id.spelling);
 		
 		StructTypedef ext = null;
@@ -507,11 +515,22 @@ public class Parser {
 				/* Declaration */
 				def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
 			else {
+				/*
+				 * Create a backup of the currently active provisos here. When parsing the functions
+				 * of this struct typedef, these functions may introduce new proviso placeholders on
+				 * their own. These should be only scoped/visible to the code inside the function,
+				 * and not the entire struct. So, if we finished parsing the function inside the struct,
+				 * we roll back the known proviso types to the provisos provided by the struct head.
+				 */
+				List<String> activeProvisosBackup = new ArrayList<>(this.activeProvisos);
 
-				List<SyntaxElement> elements = parseProgramElements(TokenType.RBRACE, true);
+				SyntaxElement element = parseProgramElement(false);
 
-				if (!elements.isEmpty()) {
-					Function f = (Function) elements.get(0);
+				/* Roll back to global struct provisos */
+				this.activeProvisos = activeProvisosBackup;
+
+				if (element != null) {
+					Function f = (Function) element;
 
 					/* Insert Struct Name */
 					f.path.path.add(f.path.path.size() - 1, def.path.getLast());
@@ -674,14 +693,17 @@ public class Parser {
 		
 		for (TYPE t : proviso) {
 			PROVISO p = (PROVISO) t;
-			this.activeProvisos.add(p.placeholderName);
+			if (!this.activeProvisos.contains(p.placeholderName))
+				this.activeProvisos.add(p.placeholderName);
 		}
 		
 		accept(TokenType.LPAREN);
 		
 		List<Declaration> parameters = new ArrayList();
 		while (current.type != TokenType.RPAREN) {
-			parameters.add(this.parseDeclaration(MODIFIER.SHARED, false, false));
+			Declaration declaration = this.parseDeclaration(MODIFIER.SHARED, false, false);
+
+			parameters.add(declaration);
 			if (current.type == TokenType.COMMA) {
 				accept();
 			}
@@ -2787,9 +2809,7 @@ public class Parser {
 		TYPE type;
 		Token token;
 		
-		if (current.type == TokenType.FUNC) token = accept();
-		else if (current.type == TokenType.IDENTIFIER) token = accept();
-		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
+		if (current.type == TokenType.FUNC || current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		if (token.type() == TokenType.AUTO) 
@@ -2869,11 +2889,11 @@ public class Parser {
 			TYPE ret = null;
 			
 			boolean anonymous = false;
-			
+
 			/* Convert next token */
 			if (this.activeProvisos.contains(current.spelling)) 
 				current.type = TokenType.PROVISO;
-			
+
 			/* Non-anonymous */
 			if (current.type != TokenType.IDENTIFIER && current.type != TokenType.RPAREN && current.type != TokenType.LBRACKET && current.type != TokenType.MUL) {
 				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
