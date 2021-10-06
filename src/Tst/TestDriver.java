@@ -95,7 +95,7 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
 		comp.printLogo();
-		
+
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		CompilerDriver.buildModulesRecurse = true;
@@ -104,7 +104,7 @@ public class TestDriver {
 		CompilerDriver.useExperimentalOptimizer = true;
 		CompilerDriver.useDefaultVersionID = false;
 
-		CompilerDriver.enableSEEn = true;
+		CompilerDriver.enableSEEn = false;
 		
 		List<String> paths = new ArrayList();
 		

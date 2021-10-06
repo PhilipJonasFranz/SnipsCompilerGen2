@@ -61,7 +61,9 @@ public class SEEngine {
     }
 
     public void interpretSyntaxElement(SyntaxElement s) throws PARS_EXC {
-        this.interpretFunction((Function) s);
+        if (s instanceof Comment) return;
+        else if (s instanceof Function f) this.interpretFunction(f);
+        else throw new SNIPS_EXC("Cannot interpret syntax element '" + s.getClass().getSimpleName() + "'");
     }
 
     public void interpretFunction(Function f) throws PARS_EXC {
@@ -135,7 +137,7 @@ public class SEEngine {
         state = state.fork();
         state.programCounter = a;
 
-        DLTerm value = this.interpretExpression(state, a.value);
+        DLTerm value = this.interpretExpression(state, a.value).simplify();
 
         if (a.lhsId instanceof SimpleLhsId id)
             state.variables.replace(id.origin.path.build(), value);
@@ -154,15 +156,30 @@ public class SEEngine {
 
         state = this.interpretStatement(state, (Statement) f.iterator).get(0);
 
+        /* For each iteration, this condition is true since the loop would not be executed otherwise. */
         DLTerm condition = this.interpretExpression(state, f.condition);
+        state.addToPathCondition(condition);
 
+        SMTSolver solver = SMTSolver.getInstance();
+
+        /* Check if invariant holds upon entry into loop */
+        DLTerm pathCondition = this.prepareTermInState(state, state.pathCondition.clone(), null);
+        DLTerm invariant = this.prepareTermInState(state, fState.invariantCondition.clone(), null);
+        boolean result = solver.solve(state, pathCondition, invariant);
+        if (!result) generateReport(state, "Invariant does not hold", pathCondition.toString(), invariant.toString());
+
+        // TODO: Execution may split here
         this.interpretBody(state, f.body);
 
-        this.interpretStatement(state, f.increment);
+        state = this.interpretStatement(state, f.increment).get(0);
 
-        // TODO: Need to check invariant, amend to path condition finally clause
+        /* Check if invariant holds after one loop execution */
+        pathCondition = this.prepareTermInState(state, state.pathCondition.clone(), null);
+        invariant = this.prepareTermInState(state, fState.invariantCondition.clone(), null);
+        result = solver.solve(state, pathCondition, invariant);
+        if (!result) generateReport(state, "Invariant does not hold", pathCondition.toString(), invariant.toString());
 
-        System.out.println(fState.postcondition.toString());
+        /* Add the 'finally' postcondition to the path condition since this condition is now active */
         state.addToPathCondition(fState.postcondition.clone());
 
         return List.of(state);
@@ -223,22 +240,18 @@ public class SEEngine {
         DLTerm condition = state.pathCondition.clone();
         DLTerm toProve = state.postcondition.clone();
 
-        DLTransform transform = DLTransform.getInstance();
-
         DLTerm result = null;
         if (r.value != null) result = interpretExpression(state, r.value);
 
         String cString = condition.simplify().toString();
         String pString = toProve.simplify().toString();
 
-        System.out.println(toProve.toString());
-
         condition = this.prepareTermInState(state, condition, result);
         toProve = this.prepareTermInState(state, toProve, result);
 
         /* Make sure the postcondition holds in the current state */
         boolean solved = SMTSolver.getInstance().solve(state, condition.clone(), toProve);
-        if (!solved) report.addAll(generateReport(state, "Returned value does not fullfill postcondition", cString, pString));
+        if (!solved) generateReport(state, "Returned value does not fullfill postcondition", cString, pString);
 
 
         if (result != null) {
@@ -253,7 +266,7 @@ public class SEEngine {
                 pString = returnTerm.simplify().toString();
 
                 solved = SMTSolver.getInstance().solve(state, condition, returnTerm);
-                if (!solved) report.addAll(generateReport(state, "Returned value does not match contract return value", cString, pString));
+                if (!solved) generateReport(state, "Returned value does not match contract return value", cString, pString);
             }
         }
 
@@ -315,7 +328,7 @@ public class SEEngine {
 
         /* Prove that this function call fullfills the required clauses in the method contract */
         boolean solved = SMTSolver.getInstance().solve(state, state.pathCondition.clone(), contractCondition);
-        if (!solved) report.addAll(generateReport(state, "Parameters do not match precondition", state.pathCondition.toString(), fString));
+        if (!solved) generateReport(state, "Parameters do not match precondition", state.pathCondition.toString(), fString);
 
         /* Add the postcondition of the function contract to the current path condition */
         state.addToPathCondition(fState.postcondition.clone());
@@ -338,38 +351,40 @@ public class SEEngine {
         return new DLAtom(a.getType().clone());
     }
 
-    public List<Message> generateReport(SEState state, String reason, String precondition, String formula) {
+    public void generateReport(SEState state, String reason, String precondition, String formula) {
         /* Generate report which formulas could not be proven */
-        List<Message> report = new ArrayList<>();
+        List<Message> report0 = new ArrayList<>();
 
         if (!failedVerificationInFunction)
-            report.add(new Message("Failed to verify function '" + this.currentFunction.path.build() + "'", LogPoint.Type.FAIL, true));
+            report0.add(new Message("Verification of function '" + this.currentFunction.path.build() + "' failed.", LogPoint.Type.FAIL, true));
 
-        report.add(new Message("SNIPS_SEEN -> Failed to verify formula", LogPoint.Type.FAIL, true));
+        report0.add(new Message("SNIPS_SEEN -> Failed to verify formula:", LogPoint.Type.FAIL, true));
 
-        report.add(new Message("        -> " + formula.toString(), LogPoint.Type.FAIL, true));
+        report0.add(new Message("        -> " + formula, LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    at statement:    '" + state.programCounter.codePrintSingle() + "', " + state.programCounter.getSource().getSourceMarker(), LogPoint.Type.FAIL, true));
+        report0.add(new Message("    at statement:    '" + state.programCounter.codePrintSingle() + "', " + state.programCounter.getSource().getSourceMarker(), LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    with condition:  " + precondition.toString(), LogPoint.Type.FAIL, true));
+        report0.add(new Message("    with condition:  " + precondition, LogPoint.Type.FAIL, true));
 
-        String vars = "";
+        StringBuilder vars = new StringBuilder();
         for (Map.Entry<String, DLTerm> var : state.variables.entrySet())
-            vars += var.getKey() + " = " + var.getValue().toString() + ", ";
-        if (vars.endsWith(", ")) vars = vars.substring(0, vars.length() - 2);
-        else vars = "-";
+            vars.append(var.getKey()).append(" = ").append(var.getValue().toString()).append(", ");
+        if (vars.toString().endsWith(", ")) vars = new StringBuilder(vars.substring(0, vars.length() - 2));
+        else vars = new StringBuilder("-");
 
-        report.add(new Message("    and variables:   " + vars, LogPoint.Type.FAIL, true));
+        report0.add(new Message("    and variables:   " + vars, LogPoint.Type.FAIL, true));
 
-        report.add(new Message("    reason:          " + reason, LogPoint.Type.FAIL, true));
+        report0.add(new Message("    reason:          " + reason, LogPoint.Type.FAIL, true));
+
+        report0.add(new Message("", LogPoint.Type.FAIL, true));
 
         failedVerifications = true;
         failedVerificationInFunction = true;
-        return report;
+        this.report.addAll(report0);
     }
 
     public DLTerm prepareTermInState(SEState state, DLTerm term, DLTerm result) {
-        String s = term.    toString();
+        String s = term.toString();
 
         DLTransform transform = DLTransform.getInstance();
 

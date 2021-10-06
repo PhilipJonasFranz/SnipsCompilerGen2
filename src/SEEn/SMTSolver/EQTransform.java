@@ -20,6 +20,16 @@ public class EQTransform {
         left = left.clone();
         right = right.clone();
 
+        if (left.visit(x -> x instanceof DLVariable var && var.name.equals(varName)).isEmpty()) {
+            DLTerm tmp = left;
+            left = right;
+            right = tmp;
+        }
+
+        return this.transformToVarImpl(left, right, varName);
+    }
+
+    private DLTerm transformToVarImpl(DLTerm left, DLTerm right, String varName) {
         DLTermVisitor<DLTerm> containsVar = s -> s instanceof DLVariable var && var.name.equals(varName);
 
         if (left instanceof DLVariable var && var.name.equals(varName)) return right;

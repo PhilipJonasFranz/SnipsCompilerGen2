@@ -57,7 +57,7 @@ public class DLAdd extends DLNFold {
             this.operands.set(i, op);
         }
 
-        if (res != 0) this.operands.add(0, new DLAtom(new INT("" + res)));
+        if (res != 0 || this.operands.isEmpty()) this.operands.add(0, new DLAtom(new INT("" + res)));
 
         if (this.operands.size() == 1) return this.operands.get(0);
         return this;

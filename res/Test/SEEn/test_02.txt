@@ -27,24 +27,21 @@ HEAP_START: .word 0
 .text
     b main
 
-.global dist
-dist:                                        /* Function: dist */
-    sub sp, sp, #12
-    stmea sp, {r3-r5}
-    mov r4, r1
-    mov r3, r0
-    cmp r1, r0
-    bge dist.L0
-    mov r5, r4
-    mov r4, r3
-    mov r3, r5
-dist.L0: 
-    sub r0, r4, r3
-    ldmfd sp!, {r3-r5}
+.global fac
+fac:                                         /* Function: fac */
+    cmp r0, #0
+    bgt fac.L1
+    mov r0, #1                               /* Evaluate Expression */
     bx lr
+fac.L1: 
+    push { r3, lr }
+    mov r3, r0
+    sub r0, r3, #1
+    bl fac                                   /* Call fac */
+    mul r0, r0, r3
+    ldmfd sp!, {r3, pc}
 
 .global main
 main:                                        /* Function: main */
-    mov r1, #8
-    mov r0, #6
-    b dist                                   /* Call dist */
+    mov r0, #4                               /* Evaluate Expression */
+    b fac                                    /* Call fac */

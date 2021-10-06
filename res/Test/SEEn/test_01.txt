@@ -7,7 +7,7 @@ SOURCE
 int sum(int n) {
 	int r = 0;
 
-	#@ invariant c >= 0 && c <= n && r == \sum(i; i >= 0 && i <= c; i)
+	#@ invariant c >= 0 && c <= n && r == \sum(i; i >= 0 && i < c; i)
 	#@ finally c == n
 	for (int c = 0; c <= n; c = c + 1) {
 	    r += c;
