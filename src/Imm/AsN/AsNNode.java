@@ -1,10 +1,13 @@
 package Imm.AsN;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 import CGen.RegSet;
 import CGen.StackSet;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMStackOp.MEM_OP;
@@ -14,19 +17,32 @@ import Imm.ASM.Util.Operands.PatchableImmOp;
 import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
+import Imm.AST.SyntaxElement;
+import Util.Pair;
 
 public abstract class AsNNode {
 
-			/* ---< NESTED >--- */
-	public enum MODIFIER {
-		
-		STATIC, SHARED, RESTRICTED, EXCLUSIVE;
-		
-	}
+	/* 
+	 * Tracks which AsNNode is creating instructions at the moment. 
+	 * Instructions will set their creator to the current top of the stack
+	 * when they are created.
+	 */
+	public static Stack<AsNNode> creatorStack = new Stack();
+	
+	/* AsNNode, Amount of Commits to this Node Type, Instruction Size, Cycles */
+	public static HashMap<String, Pair<Integer, Pair<Double, Double>>> metricsMap = new HashMap();
 	
 	
 			/* ---< FIELDS >--- */
+	/**
+	 * The ASM-Instructions that represent the cast of this node.
+	 */
 	public List<ASMInstruction> instructions = new ArrayList();
+	
+	/**
+	 * The AST-Node that that this AsNNode was casted from.
+	 */
+	public SyntaxElement castedNode;
 	
 	
 			/* ---< METHODS >--- */
@@ -66,6 +82,48 @@ public abstract class AsNNode {
 				r.free(reg);
 			}
 		}
+	}
+	
+	/**
+	 * Push this AsNNode on the stack and set the casted node of
+	 * this node to the given syntax element.
+	 * @param s The AST-Node this AsNNode is casting.
+	 */
+	public void pushOnCreatorStack(SyntaxElement s) {
+		creatorStack.push(this);
+		this.castedNode = s;
+	}
+	
+	/**
+	 * Pop this node from the creator-stack and register its metrics
+	 * in the {@link #metricsMap}.
+	 */
+	public void registerMetric() {
+		if (creatorStack.isEmpty()) throw new SNIPS_EXC("Attempted to pop from empty creator stack!");
+		else if (!creatorStack.peek().equals(this)) throw new SNIPS_EXC("Creator stack is not lined up!");
+		
+		creatorStack.pop();
+		
+		String key = this.getClass().getSimpleName();
+		
+		if (!metricsMap.containsKey(key)) 
+			metricsMap.put(key, new Pair<>(0, new Pair<>(0.0, 0.0)));
+		
+		Pair<Integer, Pair<Double, Double>> pair = metricsMap.get(key);
+		
+		pair.first++;
+		
+		int cycles = 0;
+		int sum = 0;
+		for (ASMInstruction ins : this.getInstructions()) {
+			if (ins.creator.equals(this)) {
+				cycles += ins.getRequiredCPUCycles();
+				sum++;
+			}
+		}
+		
+		pair.second.first += sum;
+		pair.second.second += cycles;
 	}
 	
 } 

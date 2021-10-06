@@ -11,17 +11,26 @@ int main() {
 TESTCASES
 5
 OUTPUT
-/* --test_00.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-get_P0:                                      /* Function: get, Provisos: INT | BOOL */
+
+.global get_P_1
+get_P_1:                                     /* Function: get, Provisos: INT | BOOL */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
-    bl get_P0                                /* Evaluate Expression */
+    bl get_P_1                               /* Evaluate Expression */
     mov r3, r0
-    bl get_P0                                /* Evaluate Expression */
+    bl get_P_1                               /* Evaluate Expression */
     mov r4, r0
     cmp r4, #0
     beq main.L0
@@ -30,4 +39,3 @@ main:                                        /* Function: main */
 main.L0: 
     mov r0, #2
     pop { pc }
-    

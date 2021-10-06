@@ -13,22 +13,16 @@ TESTCASES
 0 5
 1 3
 OUTPUT
-/* --test_01.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-/* System Routine, used to copy memory on the stack */
-_routine_stack_copy_: 
-    cmp r0, #0
-    beq _routine_stack_copy_end_
-    ldr r2, [r1, #-4]!
-    sub r0, r0, #4
-    push { r2 }
-    b _routine_stack_copy_
-_routine_stack_copy_end_: 
-    mov pc, r10
-    
-lambda_id:                                   /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
+
+.global id
 id:                                          /* Function: id */
     push { fp }
     mov fp, sp
@@ -39,24 +33,23 @@ id:                                          /* Function: id */
     mov sp, fp
     pop { fp }
     add sp, sp, #8
-    mov r0, #8
     add r1, r2, #8
+    mov r0, #8
     add r10, pc, #8                          /* Setup return address for routine */
     b _routine_stack_copy_
     mov r10, #0
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_id
-    mov r10, #0
+    ldr r0, .P581937418_id                   /* Evaluate Expression */
     push { r0 }
     ldr r4, [fp, #-4]
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #5
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     add lr, pc, #8
     mov pc, r4
@@ -65,4 +58,16 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P581937418_id: .word id
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

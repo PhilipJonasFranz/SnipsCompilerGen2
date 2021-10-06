@@ -1,0 +1,80 @@
+#include<iterable.sn>
+#include<collection.sn>
+
+namespace Streamable {
+	
+	restricted struct Stream<T> : Iterable<T> {
+		
+		shared Stream<T>* forEach(func T -> T pred) {
+			int size = (self->collection).size();
+			
+			for (int i = 0; i < size; i++) {
+				T val = pred((self->collection).get(i));
+				(self->collection).set(i, val);
+			}
+			
+			return self;
+		}
+		
+		shared Stream<T>* filter(func T -> bool pred) {
+			int c = 0;
+			int size = (self->collection).size();
+			
+			for (int i = 0; i < size; i++) {
+				if (!pred((self->collection).get(i))) {
+					(self->collection).remove(c);
+					c--;
+				}
+				
+				c++;
+			}
+			
+			return self;
+		}
+		
+		shared Stream<V>* map<V, T>(Collection<V> target, func T -> V pred) {
+			int size = (self->collection).size();
+			
+			for (int i = 0; i < size; i++) {
+				T value = (self->collection).get(i);
+				V mapped = pred(value);
+				target.add(mapped);
+			}
+			
+			return init<>(Stream<V>::(target));
+		}
+		
+		shared V fold<V, T>(V initial, func (V, T) -> V pred) {
+			int size = (self->collection).size();
+			
+			V fold = initial;
+			
+			if (size == 0) return fold;
+			
+			for (int i = 0; i < size; i++) {
+				T value = (self->collection).get(i);
+				fold = pred(fold, value);
+			}
+			
+			return fold;
+		}
+
+		shared int size() {
+			return (self->collection).size();
+		}
+		
+		shared T get(int index) {
+			return (self->collection).get(index);
+		}
+		
+		shared void set(int index, T value) {
+			(self->collection).set(index, value);
+		}
+		
+		static Stream<T> create<T>(Collection<T> collection) {
+			return Stream<T>::(collection);
+		}
+		
+	}
+	
+} 

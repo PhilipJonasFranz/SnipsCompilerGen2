@@ -12,22 +12,24 @@ import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.AssignWriteback;
+import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Expression.Boolean.AsNCmp;
+import Imm.AsN.Expression.Boolean.AsNCompare;
+import Opt.AST.Util.Matcher;
 
 public class AsNForStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForStatement cast(ForStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForStatement f = new AsNForStatement();
+		f.pushOnCreatorStack(a);
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */
@@ -37,22 +39,27 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		/* Open new seperate scope for iterator, since iterator is persistent between iterations. */
 		st.openScope(a);
 		
-		/* Initialize iterator */
-		f.instructions.addAll(AsNDeclaration.cast(a.iterator, r, map, st).getInstructions());
+		Declaration dec = null;
+		if (a.iterator instanceof Declaration) dec = (Declaration) a.iterator;
 		
-		if (r.declarationLoaded(a.iterator)) {
-			/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
-			boolean push = false;
-			for (Statement s : a.body)
-				push |= AsNCompoundStatement.hasAddressReference(s, a.iterator);
-			
-			if (push) {
-				int reg = r.declarationRegLocation(a.iterator);
+		/* Initialize iterator */
+		if (dec != null) f.instructions.addAll(AsNDeclaration.cast(dec, r, map, st).getInstructions());
+		
+		if (dec != null) {
+			if (r.declarationLoaded(dec)) {
+				/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
+				boolean push = false;
+				for (Statement s : a.body)
+					push |= Matcher.hasAddressReference(s, dec);
 				
-				f.instructions.add(new ASMPushStack(new RegOp(reg)));
-				
-				st.push(a.iterator);
-				r.free(reg);
+				if (push) {
+					int reg = r.declarationRegLocation(dec);
+					
+					f.instructions.add(new ASMPushStack(new RegOp(reg)));
+					
+					st.push(dec);
+					r.free(reg);
+				}
 			}
 		}
 		
@@ -61,6 +68,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		
 		/* Marks the start of the loop */
 		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
+		forStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		f.instructions.add(forStart);
 		
 		/* End of the loop */
@@ -72,9 +80,9 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		/* Cast condition */
 		AsNExpression expr = AsNExpression.cast(a.condition, r, map, st);
 		
-		if (expr instanceof AsNCmp) {
+		if (expr instanceof AsNCompare) {
 			/* Top Comparison */
-			AsNCmp com = (AsNCmp) expr;
+			AsNCompare com = (AsNCompare) expr;
 			
 			COND neg = com.neg;
 			
@@ -86,7 +94,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.addAll(com.getInstructions());
 			
 			/* Condition was false, no else, skip body */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(neg), new LabelOp(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, neg, new LabelOp(forEnd)));
 		}
 		else {
 			/* Default condition evaluation */
@@ -96,7 +104,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 			
 			/* Condition was false, jump to else */
-			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
+			f.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(forEnd)));
 		}
 		
 		
@@ -128,8 +136,8 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		f.instructions.add(forEnd);
 		
 		/* Remove iterator from register or stack */
-		if (r.declarationLoaded(a.iterator)) {
-			int loc = r.declarationRegLocation(a.iterator);
+		if (r.declarationLoaded(dec)) {
+			int loc = r.declarationRegLocation(dec);
 			r.getReg(loc).free();
 		}
 		else {
@@ -140,6 +148,7 @@ public class AsNForStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		f.freeDecs(r, a);
+		f.registerMetric();
 		return f;
 	}
 	

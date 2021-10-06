@@ -9,13 +9,23 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Res.Const;
+import Snips.CompilerDriver;
 import Util.Pair;
 
+/**
+ * The stack set is used to keep track of data on the stack during the casting of
+ * a single method. Using the stack set, addressing can be figured out during compile
+ * time. The stack needs to be managed delicatley during the casting of the function
+ * to prevent stack shifts and addressing issues. Generally, it is important to keep
+ * the stack layout at compile time as close to the stack layout during runtime.
+ */
 public class StackSet {
 
 			/* ---< NESTED >--- */
-	/** Used to identify the contents of a stack cell. */
-	public enum CONTENT_TYPE {
+	/** 
+	 * Used to identify the contents of a stack cell. 
+	 */
+	private enum CONTENT_TYPE {
 		REGISTER, DECLARATION;
 	}
 	
@@ -26,38 +36,54 @@ public class StackSet {
 	 */
 	public class StackCell {
 		
-		/** The content type of the cell. */
+		/** 
+		 * The content type of the cell. 
+		 */
 		private CONTENT_TYPE type;
 		
-		/** The stored register. */
+		/** 
+		 * The stored register. 
+		 */
 		private REG reg;
 		
-		/** The stored declaration */
+		/** 
+		 * The stored declaration 
+		 */
 		private Declaration declaration;
 		
-		/** Create a new stack cell, set the type to register and set given register. */
+		/** 
+		 * Create a new stack cell, set the type to register and set given register. 
+		 */
 		public StackCell(REG reg) {
 			this.reg = reg;
 			this.type = CONTENT_TYPE.REGISTER;
 		}
 		
-		/** Create a new stack cell, set the type to declaration and set given declaration. */
+		/** 
+		 * Create a new stack cell, set the type to declaration and set given declaration. 
+		 */
 		public StackCell(Declaration dec) {
 			this.declaration = dec;
 			this.type = CONTENT_TYPE.DECLARATION;
 		}
 		
-		/** Returns the Content type of this stack cell. */
+		/** 
+		 * Returns the Content type of this stack cell. 
+		 */
 		public CONTENT_TYPE getType() {
 			return this.type;
 		}
 		
-		/** Returns the register stored in this stack cell. */
+		/** 
+		 * Returns the register stored in this stack cell. 
+		 */
 		public REG getReg() {
 			return this.reg;
 		}
 		
-		/** Returns the declaration stored in this stack cell. */
+		/** 
+		 * Returns the declaration stored in this stack cell. 
+		 */
 		public Declaration getDeclaration() {
 			return this.declaration;
 		}
@@ -66,10 +92,14 @@ public class StackSet {
 	
 	
 			/* ---< FIELDS >--- */
-	/** The stack that houses the stack cells. */
+	/** 
+	 * The stack that houses the stack cells. 
+	 */
 	private Stack<StackCell> stack = new Stack();
 	
-	/** The stack that contains the scope sizes. See {@link #closeScope()} for more information. */
+	/** 
+	 * The stack that contains the scope sizes. See {@link #closeScope()} for more information. 
+	 */
 	private Stack<Pair<Integer, CompoundStatement>> scopes = new Stack();
 
 	/**
@@ -85,7 +115,7 @@ public class StackSet {
 	 */
 	public void push(Declaration...dec) {
 		for (Declaration dec0 : dec) this.stack.push(new StackCell(dec0));
-		this.newDecsOnStack = true;
+		if (dec.length > 0) this.newDecsOnStack = true;
 	}
 	
 	/** Push all given registers on the stack and wrap them in stack cells. 
@@ -99,7 +129,9 @@ public class StackSet {
 		}
 	}
 	
-	/** Pop a stack cell from the stack top. */
+	/** 
+	 * Pop a stack cell from the stack top. 
+	 */
 	public void pop() {
 		this.stack.pop();
 	}
@@ -142,19 +174,19 @@ public class StackSet {
 	
 	/** Prints out the stack layout and the contents of the stack cells. */
 	public void print() {
-		System.out.println("\n---- STACK TOP ----");
+		CompilerDriver.outs.println("\n---- STACK TOP ----");
 		
 		for (int i = this.stack.size() - 1; i >= 0; i--) {
 			StackCell x = this.stack.get(i);
 			
-			System.out.println(x.type.toString() + ": ");
+			CompilerDriver.outs.println(x.type.toString() + ": ");
 			
 			if (x.type == CONTENT_TYPE.DECLARATION) 
 				x.declaration.print(4, true);
-			else System.out.println("    " + x.reg.toString());
+			else CompilerDriver.outs.println("    " + x.reg.toString());
 		}
 		
-		System.out.println("---- STACK BASE ----\n");
+		CompilerDriver.outs.println("---- STACK BASE ----\n");
 	}
 	
 	/**
@@ -265,6 +297,27 @@ public class StackSet {
 	}
 	
 	/**
+	 * Pushes dummy R0 registers on the stack, with the amount
+	 * given by the amount argument. Dummies are used
+	 * to mark unidentified data on the stack, and to make it
+	 * consistent when data is loaded, and the recieving end
+	 * pops words off the stack.
+	 */
+	public void pushDummies(int amount) {
+		for (int i = 0; i < amount; i++) this.push(REG.R0);
+	}
+	
+	/**
+	 * Pushes a single R0 dummy on the stack. Dummies are used
+	 * to mark unidentified data on the stack, and to make it
+	 * consistent when data is loaded, and the recieving end
+	 * pops words off the stack.
+	 */
+	public void pushDummy() {
+		this.push(REG.R0);
+	}
+	
+	/**
 	 * Returns the distance in bytes from the FP/LR base to the newest pushed
 	 * SP register. Used for try/watch construct. Returns the distance in bytes or -1.
 	 */
@@ -301,6 +354,10 @@ public class StackSet {
 		return off;
 	}
 	
+	/**
+	 * Returns the capsuled stack containing the current stack layout represented
+	 * as stack cells.
+	 */
 	public Stack<StackCell> getStack() {
 		return this.stack;
 	}

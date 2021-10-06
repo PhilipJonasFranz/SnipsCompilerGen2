@@ -22,4 +22,8 @@ public class ASMDataLabel extends ASMLabel {
 		return new ASMDataLabel(this.name, this.memoryOperand.clone());
 	}
 	
+	public int getRequiredCPUCycles() {
+		return 0;
+	}
+	
 } 

@@ -7,7 +7,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMLsl;
-import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -21,6 +20,7 @@ public class AsNDeref extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNDeref cast(Deref a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNDeref ref = new AsNDeref();
+		ref.pushOnCreatorStack(a);
 		a.castedNode = ref;
 		
 		ref.clearReg(r, st, 0, 1);
@@ -54,13 +54,9 @@ public class AsNDeref extends AsNExpression {
 				 * could be stored at this location. Since we load the struct, polymorphism is not available anymore, and thus we need to overwrite
 				 * the stored SID with the actual SID of the struct type.
 				 */
-				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType() instanceof STRUCT && !CompilerDriver.disableStructSIDHeaders) {
+				if (i == a.getType().wordsize() - 1 && a.getType().getCoreType().isStruct() && !CompilerDriver.disableStructSIDHeaders) {
 					STRUCT s = (STRUCT) a.getType().getCoreType();
-					
-					ASMMov mov = new ASMMov(new RegOp(target), new ImmOp(s.getTypedef().SID));
-					mov.comment = new ASMComment("Override SID header");
-					
-					ref.instructions.add(mov);
+					s.getTypedef().loadSIDInReg(ref, new RegOp(target).reg, s.proviso);
 				}
 				else {
 					ASMLdr load = new ASMLdr(new RegOp(target), new RegOp(REG.R1), new ImmOp((a.getType().wordsize() - i - 1) * 4));
@@ -70,10 +66,11 @@ public class AsNDeref extends AsNExpression {
 				ref.instructions.add(new ASMPushStack(new RegOp(target)));
 				
 				/* Push dummy values on stack */
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 		}
 		
+		ref.registerMetric();
 		return ref;
 	}
 	

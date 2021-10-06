@@ -1,0 +1,23 @@
+namespace Array {
+	
+	shared void sort<T>(T* arr, int size, func (T, T) -> bool pred) {
+		if (size > 1) {
+			while (true) {
+				bool sorted = true;
+				for (int i = 1; i < size; i++) {
+					T a0 = *(arr + i - 1);
+					T a1 = *(arr + i);
+					if (pred(a1, a0)) {
+						sorted = false;
+						*(arr + i - 1) = a1;
+						*(arr + i) = a0;
+					}
+				}
+			
+				if (sorted) break;
+			}
+		}
+		return;
+	}
+	
+} 

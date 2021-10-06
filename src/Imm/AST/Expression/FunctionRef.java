@@ -4,11 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Imm.AST.Function;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -48,14 +54,32 @@ public class FunctionRef extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Function Ref: " + this.path.build() + "<" + ((this.getType() != null)? this.getType().typeString() : "?") + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Function Ref: " + this.path + "<" + ((this.getType() != null)? this.getType() : "?") + ">");
 	}
 	
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkFunctionRef(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkFunctionRef(this);
+		
+		ctx.popTrace();
+		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunctionRef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
 
@@ -67,8 +91,14 @@ public class FunctionRef extends Expression {
 		if (this.base != null) f.base = (IDRef) this.base.clone();
 		
 		f.origin = this.origin;
+		f.setType(this.getType().clone());
 		
+		f.copyDirectivesFrom(this);
 		return f;
+	}
+	
+	public String codePrint() {
+		return this.path.build();
 	}
 
 } 

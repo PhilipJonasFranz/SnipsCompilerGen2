@@ -15,19 +15,18 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_02.txt */
+.version 0
+
 .data
-Foo.x: .word 10
 Foo.Bar.x: .word 15
-    
+Foo.x: .word 10
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    ldr r1, .POOL0_L0_Foo.x                  /* Evaluate Expression */
-    ldr r1, [r1]
-    ldr r2, .POOL0_L1_Foo.Bar.x              /* Load from .data section */
-    ldr r2, [r2]
-    add r0, r1, r2
+    mov r0, #25                              /* Evaluate Expression */
     bx lr
-.POOL0_L1_Foo.Bar.x: .word Foo.Bar.x
-.POOL0_L0_Foo.x: .word Foo.x
-    

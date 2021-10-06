@@ -45,121 +45,35 @@ TESTCASES
 7 90
 8 111
 OUTPUT
-/* --test_07.txt */
+.version 0
+
+.include maybe resv.s
+
 .data
+NULL: .word 0
 HEAP_START: .word 0
-    
+
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
-resv:                                        /* Function: resv */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-/* Add block header to size */
-    add r3, r0, #1
-/* Get reference to heap start */
-    ldr r0, .POOL0_L0_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-/* Defragment Heap */
-resv.L6:                                     /* Evaluate condition */
-    mov r0, #1
-    cmp r0, #0
-    beq resv.L7
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L10
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-/* All structures to end are free */
-    b resv.L7
-resv.L10: 
-    add r5, r5, r6
-/* Add to current size */
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-/* Memory location is free, check size */
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-/* Fits */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L19
-resv.L15: 
-    cmp r5, r3
-    ble resv.L16
-/* Rest, subtract size, store at offset */
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L19
-resv.L16: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-/* Memory section is allocated, skip */
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-/* End reached, create new block */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L19: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL0_L0_HEAP_START: .word HEAP_START
-    
+
 /* Multiplicate the given matricies. Both matricies have to have the given */
+
 /* dimension. Returns a pointer to the resulting matrix. */
+
+.global __mat_mult
 __mat_mult:                                  /* Function: __mat_mult */
     sub sp, sp, #36
     stmea sp, {r3-r9, fp, lr}
     mov fp, sp
-    mov r3, r0
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
+    mov r3, r0
     mov r1, r2                               /* Evaluate Expression */
     ldr r2, [fp, #36]
     mul r0, r1, r2
     bl resv                                  /* Call resv */
-    mov r6, r0
     mov r7, #0
+    mov r6, r0
 __mat_mult.L1: 
     cmp r7, r5
     bge __mat_mult.L2
@@ -217,16 +131,17 @@ __mat_mult.L2:
     ldmfd sp!, {r3-r9, fp, lr}
     add sp, sp, #4
     bx lr
-    
+
+.global allocMatrix
 allocMatrix:                                 /* Function: allocMatrix */
     sub sp, sp, #24
     stmea sp, {r3-r7, lr}
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     mul r0, r0, r1
     bl resv                                  /* Call resv */
-    mov r5, r0
     mov r6, #0
+    mov r5, r0
 allocMatrix.L1: 
     cmp r6, r4
     bge allocMatrix.L2
@@ -234,9 +149,9 @@ allocMatrix.L1:
 allocMatrix.L4: 
     cmp r7, r3
     bge allocMatrix.L5
-    mla r0, r6, r4, r7
     mul r2, r6, r4
     add r1, r5, r2
+    mla r0, r6, r4, r7
     push { r0 }
     add r0, r1, r7
     lsl r1, r0, #2
@@ -250,7 +165,8 @@ allocMatrix.L5:
 allocMatrix.L2: 
     mov r0, r5                               /* Evaluate Expression */
     ldmfd sp!, {r3-r7, pc}
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
     mov r3, r0
@@ -264,13 +180,10 @@ main:                                        /* Function: main */
     mov r5, r0
     mov r0, #3                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #3
-    push { r0 }
-    push { r5 }
+    stmfd sp!, {r0, r5}
     mov r0, r4
     ldmfd sp!, {r1, r2}
     bl __mat_mult                            /* Call __mat_mult */
     add r0, r0, r3
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
     pop { pc }
-    

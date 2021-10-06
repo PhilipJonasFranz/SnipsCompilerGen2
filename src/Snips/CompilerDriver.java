@@ -8,15 +8,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
-import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
-import Exc.PARSE_EXC;
+import Exc.CTEX_EXC;
+import Exc.LINK_EXC;
+import Exc.OPT0_EXC;
+import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.AST.Program;
@@ -24,22 +28,34 @@ import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Atom;
 import Imm.AST.Statement.Declaration;
 import Imm.AsN.AsNBody;
-import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PRIMITIVES.INT;
+import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
+import Lnt.Linter;
+import Opt.ASM.ASMOptimizer;
+import Opt.AST.ASTOptimizer;
 import Par.Parser;
 import Par.Scanner;
 import Par.Token;
 import PreP.NamespaceProcessor;
 import PreP.PreProcessor;
 import PreP.PreProcessor.LineObject;
+import Res.Manager.FileUtil;
+import Res.Manager.RessourceManager;
+import Res.Manager.TranslationUnit;
+import Util.BufferedPrintStream;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Pair;
 import Util.Source;
 import Util.Util;
-import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
+import Util.Logging.LogPoint.Type;
 import Util.Logging.Message;
 import Util.Logging.ProgressMessage;
+import XMLParser.MalformedXMLException;
+import XMLParser.XMLParser;
+import XMLParser.XMLParser.XMLNode;
 
 public class CompilerDriver {
 
@@ -56,26 +72,36 @@ public class CompilerDriver {
 	
 			/* ---< FLAGS & SETTINGS >--- */
 	public static boolean 
+		saveLog = 						false,  /* Everything written to the log is saved in a file 			*/
 		logoPrinted = 					false, 	/* Set to true when the logo was printed once. 					*/
 		useTerminalColors = 			true, 	/* ANSI-Escape codes are used in the console. 					*/
 		silenced = 						true,	/* Less or no messages are printed to the console. 				*/
 		imm = 							false,	/* Immediates like the AST are printed.							*/
+		out = 							false,	/* Print final output.											*/
 		enableComments = 				true,	/* The compiler adds and preserves comments in the output. 		*/
 		disableModifiers = 				false,	/* Modifier violations are ignored.								*/
-		disableOptimizer = 				false,	/* The optimizer module is skipped in the pipeline.				*/
+		useASTOptimizer	= 				true,	/* Wether to use the AST optimizer in the pipeline.				*/
+		useASMOptimizer = 				true,	/* The optimizer modules are skipped in the pipeline.			*/
+		useExperimentalOptimizer =		false,	/* If true, new and potentially buggy opt features are used.	*/
 		optimizeFileSize = 				false,	/* The optimizer attempts to minimize the output size. 			*/
 		disableWarnings = 				false,	/* No warnings are printed.										*/
+		useLinter = 					false,	/* The linter pipeline stage is run.							*/
 		disableStructSIDHeaders = 		false,	/* Structs have no SID header, but no instanceof.				*/
-		includeMetaInformation = 		true,	/* Add compilation date, version and settings to output.		*/
-		printAllImports = 				false;	/* Print out all imported libraries during pre-processing 		*/
-			
-	
+		buildObjectFileOnly = 			false,	/* Builds the object file only and adds include directives.		*/
+		buildModulesRecurse = 			false,	/* Builds all modules in the input and saves them.				*/
+		pruneModules = 					false,	/* Prune all exisiting modules and start from scratch.			*/
+		printAllImports = 				false,	/* Print out all imported libraries during pre-processing 		*/
+		printStats = 					false,	/* Print out optimizer statistics.						 		*/
+		linkOnly = 						false;	/* Only link the given input							 		*/
+		
+
 			/* --- DEBUG --- */
 	public static boolean
 		printProvisoTypes = 			false,	/* Print out proviso types when generating type string.			*/
 		printObjectIDs = 				false,	/* Print object IDs when generating type strings.				*/
 		printErrors = 					false,	/* Print stacktraces, used for debug. 							*/
-		expectError =					false;	/* Expect an error during compilation, used for debug. 			*/
+		expectError =					false,	/* Expect an error during compilation, used for debug. 			*/
+		useDefaultVersionID = 			true;   /* Set to false to prevent .version directive.					*/
 	
 	
 			/* ---< FORMATTING --- */
@@ -84,17 +110,50 @@ public class CompilerDriver {
 	
 	
 			/* --- STATS >--- */
+	public enum PIPE_STAGE {
+		PREP("Pre-Processor"),
+		SCAN("Scanner"),
+		PARS("Parser"),
+		IMPM("Import Manager"),
+		NAMM("Namespace Manager"),
+		CTEX("Context Checker"),
+		LINT("Linter"),
+		OPT0("AST Optimizer"),
+		CGEN("Code Generation"),
+		OPT1("ASM Optimizer");
+		
+		String name;
+		
+		PIPE_STAGE(String name) {
+			this.name = name;
+		}
+		
+	}
+	
+	/** Print stream all debug and log messages are printed to */
+	public static BufferedPrintStream outs = new BufferedPrintStream(System.out);
+	
 	/* Documents the occurred compression rates */
-	public static List<Double> compressions = new ArrayList();
+	public static List<Double> compressions1 = new ArrayList();
 	
 	/* Documents the minimum and maximum compression reached */
-	public static double c_min = 100, c_max = 0;
+	public static double c_min1 = 100, c_max1 = 0;
+	
+	/* Documents the occurred compression rates */
+	public static List<Double> compressions0 = new ArrayList();
+	
+	/* Documents the minimum and maximum compression reached */
+	public static double c_min0 = 100, c_max0 = 0;
+	
+	public static int opt0_loops = 0, opt0_exc = 0;
 	
 	/* Counts the amount of the different instructions */
 	public static HashMap<String, Integer> ins_p = new HashMap();
 	
 	/* Counts the total sum of all instructions */
 	public static int instructionsGenerated = 0;
+	
+	public static Stack<SyntaxElement> stackTrace;
 	
 	
 			/* ---< ACCESSIBILITY --- */
@@ -108,7 +167,13 @@ public class CompilerDriver {
 	
 	public static XMLNode sys_config;
 	
+	public static XMLNode metrics_config;
+	
+	public static HashMap<String, Pair<Integer, Integer>> node_metrics = new HashMap();
+	
 	public Exception thrownException = null;
+	
+	public static PIPE_STAGE currentStage = null;
 	
 	
 			/* --- RESERVED DECLARATIONS & RESSOURCES >--- */
@@ -126,7 +191,7 @@ public class CompilerDriver {
 	public static void main(String [] args) {
 		/* Check if filepath argument was passed */
 		if (args.length == 0) {
-			System.out.println(new Message("No input file specified! See -help for argument information.", LogPoint.Type.FAIL).getMessage());
+			CompilerDriver.outs.println(new Message("No input file specified! See -help for argument information.", LogPoint.Type.FAIL).getMessage());
 			System.exit(0);
 		}
 		
@@ -148,13 +213,13 @@ public class CompilerDriver {
 		/* Errors occurred due to faulty parameters, abort */
 		if (!log.isEmpty()) {
 			log.add(new Message("Aborting.", LogPoint.Type.FAIL));
-			log.stream().forEach(x -> System.out.println(x.getMessage()));
+			log.stream().forEach(x -> CompilerDriver.outs.println(x.getMessage()));
 			log.clear();
 			System.exit(0);
 		}
 		
 		/* Read code from input file... */
-		List<String> code = Util.readFile(inputFile);
+		List<String> code = FileUtil.readFile(inputFile);
 		
 		/* ...and compile! */
 		scd.compile(inputFile, code);
@@ -181,44 +246,21 @@ public class CompilerDriver {
 		this.readConfig();
 	}
 	
+	public SyntaxElement createOPT0Dupe(List<Token> dequeue) throws PARS_EXC, CTEX_EXC, OPT0_EXC {
+		boolean silenced = CompilerDriver.silenced;
+		CompilerDriver.silenced = true;
+		
+		SyntaxElement AST = STAGE_PARS(dequeue);
+		AST = STAGE_PRE1(AST);
+		AST = STAGE_NAME(AST);
+		AST = STAGE_CTEX(AST);
+		
+		CompilerDriver.silenced = silenced;
+		return AST;
+	}
+	
 	
 			/* ---< METHODS >--- */
-	public void readConfig() {
-		/* Read Configuration */
-		List<String> conf = Util.readFile(new File("release\\sys-inf.xml"));
-		if (conf == null) conf = Util.readFile(new File("sys-inf.xml"));
-		sys_config  = new XMLNode(conf);
-	}
-	
-	/**
-	 * Attempts to read from the .jar of the compiler, with
-	 * replative path to the CompilerDriver.class
-	 * @param path The path to the file in the jar relative to the class.
-	 * @return The contents of the given file or null.
-	 */
-	public List<String> readFromJar(String path) {
-		List<String> lines = new ArrayList();
-	    
-		try {
-			InputStream is = CompilerDriver.class.getResourceAsStream(path);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-			String line;
-		    while ((line = br.readLine()) != null) lines.add(line);
-
-		    br.close();
-		    is.close();
-		} catch (Exception e) {
-			return null;
-		}
-	    
-	    return lines;
-	}
-	
-	public Exception getException() {
-		return this.thrownException;
-	}
-	
 	public List<String> compile(File file0, List<String> code) {
 		long start = System.currentTimeMillis();
 		
@@ -231,115 +273,178 @@ public class CompilerDriver {
 		
 		try {
 			/* Recieved no source code */
-			if (code == null) 
-				throw new SNIPS_EXC("SNIPS -> Input is null!");
+			if (code == null) throw new SNIPS_EXC("SNIPS -> Input file not found! Make sure to use absolute filepaths.");
 			
 			if (imm) {
 				log.add(new Message("SNIPS -> Recieved Code:", LogPoint.Type.INFO));
-				code.stream().forEach(x -> System.out.println(printDepth + x));
+				code.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x));
 			}
 			
-			log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
-			
-					/* --- PRE-PROCESSING --- */
-			PreProcessor preProcess = new PreProcessor(code, inputFile.getName());
-			List<LineObject> preCode = preProcess.getProcessed();
-			
-			
-					/* --- SCANNING --- */
-			ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
-			Scanner scanner = new Scanner(preCode, scan_progress);
-			List<Token> deque = scanner.scan();
-			scan_progress.finish();
-			
-			
-					/* --- PARSING --- */
-			ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
-			Parser parser = new Parser(deque, parse_progress);
-			SyntaxElement AST = parser.parse();
-			parse_progress.finish();
-			
-			
-					/* --- PROCESS IMPORTS >--- */
-			Program p = (Program) AST;
-			p.fileName = inputFile.getPath();
-			if (!referencedLibaries.isEmpty()) {
-				List<Program> dependencies = this.addDependencies();
+			if (!linkOnly) {
 				
-				/* Print out imported libaries */
-				if (printAllImports)
-					for (SyntaxElement s : dependencies) 
-						log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
+				log.add(new Message("SNIPS -> Starting compilation.", LogPoint.Type.INFO));
 				
-				/* Add libaries to AST, duplicates were already filtered */
-				int c = 0;
-				for (Program p0 : dependencies) {
-					for (SyntaxElement s : p0.programElements) 
-						p.programElements.add(c++, s);
+						/* ---< PRE-PROCESSING >--- */
+				List<LineObject> preCode = STAGE_PREP(code, inputFile.getPath());
+				
+				if (imm) {
+					log.add(new Message("SNIPS -> Pre-Processed Code:", LogPoint.Type.INFO));
+					preCode.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x.line));
 				}
+				
+						/* ---< SCANNING >--- */
+				List<Token> dequeue = STAGE_SCAN(preCode);
+				
+				/* If needed, create a cache of the tokens here */
+				List<Token> dupeCache = new ArrayList();
+				if (CompilerDriver.useASTOptimizer)
+					for (Token t : dequeue)
+						dupeCache.add(t);
+				
+						/* ---< PARSING >--- */
+				SyntaxElement AST = STAGE_PARS(dequeue);
+				
+						/* --- PROCESS DYNAMIC IMPORTS >--- */
+				AST = STAGE_PRE1(AST);
+				
+						/* ---< NAMESPACE MANAGER >--- */
+				AST = STAGE_NAME(AST);
+				
+				if (imm) AST.print(4, true);
+				
+						/* ---< CONTEXT CHECKING >--- */
+				AST = STAGE_CTEX(AST);
+				
+						/* ---< LINTER >--- */
+				if (useLinter) AST = STAGE_LINT(AST);
+				
+				if (imm) AST.print(4, true);
+				
+						/* ---< AST OPTIMIZER >--- */
+				if (useASTOptimizer) AST = STAGE_OPT0(AST, this.createOPT0Dupe(dupeCache));
+				
+				if (imm) AST.print(4, true);
+				
+						/* ---< CODE GENERATION >--- */
+				AsNBody body = STAGE_CGEN(AST);
+	
+						/* ---< ASM OPTIMIZER >--- */
+				body = STAGE_OPT1(body);
+				
+						/* ---< OUTPUT BUILDING >--- */
+				output = this.buildOutput(body.originUnit, false);
+			
+						/* ---< BUILD AND DUMP MODULES >--- */
+				STAGE_DUMP(AsNBody.translationUnits);
+				
+			}
+			else output = code;
+			
+			
+					/* ---< LINKING >--- */
+			output = STAGE_LINK(output);
+			
+			
+			if (imm || out) {
+				log.add(new Message("SNIPS -> Outputted Code:", LogPoint.Type.INFO));
+				output.stream().forEach(x -> CompilerDriver.outs.println(printDepth + x));
 			}
 			
-			
-					/* ---< NAMESPACE MANAGER --- */
-			NamespaceProcessor nameProc = new NamespaceProcessor();
-			nameProc.process((Program) AST);
-			
-			if (imm) AST.print(4, true);
-			
-			
-					/* ---< CONTEXT CHECKING --- */
-			ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
-			ContextChecker ctx = new ContextChecker(AST, ctx_progress);
-			ctx.check();
+			/* Error test generated instructions are not counted, since they duplicate many times. */
+			if (!expectError) instructionsGenerated += output.size();
 		
-			ctx_progress.finish();
-			if (imm) AST.print(4, true);
+		} catch (Exception e) {
+			boolean customExc = e instanceof CGEN_EXC || e instanceof CTEX_EXC || 
+								e instanceof PARS_EXC || e instanceof LINK_EXC || 
+								e instanceof OPT0_EXC || e instanceof SNIPS_EXC;
 			
-			
-					/* ---< CODE GENERATION --- */
-			ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
-			AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
-
-			/* Remove comments left over by removed functions */
-			for (int i = 1; i < body.instructions.size(); i++) {
-				if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
-					body.instructions.remove(i - 1);
-					i -= 2;
-					if (i < 1) i = 1;
-				}
-			}
-			
-			cgen_progress.finish();
-			
-			
-					/* --- OPTIMIZING --- */
-			if (!disableOptimizer) {
-				double before = body.getInstructions().size();
-				ProgressMessage aopt_progress = new ProgressMessage("OPT1 -> Starting", 30, LogPoint.Type.INFO);
-				
-				ASMOptimizer opt = new ASMOptimizer();
-				opt.optimize(body);
-			
-				aopt_progress.finish();
-				
-				double rate = Math.round(1 / (before / 100) * (before - body.getInstructions().size()) * 100) / 100;
-				
-				if (!expectError) {
-					compressions.add(rate);
-				
-					if (rate < c_min) c_min = rate;
-					if (rate > c_max) c_max = rate;
+			/* Exception is not ordinary and internal, print message and stack trace */
+			if (printErrors || !customExc) {
+				if (!customExc) {
+					log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
+					
+					log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
+					
+					/* Give rough estimate where error occurred */
+					
+					String approx = "Pipeline Stage: " + currentStage.name;
+					
+					if (stackTrace != null && !stackTrace.isEmpty()) 
+						approx += ", at location estimate: " + stackTrace.peek().getSource().getSourceMarker();
+					else
+						approx = approx.substring(0, approx.length() - 2);
+					
+					log.add(new Message(approx, LogPoint.Type.FAIL));
 				}
 				
-				log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
+				e.printStackTrace();
 			}
 			
+			this.thrownException = e;
+			if (expectError) return null;
+		}
+		
+		/* Report Status */
+		int err = (int) log.stream().filter(x -> x.messageType == Type.FAIL).count();
+		int warn = (int) log.stream().filter(x -> x.messageType == Type.WARN).count();
+		
+		/* Compilation finished ... */
+		if (err > 0) silenced = false;
+		log.add(new Message("Operation " + 
+				/* ... successfully */
+				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
+				/* ... with errors */
+				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL));		
+		
+		log.clear();
+		
+		if (printStats) {
+			Util.printOPT0Graph(ASTOptimizer.complexity);
+			Util.printStats(this);
+		}
+		
+		if (outputPath != null && output != null) {
+			FileUtil.writeInFile(output, outputPath);
+			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
+		}
+		
+		if (saveLog) {
+			outs.flush();
 			
-					/* --- OUTPUT BUILDING --- */
-			output = new ArrayList();
+			List<String> out = outs.getContents();
+			
+			String path = CompilerDriver.outputPath;
+			String [] sp = path.replace('\\', '/').split("/");
+			path = path.substring(0, path.length() - sp [sp.length - 1].length());
+			
+			FileUtil.writeInFile(out, path + "compile.log");
+		}
+		
+		return output;
+	}
+	
+	public List<String> buildOutput(TranslationUnit unit, boolean isModule) {
+		
+		List<ASMInstruction> unitBuild = unit.buildTranslationUnit();
+		List<String> output = new ArrayList();
+		
+		boolean isMainFile = unit.sourceFile.equals(RessourceManager.instance.toASMPath(inputFile.getPath()));
+		
+		if (unit.hasVersionChanged() || isMainFile || pruneModules) {
+			
+			/* 
+			 * The version has changed, this means that all exsisting module assembly has become invalid.
+			 * So we have to delete all existing asssembly and re-build the module from scratch.
+			 */
+			
+			if (pruneModules)
+				new Message("SNIPS -> Pruned module '" + unit.sourceFile + "'", Type.INFO);
+			
+			if (!isMainFile && !pruneModules)
+				new Message("SNIPS -> Module changed: '" + unit.sourceFile + "'", Type.INFO);
 			
 			/* Build the output as a list of strings. Filter comments out if comments are disabled, and count instruction types. */
-			output = body.getInstructions().stream().filter(x -> ((x instanceof ASMComment)? enableComments : true)).map(x -> {
+			output = unitBuild.stream().filter(x -> ((x instanceof ASMComment)? (!isModule && enableComments) : true)).map(x -> {
 				
 				/* Count instruction types */
 				if (ins_p.containsKey(x.getClass().getName())) ins_p.replace(x.getClass().getName(), ins_p.get(x.getClass().getName()) + 1);
@@ -354,46 +459,71 @@ public class CompilerDriver {
 				if (output.get(i - 1).trim().equals("") && output.get(i).trim().equals("")) 
 					output.remove(i-- - 1);
 			}
+		}
+		else {
 			
-			if (imm) {
-				log.add(new Message("SNIPS -> Outputted Code:", LogPoint.Type.INFO));
-				output.stream().forEach(x -> System.out.println(printDepth + x));
+			/* 
+			 * Version has not changed, this means we can keep all existing assembly source.
+			 * This means we have to merge the new assembly with the existing module unit.
+			 */
+			
+			int changes = 0;
+			
+			LinkerUnit existingUnit = unit.existingUnit;
+			
+			/* Output is patched existing unit */
+			output = existingUnit.build();
+			
+			/* Imports */
+			existingUnit.imports.clear();
+			existingUnit.imports.addAll(unit.imports);
+			
+			/* Data Section */
+			existingUnit.dataSection.clear();
+			for (ASMInstruction dataIns : unit.dataSection)
+				existingUnit.dataSection.add(dataIns.build());
+			
+			/* Text Section */
+			for (int i = 0; i < unitBuild.size(); i++) {
+				ASMInstruction ins = unitBuild.get(i);
+				 
+				if (ins instanceof ASMDirective) {
+					ASMDirective dir = (ASMDirective) ins;
+					if (dir.hardCode.startsWith(".global")) {
+						/* Found function head */
+						boolean found = false;
+						for (String s : output) {
+							if (s.equals(dir.hardCode)) {
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found) {
+							changes++;
+							
+							output.add("");
+							
+							for (int a = i; a < unitBuild.size(); a++) {
+								ASMInstruction ins0 = unitBuild.get(a);
+								
+								if (!ins0.equals(dir) && ins0 instanceof ASMDirective) {
+									ASMDirective dir0 = (ASMDirective) ins0;
+									if (dir0.hardCode.startsWith(".global")) {
+										i = a - 1;
+										break;
+									}
+								}
+								else output.add(ins0.build());
+							}
+						}
+					}
+				}
 			}
 			
-			/* Error test generated instructions are not counted, since they duplicate many times. */
-			if (!expectError)
-				instructionsGenerated += output.size();
-		
-		} catch (Exception e) {
-			boolean customExc = (e instanceof CGEN_EXC) || (e instanceof CTX_EXC) || (e instanceof PARSE_EXC) || (e instanceof SNIPS_EXC);
+			if (changes > 0)
+				new Message("SNIPS -> Updating module '" + unit.sourceFile + "', made " + changes + " change" + ((changes > 1)? "s" : ""), Type.INFO);
 			
-			/* Exception is not ordinary and internal, print message and stack trace */
-			if (!customExc) log.add(new Message("An unexpected error has occurred:", LogPoint.Type.FAIL));
-			if (printErrors || !customExc) e.printStackTrace();
-			if (!customExc) log.add(new Message("Please contact the developer and include the input file if possible.", LogPoint.Type.FAIL));
-		
-			this.thrownException = e;
-			
-			if (expectError) return null;
-		}
-		
-		/* Report Status */
-		int err = this.getMessageTypeNumber(LogPoint.Type.FAIL);
-		int warn = this.getMessageTypeNumber(LogPoint.Type.WARN);
-		
-		/* Compilation finished ... */
-		if (err > 0) silenced = false;
-		log.add(new Message("Compilation " + 
-				/* ... successfully */
-				((err == 0 && warn == 0)? "finished successfully in " + (System.currentTimeMillis() - start) + " Millis." : 
-				/* ... with errors */
-				((err > 0)? "aborted with " + err + " Error" + ((err > 1)? "s" : "") + ((warn > 0)? " and " : "") : "") + ((warn > 0)? "with " + warn + " Warning" + ((warn > 1)? "s" : "") : "") + "."), (err == 0)? LogPoint.Type.INFO : LogPoint.Type.FAIL));		
-		
-		log.clear();
-		
-		if (outputPath != null && output != null) {
-			Util.writeInFile(output, outputPath);
-			log.add(new Message("SNIPS -> Saved to file: " + outputPath, LogPoint.Type.INFO));
 		}
 		
 		return output;
@@ -409,19 +539,9 @@ public class CompilerDriver {
 		List<Program> ASTs = new ArrayList();
 		
 		for (String filePath : files) {
-			for (XMLNode c : sys_config.getNode("Library").children) {
-				String [] v = c.value.split(":");
-				if (v [0].equals(filePath)) 
-					filePath = v [1];
-			}
 			
-			File file = new File(filePath);
-			
-			/* Read from file */
-			List<String> code = Util.readFile(file);
-			
-			if (code == null) 
-				code = Util.readFile(new File("release\\" + filePath));
+			File file = new File(RessourceManager.instance.resolve(filePath));
+			List<String> code = RessourceManager.instance.getFile(filePath);
 			
 			/* Libary was not found */
 			if (code == null) 
@@ -453,7 +573,7 @@ public class CompilerDriver {
 			ASTs.add(AST);
 		}
 		
-		this.removeDuplicates(ASTs);
+		Util.removeDuplicates(ASTs);
 		return ASTs;
 	}
 
@@ -475,38 +595,206 @@ public class CompilerDriver {
 			ASTs.addAll(driver.hotCompile(file0));
 		}
 		
-		this.removeDuplicates(ASTs);
-		
+		Util.removeDuplicates(ASTs);
 		return ASTs;
 	}
 	
-	public void removeDuplicates(List<Program> ASTs) {
-		if (ASTs.size() > 1) for (int i = 0; i < ASTs.size(); i++) {
-			for (int a = i + 1; a < ASTs.size(); a++) {
-				if (ASTs.get(i).fileName.equals(ASTs.get(a).fileName)) {
-					ASTs.remove(a);
-					a--;
-				}
+	
+			/* ---< COMPILER PIPELINE STAGES >--- */
+	private static List<LineObject> STAGE_PREP(List<String> codeIn, String filePath) {
+		currentStage = PIPE_STAGE.PREP;
+		PreProcessor preProcess = new PreProcessor(codeIn, inputFile.getPath());
+		List<LineObject> preCode = preProcess.getProcessed();
+		if (CompilerDriver.buildModulesRecurse) 
+			new Message("Recompiling " + PreProcessor.modulesIncluded + " modules", Type.INFO);
+		
+		return preCode;
+	}
+	
+	private static List<Token> STAGE_SCAN(List<LineObject> code) {
+		currentStage = PIPE_STAGE.SCAN;
+		ProgressMessage scan_progress = new ProgressMessage("SCAN -> Starting", 30, LogPoint.Type.INFO);
+		Scanner scanner = new Scanner(code, scan_progress);
+		List<Token> dequeue = scanner.scan();
+		scan_progress.finish();
+		return dequeue;
+	}
+	
+	private static SyntaxElement STAGE_PARS(List<Token> dequeue) throws PARS_EXC {
+		currentStage = PIPE_STAGE.PARS;
+		ProgressMessage parse_progress = new ProgressMessage("PARS -> Starting", 30, LogPoint.Type.INFO);
+		Parser parser = new Parser(dequeue, parse_progress);
+		SyntaxElement AST = parser.parse();
+		parse_progress.finish();
+		return AST;
+	}
+
+	private static SyntaxElement STAGE_PRE1(SyntaxElement AST) {
+		currentStage = PIPE_STAGE.IMPM;
+		Program p = (Program) AST;
+		p.fileName = inputFile.getPath();
+		if (!driver.referencedLibaries.isEmpty()) {
+			List<Program> dependencies = driver.addDependencies();
+			
+			/* Print out imported libaries */
+			if (printAllImports)
+				for (SyntaxElement s : dependencies) 
+					log.add(new Message("PRE1 -> Imported library " + ((Program) s).fileName, LogPoint.Type.INFO));
+			
+			/* Add libaries to AST, duplicates were already filtered */
+			int c = 0;
+			for (Program p0 : dependencies) {
+				for (SyntaxElement s : p0.programElements) 
+					p.programElements.add(c++, s);
+			}
+		}
+		
+		return AST;
+	}
+	
+	private static SyntaxElement STAGE_NAME(SyntaxElement AST) {
+		currentStage = PIPE_STAGE.NAMM;
+		NamespaceProcessor nameProc = new NamespaceProcessor();
+		nameProc.process((Program) AST);
+		return AST;
+	}
+	
+	private static SyntaxElement STAGE_CTEX(SyntaxElement AST) throws CTEX_EXC {
+		currentStage = PIPE_STAGE.CTEX;
+		ProgressMessage ctx_progress = new ProgressMessage("CTEX -> Starting", 30, LogPoint.Type.INFO);
+		ContextChecker ctx = new ContextChecker(AST, ctx_progress);
+		ctx.check();
+		ctx_progress.finish();
+		return AST;
+	}
+	
+	private static SyntaxElement STAGE_LINT(SyntaxElement AST) throws CTEX_EXC {
+		currentStage = PIPE_STAGE.LINT;
+		ProgressMessage lnt_progress = new ProgressMessage("LINT -> Starting", 30, LogPoint.Type.INFO);
+		Linter lnt = new Linter((Program) AST);
+		lnt.lint();
+		lnt_progress.finish();
+		lnt.report();
+		return AST;
+	}
+	
+	private static SyntaxElement STAGE_OPT0(SyntaxElement AST, SyntaxElement AST0) throws OPT0_EXC {
+		if (useASTOptimizer) {
+			double nodes_before = AST.visit(x -> { return true; }).size();
+			currentStage = PIPE_STAGE.OPT0;
+			ProgressMessage opt_progress = new ProgressMessage("OPT0 -> Starting", 30, LogPoint.Type.INFO);
+			ASTOptimizer opt0 = new ASTOptimizer();
+			AST = opt0.optProgram((Program) AST, (Program) AST0);
+			opt_progress.finish();
+			
+			if (imm) AST.codePrint(0).stream().forEach(CompilerDriver.outs::println);
+			
+			double nodes_after = AST.visit(x -> { return true; }).size();
+			
+			double rate = Math.round(1 / (nodes_before / 100) * (nodes_before - nodes_after) * 100) / 100.0;
+			
+			if (!expectError) {
+				compressions0.add(rate);
+			
+				if (rate < c_min0) c_min0 = rate;
+				if (rate > c_max0) c_max0 = rate;
+			}
+			
+			opt0_loops += opt0.CYCLES; opt0_exc++;
+			new Message("OPT0 -> Optimization Cycles: " + opt0.CYCLES + ", Nodes: " + nodes_before + " -> " + nodes_after, LogPoint.Type.INFO);
+		}
+		
+		return AST;
+	}
+	
+	private static AsNBody STAGE_CGEN(SyntaxElement AST) throws CGEN_EXC, CTEX_EXC {
+		currentStage = PIPE_STAGE.CGEN;
+		ProgressMessage cgen_progress = new ProgressMessage("CGEN -> Starting", 30, LogPoint.Type.INFO);
+		AsNBody body = AsNBody.cast((Program) AST, cgen_progress);
+		
+		/* Remove comments left over by removed functions */
+		for (int i = 1; i < body.instructions.size(); i++) {
+			if (body.instructions.get(i) instanceof ASMSeperator && body.instructions.get(i - 1) instanceof ASMComment) {
+				body.instructions.remove(i - 1);
+				i -= 2;
+				if (i < 1) i = 1;
+			}
+		}
+		
+		cgen_progress.finish();
+		return body;
+	}
+	
+	private static AsNBody STAGE_OPT1(AsNBody body) {
+		if (useASMOptimizer) {
+			currentStage = PIPE_STAGE.OPT1;
+			
+			double rate = new ASMOptimizer().optimize(body.instructions, true);
+			
+			for (Entry<String, TranslationUnit> entry : AsNBody.translationUnits.entrySet()) 
+				rate += new ASMOptimizer().optimize(entry.getValue().textSection, false);
+			
+			rate /= AsNBody.translationUnits.size();
+			
+			rate = Math.round(rate * 100) / 100.0;
+			
+			if (!expectError) {
+				compressions1.add(rate);
+			
+				if (rate < c_min1) c_min1 = rate;
+				if (rate > c_max1) c_max1 = rate;
+			}
+			
+			log.add(new Message("OPT1 -> Compression rate: " + rate + "%", LogPoint.Type.INFO));
+		}
+		
+		return body;
+	}
+	
+	private static void STAGE_DUMP(HashMap<String, TranslationUnit> translationUnits) {
+		if (buildModulesRecurse) {
+			for (Entry<String, TranslationUnit> entry : translationUnits.entrySet()) {
+				String path = RessourceManager.instance.resolve(entry.getKey());
+
+				/* Build main file seperately */
+				String excludeMainPath = RessourceManager.instance.toASMPath(inputFile.getPath());
+				if (entry.getKey().equals(excludeMainPath)) continue;
+				
+				List<String> module = driver.buildOutput(entry.getValue(), true);
+				
+				boolean write = FileUtil.writeInFile(module, path);
+				if (!write) log.add(new Message("SNIPS -> Failed to resolve module path: " + entry.getKey(), LogPoint.Type.WARN));
 			}
 		}
 	}
 	
-	public int getMessageTypeNumber(LogPoint.Type type) {
-		return (int) log.stream().filter(x -> x.messageType == type).count();
+	private static List<String> STAGE_LINK(List<String> asm) throws LINK_EXC {
+		if (!CompilerDriver.buildObjectFileOnly) {
+			Linker.link_progress = new ProgressMessage("LINK -> Starting", 30, LogPoint.Type.INFO);
+			LinkerUnit originUnit = Linker.parseLinkerUnit(asm);
+			Lnk.Linker.linkProgram(new ArrayList(), originUnit);
+			asm = originUnit.build();
+			Linker.link_progress.finish();
+			Linker.buffer.stream().forEach(x -> x.flush());
+		}
+		
+		return asm;
 	}
 	
+	
+			/* ---< CONSOLE INFORMATION --- */
 	public void printLogo() {
 		if (logoPrinted) return;
 		else logoPrinted = true;
 		
-		for (String s : logo) System.out.println(s);
+		for (String s : logo) CompilerDriver.outs.println(s);
 		
 		String ver = "Gen.2 " + sys_config.getValue("Version");
 		
 		int l = ver.length();
 		for (int i = 0; i < 41 - l; i++) ver = " " + ver;
 		
-		System.out.println("\t" + ver + "\n");
+		CompilerDriver.outs.println("\t" + ver + "\n");
 	}
 	
 	public void readArgs(String [] args) {
@@ -525,16 +813,46 @@ public class CompilerDriver {
 			for (int i = 1; i < args.length; i++) {
 				if (args [i].equals("-viz"))		useTerminalColors = false;
 				else if (args [i].equals("-imm")) 	imm = true;
+				else if (args [i].equals("-stat")) 	printStats = true;
 				else if (args [i].equals("-warn")) 	disableWarnings = true;
+				else if (args [i].equals("-lnt")) 	useLinter = true;
 				else if (args [i].equals("-imp")) 	printAllImports = true;
-				else if (args [i].equals("-opt")) 	disableOptimizer = true;
+				else if (args [i].equals("-opt0"))  useASTOptimizer = false;
+				else if (args [i].equals("-opt1"))  useASMOptimizer = false;
+				else if (args [i].equals("-opt1e")) useExperimentalOptimizer = false;
+				else if (args [i].equals("-opt")) {
+					useASTOptimizer = false;
+					useASMOptimizer = false;
+				}
 				else if (args [i].equals("-ofs")) 	optimizeFileSize = true;
 				else if (args [i].equals("-com")) 	enableComments = false;
 				else if (args [i].equals("-rov")) 	disableModifiers = true;
 				else if (args [i].equals("-sid")) 	disableStructSIDHeaders = true;
+				else if (args [i].equals("-O")) 	buildObjectFileOnly = true;
+				else if (args [i].equals("-r")) 	buildModulesRecurse = true;
+				else if (args [i].equals("-R")) {
+													buildModulesRecurse = true;
+													pruneModules = true;
+				}
+				else if (args [i].equals("-L")) 	linkOnly = true;
+				else if (args [i].equals("-F")) {
+					List<String> flags = new ArrayList();
+					i++;
+					while (i < args.length && !args [i].startsWith("-")) {
+						flags.add(args [i]);
+						i++;
+					}
+					
+					PreProcessor.passedFlags = flags;
+				}
 				else if (args [i].equals("-log")) {
-					logoPrinted = false;
-					silenced = false;
+													logoPrinted = false;
+													silenced = false;
+				}
+				else if (args [i].equals("-logs")) {
+													logoPrinted = false;
+													silenced = false;
+													saveLog = true;
 				}
 				else if (args [i].equals("-o")) 	outputPath = args [i++ + 1];
 				else log.add(new Message("Unknown Parameter: " + args [i], LogPoint.Type.FAIL));
@@ -544,7 +862,6 @@ public class CompilerDriver {
 		if (silenced) logoPrinted = true;
 	}
 	
-			/* ---< CONSOLE INFORMATION --- */
 	public void printHelp() {
 		silenced = false;
 		new Message("Arguments: ", LogPoint.Type.INFO);
@@ -553,24 +870,105 @@ public class CompilerDriver {
 				"-info     : Print Version Compiler Version and information",
 				"[Path]    : First argument, set input file",
 				"-log      : Print out log and compile information",
+				"-logs     : Print out log and compile information, save log to file",
 				"-com      : Remove comments from assembly",
-				"-warn     : Disable Warnings",
+				"-warn     : Disable warnings",
+				"-lnt      : Find potential issues in the code, print out warnings.",
 				"-imp      : Print out all imports",
-				"-opt      : Disable Optimizer",
-				"-ofs      : Optimize for Filesize, slight performance hit",
+				"-opt0     : Disable AST Optimizer",
+				"-opt1     : Disable ASM Optimizer",
+				"-opt      : Disable code optimizers",
+				"-ofs      : Optimize for filesize, slight performance penalty",
 				"-rov      : Disable visibility modifiers",
 				"-sid      : Disable SID headers, lower memory usage, but no instanceof",
+				"-O        : Build object file only, required additional linking",
+				"-r        : Re-build all changed required modules and save them",
+				"-R        : Force to re-build all required modules and save them",
+				"-L        : Link the given assembly file. Requires the input file to be a .s file.",
+				"-F        : Pass define flags to the PreProcessor to use in #ifdef directives.",
 				"-imm      : Print out immediate representations",
+				"-stat     : Print out statistics",
 				"-o [Path] : Specify output file",
 				"-viz      : Disable Ansi Color in Log messages"
 		};
 	
-		for (String s : params) System.out.println(printDepth + s);
+		for (String s : params) CompilerDriver.outs.println(printDepth + s);
 	}
 	
 	public void printInfo() {
 		silenced = false;
 		new Message("Version: Snips Compiler Gen.2 " + sys_config.getValue("Version"), LogPoint.Type.INFO);
+	}
+	
+	
+			/* --- RESSOURCES --- */
+	public void readConfig() {
+		/* Read Configuration */
+		try {
+			/* Load library config */
+			List<String> sysconf = FileUtil.readFile(new File("release\\sys-inf.xml"));
+			if (sysconf == null) sysconf = FileUtil.readFile(new File("sys-inf.xml"));
+			sys_config  = XMLParser.parse(sysconf);
+			
+			/* Load node-to-instruction ratio config */
+			List<String> meconf = FileUtil.readFile(new File("release\\metric-inf.xml"));
+			if (meconf == null) meconf = FileUtil.readFile(new File("metric-inf.xml"));
+			metrics_config  = XMLParser.parse(meconf);
+			
+			/* Pre-Cache Ratios */
+			for (XMLNode child : metrics_config.getChildren()) {
+				String [] sp = child.getValue().split(" ");
+				Pair<Integer, Integer> ic = new Pair(Integer.parseInt(sp [0]), Integer.parseInt(sp [1]));
+				node_metrics.put(child.getID(), ic);
+			}
+		} catch (MalformedXMLException e) {
+			new Message("Failed to parse system configuration!", Type.FAIL);
+			System.exit(0);
+		}
+		
+		/* Create list of aliases for system library */
+		XMLNode library = new XMLNode("Library");
+		
+		List<String> paths = new ArrayList();
+		paths.addAll(FileUtil.fileWalk("release/lib/").stream().filter(x -> !x.endsWith(".s")).collect(Collectors.toList()));
+		paths.stream().forEach(x -> {
+			/* Cut off 'release/' from path */
+			x = x.substring(8);
+			
+			File file = new File(x);
+			
+			XMLNode alias = new XMLNode("Alias");
+			alias.setValue((file.getName() + ":" + x).replace("\\", "/"));
+			
+			library.getChildren().add(alias);
+		});
+		
+		sys_config.getChildren().add(library);
+	}
+	
+	/**
+	 * Attempts to read from the .jar of the compiler, with
+	 * replative path to the CompilerDriver.class
+	 * @param path The path to the file in the jar relative to the class.
+	 * @return The contents of the given file or null.
+	 */
+	public List<String> readFromJar(String path) {
+		List<String> lines = new ArrayList();
+	    
+		try {
+			InputStream is = CompilerDriver.class.getResourceAsStream(path);
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+			String line;
+		    while ((line = br.readLine()) != null) lines.add(line);
+
+		    br.close();
+		    is.close();
+		} catch (Exception e) {
+			return null;
+		}
+	    
+	    return lines;
 	}
 	
 	
@@ -581,117 +979,22 @@ public class CompilerDriver {
 		printErrors = !value;
 	}
 	
-	public static void printAverageCompression() {
-		double [] rate = {0};
-		compressions.stream().forEach(x -> rate [0] += x / compressions.size());
-		double r0 = rate [0];
-		r0 = Math.round(r0 * 100.0) / 100.0;
-		
-		String f = "  ";
-		
-		if (!disableOptimizer) {
-			log.add(new Message("SNIPS_OPT1 -> Compression Statistics: ", LogPoint.Type.INFO));
-			
-			/* Plot compression statistics */		
-			System.out.println();
-			
-			int [] map = new int [100];
-			for (double d : compressions) {
-				map [(int) d - 1]++;
-			}
-			
-			int m = 0;
-			for (int i : map) if (i > m) m = i;
-			
-			f = ("" + m).replaceAll(".", " ");
-			
-			for (int i = m; i >= 0; i--) {
-				
-				if (i % 5 == 0) {
-					String num = "" + i;
-					for (int k = 0; k < f.length() - num.length(); k++) System.out.print(" ");
-					System.out.print(num + "|");
-				}
-				else System.out.print(f + "|");
-				for (int a = 0; a < 100; a++) {
-					if (map [a] > i) System.out.print("\u2588");
-					else System.out.print(" ");
-				}
-				System.out.println();
-			}
-			
-			for (int i = 0; i < 100; i++) {
-				if (i > f.length()) System.out.print("-");
-				else System.out.print(" ");
-			}
-			System.out.println();
-			
-			System.out.print(" ");
-			String s = f;
-			for (int i = 0; i <= 100; i += 10) {
-				if (i % 10 == 0) {
-					s += "" + i;
-					while (s.length() < i + 10) s += " ";
-				}
-			}
-			
-			System.out.println(s + "\n");
-			
-			log.add(new Message("SNIPS_OPT1 -> Average compression rate: " + r0 + "%, min: " + c_min + "%, max: " + c_max + "%", LogPoint.Type.INFO));
-		}
-		
-		log.add(new Message("SNIPS_OPT1 -> Relative frequency of instructions: ", LogPoint.Type.INFO));
-		
-		List<Pair<Integer, String>> rmap = new ArrayList();
-		for (Entry<String, Integer> e : ins_p.entrySet()) {
-			if (rmap.isEmpty()) {
-				rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
-			}
-			else {
-				boolean added = false;
-				for (int i = 0; i < rmap.size(); i++) {
-					if (e.getValue() > rmap.get(i).first) {
-						rmap.add(i, new Pair<Integer, String>(e.getValue(), e.getKey()));
-						added = true;
-						break;
-					}
-				}
-				
-				if (!added) rmap.add(new Pair<Integer, String>(e.getValue(), e.getKey()));
-			}
-		}
-		
-		if (!rmap.isEmpty()) {
-			System.out.println();
-			
-			double stretch = 1.0;
-			
-			if (rmap.get(0).first > 75) {
-				stretch = 75.0 / rmap.get(0).first;
-			}
-			
-			for (int i = 0; i < rmap.size(); i++) {
-				System.out.print(f + "|");
-				for (int a = 0; a < (int) ((double) rmap.get(i).first * stretch); a++) {
-					System.out.print("\u2588");
-				}
-				
-				String n = rmap.get(i).second.split("\\.") [rmap.get(i).second.split("\\.").length - 1];
-				
-				System.out.println(" : " + n + " (" + rmap.get(i).first + ")");
-			}
-			
-			System.out.println();
-		}
-		
-		log.add(new Message("SNIPS_OPT1 -> Total Instructions generated: " + Util.formatNum(instructionsGenerated), LogPoint.Type.INFO));
-	}
-	
 	/** Resets flags during burst compilation */
 	public static void reset() {
 		heap_referenced = false;
 		null_referenced = false;
 		expectError = false;
+		
+		LabelUtil.c.clear();
+		
+		AsNBody.translationUnits.clear();
+		
+		ASTOptimizer.complexity.clear();
+		
+		PreProcessor.importsPerFile.clear();
+		PreProcessor.passedFlags.clear();
+		PreProcessor.imports.clear();
+		PreProcessor.modulesIncluded = 0;
 	}
 	
 } 

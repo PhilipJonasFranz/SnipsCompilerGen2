@@ -1,10 +1,11 @@
 package Imm.ASM.Processing;
 
 import Imm.ASM.ASMInstruction;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Shift;
 import Imm.ASM.Util.Operands.Operand;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Snips.CompilerDriver;
 
 public abstract class ASMBinaryData extends ASMInstruction {
@@ -31,7 +32,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	public Shift shift;
 	
 	/** Wether to update the condition field when executing this instruction. */
-	private boolean updateConditionField = false;
+	public boolean updateConditionField = false;
 	
 	
 			/* ---< CONSTRUCTURS >--- */
@@ -41,7 +42,7 @@ public abstract class ASMBinaryData extends ASMInstruction {
 		this.op1 = op1;
 	}
 	
-	public ASMBinaryData(RegOp target, RegOp op0, Operand op1, Cond cond) {
+	public ASMBinaryData(RegOp target, RegOp op0, Operand op1, COND cond) {
 		super(cond);
 		this.target = target;
 		this.op0 = op0;
@@ -66,6 +67,16 @@ public abstract class ASMBinaryData extends ASMInstruction {
 	
 	public boolean isUpdatingCondField() {
 		return this.updateConditionField;
+	}
+	
+	public int getRequiredCPUCycles() {
+		int sum = 1; // +S
+		
+		if (this.target.reg == REG.PC && this.shift != null) sum = 4; // +I +N +2S
+		else if (this.shift != null) sum = 2; // +I +S
+		else if (this.target.reg == REG.PC) sum = 3; // +N +2S
+		
+		return sum;
 	}
 
 } 

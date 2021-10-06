@@ -13,7 +13,7 @@ int main() {
 	return b->get<>();
 }
 THROWN
-MISSING_PROVISOS
+FAILED_TO_CHECK_PARAMETER
 
 SOURCE
 struct B<T> {
@@ -30,7 +30,7 @@ int main() {
 	return b->get<>();
 }
 THROWN
-MISSING_PROVISOS
+FAILED_TO_CHECK_PARAMETER
 
 SOURCE
 struct B {
@@ -47,5 +47,5 @@ int main() {
 	return b->get<>();
 }
 THROWN
-MISSING_PROVISOS
+FAILED_TO_CHECK_PARAMETER
 

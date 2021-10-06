@@ -1,11 +1,16 @@
 package Par;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
-import Exc.CTX_EXC;
-import Exc.PARSE_EXC;
+import CGen.Util.LabelUtil;
+import Exc.CTEX_EXC;
+import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
@@ -20,10 +25,12 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Deref;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.FunctionRef;
+import Imm.AST.Expression.IDOfExpression;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.InlineCall;
-import Imm.AST.Expression.InstanceofExpression;
+import Imm.AST.Expression.InlineFunction;
+import Imm.AST.Expression.OperatorExpression;
 import Imm.AST.Expression.RegisterAtom;
 import Imm.AST.Expression.SizeOfExpression;
 import Imm.AST.Expression.SizeOfType;
@@ -69,6 +76,7 @@ import Imm.AST.Statement.ForEachStatement;
 import Imm.AST.Statement.ForStatement;
 import Imm.AST.Statement.FunctionCall;
 import Imm.AST.Statement.IfStatement;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -79,7 +87,7 @@ import Imm.AST.Statement.WhileStatement;
 import Imm.AST.Typedef.EnumTypedef;
 import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AST.Typedef.StructTypedef;
-import Imm.AsN.AsNNode.MODIFIER;
+import Imm.TYPE.AUTO;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
@@ -96,6 +104,9 @@ import Par.Token.TokenType;
 import Par.Token.TokenType.TokenGroup;
 import Res.Const;
 import Snips.CompilerDriver;
+import Util.ASTDirective;
+import Util.ASTDirective.DIRECTIVE;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.NamespacePath.PATH_TERMINATION;
 import Util.Pair;
@@ -113,40 +124,42 @@ import Util.Logging.ProgressMessage;
 public class Parser {
 
 	/** List of tokens that were created by the scanner */
-	protected List<Token> tokenStream;
+	private List<Token> tokenStream;
 	
 	/** 
 	 * Current token. The current token is not in the {@link #tokenStream}, 
 	 * but is removed and set to the remove element.
 	 */
-	protected Token current;
+	private Token current;
 	
 	/** Active Struct Ids */
-	List<Pair<NamespacePath, Function>> functions = new ArrayList();
+	private List<Pair<NamespacePath, Function>> functions = new ArrayList();
 	
 	/** Active Struct Ids */
-	List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
+	private List<Pair<NamespacePath, StructTypedef>> structIds = new ArrayList();
 	
 	/** Active Interface Ids */
-	List<Pair<NamespacePath, InterfaceTypedef>> interfaceIds = new ArrayList();
+	private List<Pair<NamespacePath, InterfaceTypedef>> interfaceIds = new ArrayList();
 	
 	/** Active Enum Ids */
-	List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
+	private List<Pair<NamespacePath, EnumTypedef>> enumIds = new ArrayList();
 	
 	/** All active Provisos, like T, V */
-	List<String> activeProvisos = new ArrayList();
+	private List<String> activeProvisos = new ArrayList();
 	
 	/** The currently open namespaces */
-	Stack<NamespacePath> namespaces = new Stack();
+	private Stack<NamespacePath> namespaces = new Stack();
 	
-	Stack<List<Declaration>> scopes = new Stack();
+	private Stack<List<Declaration>> scopes = new Stack();
+	
+	private Stack<List<ASTDirective>> bufferedAnnotations = new Stack();
 	
 	/** Generated warn messages that are flushed at the end */
-	List<Message> buffered = new ArrayList();
+	private List<Message> buffered = new ArrayList();
 	
-	protected ProgressMessage progress;
+	private ProgressMessage progress;
 	
-	public int done = 0, toGo;
+	private int done = 0, toGo;
 	
 	public Parser(List tokens, ProgressMessage progress) throws SNIPS_EXC {
 		if (tokens == null) {
@@ -165,11 +178,30 @@ public class Parser {
 	
 	/**
 	 * Accept a token based on its type.
+	 * @param types Accepted types
+	 * @return The accepted Token.
+	 * @throws PARS_EXC Thrown then the token does not have one of the given types.
+	 */
+	private Token accept(TokenType...types) throws PARS_EXC {
+		/* Convert tokens dynamically based on the currently active provisos */
+		if (this.activeProvisos.contains(current.spelling)) 
+			current.type = TokenType.PROVISO;
+		
+		for (TokenType type : types) {
+			if (current.type() == type) return accept();
+		}
+		
+		this.progress.abort();
+		throw new PARS_EXC(current.source, current.type(), types);
+	}
+	
+	/**
+	 * Accept a token based on its type.
 	 * @param tokenType The type the token should match.
 	 * @return The accepted Token.
-	 * @throws PARSE_EXC Thrown then the token does not have the given type.
+	 * @throws PARS_EXC Thrown then the token does not have the given type.
 	 */
-	protected Token accept(TokenType tokenType) throws PARSE_EXC {
+	private Token accept(TokenType tokenType) throws PARS_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
@@ -177,7 +209,7 @@ public class Parser {
 		if (current.type() == tokenType) return accept();
 		else {
 			this.progress.abort();
-			throw new PARSE_EXC(current.source, current.type(), tokenType);
+			throw new PARS_EXC(current.source, current.type(), tokenType);
 		}
 	}
 	
@@ -185,9 +217,9 @@ public class Parser {
 	 * Accept a token based on its token group.
 	 * @param group The group the token should match.
 	 * @return The accepted Token.
-	 * @throws PARSE_EXC Thrown when the token does not have the given token group.
+	 * @throws PARS_EXC Thrown when the token does not have the given token group.
 	 */
-	protected Token accept(TokenGroup group) throws PARSE_EXC {
+	private Token accept(TokenGroup group) throws PARS_EXC {
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
@@ -195,7 +227,7 @@ public class Parser {
 		if (current.type().group() == group)return accept();
 		else {
 			this.progress.abort();
-			throw new PARSE_EXC(current.source, current.type());
+			throw new PARS_EXC(current.source, current.type());
 		}
 	}
 	
@@ -203,12 +235,14 @@ public class Parser {
 	 * Accept a token without any checks.
 	 * @return The accepted token.
 	 */
-	protected Token accept() {
+	private Token accept() {
+		
+		/* Store the current source, is used to give aproximation when crash occurs */
+		//CompilerDriver.lastSource = current.source;
+		
 		/* Convert tokens dynamically based on the currently active provisos */
 		if (this.activeProvisos.contains(current.spelling)) 
 			current.type = TokenType.PROVISO;
-		
-		//System.out.println("\t" + current.type.toString() + " " + current.spelling);
 		
 		if (this.progress != null) {
 			done++;
@@ -224,22 +258,17 @@ public class Parser {
 		return old;
 	}
 	
-	public SyntaxElement parse() throws PARSE_EXC {
+	public SyntaxElement parse() throws PARS_EXC {
 		Program p = parseProgram();
 		if (this.progress != null) this.progress.incProgress(1);
 		return p;
 	}
 	
-	protected Program parseProgram() throws PARSE_EXC {
+	private Program parseProgram() throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
-		List<SyntaxElement> elements = new ArrayList();
 		
-		while (this.current.type != TokenType.EOF) {
-			this.activeProvisos.clear();
-			elements.add(this.parseProgramElement());
-		}
-		
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF);
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
@@ -250,7 +279,70 @@ public class Parser {
 		return program;
 	}
 	
-	public Namespace parseNamespace() throws PARSE_EXC {
+	private List<SyntaxElement> parseProgramElements(TokenType close) throws PARS_EXC {
+		List<SyntaxElement> elements = new ArrayList();
+		
+		boolean push = true;
+		while (this.current.type != close) {
+			this.activeProvisos.clear();
+			
+			if (push) this.bufferedAnnotations.push(new ArrayList());
+			push = true;
+			
+			SyntaxElement element = this.parseProgramElement();
+			
+			if (element != null) {
+				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+				elements.add(element);
+			}
+			else push = false;
+			
+			if (element instanceof Function) {
+				Function f = (Function) element;
+				
+				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
+					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
+					
+					Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+					
+					if (first.isPresent()) {
+						/* 
+						 * Transform all tokens that use the symbol of 
+						 * the operator to operator tokens. 
+						 */
+						String symbol = first.get().getKey();
+						
+						for (int i = 0; i < this.tokenStream.size(); i++) {
+							Token t = this.tokenStream.get(i);
+							
+							String spelling = t.spelling;
+							if (spelling == null) 
+								spelling = t.type().spelling();
+							
+							if (symbol.startsWith(spelling)) {
+								String buffer = spelling;
+								for (int a = i + 1; a < this.tokenStream.size(); a++) {
+									if (buffer.length() > symbol.length()) break;
+									else {
+										if (buffer.equals(symbol)) {
+											t.markedAsOperator = true;
+											t.operatorSymbol = symbol;
+											break;
+										}
+										else buffer += this.tokenStream.get(a).spelling;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return elements;
+	}
+	
+	private Namespace parseNamespace() throws PARS_EXC {
 		Source source = accept(TokenType.NAMESPACE).source();
 		
 		NamespacePath path = this.parseNamespacePath();
@@ -259,11 +351,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = new ArrayList();
-		
-		while (current.type != TokenType.RBRACE) {
-			elements.add(this.parseProgramElement());
-		}
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE);
 		
 		this.namespaces.pop();
 		
@@ -272,9 +360,54 @@ public class Parser {
 		return new Namespace(path, elements, source);
 	}
 	
-	public SyntaxElement parseProgramElement() throws PARSE_EXC {
+	private ASTDirective parseASTAnnotation() throws PARS_EXC {
+		accept(TokenType.DIRECTIVE);
+		
+		Token type = accept(TokenType.IDENTIFIER);
+		DIRECTIVE type0 = null;
+		
+		try {
+			type0 = DIRECTIVE.valueOf(type.spelling.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			throw new SNIPS_EXC("Unknown directive: '" + type.spelling + "', " + type.source.getSourceMarker());
+		}
+		
+		HashMap<String, String> arguments = new HashMap();
+		
+		while (current.source.row == type.source.row) {
+			String key = accept().spelling;
+			
+			while (current.source.row == type.source.row && 
+					!(current.type == TokenType.LET || current.type == TokenType.COMMA)) {
+				key += accept().spelling;
+			}
+			
+			String value = null;
+			
+			if (current.type == TokenType.LET) {
+				accept(TokenType.LET);
+				value = accept(TokenType.IDENTIFIER, TokenType.INTLIT).spelling;
+			}
+			
+			if (arguments.containsKey(key.toLowerCase())) 
+				throw new SNIPS_EXC("Found duplicate directive argument key: " + key + ", " + type.source.getSourceMarker());
+			
+			arguments.put(key, value);
+			
+			if (current.source.row == type.source.row && current.type == TokenType.COMMA) accept();
+			else break;
+		}
+		
+		return new ASTDirective(type0, arguments);
+	}
+	
+	private SyntaxElement parseProgramElement() throws PARS_EXC {
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
+		}
+		else if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
 		}
 		else if (current.type == TokenType.STRUCT || (current.type.group() == TokenGroup.MODIFIER && this.tokenStream.get(0).type == TokenType.STRUCT)) {
 			return this.parseStructTypedef();
@@ -297,7 +430,7 @@ public class Parser {
 			
 			SyntaxElement element = null;
 			if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {
-				element = this.parseFunction(type, identifier, mod, false);
+				element = this.parseFunction(type, identifier, mod, false, false);
 			}
 			else {
 				Declaration d = this.parseGlobalDeclaration(type, identifier, mod);
@@ -309,12 +442,12 @@ public class Parser {
 		}
 	}
 	
-	public Comment parseComment() throws PARSE_EXC {
+	private Comment parseComment() throws PARS_EXC {
 		Token comment = accept(TokenType.COMMENT);
 		return new Comment(comment, comment.source());
 	}
 	
-	public StructTypedef parseStructTypedef() throws PARSE_EXC {
+	private StructTypedef parseStructTypedef() throws PARS_EXC {
 		
 		MODIFIER mod = this.parseModifier();
 		
@@ -369,6 +502,11 @@ public class Parser {
 					
 					InterfaceTypedef def = this.getInterfaceTypedef(ext0, source);
 					
+					if (def == null) {
+						this.progress.abort();
+						throw new SNIPS_EXC("Unknown extension: %s in " + source.getSourceMarker(), ext0.build());
+					}
+					
 					implemented.add(new INTERFACE(def, this.parseProviso()));
 					
 					if (current.type == TokenType.COMMA)
@@ -384,6 +522,16 @@ public class Parser {
 		 * such a declaration is parsed.
 		 */
 		StructTypedef def = new StructTypedef(path, proviso, new ArrayList(), new ArrayList(), ext, implemented, extProviso, mod, source);
+		
+		/*
+		 * In preparation that this struct might be the implementation of a struct typedef
+		 * that was included from the header, we already have to take action here to ensure
+		 * references from here on out are correct. So, we check if there is already a typedef
+		 * that has the same namespace path. If there is no such typedef, we use the current one.
+		 */
+		StructTypedef head = this.getStructTypedef(def.path, def.getSource());
+		if (head == null) head = def;
+		
 		this.structIds.add(new Pair<NamespacePath, StructTypedef>(path, def));
 		
 		/* Add the extended fields */
@@ -417,14 +565,19 @@ public class Parser {
 				
 				TYPE type = this.parseType();
 				
-				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false);
+				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false, true);
 				
 				/* Insert Struct Name */
 				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
 				
 				if (f.modifier != MODIFIER.STATIC) {
-					/* Inject Self Reference */
-					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(def.self.clone()), MODIFIER.SHARED, f.getSource());
+					/* 
+					 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
+					 * of a header, that we use the local variable 'head', that holds a reference to it.
+					 * This is important because later when context checking, the correct struct typedef 
+					 * reference is present and type comparisons work accordingly. 
+					 */
+					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
 					f.parameters.add(0, self);
 				}
 				
@@ -445,7 +598,7 @@ public class Parser {
 		return def;
 	}
 	
-	public InterfaceTypedef parseInterfaceTypedef() throws PARSE_EXC {
+	private InterfaceTypedef parseInterfaceTypedef() throws PARS_EXC {
 		MODIFIER mod = this.parseModifier();
 		
 		Source source = accept(TokenType.INTERFACE).source();
@@ -483,7 +636,7 @@ public class Parser {
 			MODIFIER fmod = this.parseModifier();
 			
 			TYPE ret = this.parseType();
-			Function f = this.parseFunction(ret, accept(TokenType.IDENTIFIER), fmod, true);
+			Function f = this.parseFunction(ret, accept(TokenType.IDENTIFIER), fmod, true, true);
 			
 			/* Insert Struct Name */
 			f.path.path.add(f.path.path.size() - 1, def.path.getLast());
@@ -495,8 +648,6 @@ public class Parser {
 			}
 			
 			def.functions.add(f);
-
-			accept(TokenType.SEMICOLON);
 		}
 		
 		accept(TokenType.RBRACE);
@@ -504,7 +655,7 @@ public class Parser {
 		return def;
 	}
 	
-	public EnumTypedef parseEnumTypedef() throws PARSE_EXC {
+	private EnumTypedef parseEnumTypedef() throws PARS_EXC {
 		Source source = accept(TokenType.ENUM).source();
 		Token id = accept(TokenType.ENUMID);
 		
@@ -541,7 +692,7 @@ public class Parser {
 		return def;
 	}
 	
-	public NamespacePath buildPath(String id) {
+	private NamespacePath buildPath(String id) {
 		NamespacePath path = new NamespacePath(new ArrayList());
 		for (int i = 0; i < this.namespaces.size(); i++) {
 			path.path.addAll(this.namespaces.get(i).path);
@@ -550,7 +701,7 @@ public class Parser {
 		return path;
 	}
 	
-	public NamespacePath buildPath() {
+	private NamespacePath buildPath() {
 		NamespacePath path = new NamespacePath(new ArrayList());
 		for (int i = 0; i < this.namespaces.size(); i++) {
 			path.path.addAll(this.namespaces.get(i).path);
@@ -558,7 +709,7 @@ public class Parser {
 		return path;
 	}
 	
-	protected Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod, boolean parseHeadOnly) throws PARSE_EXC {
+	private Function parseFunction(TYPE returnType, Token identifier, MODIFIER mod, boolean parseHeadOnly, boolean isNestedFunction) throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		/* Check if a function name is a reserved identifier */
@@ -607,17 +758,37 @@ public class Parser {
 			}
 		}
 		
-		List<Statement> body = (parseHeadOnly)? new ArrayList() : this.parseCompoundStatement(true);
+		List<Statement> body = null;
+		if (current.type == TokenType.SEMICOLON) accept();
+		else if (!parseHeadOnly) body = this.parseCompoundStatement(true);
 		
 		NamespacePath path = this.buildPath(identifier.spelling);
 		Function f = new Function(returnType, path, proviso, parameters, signals, signalsTypes, body, mod, identifier.source);
-		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		
+		/* 
+		 * Perform merge only for functions that are not nested here,
+		 * for nested functions merge will be done later.
+		 */
+		if (!isNestedFunction) {
+			for (Pair<NamespacePath, Function> pair : this.functions) {
+				boolean useProvisoFreeInCheck = STRUCT.useProvisoFreeInCheck;
+				STRUCT.useProvisoFreeInCheck = false;
+				if (Function.signatureMatch(f, pair.second, false, false, true)) {
+					STRUCT.useProvisoFreeInCheck = useProvisoFreeInCheck;
+					pair.second.body = f.body;
+					this.scopes.pop();
+					return null;
+				}
+				STRUCT.useProvisoFreeInCheck = useProvisoFreeInCheck;
+			}
+		}
+		
+		this.functions.add(new Pair<NamespacePath, Function>(path, f));
 		this.scopes.pop();
 		return f;
 	}
 	
-	protected Declaration parseDeclaration(MODIFIER mod, boolean parseValue, boolean acceptSemicolon) throws PARSE_EXC {
+	private Declaration parseDeclaration(MODIFIER mod, boolean parseValue, boolean acceptSemicolon) throws PARS_EXC {
 		TYPE type = this.parseType();
 		Token id = accept(TokenType.IDENTIFIER);
 
@@ -636,10 +807,15 @@ public class Parser {
 		return d;
 	}
 	
-	protected Statement parseStatement() throws PARSE_EXC {
+	private Statement parseStatement() throws PARS_EXC {
 		/* Convert next token */
 		if (this.activeProvisos.contains(current.spelling)) {
 			current.type = TokenType.PROVISO;
+		}
+		
+		if (current.type == TokenType.DIRECTIVE) {
+			this.bufferedAnnotations.peek().add(this.parseASTAnnotation());
+			return null;
 		}
 		
 		Token modT = (current.type.group() == TokenGroup.MODIFIER)? current : null;
@@ -647,7 +823,8 @@ public class Parser {
 		
 		boolean functionCheck = current.type == TokenType.NAMESPACE_IDENTIFIER || current.type == TokenType.IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
-			if (tokenStream.get(i).type == TokenType.LPAREN || tokenStream.get(i).type == TokenType.CMPLT) {
+			if (tokenStream.get(i).type == TokenType.LPAREN || (tokenStream.get(i).type == TokenType.CMPLT && 
+					!(tokenStream.get(i).markedAsOperator && tokenStream.get(i).operatorSymbol.equals("<<")))) {
 				if (tokenStream.get(i + 1).type == TokenType.CMPLE) functionCheck = false;
 				break;
 			}
@@ -710,7 +887,7 @@ public class Parser {
 		}
 		else {
 			if (modT != null) {
-				throw new PARSE_EXC(modT.source, modT.type, 
+				throw new PARS_EXC(modT.source, modT.type, 
 						TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
 						TokenType.DO, TokenType.FOR, TokenType.BREAK, 
 						TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
@@ -782,17 +959,13 @@ public class Parser {
 				return call;
 			}
 			else {
-				if (this.progress != null) this.progress.abort();
-				throw new PARSE_EXC(current.source, current.type, 
-				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
-				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
-				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
-				TokenType.IF);
+				/* Use this as default, multiple edge-cases are handled here */
+				return this.parseAssignment(false);
 			}
 		}
 	}
 	
-	protected DirectASMStatement parseDirectASM() throws PARSE_EXC {
+	private DirectASMStatement parseDirectASM() throws PARS_EXC {
 		Source source = current.source();
 		
 		accept(TokenType.ASM);
@@ -884,7 +1057,7 @@ public class Parser {
 		return new DirectASMStatement(assembly, dataIn, dataOut, source);
 	}
 	
-	protected FunctionCall parseFunctionCall() throws PARSE_EXC {
+	private FunctionCall parseFunctionCall() throws PARS_EXC {
 		Source source = current.source();
 		
 		NamespacePath path = this.parseNamespacePath();
@@ -905,13 +1078,13 @@ public class Parser {
 		accept(TokenType.SEMICOLON);
 		
 		if (path.getLast().equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		
 		return new FunctionCall(path, provisos, params, source);
 	}
 	
-	protected SwitchStatement parseSwitch() throws PARSE_EXC {
+	private SwitchStatement parseSwitch() throws PARS_EXC {
 		Source source = accept(TokenType.SWITCH).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
@@ -936,7 +1109,7 @@ public class Parser {
 		return new SwitchStatement(condition, cases, defaultStatement, source);
 	}
 	
-	protected CaseStatement parseCase() throws PARSE_EXC {
+	private CaseStatement parseCase() throws PARS_EXC {
 		Source source = accept(TokenType.CASE).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
@@ -948,7 +1121,7 @@ public class Parser {
 		return new CaseStatement(condition, body, source);
 	}
 	
-	protected DefaultStatement parseDefault() throws PARSE_EXC {
+	private DefaultStatement parseDefault() throws PARS_EXC {
 		Source source = accept(TokenType.DEFAULT).source();
 		accept(TokenType.COLON);
 		
@@ -957,19 +1130,19 @@ public class Parser {
 		return new DefaultStatement(body, source);
 	}
 	
-	protected BreakStatement parseBreak() throws PARSE_EXC {
+	private BreakStatement parseBreak() throws PARS_EXC {
 		Source source = accept(TokenType.BREAK).source();
 		accept(TokenType.SEMICOLON);
 		return new BreakStatement(source);
 	}
 	
-	protected ContinueStatement parseContinue() throws PARSE_EXC {
+	private ContinueStatement parseContinue() throws PARS_EXC {
 		Source source = accept(TokenType.CONTINUE).source();
 		accept(TokenType.SEMICOLON);
 		return new ContinueStatement(source);
 	}
 	
-	protected IfStatement parseIf() throws PARSE_EXC {
+	private IfStatement parseIf() throws PARS_EXC {
 		Source source = current.source();
 		accept(TokenType.IF);
 		accept(TokenType.LPAREN);
@@ -994,7 +1167,7 @@ public class Parser {
 		return if0;
 	}
 	
-	protected TryStatement parseTry() throws PARSE_EXC {
+	private TryStatement parseTry() throws PARS_EXC {
 		Source source = current.source();
 		accept(TokenType.TRY);
 		
@@ -1008,7 +1181,7 @@ public class Parser {
 		return new TryStatement(body, watchpoints, source);
 	}
 	
-	protected WatchStatement parseWatch() throws PARSE_EXC {
+	private WatchStatement parseWatch() throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Source source = current.source();
@@ -1027,7 +1200,7 @@ public class Parser {
 		return new WatchStatement(body, watched, source);
 	}
 	
-	protected SignalStatement parseSignal() throws PARSE_EXC {
+	private SignalStatement parseSignal() throws PARS_EXC {
 		Source source = current.source();
 		
 		accept(TokenType.SIGNAL);
@@ -1039,17 +1212,23 @@ public class Parser {
 		return new SignalStatement(ex0, source);
 	}
 	
-	protected Statement parseFor() throws PARSE_EXC {
+	private Statement parseFor() throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Source source = accept(TokenType.FOR).source();
-		accept(TokenType.LPAREN);
+		
+		boolean writeBackIterator = false;
+		if (current.type == TokenType.LBRACKET) {
+			accept();
+			writeBackIterator = true;
+		}
+		else accept(TokenType.LPAREN);
 		
 		TYPE itType = this.parseType();
 		Token itId = accept(TokenType.IDENTIFIER);
 		
-		if (current.type == TokenType.COLON) 
-			return this.parseForEach(itType, itId);
+		if (current.type == TokenType.COLON || writeBackIterator) 
+			return this.parseForEach(itType, itId, writeBackIterator);
 		
 		accept(TokenType.LET);
 		
@@ -1073,7 +1252,7 @@ public class Parser {
 		return new ForStatement(iterator, condition, increment, body, source);
 	}
 	
-	protected Statement parseForEach(TYPE itType, Token itId) throws PARSE_EXC {
+	private Statement parseForEach(TYPE itType, Token itId, boolean writeBackIterator) throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		Declaration iterator = new Declaration(new NamespacePath(itId.spelling), itType, null, MODIFIER.SHARED, itId.source());
@@ -1090,14 +1269,15 @@ public class Parser {
 			range = this.parseExpression();
 		}
 		
-		accept(TokenType.RPAREN);
+		if (writeBackIterator) accept(TokenType.RBRACKET);
+		else accept(TokenType.RPAREN);
 		
 		List<Statement> body = this.parseCompoundStatement(false);
 		
-		return new ForEachStatement(iterator, shadowRef, range, body, itId.source());
+		return new ForEachStatement(iterator, writeBackIterator, shadowRef, range, body, itId.source());
 	}
 	
-	protected WhileStatement parseWhile() throws PARSE_EXC {
+	private WhileStatement parseWhile() throws PARS_EXC {
 		Source source = accept(TokenType.WHILE).source();
 		accept(TokenType.LPAREN);
 		Expression condition = this.parseExpression();
@@ -1106,7 +1286,7 @@ public class Parser {
 		return new WhileStatement(condition, body, source);
 	}
 	
-	protected DoWhileStatement parseDoWhile() throws PARSE_EXC {
+	private DoWhileStatement parseDoWhile() throws PARS_EXC {
 		Source source = accept(TokenType.DO).source();
 		
 		List<Statement> body = this.parseCompoundStatement(true);
@@ -1122,7 +1302,7 @@ public class Parser {
 		return new DoWhileStatement(condition, body, source);
 	}
 	
-	protected Statement parseAssignment(boolean acceptSemicolon) throws PARSE_EXC {
+	private Statement parseAssignment(boolean acceptSemicolon) throws PARS_EXC {
 		/* Check if tokens ahead are a struct select */
 		boolean structSelectCheck = current.type == TokenType.IDENTIFIER;
 		for (int i = 1; i < this.tokenStream.size(); i += 2) {
@@ -1173,7 +1353,10 @@ public class Parser {
 		else {
 			SyntaxElement expr = this.parseLhsIdentifer();
 			
-			if (expr instanceof InlineCall) {
+			if (expr instanceof OperatorStatement) {
+				return (OperatorStatement) expr;
+			}
+			else if (expr instanceof InlineCall) {
 				InlineCall ic = (InlineCall) expr;
 				
 				FunctionCall fc = new FunctionCall(ic.path, ic.proviso, ic.parameters, ic.getSource());
@@ -1242,7 +1425,7 @@ public class Parser {
 		}
 	}
 	
-	protected ASSIGN_ARITH parseAssignOperator() throws PARSE_EXC {
+	private ASSIGN_ARITH parseAssignOperator() throws PARS_EXC {
 		/* None */
 		if (current.type == TokenType.LET) {
 			accept();
@@ -1267,13 +1450,13 @@ public class Parser {
 		else if (current.type == TokenType.DIV) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
 			return ASSIGN_ARITH.DIV_ASSIGN;
 		}
 		else if (current.type == TokenType.MOD) {
 			accept();
 			accept(TokenType.LET);
-			CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
 			return ASSIGN_ARITH.MOD_ASSIGN;
 		}
 		/* Bitwise Operation */
@@ -1321,13 +1504,24 @@ public class Parser {
 		else return null;
 	}
 	
-	protected SyntaxElement parseLhsIdentifer() throws PARSE_EXC {
+	private SyntaxElement parseLhsIdentifer() throws PARS_EXC {
 		if (current.type == TokenType.MUL) {
 			Source source = current.source();
 			return new PointerLhsId(this.parseDeref(), source);
 		}
 		else {
+			Token curr1 = this.current;
+			List<Token> tokenStreamCopy = this.tokenStream.stream().collect(Collectors.toList());
+			
 			Expression target = this.parseStructSelect();
+			
+			if (current.markedAsOperator && (tokenStream.get(0).type != TokenType.LET && tokenStream.get(1).type != TokenType.LET)) {
+				this.tokenStream = tokenStreamCopy;
+				this.current = curr1;
+				
+				target = this.parseExpression();
+			}
+			
 			if (target instanceof ArraySelect) {
 				return new ArraySelectLhsId((ArraySelect) target, target.getSource());
 			}
@@ -1337,16 +1531,26 @@ public class Parser {
 			else if (target instanceof StructSelect) {
 				return new StructSelectLhsId((StructSelect) target, target.getSource());
 			}
+			else if (target instanceof OperatorExpression) {
+				accept(TokenType.SEMICOLON);
+				return new OperatorStatement((OperatorExpression) target, target.getSource());
+			}
 			else if (target instanceof InlineCall) 
 				return target;
 			else {
 				this.progress.abort();
-				throw new PARSE_EXC(current.source, current.type, TokenType.IDENTIFIER);
+				
+				if (this.progress != null) this.progress.abort();
+				throw new PARS_EXC(current.source, current.type, 
+				TokenType.TYPE, TokenType.RETURN, TokenType.WHILE, 
+				TokenType.DO, TokenType.FOR, TokenType.BREAK, 
+				TokenType.CONTINUE, TokenType.SWITCH, TokenType.IDENTIFIER, 
+				TokenType.IF);
 			}
 		}
 	}
 	
-	protected Declaration parseGlobalDeclaration(TYPE type, Token identifier, MODIFIER mod) throws PARSE_EXC {
+	private Declaration parseGlobalDeclaration(TYPE type, Token identifier, MODIFIER mod) throws PARS_EXC {
 		Expression value = null;
 		
 		if (current.type == TokenType.LET) {
@@ -1360,7 +1564,7 @@ public class Parser {
 		return d;
 	}
 	
-	protected ReturnStatement parseReturn() throws PARSE_EXC {
+	private ReturnStatement parseReturn() throws PARS_EXC {
 		Token ret = accept(TokenType.RETURN);
 		
 		if (current.type == TokenType.SEMICOLON) {
@@ -1380,16 +1584,77 @@ public class Parser {
 	 * Parses an expression. Expressions are inductiveley defined. See the parsing methods below
 	 * for possible parsing patterns.
 	 */
-	protected Expression parseExpression() throws PARSE_EXC {
-			return this.parseStructureInit();
+	private Expression parseExpression() throws PARS_EXC {
+			return this.parseInlineFunction();
 	}
+	
+	private Expression parseInlineFunction() throws PARS_EXC {
+		/*
+		 * Check if the structure lying ahead is an inline function. This can be determined by
+		 * traversing forward until the bracket balance is zero. Then check if a : { follows. For example:
+		 * 
+		 * ( ... ( ... ) ... ) : { ...
+		 */
+		boolean inlineCheck = current.type == TokenType.LPAREN;
+		int bbalance = 1;
+		boolean allowLparen = false;
+		if (inlineCheck) for (int i = 0; i < this.tokenStream.size(); i++) {
+			if (bbalance == 0) {
+				inlineCheck &= tokenStream.get(i).type == TokenType.COLON;
+				inlineCheck &= tokenStream.get(i + 1).type == TokenType.LBRACE;
+				break;
+			}
+			
+			if (current.type == TokenType.FUNC)
+				allowLparen = true;
+			else if (tokenStream.get(i).type == TokenType.LPAREN) {
+				if (allowLparen)
+					bbalance++;
+				else {
+					inlineCheck = false;
+					break;
+				}
+				
+				allowLparen = false;
+			}
+			else if (tokenStream.get(i).type == TokenType.RPAREN) 
+				bbalance--;
+		}
+		
+		if (inlineCheck) {
+			accept(TokenType.LPAREN);
+			
+			List<Declaration> params = new ArrayList();
+			while (current.type != TokenType.UNION_ACCESS) {
+				params.add(this.parseDeclaration(MODIFIER.SHARED, false, false));
+				if (current.type == TokenType.COMMA) accept();
+				else break;
+			}
+			
+			accept(TokenType.UNION_ACCESS);
+			
+			TYPE ret = this.parseType();
+			
+			accept(TokenType.RPAREN);
+			
+			accept(TokenType.COLON);
+			
+			List<Statement> body = this.parseCompoundStatement(true);
+			
+			Function function = new Function(ret, this.buildPath(LabelUtil.getAnonLabel()), new ArrayList(), params, false, new ArrayList(), body, MODIFIER.SHARED, current.source);
+		
+			return new InlineFunction(function, current.source);
+		}
+		else return this.parseStructureInit();
+	}
+	
 	
 	/**
 	 * Parses a structure initialization operation with multiple operands. The parsed pattern is:<br>
 	 * <br>
 	 * 		<code>TYPE::((EXPRESSION(,EXPRESSION)*)?)</code>
 	 */
-	protected Expression parseStructureInit() throws PARSE_EXC {
+	private Expression parseStructureInit() throws PARS_EXC {
 		boolean structInitCheck = current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER;
 		for (int i = 0; i < this.tokenStream.size(); i += 3) {
 			structInitCheck &= tokenStream.get(i).type == TokenType.COLON;
@@ -1423,7 +1688,7 @@ public class Parser {
 			if (!(type instanceof STRUCT)) {
 				/* Something is definetly wrong at this point */
 				this.progress.abort();
-				throw new SNIPS_EXC(new CTX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type.typeString()).getMessage());
+				throw new SNIPS_EXC(new CTEX_EXC(source, Const.EXPECTED_STRUCT_TYPE, type).getMessage());
 			}
 			
 			accept(TokenType.COLON);
@@ -1452,7 +1717,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>{(EXPRESSION(,EXPRESSION)*)?}|[(EXPRESSION(,EXPRESSION)*)?]</code>
 	 */
-	protected Expression parseArrayInit() throws PARSE_EXC {
+	private Expression parseArrayInit() throws PARS_EXC {
 		if (current.type == TokenType.LBRACE || current.type == TokenType.LBRACKET) {
 			boolean dontCare = current.type == TokenType.LBRACKET;
 			
@@ -1480,7 +1745,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>EXPRESSION?EXPRESSION:EXPRESSION</code>
 	 */
-	protected Expression parseTernary() throws PARSE_EXC {
+	private Expression parseTernary() throws PARS_EXC {
 		Source source = current.source();
 		
 		Expression condition = this.parseOr();
@@ -1502,12 +1767,17 @@ public class Parser {
 	 * <br>
 	 * Multiple successive OR operations are stacked on the left side.
 	 */
-	protected Expression parseOr() throws PARSE_EXC {
+	private Expression parseOr() throws PARS_EXC {
 		Expression left = this.parseAnd();
 		
 		while (current.type == TokenType.OR) {
-			accept();
+			Token orT = accept();
 			left = new Or(left, this.parseAnd(), current.source);
+			
+			if (orT.markedAsOperator && orT.operatorSymbol.equals("||")) {
+				left.operatorSymbolOverride = "||";
+				left = new OperatorExpression(left, orT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1520,12 +1790,17 @@ public class Parser {
 	 * <br>
 	 * Multiple successive AND operations are stacked on the left side.
 	 */
-	protected Expression parseAnd() throws PARSE_EXC {
+	private Expression parseAnd() throws PARS_EXC {
 		Expression left = this.parseBitOr();
 		
 		while (current.type == TokenType.AND) {
-			accept();
+			Token andT = accept();
 			left = new And(left, this.parseBitOr(), current.source);
+			
+			if (andT.markedAsOperator && andT.operatorSymbol.equals("&&")) {
+				left.operatorSymbolOverride = "&&";
+				left = new OperatorExpression(left, andT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1538,12 +1813,17 @@ public class Parser {
 	 * <br>
 	 * Multiple successive OR operations are stacked on the left side.
 	 */
-	protected Expression parseBitOr() throws PARSE_EXC {
+	private Expression parseBitOr() throws PARS_EXC {
 		Expression left = this.parseBitXor();
 		
 		while (current.type == TokenType.BITOR) {
-			accept();
+			Token orT = accept();
 			left = new BitOr(left, this.parseBitXor(), current.source);
+			
+			if (orT.markedAsOperator && orT.operatorSymbol.equals("|")) {
+				left.operatorSymbolOverride = "|";
+				left = new OperatorExpression(left, orT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1556,12 +1836,17 @@ public class Parser {
 	 * <br>
 	 * Multiple successive XOR operations are stacked on the left side.
 	 */
-	protected Expression parseBitXor() throws PARSE_EXC {
+	private Expression parseBitXor() throws PARS_EXC {
 		Expression left = this.parseBitAnd();
 		
 		while (current.type == TokenType.XOR) {
-			accept();
+			Token xorT = accept();
 			left = new BitXor(left, this.parseBitAnd(), current.source);
+			
+			if (xorT.markedAsOperator && xorT.operatorSymbol.equals("^")) {
+				left.operatorSymbolOverride = "^";
+				left = new OperatorExpression(left, xorT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1574,12 +1859,17 @@ public class Parser {
 	 * <br>
 	 * Multiple successive AND operations are stacked on the left side.
 	 */
-	protected Expression parseBitAnd() throws PARSE_EXC {
+	private Expression parseBitAnd() throws PARS_EXC {
 		Expression left = this.parseCompare();
 		
 		while (current.type == TokenType.ADDROF) {
-			accept();
+			Token andT = accept();
 			left = new BitAnd(left, this.parseCompare(), current.source);
+			
+			if (andT.markedAsOperator && andT.operatorSymbol.equals("&")) {
+				left.operatorSymbolOverride = "&";
+				left = new OperatorExpression(left, andT.operatorSymbol, left.getSource());
+			}
 		}
 		
 		return left;
@@ -1590,34 +1880,45 @@ public class Parser {
 	 * <br>
 	 * 		<code>EXPRESSION(==|!=|>=|>|<=|<)EXPRESSION</code>
 	 */
-	protected Expression parseCompare() throws PARSE_EXC {
+	private Expression parseCompare() throws PARS_EXC {
 		Expression left = this.parseShift();
 		
 		if (current.type.group() == TokenGroup.COMPARE) {
+			Token cmpT = current;
+			
+			Compare cmp = null;
+			
 			Source source = current.source();
 			if (current.type == TokenType.CMPEQ) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.EQUAL, source);
 			}
 			else if (current.type == TokenType.CMPNE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.NOT_EQUAL, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.NOT_EQUAL, source);
 			}
 			else if (current.type == TokenType.CMPGE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_SAME, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.GREATER_SAME, source);
 			}
 			else if (current.type == TokenType.CMPGT) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.GREATER_THAN, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.GREATER_THAN, source);
 			}
 			else if (current.type == TokenType.CMPLE) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.LESS_SAME, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.LESS_SAME, source);
 			}
 			else if (current.type == TokenType.CMPLT) {
 				accept();
-				return new Compare(left, this.parseShift(), COMPARATOR.LESS_THAN, source);
+				cmp = new Compare(left, this.parseShift(), COMPARATOR.LESS_THAN, source);
+			}
+			
+			left = cmp;
+			
+			if (cmpT.markedAsOperator && cmpT.operatorSymbol.equals(cmp.comparator.toString())) {
+				left.operatorSymbolOverride = cmpT.operatorSymbol;
+				left = new OperatorExpression(left, cmpT.operatorSymbol, left.getSource());
 			}
 		}
 		
@@ -1631,20 +1932,30 @@ public class Parser {
 	 * <br>
 	 * Multiple successive shift operations are stacked on the left side.
 	 */
-	protected Expression parseShift() throws PARSE_EXC {
+	private Expression parseShift() throws PARS_EXC {
 		Expression left = this.parseAddSub();
 		
 		while ((current.type == TokenType.CMPLT && this.tokenStream.get(0).type == TokenType.CMPLT) || 
 			   (current.type == TokenType.CMPGT && this.tokenStream.get(0).type == TokenType.CMPGT)) {
 			if (current.type == TokenType.CMPLT) {
-				accept();
+				Token lslT = accept();
 				accept();
 				left = new Lsl(left, this.parseAddSub(), current.source);
+				
+				if (lslT.markedAsOperator && lslT.operatorSymbol.equals("<<")) {
+					left.operatorSymbolOverride = "<<";
+					left = new OperatorExpression(left, lslT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				accept();
+				Token lsrT = accept();
 				accept();
 				left = new Lsr(left, this.parseAddSub(), current.source);
+				
+				if (lsrT.markedAsOperator && lsrT.operatorSymbol.equals(">>")) {
+					left.operatorSymbolOverride = ">>";
+					left = new OperatorExpression(left, lsrT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -1658,17 +1969,27 @@ public class Parser {
 	 * <br>
 	 * Multiple successive operations are stacked on the left side.
 	 */
-	protected Expression parseAddSub() throws PARSE_EXC {
+	private Expression parseAddSub() throws PARS_EXC {
 		Expression left = this.parseMulDivMod();
 		
 		while (current.type == TokenType.ADD || current.type == TokenType.SUB) {
 			if (current.type == TokenType.ADD) {
-				accept();
+				Token addT = accept();
 				left = new Add(left, this.parseMulDivMod(), current.source);
+				
+				if (addT.markedAsOperator && addT.operatorSymbol.equals("+")) {
+					left.operatorSymbolOverride = "+";
+					left = new OperatorExpression(left, addT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				accept();
+				Token subT = accept();
 				left = new Sub(left, this.parseMulDivMod(), current.source);
+				
+				if (subT.markedAsOperator && subT.operatorSymbol.equals("-")) {
+					left.operatorSymbolOverride = "-";
+					left = new OperatorExpression(left, subT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -1682,33 +2003,52 @@ public class Parser {
 	 * <br>
 	 * Multiple successive operations are stacked on the left side.
 	 */
-	protected Expression parseMulDivMod() throws PARSE_EXC {
+	private Expression parseMulDivMod() throws PARS_EXC {
 		Expression left = this.parseSizeOf();
 		
 		while (current.type == TokenType.MUL || current.type == TokenType.DIV || current.type == TokenType.MOD) {
 			if (current.type == TokenType.MUL) {
-				accept();
+				Token mulT = accept();
 				left = new Mul(left, this.parseSizeOf(), current.source);
+				
+				if (mulT.markedAsOperator && mulT.operatorSymbol.equals("*")) {
+					left.operatorSymbolOverride = "*";
+					left = new OperatorExpression(left, mulT.operatorSymbol, left.getSource());
+				}
 			}
 			else if (current.type == TokenType.DIV) {
-				Source source = accept().source();
+				Token divT = accept();
+				Source source = divT.source;
+				
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
 				
 				/* Create inline call to libary function, add div operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_div"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_div.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_div.sn");
+				
+				if (divT.markedAsOperator && divT.operatorSymbol.equals("/")) {
+					left.operatorSymbolOverride = "/";
+					left = new OperatorExpression(left, divT.operatorSymbol, left.getSource());
+				}
 			}
 			else {
-				Source source = accept().source();
+				Token modT = accept();
+				Source source = modT.source;
+				
 				List<Expression> params = new ArrayList();
 				params.add(left);
 				params.add(this.parseSizeOf());
 				
 				/* Create inline call to libary function, add mod operator to referenced libaries */
 				left = new InlineCall(new NamespacePath("__op_mod"), new ArrayList(), params, source);
-				CompilerDriver.driver.referencedLibaries.add("lib/op/__op_mod.sn");
+				CompilerDriver.driver.referencedLibaries.add("release/lib/op/__op_mod.sn");
+				
+				if (modT.markedAsOperator && modT.operatorSymbol.equals("%")) {
+					left.operatorSymbolOverride = "%";
+					left = new OperatorExpression(left, modT.operatorSymbol, left.getSource());
+				}
 			}
 		}
 		
@@ -1720,7 +2060,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>sizeof(TYPE|EXPRESSION)</code>
 	 */
-	protected Expression parseSizeOf() throws PARSE_EXC {
+	private Expression parseSizeOf() throws PARS_EXC {
 		if (current.type == TokenType.SIZEOF) {
 			Expression sof = null;
 			
@@ -1744,26 +2084,37 @@ public class Parser {
 			
 			return sof;
 		}
-		else return this.parseInstanceOf();
+		else return this.parseIDOf();
 	}
 	
 	/**
-	 * Parses a sizeof operation between two operands. The parsed pattern is:<br>
+	 * Parses a sizeof operation for a single operand. The parsed pattern is:<br>
 	 * <br>
-	 * 		<code>EXPRESSIONinstanceofTYPE</code>
+	 * 		<code>idof(TYPE)</code>
 	 */
-	protected Expression parseInstanceOf() throws PARSE_EXC {
-		Expression iof = this.parseAddressOf();
-		
-		if (current.type == TokenType.INSTANCEOF) {
+	private Expression parseIDOf() throws PARS_EXC {
+		if (current.type == TokenType.IDOF) {
+			Expression iof = null;
+			
 			Source source = accept().source();
+			accept(TokenType.LPAREN);
 			
-			TYPE type = this.parseType();
+			/* Convert next token */
+			if (this.activeProvisos.contains(current.spelling)) {
+				current.type = TokenType.PROVISO;
+			}
 			
-			iof = new InstanceofExpression(iof, type, source);
+			/* Size of Type */
+			if (current.type.group() == TokenGroup.TYPE) {
+				TYPE type = this.parseType();
+				iof = new IDOfExpression(type, source);
+			}
+			
+			accept(TokenType.RPAREN);
+			
+			return iof;
 		}
-		
-		return iof;
+		else return this.parseAddressOf();
 	}
 	
 	/**
@@ -1771,7 +2122,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>&EXPRESSION</code>
 	 */
-	protected Expression parseAddressOf() throws PARSE_EXC {
+	private Expression parseAddressOf() throws PARS_EXC {
 		if (current.type == TokenType.ADDROF) {
 			Source source = accept().source();
 			
@@ -1788,7 +2139,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>*EXPRESSION</code>
 	 */
-	protected Expression parseDeref() throws PARSE_EXC {
+	private Expression parseDeref() throws PARS_EXC {
 		if (current.type == TokenType.MUL) {
 			Source source = accept().source();
 			return new Deref(this.parseDeref(), source);
@@ -1801,7 +2152,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>(TYPE)EXPRESSION</code>
 	 */
-	protected Expression parseTypeCast() throws PARSE_EXC {
+	private Expression parseTypeCast() throws PARS_EXC {
 		/* Convert next token */
 		if (this.activeProvisos.contains(this.tokenStream.get(0).spelling)) 
 			this.tokenStream.get(0).type = TokenType.PROVISO;
@@ -1818,7 +2169,7 @@ public class Parser {
 		else return this.parseNot();
 	}
 	
-	public boolean castCheck() {
+	private boolean castCheck() {
 		boolean castCheck = current.type == TokenType.LPAREN;
 		if (!castCheck) return false;
 		
@@ -1855,15 +2206,29 @@ public class Parser {
 	 * <br>
 	 * 		<code>!EXPRESSION</code>
 	 */
-	protected Expression parseNot() throws PARSE_EXC {
+	private Expression parseNot() throws PARS_EXC {
 		if (current.type == TokenType.NEG || current.type == TokenType.NOT) {
 			if (current.type == TokenType.NEG) {
-				accept();
-				return new Not(this.parseNot(), current.source);
+				Token negT = accept();
+				Expression left = new Not(this.parseNot(), current.source);
+				
+				if (negT.markedAsOperator && negT.operatorSymbol.equals("!")) {
+					left.operatorSymbolOverride = "!";
+					left = new OperatorExpression(left, negT.operatorSymbol, left.getSource());
+				}
+					
+				return left;
 			}
 			else {
-				accept(TokenType.NOT);
-				return new BitNot(this.parseNot(), current.source);
+				Token notT = accept(TokenType.NOT);
+				Expression left = new BitNot(this.parseNot(), current.source);
+				
+				if (notT.markedAsOperator && notT.operatorSymbol.equals("~")) {
+					left.operatorSymbolOverride = "~";
+					left = new OperatorExpression(left, notT.operatorSymbol, left.getSource());
+				}
+				
+				return left;
 			}
 		}
 		else return this.parseUnaryMinus();
@@ -1874,10 +2239,17 @@ public class Parser {
 	 * <br>
 	 * 		<code>-EXPRESSION</code>
 	 */
-	protected Expression parseUnaryMinus() throws PARSE_EXC {
+	private Expression parseUnaryMinus() throws PARS_EXC {
 		if (current.type == TokenType.SUB) {
-			accept();
-			return new UnaryMinus(this.parseUnaryMinus(), current.source);
+			Token subT = accept();
+			Expression left = new UnaryMinus(this.parseUnaryMinus(), current.source);
+			
+			if (subT.markedAsOperator && subT.operatorSymbol.equals("-")) {
+				left.operatorSymbolOverride = "-";
+				left = new OperatorExpression(left, subT.operatorSymbol, left.getSource());
+			}
+			
+			return left;
 		}
 		else return this.parseIncrDecr();
 	}
@@ -1887,22 +2259,40 @@ public class Parser {
 	 * <br>
 	 * 		<code>EXPRESSION(++|--)</code>
 	 */
-	protected Expression parseIncrDecr() throws PARSE_EXC {
+	private Expression parseIncrDecr() throws PARS_EXC {
 		Expression ref = this.parseStructSelect();
 		
 		if (current.type == TokenType.INCR || current.type == TokenType.DECR) {
 			Source source = current.source();
 			if (current.type == TokenType.INCR) {
-				accept();
+				Token incrT = accept();
+				Expression e = null;
+				
 				if (ref instanceof IDRef)
-					return new IDRefWriteback(WRITEBACK.INCR, ref, source);
-				else return new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+					e = new IDRefWriteback(WRITEBACK.INCR, ref, source);
+				else e = new StructSelectWriteback(WRITEBACK.INCR, ref, source);
+				
+				if (incrT.markedAsOperator && incrT.operatorSymbol.equals("++")) {
+					e.operatorSymbolOverride = "++";
+					e = new OperatorExpression(e, incrT.operatorSymbol, e.getSource());
+				}
+				
+				return e;
 			}
 			else {
-				accept();
+				Token decrT = accept();
+				Expression e = null;
+				
 				if (ref instanceof IDRef)
-					return new IDRefWriteback(WRITEBACK.DECR, ref, source);
-				else return new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+					e = new IDRefWriteback(WRITEBACK.DECR, ref, source);
+				else e = new StructSelectWriteback(WRITEBACK.DECR, ref, source);
+				
+				if (decrT.markedAsOperator && decrT.operatorSymbol.equals("--")) {
+					e.operatorSymbolOverride = "--";
+					e = new OperatorExpression(e, decrT.operatorSymbol, e.getSource());
+				}
+				
+				return e;
 			}
 		}
 		else return ref;
@@ -1913,7 +2303,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>EXPRESSION((.|->)EXPRESSION)+</code>
 	 */
-	protected Expression parseStructSelect() throws PARSE_EXC {
+	private Expression parseStructSelect() throws PARS_EXC {
 		Expression ref = this.parseArraySelect();
 		
 		boolean dot = false;
@@ -2008,7 +2398,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>EXPRESSION([EXPRESSION])+</code>
 	 */
-	protected Expression parseArraySelect() throws PARSE_EXC {
+	private Expression parseArraySelect() throws PARS_EXC {
 		Expression ref = this.parseAtom();
 		
 		if (current.type == TokenType.LBRACKET) {
@@ -2031,7 +2421,7 @@ public class Parser {
 	 * <br>
 	 * 		<code>ATOM</code>
 	 */
-	protected Expression parseAtom() throws PARSE_EXC {
+	private Expression parseAtom() throws PARS_EXC {
 		if (current.type == TokenType.LPAREN) {
 			accept();
 			Expression expression = this.parseExpression();
@@ -2050,7 +2440,7 @@ public class Parser {
 			
 			if (current.type == TokenType.COLON && tokenStream.get(0).type == TokenType.COLON) {
 				this.progress.abort();
-				throw new SNIPS_EXC("Unknown namespace '" + path.build() + "', " + source.getSourceMarker());
+				throw new SNIPS_EXC("Unknown namespace '" + path + "', " + source.getSourceMarker());
 			}
 			
 			/* Convert next token */
@@ -2087,7 +2477,7 @@ public class Parser {
 				
 				if (current.type != TokenType.ENUMLIT) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM_FIELD, current.spelling, path, source.getSourceMarker());
 				}
 				
 				/* Actual enum field value */
@@ -2098,7 +2488,7 @@ public class Parser {
 				
 				if (def == null) {
 					this.progress.abort();
-					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path.build(), source.getSourceMarker());
+					throw new SNIPS_EXC(Const.UNKNOWN_ENUM, path, source.getSourceMarker());
 				}
 				
 				return this.wrapPlaceholder(new Atom(def.getEnumField(value.spelling, source), source));
@@ -2114,7 +2504,7 @@ public class Parser {
 				for (int i = this.scopes.size() - 1; i >= 0; i--) {
 					List<Declaration> scope = this.scopes.get(i);
 					for (int a = 0; a < scope.size(); a++) 
-						if (scope.get(a).path.build().equals(path.build())) 
+						if (scope.get(a).path.equals(path)) 
 							/* Path referres to a variable, set lambda to null */
 							lambda = null;
 				}
@@ -2220,8 +2610,8 @@ public class Parser {
 			}
 			else {
 				if (curr0 == current) {
-					this.progress.abort();
-					throw new PARSE_EXC(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
+					if (this.progress != null) this.progress.abort();
+					throw new PARS_EXC(current.source, current.type, TokenType.LPAREN, TokenType.IDENTIFIER, TokenType.INTLIT);
 				}
 				else {
 					curr0 = current;
@@ -2239,20 +2629,23 @@ public class Parser {
 	 * @param name The name of the function, does not have to match one of the
 	 * 		listed names. Should not be null.
 	 */
-	public void checkAutoInclude(String name) {
+	private void checkAutoInclude(String name) {
 		if (name.equals("resv")) {
 			CompilerDriver.heap_referenced = true;
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
 		}
 		else if (name.equals("init")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/resv.sn");
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/init.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/resv.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/init.sn");
+		}
+		else if (name.equals("isa") || name.equals("isar")) {
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/isa.sn");
 		}
 		else if (name.equals("free")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/free.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/free.sn");
 		}
 		else if (name.equals("hsize")) {
-			CompilerDriver.driver.referencedLibaries.add("lib/mem/hsize.sn");
+			CompilerDriver.driver.referencedLibaries.add("release/lib/mem/hsize.sn");
 		}
 	}
 
@@ -2263,7 +2656,7 @@ public class Parser {
 	 * <br>
 	 * Returns the given expression if '...' is not seen.
 	 */
-	public Expression wrapPlaceholder(Expression base) {
+	private Expression wrapPlaceholder(Expression base) {
 		if (this.checkPlaceholder()) {
 			Source source = current.source();
 			
@@ -2283,15 +2676,15 @@ public class Parser {
 	 * 		- The next token is a '.'<br>
 	 * 		- The token after that is a '.'
 	 */
-	public boolean checkPlaceholder() {
+	private boolean checkPlaceholder() {
 		return (current.type == TokenType.DOT && tokenStream.get(0).type == TokenType.DOT && tokenStream.get(1).type == TokenType.DOT);
 	}
 	
-	public Function findFunction(NamespacePath path) {
+	private Function findFunction(NamespacePath path) {
 		Function lambda = null;
 		
 		for (Pair<NamespacePath, Function> p : this.functions) 
-			if (p.first.build().equals(path.build())) 
+			if (p.first.equals(path)) 
 				return p.second;
 
 		if (lambda == null) {
@@ -2323,9 +2716,9 @@ public class Parser {
 	 * 
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
-	public InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
+	private InterfaceTypedef getInterfaceTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<InterfaceTypedef> defs = new ArrayList();
@@ -2338,11 +2731,9 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (InterfaceTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 	
@@ -2356,9 +2747,9 @@ public class Parser {
 	 * 
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
-	public StructTypedef getStructTypedef(NamespacePath path, Source source) {
+	private StructTypedef getStructTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<StructTypedef> defs = new ArrayList();
@@ -2367,15 +2758,9 @@ public class Parser {
 				defs.add(p.getSecond());
 
 		if (defs.isEmpty()) return null;
-		else if (defs.size() == 1) {
-			return defs.get(0);
-		}
 		else {
-			String s = "";
-			for (StructTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
-			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_STRUCT_TYPE, path.build(), s, source.getSourceMarker());
+			// TODO Make sure only one header and one implementation exists
+			return defs.get(0);
 		}
 	}
 	
@@ -2389,9 +2774,9 @@ public class Parser {
 	 * 
 	 * @throws SNIPS_EXC When multiple matches are found for the given path.
 	 */
-	public EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
+	private EnumTypedef getEnumTypedef(NamespacePath path, Source source) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
-			if (p.getFirst().build().equals(path.build())) 
+			if (p.getFirst().equals(path)) 
 				return p.getSecond();
 
 		List<EnumTypedef> defs = new ArrayList();
@@ -2404,11 +2789,9 @@ public class Parser {
 			return defs.get(0);
 		}
 		else {
-			String s = "";
-			for (EnumTypedef def : defs) s += def.path.build() + ", ";
-			s = s.substring(0, s.length() - 2);
 			this.progress.abort();
-			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path.build(), s, source.getSourceMarker());
+			String s = defs.stream().map(x -> x.path.build()).collect(Collectors.joining(", "));
+			throw new SNIPS_EXC(Const.MULTIPLE_MATCHES_FOR_ENUM_TYPE, path, s, source.getSourceMarker());
 		}
 	}
 
@@ -2416,7 +2799,7 @@ public class Parser {
 	 * Returns true iff a InterfaceTypedef exists in the {@link #interfaceIds} list which path
 	 * ends with the given string.
 	 */
-	public boolean containsInterfaceTypedef(String name) {
+	private boolean containsInterfaceTypedef(String name) {
 		for (Pair<NamespacePath, InterfaceTypedef> p : this.interfaceIds) 
 			if (p.getFirst().getLast().equals(name)) 
 				return true;
@@ -2428,7 +2811,7 @@ public class Parser {
 	 * Returns true iff a StructTypedef exists in the {@link #structIds} list which path
 	 * ends with the given string.
 	 */
-	public boolean containsStructTypedef(String name) {
+	private boolean containsStructTypedef(String name) {
 		for (Pair<NamespacePath, StructTypedef> p : this.structIds) 
 			if (p.getFirst().getLast().equals(name)) 
 				return true;
@@ -2440,7 +2823,7 @@ public class Parser {
 	 * Returns true iff a EnumTypedef exists in the {@link #structIds} list which path
 	 * ends with the given string.
 	 */
-	public boolean containsEnumTypedef(String token) {
+	private boolean containsEnumTypedef(String token) {
 		for (Pair<NamespacePath, EnumTypedef> p : this.enumIds) 
 			if (p.getFirst().getLast().equals(token)) 
 				return true;
@@ -2448,7 +2831,7 @@ public class Parser {
 		return false;
 	}
 
-	protected TYPE parseType() throws PARSE_EXC {
+	private TYPE parseType() throws PARS_EXC {
 		TYPE type = null;
 		Token token = null;
 		
@@ -2456,6 +2839,10 @@ public class Parser {
 		else if (current.type == TokenType.IDENTIFIER) token = accept();
 		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
+		
+		if (token.type() == TokenType.AUTO) 
+			/* Auto type is always a standalone, so no wrapping in Pointer etc. */
+			return new AUTO();
 		
 		InterfaceTypedef intf = null;
 		StructTypedef stru = null;
@@ -2499,7 +2886,7 @@ public class Parser {
 			/* Nothing found, error */
 			if (enu == null && stru == null && intf == null) {
 				this.progress.abort();
-				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path.build(), token.source().getSourceMarker());
+				throw new SNIPS_EXC(Const.UNKNOWN_STRUCT_OR_ENUM_OR_INTERFACE, path, token.source().getSourceMarker());
 			}
 		}
 		
@@ -2640,7 +3027,7 @@ public class Parser {
 		return type;
 	}
 	
-	protected List<TYPE> parseProviso() throws PARSE_EXC {
+	private List<TYPE> parseProviso() throws PARS_EXC {
 		List<TYPE> pro = new ArrayList();
 		
 		if (current.type == TokenType.CMPLT) {
@@ -2684,7 +3071,7 @@ public class Parser {
 		return pro;
 	}
 	
-	protected NamespacePath parseNamespacePath() throws PARSE_EXC {
+	private NamespacePath parseNamespacePath() throws PARS_EXC {
 		Token token;
 		
 		if (current.type == TokenType.INTERFACEID) {
@@ -2704,7 +3091,7 @@ public class Parser {
 		return this.parseNamespacePath(token);
 	}
 	
-	protected NamespacePath parseNamespacePath(Token first) throws PARSE_EXC {
+	private NamespacePath parseNamespacePath(Token first) throws PARS_EXC {
 		List<String> ids = new ArrayList();
 		ids.add(first.spelling);
 		
@@ -2753,7 +3140,7 @@ public class Parser {
 	 * @param forceBraces If set to true, braces around the body must exist. If set to false,
 	 * 		only a single statement without braces is parsed.
 	 */
-	protected List<Statement> parseCompoundStatement(boolean forceBraces) throws PARSE_EXC {
+	private List<Statement> parseCompoundStatement(boolean forceBraces) throws PARS_EXC {
 		this.scopes.push(new ArrayList());
 		
 		List<Statement> body = new ArrayList();
@@ -2762,13 +3149,39 @@ public class Parser {
 		if (current.type == TokenType.LBRACE || forceBraces) {
 			accept(TokenType.LBRACE);
 			
-			while (current.type != TokenType.RBRACE) 
-				body.add(this.parseStatement());
+			boolean push = true;
+			while (current.type != TokenType.RBRACE) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+				}
+				else push = false;
+			}
 			
 			accept(TokenType.RBRACE);
 		}
 		/* Without braces, one statement only */
-		else body.add(this.parseStatement());
+		else {
+			boolean push = true;
+			while (true) {
+				if (push) this.bufferedAnnotations.push(new ArrayList());
+				push = true;
+				
+				Statement s = this.parseStatement();
+				
+				if (s != null) {
+					s.activeAnnotations.addAll(this.bufferedAnnotations.pop());
+					body.add(s);
+					break;
+				}
+				else push = false;
+			}
+		}
 		
 		this.scopes.pop();
 		return body;
@@ -2781,7 +3194,7 @@ public class Parser {
 	 * <br>
 	 * Defaults to SHARED modifier if no modifier exists is not seen.
 	 */
-	protected MODIFIER parseModifier() {
+	private MODIFIER parseModifier() {
 		MODIFIER mod = MODIFIER.SHARED;
 		
 		if (current.type.group() == TokenGroup.MODIFIER) {
@@ -2796,7 +3209,7 @@ public class Parser {
 	 * Converts given token spelling to the corresponding modifier enum. 
 	 * Defaults to SHARED modifier if the token spelling does not match any modifier.
 	 */
-	protected MODIFIER resolve(Token token) {
+	private MODIFIER resolve(Token token) {
 		for (MODIFIER mod : MODIFIER.values())
 			if (token.spelling.toUpperCase().equals(mod.toString()))
 				return mod;

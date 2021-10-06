@@ -4,6 +4,7 @@ import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import Exc.CGEN_EXC;
+import Exc.SNIPS_EXC;
 import Imm.ASM.ASMHardcode;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
@@ -28,6 +29,7 @@ public class AsNDirectASMStatement extends AsNStatement {
 
 	public static AsNDirectASMStatement cast(DirectASMStatement d, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDirectASMStatement asm = new AsNDirectASMStatement();
+		asm.pushOnCreatorStack(d);
 		d.castedNode = asm;
 		
 		/* Load data in */
@@ -66,11 +68,17 @@ public class AsNDirectASMStatement extends AsNStatement {
 			/* Store to stack */
 			else {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
-					
+				
+				r.print();
+				st.print();
+				
+				if (off == -1) throw new SNIPS_EXC(ref.path + " is not loaded!");
+				
 				asm.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
 		}
 		
+		asm.registerMetric();
 		return asm;
 	}
 	

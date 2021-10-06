@@ -31,4 +31,8 @@ public class VOID extends PRIMITIVE<Void> {
 		return b;
 	}
 	
+	public String codeString() {
+		return "void";
+	}
+	
 } 

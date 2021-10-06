@@ -2,6 +2,7 @@ package Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NamespacePath {
 
@@ -75,13 +76,7 @@ public class NamespacePath {
 	 * <code>Name1.Name2.Target</code>
 	 */
 	public String build() {
-		String s = this.path.get(0);
-		if (this.path.size() > 1) {
-			for (int i = 1; i < this.path.size(); i++) {
-				s += "." + this.path.get(i);
-			}
-		}
-		return s;
+		return this.path.stream().collect(Collectors.joining("."));
 	}
 	
 	/**
@@ -89,14 +84,12 @@ public class NamespacePath {
 	 * the last path part.
 	 */
 	public String buildPathOnly() {
-		String s = "";
+		String s = this.path.stream().collect(Collectors.joining("."));
 		
-		for (int i = 0; i < this.path.size() - 1; i++) 
-			s += this.path.get(i) + ".";
-		
-		/* Cut of the last dot */
-		if (!s.isEmpty()) 
-			s = s.substring(0, s.length() - 1);
+		if (!this.path.isEmpty()) {
+			s = s.substring(0, s.length() - this.path.get(this.path.size() - 1).length());
+			if (s.endsWith(".")) s = s.substring(0, s.length() - 1);
+		}
 		
 		return s;
 	}
@@ -111,6 +104,17 @@ public class NamespacePath {
 		clone.termination = this.termination;
 		for (String s : this.path) clone.path.add(s);
 		return clone;
+	}
+	
+	/**
+	 * Relays to {@link #build()}.
+	 */
+	public String toString() {
+		return this.build();
+	}
+	
+	public boolean equals(Object object) {
+		return object instanceof NamespacePath && this.toString().equals(object.toString());
 	}
 	
 } 

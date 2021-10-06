@@ -42,6 +42,7 @@ public class AsNStructSelect extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNStructSelect cast(StructSelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructSelect sel = new AsNStructSelect();
+		sel.pushOnCreatorStack(s);
 		s.castedNode = sel;
 		
 		if (s.selection instanceof InlineCall) {
@@ -60,7 +61,7 @@ public class AsNStructSelect extends AsNExpression {
 					StackUtil.copyToStackFromAddress(sel, s.getType().wordsize());
 					
 					/* Create dummy stack entries for newly copied struct on stack */
-					for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
+					st.pushDummies(s.getType().wordsize());
 				}
 				else {
 					/* Load in register */
@@ -71,6 +72,7 @@ public class AsNStructSelect extends AsNExpression {
 			}
 		}
 		
+		sel.registerMetric();
 		return sel;
 	}
 	
@@ -96,8 +98,10 @@ public class AsNStructSelect extends AsNExpression {
 			 * 
 			 * This is done by setting this flag to true. It overrides the addressLoader flag, since
 			 * they are having the same goal, which is loading the location of the substructure.
+			 * 
+			 * The same principle goes for the global memory.
 			 */
-			boolean isInStack = false;
+			boolean isInStack = false, isInGlobalMemory = false;
 			
 			if (r.declarationLoaded(ref.origin)) {
 				int loc = r.declarationRegLocation(ref.origin);
@@ -138,6 +142,8 @@ public class AsNStructSelect extends AsNExpression {
 				
 				/* Load data label */
 				node.instructions.add(new ASMLdrLabel(new RegOp(REG.R1), new LabelOp(label), ref.origin));
+			
+				isInGlobalMemory = true;
 			}
 			else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 			
@@ -149,7 +155,7 @@ public class AsNStructSelect extends AsNExpression {
 			 * 
 			 * The addressLoader flag is overridden by the isInStack flag.
 			 */
-			if ((addressLoader || isInStack) && ref.getType() instanceof POINTER) 
+			if ((addressLoader || isInStack || isInGlobalMemory) && ref.getType() instanceof POINTER) 
 				node.instructions.add(new ASMLdr(new RegOp(REG.R1), new RegOp(REG.R1)));
 		}
 		else if (base instanceof ArraySelect) {
@@ -289,12 +295,12 @@ public class AsNStructSelect extends AsNExpression {
 				}
 			}
 			
-			/* Keep selecting */
 			if (selection instanceof StructSelect) 
+				/* Keep selecting */
 				sel0 = (StructSelect) sel0.selection;
-			
-			/* Base Case reached */
-			else break;
+			else 
+				/* Base Case reached */
+				break;
 		}
 		
 		return false;

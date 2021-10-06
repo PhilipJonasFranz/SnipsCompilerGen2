@@ -4,115 +4,73 @@ import Imm.AST.Expression.Atom;
 import Imm.AST.Expression.Expression;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.PRIMITIVES.INT;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
-import Imm.TYPE.PRIMITIVES.VOID;
 
 public class ARRAY extends COMPOSIT {
 
 	public TYPE elementType;
 	
-	private Expression length0;
+	private int length;
 	
-	private TYPE coreType;
-	
-	public int length;
-	
+	/**
+	 * Create ARRAY type with length determined by constant expression.
+	 */
 	public ARRAY(TYPE elementType, Expression length) {
 		this.elementType = elementType;
-		if (elementType instanceof PRIMITIVE) {
-			this.coreType = elementType;
-		}
-		else {
-			this.coreType = elementType.getCoreType();
-		}
-		this.length0 = length;
+		this.length = ((Atom) length).getType().toInt();
 	}
 	
+	/**
+	 * Create array with given static size.
+	 */
 	public ARRAY(TYPE elementType, int length) {
 		this.elementType = elementType;
-		if (elementType instanceof PRIMITIVE) {
-			this.coreType = elementType;
-		}
-		else {
-			this.coreType = elementType.getCoreType();
-		}
 		this.length = length;
-		this.wordSize = elementType.wordsize() * length;
 	}
 	
 	public int getLength() {
-		if (this.length0 == null) return this.length;
-		else {
-			this.length = ((INT) ((Atom) this.length0).getType()).value;
-			this.length0 = null;
-			this.wordSize = this.elementType.wordsize() * this.length;
-			return this.length;
-		}
+		return this.length;
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			if (p.hasContext()) return this.isEqual(p.getContext());
 			else return false;
 		}
-		if (type instanceof ARRAY) {
+		if (type.isArray()) {
 			ARRAY array = (ARRAY) type;
 			return this.elementType.isEqual(array.elementType) && this.getLength() == array.getLength();
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			return this.getCoreType().isEqual(type.getCoreType());
 		}
 		else return false;
 	}
 
 	public String typeString() {
-		String s = this.coreType.typeString().split(":") [0] + "[" + this.getLength() + "]";
-		TYPE t = this.elementType;
-		while (t instanceof ARRAY) {
-			s += "[" + ((ARRAY) t).getLength() + "]";
-			t = ((ARRAY) t).elementType;
-		}
-		return s;
+		return this.elementType.typeString() + "[" + this.getLength() + "]";
 	}
 
-	public void setValue(String value) {
-		/* No value for arrays */
-		return;
-	}
-
-	public String sourceCodeRepresentation() {
-		return null;
-	}
-
-	@Override
 	public int wordsize() {
-		if (this.length0 != null) {
-			this.length = ((INT) ((Atom) this.length0).getType()).value;
-			this.wordSize = this.elementType.wordsize() * this.length;
-		}
-		
-		return this.wordSize;
+		return this.elementType.wordsize() * this.getLength();
 	}
 
 	public TYPE clone() {
-		if (this.length0 != null) {
-			ARRAY arr = new ARRAY(this.elementType.clone(), this.length0);
-			return arr;
-		}
-		else return new ARRAY(this.elementType.clone(), this.length);
+		return new ARRAY(this.elementType.clone(), this.length);
 	}
 	
 	public TYPE getCoreType() {
-		return this.coreType;
+		return this.elementType.getCoreType().clone();
+	}
+	
+	public TYPE getContainedType() {
+		return this.elementType;
 	}
 
 	public TYPE provisoFree() {
 		ARRAY arr = (ARRAY) this.clone();
 		arr.elementType = arr.elementType.provisoFree();
-		arr.coreType = arr.coreType.provisoFree();
 		return arr;
 	}
 
@@ -122,7 +80,7 @@ public class ARRAY extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof ARRAY) {
+		if (mapType.isArray()) {
 			ARRAY arr = (ARRAY) mapType;
 			return this.elementType.mappable(arr.elementType, searchedProviso);
 		}
@@ -131,6 +89,10 @@ public class ARRAY extends COMPOSIT {
 
 	public boolean hasProviso() {
 		return this.elementType.hasProviso();
+	}
+	
+	public String codeString() {
+		return this.elementType.codeString() + " [" + this.getLength() + "]";
 	}
 
 } 

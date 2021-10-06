@@ -9,7 +9,16 @@ TESTCASES
 4 9
 -2 3
 OUTPUT
-/* --test_02.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     push { fp }
     mov fp, sp
@@ -24,4 +33,3 @@ main:                                        /* Function: main */
     mov sp, fp
     pop { fp }
     bx lr
-    

@@ -1,0 +1,45 @@
+SOURCE
+#define C0 true
+#define C1 false
+#define C2 true
+
+#ifdef C0
+int add() {
+	return 10;
+}
+#end
+
+int main(int x) {
+	int sum = 12;
+#ifdef (C0 && C1) || C2
+	sum = sum + add();
+#end
+	return sum;
+}
+
+TESTCASES
+22
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global add
+add:                                         /* Function: add */
+    mov r0, #10                              /* Evaluate Expression */
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r4, #12
+    mov r0, #12                              /* Evaluate Expression */
+    bl add                                   /* Evaluate Expression */
+    add r4, r0, #12
+    mov r0, r4                               /* Evaluate Expression */
+    pop { pc }

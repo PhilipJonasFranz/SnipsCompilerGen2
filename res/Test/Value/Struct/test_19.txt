@@ -13,26 +13,33 @@ int main() {
 TESTCASES
 48
 OUTPUT
-/* --test_19.txt */
+.version 0
+
+.data
+A: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #10                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1823275353_A
     push { r0 }
     sub r1, fp, #4
     ldr r2, [r1]
     add r0, r2, #5
     str r0, [r1]                             /* Store value to struct field */
-    sub r1, fp, #4
     ldr r2, [r1]
     sub r0, r2, #3
     str r0, [r1]                             /* Store value to struct field */
-    mov r0, #4                               /* Evaluate Expression */
-    sub r1, fp, #4
     ldr r2, [r1]
-    mul r0, r2, r0
+    lsl r0, r2, #2
     str r0, [r1]                             /* Store value to struct field */
     ldr r0, [fp, #-4]                        /* Load field from struct */
     bx lr
-    
+.P1823275353_A: .word A

@@ -17,22 +17,31 @@ TESTCASES
 2 1 0
 2 2 4
 OUTPUT
-/* --test_11.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r3, r0
     mov r4, r1
-    mov r0, #4                               /* Evaluate Expression */
-    mov r1, #0
+    mov r3, r0
     mov r2, #1
+    mov r1, #0
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #8
-    mov r1, #3
     mov r2, #0
+    mov r1, #3
+    mov r0, #8
     stmfd sp!, {r0-r2}
-    mov r0, #2
-    mov r1, #6
     mov r2, #3
+    mov r1, #6
+    mov r0, #2
     stmfd sp!, {r0-r2}
     mov r2, #0                               /* Evaluate Expression */
     mov r1, #12
@@ -44,4 +53,3 @@ main:                                        /* Function: main */
     ldr r0, [r0, r2]
     mov sp, fp
     bx lr
-    

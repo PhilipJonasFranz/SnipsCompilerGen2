@@ -11,12 +11,20 @@ int main() {
 TESTCASES
 5
 OUTPUT
-/* --test_05.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-foo_P0:                                      /* Function: foo, Provisos: INT */
+
+.global foo_P_1
+foo_P_1:                                     /* Function: foo, Provisos: INT */
     mov r0, #5                               /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
-    b foo_P0                                 /* Evaluate Expression */
-    
+    b foo_P_1                                /* Evaluate Expression */

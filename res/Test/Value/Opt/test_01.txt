@@ -1,0 +1,24 @@
+SOURCE
+int main() {
+	bool a = true;
+	bool b = false;
+	bool c = a && b;
+	bool d = c || a;
+	return (int) (c || d);
+}
+TESTCASES
+1
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    mov r0, #1                               /* Evaluate Expression */
+    bx lr

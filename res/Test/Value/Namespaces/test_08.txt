@@ -9,13 +9,18 @@ int main() {
 TESTCASES
 40
 OUTPUT
-/* --test_08.txt */
+.version 0
+
+.include res\Test\Value\Namespaces\exclude_import.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-Test.foo:                                    /* Function: Test.foo */
-    lsl r0, r0, #2
-    bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     mov r0, #10                              /* Evaluate Expression */
     b Test.foo                               /* Call Test.foo */
-    

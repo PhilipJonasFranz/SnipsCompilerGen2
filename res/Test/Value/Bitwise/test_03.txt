@@ -8,8 +8,16 @@ TESTCASES
 -1 0
 -2 1
 OUTPUT
-/* --test_03.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mvn r0, r0
     bx lr
-    

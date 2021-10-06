@@ -8,8 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.IfStatement;
 import Imm.AsN.Expression.AsNExpression;
@@ -18,6 +17,8 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNIfStatement cast(IfStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNIfStatement if0 = new AsNIfStatement();
+		if0.pushOnCreatorStack(a);
+		a.castedNode = if0;
 		
 		/* Used to iterate over if-chain */
 		IfStatement currentIf = a;
@@ -27,16 +28,20 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 		while (currentIf != null) {
 			ASMLabel elseTarget = new ASMLabel(LabelUtil.getLabel());
 		
+			COND cond = COND.NO;
+			
 			/* Else If Statement */
 			if (currentIf.condition != null) {
-				COND cond = injectConditionEvaluation(if0, AsNExpression.cast(currentIf.condition, r, map, st));
+				cond = injectConditionEvaluation(if0, AsNExpression.cast(currentIf.condition, r, map, st), currentIf.condition);
 				
-				if (currentIf.elseStatement != null) 
-					/* Condition was false, jump to else */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(elseTarget)));
-				else 
-					/* Condition was false, no else, skip body */
-					if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(endTarget)));
+				if (cond != COND.NO) {
+					if (currentIf.elseStatement != null) 
+						/* Condition was false, jump to else */
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(elseTarget)));
+					else 
+						/* Condition was false, no else, skip body */
+						if0.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(endTarget)));
+				}
 			}
 			
 			/* Add Body */
@@ -48,12 +53,15 @@ public class AsNIfStatement extends AsNConditionalCompoundStatement {
 				if0.instructions.add(elseTarget);
 			}
 			
+			if (cond == COND.NO) break;
+			
 			currentIf = currentIf.elseStatement;
 		}
 		
 		if0.instructions.add(endTarget);
 		
 		if0.freeDecs(r, a);
+		if0.registerMetric();
 		return if0;
 	}
 	

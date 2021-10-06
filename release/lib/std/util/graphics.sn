@@ -42,6 +42,7 @@ namespace Graphics {
 	 * Changes the pixel at given coordinates to the color
 	 * specified by the graphics object
 	 */
+	#unsafe
 	shared void setPix(Graphics2D* g, int x, int y) {
 		void* addr = (void*) (g->targetBase + (g->targetWidth * y) + x);
 		*addr = g->color->rgba;
@@ -58,6 +59,7 @@ namespace Graphics {
 		 * is specified by the x and y coordinates. The width and height is specified
 		 * by the w and h parameters.
 		 */
+		#unsafe
 		shared void drawRect(Graphics2D* g, int x, int y, int w, int h) {
 			int dx = x + w;
 			int dy = y + h;
@@ -93,6 +95,7 @@ namespace Graphics {
 		 * is specified by the x and y coordinates. The width and height is specified
 		 * by the w and h parameters.
 		 */
+		#unsafe
 		shared void fillRect(Graphics2D* g, int x, int y, int w, int h) {
 			int dx = x + w;
 			int dy = y + h;

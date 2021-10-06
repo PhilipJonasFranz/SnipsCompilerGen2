@@ -1,14 +1,13 @@
 package Imm.TYPE.COMPOSIT;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.PRIMITIVES.VOID;
 import Res.Const;
 import Snips.CompilerDriver;
 import Util.NamespacePath;
@@ -23,14 +22,13 @@ public class STRUCT extends COMPOSIT {
 	public List<TYPE> proviso;
 	
 	public STRUCT(StructTypedef typedef, List<TYPE> proviso) {
-		super(null);
 		this.typedef = typedef;
 		this.proviso = proviso;
 	}
 	
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof INTERFACE) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isInterface()) {
 			INTERFACE i = (INTERFACE) type;
 			for (INTERFACE def : this.typedef.implemented)
 				if (i.getTypedef().equals(def.getTypedef())) {
@@ -39,7 +37,7 @@ public class STRUCT extends COMPOSIT {
 			
 			return false;
 		}
-		if (type instanceof STRUCT) {
+		if (type.isStruct()) {
 			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = struct.typedef;
@@ -63,8 +61,8 @@ public class STRUCT extends COMPOSIT {
 	 * The passed types acts in this case as the child of this type.
 	 */
 	public boolean isEqualExtended(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof STRUCT) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isStruct()) {
 			STRUCT struct = (STRUCT) type;
 			
 			StructTypedef sDef = this.typedef;
@@ -98,7 +96,7 @@ public class STRUCT extends COMPOSIT {
 	 * true if given type is a struct and this struct extends from it.
 	 */
 	public boolean isPolymorphTo(TYPE t) {
-		if (t instanceof STRUCT) {
+		if (t.isStruct()) {
 			STRUCT s = (STRUCT) t;
 			
 			StructTypedef sDef = this.typedef;
@@ -135,9 +133,9 @@ public class STRUCT extends COMPOSIT {
 		return this.typedef.getFields().get(i).clone();
 	}
 	
-	public void checkProvisoPresent(Source source) throws CTX_EXC {
+	public void checkProvisoPresent(Source source) throws CTEX_EXC {
 		if (this.proviso.size() != this.typedef.proviso.size())
-			throw new CTX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
+			throw new CTEX_EXC(source, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.typedef.proviso.size(), this.proviso.size());
 	}
 	
 	/**
@@ -155,7 +153,7 @@ public class STRUCT extends COMPOSIT {
 		for (int i = 0; i < this.typedef.getFields().size(); i++) {
 			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
 			
-			if (dec.path.build().equals(path.build())) {
+			if (dec.path.equals(path)) {
 				return offset * 4;
 			}
 			else offset += dec.getType().wordsize();
@@ -167,14 +165,8 @@ public class STRUCT extends COMPOSIT {
 	public String typeString() {
 		String s = this.typedef.path.build();
 		
-		if (!this.proviso.isEmpty()) {
-			s += "<";
-			for (TYPE t : this.proviso) {
-				s += t.typeString() + ",";
-			}
-			s = s.substring(0, s.length() - 1);
-			s += ">";
-		}
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(",", "<", ">"));
 		
 		if (CompilerDriver.printObjectIDs) s += " " + this.toString().split("@") [1];
 		return s;
@@ -182,25 +174,16 @@ public class STRUCT extends COMPOSIT {
 	
 	public String getProvisoString() {
 		String s = "";
-		if (!this.proviso.isEmpty()) {
-			s += " {";
-			for (TYPE t : this.proviso) s += t.typeString() + ", ";
-			s = s.substring(0, s.length() - 2);
-			s += "}";
-		}
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", " {", "}"));
+		
 		return s;
-	}
-
-	public void setValue(String value) {
-		return;
-	}
-
-	public String sourceCodeRepresentation() {
-		return null;
 	}
 
 	public int wordsize() {
 		int sum = 0;
+		
 		for (int i = 0; i < this.typedef.getFields().size(); i++) { 
 			Declaration dec = this.getField(this.typedef.getFields().get(i).path);
 			sum += dec.getType().wordsize();
@@ -213,19 +196,22 @@ public class STRUCT extends COMPOSIT {
 		/* Struct acts as its own type, so its is own core type. */
 		return this;
 	}
+	
+	public TYPE getContainedType() {
+		return this;
+	}
 
 	public STRUCT clone() {
-		List<TYPE> prov0 = new ArrayList();
-		
-		for (TYPE t : this.proviso) 
-			prov0.add(t.clone());
-		
+		List<TYPE> prov0 = this.proviso.stream().map(x -> x.clone()).collect(Collectors.toList());
 		return new STRUCT(this.typedef, prov0);
 	}
 
 	public TYPE provisoFree() {
 		STRUCT s = (STRUCT) this.clone();
-		for (int i = 0; i < s.proviso.size(); i++) s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
+		for (int i = 0; i < s.proviso.size(); i++) 
+			s.proviso.set(i, s.proviso.get(i).provisoFree());
+		
 		return s;
 	}
 
@@ -237,9 +223,9 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public TYPE mappable(TYPE mapType, String searchedProviso) {
-		if (mapType instanceof STRUCT) {
+		if (mapType.isStruct()) {
 			STRUCT s = (STRUCT) mapType;
-			if (s.getTypedef().SID == this.getTypedef().SID) {
+			if (s.isPolymorphTo(this)) {
 				/* Missing provisos */
 				if (this.proviso.size() != s.proviso.size())
 					return null;
@@ -258,10 +244,16 @@ public class STRUCT extends COMPOSIT {
 	}
 
 	public boolean hasProviso() {
-		for (TYPE t : this.proviso)
-			if (t.hasProviso())
-				return true;
-		return false;
+		return this.proviso.stream().filter(x -> x.hasProviso()).count() > 0;
+	}
+	
+	public String codeString() {
+		String s = this.getTypedef().path.build();
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
+		
+		return s;
 	}
 	
 } 

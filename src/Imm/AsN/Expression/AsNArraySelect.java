@@ -23,6 +23,7 @@ import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.ArraySelect;
 import Imm.AsN.AsNNode;
+import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.POINTER;
 import Res.Const;
@@ -41,6 +42,7 @@ public class AsNArraySelect extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNArraySelect cast(ArraySelect s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNArraySelect select = new AsNArraySelect();
+		select.pushOnCreatorStack(s);
 		s.castedNode = select;
 		
 		r.free(0, 1, 2);
@@ -77,13 +79,14 @@ public class AsNArraySelect extends AsNExpression {
 			StackUtil.copyToStackFromAddress(select, s.getType().wordsize());
 			
 			/* Push dummy values on the stack */
-			for (int i = 0; i < s.getType().wordsize(); i++) st.push(REG.R0);
+			st.pushDummies(s.getType().wordsize());
 		}
 		else {
 			/* Load single value into R0 */
 			select.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 		}
 		
+		select.registerMetric();
 		return select;
 	}
 	
@@ -98,7 +101,7 @@ public class AsNArraySelect extends AsNExpression {
 			node.instructions.add(sum);
 			
 			ARRAY superType = null;
-			if (s.idRef.getType() instanceof POINTER) {
+			if (s.idRef.getType().isPointer()) {
 				superType = (ARRAY) ((POINTER) s.idRef.getType()).targetType;
 			}
 			else superType = (ARRAY) s.idRef.origin.getType();
@@ -122,7 +125,7 @@ public class AsNArraySelect extends AsNExpression {
 				node.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R0)));
 				
 				/* Next element in chain */
-				if (!(superType.elementType instanceof ARRAY)) break;
+				if (!superType.elementType.isArray()) break;
 				else superType = (ARRAY) superType.elementType;
 			}
 		}
@@ -130,12 +133,21 @@ public class AsNArraySelect extends AsNExpression {
 			/* Load Index and multiply with 4 to convert index to byte offset */
 			node.instructions.addAll(AsNExpression.cast(s.selection.get(0), r, map, st).getInstructions());
 			node.instructions.add(new ASMLsl(new RegOp(REG.R2), new RegOp(REG.R0), new ImmOp(2)));
+			
+			/* 
+			 * Searches the type the array consists of. The wordsize of the type is then multiplied with
+			 * the index. If the type, which is selected from, is a pointer, we get the target of the pointer.
+			 * If the resulting type is an array, we also get the element type of the array, since we can
+			 * assume we deref and select an index in this expression.
+			 */
+			TYPE targetType = s.idRef.getType().getContainedType();
+			if (s.idRef.getType().isPointer() && targetType.isArray()) 
+				targetType = targetType.getContainedType();
 		
 			/* Multiply with type wordsize */
-			int wordSize = s.getType().getCoreType().wordsize();
-			if (wordSize > 1) {
+			if (targetType.wordsize() > 1) {
 				/* Move wordsize in R0 */
-				node.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(wordSize)));
+				node.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(targetType.wordsize())));
 				/* Multiply with word Size */
 				node.instructions.add(new ASMMult(new RegOp(REG.R2), new RegOp(REG.R2), new RegOp(REG.R0)));
 			}

@@ -1,0 +1,24 @@
+#include <object.hn>
+
+namespace ExceptionBase {
+	
+	restricted auto excsname = "Exception";
+	
+	restricted struct Exception : Object {
+
+		char* message;
+
+		/*
+		 * Returns a string that contains a message
+		 * why this exception was thrown.
+		 */
+		shared char* getMessage();
+		
+		/*
+		 * Creates a new exception with a given message.
+		 */
+		static Exception create(char* message);
+
+	}
+
+}

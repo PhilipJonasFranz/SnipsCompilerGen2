@@ -1,12 +1,19 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -33,16 +40,36 @@ public class TypeCast extends Expression {
 
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "TypeCast");
-		System.out.println(this.pad(d + this.printDepthStep) + this.castType.typeString());
+		CompilerDriver.outs.println(Util.pad(d) + "TypeCast");
+		CompilerDriver.outs.println(Util.pad(d + this.printDepthStep) + this.castType);
 		if (rec) this.expression.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkTypeCast(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkTypeCast(this);
+		
+		ctx.popTrace();
+		return t;
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optTypeCast(this);
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		result.addAll(this.expression.visit(visitor));
+		
+		return result;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		/** Apply context to cast type */
 		ProvisoUtil.mapNTo1(this.castType, context);
 		
@@ -50,7 +77,14 @@ public class TypeCast extends Expression {
 	}
 
 	public Expression clone() {
-		return new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+		TypeCast tc = new TypeCast(this.expression.clone(), this.castType.clone(), this.getSource().clone());
+		tc.setType(this.getType().clone());
+		tc.copyDirectivesFrom(this);
+		return tc;
+	}
+
+	public String codePrint() {
+		return "(" + this.castType.codeString() + ") " + this.expression.codePrint();
 	}
 
 } 

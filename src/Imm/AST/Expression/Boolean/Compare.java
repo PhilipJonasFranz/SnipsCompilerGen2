@@ -1,19 +1,40 @@
 package Imm.AST.Expression.Boolean;
 
-import Ctx.ContextChecker;
-import Exc.CTX_EXC;
-import Imm.AST.Expression.BinaryExpression;
-import Imm.AST.Expression.Expression;
-import Imm.TYPE.TYPE;
-import Util.Source;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class Compare extends BinaryExpression {
+import Ctx.ContextChecker;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
+import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Util.Source;
+import Util.Util;
+
+public class Compare extends NFoldExpression {
 
 			/* ---< NESTED >--- */
 	public enum COMPARATOR {
 		EQUAL, NOT_EQUAL,
 		LESS_SAME, LESS_THAN, 
-		GREATER_SAME, GREATER_THAN
+		GREATER_SAME, GREATER_THAN;
+		
+		public String toString() {
+			String comp = "";
+			
+			if (this == COMPARATOR.EQUAL) comp = "==";
+			if (this == COMPARATOR.GREATER_SAME) comp = ">=";
+			if (this == COMPARATOR.GREATER_THAN) comp = ">";
+			if (this == COMPARATOR.LESS_SAME) comp = "<=";
+			if (this == COMPARATOR.LESS_THAN) comp = "<";
+			if (this == COMPARATOR.NOT_EQUAL) comp = "!=";
+			
+			return comp;
+		}
 	}
 	
 	
@@ -27,23 +48,52 @@ public class Compare extends BinaryExpression {
 		this.comparator = comparator;
 	}
 	
+	public Compare(List<Expression> operands, COMPARATOR comparator, Source source) {
+		super(operands, Operator.CMP, source);
+		this.comparator = comparator;
+	}
+	
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Compare " + this.comparator.toString());
+		CompilerDriver.outs.println(Util.pad(d) + "Compare " + this.comparator.toString());
 		
 		if (rec) {
-			this.getLeft().print(d + this.printDepthStep, rec);
-			this.getRight().print(d + this.printDepthStep, rec);
+			for (Expression e : this.operands)
+				e.print(d + this.printDepthStep, rec);
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkCompare(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkCompare(this);
+		
+		ctx.popTrace();
+		return t;
 	}
 	
-	public BinaryExpression clone() {
-		return new Compare(this.left.clone(), this.right.clone(), this.comparator, this.getSource().clone());
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optCompare(this);
+	}
+	
+	public Compare clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		Compare e = new Compare(op0, this.comparator, this.getSource().clone());
+		
+		if (this.getType() != null)
+			e.setType(this.getType().clone());
+		
+		e.copyDirectivesFrom(this);
+		return e;
+	}
+	
+	public String codePrint() {
+		String comp = this.comparator.toString();
+		return this.operands.stream().map(Expression::codePrint).collect(Collectors.joining(" " + comp + " "));
 	}
 	
 } 

@@ -19,25 +19,30 @@ int main() {
 TESTCASES
 25
 OUTPUT
-/* --test_08.txt */
+.version 0
+
+.data
+K: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-lambda_sortPred:                             /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
+
+.global sortPred
 sortPred:                                    /* Function: sortPred */
     cmp r0, r1
     movlt r0, #1
     movge r0, #0
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_sortPred
-    mov r10, #0
+    ldr r0, .P279150816_sortPred             /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P279150816_K
     push { r0 }
     ldr r3, [fp, #-4]                        /* Load field from struct */
     mov r1, #10
@@ -53,4 +58,5 @@ main.L0:
 main.L2: 
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P279150816_K: .word K
+.P279150816_sortPred: .word sortPred

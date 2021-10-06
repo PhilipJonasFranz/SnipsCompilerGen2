@@ -20,47 +20,42 @@ TESTCASES
 1 15
 -2 -30
 OUTPUT
-/* --test_05.txt */
+.version 0
+
 .data
-sw: .word 1
-s0: .skip 12
+S: .word 0
 s1: .skip 12
-    
+s0: .skip 12
+sw: .word 1
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main_init
+
+.global main
+
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
-    mov r0, #5
     mov r1, #10
+    mov r0, #5
     stmfd sp!, {r0, r1}
-    mov r0, #1
-    ldr r1, .POOL0_L1_s0                     /* Load from .data section */
+    ldr r0, .P308228756_S
+    ldr r1, .P308228756_s0                   /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
     pop { r0 }
     str r0, [r1, #8]
-    ldr r0, .POOL0_L0_sw                     /* Load from .data section */
-    ldr r0, [r0]
-    cmp r0, #0
-    beq main.L2
     mov r0, #2
     push { r0 }
-    ldr r1, .POOL0_L1_s0                     /* Load field location */
+    ldr r1, .P308228756_s0                   /* Load field location */
     ldr r0, [r1, #8]                         /* Load field from struct */
     push { r0 }
-    mov r0, #1
-    push { r0 }
-    b main.L3
-main.L2: 
-    ldr r2, .POOL0_L1_s0                     /* Load data section address */
-    add r2, r2, #8
-    ldr r0, [r2] #-4
-    ldr r1, [r2] #-4
-    stmfd sp!, {r0, r1}
-main.L3: 
-    pop { r0 }
-    ldr r1, .POOL0_L2_s1                     /* Load from .data section */
+    ldr r0, .P308228756_S
+    ldr r1, .P308228756_s1                   /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -69,14 +64,13 @@ main.L3:
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
     mov r3, r0
-    ldr r1, .POOL0_L1_s0                     /* Evaluate Expression */
+    ldr r1, .P308228756_s0                   /* Evaluate Expression */
     ldr r0, [r1, #4]                         /* Load field from struct */
-    ldr r1, .POOL0_L1_s0                     /* Load field location */
+    ldr r1, .P308228756_s0                   /* Load field location */
     ldr r2, [r1, #8]                         /* Load field from struct */
     add r2, r0, r2
     mul r0, r3, r2
     bx lr
-.POOL0_L2_s1: .word s1
-.POOL0_L0_sw: .word sw
-.POOL0_L1_s0: .word s0
-    
+.P308228756_s1: .word s1
+.P308228756_s0: .word s0
+.P308228756_S: .word S

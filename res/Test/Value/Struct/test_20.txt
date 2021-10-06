@@ -12,22 +12,32 @@ TESTCASES
 0 18
 1 13
 OUTPUT
-/* --test_20.txt */
+.version 0
+
+.data
+Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #8
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
     mov r0, #10
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1193434031_Test
     push { r0 }
-    sub r1, fp, #8                           /* Evaluate Expression */
     lsl r2, r3, #2
+    sub r1, fp, #8                           /* Evaluate Expression */
     ldr r0, [r1, r2]                         /* Load field from struct */
     ldr r2, [fp, #-12]                       /* Load field from struct */
     add r0, r0, r2
     mov sp, fp
     bx lr
-    
+.P1193434031_Test: .word Test

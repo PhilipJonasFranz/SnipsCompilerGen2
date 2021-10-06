@@ -1,0 +1,113 @@
+SOURCE
+interface Getter<T> {
+	T get();
+	
+	T get(bool b);
+}
+
+struct X<V> : Getter<V> {
+	V val;
+	
+	V get() {
+		return self->val;
+	}
+	
+	V get(bool mult) {
+		return (mult)? self->val * 2 : 2;
+	}
+}
+
+int main(bool b) {
+	X<int> x = X<int>::(10);
+	Getter<int> g = &x;
+	
+	return g.get() + g.get(b);
+}
+TESTCASES
+0 12
+1 30
+OUTPUT
+.version 0
+
+.data
+X_P_1: .word 0
+X_P_1_resolver_relay: .word X_P_1_resolver
+Getter_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global X.get_30282381_P_1
+X.get_30282381_P_1:                          /* Function: X.get, Provisos: INT */
+    mov r10, #0
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+
+.global X.get_586492511_P_1
+X.get_586492511_P_1:                         /* Function: X.get, Provisos: INT */
+    mov r10, #0
+    push { r3 }
+    mov r3, r0
+    cmp r1, #0
+    beq X.get_P_1_586492511.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]                         /* Load field from struct */
+    lsl r0, r1, #1
+    b X.get_P_1_586492511.L1
+X.get_P_1_586492511.L0: 
+    mov r0, #2
+X.get_P_1_586492511.L1: 
+    pop { r3 }
+    bx lr
+
+X_P_1_Getter:                                /* Relay: Getter -> X */
+    mov r10, #0
+    pop { r12 }
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get_30282381_P_1
+    b X.get_586492511_P_1
+
+X_P_1_resolver:                              /* Relay: X -> INTF */
+    ldr r12, .P1144089514_Getter_P_1
+    cmp r10, r12
+    beq X_P_1_Getter
+.P1144089514_Getter_P_1: .word Getter_P_1
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    ldr r0, .P1144089515_X_P_1
+    push { r0 }
+    mov r12, #0                              /* Offset to Getter.get */
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r4, r0, #2
+    mov r0, r4                               /* Evaluate Expression */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1144089515_Getter_P_1
+    add lr, pc, #8
+    mov pc, r12
+    mov r12, #4                              /* Offset to Getter.get */
+    mov r5, r0
+    mov r1, r3
+    mov r0, r4
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1144089515_Getter_P_1
+    add lr, pc, #8
+    mov pc, r12
+    add r0, r5, r0
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P1144089515_Getter_P_1: .word Getter_P_1
+.P1144089515_X_P_1: .word X_P_1

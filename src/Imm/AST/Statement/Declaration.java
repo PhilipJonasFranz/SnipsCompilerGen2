@@ -1,37 +1,60 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.AST.Expression.Expression;
-import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
  */
 public class Declaration extends Statement {
 
+	private static int SERIAL_CNT = 0;
+	
 			/* ---< FIELDS >--- */
-	/** The visibility modifer of this declaration. Can only be applied to global declarations. */
+	public long SERIAL = SERIAL_CNT++;
+	
+	/** 
+	 * The visibility modifer of this declaration. Can only be applied to global declarations. 
+	 */
 	public MODIFIER modifier;
 	
-	/** The namespace path of this declaration. */
+	/** 
+	 * The namespace path of this declaration. 
+	 */
 	public NamespacePath path;
 	
-	/** The effective type of this declaration. */
+	/** 
+	 * The effective type of this declaration. 
+	 */
 	private TYPE type;
 	
-	/** The initial value of this declaration. */
+	/** 
+	 * The initial value of this declaration. 
+	 */
 	public Expression value;
 	
-	/** The last statement that accessed this Declaration. */
+	/** 
+	 * The last statement that accessed this Declaration. 
+	 */
 	public Statement last = null;
+	
+	public boolean hadAutoType = false;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -58,26 +81,51 @@ public class Declaration extends Statement {
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
 		try {
-			System.out.println(this.pad(d) + "Declaration <" + this.type.typeString() + "> " + this.path.build());
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <" + this.type + "> " + this.path);
 		} catch (Exception e) {
-			System.out.println(this.pad(d) + "Declaration <?> " + this.path.build());
+			CompilerDriver.outs.println(Util.pad(d) + "Declaration <?> " + this.path);
 		}
 		
 		if (rec && this.value != null) 
 			this.value.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkDeclaration(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkDeclaration(this);
+		
+		ctx.popTrace();
+		return t;
+	}
+	
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optDeclaration(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		if (this.value != null)
+			result.addAll(this.value.visit(visitor));
+		
+		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		/* Apply to declaration type */
 		ProvisoUtil.mapNTo1(this.type, context);
 		
 		/* Apply to value */
 		if (this.value != null) 
 			this.value.setContext(context);
+		
+		/* Copy type of value to make sure correct provisos are set */
+		if (this.hadAutoType) 
+			this.type = this.value.getType().clone();
 	}
 
 	/** 
@@ -102,7 +150,21 @@ public class Declaration extends Statement {
 	
 	public Declaration clone() {
 		Declaration clone = new Declaration(this.path, this.type.clone(), this.modifier, this.getSource());
+		
+		if (this.value != null) clone.value = this.value.clone();
+		
+		clone.SERIAL = this.SERIAL;
+		clone.copyDirectivesFrom(this);
 		return clone;
+	}
+
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		String s = this.type.codeString() + " " + this.path;
+		if (this.value != null)
+			s += " = " + this.value.codePrint() + ";";
+		code.add(Util.pad(d) + s);
+		return code;
 	}
 	
 } 

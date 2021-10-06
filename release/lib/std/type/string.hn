@@ -1,0 +1,40 @@
+#include<linked_list.hn>
+
+/*
+ * This package contains various utility functions for Strings chars.
+ */
+namespace String {
+
+	/*
+	 * Compares the two given strings. Checks if all chars are equal and returns the
+	 * boolean result.
+	 */
+	shared bool equals(char* str0, char* str1);
+
+	/*
+	 * Collects all chars in the string whiches index is greater or equal to begin and less than end.
+	 * This means that the length of the resulting string will be (end - begin), starting at begin.
+	 * Valid inputs for the ranges can be negative numbers and indexes out of bounds, 
+	 * but result may not be as expected.
+	 */
+	shared char* substring(char* str, int begin, int end);
+	
+	/*
+	 * Returns the length of the string. The length is determined by the first
+	 * occurrence of the 0 termination char. The length does include the 0 char.
+	 */
+	shared int length(char* str);
+
+	/*
+	 * Returns the char at the given index in the string.
+	 * Returns the 0-char if the given index is out of bounds.
+	 */
+	shared char charAt(char* str, int i);
+	
+	/* 
+	 * Concatenates the two given strings. Result is one string. Does
+	 * only read the two given strings.
+	 */
+	shared char* concat(char* str0, char* str1);
+
+} 

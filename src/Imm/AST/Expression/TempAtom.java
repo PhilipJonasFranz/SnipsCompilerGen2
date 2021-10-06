@@ -1,12 +1,19 @@
 package Imm.AST.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all Expressions.
@@ -14,9 +21,14 @@ import Util.Source;
 public class TempAtom extends Expression {
 
 			/* ---< FIELDS >--- */
+	/**
+	 * The expression which evaluates the value the stack is filled with.
+	 */
 	public Expression base;
 	
-	/* The type this placeholder atom replaces */
+	/**
+	 * The type this placeholder atom replaces.
+	 */
 	public TYPE inheritType;
 	
 	
@@ -33,31 +45,59 @@ public class TempAtom extends Expression {
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Placeholder Atom <" + this.getType().typeString() + ">");
-		System.out.println(this.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType.typeString() : "?") + ">");
-		if (rec) this.base.print(d + this.printDepthStep, rec);
+		CompilerDriver.outs.println(Util.pad(d) + "Placeholder Atom <" + this.getType() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Inherited Type <" + ((this.inheritType != null)? this.inheritType : "?") + ">");
+		if (rec && this.base != null) this.base.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		TYPE t = ctx.checkPlaceholderAtom(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkTempAtom(this);
 		
 		if (this.inheritType == null)
-			throw new CTX_EXC(this.getSource(), "Placeholder atom is not available at this location");
+			throw new CTEX_EXC(this, "Placeholder atom is not available at this location");
 		
+		ctx.popTrace();
 		return t;
 	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optTempAtom(this);
+	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		if (this.base != null)
+			result.addAll(this.base.visit(visitor));
+		
+		return result;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		if (this.inheritType != null)
 			ProvisoUtil.mapNTo1(this.inheritType, context);
-		
-		this.base.setContext(context);
+		if (this.base != null)
+			this.base.setContext(context);
 	}
 
 	public Expression clone() {
-		TempAtom t = new TempAtom(this.base.clone(), this.getSource().clone());
-		if (this.inheritType != null) t.inheritType = this.inheritType.clone();
+		TempAtom t = new TempAtom(((this.base != null)? this.base.clone() : null), this.getSource().clone());
+		if (this.inheritType != null) 
+			t.inheritType = this.inheritType.clone();
+		
+		t.setType(this.getType().clone());
+		t.copyDirectivesFrom(this);
 		return t;
+	}
+
+	public String codePrint() {
+		if (this.base == null) return "...";
+		else return "(" + this.base.codePrint() + ")...";
 	}
 
 } 

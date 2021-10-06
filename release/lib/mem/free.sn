@@ -3,6 +3,7 @@
  * the memory address, but the memory block will not be registered to be used anymore and
  * thus can be overwritten.
  */
+# unsafe
 shared void free(void* p) {
 	/* Jump to block head */
 	p -= 1;

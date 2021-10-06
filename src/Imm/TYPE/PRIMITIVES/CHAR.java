@@ -23,12 +23,12 @@ public class CHAR extends PRIMITIVE<Character> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof CHAR;
 		}
@@ -43,10 +43,18 @@ public class CHAR extends PRIMITIVE<Character> {
 		return "" + (int) this.value;
 	}
 	
+	public Integer toInt() {
+		return (int) this.value;
+	}
+	
 	public TYPE clone() {
 		CHAR b = new CHAR();
 		if (this.value != null) b.setValue(this.value + "");
 		return b;
+	}
+	
+	public String codeString() {
+		return "char";
 	}
 	
 } 

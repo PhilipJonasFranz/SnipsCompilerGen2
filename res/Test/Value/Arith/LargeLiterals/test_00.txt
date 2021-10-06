@@ -8,11 +8,19 @@ TESTCASES
 2 2048
 5 5120
 OUTPUT
-/* --test_00.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    mov r1, r0                               /* Evaluate Expression */
-    ldr r2, .POOL0_LIT_1024                  /* Literal is too large, load from literal pool */
-    mul r0, r1, r2
+    mov r3, r0
+    ldr r2, .P1858752345_LIT_1024            /* Literal is too large, load from literal pool */
+    mul r0, r3, r2
     bx lr
-.POOL0_LIT_1024: .word 1024
-    
+.P1858752345_LIT_1024: .word 1024

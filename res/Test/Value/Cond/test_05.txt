@@ -14,16 +14,22 @@ TESTCASES
 2 4 14
 3 5 21
 OUTPUT
-/* --test_05.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
     cmp r0, #3
     bne main.L0
-    lsl r5, r3, #1
-    add r4, r4, r5
+    add r4, r4, #6
 main.L0: 
     add r4, r4, #10
     mov r0, r4                               /* Evaluate Expression */
     bx lr
-    

@@ -18,8 +18,16 @@ int main() {
 TESTCASES
 78
 OUTPUT
-/* --test_05.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global det
 det:                                         /* Function: det */
     ldr r0, [sp]
     ldr r2, [sp, #16]
@@ -58,21 +66,22 @@ det:                                         /* Function: det */
     sub r0, r1, r2
     add sp, sp, #36
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #4                               /* Evaluate Expression */
-    mov r1, #0
     mov r2, #1
+    mov r1, #0
+    mov r0, #4                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #8
-    mov r1, #3
     mov r2, #0
+    mov r1, #3
+    mov r0, #8
     stmfd sp!, {r0-r2}
-    mov r0, #2
-    mov r1, #6
     mov r2, #3
+    mov r1, #6
+    mov r0, #2
     stmfd sp!, {r0-r2}
     sub r0, fp, #4
     ldmfa r0, {r0-r2}
@@ -86,4 +95,3 @@ main:                                        /* Function: main */
     bl det                                   /* Call det */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

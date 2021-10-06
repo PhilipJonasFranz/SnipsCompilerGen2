@@ -1,14 +1,11 @@
 package Imm.AsN.Statement.Lhs;
 
-import java.util.List;
-
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
 import CGen.Util.StackUtil;
 import Exc.CGEN_EXC;
 import Exc.SNIPS_EXC;
-import Imm.ASM.ASMInstruction;
 import Imm.ASM.Memory.ASMLdr;
 import Imm.ASM.Memory.ASMLdrLabel;
 import Imm.ASM.Memory.ASMStr;
@@ -28,10 +25,6 @@ import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
 import Imm.AST.Lhs.SimpleLhsId;
 import Imm.AST.Statement.Assignment.ASSIGN_ARITH;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.COMPOSIT.STRUCT;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Res.Const;
 
 public class AsNSimpleLhsId extends AsNLhsId {
@@ -39,6 +32,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 	public static AsNSimpleLhsId cast(SimpleLhsId lhs, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		/* Relay to statement type cast */
 		AsNSimpleLhsId id = new AsNSimpleLhsId();
+		id.pushOnCreatorStack(lhs);
 		lhs.castedNode = id;
 
 		IDRef ref = lhs.ref;
@@ -49,8 +43,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 			
 			/* Create the injection, use direct targeting of register */
 			if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
-				List<ASMInstruction> inj = id.buildInjector(lhs.assign, reg, 0, true, false);
-				id.instructions.addAll(inj);
+				id.instructions.addAll(id.buildInjector(lhs.assign, reg, 0, true, false));
 			}
 			else id.instructions.add(new ASMMov(new RegOp(reg), new RegOp(0)));
 		}
@@ -67,21 +60,19 @@ public class AsNSimpleLhsId extends AsNLhsId {
 					id.instructions.add(new ASMLdr(new RegOp(REG.R2), new RegOp(REG.R1)));
 					
 					/* Injector will calculate assignment arith into R0 */
-					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, true);
-					id.instructions.addAll(inj);
+					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, true));
 				}
 				
 				/* Store computed to memory */
 				id.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R1)));
 			}
-			else {
+			else 
 				/* Copy the value on the stack to the desired location */
 				StackUtil.copyToAddressFromStack(ref.origin.getType().wordsize(), id, st);
-			}
 		}
 		/* Store to stack */
 		else {
-			if (ref.origin.getType() instanceof PRIMITIVE || ref.origin.getType() instanceof POINTER) {
+			if (ref.origin.getType().isRegType()) {
 				int off = st.getDeclarationInStackByteOffset(ref.origin);
 				
 				if (lhs.assign.assignArith != ASSIGN_ARITH.NONE) {
@@ -89,16 +80,15 @@ public class AsNSimpleLhsId extends AsNLhsId {
 							new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 					
 					/* R1 can be overwritten, offset is known */
-					List<ASMInstruction> inj = id.buildInjector(lhs.assign, 2, 0, false, false);
-					id.instructions.addAll(inj);
+					id.instructions.addAll(id.buildInjector(lhs.assign, 2, 0, false, false));
 				}
 				
 				id.instructions.add(new ASMStrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.FP), 
 					new PatchableImmOp(PATCH_DIR.DOWN, -off)));
 			}
-			else if (ref.origin.getType() instanceof ARRAY || ref.origin.getType() instanceof STRUCT) {
+			else if (ref.origin.getType().isStackType()) {
 				/* 
-				 * Use light variations of the addressing injector from AsNElementSelect, since we 
+				 * Use slight variations of the addressing injector from AsNElementSelect, since we 
 				 * dont have to add the sum to the sub structure.
 				 */
 				
@@ -137,6 +127,7 @@ public class AsNSimpleLhsId extends AsNLhsId {
 		
 		r.free(0, 1, 2);
 		
+		id.registerMetric();
 		return id;
 	}
 	

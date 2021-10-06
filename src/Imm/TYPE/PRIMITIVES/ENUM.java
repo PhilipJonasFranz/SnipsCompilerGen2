@@ -22,12 +22,12 @@ public class ENUM extends PRIMITIVE<String> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			if (p.getCoreType() instanceof ENUM) {
 				ENUM e0 = (ENUM) p.getCoreType();
@@ -44,7 +44,7 @@ public class ENUM extends PRIMITIVE<String> {
 	}
 	
 	public String typeString() {
-		return "ENUM<" + this.def.path.build() + ">";
+		return "ENUM<" + this.def.path + ">";
 	}
 
 	public String sourceCodeRepresentation() {
@@ -59,6 +59,10 @@ public class ENUM extends PRIMITIVE<String> {
 		ENUM b = new ENUM(this.def, this.fieldName, Integer.parseInt(this.getValue()));
 		if (this.value != null) b.setValue(this.value + "");
 		return b;
+	}
+	
+	public String codeString() {
+		return this.def.path.build();
 	}
 	
 } 

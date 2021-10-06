@@ -1,165 +1,97 @@
-#include<collection.sn>
-#include<serializable.sn>
+#include<collection.hn>
+#include<serializable.hn>
 
-/*
- * This package contains the utility to create a linked-list,
- * insert and remove values from it, as well as some functions
- * that give information about the state of the list.
- */
 namespace List {
 
-	/*
-	 * A single list entry, contains a pointer to the next node
-	 * and a value.
-	 */
-	restricted struct ListNode<T> {
-		ListNode<T>* next;
-		T value;
-	}
-	
-	/*
-	 * Wraps the list head and tail.
-	 */
 	restricted struct LinkedList<T> : Collection<T>, Serializable {
 		
-		/* Points to the head of the list or is null. */
-		ListNode<T>* head;
-		
-		/* Points to the last element of the list or is null. */
-		ListNode<T>* tail;
-		
-		/* Assumed size of list, use count() to re-count the elements */
-		int size;
-		
-		/* The default value that can be returned */
-		T defValue;
-		
-		/*
-		 * Creates a new list node for given value x and adds the node at the
-		 * end of the list.
-		 */
 		shared void add(T x) {
 			/* Initialize the new List Node, set the next pointer to null */
-			ListNode<T>* n = init<>(ListNode<T>::(null, x));
+			auto node = init<>(ListNode<T>::(null, x));
 		
-			if (self->head == null) {
-				self->head = n;
-				self->tail = n;
-			}
-			else {
-				self->tail->next = n;
-				self->tail = n;
-			}	
+			if (self->head == null) self->head = node;
+			if (self->tail != null) self->tail->next = node;
 			
+			self->tail = node;
 			self->size++;
 		}
 		
-		/*
-		 * Returns the value of the node at the given index. Returns
-		 * the default value if the index is invalid.
-		 */
 		shared T get(int i) {
-			if (i < 0) return self->defValue;
+			/* Index out of bounds */
+			if (i < 0 || i >= self->size) 
+				return self->defValue;
 		
-			ListNode<T>* n = self->head;
+			/* List walk is safe since index is within bounds */
+			auto node = self->head;
 			while (i != 0) {
-				if (n->next == null) return self->defValue;
-				
-				/* Jump to next */
-				n = n->next;
+				node = node->next;
 				i--;
 			}
 			
-			return n->value;	
+			return node->value;	
 		}
 		
-		/*
-		 * Returns the value of the node at the given index. Returns
-		 * the default value if the index is invalid.
-		 */
 		shared void set(int i, T value) {
-			ListNode<T>* n = self->head;
+			auto node = self->head;
 			while (i != 0) {
-				if (n->next == null) return;
+				if (node->next == null) return;
 				
 				/* Jump to next */
-				n = n->next;
+				node = node->next;
 				i--;
 			}
 			
-			n->value = value;
+			node->value = value;
 		}
 		
-		/*
-		 * Free the list by freeing all contained list nodes, and the list itself.
-		 */
 		shared void destroy<T:void>() {
-			ListNode<void>* n = self->head;
-			while (n != null) {
-				free(n);
-				n = n->next;
+			ListNode<void>* node = self->head;
+			while (node != null) {
+				free(node);
+				node = node->next;
 			}
 			free(self);
 		}
 		
-		/*
-		 * Check if given list contains given value. If the current value matches
-		 * the searched value determines the predicate.
-		 */
 		shared bool contains(func (T, T) -> bool pred, T x) {
-			ListNode<T>* n = self->head;
+			auto node = self->head;
 			while (true) {
-				if (n == null) return false;
+				if (node == null) return false;
 				
 				/* Value found */
-				if (pred(x, n->value)) return true;
+				if (pred(x, node->value)) return true;
 				
 				/* Jump to next */
-				n = n->next;
+				node = node->next;
 			}
 		}
 		
-		/*
-		 * Finds the first node in the list that has given value.
-		 * Returns a pointer to this list node, or 0 in case the
-		 * value wasnt found.
-		 */
 		shared ListNode<T>* find(func (T, T) -> bool pred, T x) {
-			ListNode<T>* n = self->head;
-			while (n != null) {
+			auto node = self->head;
+			while (node != null) {
 				/* 
 				 * If the predicate matches given value, 
 				 * the searched value was found.
 				 */
-				if (pred(x, n->value)) return n;
+				if (pred(x, node->value)) return node;
 				
 				/* Jump to next */
-				n = n->next;
+				node = node->next;
 			}
 
 			/* Not found */
 			return null;
 		}
 		
-		/*
-		 * Returns the amount of elements stored in the list.
-		 */
 		shared int size<T:void>() {
 			return self->size;
 		}
 		
-		/* 
-		 * Re-counts the elements in the list. In general, the
-		 * size count should not differ from the actual size, but
-		 * when manual list manipulation is done, the size may very
-		 * well be changed. Calling this method will refresh the size
-		 * counter and returns the current size.
-		 */
 		shared int count<T:void>() {
-			ListNode<void>* n = self->head;
+			ListNode<void>* node = self->head;
 			int size = 0;
-			while (n != null) {
-				n = n->next;
+			while (node != null) {
+				node = node->next;
 				size++;
 			}
 			
@@ -167,10 +99,7 @@ namespace List {
 			return size;
 		}
 		
-		/*
-		 * Returns the index of given node in the list.
-		 */
-		shared int indexOf<T:void>(ListNode<void>* n) {
+		shared int indexOf<T:void>(ListNode<void>* node) {
 			/* Start iterating at head of list */
 			ListNode<void>* n0 = self->head;
 			
@@ -179,7 +108,7 @@ namespace List {
 			
 			while (n0 != null) {
 				/* Addresses match, node found, return current index */
-				if (n0 == n) return i;
+				if (n0 == node) return i;
 				else {
 					/* Jump to next node */
 					n0 = n0->next;
@@ -191,10 +120,6 @@ namespace List {
 			return -1;
 		}
 		
-		/*
-		 * Removes the index at given index.
-		 * If the index is out of bounds nothing is removed.
-		 */
 		shared void remove<T:void>(int i) {
 			/* Out of bounds */
 			if (i < 0) return;
@@ -202,58 +127,101 @@ namespace List {
 			if (i == 0) {
 				/* Remove first element */
 				if (self->head != null) {
-					ListNode<void>* n = self->head;
+					ListNode<void>* node = self->head;
 					self->head = self->head->next;
 					
 					/* Only one element in list */
-					if (self->tail == n) self->tail = null;
+					if (self->tail == node) self->tail = null;
 					
-					free(n);
+					self->size--;
+					free(node);
 				}
 				
 				return;
 			}
 			else {
-				ListNode<T>* n = self->head;
+				auto node = self->head;
 				i--;
 				
 				/* Jump to element before element to remove */
 				while (i > 0) {
-					if (n->next == null) return;
+					if (node->next == null) return;
 					else {
-						n = n->next;
+						node = node->next;
 						i--;
 					}
 				}
 				
 				/* Out of bounds */
-				if (n->next == null) return;
+				if (node->next == null) return;
 				else {
-					if (n->next->next == null) {
+					if (node->next->next == null) {
 						/* Element to remove is last element in list */
-						free(n->next);
-						n->next = null;
-						self->tail = n;
+						free(node->next);
+						node->next = null;
+						self->tail = node;
 					}
 					else {
 						/* Cut out element and set next pointers */
-						ListNode<void>* next = n->next->next;
-						free(n->next);
-						n->next = next;
+						ListNode<void>* next = node->next->next;
+						free(node->next);
+						node->next = next;
 					}
+					
+					self->size--;
 					return;
 				}
 			}
 		}
 		
-		/*
-		 * Removes all elements from the list
-		 */
+		shared void reverse() {
+			int s = self->size;
+			
+			/* Current node */
+			auto node = self->head;
+				
+			/* 
+			 * List must contain at least two elements 
+			 * to be 'reversable'.
+			 */
+			if (node != null && s > 1) {
+				ListNode<T>* tail0 = node;
+				
+				/* Keep reference to original tail */
+				auto head0 = node;
+				
+				/*
+				 * For entire list, walk the list, and build
+				 * reversed list in parallel.
+				 */
+				while (s > 0) {
+					auto n0 = node->next;
+					
+					node->next = head0;
+					head0 = node;
+					
+					node = n0;
+					s--;
+				}
+				
+				/* 
+				 * Currently loop, cut at original 
+				 * start of list, that is now the tail.
+				 */
+				tail0->next = null;
+				
+				/* Set new head and tail references */
+				self->head = head0;
+				self->tail = tail0;
+			}
+		}
+		
 		shared void clear<T:void>() {
-			ListNode<void>* n = self->head;
-			while (n != null) {
-				free(n);
-				n = n->next;
+			ListNode<void>* node = self->head;
+			
+			while (node != null) {
+				free(node);
+				node = node->next;
 			}
 			
 			self->head = null;
@@ -261,10 +229,7 @@ namespace List {
 			
 			return;
 		}
-
-		/*
-		 * Returns if the list is empty.
-		 */
+		
 		shared bool isEmpty<T:void>() {
 			return self->head == null;
 		}
@@ -278,14 +243,42 @@ namespace List {
 			return null;
 		}
 	
-		/*
-		 * Creates a new List Object and initializes the head an tail to null.
-		 */
 		static LinkedList<T>* create<T>(T defValue) {
 			/* Initialize list, set pointers to null */
 			return init<>(LinkedList<T>::(null, null, 0, defValue));
 		}
 		
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_add<T>(LinkedList<T>* list, T value) {
+		list->add(value);
+		return list;
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_addAll<T>(LinkedList<T>* list, LinkedList<T>* toAdd) {
+		auto node = toAdd->head;
+		
+		while (node != null) {
+			list->add(node->value);
+			node = node->next;
+		}
+		
+		return list;
+	}
+	
+	#operator <<
+	static LinkedList<T>* op_apply<T>(LinkedList<T>* list, func T -> T pred) {
+		auto node = list->head;
+		
+		while (node != null) {
+			T nVal = pred(node->value);
+			node->value = nVal;
+			node = node->next;
+		}
+		
+		return list;
 	}
 	
 } 

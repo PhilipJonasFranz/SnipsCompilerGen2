@@ -13,11 +13,20 @@ int main() {
 TESTCASES
 128
 OUTPUT
-/* --test_03.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global bar
 bar:                                         /* Function: bar */
     bx lr
-    
+
+.global foo
 foo:                                         /* Function: foo */
     push { r3, lr }
     mov r0, #4                               /* Evaluate Expression */
@@ -32,7 +41,8 @@ foo:                                         /* Function: foo */
     bl bar                                   /* Call bar */
     mul r0, r3, r0
     ldmfd sp!, {r3, pc}
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
     bl foo                                   /* Evaluate Expression */
@@ -40,4 +50,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     add r0, r3, r0
     pop { pc }
-    

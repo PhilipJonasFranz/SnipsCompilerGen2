@@ -1,7 +1,7 @@
 package Imm.AST.Expression.Boolean;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.UnaryExpression;
 import Imm.TYPE.TYPE;
@@ -23,8 +23,13 @@ public abstract class BoolUnaryExpression extends UnaryExpression {
 
 	
 			/* ---< METHODS >--- */
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkBoolUnaryExpression(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkBoolUnaryExpression(this);
+		
+		ctx.popTrace();
+		return t;
 	}
 	
 } 

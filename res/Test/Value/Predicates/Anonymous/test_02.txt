@@ -17,8 +17,53 @@ int main() {
 TESTCASES
 11
 OUTPUT
-/* --test_02.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global get
+get:                                         /* Function: get */
+    push { fp }
+    mov fp, sp
+    mov r1, #5
+    mov r0, #3                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    mov r2, sp
+    mov sp, fp
+    pop { fp }
+    add r1, r2, #8
+    mov r0, #8
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    ldr r0, .P553308267_get                  /* Evaluate Expression */
+    push { r0 }
+    ldr r3, [fp, #-4]
+/* Call the predicate */
+    add lr, pc, #8
+    mov pc, r3
+    sub sp, fp, #4                           /* Reset the stack after anonymous call */
+    mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    ldr r0, [fp, #-12]
+    ldr r2, [fp, #-8]
+    add r0, r0, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P553308267_get: .word get
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -29,44 +74,4 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-lambda_get:                                  /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
-get:                                         /* Function: get */
-    push { fp }
-    mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
-    mov r1, #5
-    stmfd sp!, {r0, r1}
-    mov r2, sp
-    mov sp, fp
-    pop { fp }
-    mov r0, #8
-    add r1, r2, #8
-    add r10, pc, #8                          /* Setup return address for routine */
-    b _routine_stack_copy_
-    mov r10, #0
-    bx lr
-    
-main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_get
-    mov r10, #0
-    push { r0 }
-    ldr r3, [fp, #-4]
-/* Call the predicate */
-    add lr, pc, #8
-    mov pc, r3
-    sub sp, fp, #4                           /* Reset the stack after anonymous call */
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #5
-    stmfd sp!, {r0, r1}
-    ldr r0, [fp, #-12]
-    ldr r2, [fp, #-8]
-    add r0, r0, r2
-    mov sp, fp
-    ldmfd sp!, {fp, pc}
-    
+

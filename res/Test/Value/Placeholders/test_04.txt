@@ -5,6 +5,7 @@ struct Test {
 }
 
 int main(int k) {
+	/* Generates the Struct (SID, [1, 2, 1, 2], 1) */
 	Test t = Test::(({1, 2})...);
 	
 	t.x [1] = 5;
@@ -15,18 +16,36 @@ int main(int k) {
 TESTCASES
 6
 OUTPUT
-/* --test_04.txt */
+.version 0
+
+.data
+Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
+/* Generates the Struct (SID, [1, 2, 1, 2], 1) */
+    sub sp, sp, #12                          /* Evaluate Expression */
     mov r1, #1
+    mov r0, #2
     stmfd sp!, {r0, r1}
-    ldr r0, [sp]
-    str r0, [sp, #-8]
-    ldr r0, [sp, #4]
-    str r0, [sp, #-4]
-    sub sp, sp, #8
-    mov r0, #1
+    mov r2, sp
+    mov r1, #3
+main.L0: 
+    cmp r1, #0
+    beq main.L1
+    ldr r0, [r2]
+    str r0, [r2, #8]
+    add r2, r2, #4
+    sub r1, r1, #1
+    b main.L0
+main.L1: 
+    ldr r0, .P1396767904_Test
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     str r0, [fp, #-16]                       /* Store value to struct field */
@@ -37,4 +56,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-    
+.P1396767904_Test: .word Test

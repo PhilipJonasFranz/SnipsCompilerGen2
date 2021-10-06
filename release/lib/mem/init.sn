@@ -3,6 +3,7 @@
  * to this memory section, and returns a pointer to the new memory
  * section.
  */
+# unsafe
 shared void* init<T>(T value) {
 	void* p = resv(sizeof(T));
 	*p = value;

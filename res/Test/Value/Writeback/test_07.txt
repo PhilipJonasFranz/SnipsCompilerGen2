@@ -14,29 +14,34 @@ TESTCASES
 3 6
 4 10
 OUTPUT
-/* --test_07.txt */
+.version 0
+
 .data
 s: .word 0
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
     b main
+
 /* In global memory */
+
+.global main
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, #0
+    mov r3, r0
 main.L1: 
     cmp r4, r3
     bge main.L2
-    add r0, r4, #1
-    ldr r1, .POOL0_L0_s
+    ldr r1, .P1969102551_s
     ldr r2, [r1]
+    add r0, r4, #1
     add r0, r2, r0
     str r0, [r1]
     add r4, r4, #1
     b main.L1
 main.L2: 
-    ldr r0, .POOL0_L0_s                      /* Evaluate Expression */
+    ldr r0, .P1969102551_s                   /* Evaluate Expression */
     ldr r0, [r0]
     bx lr
-.POOL0_L0_s: .word s
-    
+.P1969102551_s: .word s

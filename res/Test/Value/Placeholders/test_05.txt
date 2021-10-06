@@ -19,16 +19,26 @@ int main(int k) {
 TESTCASES
 10
 OUTPUT
-/* --test_05.txt */
+.version 0
+
+.data
+Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #5
+    mov r1, #5
+    mov r0, #5                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r2, #1
+    ldr r2, .P1368138753_Test
     stmfd sp!, {r0-r2}
-    mov r0, #9
+    mov r0, #9                               /* Evaluate Expression */
     str r0, [fp, #-16]                       /* Store value to struct field */
     mov r0, #1                               /* Evaluate Expression */
     str r0, [fp, #-4]                        /* Store value to struct field */
@@ -37,4 +47,4 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     bx lr
-    
+.P1368138753_Test: .word Test

@@ -10,14 +10,17 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_00.txt */
+.version 0
+
 .data
 Test.x: .word 10
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    ldr r0, .POOL0_L0_Test.x                 /* Evaluate Expression */
-    ldr r0, [r0]
+    mov r0, #10                              /* Evaluate Expression */
     bx lr
-.POOL0_L0_Test.x: .word Test.x
-    

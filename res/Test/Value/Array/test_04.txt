@@ -17,8 +17,16 @@ TESTCASES
 1 32
 2 33
 OUTPUT
-/* --test_04.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global bar
 bar:                                         /* Function: bar */
     ldr r0, [sp]
     ldr r2, [sp, #4]
@@ -27,7 +35,8 @@ bar:                                         /* Function: bar */
     add r0, r0, r2
     add sp, sp, #12
     bx lr
-    
+
+.global foo
 foo:                                         /* Function: foo */
     push { fp, lr }
     mov fp, sp
@@ -46,18 +55,19 @@ foo:                                         /* Function: foo */
     ldmfd sp!, {fp, lr}
     add sp, sp, #24
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #3                               /* Evaluate Expression */
-    mov r1, #2
     mov r2, #1
+    mov r1, #2
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #4
+    mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     sub r0, fp, #4
     ldmfa r0, {r0-r2}
@@ -69,4 +79,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

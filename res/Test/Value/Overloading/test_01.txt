@@ -1,0 +1,43 @@
+SOURCE
+int get(bool x) {
+	return (int) x;
+}
+
+int get(int x) {
+	return x * 2;
+}
+
+int main() {
+	return get(10) + get(true);
+}
+TESTCASES
+21
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global get_1461183196
+get_1461183196:                              /* Function: get */
+    bx lr
+
+.global get_290971493
+get_290971493:                               /* Function: get */
+    lsl r0, r0, #1
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r0, #10                              /* Evaluate Expression */
+    bl get_290971493                         /* Call get */
+    mov r3, r0
+    mov r0, #1                               /* Load parameters */
+    bl get_1461183196                        /* Call get */
+    add r0, r3, r0
+    pop { pc }

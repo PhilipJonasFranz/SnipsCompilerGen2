@@ -13,6 +13,7 @@ import Imm.AST.Statement.ContinueStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.DirectASMStatement;
 import Imm.AST.Statement.FunctionCall;
+import Imm.AST.Statement.OperatorStatement;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.SignalStatement;
 import Imm.AST.Statement.Statement;
@@ -36,13 +37,13 @@ public abstract class AsNStatement extends AsNNode {
 			node = AsNFunctionCall.cast((FunctionCall) s, r, map, st); 
 		}
 		else if (s instanceof ReturnStatement) {
-			node = AsNReturn.cast((ReturnStatement) s, r, map, st); 
+			node = AsNReturnStatement.cast((ReturnStatement) s, r, map, st); 
 		}
 		else if (s instanceof BreakStatement) {
-			node = AsNBreak.cast((BreakStatement) s, r, map, st); 
+			node = AsNBreakStatement.cast((BreakStatement) s, r, map, st); 
 		}
 		else if (s instanceof ContinueStatement) {
-			node = AsNContinue.cast((ContinueStatement) s, r, map, st); 
+			node = AsNContinueStatement.cast((ContinueStatement) s, r, map, st); 
 		}
 		else if (s instanceof Declaration) {
 			node = AsNDeclaration.cast((Declaration) s, r, map, st);
@@ -65,6 +66,9 @@ public abstract class AsNStatement extends AsNNode {
 		else if (s instanceof Comment) {
 			node = AsNComment.cast((Comment) s, r, map, st); 
 		}
+		else if (s instanceof OperatorStatement) {
+			node = AsNOperatorStatement.cast((OperatorStatement) s, r, map, st); 
+		}
 		else throw new CGEN_EXC(s.getSource(), Const.NO_INJECTION_CAST_AVAILABLE, s.getClass().getName());
 	
 		s.castedNode = node;
@@ -72,10 +76,7 @@ public abstract class AsNStatement extends AsNNode {
 	}
 	
 	public void freeDecs(RegSet r, Statement s) {
-		for (Declaration d : s.free) {
-			int loc = r.declarationRegLocation(d);
-			if (loc != -1) r.free(loc);
-		}
+		return;
 	}
 	
 } 

@@ -8,22 +8,30 @@ int main() {
 TESTCASES
 3
 OUTPUT
-/* --test_22.txt */
+.version 0
+
 .data
 vec: .skip 16
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main_init
+
+.global main
+
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
-    mov r0, #0
     mov r1, #2
+    mov r0, #0
     stmfd sp!, {r0, r1}
-    mov r0, #7
     mov r1, #3
+    mov r0, #7
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
+    ldr r1, .P798631203_vec                  /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -33,11 +41,10 @@ vec: .skip 16
     str r0, [r1, #12]
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
-    ldr r1, .POOL0_L0_vec                    /* Load data section address */
+    ldr r1, .P798631203_vec                  /* Load data section address */
     ldr r0, [r1, #4]
     ldr r2, [r1]
     stmfd sp!, {r0, r2}
     ldr r0, [sp]
     bx lr
-.POOL0_L0_vec: .word vec
-    
+.P798631203_vec: .word vec

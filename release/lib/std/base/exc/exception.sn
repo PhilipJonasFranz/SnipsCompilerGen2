@@ -1,0 +1,19 @@
+#include <object.hn>
+
+namespace ExceptionBase {
+	
+	restricted struct Exception : Object {
+
+		shared char* getMessage() {
+			return self->message;
+		}
+		
+		static Exception create(char* message) {
+			Exception exc = Exception::(super(), message);
+			exc.sname = &ExceptionBase::excsname;
+			return exc;
+		}
+
+	}
+
+}

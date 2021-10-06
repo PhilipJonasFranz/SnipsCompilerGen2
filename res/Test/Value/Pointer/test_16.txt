@@ -17,8 +17,16 @@ TESTCASES
 2 5
 3 -2
 OUTPUT
-/* --test_16.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global get
 get:                                         /* Function: get */
     push { r3, fp }
     mov fp, sp
@@ -36,22 +44,22 @@ get:                                         /* Function: get */
     ldmfd sp!, {r3, fp}
     add sp, sp, #8
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #1                               /* Evaluate Expression */
     mov r1, #9
+    mov r0, #1                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #3
     mov r1, #5
+    mov r0, #3
     stmfd sp!, {r0, r1}
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #4
     stmfd sp!, {r0, r1}
-    mov r0, #2
     mov r1, #1
+    mov r0, #2
     stmfd sp!, {r0, r1}
     sub r0, fp, #32                          /* Evaluate Expression */
     lsr r0, r0, #2
@@ -66,4 +74,3 @@ main:                                        /* Function: main */
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

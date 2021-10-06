@@ -21,7 +21,16 @@ TESTCASES
 6 9
 7 10
 OUTPUT
-/* --test_06.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     cmp r0, #1
@@ -61,4 +70,3 @@ main.L10:
 main.L11: 
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    

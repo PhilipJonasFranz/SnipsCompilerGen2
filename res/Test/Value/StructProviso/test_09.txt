@@ -17,7 +17,18 @@ int main() {
 TESTCASES
 30
 OUTPUT
-/* --test_09.txt */
+.version 0
+
+.data
+Data_P_1: .word 0
+Nib_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, #19
@@ -25,16 +36,15 @@ main:                                        /* Function: main */
     mov r3, #11
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r0, r0, #2
-    push { r3 }                              /* Push declaration on stack, referenced by addressof. */
-    push { r0 }
-    mov r0, #1
+    push { r0, r3 }                          /* Push declaration on stack, referenced by addressof. */
+    ldr r0, .P1841790438_Nib_P_1
     push { r0 }
     sub r0, fp, #4
     lsr r0, r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1841790438_Nib_P_1
     push { r0 }
-    mov r0, #2
+    ldr r0, .P1841790438_Data_P_1
     push { r0 }
     ldr r0, [fp, #-20]                       /* Load field from struct */
     ldr r1, [r10, r0, lsl #2]                /* Load from address */
@@ -43,4 +53,5 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     bx lr
-    
+.P1841790438_Data_P_1: .word Data_P_1
+.P1841790438_Nib_P_1: .word Nib_P_1

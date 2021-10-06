@@ -17,12 +17,20 @@ TESTCASES
 2 5
 3 -2
 OUTPUT
-/* --test_17.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global get
 get:                                         /* Function: get */
     push { r3, r4 }
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     ldr r1, [r10, r3, lsl #2]                /* Load from address */
     add r0, r1, r4
     ldr r0, [r10, r0, lsl #2]                /* Load from address */
@@ -35,22 +43,22 @@ get:                                         /* Function: get */
     sub r0, r1, r2
     ldmfd sp!, {r3, r4}
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
-    mov r0, #1                               /* Evaluate Expression */
     mov r1, #9
+    mov r0, #1                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #3
     mov r1, #5
+    mov r0, #3
     stmfd sp!, {r0, r1}
-    mov r0, #3                               /* Evaluate Expression */
     mov r1, #4
     stmfd sp!, {r0, r1}
-    mov r0, #2
     mov r1, #1
+    mov r0, #2
     stmfd sp!, {r0, r1}
     sub r0, fp, #32                          /* Evaluate Expression */
     lsr r0, r0, #2
@@ -58,10 +66,9 @@ main:                                        /* Function: main */
     sub r0, fp, #16
     lsr r0, r0, #2
     push { r0 }
+    mov r1, r3
     sub r0, fp, #40
     lsr r0, r0, #2
-    mov r1, r3
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

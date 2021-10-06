@@ -31,167 +31,79 @@ int main(int a) {
 TESTCASES
 16
 OUTPUT
-/* --test_12.txt */
+.version 0
+
+.include maybe resv.s
+.include maybe init.s
+
 .data
+B_P_1: .word A_P_1
+B_P_1_resolver_relay: .word B_P_1_resolver
+A_P_1: .word 0
+A_P_1_resolver_relay: .word A_P_1_resolver
+Getter_P_1: .word 0
+NULL: .word 0
 HEAP_START: .word 0
-    
+
 .text
     b main
-/* Reseve a memory block with given size + 1. The block size has to be increased */
-/* by one to accomodate the block metadata. The function returns a void pointer to */
-/* the start of the reserved memory section + 1. This means the pointer points to */
-/* the start of the memory thats actually supposed to be used. */
-resv:                                        /* Function: resv */
-    sub sp, sp, #16
-    stmea sp, {r3-r6}
-    mov r3, r0
-/* Add block header to size */
-    add r3, r0, #1
-/* Get reference to heap start */
-    ldr r0, .POOL0_L5_HEAP_START             /* Evaluate Expression */
-    lsr r4, r0, #2
-resv.L1:                                     /* Evaluate condition */
-    ldr r0, [r10, r4, lsl #2]                /* Load from address */
-    cmp r0, #0
-    beq resv.L2
-/* Memory Section is allocated or free */
-/* Load block size from memory */
-    ldr r5, [r10, r4, lsl #2]                /* Load from address */
-    cmp r5, #0
-    bge resv.L4
-/* Defragment Heap */
-resv.L6:                                     /* Evaluate condition */
-    mov r0, #1
-    cmp r0, #0
-    beq resv.L7
-    sub r0, r4, r5
-    ldr r6, [r10, r0, lsl #2]                /* Load from address */
-    cmp r6, #0
-    ble resv.L9
-    b resv.L7
-resv.L9: 
-    cmp r6, #0
-    bne resv.L10
-    mov r0, #0                               /* Evaluate Expression */
-    mov r5, #0
-/* All structures to end are free */
-    b resv.L7
-resv.L10: 
-    add r5, r5, r6
-/* Add to current size */
-    b resv.L6
-resv.L7: 
-    str r5, [r10, r4, lsl #2]
-/* Write defragmented size to heap */
-    cmp r5, #0
-    bne resv.L12
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-resv.L12: 
-/* Memory location is free, check size */
-    rsb r5, r5, #0
-    cmp r5, r3
-    bne resv.L15
-/* Fits */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-    b resv.L19
-resv.L15: 
-    cmp r5, r3
-    ble resv.L16
-/* Rest, subtract size, store at offset */
-    sub r5, r5, r3
-    str r3, [r10, r4, lsl #2]
-    rsb r0, r5, #0
-    push { r0 }
-    add r0, r4, r3
-    lsl r1, r0, #2
-    pop { r0 }
-    str r0, [r1]
-    add r0, r4, #1
-    b resv.L19
-resv.L16: 
-    add r4, r4, r5
-    b resv.L3
-resv.L4: 
-/* Memory section is allocated, skip */
-    add r4, r4, r5
-resv.L3: 
-    b resv.L1
-resv.L2: 
-/* End reached, create new block */
-    str r3, [r10, r4, lsl #2]
-    add r0, r4, #1
-resv.L19: 
-    ldmfd sp!, {r3-r6}
-    bx lr
-.POOL0_L5_HEAP_START: .word HEAP_START
-    
-/* Reserves a memory section using resv, assigns the given value */
-/* to this memory section, and returns a pointer to the new memory */
-/* section. */
-init_P1:                                     /* Function: init, Provisos: B<INT> */
-    sub sp, sp, #12
-    stmea sp, {r3, fp, lr}
-    mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
-    bl resv                                  /* Call resv */
-    mov r3, r0
-    add r0, fp, #20
-    ldmfa r0, {r0-r2}
-    stmfd sp!, {r0-r2}
-    pop { r0 }
-    lsl r1, r3, #2
-    str r0, [r1]
-    pop { r0 }
-    str r0, [r1, #4]
-    pop { r0 }
-    str r0, [r1, #8]
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, fp, lr}
-    add sp, sp, #12
-    bx lr
-    
-Getter.L2_P0:                                /* Interface : Getter, Provisos: INT,  */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #1
-    moveq r10, #0
-    beq Getter.L3
-    cmp r10, #2
-    moveq r10, #4
-Getter.L3: 
-    add r10, r10, r12
-    add r10, r10, #4
-    mov r12, #0
-    add pc, pc, r10
-    b A.get_P2
-    b B.get_P3
-    
-A.get_P2:                                    /* Function: A.get, Provisos: INT */
+
+.global A.get_P_1
+A.get_P_1:                                   /* Function: A.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
-B.get_P3:                                    /* Function: B.get, Provisos: INT */
+
+A_P_1_Getter:                                /* Relay: Getter -> A */
+    mov r10, #0
+    pop { r12 }
+    add r12, r12, #4
+    add pc, pc, r12
+    b A.get_P_1
+
+A_P_1_resolver:                              /* Relay: A -> INTF */
+    ldr r12, .P1282809961_Getter_P_1
+    cmp r10, r12
+    beq A_P_1_Getter
+.P1282809961_Getter_P_1: .word Getter_P_1
+
+.global B.get_P_1
+B.get_P_1:                                   /* Function: B.get, Provisos: INT */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #8]                         /* Load field from struct */
     bx lr
-    
+
+B_P_1_Getter:                                /* Relay: Getter -> B */
+    mov r10, #0
+    pop { r12 }
+    add r12, r12, #4
+    add pc, pc, r12
+    b B.get_P_1
+
+B_P_1_resolver:                              /* Relay: B -> INTF */
+    ldr r12, .P1282809962_Getter_P_1
+    cmp r10, r12
+    beq B_P_1_Getter
+.P1282809962_Getter_P_1: .word Getter_P_1
+
+.global main
 main:                                        /* Function: main */
     push { lr }
-    mov r0, #16                              /* Evaluate Expression */
     mov r1, #10
+    mov r0, #16                              /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #2
+    ldr r0, .P1282809963_B_P_1
     push { r0 }
-    bl init_P1                               /* Call init */
-    bl Getter.L2_P0                          /* Branch to relay table of Getter */
+    bl init_P_3                              /* Call init */
+    mov r12, #0                              /* Offset to Getter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P1282809963_Getter_P_1
+    add lr, pc, #8
+    mov pc, r12
     pop { pc }
-    
+.P1282809963_Getter_P_1: .word Getter_P_1
+.P1282809963_B_P_1: .word B_P_1

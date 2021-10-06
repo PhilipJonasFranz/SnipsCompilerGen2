@@ -1,0 +1,46 @@
+#include <integer.hn>
+#include <string.hn>
+
+namespace ObjectBase {
+	
+	/* Counter to produce unique object ids. */
+	restricted int OIDCnt = 0;
+	
+	/* Name of struct object */
+	restricted auto objSname = "Object";
+			
+	restricted struct Object {
+
+		/*
+		 * The name of this structure. Replace this pointer
+		 * to point to a custom name.
+		 */
+		char* sname;
+
+		/*
+		 * The unique object id of this object. Can be used
+		 * to compare if two objects are the same intance.
+		 */
+		int oid;
+		
+		/*
+		 * Returns true iff this object is equal to
+		 * the given object. This is done by comparing
+		 * their Object-IDs.
+		 */
+		shared bool equals(Object* object);
+		
+		/*
+		 * Creates a string-representation of this object.
+		 * The created string has the format 'Object@[OID]'.
+		 */
+		shared char* toString();
+		
+		/*
+		 * Creates a new object with a unique object-id.
+		 */
+		static Object create();
+
+	}
+
+}

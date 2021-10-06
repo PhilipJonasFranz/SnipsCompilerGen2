@@ -23,8 +23,7 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.Operand;
@@ -43,12 +42,14 @@ import Imm.AsN.Expression.AsNExpression;
 import Imm.AsN.Expression.AsNIDRef;
 import Imm.AsN.Expression.AsNStructSelect;
 import Imm.TYPE.COMPOSIT.ARRAY;
+import Opt.AST.Util.Matcher;
 import Res.Const;
 
 public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNForEachStatement cast(ForEachStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNForEachStatement f = new AsNForEachStatement();
+		f.pushOnCreatorStack(a);
 		a.castedNode = f;
 		
 		/* Create jump as target for continue statements */
@@ -68,7 +69,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* Check if an address reference was made to the declaration, if yes, push it on the stack. */
 			boolean push = false;
 			for (Statement s : a.body)
-				push |= AsNCompoundStatement.hasAddressReference(s, a.iterator);
+				push |= Matcher.hasAddressReference(s, a.iterator);
 			
 			if (push) {
 				int reg = r.declarationRegLocation(a.iterator);
@@ -85,6 +86,7 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		/* Marks the start of the loop */
 		ASMLabel forStart = new ASMLabel(LabelUtil.getLabel());
+		forStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		f.instructions.add(forStart);
 		
 		/* End of the loop */
@@ -107,12 +109,13 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			/* Load the range, automatically calculates range * iterator word size */
 			f.instructions.addAll(AsNExpression.cast(a.range, r, map, st).getInstructions());
 			
-			f.loadCounter(r, st, a, 1);
+			/* Load counter */
+			f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 1).getInstructions());
 			
 			f.instructions.add(new ASMCmp(new RegOp(REG.R0), new RegOp(REG.R1)));
 		}
 		
-		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(forEnd)));
+		f.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(forEnd)));
 		
 		/* Free the counter from the reg set */
 		r.free(0);
@@ -123,13 +126,14 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 			int loc = r.declarationRegLocation(a.iterator);
 			
 			if (a.select != null) {
-				if (a.select.idRef == null && a.select.getShadowRef() instanceof StructSelect) {
+				if (a.select.getShadowRef() instanceof StructSelect) {
 					
 					StructSelect sel = (StructSelect) a.select.getShadowRef();
 
 					AsNStructSelect.injectAddressLoader(f, sel, r, map, st, false);
 					
-					f.loadCounter(r, st, a, 0);
+					/* Load counter */
+					f.instructions.addAll(AsNIDRef.cast(a.counterRef, r, map, st, 0).getInstructions());
 					
 					/* Multiply counter with word size */
 					if (a.counter.getType().wordsize() > 1) {
@@ -185,6 +189,12 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		
 		/* Add jump for continue statements to use as target */
 		f.instructions.add(continueJump);
+		
+		
+		if (a.writeBackIterator) 
+			/* Write back the value of the iterator into the base */
+			f.instructions.addAll(AsNAssignment.cast(a.writeback, r, map, st).getInstructions());
+		
 		
 		/* Free all declarations in scope */
 		popDeclarationScope(f, a, r, st, true);
@@ -249,24 +259,8 @@ public class AsNForEachStatement extends AsNConditionalCompoundStatement {
 		}
 		
 		f.freeDecs(r, a);
+		f.registerMetric();
 		return f;
-	}
-	
-	public void loadCounter(RegSet r, StackSet st, ForEachStatement f, int target) {
-		/* Increment Counter */
-		if (r.declarationLoaded(f.counter)) {
-			/* In Reg Set */
-			int loc = r.declarationRegLocation(f.counter);
-			if (loc != target)
-				this.instructions.add(new ASMMov(new RegOp(target), new RegOp(loc)));
-		}
-		else if (st.getDeclarationInStackByteOffset(f.counter) != -1) {
-			/* On Stack */
-			int off = st.getDeclarationInStackByteOffset(f.counter);
-		
-			this.instructions.add(new ASMLdrStack(MEM_OP.PRE_NO_WRITEBACK, new RegOp(target), new RegOp(REG.FP), new PatchableImmOp(PATCH_DIR.DOWN, -off)));
-		}
-		else throw new SNIPS_EXC(Const.OPERATION_NOT_IMPLEMENTED);
 	}
 	
 } 

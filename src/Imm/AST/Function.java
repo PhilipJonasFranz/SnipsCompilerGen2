@@ -1,23 +1,31 @@
 package Imm.AST;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
 import Exc.SNIPS_EXC;
+import Imm.ASM.Structural.Label.ASMLabel;
 import Imm.AST.Statement.CompoundStatement;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.ReturnStatement;
 import Imm.AST.Statement.Statement;
 import Imm.AST.Typedef.InterfaceTypedef;
-import Imm.AsN.AsNNode.MODIFIER;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Res.Const;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -25,18 +33,38 @@ import Util.Source;
 public class Function extends CompoundStatement {
 
 			/* ---< NESTED >--- */
+	/**
+	 * A proviso mapping is used to store a unique mapping that was
+	 * applied to this function or ressource. The mapping stores a unique
+	 * postfix, return type and the provided proviso types. All types are
+	 * stored as copies and proviso free.
+	 */
 	public class ProvisoMapping {
 		
-		public String provisoPostfix;
-		
+				/* ---< FIELDS >--- */
+		/**
+		 * The return type of the function when this mapping is applied to it.
+		 */
 		public TYPE returnType;
 		
+		/**
+		 * The provided proviso types.
+		 */
 		public List<TYPE> provisoMapping;
 		
-		public ProvisoMapping(String provisoPostfix, TYPE returnType, List<TYPE> provisoMapping) {
-			this.provisoPostfix = provisoPostfix;
+		
+				/* ---< CONSTRUCTORS >--- */
+		public ProvisoMapping(TYPE returnType, List<TYPE> provisoMapping) {
 			this.returnType = returnType;
 			this.provisoMapping = provisoMapping;
+			
+			for (TYPE t : provisoMapping) {
+				assert !t.typeString().contains("PROVISO") : "Found proviso type in proviso mapping!";
+			}
+		}
+		
+		public String getProvisoPostfix() {
+			return LabelUtil.getProvisoPostfix(this.provisoMapping);
 		}
 		
 	}
@@ -56,13 +84,6 @@ public class Function extends CompoundStatement {
 	public boolean requireR10Reset = false;
 	
 	/**
-	 * Set to true when this function is called at least once. This is required
-	 * when this function is part of an interface typedef, its nessesary to determine
-	 * which functions need to be included in the relay table.
-	 */
-	public boolean wasCalled = false;
-	
-	/**
 	 * The flattened namespace path of this function.
 	 */
 	public NamespacePath path;
@@ -70,7 +91,7 @@ public class Function extends CompoundStatement {
 	/** 
 	 * List of the provisos types this function is templated with 
 	 */
-	public List<TYPE> provisosTypes;
+	public List<TYPE> provisoTypes;
 	
 	/** 
 	 * A list that contains the combinations of types this function was templated with. 
@@ -83,22 +104,69 @@ public class Function extends CompoundStatement {
 	 */
 	public MODIFIER modifier = MODIFIER.SHARED;
 	
+	/**
+	 * The return type of this function. May contain provisos.
+	 */
 	private TYPE returnType;
 	
+	/**
+	 * The parameters of this function.
+	 */
 	public List<Declaration> parameters;
 	
+	/**
+	 * The types this function signals.
+	 */
 	public List<TYPE> signalsTypes;
+	
+	/**
+	 * The types this function actually signals.
+	 */
+	public List<TYPE> actualSignals = new ArrayList();
 	
 	/* Flags for lambda targeting */
 	public Declaration lambdaDeclaration;
 	
-	public boolean isLambdaTarget = false;
-	
+	/**
+	 * Set to true when this function is used as a function
+	 * head, or is capsuled within a FUNC type.
+	 */
 	public boolean isLambdaHead = false;
 	
+	/**
+	 * Set to true when at least one return statement
+	 * within the body of the function has a return value.
+	 */
 	public boolean hasReturn = false;
 	
+	/**
+	 * Set during context checking. Used to make sure that at least
+	 * one return statement. 
+	 */
 	public ReturnStatement noReturn = null;
+	
+	/**
+	 * Unique ID of this function.
+	 */
+	public int UID = LabelUtil.getUID();
+	
+	public Function ASTOptCounterpart;
+	
+	public int LAST_UPDATE = 0;
+	
+	/**
+	 * If this function is not null, and the body of this function is null,
+	 * the cast of this function will simply relay to this function.
+	 */
+	public Function inheritLink = null;
+	
+	/**
+	 * If set to true, the '...@UID' will be included in the function
+	 * head asm label.
+	 */
+	public boolean requireUIDInLabel = false;
+	
+	public HashMap<String, ASMLabel> headLabelMap = new HashMap();
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -112,54 +180,82 @@ public class Function extends CompoundStatement {
 		
 		this.modifier = modifier;
 		
-		this.provisosTypes = proviso;
+		this.provisoTypes = proviso;
 		
-		if (path.build().equals("main")) {
+		if (path.build().equals("main")) 
 			/* Add default mapping */
 			this.addProvisoMapping(null, new ArrayList());
-		}
+		
+		this.UID = Math.abs(this.signatureToString().hashCode());
 	}
 	
 	
 			/* ---< METHODS >--- */
 	public void print(int d, boolean rec) {
-		System.out.print(this.pad(d) + "<" + this.returnType.typeString() + "> " + this.path.build());
+		CompilerDriver.outs.print(Util.pad(d) + "<" + this.returnType + "> " + this.path);
 		
-		if (!this.provisosTypes.isEmpty()) {
-			System.out.print("<");
-			for (int i = 0; i < this.provisosTypes.size(); i++) {
-				System.out.print(this.provisosTypes.get(i).typeString());
-				if (i < this.provisosTypes.size() - 1) System.out.print(", ");
+		if (!this.provisoTypes.isEmpty()) {
+			CompilerDriver.outs.print("<");
+			for (int i = 0; i < this.provisoTypes.size(); i++) {
+				CompilerDriver.outs.print(this.provisoTypes.get(i).typeString());
+				if (i < this.provisoTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
-			System.out.print(">");
+			CompilerDriver.outs.print(">");
 		}
 		
-		System.out.print("(");
+		CompilerDriver.outs.print("(");
 		for (int i = 0; i < this.parameters.size(); i++) {
 			Declaration dec = parameters.get(i);
-			System.out.print("<" + dec.getRawType().typeString() + "> " + dec.path.build());
-			if (i < this.parameters.size() - 1) System.out.print(", ");
+			CompilerDriver.outs.print("<" + dec.getRawType() + "> " + dec.path);
+			if (i < this.parameters.size() - 1) CompilerDriver.outs.print(", ");
 		}
-		System.out.print(")");
+		CompilerDriver.outs.print(")");
 		
 		if (!this.signalsTypes.isEmpty()) {
-			System.out.print(" signals ");
+			CompilerDriver.outs.print(" signals ");
 			for (int i = 0; i < this.signalsTypes.size(); i++) {
-				System.out.print(this.signalsTypes.get(i).typeString());
-				if (i < this.signalsTypes.size() - 1) System.out.print(", ");
+				CompilerDriver.outs.print(this.signalsTypes.get(i).typeString());
+				if (i < this.signalsTypes.size() - 1) CompilerDriver.outs.print(", ");
 			}
 		}
 		
-		System.out.println(" " + this.toString().split("@") [1]);
+		if (!this.activeAnnotations.isEmpty()) 
+			CompilerDriver.outs.print(" " + this.activeAnnotations.toString());
 		
-		if (rec) for (Statement s : body) 
+		CompilerDriver.outs.println();
+		
+		if (rec && body != null) for (Statement s : body) 
 			s.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkFunction(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkFunction(this);
+		
+		ctx.popTrace();
+		return t;
 	}
-
+	
+	public Function opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optFunction(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this)) 
+			result.add((T) this);
+		
+		if (this.body != null) {
+			for (Statement s : this.body) {
+				result.addAll(s.visit(visitor));
+			}
+		}
+		
+		return result;
+	}
+	
 	/** 
 	 * Returns the current return type, proviso-free.
 	 */
@@ -189,21 +285,21 @@ public class Function extends CompoundStatement {
 	}
 
 	
-			/* --- PROVISO RELATED >--- */
+			/* ---< PROVISO RELATED >--- */
 	/**
 	 * Set given context to the function, including parameters, return type and body.
 	 * Check if the given mapping already existed in the mapping pool, if not create a 
 	 * new proviso-free mapping and store it in the proviso calls.
 	 */
-	public void setContext(List<TYPE> context) throws CTX_EXC {
-		if (context.size() != this.provisosTypes.size()) 
-			throw new CTX_EXC(this.getSource(), Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisosTypes.size(), context.size());
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
+		if (context.size() != this.provisoTypes.size()) 
+			throw new CTEX_EXC(this, Const.MISSMATCHING_NUMBER_OF_PROVISOS, this.provisoTypes.size(), context.size());
 		
-		ProvisoUtil.mapNToN(this.provisosTypes, context);
+		ProvisoUtil.mapNToN(this.provisoTypes, context);
 
 		/* Copy proviso types with applied context */
 		List<TYPE> clone = new ArrayList();
-		for (TYPE t : this.provisosTypes) clone.add(t.clone());
+		for (TYPE t : this.provisoTypes) clone.add(t.clone());
 		
 		ProvisoUtil.mapNTo1(this.returnType, clone);
 		
@@ -216,8 +312,9 @@ public class Function extends CompoundStatement {
 			d.setContext(clone);
 		
 		/* Apply to body */
-		for (Statement s : this.body) 
-			s.setContext(clone);
+		if (this.body != null)
+			for (Statement s : this.body) 
+				s.setContext(clone);
 		
 		/* Get proviso free of header provisos and return type copy */
 		for (int i = 0; i < clone.size(); i++)
@@ -258,28 +355,12 @@ public class Function extends CompoundStatement {
 		for (int i = 0; i < this.provisosCalls.size(); i++) {
 			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
 			
-			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) 
-				return this.provisosCalls.get(i).provisoPostfix;
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map)) {
+				return LabelUtil.getProvisoPostfix(this.provisosCalls.get(i).provisoMapping);
+			}
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Returns the return type that corresponds to the given mapping.
-	 * @param map The proviso map which is matched to the registered proviso maps to get the return type from.
-	 * @return The return type.
-	 * @throws SNIPS_EXC If no registered mapping is equal to the given mapping.
-	 */
-	public TYPE getMappingReturnType(List<TYPE> map) {
-		for (int i = 0; i < this.provisosCalls.size(); i++) {
-			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
-			
-			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
-				return this.provisosCalls.get(i).returnType;
-		}
-		
-		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
 	}
 	
 	/**
@@ -292,41 +373,16 @@ public class Function extends CompoundStatement {
 		/* Proviso mapping already exists, just return */
 		if (this.containsMapping(context)) return;
 		else {
-			/* Add proviso mapping, create new proviso postfix for mapping */
-			String postfix = (context.isEmpty())? "" : LabelUtil.getProvisoPostfix();
-			this.provisosCalls.add(new ProvisoMapping(postfix, returnType, context));
+			TYPE retTypeClone = null;
+			if (returnType != null) 
+				returnType.clone().provisoFree();
+			
+			List<TYPE> contextClone = new ArrayList();
+			for (TYPE t : context)
+				contextClone.add(t.clone().provisoFree());
+			
+			this.provisosCalls.add(new ProvisoMapping(retTypeClone, contextClone));
 		}
-	}
-	
-	/**
-	 * Clones the function's signature. This includes deep copies of:
-	 * 
-	 * - Return Type
-	 * - Namespace Path
-	 * - Proviso Types
-	 * - Parameters
-	 * - Signal Types
-	 * 
-	 * As well as copies of all other fields and flags, except the body of the function,
-	 * which is left empty.
-	 * 
-	 * @return The newly created function signature.
-	 */
-	public Function cloneSignature() {
-		List<TYPE> provClone = new ArrayList();
-		for (TYPE t : this.provisosTypes)
-			provClone.add(t.clone());
-		
-		List<Declaration> params = new ArrayList();
-		for (Declaration d : this.parameters)
-			params.add(d.clone());
-		
-		List<TYPE> signalsTypes = new ArrayList();
-		for (TYPE t : this.signalsTypes)
-			signalsTypes.add(t.clone());
-		
-		/* Clone the function signature */
-		return new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
 	}
 	
 	/**
@@ -345,13 +401,66 @@ public class Function extends CompoundStatement {
 	public void translateProviso(List<TYPE> source, List<TYPE> target) {
 		this.returnType = ProvisoUtil.translate(this.returnType, source, target);
 		
-		for (int i = 0; i < this.provisosTypes.size(); i++)
-			this.provisosTypes.set(i, ProvisoUtil.translate(this.provisosTypes.get(i), source, target));
+		for (int i = 0; i < this.provisoTypes.size(); i++)
+			this.provisoTypes.set(i, ProvisoUtil.translate(this.provisoTypes.get(i), source, target));
 		
 		for (Declaration d : this.parameters)
 			d.setType(ProvisoUtil.translate(d.getRawType(), source, target));
 		
 		// TODO: Also translate body
+	}
+	
+	
+			/* ---< METHOD >--- */
+	/**
+	 * Returns the return type that corresponds to the given mapping.
+	 * @param map The proviso map which is matched to the registered proviso maps to get the return type from.
+	 * @return The return type.
+	 * @throws SNIPS_EXC If no registered mapping is equal to the given mapping.
+	 */
+	public TYPE getMappingReturnType(List<TYPE> map) {
+		for (int i = 0; i < this.provisosCalls.size(); i++) {
+			List<TYPE> map0 = this.provisosCalls.get(i).provisoMapping;
+			
+			if (ProvisoUtil.mappingIsEqualProvisoFree(map0, map))
+				return this.provisosCalls.get(i).returnType;
+		}
+		
+		throw new SNIPS_EXC(Const.NO_MAPPING_EQUAL_TO_GIVEN_MAPPING);
+	}
+	
+	/**
+	 * Clones the function's signature. This includes deep copies of:
+	 * 
+	 * - Return Type
+	 * - Namespace Path
+	 * - Proviso Types
+	 * - Parameters
+	 * - Signal Types
+	 * 
+	 * As well as copies of all other fields and flags, except the body of the function,
+	 * which is left empty.
+	 * 
+	 * @return The newly created function signature.
+	 */
+	public Function cloneSignature() {
+		List<TYPE> provClone = new ArrayList();
+		for (TYPE t : this.provisoTypes)
+			provClone.add(t.clone());
+		
+		List<Declaration> params = new ArrayList();
+		for (Declaration d : this.parameters)
+			params.add(d.clone());
+		
+		List<TYPE> signalsTypes = new ArrayList();
+		for (TYPE t : this.signalsTypes)
+			signalsTypes.add(t.clone());
+		
+		/* Clone the function signature */
+		Function f = new Function(this.getReturnTypeDirect().clone(), this.path.clone(), provClone, params, this.signals(), signalsTypes, new ArrayList(), this.modifier, this.getSource().clone());
+
+		f.UID = this.UID;
+		return f;
 	}
 	
 	/**
@@ -360,13 +469,19 @@ public class Function extends CompoundStatement {
 	 * @param f0 The first function.
 	 * @param f1 The second function to match against the first.
 	 * @param matchParamNames If set to true, the name of the parameter names will be matched as well.
-	 * @return True iff the signatures match.
+	 * @param useProvisoFreeParams If set to true, when comparing the parameter types, the types will be compared proviso free.
+	 * 		This might cause a crash when using this functionality in early stages, for example before its possible to set
+	 * 		a context.
+	 * @param matchFullNames If set to true, the full namespace paths of the function will be matched, instead of only the last part.
+	 * @return True iff the signatures match with the specified flags.
 	 */
-	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames) {
+	public static boolean signatureMatch(Function f0, Function f1, boolean matchParamNames, boolean useProvisoFreeParams, boolean matchFullNames) {
 		boolean match = true;
 		
 		/* Match function name, not namespace path */
 		match &= f0.path.getLast().equals(f1.path.getLast());
+		
+		if (matchFullNames) match &= f0.path.equals(f1.path);
 		
 		/* Match function modifier */
 		match &= f0.modifier == f1.modifier;
@@ -380,7 +495,8 @@ public class Function extends CompoundStatement {
 				/* Also match names if flag is set */
 				if (matchParamNames) match &= d0.path.getLast().equals(d1.path.getLast());
 				
-				match &= d0.getType().isEqual(d1.getType());
+				if (useProvisoFreeParams) match &= d0.getType().isEqual(d1.getType());
+				else match &= d0.getRawType().isEqual(d1.getRawType());
 			}
 		}
 		else match = false;
@@ -390,15 +506,92 @@ public class Function extends CompoundStatement {
 		
 		return match;
 	}
+	
+	/**
+	 * Builds the string that this function can be called with. The label will contain:<br>
+	 * - The name of the function<br>
+	 * - '@UID'<br>
+	 * - The proviso postfix<br>
+	 * @param provisos The proviso mapping to determine the proviso postfix.
+	 * @return The generated string.
+	 */
+	public String buildCallLabel(List<TYPE> provisos) {
+		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
+		return this.path.build() + ((this.path.build().startsWith("__") || this.path.build().equals("main")|| 
+									 this.path.build().equals("resv")|| this.path.build().equals("free") || this.path.build().equals("isa") || this.path.build().equals("isar") || 
+									 this.path.build().equals("init")|| this.path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "_" + this.UID)
+				+ this.getProvisoPostfix(provisos);
+	}
+	
+	public String buildInheritedCallLabel(List<TYPE> provisos) {
+		NamespacePath path = this.inheritLink.path;
+		
+		/* Excluded from UIDs in the label are the main function and any dynamic library functions like operators and memory routines */
+		return path.build() + ((path.build().startsWith("__") || path.build().equals("main")|| 
+									 path.build().equals("resv")|| path.build().equals("free") || path.build().equals("isa") || path.build().equals("isar") || 
+									 path.build().equals("init")|| path.build().equals("hsize") || !this.requireUIDInLabel)? "" : "_" + this.UID)
+				+ this.getProvisoPostfix(provisos);
+	}
 
 	public Function clone() {
 		Function f = this.cloneSignature();
 		
-		List<Statement> clone = new ArrayList();
-		for (Statement s : this.body) clone.add(s.clone());
-		f.body = clone;
+		if (this.body != null) {
+			List<Statement> clone = new ArrayList();
+			for (Statement s : this.body) clone.add(s.clone());
+			f.body = clone;
+		}
 		
+		f.copyDirectivesFrom(this);
 		return f;
 	}
+	
+	public String signatureToString() {
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += this.returnType.codeString() + " ";
+		
+		s += this.path.build();
+		
+		if (!this.provisoTypes.isEmpty()) 
+			s += this.provisoTypes.stream().map(TYPE::codeString).collect(Collectors.joining(", ", "<", ">"));
+		
+		s += "(";
+		
+		if (!this.parameters.isEmpty()) 
+			s += this.parameters.stream().map(x -> x.getType().codeString() + " " + x.path)
+				.collect(Collectors.joining(", "));
+		
+		s += ")";
+		
+		return s;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = this.signatureToString();
+		
+		if (this.body != null) {
+			s += " {";
+			code.add(Util.pad(d) + s);
+			for (Statement s0 : this.body) {
+				code.addAll(s0.codePrint(d + this.printDepthStep));
+			}
+			code.add(Util.pad(d) + "}");
+		}
+		else code.add(Util.pad(d) + s + ";");
+		
+		return code;
+	}
+	
+	public boolean isConstructor() { 
+		return this.modifier == MODIFIER.STATIC && 
+				this.path.build().endsWith("create") && 
+				this.getReturnType().isStruct();
+	};
 	
 } 

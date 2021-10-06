@@ -1,0 +1,65 @@
+SOURCE
+int main() {
+	int [10] arr = ...;
+	
+	int c = 0;
+	for [int i : arr] {
+		if (c < 2) i = 1;
+		else i = arr [c - 1] + arr [c - 2];
+		c++;
+	}
+	
+	return arr [9];
+}
+TESTCASES
+55
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    mov fp, sp
+    sub sp, sp, #40                          /* Evaluate Expression */
+    mov r5, #0
+    mov r4, #0
+    mov r3, #0
+    mov r0, #0                               /* Evaluate Expression */
+main.L1: 
+    cmp r4, #10
+    beq main.L2
+    lsl r2, r4, #2
+    sub r0, fp, #40
+    ldr r5, [r0, r2]
+    cmp r3, #2
+    bge main.L4
+    mov r5, #1
+    mov r0, #1                               /* Evaluate Expression */
+    b main.L3
+main.L4: 
+    sub r0, r3, #1
+    lsl r2, r0, #2
+    sub r0, fp, #40
+    ldr r1, [r0, r2]
+    sub r0, r3, #2
+    lsl r2, r0, #2
+    sub r0, fp, #40
+    ldr r2, [r0, r2]
+    add r5, r1, r2
+main.L3: 
+    add r3, r3, #1
+    lsl r2, r4, #2
+    sub r0, fp, #40
+    str r5, [r0, r2]
+    add r4, r4, #1
+    b main.L1
+main.L2: 
+    ldr r0, [fp, #-4]
+    mov sp, fp
+    bx lr

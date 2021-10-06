@@ -1,9 +1,12 @@
 SOURCE
 int __vec_cross(int [3] v, int [3] w) {
 	int sum = 0;
+	
+	#unroll depth = 3
 	for (int i = 0; i < 3; i = i + 1) {
 		sum = sum + (v [i] * w [i]);
 	}
+	
 	return sum;
 }
 
@@ -16,62 +19,58 @@ int main() {
 TESTCASES
 30
 OUTPUT
-/* --test_19.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global __vec_cross
 __vec_cross:                                 /* Function: __vec_cross */
-    sub sp, sp, #12
-    stmea sp, {r3, r4, fp}
-    mov fp, sp
-    mov r3, #0
-    mov r0, #0                               /* Evaluate Expression */
-    mov r4, #0
-__vec_cross.L1: 
-    cmp r4, #3
-    bge __vec_cross.L2
-    lsl r2, r4, #2
-    add r0, fp, #24
-    ldr r0, [r0, r2]
-    lsl r2, r4, #2
-    mov r1, r0
-    add r0, fp, #12
-    ldr r2, [r0, r2]
-    mul r2, r1, r2
-    add r3, r3, r2
-    add r4, r4, #1
-    b __vec_cross.L1
-__vec_cross.L2: 
-    mov r0, r3                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {r3, r4, fp}
+    ldr r0, [sp, #12]
+    ldr r2, [sp]
+    mul r1, r0, r2
+    ldr r0, [sp, #16]
+    ldr r2, [sp, #4]
+    mul r2, r0, r2
+    add r1, r1, r2
+    ldr r0, [sp, #20]
+    ldr r2, [sp, #8]
+    mul r2, r0, r2
+    add r0, r1, r2
     add sp, sp, #24
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #9                               /* Evaluate Expression */
-    mov r1, #8
     mov r2, #7
-    stmfd sp!, {r0-r2}
-    mov r0, #6
-    mov r1, #5
-    mov r2, #4
-    stmfd sp!, {r0-r2}
-    mov r0, #3
-    mov r1, #2
-    mov r2, #1
-    stmfd sp!, {r0-r2}
+    mov r1, #8
     mov r0, #9                               /* Evaluate Expression */
-    mov r1, #6
-    mov r2, #3
     stmfd sp!, {r0-r2}
-    mov r0, #8
+    mov r2, #4
     mov r1, #5
-    mov r2, #2
+    mov r0, #6
     stmfd sp!, {r0-r2}
-    mov r0, #7
-    mov r1, #4
     mov r2, #1
+    mov r1, #2
+    mov r0, #3
+    stmfd sp!, {r0-r2}
+    mov r2, #3
+    mov r1, #6
+    mov r0, #9                               /* Evaluate Expression */
+    stmfd sp!, {r0-r2}
+    mov r2, #2
+    mov r1, #5
+    mov r0, #8
+    stmfd sp!, {r0-r2}
+    mov r2, #1
+    mov r1, #4
+    mov r0, #7
     stmfd sp!, {r0-r2}
     sub r1, fp, #36                          /* Start of structure in stack */
     ldr r0, [r1, #8]
@@ -88,4 +87,3 @@ main:                                        /* Function: main */
     bl __vec_cross                           /* Call __vec_cross */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

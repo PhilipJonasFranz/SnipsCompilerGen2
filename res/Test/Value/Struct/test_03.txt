@@ -16,20 +16,31 @@ int main(int x) {
 TESTCASES
 8
 OUTPUT
-/* --test_03.txt */
+.version 0
+
+.data
+Test: .word 0
+Nib: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
     mov r0, #8
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1412413356_Nib
     push { r0 }
     mov r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1412413356_Nib
     push { r0 }
-    mov r0, #2
+    ldr r0, .P1412413356_Test
     push { r0 }
     sub r1, fp, #12                          /* Evaluate Expression */
     ldr r0, [r1, #4]
@@ -38,4 +49,5 @@ main:                                        /* Function: main */
     ldr r0, [fp, #-28]                       /* Load field from struct */
     mov sp, fp
     bx lr
-    
+.P1412413356_Test: .word Test
+.P1412413356_Nib: .word Nib

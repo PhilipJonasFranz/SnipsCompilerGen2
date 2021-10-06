@@ -6,9 +6,8 @@ import java.util.List;
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import Ctx.Util.ProvisoUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Exc.SNIPS_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
@@ -23,8 +22,7 @@ import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -36,11 +34,10 @@ import Imm.AST.Expression.InlineCall;
 import Imm.AST.Expression.TempAtom;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.FunctionCall;
-import Imm.AST.Typedef.InterfaceTypedef.InterfaceProvisoMapping;
+import Imm.AST.Typedef.InterfaceTypedef;
 import Imm.AsN.AsNFunction;
 import Imm.AsN.AsNNode;
 import Imm.AsN.Expression.AsNExpression;
-import Imm.AsN.Typedef.AsNInterfaceTypedef;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
@@ -51,6 +48,7 @@ public class AsNFunctionCall extends AsNStatement {
 			/* ---< METHODS >--- */
 	public static AsNFunctionCall cast(FunctionCall fc, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNFunctionCall call = new AsNFunctionCall();
+		call.pushOnCreatorStack(fc);
 		fc.castedNode = call;
 		
 		if (fc.anonTarget == null) 
@@ -59,17 +57,18 @@ public class AsNFunctionCall extends AsNStatement {
 			 * A indicator the order is incorrect is that the casted node is null at this point.
 			 */
 			if (fc.calledFunction.castedNode == null && fc.calledFunction.definedInInterface == null) 
-				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path.build(), fc.getSource().getSourceMarker());
+				throw new SNIPS_EXC(Const.FUNCTION_UNDEFINED_AT_THIS_POINT, fc.calledFunction.path, fc.getSource().getSourceMarker());
 		
 		call(fc.calledFunction, fc.anonTarget, fc.proviso, fc.parameters, fc, call, r, map, st);
 		
 		if (fc.anonTarget == null && fc.calledFunction.signals()) {
 			/* Check if exception was thrown and jump to watchpoint */
 			call.instructions.add(new ASMCmp(new RegOp(REG.R12), new ImmOp(0)));
-			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, new Cond(COND.NE));
+			AsNSignalStatement.injectWatchpointBranch(call, fc.watchpoint, COND.NE);
 		}
 		
 		call.freeDecs(r, fc);
+		call.registerMetric();
 		return call;
 	}
 	
@@ -97,7 +96,7 @@ public class AsNFunctionCall extends AsNStatement {
 		if (f != null) {
 			try {
 				f.setContext(provisos);
-			} catch (CTX_EXC e) {
+			} catch (CTEX_EXC e) {
 				e.printStackTrace();
 			}
 		}
@@ -165,50 +164,66 @@ public class AsNFunctionCall extends AsNStatement {
 			}
 		}
 		
-		/* Pop Parameters on the stack into the correct registers, 
-		 * 		Parameter for R0 is already located in reg */
+		/* 
+		 * Pop Parameters on the stack into the correct registers, 
+		 * Parameter for R0 is already located in reg 
+		 */
 		if (regMapping >= 3) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1), new RegOp(REG.R2)));
 		else if (regMapping == 2) 
 			call.instructions.add(new ASMPopStack(new RegOp(REG.R1)));
 		
 		if (f != null && f.definedInInterface != null) {
-			AsNInterfaceTypedef def = (AsNInterfaceTypedef) f.definedInInterface.castedNode;
 			
-			/* Move the index in the interface typedef of the function * 4 in R12 */
-			for (int i = 0; i < f.definedInInterface.functions.size(); i++)
-				if (f.definedInInterface.functions.get(i).path.getLast().equals(f.path.getLast())) {
-					if (i > 0) call.instructions.add(new ASMMov(new RegOp(REG.R12), new ImmOp(i * 4)));
-					break;
-				}
+			/*
+			 * R0  = SID of struct w. mapping
+			 * R10 = IID of interface w. mapping
+			 * R12 = Address to resolver
+			 * In Stack = Offset to Function, popped by table mapping
+			 */
 			
-			String postfix = "";
+			InterfaceTypedef inter = f.definedInInterface;
 			
-			for (InterfaceProvisoMapping provisoMap : f.definedInInterface.registeredMappings) {
-				if (ProvisoUtil.mappingIsEqualProvisoFree(provisoMap.providedHeadProvisos, provisos)) {
-					if (f.definedInInterface.registeredMappings.size() == 1 && provisoMap.providedHeadProvisos.isEmpty())
-						break;
-					
-					postfix = provisoMap.provisoPostfix;
+			boolean found = false;
+			int offset = 0;
+			for (int i = 0; i < inter.functions.size(); i++) {
+				if (Function.signatureMatch(inter.functions.get(i), f, false, true, false)) {
+					offset = i * 4;
+					found = true;
 					break;
 				}
 			}
+			
+			/* Make sure the function was found */
+			assert found : "Failed to locate function '" + f.path + "'!";
 			
 			boolean nestedDeref = false;
 			if (callee instanceof InlineCall)
 				nestedDeref = ((InlineCall) callee).nestedDeref;
 			
+			/* Interface reference is a pointer, and call uses deref, need to load from pointer */
 			if (nestedDeref) {
-				/* Load Interface from pointer into R10 */
 				call.instructions.add(new ASMLsl(new RegOp(REG.R0), new RegOp(REG.R0), new ImmOp(2)));
 				call.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R0)));
 			}
 			
-			ASMLabel label = new ASMLabel(def.tableHead.name + postfix);
+			/* Load and push the function offset for later use */
+			ASMMov offsetMov = new ASMMov(new RegOp(REG.R12), new ImmOp(offset));
+			offsetMov.comment = new ASMComment("Offset to " + f.path);
+			call.instructions.add(offsetMov);
+			call.instructions.add(new ASMPushStack(new RegOp(REG.R12)));
 			
-			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(label));
-			branch.comment = new ASMComment("Branch to relay table of " + f.definedInInterface.path.build());
-			call.instructions.add(branch);
+			/* Load address of struct interface resolver */
+			call.instructions.add(new ASMLsl(new RegOp(REG.R12), new RegOp(REG.R0), new ImmOp(2)));
+			call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12)));
+			call.instructions.add(new ASMLdr(new RegOp(REG.R12), new RegOp(REG.R12), new ImmOp(4)));
+			
+			/* Load IID of interface */
+			inter.loadIIDInReg(call, REG.R10, provisos);
+			
+			/* Perform a system branch to resolver */
+			call.instructions.add(new ASMAdd(new RegOp(REG.LR), new RegOp(REG.PC), new ImmOp(8)));
+			call.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R12)));
 		}
 		else if ((f != null && f.isLambdaHead) || anonCall != null) {
 			if (anonCall != null) {
@@ -238,12 +253,12 @@ public class AsNFunctionCall extends AsNStatement {
 		}
 		else {
 			/* Branch to function */
-			String target = f.path.build() + f.getProvisoPostfix(provisos);
+			String target = f.buildCallLabel(provisos);
 			
 			ASMLabel functionLabel = new ASMLabel(target);
 			
 			ASMBranch branch = new ASMBranch(BRANCH_TYPE.BL, new LabelOp(functionLabel));
-			branch.comment = new ASMComment("Call " + f.path.build());
+			branch.comment = new ASMComment("Call " + f.path);
 			call.instructions.add(branch);
 		}
 		

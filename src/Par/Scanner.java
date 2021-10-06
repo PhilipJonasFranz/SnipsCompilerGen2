@@ -26,7 +26,7 @@ public class Scanner {
 		INT, HEX_INT, BIN_INT, FLOAT, COMMENT, CHARLIT, STRINGLIT
 	}
 	
-	public class ScannableToken {
+	private class ScannableToken {
 	
 		String base;
 		
@@ -68,10 +68,9 @@ public class Scanner {
 	/**
 	 * All simple scannable tokens, represented in base/reset token format.
 	 */
-	protected ScannableToken [] scannables = {
+	private ScannableToken [] scannables = {
 			new ScannableToken("(",			TokenType.LPAREN,		ACC_STATE.NONE,			""),
 			new ScannableToken(")",			TokenType.RPAREN,		ACC_STATE.NONE,			""),
-			new ScannableToken("@",			TokenType.AT,			ACC_STATE.NONE,			""),
 			new ScannableToken("{",			TokenType.LBRACE,		ACC_STATE.NONE,			""),
 			new ScannableToken("}",			TokenType.RBRACE,		ACC_STATE.NONE,			""),
 			new ScannableToken("[",			TokenType.LBRACKET,		ACC_STATE.NONE,			""),
@@ -92,7 +91,7 @@ public class Scanner {
 			new ScannableToken("exclusive",	TokenType.EXCLUSIVE,	ACC_STATE.NONE,			" "),
 			new ScannableToken("null",		TokenType.NULL,			ACC_STATE.NONE,			""),
 			new ScannableToken("sizeof",	TokenType.SIZEOF,		ACC_STATE.NONE,			" ", "("),
-			new ScannableToken("instanceof",TokenType.INSTANCEOF,	ACC_STATE.NONE,			" "),
+			new ScannableToken("idof",		TokenType.IDOF,			ACC_STATE.NONE,			" ", "("),
 			new ScannableToken("try",		TokenType.TRY,			ACC_STATE.NONE,			" ", "{"),
 			new ScannableToken("watch",		TokenType.WATCH,		ACC_STATE.NONE,			" ", "("),
 			new ScannableToken("\\",		TokenType.BACKSL,		ACC_STATE.NONE,			""),
@@ -101,6 +100,7 @@ public class Scanner {
 			new ScannableToken("false",		TokenType.BOOLLIT,		ACC_STATE.NONE,	true,	""),
 			new ScannableToken("else",		TokenType.ELSE,			ACC_STATE.NONE,			""),
 			new ScannableToken("void",		TokenType.VOID,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
+			new ScannableToken("auto",		TokenType.AUTO,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("func",		TokenType.FUNC,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("int",		TokenType.INT,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
 			new ScannableToken("char",		TokenType.CHAR,			ACC_STATE.NONE,			" ", "*", "[", ">", ")", ","),
@@ -140,18 +140,18 @@ public class Scanner {
 			new ScannableToken(">=",		TokenType.CMPGE,		ACC_STATE.NONE,			"")
 	};
 	
-	protected static ScannableToken [] staticScannables;
+	private static ScannableToken [] staticScannables;
 	
 	/** 
 	 * A map containing all combinations of scannable token bases and reset 
 	 * tokens appended, used to quick check for a complete token.
 	 * This map is setup once.
 	 */
-	static HashMap<String, ScannableToken> scannableMap = new HashMap();
+	private static HashMap<String, ScannableToken> scannableMap = new HashMap();
 	
-	List<LineObject> input;
+	private List<LineObject> input;
 	
-	public ProgressMessage progress;
+	private ProgressMessage progress;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
@@ -177,7 +177,7 @@ public class Scanner {
 		
 		for (int i = 0; i < input.size(); i++) {
 			/* Replace tabs with 4 spaces */
-			input.get(i).line = input.get(i).line.replace("\t", "    ");
+			input.get(i).line = input.get(i).line.replace("\t", "    ") + " ";
 			
 			/* For every char in every line, let fsm read char and check state */
 			for (int a = 0; a < input.get(i).line.length(); a++) 
@@ -242,7 +242,7 @@ public class Scanner {
 		/**
 		 * Read a single char, append it to the buffer and check the state.
 		 */
-		public void readChar(char c, int i, int a, String fileName) {
+		public void readChar(char c, int lineNumber, int columnNumber, String fileName) {
 			if (this.buffer.isEmpty() && ("" + c).trim().equals("")) return;
 			else {
 				if (this.state != ACC_STATE.COMMENT && this.state != ACC_STATE.CHARLIT && this.state != ACC_STATE.STRINGLIT) 
@@ -251,9 +251,9 @@ public class Scanner {
 				this.buffer += c;
 				
 				boolean b = true;
-				while (b) b = this.checkState(i, a, fileName);
+				while (b) b = this.checkState(lineNumber, columnNumber, fileName);
 				
-				this.lastLine = i;
+				this.lastLine = lineNumber;
 			}
 		}
 		
@@ -388,15 +388,15 @@ public class Scanner {
 						else tokens.add(new Token(TokenType.IDENTIFIER, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.INTERFACE_ID) {
-						this.interfaceIds.add(id);
+						if (!this.interfaceIds.contains(id)) this.interfaceIds.add(id);
 						tokens.add(new Token(TokenType.INTERFACEID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.STRUCT_ID) {
-						this.structIds.add(id);
+						if (!this.structIds.contains(id)) this.structIds.add(id);
 						tokens.add(new Token(TokenType.STRUCTID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.ENUM_ID) {
-						this.enumIds.add(id);
+						if (!this.enumIds.contains(id)) this.enumIds.add(id);
 						tokens.add(new Token(TokenType.ENUMID, new Source(fileName, i, a), id));
 					}
 					else if (this.state == ACC_STATE.NAMESPACE_ID) {

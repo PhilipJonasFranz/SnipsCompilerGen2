@@ -1,20 +1,34 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.ASM.ASMInstruction;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
-import Imm.AsN.AsNNode.MODIFIER;
+import Imm.AsN.AsNNode;
 import Imm.TYPE.PROVISO;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -35,6 +49,8 @@ public class InterfaceTypedef extends SyntaxElement {
 	
 	public List<StructTypedef> implementers = new ArrayList();
 
+	public HashMap<String, ASMDataLabel> IIDLabelMap = new HashMap();
+	
 	public class InterfaceProvisoMapping {
 		
 		public String provisoPostfix;
@@ -100,7 +116,7 @@ public class InterfaceTypedef extends SyntaxElement {
 				
 				boolean override = false;
 				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false))
+					if (Function.signatureMatch(fs, f0, false, true, false))
 						override = true;
 				
 				if (!override) {
@@ -125,14 +141,8 @@ public class InterfaceTypedef extends SyntaxElement {
 			clone.add(t.clone());
 		
 		/* Create the new mapping and store it */
-		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(), clone);
+		InterfaceProvisoMapping mapping = new InterfaceProvisoMapping(LabelUtil.getProvisoPostfix(newMapping), clone);
 		this.registeredMappings.add(mapping);
-		
-		String s = "";
-		for (TYPE t : newMapping)
-			s += t.typeString() + ",";
-		if (!newMapping.isEmpty())
-			s = s.substring(0, s.length() - 1);
 		
 		return mapping;
 	}
@@ -157,9 +167,9 @@ public class InterfaceTypedef extends SyntaxElement {
 					f0.parameters.get(a).setType(this.quickTranslate(t0, providedProvisos));
 				}
 				
-				for (int a = 0; a < f.provisosTypes.size(); a++) {
-					TYPE t0 = f0.provisosTypes.get(a);
-					f0.provisosTypes.set(a, this.quickTranslate(t0, providedProvisos));
+				for (int a = 0; a < f.provisoTypes.size(); a++) {
+					TYPE t0 = f0.provisoTypes.get(a);
+					f0.provisoTypes.set(a, this.quickTranslate(t0, providedProvisos));
 				}
 				
 				return f0;
@@ -183,18 +193,94 @@ public class InterfaceTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		System.out.println(this.pad(d) + "Interface Typedef:<" + this.path.build() + ">");
+		CompilerDriver.outs.println(Util.pad(d) + "Interface Typedef:<" + this.path + ">");
 		
 		if (rec) for (Function f : this.functions)
 			f.print(d + this.printDepthStep, rec);
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkInterfaceTypedef(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkInterfaceTypedef(this);
+		
+		ctx.popTrace();
+		return t;
+	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optInterfaceTypedef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Function f : this.functions) 
+			result.addAll(f.visit(visitor));
+		
+		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
+	
+	public void loadIIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		node.instructions.addAll(this.loadIIDInReg(reg, context));
+	}
+	
+	public List<ASMInstruction> loadIIDInReg(REG reg, List<TYPE> context) {
+		List<ASMInstruction> ins = new ArrayList();
+		
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.IIDLabelMap.get(postfix) != null : 
+			"Attempted to load IID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.IIDLabelMap.get(postfix));
+		ins.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+		
+		return ins;
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += "interface " + this.path;
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
+		
+		if (!this.implemented.isEmpty()) {
+			s += " : ";
+			s += this.implemented.stream().map(x -> x.codeString()).collect(Collectors.joining(", "));
+		}
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		code.add("");
+		
+		for (Function f : this.functions) {
+			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		
+		return code;
+	}
 
+	public SyntaxElement clone() {
+		return this;
+	}
 } 

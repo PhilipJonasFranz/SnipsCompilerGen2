@@ -16,18 +16,21 @@ int main() {
 TESTCASES
 16
 OUTPUT
-/* --test_06.txt */
+.version 0
+
 .data
 Baz.x: .word 16
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
     b main
+
+.global Foo.get
 Foo.get:                                     /* Function: Foo.get */
-    ldr r0, .POOL0_L0_Baz.x                  /* Evaluate Expression */
-    ldr r0, [r0]
+    mov r0, #16                              /* Evaluate Expression */
     bx lr
-.POOL0_L0_Baz.x: .word Baz.x
-    
+
+.global main
 main:                                        /* Function: main */
     b Foo.get                                /* Evaluate Expression */
-    

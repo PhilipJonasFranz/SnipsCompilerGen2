@@ -20,8 +20,57 @@ int main() {
 TESTCASES
 55
 OUTPUT
-/* --test_03.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global f
+f:                                           /* Function: f */
+    push { r3, fp }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #0                               /* Evaluate Expression */
+    stmfd sp!, {r0, r3}
+    mov r2, sp
+    mov sp, fp
+    ldmfd sp!, {r3, fp}
+    add r1, r2, #8
+    mov r0, #8
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    ldr r3, .P524679116_f                    /* Evaluate Expression */
+    mov r5, #0
+    mov r4, #0
+    mov r0, #0                               /* Evaluate Expression */
+main.L1: 
+    cmp r5, #10
+    bge main.L2
+    add r0, r5, #1
+    add lr, pc, #8
+    mov pc, r3
+    ldr r0, [fp, #-8]
+    add r5, r5, #1
+    add r4, r4, r0
+    add sp, sp, #8
+    b main.L1
+main.L2: 
+    mov r0, r4                               /* Evaluate Expression */
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P524679116_f: .word f
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -32,51 +81,4 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-lambda_f:                                    /* Function address getter for predication */
-    add r0, pc, #8
-    mov pc, r10
-f:                                           /* Function: f */
-    push { r3, fp }
-    mov fp, sp
-    mov r3, r0
-    mov r0, #0                               /* Evaluate Expression */
-    push { r0 }
-    push { r3 }
-    mov r2, sp
-    mov sp, fp
-    ldmfd sp!, {r3, fp}
-    mov r0, #8
-    add r1, r2, #8
-    add r10, pc, #8                          /* Setup return address for routine */
-    b _routine_stack_copy_
-    mov r10, #0
-    bx lr
-    
-main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
-    add r10, pc, #8                          /* Evaluate Expression */
-    b lambda_f
-    mov r10, #0
-    mov r4, r0
-    mov r5, r0
-    mov r4, #0
-    mov r0, #0                               /* Evaluate Expression */
-    mov r6, #0
-main.L1: 
-    cmp r6, #10
-    bge main.L2
-    add r0, r6, #1
-    add lr, pc, #8
-    mov pc, r5
-    ldr r7, [fp, #-8]
-    add r4, r4, r7
-    add r6, r6, #1
-    add sp, sp, #8
-    b main.L1
-main.L2: 
-    mov r0, r4                               /* Evaluate Expression */
-    mov sp, fp
-    ldmfd sp!, {fp, pc}
-    
+

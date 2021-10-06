@@ -13,17 +13,26 @@ TESTCASES
 1 2 3 4 5 19
 1 0 1 0 1 1
 OUTPUT
-/* --test_02.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global foo
 foo:                                         /* Function: foo */
     mul r0, r0, r1
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r4, r1
     mov r5, r2
+    mov r4, r1
     ldr r1, [fp, #8]                         /* Evaluate Expression */
     bl foo                                   /* Call foo */
     add r0, r0, r4
@@ -32,4 +41,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

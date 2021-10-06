@@ -9,12 +9,21 @@ int main() {
 TESTCASES
 100
 OUTPUT
-/* --test_00.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global foo
 foo:                                         /* Function: foo */
     mov r0, #10                              /* Evaluate Expression */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { lr }
     bl foo                                   /* Evaluate Expression */
@@ -22,4 +31,3 @@ main:                                        /* Function: main */
     bl foo                                   /* Call foo */
     mul r0, r3, r0
     pop { pc }
-    

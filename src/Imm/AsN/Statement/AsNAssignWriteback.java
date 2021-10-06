@@ -36,10 +36,13 @@ public class AsNAssignWriteback extends AsNStatement {
 
 	public static AsNAssignWriteback cast(AssignWriteback wb, RegSet r, MemoryMap map, StackSet st, boolean partOfExpression) throws CGEN_EXC {
 		AsNAssignWriteback w = new AsNAssignWriteback();
+		w.pushOnCreatorStack(wb);
+		wb.castedNode = w;
 		
 		injectWriteback(w, wb.reference, r, map, st, partOfExpression);
 		
 		w.freeDecs(r, wb);
+		w.registerMetric();
 		return w;
 	}
 	

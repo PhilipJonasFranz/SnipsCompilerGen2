@@ -22,29 +22,40 @@ TESTCASES
 1 10
 2 9
 OUTPUT
-/* --test_10.txt */
+.version 0
+
+.data
+Data_P_1: .word 0
+Nib_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
     mov r3, r0
-    mov r0, #3                               /* Evaluate Expression */
-    mov r1, #2
     mov r2, #1
+    mov r1, #2
+    mov r0, #3                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #5
     mov r2, #4
+    mov r1, #5
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     sub r0, fp, #24                          /* Evaluate Expression */
     lsr r0, r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
     sub r0, fp, #12
     lsr r0, r0, #2
     push { r0 }
-    mov r0, #1
+    ldr r0, .P1823335536_Nib_P_1
     push { r0 }
-    mov r0, #2
+    ldr r0, .P1823335536_Data_P_1
     push { r0 }
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
@@ -64,4 +75,5 @@ main:                                        /* Function: main */
     add r0, r1, r2
     mov sp, fp
     bx lr
-    
+.P1823335536_Data_P_1: .word Data_P_1
+.P1823335536_Nib_P_1: .word Nib_P_1

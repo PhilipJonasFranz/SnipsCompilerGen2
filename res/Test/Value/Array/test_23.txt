@@ -11,22 +11,30 @@ TESTCASES
 1 0 2
 1 1 0
 OUTPUT
-/* --test_23.txt */
+.version 0
+
 .data
 vec: .skip 16
-    
+NULL: .word 0
+HEAP_START: .word 0
+
 .text
+    b main_init
+
+.global main
+
 /* Initialize the global variables */
+main_init: 
     sub sp, sp, #12
     stmea sp, {r0-r2}
-    mov r0, #0
     mov r1, #2
+    mov r0, #0
     stmfd sp!, {r0, r1}
-    mov r0, #7
     mov r1, #3
+    mov r0, #7
     stmfd sp!, {r0, r1}
     pop { r0 }
-    ldr r1, .POOL0_L0_vec                    /* Load from .data section */
+    ldr r1, .P770002052_vec                  /* Load from .data section */
     str r0, [r1]
     pop { r0 }
     str r0, [r1, #4]
@@ -36,18 +44,17 @@ vec: .skip 16
     str r0, [r1, #12]
     ldmfd sp!, {r0-r2}
 main:                                        /* Function: main */
-    mov r3, r0
     mov r4, r1
+    mov r3, r0
     mov r1, #4
-    ldr r0, .POOL0_L0_vec                    /* Load data section address */
+    ldr r0, .P770002052_vec                  /* Load data section address */
     str r1, [r0, #4]
     mov r2, #0                               /* Evaluate Expression */
     lsl r0, r3, #3
     add r2, r2, r0
     lsl r0, r4, #2
     add r2, r2, r0
-    ldr r0, .POOL0_L0_vec                    /* Load data section address */
+    ldr r0, .P770002052_vec                  /* Load data section address */
     ldr r0, [r0, r2]
     bx lr
-.POOL0_L0_vec: .word vec
-    
+.P770002052_vec: .word vec

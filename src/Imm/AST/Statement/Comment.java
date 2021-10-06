@@ -1,11 +1,16 @@
 package Imm.AST.Statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Ctx.ContextChecker;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
+import Opt.AST.ASTOptimizer;
 import Par.Token;
+import Tools.ASTNodeVisitor;
 import Util.Source;
 
 /**
@@ -34,16 +39,35 @@ public class Comment extends Statement {
 		return;
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
 		return null;
 	}
 	
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public Statement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return this;
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		return result;
+	}
+	
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
 	}
 
 	public Statement clone() {
-		return new Comment(this.comment, this.getSource().clone());
+		Comment com = new Comment(this.comment, this.getSource().clone());
+		com.copyDirectivesFrom(this);
+		return com;
+	}
+
+	public List<String> codePrint(int d) {
+		return new ArrayList();
 	}
 
 } 

@@ -5,9 +5,16 @@ int main() {
 TESTCASES
 4
 OUTPUT
-/* --test_07.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    mvn r2, #1
-    rsb r0, r2, #2
+    mov r0, #4                               /* Evaluate Expression */
     bx lr
-    

@@ -15,11 +15,11 @@ public class CGEN_EXC extends Exception {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
-	String message;
+	private String message;
 	
-	Source location;
+	private Source location;
 	
-	Object [] format;
+	private Object [] format;
 	
 	public CGEN_EXC(Source source, String message, Object...format) {
 		this.location = source;

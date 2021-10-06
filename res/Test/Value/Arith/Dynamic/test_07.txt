@@ -5,13 +5,19 @@ int main(int a) {
 TESTCASES
 4 1
 OUTPUT
-/* --test_07.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
-    mov r3, r0
-    lsl r1, r0, #1
+    mul r2, r0, r0
+    sub r2, r0, r2
+    add r1, r2, r0, lsl #1
     add r0, r1, #5
-    mul r2, r3, r3
-    sub r2, r3, r2
-    add r0, r0, r2
     bx lr
-    

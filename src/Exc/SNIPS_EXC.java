@@ -13,9 +13,9 @@ public class SNIPS_EXC extends RuntimeException {
 
 	private static final long serialVersionUID = 765217464625890214L;
 
-	String message;
+	private String message;
 	
-	Object [] format;
+	private Object [] format;
 	
 	public SNIPS_EXC() {
 		this.message = "An error has occurred.";

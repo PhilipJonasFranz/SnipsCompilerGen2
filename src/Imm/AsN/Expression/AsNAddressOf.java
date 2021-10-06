@@ -26,8 +26,6 @@ import Imm.AST.Expression.IDRefWriteback;
 import Imm.AST.Expression.StructSelect;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Statement.Declaration;
-import Imm.TYPE.COMPOSIT.ARRAY;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Res.Const;
 
 public class AsNAddressOf extends AsNExpression {
@@ -35,6 +33,7 @@ public class AsNAddressOf extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNAddressOf cast(AddressOf a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNAddressOf aof = new AsNAddressOf();
+		aof.pushOnCreatorStack(a);
 		a.castedNode = aof;
 		
 		aof.clearReg(r, st, 0, 1);
@@ -84,7 +83,7 @@ public class AsNAddressOf extends AsNExpression {
 		else if (a.expression instanceof ArraySelect) {
 			ArraySelect select = (ArraySelect) a.expression;
 			
-			if (select.getType() instanceof ARRAY)
+			if (select.getType().isArray())
 				AsNArraySelect.loadSumR2(aof, select, r, map, st, true);
 			else 
 				AsNArraySelect.loadSumR2(aof, select, r, map, st, false);
@@ -130,7 +129,7 @@ public class AsNAddressOf extends AsNExpression {
 			/* Cast the structure init */
 			aof.instructions.addAll(AsNExpression.cast(a.expression, r, map, st).getInstructions());
 			
-			if (a.expression.getType().wordsize() > 1 || a.expression.getType() instanceof STRUCT) {
+			if (a.expression.getType().wordsize() > 1 || a.expression.getType().isStruct()) {
 				/* Swap R0 dummys with unbound data regs. */
 				st.popXWords(a.expression.getType().wordsize());
 				for (int i = 0; i < a.expression.getType().wordsize(); i++) st.push(REG.RX);
@@ -156,6 +155,7 @@ public class AsNAddressOf extends AsNExpression {
 		
 		r.free(0);
 		
+		aof.registerMetric();
 		return aof;
 	}
 	

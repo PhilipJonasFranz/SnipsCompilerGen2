@@ -2,6 +2,7 @@ package Imm.ASM.Memory;
 
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Statement.Declaration;
 import Snips.CompilerDriver;
 
@@ -28,7 +29,8 @@ public class ASMLdrLabel extends ASMLdr {
 			if (s0.startsWith(".")) s0 = s0.substring(1);
 			s += s0;
 		}
-		else this.op0.toString();
+		else s += this.op0.toString();
+		
 		return s;
 	}
 	
@@ -40,6 +42,11 @@ public class ASMLdrLabel extends ASMLdr {
 	
 	public String getName() {
 		return this.prefix + target.toString();
+	}
+	
+	public int getRequiredCPUCycles() {
+		if (this.target.reg == REG.PC) return 5; // +N +I +N + 2S
+		else return 3; // +N +I +S
 	}
 	
 } 

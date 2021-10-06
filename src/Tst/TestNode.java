@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Logging.Message;
 
@@ -68,9 +69,9 @@ public class TestNode {
 	public void print(int d) {
 		String s = "";
 		for (int i = 0; i < d; i++) s += " ";
-		System.out.println(s + this.testPackage);
+		CompilerDriver.outs.println(s + this.testPackage);
 		for (Pair<String, List<Message>> tests : this.tests) {
-			System.out.println(s + "    " + "Test: " + tests.getFirst());
+			CompilerDriver.outs.println(s + "    " + "Test: " + tests.getFirst());
 		}
 		
 		for (Entry<String, TestNode> entry : this.childPackages.entrySet()) {

@@ -1,13 +1,19 @@
 package Imm.AST.Expression.Arith;
 
-import Imm.AST.Expression.BinaryExpression;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import Exc.OPT0_EXC;
 import Imm.AST.Expression.Expression;
+import Imm.AST.Expression.NFoldExpression;
+import Opt.AST.ASTOptimizer;
 import Util.Source;
 
 /**
  * This class represents a superclass for all Expressions.
  */
-public class Mul extends BinaryExpression {
+public class Mul extends NFoldExpression {
 	
 			/* ---< CONSTRUCTORS >--- */
 	/**
@@ -18,8 +24,30 @@ public class Mul extends BinaryExpression {
 		super(left, right, Operator.MUL, source);
 	}
 	
-	public BinaryExpression clone() {
-		return new Mul(this.left.clone(), this.right.clone(), this.getSource().clone());
+	public Mul(List<Expression> operands, Source source) {
+		super(operands, Operator.MUL, source);
+	}
+	
+	public Expression opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optMul(this);
+	}
+	
+	public Mul clone() {
+		List<Expression> op0 = new ArrayList();
+		for (Expression e : this.operands)
+			op0.add(e.clone());
+		
+		Mul e = new Mul(op0, this.getSource().clone());
+		
+		if (this.getType() != null)
+			e.setType(this.getType().clone());
+		
+		e.copyDirectivesFrom(this);
+		return e;
+	}
+	
+	public String codePrint() {
+		return this.operands.stream().map(Expression::codePrint).collect(Collectors.joining(" * "));
 	}
 
 } 

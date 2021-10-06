@@ -27,8 +27,7 @@ import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
@@ -88,7 +87,7 @@ public class StackUtil {
 			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));
 			
 			/* Branch to loop end */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(loopEnd)));
 			
 			/* Pop value from stack and store it at location */
 			node.instructions.add(new ASMPopStack(new RegOp(REG.R0)));
@@ -128,9 +127,7 @@ public class StackUtil {
 				offset -= 4;
 			}
 			
-			if (r0) {
-				node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-			}
+			if (r0) node.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 		}
 		/* Do it via ASM Loop for bigger data chunks */
 		else {
@@ -147,7 +144,7 @@ public class StackUtil {
 			node.instructions.add(new ASMCmp(new RegOp(REG.R1), new RegOp(REG.R2)));
 			
 			/* Branch to loop end */
-			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
+			node.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(loopEnd)));
 			
 			/* Load value and push it on the stack */
 			node.instructions.add(new ASMLdrStack(MEM_OP.POST_WRITEBACK, new RegOp(REG.R0), new RegOp(REG.R1), new ImmOp(4)));
@@ -192,7 +189,7 @@ public class StackUtil {
 					regs = 0;
 				}
 				offset -= 4;
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			
 			AsNStructureInit.flush(regs, node);
@@ -218,7 +215,7 @@ public class StackUtil {
 					AsNStructureInit.flush(regs, node);
 					regs = 0;
 				}
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 		}
 		/* Origin is in local stack */
@@ -237,7 +234,7 @@ public class StackUtil {
 					regs = 0;
 				}
 				offset += 4;
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			
 			AsNStructureInit.flush(regs, node);
@@ -270,7 +267,7 @@ public class StackUtil {
 		routine.add(new ASMCmp(new RegOp(REG.R0), new ImmOp(0)));
 		
 		/* Branch to loop end */
-		routine.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(loopEnd)));
+		routine.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(loopEnd)));
 		
 		routine.add(new ASMLdrStack(MEM_OP.PRE_WRITEBACK, new RegOp(REG.R2), new RegOp(REG.R1), new ImmOp(-4)));
 		

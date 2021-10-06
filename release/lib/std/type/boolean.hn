@@ -1,0 +1,19 @@
+#include<string.hn>
+
+/*
+ * This package contains utility functions for bool values.
+ */
+namespace Boolean {
+
+	/*
+	 * Parses given string to boolean. Returns true if the String equals
+	 * 'true', false if not.
+	 */
+	shared bool parseBool(char* str);
+	
+	/*
+	 * Converts given boolean to a String representation.
+	 */
+	shared char* toString(bool b);
+
+} 

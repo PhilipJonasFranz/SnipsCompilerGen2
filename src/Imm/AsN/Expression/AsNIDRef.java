@@ -20,9 +20,6 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.IDRef;
-import Imm.TYPE.COMPOSIT.INTERFACE;
-import Imm.TYPE.COMPOSIT.POINTER;
-import Imm.TYPE.PRIMITIVES.PRIMITIVE;
 import Res.Const;
 
 public class AsNIDRef extends AsNExpression {
@@ -30,6 +27,7 @@ public class AsNIDRef extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNIDRef cast(IDRef i, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNIDRef ref = new AsNIDRef();
+		ref.pushOnCreatorStack(i);
 		i.castedNode = ref;
 		
 		/* Declaration is already loaded in Reg Stack */
@@ -62,7 +60,7 @@ public class AsNIDRef extends AsNExpression {
 		else if (map.declarationLoaded(i.origin)) {
 			ref.clearReg(r, st, target);
 			
-			if (i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE) {
+			if (i.origin.getType().isRegType()) {
 				/* Load value from memory */
 				
 				ASMDataLabel label = map.resolve(i.origin);
@@ -82,7 +80,7 @@ public class AsNIDRef extends AsNExpression {
 		/* Load from Stack */
 		else {
 			/* Load copy on stack */
-			if (!(i.origin.getType() instanceof PRIMITIVE || i.origin.getType() instanceof POINTER || i.origin.getType() instanceof INTERFACE)) {
+			if (!(i.origin.getType().isRegType())) {
 				StackUtil.copyToStackFromDeclaration(ref, i, r, map, st);
 			}
 			/* Load in register */
@@ -107,6 +105,7 @@ public class AsNIDRef extends AsNExpression {
 			}
 		}
 		
+		ref.registerMetric();
 		return ref;
 	}
 	

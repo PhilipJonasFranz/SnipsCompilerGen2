@@ -3,7 +3,7 @@ package Imm.AST.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.TYPE.TYPE;
 import Util.Source;
 
@@ -29,7 +29,7 @@ public abstract class CompoundStatement extends Statement {
 	
 	
 			/* ---< METHODS >--- */
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		for (Statement s : this.body) 
 			s.setContext(context);
 	}

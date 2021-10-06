@@ -9,7 +9,6 @@ import Exc.CGEN_EXC;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Memory.Stack.ASMPushStack;
 import Imm.ASM.Processing.Arith.ASMAdd;
-import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.RegOp;
@@ -19,7 +18,6 @@ import Imm.AST.Expression.Expression;
 import Imm.AST.Expression.StructureInit;
 import Imm.AST.Expression.TempAtom;
 import Imm.AsN.AsNNode;
-import Imm.TYPE.COMPOSIT.ARRAY;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 
@@ -28,6 +26,7 @@ public class AsNStructureInit extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNStructureInit cast(StructureInit s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNStructureInit init = new AsNStructureInit();
+		init.pushOnCreatorStack(s);
 		s.castedNode = init;
 		
 		r.free(0, 1, 2);
@@ -36,32 +35,35 @@ public class AsNStructureInit extends AsNExpression {
 		if (s.elements.size() == 1 && s.elements.get(0) instanceof TempAtom) {
 			TempAtom a = (TempAtom) s.elements.get(0);
 			if (a.base == null) {
-				/* Absolute placeholder */
+				
+				/* Size of the memory section that the placeholder covers in words */
 				int size = s.structType.wordsize();
 				
-				if (!CompilerDriver.disableStructSIDHeaders)
-					size--;
+				/* One word is covered by the SID */
+				if (!CompilerDriver.disableStructSIDHeaders) size--;
 				
+				/* Make space on stack */
 				init.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(size * 4)));
 				
-				for (int i = 0; i < size; i++)
-					st.push(REG.R0);
+				st.pushDummies(size);
 				
 				if (!CompilerDriver.disableStructSIDHeaders) {
 					/* Load SID header */
-					init.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.structType.getTypedef().SID)));
+					s.structType.getTypedef().loadSIDInReg(init, REG.R0, s.structType.proviso);
 					init.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
 					
 					/* Push dummy for SID header */
-					st.push(REG.R0);
+					st.pushDummy();
 				}
 				
+				init.registerMetric();
 				return init;
 			}
 		}
 		
 		structureInit(init, s.elements, (STRUCT) s.getType(), s.isTopLevelExpression, s.hasCoveredParam, r, map, st);
 		
+		init.registerMetric();
 		return init;
 	}
 	
@@ -92,7 +94,7 @@ public class AsNStructureInit extends AsNExpression {
 					regs = 0;
 				}
 				
-				st.push(REG.R0);
+				st.pushDummy();
 			}
 			else if (elements.get(i) instanceof TempAtom) {
 				TempAtom atom = (TempAtom) elements.get(i);
@@ -114,9 +116,9 @@ public class AsNStructureInit extends AsNExpression {
 				node.instructions.addAll(AsNExpression.cast(elements.get(i), r, map, st).getInstructions());
 			
 				/* Push on stack, push R0 on stack, AsNDeclaration will pop the R0s and replace it with the declaration */
-				if (!(elements.get(i).getType() instanceof ARRAY || elements.get(i).getType() instanceof STRUCT)) {
+				if (!elements.get(i).getType().isStackType()) {
 					node.instructions.add(attatchFlag(new ASMPushStack(new RegOp(REG.R0))));
-					st.push(REG.R0);
+					st.pushDummy();
 				}
 			}
 		}
@@ -140,10 +142,10 @@ public class AsNStructureInit extends AsNExpression {
 		
 		if (!CompilerDriver.disableStructSIDHeaders && struct != null) {
 			/* Load SID header */
-			node.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(struct.getTypedef().SID)));
+			struct.getTypedef().loadSIDInReg(node, new RegOp(regs).reg, struct.proviso);
 			
 			/* Push dummy for SID header */
-			st.push(REG.R0);
+			st.pushDummy();
 			regs++;
 		}
 		

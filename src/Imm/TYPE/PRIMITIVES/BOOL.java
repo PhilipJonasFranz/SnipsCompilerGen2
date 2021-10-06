@@ -20,12 +20,12 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	}
 
 	public boolean isEqual(TYPE type) {
-		if (type.getCoreType() instanceof VOID) return true;
-		if (type instanceof PROVISO) {
+		if (type.getCoreType().isVoid()) return true;
+		if (type.isProviso()) {
 			PROVISO p = (PROVISO) type;
 			return p.isEqual(this);
 		}
-		else if (type instanceof POINTER) {
+		else if (type.isPointer()) {
 			POINTER p = (POINTER) type;
 			return p.getCoreType() instanceof BOOL;
 		}
@@ -39,11 +39,19 @@ public class BOOL extends PRIMITIVE<Boolean> {
 	public String sourceCodeRepresentation() {
 		return (this.value)? "1" : "0";
 	}
+	
+	public Integer toInt() {
+		return (this.value)? 1 : 0;
+	}
 
 	public TYPE clone() {
 		BOOL b = new BOOL();
 		if (this.value != null) b.setValue(this.value + "");
 		return b;
+	}
+	
+	public String codeString() {
+		return "bool";
 	}
 	
 } 

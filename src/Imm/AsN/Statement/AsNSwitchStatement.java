@@ -8,8 +8,7 @@ import Exc.CGEN_EXC;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Expression.Boolean.Compare;
 import Imm.AST.Expression.Boolean.Compare.COMPARATOR;
@@ -21,6 +20,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNSwitchStatement cast(SwitchStatement s, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNSwitchStatement sw = new AsNSwitchStatement();
+		sw.pushOnCreatorStack(s);
 		s.castedNode = sw;
 		
 		/* Capsule expressions in compare statements */
@@ -31,10 +31,10 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		for (CaseStatement cs : s.cases) {
 			ASMLabel next = new ASMLabel(LabelUtil.getLabel());
 			
-			COND cond = injectConditionEvaluation(sw, AsNExpression.cast(cs.condition, r, map, st));
+			COND cond = injectConditionEvaluation(sw, AsNExpression.cast(cs.condition, r, map, st), cs.condition);
 			
 			/* Condition was false, skip body */
-			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(next)));
+			sw.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(next)));
 			
 			/* Add body */
 			sw.addBody(cs, r, map, st);
@@ -53,6 +53,7 @@ public class AsNSwitchStatement extends AsNConditionalCompoundStatement {
 		sw.instructions.add(end);
 		
 		sw.freeDecs(r, s);
+		sw.registerMetric();
 		return sw;
 	}
 	

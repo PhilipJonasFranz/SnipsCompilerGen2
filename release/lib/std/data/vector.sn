@@ -1,0 +1,51 @@
+#include <iterable.hn>
+
+namespace VectorArray {
+	
+	restricted struct Vector<T> : Iterable<T> {
+		
+		shared T* begin() {
+			return self->begin;
+		}
+		
+		shared T* end() {
+			return self->end;
+		}
+		
+		shared void set(int i, T val) {
+			*(self->begin + (i * sizeof(T))) = val;
+		}
+		
+		shared T get(int i) {
+			return *(self->begin + (i * sizeof(T)));
+		}
+		
+		shared int length() {
+			return (int) self->end - (int) self->begin;
+		}
+		
+		shared int size() {
+			int size = (int) self->end - (int) self->begin;
+			return size / sizeof(T);
+		}
+		
+		shared void fill(func int -> T pred) {
+			int size = self->size();
+			for (int i = 0; i < size; i++) {
+				T val = pred(i);
+				*(self->begin + (i * sizeof(T))) = val;
+			}
+		}
+		
+		static Vector<T> create(int length) {
+			int size = length * sizeof(T);
+			
+			void* begin = resv(size);
+			void* end = begin + size;
+			
+			return Vector<T>::(begin, end);
+		}
+		
+	}
+	
+} 

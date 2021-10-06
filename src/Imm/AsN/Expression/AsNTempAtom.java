@@ -14,15 +14,14 @@ import Imm.ASM.Processing.Arith.ASMAdd;
 import Imm.ASM.Processing.Arith.ASMMov;
 import Imm.ASM.Processing.Arith.ASMSub;
 import Imm.ASM.Processing.Logic.ASMCmp;
-import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Expression.TempAtom;
+import Imm.AST.Typedef.StructTypedef;
 import Imm.TYPE.COMPOSIT.STRUCT;
 import Snips.CompilerDriver;
 
@@ -31,7 +30,18 @@ public class AsNTempAtom extends AsNExpression {
 			/* ---< METHODS >--- */
 	public static AsNTempAtom cast(TempAtom a, RegSet r, MemoryMap map, StackSet st, int target) throws CGEN_EXC {
 		AsNTempAtom atom = new AsNTempAtom();
+		atom.pushOnCreatorStack(a);
 		a.castedNode = atom;
+
+		STRUCT struct = null;
+		StructTypedef def = null;
+		
+		if (a.getType() instanceof STRUCT) {
+			struct = (STRUCT) a.getType();
+			def = ((STRUCT) a.inheritType).getTypedef();
+		}
+		
+		boolean pushSID = def != null && !CompilerDriver.disableStructSIDHeaders;
 		
 		/* Free as many regs as needed */
 		if (a.base == null || (a.base != null && a.base.getType().wordsize() == 1 && a.inheritType.wordsize() == 1))
@@ -41,81 +51,91 @@ public class AsNTempAtom extends AsNExpression {
 		else 
 			r.free(0, 1, 2);
 		
+		/* Temp atom is an absolute placeholder */
 		if (a.base == null) {
 			/* Make space on stack */
 			if (a.getType().wordsize() > 1) {
 				/* Override last value and insert SID */
-				if (a.getType() instanceof STRUCT && !CompilerDriver.disableStructSIDHeaders) {
-					STRUCT s = (STRUCT) a.getType();
-					
+				if (pushSID) {
+					/* Make space on stack */
 					atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp((a.getType().wordsize() - 1) * 4)));
 					
-					atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(s.getTypedef().SID)));
+					/* Insert SID */
+					if (def != null) def.loadSIDInReg(atom, REG.R0, struct.proviso);
+					else atom.instructions.add(new ASMMov(new RegOp(REG.R0), new ImmOp(-1)));
+					
 					atom.instructions.add(new ASMPushStack(new RegOp(REG.R0)));
-					
-					for (int i = 0; i < a.getType().wordsize(); i++)
-						st.push(REG.R0);
 				}
-				else {
+				else 
+					/* Only make space on stack, no SID */
 					atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(a.getType().wordsize() * 4)));
-					
-					for (int i = 0; i < a.getType().wordsize(); i++)
-						st.push(REG.R0);
-				}
+				
+				/* Push dummies to align stack */
+				st.pushDummies(a.getType().wordsize());
 			}
 			else {
-				/* Dont need to do anything here */
+				/* Value would be placed in register, no need to do anything here */
 			}
 		}
+		/* Temp atom fills with values defined by the base expression */
 		else {
 			if (a.base.getType().wordsize() > 1) {
-				int range = a.inheritType.wordsize() / a.base.getType().wordsize();
+
+				int wordsToStore = a.getType().wordsize() - a.base.getType().wordsize();
+				if (pushSID) wordsToStore--;
 				
+				/* 
+				 * Aligns the stack so that when casting the base, the top of 
+				 * the base is aligned to the head of the final memory section 
+				 */
+				atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(wordsToStore * 4)));
+				
+				st.pushDummies(wordsToStore);
+			
+				/* Cast the base expression once */
 				atom.instructions.addAll(AsNExpression.cast(a.base, r, map, st).getInstructions());
 				
-				ASMLabel start = null;
-				
-				ASMLabel end = null;
-				
-				if (range - 1 > 1) {
-					ASMMov mov = new ASMMov(new RegOp(REG.R1), new ImmOp(0));
-					mov.comment = new ASMComment("Copy substructure with loop " + (range - 1) + " times");
-					atom.instructions.add(mov);
+				if (wordsToStore > 0) {
+					/* Points to start of base in stack */
+					atom.instructions.add(new ASMMov(new RegOp(REG.R2), new RegOp(REG.SP)));
 					
-					start = new ASMLabel(LabelUtil.getLabel());
+					/* Counter that keeps track of how many words still need to be copied */
+					atom.instructions.add(new ASMMov(new RegOp(REG.R1), new ImmOp(wordsToStore)));
 					
-					end = new ASMLabel(LabelUtil.getLabel());
+					ASMLabel start = new ASMLabel(LabelUtil.getLabel());
 					
+					ASMLabel end = new ASMLabel(LabelUtil.getLabel());
+					
+					/* Start of loop */
 					atom.instructions.add(start);
 					
-					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(range - 1)));
+					/* Counter is zero, branch to end */
+					atom.instructions.add(new ASMCmp(new RegOp(REG.R1), new ImmOp(0)));
+					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(end)));
 					
-					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(end)));
-				}
-				
-				for (int k = 0; k < a.base.getType().wordsize(); k++) {
-					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp(k * 4)));
-					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.SP), new ImmOp((k - a.base.getType().wordsize()) * 4)));
-				}
-				
-				atom.instructions.add(new ASMSub(new RegOp(REG.SP), new RegOp(REG.SP), new ImmOp(a.base.getType().wordsize() * 4)));
-				
-				if (range - 1 > 1) {
-					atom.instructions.add(new ASMAdd(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(1)));
+					/* Load current dataword */
+					atom.instructions.add(new ASMLdr(new RegOp(REG.R0), new RegOp(REG.R2)));
+					
+					/* Store the word below the end of the complete structure */
+					atom.instructions.add(new ASMStr(new RegOp(REG.R0), new RegOp(REG.R2), new ImmOp(a.base.getType().wordsize() * 4)));
+					
+					/* Slide down to next data word */
+					atom.instructions.add(new ASMAdd(new RegOp(REG.R2), new RegOp(REG.R2), new ImmOp(4)));
+					
+					/* Decrement counter */
+					atom.instructions.add(new ASMSub(new RegOp(REG.R1), new RegOp(REG.R1), new ImmOp(1)));
 					
 					atom.instructions.add(new ASMBranch(BRANCH_TYPE.B, new LabelOp(start)));
 					
 					atom.instructions.add(end);
 				}
-				
-				for (int i = 0; i < range - 1; i++)
-					for (int k = 0; k < a.base.getType().wordsize(); k++) 
-						st.push(REG.R0);
 			}
+			/* Base is one word large */
 			else {
-				/* Cast the base expression */
+				/* Cast the base expression once */
 				atom.instructions.addAll(AsNExpression.cast(a.base, r, map, st).getInstructions());
 				
+				/* Single word needs to be duplicated multiple times */
 				if (a.getType().wordsize() > 1) {
 					/* Propagate data into paralell registers to make use of ldm */
 					if (a.getType().wordsize() > 1) 
@@ -125,10 +145,11 @@ public class AsNTempAtom extends AsNExpression {
 					
 					int regs = 0;
 					for (int i = 0; i < a.inheritType.wordsize(); i++) {
+						
 						/* If the inherited type is a struct and SIDs are enabled and this is the last word to be pushed, override value to SID */
-						if (a.inheritType instanceof STRUCT && !CompilerDriver.disableStructSIDHeaders && i == a.inheritType.wordsize() - 1) {
-							STRUCT s = (STRUCT) a.inheritType;
-							atom.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(s.getTypedef().SID)));
+						if (pushSID && i == a.inheritType.wordsize() - 1) {
+							if (def != null) def.loadSIDInReg(atom, new RegOp(regs).reg, struct.proviso);
+							else atom.instructions.add(new ASMMov(new RegOp(regs), new ImmOp(-1)));
 						}
 						
 						if (regs == 3) {
@@ -137,18 +158,21 @@ public class AsNTempAtom extends AsNExpression {
 						}
 						
 						regs++;
-						st.push(REG.R0);
+						st.pushDummy();
 					}
 					
 					AsNStructureInit.flush(regs, atom);
 				}
-				else {
-					if (target != 0)
-						atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(REG.R0)));
-				}
+				else 
+					/* If the target type is only one large, we should not be required to push the SID */
+					assert !pushSID : "Pushing the SID at this point is impossible!";
+					
+					/* If the target was not R0, we need to move it there from R0. Otherwise we are done. */
+					if (target != 0) atom.instructions.add(new ASMMov(new RegOp(target), new RegOp(REG.R0)));
 			}
 		}
 		
+		atom.registerMetric();
 		return atom;
 	}
 	

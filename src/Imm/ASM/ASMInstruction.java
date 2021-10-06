@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Imm.ASM.Structural.ASMComment;
-import Imm.ASM.Util.Cond;
+import Imm.ASM.Util.COND;
+import Imm.AsN.AsNNode;
 
 /**
  * Acts as a base class for all assembly instructions.
@@ -39,11 +40,28 @@ public abstract class ASMInstruction {
 		
 		BX_SEMI_EXIT,
 		
+		BRANCH_TO_EXIT,
+		
 		/**
 		 * Mark that a jump will target a loop start, or that its jumping upwards, which means
 		 * that it can distrupt dataflows.
 		 */
 		LOOP_BRANCH, 
+		
+		/**
+		 * Applied to labels that are the head of an assembly loop.
+		 */
+		LOOP_HEAD,
+		
+		/**
+		 * Excludes a label from unused removal.
+		 */
+		LABEL_USED,
+		
+		/**
+		 * Marks this instructions as offset padding, preventing modification and/or removal.
+		 */
+		IS_PADDING,
 		
 		/**
 		 * When casting a break or continue statement, a scope pop will be initiated. This will
@@ -60,24 +78,33 @@ public abstract class ASMInstruction {
 	/**
 	 * The condition operand of this instruction for conditional instruction execution. 
 	 */
-	public Cond cond;
+	public COND cond;
 	
 	/**
 	 * A comment attatched to this instruction. Will be added after the instruction when building.
 	 */
 	public ASMComment comment;
 	
+	/**
+	 * The AsNNode that was active when this instruction was created.
+	 */
+	public AsNNode creator;
+	
 	
 			/* ---< CONSTRUCTORS >--- */
 	public ASMInstruction() {
-		
+		if (!AsNNode.creatorStack.isEmpty())
+			this.creator = AsNNode.creatorStack.peek();
 	}
 	
 	/**
 	 * Constructor for instruction with conditional.
 	 */
-	public ASMInstruction(Cond cond) {
+	public ASMInstruction(COND cond) {
 		this.cond = cond;
+		
+		if (!AsNNode.creatorStack.isEmpty())
+			this.creator = AsNNode.creatorStack.peek();
 	}
 	
 	
@@ -87,5 +114,9 @@ public abstract class ASMInstruction {
 	 * @return
 	 */
 	public abstract String build();
+	
+	public int getRequiredCPUCycles() {
+		return 1;
+	}
 	
 } 

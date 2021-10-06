@@ -1,20 +1,35 @@
 package Imm.AST.Typedef;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import CGen.Util.LabelUtil;
 import Ctx.ContextChecker;
 import Ctx.Util.ProvisoUtil;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
+import Exc.OPT0_EXC;
+import Imm.ASM.Memory.ASMLdrLabel;
+import Imm.ASM.Structural.Label.ASMDataLabel;
+import Imm.ASM.Structural.Label.ASMLabel;
+import Imm.ASM.Util.Operands.LabelOp;
+import Imm.ASM.Util.Operands.RegOp;
+import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
 import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
-import Imm.AsN.AsNNode.MODIFIER;
+import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Imm.TYPE.COMPOSIT.INTERFACE;
 import Imm.TYPE.COMPOSIT.STRUCT;
+import Opt.AST.ASTOptimizer;
+import Snips.CompilerDriver;
+import Tools.ASTNodeVisitor;
+import Util.MODIFIER;
 import Util.NamespacePath;
 import Util.Source;
+import Util.Util;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -37,6 +52,8 @@ public class StructTypedef extends SyntaxElement {
 	
 	public StructTypedef extension = null;
 	
+	public List<ASMDataLabel> interfaceRelayLabels = new ArrayList();
+	
 	public List<INTERFACE> implemented;
 	
 	/** Proviso types provided by the typedef to the extension */
@@ -47,22 +64,44 @@ public class StructTypedef extends SyntaxElement {
 	
 	public STRUCT self;
 	
-	/* 
-	 * SID is assigned during context checking, in order to allow for efficient instanceof expressions.
-	 */
-	public int SID;
+	private boolean copiedInheritedFunctions = false;
 	
-	public StructTypedef SIDNeighbour;
+	public HashMap<String, ASMDataLabel> SIDLabelMap = new HashMap();
 	
 	public class StructProvisoMapping {
 		
-		public List<TYPE> providedHeadProvisos;
+		private List<TYPE> providedHeadProvisos;
 		
-		public List<TYPE> effectiveFieldTypes;
+		private List<TYPE> effectiveFieldTypes;
+		
+		public HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap = new HashMap();
 		
 		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes) {
 			this.providedHeadProvisos = providedHeadProvisos;
 			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public StructProvisoMapping(List<TYPE> providedHeadProvisos, List<TYPE> effectiveFieldTypes, HashMap<InterfaceTypedef, ASMLabel> resolverLabelMap) {
+			this.providedHeadProvisos = providedHeadProvisos;
+			this.effectiveFieldTypes = effectiveFieldTypes;
+		}
+		
+		public List<TYPE> getProvidedProvisos() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.providedHeadProvisos)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public List<TYPE> getFieldTypes() {
+			List<TYPE> clone = new ArrayList();
+			for (TYPE t : this.effectiveFieldTypes)
+				clone.add(t.clone());
+			return clone;
+		}
+		
+		public StructProvisoMapping clone() {
+			return new StructProvisoMapping(this.getProvidedProvisos(), this.getFieldTypes(), this.resolverLabelMap);
 		}
 		
 	}
@@ -103,8 +142,6 @@ public class StructTypedef extends SyntaxElement {
 	 * overwritten functions.
 	 */
 	public void postInitialize() {
-		int c = 0;
-		
 		/* Add this typedef to extenders of extension */
 		if (this.extension != null) {
 			this.extension.extenders.add(this);
@@ -130,7 +167,7 @@ public class StructTypedef extends SyntaxElement {
 					for (int a = 0; a < this.extension.proviso.size(); a++) {
 						TYPE translated = ProvisoUtil.translate(i.getTypedef().proviso.get(a).clone(), i.getTypedef().proviso, this.extension.proviso);
 						pClone.add(translated);
-					}
+					} 
 					
 					/* Translate: Extension Head Proviso -> Extension Proviso */
 					for (int a = 0; a < iclone.proviso.size(); a++) {
@@ -142,6 +179,33 @@ public class StructTypedef extends SyntaxElement {
 					i.getTypedef().implementers.add(this);
 				}
 			}
+		}
+		
+		if (proviso.isEmpty()) {
+			/* Add default proviso mapping if no provisos exist */
+			List<TYPE> fieldTypes = new ArrayList();
+			for (Declaration d : this.fields)
+				fieldTypes.add(d.getType().clone());
+			this.registeredMappings.add(new StructProvisoMapping(new ArrayList(), fieldTypes));
+		}
+	}
+	
+	/**
+	 * Copy all the functions of the extension to this extension. This needs to be done
+	 * when this struct typedef is checked first during context checking. This is due
+	 * to the fact that the extension may come from two sources, header and implementation.
+	 * 
+	 * This means that at the point, where {@link #postInitialize()} is called, they have 
+	 * not been fused yet. So, we have to call it during context checking. Cloning the 
+	 * function bodies at this moment is not an issue, since they will be re-checked
+	 * anyways, so all references will be updated to the new tree.
+	 */
+	public void copyInheritedFunctions() {
+		if (copiedInheritedFunctions) return;
+		else copiedInheritedFunctions = true;
+		
+		if (this.extension != null) {
+			int c = 0;
 			
 			/* 
 			 * For every function in the extension, copy the function, 
@@ -154,57 +218,40 @@ public class StructTypedef extends SyntaxElement {
 				/* Construct a namespace path that has this struct as base */
 				NamespacePath base = this.path.clone();
 				base.path.add(f.path.getLast());
-
+	
 				/* Create a copy of the function, but keep reference on body */
 				Function f0 = f.clone();
+				f0.inheritLink = f;
+				f0.body = null;
 				f0.path = base;
+				
+				/* Apply new source file */
+				String file = this.getSource().sourceFile;
+				f0.visit(x -> true).stream().forEach(x -> x.getSource().sourceFile = file);
 				
 				f0.translateProviso(this.extension.proviso, this.extProviso);
 				
+				/* Temporarily disable the provisoFree() part in the isEqualExtended() method */
 				STRUCT.useProvisoFreeInCheck = false;
 				
 				boolean override = false;
-				for (Function fs : this.functions) 
-					if (Function.signatureMatch(fs, f0, false))
+				for (Function fs : this.functions) {
+					if (Function.signatureMatch(fs, f0, false, true, false)) {
 						override = true;
+						
+						/* Set link to actual inherited function */
+						fs.inheritLink = f;
+					}
+				}
 				
 				if (!override) {
 					this.functions.add(c++, f0);
 					this.inheritedFunctions.add(f0);
 				}
-
+	
 				STRUCT.useProvisoFreeInCheck = true;
 			}
 		}
-	}
-	
-	/**
-	 * Assign SIDs and neighbours to the StructTypedefs based on the location
-	 * in the extension tree. SIDs are unique, as well as the neighbours.
-	 */
-	public int propagateSIDs(int start, StructTypedef neighbour) {
-		this.SID = start;
-		start++;
-		this.SIDNeighbour = neighbour;
-		
-		if (!this.extenders.isEmpty()) {
-			if (this.extenders.size() == 1) 
-				start = this.extenders.get(0).propagateSIDs(start, neighbour);
-			else {
-				/* Apply to first n - 1 */
-				for (int i = 1; i < this.extenders.size(); i++) { 
-					start = this.extenders.get(i - 1).propagateSIDs(start, this.extenders.get(i));
-					
-					/* Set neighbour of n - 1 to n */
-					this.extenders.get(i - 1).SIDNeighbour = this.extenders.get(i);
-				}
-				
-				/* Apply to last */
-				this.extenders.get(this.extenders.size() - 1).propagateSIDs(start, neighbour);
-			}
-		}
-		
-		return start;
 	}
 	
 	/**
@@ -219,10 +266,10 @@ public class StructTypedef extends SyntaxElement {
 		Declaration dec = null;
 		
 		for (int i = 0; i < this.fields.size(); i++) {
-			if (this.fields.get(i).path.build().equals(path.build())) {
+			if (this.fields.get(i).path.equals(path)) {
 				/* Copy field and apply field type */
 				dec = this.fields.get(i).clone();
-				dec.setType(match.effectiveFieldTypes.get(i).provisoFree());
+				dec.setType(match.effectiveFieldTypes.get(i).clone().provisoFree());
 			}
 		}
 		
@@ -233,7 +280,7 @@ public class StructTypedef extends SyntaxElement {
 		return this.fields;
 	}
 	
-	private StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
+	public StructProvisoMapping findMatch(List<TYPE> providedProvisos) {
 		
 		/* Make sure that proviso sizes are equal, if not an error should've been thrown before */
 		assert this.proviso.size() == providedProvisos.size() : "Expected " + this.proviso.size() + " proviso types, but got " + providedProvisos.size();
@@ -248,7 +295,7 @@ public class StructTypedef extends SyntaxElement {
 				 */
 				equal &= m.providedHeadProvisos.get(i).typeString().equals(providedProvisos.get(i).typeString());
 			
-			if (equal) return m;
+			if (equal) return m.clone();
 		}
 		
 		/* Copy own provisos */
@@ -267,10 +314,44 @@ public class StructTypedef extends SyntaxElement {
 		for (int i = 0; i < newActive.size(); i++) 
 			ProvisoUtil.mapNTo1(newActive.get(i), clone);
 		
+		List<TYPE> headMapped = ProvisoUtil.mapToHead(this.proviso, clone);
+		
+		/* Need to propagate new proviso mapping to extended structs */
+		if (this.extension != null) {
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : this.extProviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, headMapped);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at extension */
+			this.extension.findMatch(extTypes);
+		}
+	
+		/* Need to propagate new proviso mapping to implemented interfaces */
+		for (INTERFACE intf : this.implemented) {
+			headMapped = ProvisoUtil.mapToHead(intf.proviso, clone);
+			
+			List<TYPE> extTypes = new ArrayList();
+			for (TYPE t : intf.proviso) {
+				TYPE t0 = t.clone();
+				ProvisoUtil.mapNTo1(t0, headMapped);
+				extTypes.add(t0.provisoFree());
+			}
+			
+			/* Register mapping at implemented interface */
+			intf.getTypedef().registerMapping(extTypes);
+		}
+		
+		/* Remove provisos from provided types */
+		for (int i = 0; i < clone.size(); i++) 
+			clone.set(i, clone.get(i).provisoFree());
+
 		/* Remove provisos from field types */
 		for (int i = 0; i < newActive.size(); i++) 
 			newActive.set(i, newActive.get(i).provisoFree());
-
+		
 		/* Create the new mapping and store it */
 		StructProvisoMapping newMapping = new StructProvisoMapping(clone, newActive);
 		this.registeredMappings.add(newMapping);
@@ -279,10 +360,10 @@ public class StructTypedef extends SyntaxElement {
 	}
 	
 	public void print(int d, boolean rec) {
-		String s = this.pad(d) + "Struct Typedef:SID=" + this.SID + "<" + this.path.build() + ">";
+		String s = Util.pad(d) + "Struct Typedef<" + this.path + ">";
 		
 		if (this.extension != null)
-			s += ":extends:" + this.extension.path.build() + ",";
+			s += ":extends:" + this.extension.path + ",";
 		
 		if (!this.implemented.isEmpty()) {
 			if (this.extension != null)
@@ -294,12 +375,12 @@ public class StructTypedef extends SyntaxElement {
 		}
 		
 		for (INTERFACE def : this.implemented)
-			s += def.getTypedef().path.build() + ",";
+			s += def.getTypedef().path + ",";
 		
 		if (this.extension != null || !this.implemented.isEmpty())
 			s = s.substring(0, s.length() - 1);
 		
-		System.out.println(s);
+		CompilerDriver.outs.println(s);
 		
 		if (rec) {
 			for (Declaration dec : this.fields) 
@@ -310,12 +391,89 @@ public class StructTypedef extends SyntaxElement {
 		}
 	}
 
-	public TYPE check(ContextChecker ctx) throws CTX_EXC {
-		return ctx.checkStructTypedef(this);
+	public TYPE check(ContextChecker ctx) throws CTEX_EXC {
+		ctx.pushTrace(this);
+		
+		TYPE t = ctx.checkStructTypedef(this);
+		
+		ctx.popTrace();
+		return t;
+	}
+	
+	public SyntaxElement opt(ASTOptimizer opt) throws OPT0_EXC {
+		return opt.optStructTypedef(this);
+	}
+	
+	public <T extends SyntaxElement> List<T> visit(ASTNodeVisitor<T> visitor) {
+		List<T> result = new ArrayList();
+		
+		if (visitor.visit(this))
+			result.add((T) this);
+		
+		for (Function f : this.functions)
+			result.addAll(f.visit(visitor));
+		
+		return result;
 	}
 
-	public void setContext(List<TYPE> context) throws CTX_EXC {
+	public void setContext(List<TYPE> context) throws CTEX_EXC {
 		return;
+	}
+	
+	public void loadSIDInReg(AsNNode node, REG reg, List<TYPE> context) {
+		String postfix = LabelUtil.getProvisoPostfix(context);
+		
+		assert this.SIDLabelMap.get(postfix) != null : 
+			"Attempted to load SID for a not registered mapping!";
+		
+		LabelOp operand = new LabelOp(this.SIDLabelMap.get(postfix));
+		node.instructions.add(new ASMLdrLabel(new RegOp(reg), operand, null));
+	}
+	
+	public List<String> codePrint(int d) {
+		List<String> code = new ArrayList();
+		
+		String s = "";
+		
+		if (this.modifier != MODIFIER.SHARED)
+			s += this.modifier.toString().toLowerCase() + " ";
+		
+		s += "struct " + this.path;
+		
+		if (!this.proviso.isEmpty()) 
+			s += this.proviso.stream().map(TYPE::toString).collect(Collectors.joining(", ", "<", ">"));
+		
+		if (!this.implemented.isEmpty() || this.extension != null) {
+			s += " : ";
+			
+			if (this.extension != null) 
+				s += this.extension.codePrint(0).get(0) + ", ";
+			
+			s += this.implemented.stream().map(TYPE::codeString).collect(Collectors.joining(", "));
+		}
+		
+		s += " {";
+		
+		code.add(Util.pad(d) + s);
+		
+		for (Declaration d0 : this.fields) 
+			code.addAll(d0.codePrint(d + this.printDepthStep));
+		
+		if (!this.fields.isEmpty() && !this.functions.isEmpty())
+			code.add("");
+		
+		for (Function f : this.functions) {
+			code.addAll(f.codePrint(d + this.printDepthStep));
+			code.add("");
+		}
+		
+		code.add(Util.pad(d) + "}");
+		
+		return code;
+	}
+
+	public SyntaxElement clone() {
+		return this;
 	}
 
 } 

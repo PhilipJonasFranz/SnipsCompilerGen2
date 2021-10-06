@@ -11,12 +11,20 @@ int main() {
 TESTCASES
 1
 OUTPUT
-/* --test_02.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-toInt_P0:                                    /* Function: toInt, Provisos: BOOL */
+
+.global toInt_P_1
+toInt_P_1:                                   /* Function: toInt, Provisos: BOOL */
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     mov r0, #1                               /* Evaluate Expression */
-    b toInt_P0                               /* Call toInt */
-    
+    b toInt_P_1                              /* Call toInt */

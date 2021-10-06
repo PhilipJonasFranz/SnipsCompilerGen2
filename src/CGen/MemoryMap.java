@@ -6,6 +6,7 @@ import java.util.List;
 
 import Imm.ASM.Structural.Label.ASMDataLabel;
 import Imm.AST.Statement.Declaration;
+import Snips.CompilerDriver;
 
 /**
  * The memory map is used to lay out the static .data memory and get the memory offsets of the
@@ -79,12 +80,12 @@ public class MemoryMap {
 	
 	/** Prints out the memory layout. */
 	public void print() {
-		System.out.println("\n----< MEMORY START ----");
+		CompilerDriver.outs.println("\n----< MEMORY START ----");
 		for (int i = 0; i < this.map.size(); i++) {
 			MemoryCell x = this.map.get(i);
 			x.declaration.print(4, true);
 		}
-		System.out.println("----< MEMORY END >----\n");
+		CompilerDriver.outs.println("----< MEMORY END >----\n");
 	}
 	
 	/**

@@ -16,12 +16,20 @@ int main() {
 TESTCASES
 10
 OUTPUT
-/* --test_19.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global set
 set:                                         /* Function: set */
     push { r3 }
-    mov r3, r0
 /* Set m [0] [1] */
+    mov r3, r0
     mov r0, #8                               /* Evaluate Expression */
     push { r0 }
     ldr r1, [r10, r3, lsl #2]                /* Load from address */
@@ -39,15 +47,16 @@ set:                                         /* Function: set */
     str r0, [r1]
     pop { r3 }
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #2                               /* Evaluate Expression */
     mov r1, #1
+    mov r0, #2                               /* Evaluate Expression */
     stmfd sp!, {r0, r1}
-    mov r0, #6
     mov r1, #3
+    mov r0, #6
     stmfd sp!, {r0, r1}
     sub r0, fp, #8
     lsr r0, r0, #2
@@ -63,4 +72,3 @@ main:                                        /* Function: main */
     add r0, r0, r2
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

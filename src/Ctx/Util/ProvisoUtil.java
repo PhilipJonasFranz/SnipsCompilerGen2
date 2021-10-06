@@ -1,5 +1,6 @@
 package Ctx.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Exc.SNIPS_EXC;
@@ -39,7 +40,7 @@ public class ProvisoUtil {
 			if (f.funcHead != null) {
 				/* Map to each parameter type */
 				for (Declaration d : f.funcHead.parameters)
-					map &= map1To1Maybe(d.getType(), source);
+					map &= map1To1Maybe(d.getRawType(), source);
 				
 				map &= map1To1Maybe(f.funcHead.getReturnTypeDirect(), source);
 			}
@@ -143,7 +144,7 @@ public class ProvisoUtil {
 			/* Relay to array target type */
 			map1To1(a.elementType, source);
 		}
-		else throw new SNIPS_EXC(Const.CANNOT_MAP_TYPE_TO_PROVISO, source.typeString(), target.typeString());
+		else throw new SNIPS_EXC(Const.CANNOT_MAP_TYPE_TO_PROVISO, source, target);
 	}
 	
 	/**
@@ -193,6 +194,14 @@ public class ProvisoUtil {
 		return isEqual;
 	}
 	
+	/**
+	 * Checks if two given mappings are equal. This means that they have to be of equal length, and 
+	 * for every two types, the proviso-free type string has to be equal. The types are compared
+	 * without calling proviso-free on them.
+	 * @param map0 The first proviso map.
+	 * @param map1 The second proviso map.
+	 * @return True if the maps are equal, false if not.
+	 */
 	public static boolean mappingIsEqual(List<TYPE> map0, List<TYPE> map1) {
 		boolean isEqual = true;
 		for (int a = 0; a < map0.size(); a++) 
@@ -201,12 +210,12 @@ public class ProvisoUtil {
 		return isEqual;
 	}
 	
+	/**
+	 * Check if the given proviso mapping has no type that contains
+	 * a capsuled proviso type.
+	 */
 	public static boolean isProvisoFreeMapping(List<TYPE> mapping) {
-		boolean provisoFree = true;
-		
-		for (TYPE t : mapping) provisoFree &= !t.hasProviso();
-		
-		return provisoFree;
+		return mapping.stream().filter(TYPE::hasProviso).count() == 0;
 	}
 
 	/**
@@ -220,6 +229,17 @@ public class ProvisoUtil {
 		}
 		
 		return t;
+	}
+	
+	public static List<TYPE> mapToHead(List<TYPE> head, List<TYPE> context) {
+		List<TYPE> headMapped = new ArrayList();
+		for (int i = 0; i < head.size(); i++) {
+			TYPE t0 = head.get(i).clone();
+			ProvisoUtil.map1To1(t0, context.get(i).clone());
+			headMapped.add(t0);
+		}
+		
+		return headMapped;
 	}
 	
 } 

@@ -2,18 +2,19 @@ package Imm.AsN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import CGen.MemoryMap;
 import CGen.RegSet;
 import CGen.StackSet;
-import CGen.Opt.ASMOptimizer;
 import CGen.Util.LabelUtil;
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
+import Exc.CTEX_EXC;
 import Imm.ASM.ASMInstruction;
 import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
+import Imm.ASM.Directive.ASMDirective;
 import Imm.ASM.Memory.ASMMemOp;
 import Imm.ASM.Memory.Stack.ASMPopStack;
 import Imm.ASM.Memory.Stack.ASMPushStack;
@@ -25,8 +26,7 @@ import Imm.ASM.Processing.Logic.ASMCmp;
 import Imm.ASM.Structural.ASMComment;
 import Imm.ASM.Structural.ASMSeperator;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.ImmOp;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.ASM.Util.Operands.PatchableImmOp;
@@ -34,16 +34,20 @@ import Imm.ASM.Util.Operands.PatchableImmOp.PATCH_DIR;
 import Imm.ASM.Util.Operands.RegOp;
 import Imm.ASM.Util.Operands.RegOp.REG;
 import Imm.AST.Function;
-import Imm.AST.Function.ProvisoMapping;
 import Imm.AST.Statement.Declaration;
 import Imm.AST.Statement.Statement;
 import Imm.AsN.Statement.AsNCompoundStatement;
 import Imm.TYPE.TYPE;
-import Imm.TYPE.COMPOSIT.STRUCT;
 import Imm.TYPE.PRIMITIVES.FUNC;
 import Imm.TYPE.PRIMITIVES.INT;
+import Opt.ASM.ASMOptimizer;
+import Opt.AST.Util.Matcher;
 import Res.Const;
+import Res.Manager.RessourceManager;
+import Snips.CompilerDriver;
 import Util.Pair;
+import Util.Logging.LogPoint.Type;
+import Util.Logging.Message;
 
 public class AsNFunction extends AsNCompoundStatement {
 
@@ -53,15 +57,25 @@ public class AsNFunction extends AsNCompoundStatement {
 	public Function source;
 	
 	public ASMLabel copyLoopEscape;
+
+	public List<String> generatedLabels = new ArrayList();
 	
+	/* 
+	 * List that contains all the names of the proviso calls that were already translated.
+	 * This is used to check wether to translate the current proviso mapping again. The name
+	 * would be the same since it was changed up below.
+	 */
+	public List<String> translated = new ArrayList();
 	
+
 			/* ---< METHODS >--- */
 	/**
 	 * Casts given syntax element based on the given reg set to a asm function node. 
-	 * @throws CTX_EXC 
+	 * @throws CTEX_EXC 
 	 */
-	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTX_EXC {
+	public static AsNFunction cast(Function f, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC, CTEX_EXC {
 		AsNFunction func = new AsNFunction();
+		func.pushOnCreatorStack(f);
 		f.castedNode = func;
 		func.source = f;
 		
@@ -77,6 +91,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		
 		LabelUtil.reset();
 		LabelUtil.funcPrefix = f.path.build();
+		LabelUtil.funcUID = (f.requireUIDInLabel)? f.UID : -1;
 		
 		if (f.signals()) func.copyLoopEscape = new ASMLabel(LabelUtil.getLabel());
 		
@@ -98,55 +113,82 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 		}
 		
-		/*
-		 * Change names of proviso mappings if the types are word-size equal.
-		 * The translation will result in the same assembly, so we dont have to do it again.
-		 * The name is set to the first occurrence of the similar mappings. Down below
-		 * the name is checked if its already in a list of translated mappings.
-		 */
-		for (int i = 0; i < f.provisosCalls.size(); i++) {
-			ProvisoMapping call0 = f.provisosCalls.get(i);
-			for (int a = i + 1; a < f.provisosCalls.size(); a++) {
-				ProvisoMapping call1 = f.provisosCalls.get(a);
-				
-				if (!call0.provisoPostfix.equals(call1.provisoPostfix)) {
-					boolean equal = true;
-					
-					/* Check for equal return type */
-					equal &= call0.returnType.wordsize() == call1.returnType.wordsize();
-					
-					/* Check for equal parameter types */
-					for (int k = 0; k < call0.provisoMapping.size(); k++) 
-						equal &= call0.provisoMapping.get(k).wordsize() == call1.provisoMapping.get(k).wordsize();
-					
-					/* 
-					 * Mappings are of equal types, set label gen postfix of 
-					 * this one to the other equal one 
-					 */
-					if (equal) 
-						call1.provisoPostfix = call0.provisoPostfix;
-				}
-			}
-		}
-		
-		/* 
-		 * List that contains all the names of the proviso calls that were already translated.
-		 * This is used to check wether to translate the current proviso mapping again. The name
-		 * would be the same since it was changed up below.
-		 */
-		List<String> translated = new ArrayList();
-		
 		for (int k = 0; k < f.provisosCalls.size(); k++) {
+			
+			if (f.inheritLink == null) {
+				/* 
+				 * Body is null, insert include directive instead, or build 
+				 * object file only and this function is not from the main file
+				 */
+				if (!CompilerDriver.buildModulesRecurse && 
+						(f.body == null || 
+						!CompilerDriver.inputFile.getAbsolutePath().endsWith(f.getSource().sourceFile))) {
+					
+					/* Replace .hn with .sn in module link */
+					String source = RessourceManager.instance.toASMPath(f.getSource().sourceFile);
+					
+					func.instructions.add(new ASMDirective(".include " + source + "@" + f.path + f.provisosCalls.get(k).getProvisoPostfix()));
+					
+					/* Check if required module exists */
+					String mappedPath = RessourceManager.instance.resolve(source);
+					if (RessourceManager.instance.getFile(mappedPath) == null) {
+						AsNBody.progress.abort();
+						new Message("Module '" + f.path + f.provisosCalls.get(k).getProvisoPostfix() + "' in '" + source + "' does not exist", Type.WARN);
+						new Message("To create the missing module, use -R to recompile modules recursiveley", Type.WARN);
+					}
+					
+					continue;
+				}
+				
+				if (f.body == null) 
+					throw new CGEN_EXC("Attempted to cast function without body: " + f.path.build());
+			}
+			
+			/*
+			 * Function was inherited into struct but not overridden there.
+			 * We can relay to the cast of the parent implementation here.
+			 * But, we still need to create the symbolic function so the linker/assembler
+			 * recognizes it.
+			 */
+			if (f.inheritLink != null && f.body == null) {
+				/* Create the function head label */
+				String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
+				
+				func.generatedLabels.add(funcLabel);
+				
+				/* Add .global label */
+				ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+				func.instructions.add(globalFunction);
+				
+				
+				/* Function Header and Entry Label, add proviso specific postfix */
+				ASMLabel label = new ASMLabel(funcLabel, true);
+				f.headLabelMap.put(LabelUtil.getProvisoPostfix(f.provisosCalls.get(k).provisoMapping), label);
+				func.instructions.add(label);
+				
+				
+				String call = f.buildInheritedCallLabel(f.provisosCalls.get(k).provisoMapping);
+				
+				ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(new ASMLabel(call)));
+				branch.optFlags.add(OPT_FLAG.SYS_JMP);
+				branch.comment = new ASMComment("Relay to inherited " + call);
+				
+				func.instructions.add(branch);
+				continue;
+			}
+			
+			LabelUtil.currentContext = f.provisosCalls.get(k).getProvisoPostfix();
+			
 			/* Reset regs and stack */
 			r = new RegSet();
 			st = new StackSet();
 			
 			/* Check if mapping was already translated, if yes, skip */
-			if (translated.contains(f.provisosCalls.get(k).provisoPostfix)) continue;
-			else translated.add(f.provisosCalls.get(k).provisoPostfix);
+			if (func.translated.contains(f.provisosCalls.get(k).getProvisoPostfix())) continue;
+			else func.translated.add(f.provisosCalls.get(k).getProvisoPostfix());
 			
 			/* Set the current proviso call scheme if its not the default scheme */
-			if (!f.provisosCalls.get(k).provisoPostfix.equals("")) 
+			if (!f.provisosCalls.get(k).getProvisoPostfix().equals("")) 
 				f.setContext(f.provisosCalls.get(k).provisoMapping);
 			
 			/* Setup Parameter Mapping */
@@ -163,47 +205,40 @@ public class AsNFunction extends AsNCompoundStatement {
 			}
 			
 			/* Create the function head label */
-			String funcLabel = func.source.path.build() + f.provisosCalls.get(k).provisoPostfix;
+			String funcLabel = f.buildCallLabel(f.provisosCalls.get(k).provisoMapping);
 			
-			/* Function address getter for lambda */
-			if (f.isLambdaTarget) {
-				ASMLabel l = new ASMLabel("lambda_" + funcLabel, true);
-				l.comment = new ASMComment("Function address getter for predication");
-				func.instructions.add(l);
-				
-				func.instructions.add(new ASMAdd(new RegOp(REG.R0), new RegOp(REG.PC), new ImmOp(8)));
-				
-				/* Branch back via sys jump */
-				func.instructions.add(new ASMMov(new RegOp(REG.PC), new RegOp(REG.R10)));
-			}
+			func.generatedLabels.add(funcLabel);
+			
+			/* Add .global label */
+			ASMDirective globalFunction = new ASMDirective(".global " + funcLabel);
+			func.instructions.add(globalFunction);
+			
 			
 			/* Function Header and Entry Label, add proviso specific postfix */
 			ASMLabel label = new ASMLabel(funcLabel, true);
+			f.headLabelMap.put(LabelUtil.getProvisoPostfix(f.provisosCalls.get(k).provisoMapping), label);
+			
 			
 			/* Generate comment with function name and potential proviso types */
 			String com = "";
-			if (f.provisosCalls.get(k).provisoPostfix.equals("")) {
-				com = "Function: " + f.path.build();
+			if (f.provisosCalls.get(k).getProvisoPostfix().equals("")) {
+				com = "Function: " + f.path;
 			}
 			else {
-				com = ((k == 0)? "Function: " + f.path.build() + ", " : "") + ((f.provisosTypes.isEmpty())? "" : "Provisos: ");
+				com = ((k == 0)? "Function: " + f.path + ", " : "") + ((f.provisoTypes.isEmpty())? "" : "Provisos: ");
 				
 				/* Create a String that lists all proviso mappings that this version of the function represents */
 				for (int z = k; z < f.provisosCalls.size(); z++) {
-					if (f.provisosCalls.get(z).provisoPostfix.equals(f.provisosCalls.get(k).provisoPostfix)) {
+					if (f.provisosCalls.get(z).getProvisoPostfix().equals(f.provisosCalls.get(k).getProvisoPostfix())) {
 						List<TYPE> types = f.provisosCalls.get(z).provisoMapping;
 						
-						for (int x = 0; x < types.size(); x++) 
-							com += types.get(x).provisoFree().typeString() + ", ";
+						com += types.stream().map(x -> x.provisoFree().toString()).collect(Collectors.joining(", "));
 						
-						com = com.trim().substring(0, com.trim().length() - 1);
-						
-						if (z < f.provisosCalls.size() - 1) com += " | ";
+						if (z < f.provisosCalls.size() - 2) com += " | ";
 					}
 				}
 			}
 			label.comment = new ASMComment(com);
-			
 			
 			/* Add function label */
 			func.instructions.add(label);
@@ -231,7 +266,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					
 					boolean hasRef = false;
 					for (Statement s : f.body) 
-						hasRef |= AsNCompoundStatement.hasAddressReference(s, d);
+						hasRef |= Matcher.hasAddressReference(s, d);
 					
 					if (hasRef) {
 						ASMPushStack init = new ASMPushStack(new RegOp(i));
@@ -373,7 +408,7 @@ public class AsNFunction extends AsNCompoundStatement {
 			
 			ASMLabel singleWordSkip = new ASMLabel(LabelUtil.getLabel());
 			if (f.getReturnType().wordsize() == 1 && f.signals()) 
-				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(COND.EQ), new LabelOp(singleWordSkip)));
+				func.instructions.add(new ASMBranch(BRANCH_TYPE.B, COND.EQ, new LabelOp(singleWordSkip)));
 			
 			
 			if (f.getReturnType().wordsize() > 1 || f.signals()) {
@@ -382,7 +417,7 @@ public class AsNFunction extends AsNCompoundStatement {
 					 * No exception, move word size of return type in R0, if execption 
 					 * were thrown, the word size would already be in R0 
 					 */
-					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), new Cond(COND.EQ));
+					ASMMov mov = new ASMMov(new RegOp(REG.R0), new ImmOp(f.getReturnType().wordsize() * 4), COND.EQ);
 					mov.optFlags.add(OPT_FLAG.WRITEBACK);
 					func.instructions.add(mov);
 				}
@@ -424,14 +459,17 @@ public class AsNFunction extends AsNCompoundStatement {
 			if (f.provisosCalls.size() > 1 && k < f.provisosCalls.size() - 1) 
 				func.instructions.add(new ASMSeperator());
 			
-			if (!f.provisosTypes.isEmpty()) {
+			if (!f.provisoTypes.isEmpty()) {
 				all.addAll(func.instructions);
 				func.instructions.clear();
 			}
+			
+			LabelUtil.currentContext = null;
 		}
 		
-		if (!f.provisosTypes.isEmpty()) func.instructions.addAll(all);
+		if (!f.provisoTypes.isEmpty()) func.instructions.addAll(all);
 	
+		func.registerMetric();
 		return func;
 	}
 	
@@ -445,6 +483,7 @@ public class AsNFunction extends AsNCompoundStatement {
 				/* Only patch bx and instructions that are not part of exceptional exit */
 				if (branch.type == BRANCH_TYPE.BX && !branch.optFlags.contains(OPT_FLAG.EXC_EXIT)) {
 					branch.type = BRANCH_TYPE.B;
+					branch.optFlags.add(OPT_FLAG.BRANCH_TO_EXIT);
 					branch.target = new LabelOp(funcReturn);
 				}
 			}
@@ -536,7 +575,7 @@ public class AsNFunction extends AsNCompoundStatement {
 		List<Pair<Declaration, Integer>> mapping = new ArrayList();
 		
 		for (Declaration dec : this.source.parameters) {
-			if (dec.getType().wordsize() == 1 && r < 3 && !(dec.getType() instanceof STRUCT)) {
+			if (dec.getType().wordsize() == 1 && r < 3 && !dec.getType().isStruct()) {
 				/* Load in register */
 				mapping.add(new Pair(dec, r));
 				r++;

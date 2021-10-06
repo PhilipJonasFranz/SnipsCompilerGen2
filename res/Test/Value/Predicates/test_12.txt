@@ -1,0 +1,31 @@
+SOURCE
+int main() {
+	func int -> int pred = (int x -> int) : { return x + 10; };
+	return pred(3);
+}
+TESTCASES
+13
+OUTPUT
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global ANON1
+ANON1:                                       /* Function: ANON1 */
+    add r0, r0, #10
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    ldr r3, .P994879591_ANON1                /* Evaluate Expression */
+    mov r0, #3                               /* Evaluate Expression */
+    add lr, pc, #8
+    mov pc, r3
+    pop { pc }
+.P994879591_ANON1: .word ANON1

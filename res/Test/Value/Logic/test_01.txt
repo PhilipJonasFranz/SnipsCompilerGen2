@@ -1,19 +1,27 @@
 SOURCE
 bool main(bool a) {
-	return !!a;
+	return (bool) ((!!a)? 1 : 0);
 }
 TESTCASES
 0 0
 1 1
 10 1
 OUTPUT
-/* --test_01.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     cmp r0, #0
-    moveq r0, #1
-    movne r0, #0
-    cmp r0, #0
-    moveq r0, #1
-    movne r0, #0
+    beq main.L0
+    mov r0, #1
     bx lr
-    
+main.L0: 
+    mov r0, #0
+    bx lr

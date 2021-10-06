@@ -10,23 +10,31 @@ int main() {
 TESTCASES
 4
 OUTPUT
-/* --test_03.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global get
 get:                                         /* Function: get */
     ldr r1, [r10, r0, lsl #2]                /* Load from address */
     add r0, r1, #1
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r0, #7                               /* Evaluate Expression */
-    mov r1, #6
     mov r2, #3
+    mov r1, #6
+    mov r0, #7                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     sub r0, fp, #12                          /* Evaluate Expression */
     lsr r0, r0, #2
     bl get                                   /* Call get */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

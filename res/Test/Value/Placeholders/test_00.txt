@@ -10,15 +10,26 @@ int main(int k) {
 TESTCASES
 3
 OUTPUT
-/* --test_00.txt */
+.version 0
+
+.data
+Test: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #3                               /* Evaluate Expression */
+    ldr r2, .P1511284508_Test
     mov r1, #3
-    stmfd sp!, {r0, r1}
-    mov r0, #1
+    mov r0, #3                               /* Evaluate Expression */
+    stmfd sp!, {r0-r2}
+    ldr r0, .P1511284508_Test
     push { r0 }
-    ldr r0, [fp, #-4]                        /* Load field from struct */
+    ldr r0, [fp, #-8]                        /* Load field from struct */
     mov sp, fp
     bx lr
-    
+.P1511284508_Test: .word Test

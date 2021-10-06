@@ -1,0 +1,72 @@
+#include<iterable.hn>
+#include<collection.hn>
+
+/*
+ * Contains the utility to create a stream from an collection
+ * interface and to modify the data behind the interface with
+ * predicates.
+ */
+namespace Streamable {
+	
+	/*
+	 * A stream capsules an Iterable interface, that contains the
+	 * data. Within the typedef, a range of functions are defined
+	 * to modify the data using predicates.
+	 */
+	restricted struct Stream<T> : Iterable<T> {
+		
+		/* The interface which the data is behind */
+		Collection<T> collection;
+		
+		/*
+		 * Iterates over the data and applies the given predicate
+		 * to it. Overwrites the previous data in the stream.
+		 */
+		shared Stream<T>* forEach(func T -> T pred);
+		
+		/*
+		 * Filters out all values in the stream that do not match
+		 * the filter predicate.
+		 */
+		shared Stream<T>* filter(func T -> bool pred);
+
+		/*
+		 * Using the given predicate, all elements of this stream
+		 * are mapped to a value of the type V and are added to 
+		 * the given collection. A new stream containing this collection
+		 * is created and returned.
+		 */
+		shared Stream<V>* map<V, T>(Collection<V> target, func T -> V pred);
+
+		/*
+		 * Folds all values of this stream to a single value using the
+		 * given predicate. Returns this value.
+		 */
+		shared V fold<V, T>(V initial, func (V, T) -> V pred);
+
+		/*
+		 * Returns the size of the capsuled interable interface.
+		 */
+		shared int size();
+		
+		/*
+		 * Returns the value at given index from 
+		 * the capsuled collection interface.
+		 */
+		shared T get(int index);
+		
+		/*
+		 * Sets the value at the given index to the
+		 * given value in the capsuled collection interface.
+		 */
+		shared void set(int index, T value);
+		
+		/*
+		 * Creates and initializes a new stream.
+		 * Returns a pointer to the newly created stream.
+		 */
+		static Stream<T> create<T>(Collection<T> collection);
+		
+	}
+	
+} 

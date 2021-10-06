@@ -1,0 +1,114 @@
+SOURCE
+#include<linked_list.sn>
+
+struct X<T> {
+	
+	T val;
+	
+	T get() {
+		return self->val;
+	}
+	
+	void set(T nVal) {
+		self->val = nVal;
+	}
+	
+	static X<T> create<T>(T val) {
+		return X<T>::(val);
+	}
+}
+
+int main() {
+	X<int>* x = init<>(X::create<int>(10));
+	LinkedList<X<int>*>* list = LinkedList::create<X<int>*>(null);
+	
+	list->add(x);
+	
+	x->set(12);
+	
+	return list->get(0)->get();
+}
+TESTCASES
+12
+OUTPUT
+.version 0
+
+.include maybe resv.s
+.include maybe init.s
+.include maybe free.s
+.include linked_list.s
+
+.data
+X_P_1: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global X.get_P_1
+X.get_P_1:                                   /* Function: X.get, Provisos: INT */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+
+.global X.set_P_1
+X.set_P_1:                                   /* Function: X.set, Provisos: INT */
+    push { r4 }
+    mov r4, r1
+    lsl r1, r0, #2                           /* Convert to bytes */
+    str r4, [r1, #4]                         /* Store value to struct field */
+    pop { r4 }
+    bx lr
+
+.global X.create_P_1
+X.create_P_1:                                /* Function: X.create, Provisos: INT */
+    push { fp }
+    mov fp, sp
+    push { r0 }
+    ldr r0, .P321637214_X_P_1
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    pop { fp }
+    add r1, r2, #8
+    mov r0, #8
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+.P321637214_X_P_1: .word X_P_1
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    mov r0, #10                              /* Evaluate Expression */
+    bl X.create_P_1                          /* Call X.create */
+    bl init_P_2                              /* Call init */
+    mov r3, r0
+    ldr r0, .P321637213_NULL                 /* Evaluate Expression */
+    bl List.LinkedList.create_P_1            /* Call List.LinkedList.create */
+    mov r4, r0
+    mov r1, r3
+    bl List.LinkedList.add_P_1               /* Call List.LinkedList.add */
+    mov r1, #12
+    mov r0, r3
+    bl X.set_P_1                             /* Call X.set */
+    mov r1, #0
+    mov r0, r4
+    bl List.LinkedList.get_P_1               /* Call List.LinkedList.get */
+    bl X.get_P_1                             /* Call X.get */
+    pop { pc }
+.P321637213_NULL: .word NULL
+
+/* System Routine, used to copy memory on the stack */
+_routine_stack_copy_: 
+    cmp r0, #0
+    beq _routine_stack_copy_end_
+    ldr r2, [r1, #-4]!
+    sub r0, r0, #4
+    push { r2 }
+    b _routine_stack_copy_
+_routine_stack_copy_end_: 
+    mov pc, r10
+

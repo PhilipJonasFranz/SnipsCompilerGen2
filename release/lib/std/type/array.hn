@@ -1,0 +1,13 @@
+namespace Array {
+		
+	/*
+	 * Sorts an array with given size. Uses
+	 * the bubble sort algorithm to sort.
+	 * The given predicate should return true if
+	 * the first passed parameter should be considered
+	 * 'smaller' and should be ordered before the second
+	 * parameter.
+	 */
+	shared void sort<T>(T* arr, int size, func (T, T) -> bool pred);
+	
+} 

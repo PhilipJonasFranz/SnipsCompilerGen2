@@ -14,8 +14,16 @@ int main() {
 TESTCASES
 5
 OUTPUT
-/* --test_23.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global incr
 incr:                                        /* Function: incr */
     push { r3 }
     mov r3, r0
@@ -24,12 +32,13 @@ incr:                                        /* Function: incr */
     str r0, [r10, r3, lsl #2]
     pop { r3 }
     bx lr
-    
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
-    mov r3, #0
     mov r4, #0
+    mov r3, #0
     push { r4 }
 main.L1: 
     ldr r0, [fp, #-4]
@@ -48,4 +57,3 @@ main.L2:
     mov r0, r3                               /* Evaluate Expression */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    

@@ -43,52 +43,88 @@ TESTCASES
 0 25
 1 10
 OUTPUT
-/* --test_07.txt */
+.version 0
+
+.data
+Y: .word 0
+Y_resolver_relay: .word Y_resolver
+X: .word 0
+X_resolver_relay: .word X_resolver
+Inter: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
-Inter.L1:                                    /* Interface : Inter */
-    ldr r10, [r10, r0, lsl #2]
-    cmp r10, #1
-    moveq r10, #0
-    beq Inter.L2
-    cmp r10, #2
-    moveq r10, #4
-Inter.L2: 
-    add r10, r10, r12
-    add r10, r10, #4
-    mov r12, #0
-    add pc, pc, r10
-    b X.get
-    b Y.get
-    
+
+.global X.get
 X.get:                                       /* Function: X.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r0, [r1, #4]                         /* Load field from struct */
     bx lr
-    
+
+X_Inter:                                     /* Relay: Inter -> X */
+    mov r10, #0
+    pop { r12 }
+    add r12, r12, #4
+    add pc, pc, r12
+    b X.get
+
+X_resolver:                                  /* Relay: X -> INTF */
+    ldr r12, .P538452035_Inter
+    cmp r10, r12
+    beq X_Inter
+.P538452035_Inter: .word Inter
+
+.global Y.get
 Y.get:                                       /* Function: Y.get */
     mov r10, #0
     lsl r1, r0, #2                           /* Convert to bytes */
     ldr r1, [r1, #4]                         /* Load field from struct */
     lsl r0, r1, #1
     bx lr
-    
+
+Y_Inter:                                     /* Relay: Inter -> Y */
+    mov r10, #0
+    pop { r12 }
+    add r12, r12, #4
+    add pc, pc, r12
+    b Y.get
+
+Y_resolver:                                  /* Relay: Y -> INTF */
+    ldr r12, .P538452036_Inter
+    cmp r10, r12
+    beq Y_Inter
+.P538452036_Inter: .word Inter
+
+.global process
 process:                                     /* Function: process */
-    b Inter.L1                               /* Branch to relay table of Inter */
-    
+    push { lr }
+    mov r12, #0                              /* Offset to Inter.get */
+    push { r12 }
+    ldr r12, [r10, r0, lsl #2]
+    ldr r12, [r12, #4]
+    ldr r10, .P538452037_Inter
+    add lr, pc, #8
+    mov pc, r12
+    pop { pc }
+.P538452037_Inter: .word Inter
+
+.global main
 main:                                        /* Function: main */
     push { fp, lr }
     mov fp, sp
     mov r3, r0
     mov r0, #25                              /* Evaluate Expression */
     push { r0 }
-    mov r0, #1
+    ldr r0, .P538452038_X
     push { r0 }
     sub r0, fp, #8                           /* Evaluate Expression */
     lsr r4, r0, #2
     mov r0, #5                               /* Evaluate Expression */
     push { r0 }
-    mov r0, #2
+    ldr r0, .P538452038_Y
     push { r0 }
     sub r0, fp, #16                          /* Evaluate Expression */
     lsr r5, r0, #2
@@ -102,4 +138,5 @@ main.L1:
     bl process                               /* Call process */
     mov sp, fp
     ldmfd sp!, {fp, pc}
-    
+.P538452038_Y: .word Y
+.P538452038_X: .word X

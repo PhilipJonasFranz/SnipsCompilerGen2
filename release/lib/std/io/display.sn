@@ -24,6 +24,7 @@ namespace Display {
 	restricted int lineCount = 32;
 
 	/* Reads the char from the display input at base + 1 */
+	#unsafe
 	restricted char getChar() {
 		int* base = (int*) (Display::displayBase + 1);
 		int c = *base;
@@ -31,6 +32,7 @@ namespace Display {
 		return (char) c;
 	}
 	
+	#unsafe
 	restricted void wrapLine() {
 		/* Clear the next two lines */
 		for (int i = cursor; i < (cursor + (lineLength * 2)); i++) {
@@ -41,6 +43,7 @@ namespace Display {
 	}
 	
 	/* Puts the char at the current cursor location and increments the cursor */
+	#unsafe
 	restricted void putChar(char c) {
 		/* Clean the next two lines if cursor is at start of line */
 		if (cursor % lineLength == 0)
@@ -60,6 +63,7 @@ namespace Display {
 	namespace Print {
 		
 		/* Skips the cursor to a new line */
+		#unsafe
 		shared void println() {
 			int rest = 70 - (cursor % 70);
 			for (int i = 0; i < rest; i++)
@@ -67,7 +71,8 @@ namespace Display {
 		}
 		
 		/* Prints the string the given char pointer points to. */
-		shared void printString(char* str) {
+		#unsafe
+		shared void print(char* str) {
 			int c = 0;
 			while ((int) (*(str + c)) != 0) {
 				char c0 = *(str + c);
@@ -77,12 +82,14 @@ namespace Display {
 		}
 		
 		/* Prints out given string and a new line */
-		shared void printlnString(char* str) {
-			printString(str);
+		#unsafe
+		shared void println(char* str) {
+			print(str);
 			println();
 		}
 		
 		/* Prints out given string and formats in given arguments. */
+		#unsafe
 		shared void printf(char* c, void* f) {
 			int i = 0;
 			int fi = 0;
@@ -100,13 +107,13 @@ namespace Display {
 						/* Format int */
 						int toFormat = *(f + fi);
 						char* str = Integer::toString(toFormat);
-						printString(str);
+						print(str);
 						free(str);
 					}
 					else if (c0 == 's') {
 						/* Print templated string */
 						char* toFormat = *(f + fi);
-						printString(toFormat);
+						print(toFormat);
 					}
 					
 					fi++;
@@ -147,9 +154,10 @@ namespace Display {
 
 	namespace Scanf {
 		
+		#unsafe
 		shared char* scanf() {
 			/* Create a list where the input is temporarily stored */
-			LinkedList<char>* input = LinkedList::create<>((char) 0);
+			LinkedList<char>* input = LinkedList::create((char) 0);
 			
 			while (true) {
 				char c = Display::getChar();
@@ -160,7 +168,7 @@ namespace Display {
 				
 				/* Input is a new character, add to input */
 				if ((int) c != 0) {
-					input->add<>(c);
+					input->add(c);
 					putChar(c);
 				}
 			}
@@ -172,7 +180,7 @@ namespace Display {
 			char* arr = resv(size + 1);
 			
 			for (int i = 0; i < size; i++) 
-				*(arr + i) = input->get<>(i);
+				*(arr + i) = input->get(i);
 
 			/* Insert 0 char termination */
 			*(arr + size) = (char) 0;

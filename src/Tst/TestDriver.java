@@ -1,29 +1,30 @@
 package Tst;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import Exc.CGEN_EXC;
-import Exc.CTX_EXC;
-import Exc.PARSE_EXC;
+import Exc.CTEX_EXC;
+import Exc.LINK_EXC;
+import Exc.OPT0_EXC;
+import Exc.PARS_EXC;
 import Exc.SNIPS_EXC;
+import Lnk.Linker;
+import Lnk.Linker.LinkerUnit;
 import REv.CPU.ProcessorUnit;
+import Res.Manager.FileUtil;
 import Snips.CompilerDriver;
 import Util.Pair;
 import Util.Util;
-import Util.XMLParser;
-import Util.XMLParser.XMLNode;
 import Util.Logging.LogPoint;
 import Util.Logging.Message;
 import Util.Logging.SimpleMessage;
+import XMLParser.MalformedXMLException;
+import XMLParser.XMLParser;
+import XMLParser.XMLParser.XMLNode;
 
 public class TestDriver {
 
@@ -58,17 +59,27 @@ public class TestDriver {
 	/** The amount of milliseconds the program can run on the processor until it counts as a timeout */
 	public long ttl = 200, progressIndicatorSpeed = 1000;
 	
+	/** The amount of milliseconds the compiler can run for a given program before being considered timeouted. */
+	public long MAX_COMPILE_TIME = 5000;
+	
 	/** Print the compiler messages for each test. */
 	public boolean detailedCompilerMessages = false;
 	
 	/** Print the compiler immediate representations */
 	public boolean displayCompilerImmediateRepresentations = false;
 	
+	/** If true, the metrics-inf.xml file will be updated. */
+	public boolean updateNodeMetrics = false;
+	
 	/** Print the assembly compilation results */
 	public boolean printResult = false;
 	
+	public boolean printResultOnError = true;
+	
 	/** Store/Update asm results in the tested file */
 	public boolean writebackResults = false;
+	
+	public static boolean excludeASMErrors = false;
 	
 	/** The Result Stack used to propagate package test results back up */
 	Stack<ResultCnt> resCnt = new Stack();
@@ -85,27 +96,31 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
 		comp.printLogo();
+		
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
-		CompilerDriver.includeMetaInformation = false;
-		
-		/* Experimental Flags */
-		//CompilerDriver.optimizeFileSize = true;
+		CompilerDriver.buildModulesRecurse = true;
+		CompilerDriver.buildObjectFileOnly = true;
+		CompilerDriver.pruneModules = true;
+		CompilerDriver.useExperimentalOptimizer = true;
+		CompilerDriver.useDefaultVersionID = false;
 		
 		List<String> paths = new ArrayList();
 		
 		/* Add add files to the paths list */
-		if (args.length == 0) paths.addAll(this.getTestFiles("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+		if (args.length == 0) paths.addAll(FileUtil.fileWalk("res\\Test\\").stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 		else {
 			for (String s : args) {
 				if (s.endsWith(".sn")) paths.add(s);
 				else {
-					paths.addAll(this.getTestFiles(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
+					paths.addAll(FileUtil.fileWalk(s).stream().filter(x -> !x.startsWith("exclude_") && x.endsWith(".txt")).collect(Collectors.toList()));
 				}
 			}
 		}
 		
 		amount = paths.size();
+		
+		//if (amount == 1) printResult = true;
 		
 		/* No paths were found, print warning and quit */
 		if (paths.size() == 0) {
@@ -131,7 +146,7 @@ public class TestDriver {
 		testPackage(head);
 		
 		/* Print out ASM-OPT stats */
-		CompilerDriver.printAverageCompression();
+		Util.printStats(CompilerDriver.driver);
 		
 		/* Get result and print feedback */
 		ResultCnt res = resCnt.pop();
@@ -145,9 +160,16 @@ public class TestDriver {
 		
 		/* Print Build status */
 		if (res.getCrashed() == 0 && res.getTimeout() == 0 && res.getFailed() == 0) {
+			if (paths.size() > 1 && updateNodeMetrics) {
+				new Message("Created new node metrics config.", LogPoint.Type.INFO);
+				Util.flushAsNNodeMetrics();
+			}
+			
 			new Message("[BUILD] Successful.", LogPoint.Type.INFO);
 		}
 		else new Message("[BUILD] Failed.", LogPoint.Type.FAIL);
+		
+		System.exit(0);
 	}
 	
 	
@@ -190,6 +212,8 @@ public class TestDriver {
 					headMessage.flush();
 					printedHead = true;
 				}
+				
+				CompilerDriver.silenced = false;
 				test.getSecond().stream().forEach(x -> x.flush());
 			}
 			
@@ -217,7 +241,7 @@ public class TestDriver {
 		List<Message> buffer = new ArrayList();
 		try {
 			/* Read content of test file */
-			List<String> content = Util.readFile(new File(file));
+			List<String> content = FileUtil.readFile(new File(file));
 		
 			/* Extract contents */
 			List<String> code = new ArrayList();
@@ -314,6 +338,8 @@ public class TestDriver {
 			else buffer.add(new Message("Test finished successfully.", LogPoint.Type.INFO, true));
 		
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			/* Test crashed */
 			buffer.add(new Message("-> Test " + file + " ran into an error!", LogPoint.Type.FAIL, true));
 			resCnt.peek().crashed++;
@@ -343,7 +369,7 @@ public class TestDriver {
 				
 				cd.setBurstMode(false, false);
 				
-				Exception e = cd.getException();
+				Exception e = cd.thrownException;
 				
 				if (e == null) {
 					/* No exception was thrown, but an exception was expected */
@@ -357,14 +383,16 @@ public class TestDriver {
 					/* Figure out exception field value */
 					if (e instanceof SNIPS_EXC) 
 						msg = ((SNIPS_EXC) e).getExcFieldName();
-					else if (e instanceof CTX_EXC) 
-						msg = ((CTX_EXC) e).getExcFieldName();
-					else if (e instanceof PARSE_EXC) 
-						msg = ((PARSE_EXC) e).getExcFieldName();
+					else if (e instanceof CTEX_EXC) 
+						msg = ((CTEX_EXC) e).getExcFieldName();
+					else if (e instanceof PARS_EXC) 
+						msg = ((PARS_EXC) e).getExcFieldName();
 					else if (e instanceof CGEN_EXC) 
 						msg = ((CGEN_EXC) e).getExcFieldName();
+					else if (e instanceof OPT0_EXC) 
+						msg = ((OPT0_EXC) e).getExcFieldName();
 					else {
-						System.out.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
+						CompilerDriver.outs.println(new Message("Cannot get type of error " + e.getClass().getName(), LogPoint.Type.FAIL).getMessage());
 						System.exit(0);
 					}
 					
@@ -385,30 +413,54 @@ public class TestDriver {
 		else {
 			cd.setBurstMode(!this.detailedCompilerMessages, this.displayCompilerImmediateRepresentations);
 			
-			File file = new File(path);
-			List<String> compile = cd.compile(new File(path), code);
+			List<String> compile = doCompile(cd, path, code);
 
+			List<String> copy = new ArrayList();
+			
+			if (compile != null) {
+				for (String s : compile) copy.add("" + s);
+				
+				try {
+					LinkerUnit originUnit = Linker.parseLinkerUnit(compile);
+					Linker.linkProgram(new ArrayList(), originUnit);
+					compile = originUnit.build();
+				} catch (LINK_EXC e) {
+					cd.setBurstMode(false, false);
+					buffer.add(new Message("Error when linking output! " + e.getMessage(), LogPoint.Type.FAIL, true));
+					
+					if (printResultOnError) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
+			}
+			
 			cd.setBurstMode(false, false);
 			
 			if (compile == null) {
-				buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
-				if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
-				cd.compile(file, code);
-				return new Result(RET_TYPE.CRASH, 0, 0);
+				if (timeout) {
+					buffer.add(new Message("-> The compilation process timed out.", LogPoint.Type.FAIL, true));
+					return new Result(RET_TYPE.TIMEOUT, 0, 0);
+				}
+				else {
+					buffer.add(new Message("-> A crash occured during compilation.", LogPoint.Type.FAIL, true));
+					if (this.printResult) buffer.add(new Message("-> Tested code:", LogPoint.Type.FAIL, true));
+					doCompile(cd, path, code);
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
 			}
 			else {
 				/* Write output */
 				if (writebackResults) {
 					content.add("OUTPUT");
-					content.addAll(compile);
-					Util.writeInFile(content, path);
+					content.addAll(copy);
+					FileUtil.writeInFile(content, path);
 				}
 			}
 			
 			boolean printedOutput = this.printResult;
 			
 			if (this.printResult) {
-				compile.stream().forEach(x -> System.out.println(x));
+				compile.stream().forEach(x -> CompilerDriver.outs.println(x));
 				printedOutput = true;
 			}
 			
@@ -417,8 +469,43 @@ public class TestDriver {
 				String [] sp = cases.get(i).split(" ");
 				
 				boolean assemblyMessages = false;
-				XMLNode head = new XMLParser(new File("res\\Test\\config.xml")).root;
-				ProcessorUnit pcu = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+				XMLNode head = null;
+				
+				try {
+					head = XMLParser.parse(new File("res\\Test\\config.xml"));
+				} catch (MalformedXMLException e) {
+					new Message("Failed to parse LLVM xml configuration!", LogPoint.Type.FAIL);
+					System.exit(0);
+				}
+				
+				ProcessorUnit pcu0 = null;
+				
+				boolean silenced = CompilerDriver.silenced;
+				
+				try {
+					if (excludeASMErrors) CompilerDriver.silenced = true;
+					
+					pcu0 = REv.Modules.Tools.Util.buildEnvironmentFromXML(head, compile, !assemblyMessages);
+					
+					CompilerDriver.silenced = silenced;
+				} catch (Exception e) {
+					CompilerDriver.silenced = silenced;
+					
+					buffer.add(new Message("Error generating assembly!", LogPoint.Type.FAIL, true));
+					
+					if (!excludeASMErrors) {
+						e.printStackTrace();
+						
+						if (printResultOnError) {
+							buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
+							compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
+						}
+					}
+					
+					return new Result(RET_TYPE.CRASH, 0, 0);
+				}
+				
+				ProcessorUnit pcu = pcu0;
 				
 				/* Setup parameters in registers and stack */
 				if (sp.length > 1) {
@@ -454,7 +541,6 @@ public class TestDriver {
 						runThread.stop();
 						runThread = null;
 						buffer.add(new Message("The compiled program timed out!", LogPoint.Type.FAIL, true));
-						if (cases.size() > 1) buffer.add(new Message("Testcase " + (i + 1) + "/" + cases.size() + " failed.", LogPoint.Type.FAIL, true));
 						fail++;
 						if (!printedOutput) compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 						printedOutput = true;
@@ -475,19 +561,18 @@ public class TestDriver {
 					buffer.add(new Message("-> Expected <" + Integer.parseInt(sp [sp.length - 1]) + ">, actual <" + pcu_return + ">.", LogPoint.Type.FAIL, true));
 					
 					/* Print inputted parameters */
-					String params = "-> Params: ";
-					if (sp.length == 1) params += "-";
-					else {
+					if (sp.length > 1) {
+						String params = "-> Params: ";
 						for (int a = 0; a < sp.length - 1; a++) {
 							params += sp [a];
 							if (a < sp.length - 2) {
 								params += ", ";
 							}
 						}
+						buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					}
-					buffer.add(new Message(params, LogPoint.Type.FAIL, true));
 					
-					if (!printedOutput) {
+					if (printResultOnError && !printedOutput) {
 						buffer.add(new Message("-> Outputted Assemby Program: ", LogPoint.Type.FAIL, true));
 						compile.stream().forEach(x -> buffer.add(new SimpleMessage(CompilerDriver.printDepth + x, true)));
 					}
@@ -501,19 +586,37 @@ public class TestDriver {
 		return new Result((fail > 0)? RET_TYPE.FAIL : RET_TYPE.SUCCESS, succ, fail);
 	}
 	
-	/**
-	 * Recursiveley get all test files from the res/Test/ directory
-	 * @return A list of all file names.
-	 */
-	public List<String> getTestFiles(String path) {
-		try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-			List<String> result = walk.filter(Files::isRegularFile)
-				.map(x -> x.toString()).collect(Collectors.toList());
-			return result;
-		} catch (IOException e) {
-			e.printStackTrace();
+	private boolean timeout = false;
+	
+	public List<String> doCompile(CompilerDriver cd, String path, List<String> code) {
+		Object [] out = new Object [] {null};
+		
+		timeout = false;
+		
+		Thread compileThread = new Thread(new Runnable() {
+			public void run() {
+				out [0] = cd.compile(new File(path), code);
+			}
+		});
+		
+		compileThread.start();
+		
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() - start < MAX_COMPILE_TIME && compileThread.isAlive()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_COMPILE_TIME) {
+			timeout = true;
 			return null;
 		}
+		
+		CompilerDriver.reset();
+		return (List<String>) out [0];
 	}
-
+	
 }

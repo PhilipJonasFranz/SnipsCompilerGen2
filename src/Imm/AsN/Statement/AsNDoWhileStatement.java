@@ -9,8 +9,7 @@ import Imm.ASM.ASMInstruction.OPT_FLAG;
 import Imm.ASM.Branch.ASMBranch;
 import Imm.ASM.Branch.ASMBranch.BRANCH_TYPE;
 import Imm.ASM.Structural.Label.ASMLabel;
-import Imm.ASM.Util.Cond;
-import Imm.ASM.Util.Cond.COND;
+import Imm.ASM.Util.COND;
 import Imm.ASM.Util.Operands.LabelOp;
 import Imm.AST.Statement.DoWhileStatement;
 import Imm.AsN.Expression.AsNExpression;
@@ -19,6 +18,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 
 	public static AsNDoWhileStatement cast(DoWhileStatement a, RegSet r, MemoryMap map, StackSet st) throws CGEN_EXC {
 		AsNDoWhileStatement w = new AsNDoWhileStatement();
+		w.pushOnCreatorStack(a);
 		a.castedNode = w;
 
 		/* End of while loop */
@@ -29,6 +29,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		
 		/* Loop Entrypoint */
 		ASMLabel whileStart = new ASMLabel(LabelUtil.getLabel());
+		whileStart.optFlags.add(OPT_FLAG.LOOP_HEAD);
 		w.instructions.add(whileStart);
 		
 		/* Add Body */
@@ -37,10 +38,12 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		/* Add jump for continue statements to use as target */
 		w.instructions.add(w.continueJump);
 
-		COND cond = injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st));
+		COND cond = injectConditionEvaluation(w, AsNExpression.cast(a.condition, r, map, st), a.condition);
 
-		/* Condition was false, no else, skip body */
-		w.instructions.add(new ASMBranch(BRANCH_TYPE.B, new Cond(cond), new LabelOp(w.breakJump)));
+		if (cond != COND.NO) {
+			/* Condition was false, jump to end */
+			w.instructions.add(new ASMBranch(BRANCH_TYPE.B, cond, new LabelOp(w.breakJump)));
+		}
 		
 		/* Branch to loop start */
 		ASMBranch branch = new ASMBranch(BRANCH_TYPE.B, new LabelOp(whileStart));
@@ -48,6 +51,7 @@ public class AsNDoWhileStatement extends AsNConditionalCompoundStatement {
 		w.instructions.add(branch);
 		
 		w.instructions.add(w.breakJump);
+		w.registerMetric();
 		return w;
 	}
 	

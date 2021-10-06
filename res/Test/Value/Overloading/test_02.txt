@@ -1,0 +1,76 @@
+SOURCE
+struct X {
+	int val;
+	
+	int get() {
+		return self->val;
+	}
+	
+	int get(bool mult) {
+		return (mult)? self->val * 2 : 2;
+	}
+}
+
+int main(bool b) {
+	X x = X::(10);
+	X* x0 = &x;
+	
+	return x0->get() + x0->get(b);
+}
+TESTCASES
+0 12
+1 30
+OUTPUT
+.version 0
+
+.data
+X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global X.get_1482960026
+X.get_1482960026:                            /* Function: X.get */
+    lsl r1, r0, #2                           /* Convert to bytes */
+    ldr r0, [r1, #4]                         /* Load field from struct */
+    bx lr
+
+.global X.get_622834266
+X.get_622834266:                             /* Function: X.get */
+    push { r3 }
+    mov r3, r0
+    cmp r1, #0
+    beq X.get_622834266.L0
+    lsl r1, r3, #2                           /* Convert to bytes */
+    ldr r1, [r1, #4]                         /* Load field from struct */
+    lsl r0, r1, #1
+    b X.get_622834266.L1
+X.get_622834266.L0: 
+    mov r0, #2
+X.get_622834266.L1: 
+    pop { r3 }
+    bx lr
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    mov r3, r0
+    mov r0, #10                              /* Evaluate Expression */
+    push { r0 }
+    ldr r0, .P1086831212_X
+    push { r0 }
+    sub r0, fp, #8                           /* Evaluate Expression */
+    lsr r4, r0, #2
+    mov r0, r4                               /* Evaluate Expression */
+    bl X.get_1482960026                      /* Call X.get */
+    mov r5, r0
+    mov r1, r3
+    mov r0, r4
+    bl X.get_622834266                       /* Call X.get */
+    add r0, r5, r0
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+.P1086831212_X: .word X

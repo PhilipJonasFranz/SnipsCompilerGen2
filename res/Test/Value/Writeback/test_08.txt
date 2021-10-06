@@ -9,7 +9,16 @@ TESTCASES
 1 0 0
 1 1 1
 OUTPUT
-/* --test_08.txt */
+.version 0
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov r3, r0
     adds r0, r1, #0
@@ -19,4 +28,3 @@ main:                                        /* Function: main */
     moveq r3, #0
     mov r0, r3                               /* Evaluate Expression */
     bx lr
-    

@@ -17,23 +17,33 @@ int main() {
 TESTCASES
 16
 OUTPUT
-/* --test_07.txt */
+.version 0
+
+.data
+X: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
 main:                                        /* Function: main */
     mov fp, sp
-    mov r0, #6                               /* Evaluate Expression */
-    mov r1, #2
     mov r2, #3
+    mov r1, #2
+    mov r0, #6                               /* Evaluate Expression */
     stmfd sp!, {r0-r2}
     mov r0, #5
     push { r0 }
-    mov r0, #1
+    ldr r0, .P853052219_X
     push { r0 }
+    mov r6, #0
+    mov r5, #0
+    mov r4, #0
     sub r0, fp, #20                          /* Evaluate Expression */
     lsr r3, r0, #2
-    mov r4, #0
     mov r0, #0                               /* Load field location */
-    mov r5, #0
-    mov r6, #0
 main.L1: 
     cmp r5, #4
     beq main.L2
@@ -41,11 +51,11 @@ main.L1:
     add r1, r1, #4
     lsl r0, r5, #2
     ldr r6, [r1, r0]
-    add r4, r4, r6
     add r5, r5, #1
+    add r4, r4, r6
     b main.L1
 main.L2: 
     mov r0, r4                               /* Evaluate Expression */
     mov sp, fp
     bx lr
-    
+.P853052219_X: .word X

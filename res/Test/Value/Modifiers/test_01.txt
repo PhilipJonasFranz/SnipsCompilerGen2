@@ -19,8 +19,47 @@ int main() {
 TESTCASES
 15
 OUTPUT
-/* --test_01.txt */
+.version 0
+
+.data
+Test.S: .word 0
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
     b main
+
+.global Test.getter
+Test.getter:                                 /* Function: Test.getter */
+    push { fp }
+    mov fp, sp
+    mov r1, #10
+    mov r0, #5                               /* Evaluate Expression */
+    stmfd sp!, {r0, r1}
+    ldr r0, .P1892863495_Test.S
+    push { r0 }
+    mov r2, sp
+    mov sp, fp
+    pop { fp }
+    add r1, r2, #12
+    mov r0, #12
+    add r10, pc, #8                          /* Setup return address for routine */
+    b _routine_stack_copy_
+    mov r10, #0
+    bx lr
+.P1892863495_Test.S: .word Test.S
+
+.global main
+main:                                        /* Function: main */
+    push { fp, lr }
+    mov fp, sp
+    bl Test.getter                           /* Evaluate Expression */
+    ldr r0, [fp, #-8]                        /* Load field from struct */
+    ldr r2, [fp, #-4]                        /* Load field from struct */
+    add r0, r0, r2
+    mov sp, fp
+    ldmfd sp!, {fp, pc}
+
 /* System Routine, used to copy memory on the stack */
 _routine_stack_copy_: 
     cmp r0, #0
@@ -31,32 +70,4 @@ _routine_stack_copy_:
     b _routine_stack_copy_
 _routine_stack_copy_end_: 
     mov pc, r10
-    
-Test.getter:                                 /* Function: Test.getter */
-    push { fp }
-    mov fp, sp
-    mov r0, #5                               /* Evaluate Expression */
-    mov r1, #10
-    stmfd sp!, {r0, r1}
-    mov r0, #1
-    push { r0 }
-    mov r2, sp
-    mov sp, fp
-    pop { fp }
-    mov r0, #12
-    add r1, r2, #12
-    add r10, pc, #8                          /* Setup return address for routine */
-    b _routine_stack_copy_
-    mov r10, #0
-    bx lr
-    
-main:                                        /* Function: main */
-    push { fp, lr }
-    mov fp, sp
-    bl Test.getter                           /* Evaluate Expression */
-    ldr r0, [fp, #-8]                        /* Load field from struct */
-    ldr r2, [fp, #-4]                        /* Load field from struct */
-    add r0, r0, r2
-    mov sp, fp
-    ldmfd sp!, {fp, pc}
-    
+

@@ -1,14 +1,7 @@
-#include<linked_list.sn>
+#include<linked_list.hn>
 
-/*
- * This package contains various utility functions for Strings chars.
- */
 namespace String {
 
-	/*
-	 * Compares the two given strings. Checks if all chars are equal and returns the
-	 * boolean result.
-	 */
 	shared bool equals(char* str0, char* str1) {
 		bool equal = true;
 		int c = 0;
@@ -24,32 +17,26 @@ namespace String {
 		return equal;
 	}
 
-	/*
-	 * Collects all chars in the string whiches index is greater or equal to begin and less than end.
-	 * This means that the length of the resulting string will be (end - begin), starting at begin.
-	 * Valid inputs for the ranges can be negative numbers and indexes out of bounds, 
-	 * but result may not be as expected.
-	 */
 	shared char* substring(char* str, int begin, int end) {
-		LinkedList<char>* sub = LinkedList::create<>((char) 0);
+		auto subs = LinkedList::create<>((char) 0);
 		
 		/* Iterate over String and collect characters in range */
 		int c = 0;
 		while (((int) *(str + c)) != 0) {
 			if (c >= begin && c < end) 
-				sub->add<>(*(str + c));
+				subs->add<>(*(str + c));
 			c++;
 		}
 
-		int size = sub->size();
+		int size = subs->size();
 
 		/* Substring only consists out of null char */
-		if (size == 1 && (int) sub->get<>(0) == 0) {
+		if (size == 1 && (int) subs->get<>(0) == 0) {
 			char* str0 = resv(1);
 			*str = (char) 0;
 			
 			/* Cleanup and return result */
-			free(sub);
+			free(subs);
 			return str0;
 		}
 		else {
@@ -57,20 +44,16 @@ namespace String {
 			char* str0 = resv(size + 1);
 			
 			for (int i = 0; i < size; i++) 
-				*(str0 + i) = sub->get<>(i);
+				*(str0 + i) = subs->get<>(i);
 			
 			*(str0 + size) = (char) 0;
 		
 			/* Cleanup and return result */
-			free(sub);
+			free(subs);
 			return str0;
 		}
 	}
 	
-	/*
-	 * Returns the length of the string. The length is determined by the first
-	 * occurrence of the 0 termination char. The length does include the 0 char.
-	 */
 	shared int length(char* str) {
 		int size = 0;
 		
@@ -80,19 +63,11 @@ namespace String {
 		return size + 1;
 	}
 
-	/*
-	 * Returns the char at the given index in the string.
-	 * Returns the 0-char if the given index is out of bounds.
-	 */
 	shared char charAt(char* str, int i) {
 		if (i >= String::length(str) || i < 0) return (char) 0;
 		else return *(str + i);
 	}
 	
-	/* 
-	 * Concatenates the two given strings. Result is one string. Does
-	 * only read the two given strings.
-	 */
 	shared char* concat(char* str0, char* str1) {
 		int s0 = length(str0) - 1;
 		int s1 = length(str1);

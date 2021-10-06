@@ -1,0 +1,26 @@
+SOURCE
+#include <res\Test\Value\Modules\exclude_import.sn>
+
+int main() {
+	return Global::globalVar + Global::foo();
+}
+TESTCASES
+30
+OUTPUT
+.version 0
+
+.include res\Test\Value\Modules\exclude_import.s
+
+.data
+NULL: .word 0
+HEAP_START: .word 0
+
+.text
+    b main
+
+.global main
+main:                                        /* Function: main */
+    push { lr }
+    bl Global.foo                            /* Evaluate Expression */
+    add r0, r0, #10
+    pop { pc }
