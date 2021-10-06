@@ -4,7 +4,7 @@ import Util.FBin;
 
 public class VFPCoProcessor {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 
 	/* 32 * F32 Registers */
 	public int [] [] regs = new int [32] [32];

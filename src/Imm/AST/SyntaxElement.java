@@ -3,6 +3,7 @@ package Imm.AST;
 import Ctx.ContextChecker;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
+import Imm.AST.Expression.Expression;
 import Imm.AsN.AsNNode;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
@@ -15,6 +16,7 @@ import Util.Source;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a superclass for all AST-Nodes.
@@ -113,7 +115,24 @@ public abstract class SyntaxElement {
 	 * @param Current printing depth, initially 0.
 	 */
 	public abstract List<String> codePrint(int d);
-	
+
+	public String codePrintSingle() {
+		List<String> printList = this.codePrint(0);
+
+		if (printList == null && this instanceof Expression e) {
+			printList = List.of(e.codePrint());
+		}
+
+		if (printList != null && !printList.isEmpty()) {
+			String print = printList.get(0);
+			if (print.endsWith("{"))
+				print = print.substring(0, print.length() - 1);
+
+			return print.trim();
+		}
+		else return this.getClass().getSimpleName();
+	}
+
 	/**
 	 * Returns the source at which this syntax element was parsed. The Source holds the
 	 * approximated source file location from which this AST node was parsed.
@@ -193,11 +212,22 @@ public abstract class SyntaxElement {
 	public boolean hasDirective(DIRECTIVE annotation) {
 		return this.activeAnnotations.stream().anyMatch(x -> x.type() == annotation);
 	}
-	
+
+	/**
+	 * Returns the first ASTAnnotation that matches the given directive,
+	 * or return null if none is found.
+	 */
 	public ASTDirective getDirective(DIRECTIVE annotation) {
 		for (ASTDirective x : this.activeAnnotations)
 			if (x.type() == annotation) return x;
 		return null;
+	}
+
+	/**
+	 * Returns all ASTAnnotations that match the given directive.
+	 */
+	public List<ASTDirective> getDirectives(DIRECTIVE annotation) {
+		return this.activeAnnotations.stream().filter(x -> x.type() == annotation).collect(Collectors.toList());
 	}
 	
 } 

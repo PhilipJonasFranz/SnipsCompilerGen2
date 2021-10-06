@@ -61,19 +61,26 @@ public class ASTDirective {
 		 * Properties:
 		 * 		- [Symbol]			: The Symbol this operator is overriding. 
 		 */
-		OPERATOR
+		OPERATOR,
 
-			}
+		/**
+		 * Used for SE-Testing & Verification. All AST-Annotations that start with
+		 *  	'#@ ... '
+		 * are considered SE_PROPERTIES, and will be assigned this AST annotation.
+		 */
+		SE_PROPERTY
+
+	}
 	
 	
 			/* ---< FIELDS >--- */
 	private DIRECTIVE type;
 	
-	private HashMap<String, String> properties;
+	private HashMap<String, Object> properties;
 	
 	
 			/* ---< CONSTRUCTORS >--- */
-	public ASTDirective(DIRECTIVE type, HashMap<String, String> properties) {
+	public ASTDirective(DIRECTIVE type, HashMap<String, Object> properties) {
 		this.type = type;
 		this.properties = properties;
 	}
@@ -86,7 +93,7 @@ public class ASTDirective {
 			/* ---< METHODS >--- */
 	public ASTDirective clone() {
 		ASTDirective annotation = new ASTDirective(this.type);
-		for (Entry<String, String> entry : this.properties.entrySet()) {
+		for (Entry<String, Object> entry : this.properties.entrySet()) {
 			annotation.properties.put(entry.getKey(), entry.getValue());
 		}
 		return annotation;
@@ -96,7 +103,7 @@ public class ASTDirective {
 		return this.type;
 	}
 	
-	public HashMap<String, String> properties() {
+	public HashMap<String, Object> properties() {
 		return this.properties;
 	}
 	
@@ -105,14 +112,18 @@ public class ASTDirective {
 		return this.properties.containsKey(key.toLowerCase());
 	}
 	
-	public String getProperty(String key) {
+	public Object getProperty(String key) {
 		return this.properties.get(key.toLowerCase());
+	}
+
+	public String getPropertyAsString(String key) {
+		return this.properties.get(key.toLowerCase()).toString();
 	}
 	
 	public String toString() {
 		String s = "#" + this.type.toString().toLowerCase();
 		
-		for (Entry<String, String> property : this.properties.entrySet()) {
+		for (Entry<String, Object> property : this.properties.entrySet()) {
 			s += " " + property.getKey();
 			if (property.getValue() != null)
 				s += "=" + property.getValue();

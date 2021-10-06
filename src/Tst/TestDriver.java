@@ -95,7 +95,7 @@ public class TestDriver {
 		/* Setup Compiler Driver */
 		CompilerDriver comp = new CompilerDriver();
 		comp.printLogo();
-		
+
 		CompilerDriver.useTerminalColors = true;
 		CompilerDriver.silenced = false;
 		CompilerDriver.buildModulesRecurse = true;
@@ -103,6 +103,8 @@ public class TestDriver {
 		CompilerDriver.pruneModules = true;
 		CompilerDriver.useExperimentalOptimizer = true;
 		CompilerDriver.useDefaultVersionID = false;
+
+		CompilerDriver.enableSEEn = false;
 		
 		List<String> paths = new ArrayList();
 		
@@ -642,6 +644,8 @@ public class TestDriver {
 		
 		if (cd.thrownException == null && System.currentTimeMillis() - start >= MAX_COMPILE_TIME) {
 			timeout = true;
+			for (StackTraceElement e : compileThread.getStackTrace())
+				System.out.println(e);
 			return null;
 		}
 		

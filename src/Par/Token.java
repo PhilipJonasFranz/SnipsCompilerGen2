@@ -53,6 +53,10 @@ public class Token {
 	public String spelling() {
 		return this.spelling;
 	}
+
+	public String toString() {
+		return "<" + this.type + ":" + this.spelling + ">";
+	}
 	
 			/* ---< NESTED >--- */
 	public enum TokenType {
@@ -60,6 +64,7 @@ public class Token {
 		/* Structural */
 		COMMENT(""),
 		DIRECTIVE("#"),
+		AT("@"),
 		BACKSL("\\"),
 		EOF("<EOF>"),
 		

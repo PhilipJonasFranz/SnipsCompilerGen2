@@ -1,17 +1,13 @@
 package Imm.AST.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import Ctx.ContextChecker;
 import Ctx.Util.Callee;
 import Ctx.Util.ProvisoUtil;
 import Exc.CTEX_EXC;
 import Exc.OPT0_EXC;
 import Imm.AST.Function;
-import Imm.AST.SyntaxElement;
 import Imm.AST.Statement.Declaration;
+import Imm.AST.SyntaxElement;
 import Imm.TYPE.TYPE;
 import Opt.AST.ASTOptimizer;
 import Snips.CompilerDriver;
@@ -21,6 +17,10 @@ import Util.ASTDirective.DIRECTIVE;
 import Util.NamespacePath;
 import Util.Source;
 import Util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class InlineCall extends Expression implements Callee {
 
@@ -90,7 +90,7 @@ public class InlineCall extends Expression implements Callee {
 			if (called.hasDirective(DIRECTIVE.INLINE)) {
 				ASTDirective directive = called.getDirective(DIRECTIVE.INLINE);
 				if (directive.hasProperty("depth")) {
-					this.INLINE_DEPTH = Integer.parseInt(directive.getProperty("depth"));
+					this.INLINE_DEPTH = Integer.parseInt(directive.getPropertyAsString("depth"));
 				}
 			}
 		}

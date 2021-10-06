@@ -178,7 +178,7 @@ public class Parser {
 			done++;
 			this.progress.incProgress((double) done / this.toGo);
 		}
-		
+
 		Token old = current;
 		if (!tokenStream.isEmpty()) {
 			current = tokenStream.get(0);
@@ -198,7 +198,7 @@ public class Parser {
 		this.scopes.push(new ArrayList());
 		Source source = this.current.source;
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.EOF, false, true);
 		accept(TokenType.EOF);
 		
 		Program program = new Program(elements, source);
@@ -209,17 +209,15 @@ public class Parser {
 		return program;
 	}
 	
-	private List<SyntaxElement> parseProgramElements(TokenType close) throws PARS_EXC {
+	private List<SyntaxElement> parseProgramElements(TokenType close, boolean singleOnly, boolean resetKnownProvisos) throws PARS_EXC {
 		List<SyntaxElement> elements = new ArrayList();
 		
 		boolean push = true;
 		while (this.current.type != close) {
-			this.activeProvisos.clear();
-			
 			if (push) this.bufferedAnnotations.push(new ArrayList());
 			push = true;
 			
-			SyntaxElement element = this.parseProgramElement();
+			SyntaxElement element = this.parseProgramElement(resetKnownProvisos);
 			
 			if (element != null) {
 				element.activeAnnotations.addAll(this.bufferedAnnotations.pop());
@@ -231,7 +229,7 @@ public class Parser {
 				if (f.hasDirective(DIRECTIVE.OPERATOR)) {
 					ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
 					
-					Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+					Optional<Entry<String, Object>> first = dir.properties().entrySet().stream().findFirst();
 					
 					if (first.isPresent()) {
 						/* 
@@ -265,6 +263,8 @@ public class Parser {
 					}
 				}
 			}
+
+			if (elements.size() == 1 && singleOnly) break;
 		}
 		
 		return elements;
@@ -279,7 +279,7 @@ public class Parser {
 		
 		accept(TokenType.LBRACE);
 		
-		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE);
+		List<SyntaxElement> elements = this.parseProgramElements(TokenType.RBRACE, false, true);
 		
 		this.namespaces.pop();
 		
@@ -290,7 +290,25 @@ public class Parser {
 	
 	private ASTDirective parseASTAnnotation() throws PARS_EXC {
 		accept(TokenType.DIRECTIVE);
-		
+
+		/*
+		 * Special handling for SE-Properties.
+		 */
+		if (current.type == TokenType.AT) {
+
+			List<Token> annotationTokens = new ArrayList<>();
+
+			int line = current.source.row;
+			while (current.type != TokenType.EOF && current.source.row == line)
+				annotationTokens.add(accept());
+
+			DIRECTIVE type = DIRECTIVE.SE_PROPERTY;
+			HashMap<String, Object> arguments = new HashMap();
+			arguments.put("tokens", annotationTokens);
+
+			return new ASTDirective(type, arguments);
+		}
+
 		Token type = accept(TokenType.IDENTIFIER);
 		DIRECTIVE type0 = null;
 		
@@ -300,7 +318,7 @@ public class Parser {
 			throw new SNIPS_EXC("Unknown directive: '" + type.spelling + "', " + type.source.getSourceMarker());
 		}
 		
-		HashMap<String, String> arguments = new HashMap();
+		HashMap<String, Object> arguments = new HashMap();
 		
 		while (current.source.row == type.source.row) {
 			String key = accept().spelling;
@@ -329,7 +347,9 @@ public class Parser {
 		return new ASTDirective(type0, arguments);
 	}
 	
-	private SyntaxElement parseProgramElement() throws PARS_EXC {
+	private SyntaxElement parseProgramElement(boolean resetKnownProvisos) throws PARS_EXC {
+		if (resetKnownProvisos) this.activeProvisos.clear();
+
 		if (current.type == TokenType.COMMENT) {
 			return this.parseComment();
 		}
@@ -376,13 +396,21 @@ public class Parser {
 	}
 	
 	private StructTypedef parseStructTypedef() throws PARS_EXC {
-		
+		this.activeProvisos.clear();
+
 		MODIFIER mod = this.parseModifier();
 		
 		Source source = accept(TokenType.STRUCT).source();
 		Token id = accept(TokenType.STRUCTID);
 		
 		List<TYPE> proviso = this.parseProviso();
+
+		/* Register new proviso placeholder names to be used inside the structs body. */
+		for (TYPE t : proviso) {
+			if (t instanceof PROVISO p && !this.activeProvisos.contains(p.placeholderName))
+				this.activeProvisos.add(p.placeholderName);
+		}
+
 		NamespacePath path = this.buildPath(id.spelling);
 		
 		StructTypedef ext = null;
@@ -487,28 +515,39 @@ public class Parser {
 				/* Declaration */
 				def.getFields().add(this.parseDeclaration(MODIFIER.SHARED, false, true));
 			else {
-				/* Nested function */
-				MODIFIER m = this.parseModifier();
-				
-				TYPE type = this.parseType();
-				
-				Function f = this.parseFunction(type, accept(TokenType.IDENTIFIER), m, false, true);
-				
-				/* Insert Struct Name */
-				f.path.path.add(f.path.path.size() - 1, def.path.getLast());
-				
-				if (f.modifier != MODIFIER.STATIC) {
-					/* 
-					 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
-					 * of a header, that we use the local variable 'head', that holds a reference to it.
-					 * This is important because later when context checking, the correct struct typedef 
-					 * reference is present and type comparisons work accordingly. 
-					 */
-					Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
-					f.parameters.add(0, self);
+				/*
+				 * Create a backup of the currently active provisos here. When parsing the functions
+				 * of this struct typedef, these functions may introduce new proviso placeholders on
+				 * their own. These should be only scoped/visible to the code inside the function,
+				 * and not the entire struct. So, if we finished parsing the function inside the struct,
+				 * we roll back the known proviso types to the provisos provided by the struct head.
+				 */
+				List<String> activeProvisosBackup = new ArrayList<>(this.activeProvisos);
+
+				SyntaxElement element = parseProgramElement(false);
+
+				/* Roll back to global struct provisos */
+				this.activeProvisos = activeProvisosBackup;
+
+				if (element != null) {
+					Function f = (Function) element;
+
+					/* Insert Struct Name */
+					f.path.path.add(f.path.path.size() - 1, def.path.getLast());
+
+					if (f.modifier != MODIFIER.STATIC) {
+						/*
+						 * Inject Self Reference. Here it is crucial, if this typedef is an implementation
+						 * of a header, that we use the local variable 'head', that holds a reference to it.
+						 * This is important because later when context checking, the correct struct typedef
+						 * reference is present and type comparisons work accordingly.
+						 */
+						Declaration self = new Declaration(new NamespacePath("self"), new POINTER(head.self.clone()), MODIFIER.SHARED, f.getSource());
+						f.parameters.add(0, self);
+					}
+
+					def.functions.add(f);
 				}
-				
-				def.functions.add(f);
 			}
 		}
 		
@@ -654,14 +693,17 @@ public class Parser {
 		
 		for (TYPE t : proviso) {
 			PROVISO p = (PROVISO) t;
-			this.activeProvisos.add(p.placeholderName);
+			if (!this.activeProvisos.contains(p.placeholderName))
+				this.activeProvisos.add(p.placeholderName);
 		}
 		
 		accept(TokenType.LPAREN);
 		
 		List<Declaration> parameters = new ArrayList();
 		while (current.type != TokenType.RPAREN) {
-			parameters.add(this.parseDeclaration(MODIFIER.SHARED, false, false));
+			Declaration declaration = this.parseDeclaration(MODIFIER.SHARED, false, false);
+
+			parameters.add(declaration);
 			if (current.type == TokenType.COMMA) {
 				accept();
 			}
@@ -2767,9 +2809,7 @@ public class Parser {
 		TYPE type;
 		Token token;
 		
-		if (current.type == TokenType.FUNC) token = accept();
-		else if (current.type == TokenType.IDENTIFIER) token = accept();
-		else if (current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
+		if (current.type == TokenType.FUNC || current.type == TokenType.IDENTIFIER || current.type == TokenType.NAMESPACE_IDENTIFIER) token = accept();
 		else token = accept(TokenGroup.TYPE);
 		
 		if (token.type() == TokenType.AUTO) 
@@ -2849,11 +2889,11 @@ public class Parser {
 			TYPE ret = null;
 			
 			boolean anonymous = false;
-			
+
 			/* Convert next token */
 			if (this.activeProvisos.contains(current.spelling)) 
 				current.type = TokenType.PROVISO;
-			
+
 			/* Non-anonymous */
 			if (current.type != TokenType.IDENTIFIER && current.type != TokenType.RPAREN && current.type != TokenType.LBRACKET && current.type != TokenType.MUL) {
 				if (current.type == TokenType.LPAREN || current.type == TokenType.CMPLT) {

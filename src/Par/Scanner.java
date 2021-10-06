@@ -87,6 +87,7 @@ public class Scanner {
 			new ScannableToken("^", TokenType.XOR, ACC_STATE.NONE, ""),
 			new ScannableToken("~", TokenType.NOT, ACC_STATE.NONE, ""),
 			new ScannableToken("#", TokenType.DIRECTIVE, ACC_STATE.NONE, ""),
+			new ScannableToken("@", TokenType.AT, ACC_STATE.NONE, ""),
 			new ScannableToken("namespace", TokenType.NAMESPACE, ACC_STATE.NAMESPACE_ID, " "),
 			new ScannableToken("static", TokenType.STATIC, ACC_STATE.NONE, " "),
 			new ScannableToken("shared", TokenType.SHARED, ACC_STATE.NONE, " "),

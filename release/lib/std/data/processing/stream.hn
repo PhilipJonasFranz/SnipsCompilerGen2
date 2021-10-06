@@ -34,13 +34,13 @@ namespace Streamable {
          * Returns true if all elements in the stream match the given
          * predicate. Does not modify the stream's elements.
          */
-		shared boolean allMatch(func T -> bool pred);
+		shared bool allMatch(func T -> bool pred);
 
         /*
          * Returns true if there is at least one element that matches
          * the given predicate. Does not modify the stream's elements.
          */
-		shared boolean anyMatch(func T -> bool pred);
+		shared bool anyMatch(func T -> bool pred);
 
 		/*
 		 * Using the given predicate, all elements of this stream

@@ -925,7 +925,7 @@ public class ContextChecker {
 		if (w.hasDirective(DIRECTIVE.UNROLL)) {
 			ASTDirective directive = w.getDirective(DIRECTIVE.UNROLL);
 			if (directive.hasProperty("depth")) {
-				w.CURR_UNROLL_DEPTH = Integer.parseInt(directive.getProperty("depth"));
+				w.CURR_UNROLL_DEPTH = Integer.parseInt(directive.getPropertyAsString("depth"));
 			}
 		}
 		
@@ -958,7 +958,7 @@ public class ContextChecker {
 		if (f.hasDirective(DIRECTIVE.UNROLL)) {
 			ASTDirective directive = f.getDirective(DIRECTIVE.UNROLL);
 			if (directive.hasProperty("depth")) {
-				f.CURR_UNROLL_DEPTH = Integer.parseInt(directive.getProperty("depth"));
+				f.CURR_UNROLL_DEPTH = Integer.parseInt(directive.getPropertyAsString("depth"));
 			}
 		}
 		
@@ -1501,7 +1501,7 @@ public class ContextChecker {
 			
 			/* Extract overloaded operator symbol from function */
 			ASTDirective dir = f.getDirective(DIRECTIVE.OPERATOR);
-			Optional<Entry<String, String>> first = dir.properties().entrySet().stream().findFirst();
+			Optional<Entry<String, Object>> first = dir.properties().entrySet().stream().findFirst();
 			String symbol = first.get().getKey();
 			
 			isOperator &= op.actualExpression.operatorSymbolOverride.equalsIgnoreCase(symbol);
