@@ -131,7 +131,7 @@ Additionally, a VFP-Coprocessor can handle floating point arithmetic.
 All instructions do support the condition field. If you compile your assembly code with the Assembler mentioned up below you can be sure for it to work since the Assembler roughly implements the feature set of the Processor.
 
 ### XML-Parser
- Uses my XML-Parser implementation wich can be found here: [XML-Parser](https://github.com/PhilipJonasFranz/XMLParser)
+ Uses my XML-Parser implementation which can be found here: [XML-Parser](https://github.com/PhilipJonasFranz/XMLParser).
  
 ### Utility
  Under `src/REv/Modules/Tools/Util.java` you can find some [Utility Functions](src/REv/Modules/Tools/Util.java) for binary arithmetic, as well as File-I/O and a method that sets up the Processor with a provided configuration file. This is used by the TestDriver.java to set up the runtime environment. 
